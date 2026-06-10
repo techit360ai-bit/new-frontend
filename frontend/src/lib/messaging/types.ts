@@ -21,6 +21,8 @@ export interface WireChannel { id: string; name: string; kind: string }
 export interface WirePost {
   id: string;
   authorId: string;
+  authorRole: string;
+  audience: string[];
   kind: string;
   body: string;
   ts: string;
