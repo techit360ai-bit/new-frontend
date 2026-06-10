@@ -114,10 +114,17 @@ import { NotificationsPage as FeedNotificationsPage } from "@/dashboard/feed/pag
 import { PostDetailPage } from "@/dashboard/feed/pages/PostDetailPage";
 import { MyLogPage } from "@/dashboard/feed/pages/MyLogPage";
 import { UserProfilePage } from "@/dashboard/feed/pages/UserProfilePage";
+import { MessagingProvider } from "@/contexts/MessagingProvider";
+import { setMessagingToken } from "@/lib/messaging/config";
+
+setMessagingToken(() => {
+  try { return localStorage.getItem("techit_token"); } catch { return null; }
+});
 
 const App = () => {
   return (
     <UserProvider>
+      <MessagingProvider>
       <Routes>
         <Route path="/" element={<Landing />} />
 
@@ -279,6 +286,7 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ThemeToggle />
+      </MessagingProvider>
     </UserProvider>
   );
 };
