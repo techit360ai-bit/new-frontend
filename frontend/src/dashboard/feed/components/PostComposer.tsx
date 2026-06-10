@@ -1,4 +1,7 @@
 import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { createPost } from '@/lib/messaging/feed';
+import { VIEWER_ROLES } from '@/lib/messaging/roles';
 
 export function PostComposer({ expanded, setExpanded, selectedType, setSelectedType }: { expanded: boolean; setExpanded: (v: boolean) => void; selectedType: string; setSelectedType: (v: string) => void }) {
   const postTypes = [
@@ -9,6 +12,19 @@ export function PostComposer({ expanded, setExpanded, selectedType, setSelectedT
     { id: 'collab', label: '🤝 Collab Call', color: 'score-purple' },
     { id: 'problem', label: '🌍 Problem Signal', color: 'score-red' },
   ];
+
+  const [body, setBody] = useState('');
+  const [audience, setAudience] = useState<string[]>([]); // [] = Everyone
+  const targetRoles = VIEWER_ROLES.filter((r) => r !== 'community');
+  const toggleAudience = (role: string) =>
+    setAudience((cur) => (cur.includes(role) ? cur.filter((r) => r !== role) : [...cur, role]));
+  const handlePost = () => {
+    if (!body.trim()) return;
+    void createPost(selectedType, body.trim(), audience.length ? audience : undefined);
+    setBody('');
+    setAudience([]);
+    setExpanded(false);
+  };
 
   return (
     <div className="bg-bg-surface border border-border-default rounded-xl p-4 mb-4">
@@ -25,7 +41,7 @@ export function PostComposer({ expanded, setExpanded, selectedType, setSelectedT
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary to-score-purple flex-shrink-0"></div>
         <div className="flex-1">
           {expanded ? (
-            <textarea className="w-full min-h-[120px] bg-bg-elevated rounded-lg px-4 py-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent-primary" placeholder="What did you build, ship, or learn today?" autoFocus />
+            <textarea value={body} onChange={(e) => setBody(e.target.value)} className="w-full min-h-[120px] bg-bg-elevated rounded-lg px-4 py-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent-primary" placeholder="What did you build, ship, or learn today?" autoFocus />
           ) : (
             <button onClick={() => setExpanded(true)} className="w-full h-11 bg-bg-elevated rounded-lg px-4 text-left text-sm text-text-muted hover:bg-bg-overlay transition-colors">What did you build, ship, or learn today?</button>
           )}
@@ -37,6 +53,25 @@ export function PostComposer({ expanded, setExpanded, selectedType, setSelectedT
       {expanded && (
         <>
           <div className="mt-3 text-xs text-text-muted">Sharing as: <span className="inline-block bg-bg-elevated text-accent-primary px-2 py-0.5 rounded-full ml-1">MVP</span></div>
+          {/* Target audience (WS6): empty = Everyone */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs text-text-muted">Target:</span>
+            <button
+              onClick={() => setAudience([])}
+              className={`text-xs px-2 py-1 rounded-full border transition-colors ${audience.length === 0 ? 'border-accent-primary text-accent-primary' : 'border-border-default text-text-secondary hover:border-border-active'}`}
+            >
+              Everyone
+            </button>
+            {targetRoles.map((role) => (
+              <button
+                key={role}
+                onClick={() => toggleAudience(role)}
+                className={`text-xs px-2 py-1 rounded-full border capitalize transition-colors ${audience.includes(role) ? 'border-accent-primary text-accent-primary' : 'border-border-default text-text-secondary hover:border-border-active'}`}
+              >
+                {role}
+              </button>
+            ))}
+          </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="text-xs bg-bg-elevated border border-border-default text-text-secondary px-2 py-1 rounded">#healthtech</span>
             <span className="text-xs bg-bg-elevated border border-border-default text-text-secondary px-2 py-1 rounded">#mvp</span>
@@ -56,7 +91,7 @@ export function PostComposer({ expanded, setExpanded, selectedType, setSelectedT
             <div className="flex items-end gap-3">
               <div className="text-right">
                 <button onClick={() => setExpanded(false)} className="text-text-secondary hover:text-text-primary text-sm mr-3 transition-colors">Cancel</button>
-                <button className="bg-accent-primary text-text-primary text-sm font-medium px-5 py-2 rounded-lg hover:opacity-90 transition-opacity">Post to Tribe</button>
+                <button onClick={handlePost} disabled={!body.trim()} className="bg-accent-primary text-text-primary text-sm font-medium px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50">Post to Tribe</button>
                 <p className="text-text-muted text-[11px] mt-1">Estimated reach: ~140 founders in healthtech/MVP stage</p>
               </div>
             </div>
