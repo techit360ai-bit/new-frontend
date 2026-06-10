@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { fetchConversations, fetchHistory, restSendDM } from "@/lib/messaging/conversations";
+import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
+import { useMessaging } from "@/contexts/MessagingProvider";
 import { Paperclip, Send } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -125,6 +128,39 @@ export function Messages() {
   const [cSubject, setCSubject] = useState("");
   const [cBody, setCBody] = useState("");
 
+  const { store, socket } = useMessaging();
+  useEffect(() => {
+    let alive = true;
+    fetchConversations().then((list) => {
+      if (alive && list.length > 0) setConversations(list.map(mapConvSummary));
+    });
+    return () => { alive = false; };
+  }, []);
+  // when a conversation is selected, load its history once
+  useEffect(() => {
+    if (!activeId) return;
+    let alive = true;
+    fetchHistory(activeId).then((msgs) => {
+      if (!alive || msgs.length === 0) return;
+      const me = (() => { try { return JSON.parse(localStorage.getItem("techit_user") || "{}").id || ""; } catch { return ""; } })();
+      const thread = msgs.slice().reverse().map((m) => mapMessage(m, me));
+      setConversations((cur) => cur.map((c) => (c.id === activeId ? { ...c, thread } : c)));
+    });
+    return () => { alive = false; };
+  }, [activeId]);
+  // live: when the socket store gains messages for the active conversation, merge
+  useEffect(() => {
+    if (!activeId) return;
+    const live = store.threads[activeId];
+    if (!live || live.length === 0) return;
+    setConversations((cur) => cur.map((c) => {
+      if (c.id !== activeId) return c;
+      const seen = new Set(c.thread.map((m) => m.id));
+      const merged = [...c.thread, ...live.filter((m) => !seen.has(m.id))];
+      return { ...c, thread: merged };
+    }));
+  }, [store, activeId]);
+
   const active = conversations.find((c) => c.id === activeId);
   const unreadCount = conversations.filter((c) => c.unread).length;
 
@@ -135,8 +171,9 @@ export function Messages() {
 
   const handleSend = () => {
     if (!draft.trim() || !activeId) return;
+    const clientMsgId = `cm-${Date.now()}`;
     const msg: ConversationMessage = {
-      id: `m-${Date.now()}`,
+      id: clientMsgId,
       fromMe: true,
       authorName: "You",
       body: draft.trim(),
@@ -145,6 +182,12 @@ export function Messages() {
     setConversations((cur) =>
       cur.map((c) => (c.id === activeId ? { ...c, thread: [...c.thread, msg] } : c)),
     );
+    // emit to backend: socket if connected, else REST fallback
+    if (socket) {
+      socket.send({ type: "message.send", data: { convId: activeId, clientMsgId, type: "text", body: draft.trim() } });
+    } else {
+      void restSendDM(activeId, clientMsgId, draft.trim());
+    }
     setDraft("");
   };
 

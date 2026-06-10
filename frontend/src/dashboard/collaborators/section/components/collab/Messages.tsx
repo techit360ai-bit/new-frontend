@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Paperclip, Send } from "lucide-react";
 import {
   conversations as initialConvos, projects,
   type Conversation, type ConversationMessage,
 } from "@/dashboard/collaborators/section/data/mockData";
+import { fetchConversations, fetchHistory, restSendDM } from "@/lib/messaging/conversations";
+import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
+import { useMessaging } from "@/contexts/MessagingProvider";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/dashboard/collaborators/section/components/ui/dialog";
@@ -21,6 +24,37 @@ export function Messages() {
   const [cSubject,   setCSubject]   = useState("");
   const [cBody,      setCBody]      = useState("");
 
+  const { store, socket } = useMessaging();
+  useEffect(() => {
+    let alive = true;
+    fetchConversations().then((list) => {
+      if (alive && list.length > 0) setConvos(list.map(mapConvSummary));
+    });
+    return () => { alive = false; };
+  }, []);
+  useEffect(() => {
+    if (!activeId) return;
+    let alive = true;
+    fetchHistory(activeId).then((msgs) => {
+      if (!alive || msgs.length === 0) return;
+      const me = (() => { try { return JSON.parse(localStorage.getItem("techit_user") || "{}").id || ""; } catch { return ""; } })();
+      const thread = msgs.slice().reverse().map((m) => mapMessage(m, me));
+      setConvos((cur) => cur.map((c) => (c.id === activeId ? { ...c, thread } : c)));
+    });
+    return () => { alive = false; };
+  }, [activeId]);
+  useEffect(() => {
+    if (!activeId) return;
+    const live = store.threads[activeId];
+    if (!live || live.length === 0) return;
+    setConvos((cur) => cur.map((c) => {
+      if (c.id !== activeId) return c;
+      const seen = new Set(c.thread.map((m) => m.id));
+      const merged = [...c.thread, ...live.filter((m) => !seen.has(m.id))];
+      return { ...c, thread: merged };
+    }));
+  }, [store, activeId]);
+
   const active = convos.find((c) => c.id === activeId);
   const unreadCount = convos.filter((c) => c.unread).length;
 
@@ -31,11 +65,17 @@ export function Messages() {
 
   const handleSend = () => {
     if (!draft.trim() || !activeId) return;
+    const clientMsgId = `cm-${Date.now()}`;
     const msg: ConversationMessage = {
-      id: `m-${Date.now()}`, fromMe: true, authorName: "You",
+      id: clientMsgId, fromMe: true, authorName: "You",
       body: draft.trim(), timestamp: new Date().toISOString(),
     };
     setConvos((cur) => cur.map((c) => c.id === activeId ? { ...c, thread: [...c.thread, msg] } : c));
+    if (socket) {
+      socket.send({ type: "message.send", data: { convId: activeId, clientMsgId, type: "text", body: draft.trim() } });
+    } else {
+      void restSendDM(activeId, clientMsgId, draft.trim());
+    }
     setDraft("");
   };
 
