@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { emptyStore, applyEnvelope, type MsgStore } from "./wsReducer";
+import { emptyStore, applyEnvelope, inTribe, type MsgStore } from "./wsReducer";
 
 const me = "u1";
 
@@ -34,4 +34,25 @@ test("unknown envelope type is a no-op (same reference is fine)", () => {
   const s0 = emptyStore();
   const s1 = applyEnvelope(s0, { type: "totally.unknown", id: "e", ts: "t" }, me);
   expect(s1.feed.length).toBe(0);
+});
+
+test("inTribe: own role matches", () => {
+  expect(inTribe({ authorRole: "collaborator", audience: ["all"] }, "collaborator")).toBe(true);
+});
+test("inTribe: targeted audience matches", () => {
+  expect(inTribe({ authorRole: "organisation", audience: ["collaborator"] }, "collaborator")).toBe(true);
+});
+test("inTribe: unrelated does not match", () => {
+  expect(inTribe({ authorRole: "founder", audience: ["all"] }, "collaborator")).toBe(false);
+});
+
+test("post.new routes into global always and tribe conditionally", () => {
+  let s = emptyStore();
+  s = applyEnvelope(s, { type: "post.new", id: "e", ts: "t", data: { id: "p1", authorId: "o", authorRole: "organisation", audience: ["collaborator"], kind: "opportunity", body: "x", ts: "t" } }, "collaborator");
+  expect(s.feed[0]?.id).toBe("p1");        // global
+  expect(s.tribe[0]?.id).toBe("p1");       // tribe (targeted)
+  let s2 = emptyStore();
+  s2 = applyEnvelope(s2, { type: "post.new", id: "e", ts: "t", data: { id: "p2", authorId: "f", authorRole: "founder", audience: ["all"], kind: "update", body: "y", ts: "t" } }, "collaborator");
+  expect(s2.feed[0]?.id).toBe("p2");       // global
+  expect(s2.tribe.length).toBe(0);         // not in tribe
 });

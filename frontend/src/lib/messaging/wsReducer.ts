@@ -1,5 +1,5 @@
 import { mapMessage } from "./map";
-import type { UIMessage, WireMessage, WirePost } from "./types";
+import type { UIMessage, WireMessage } from "./types";
 
 export interface Envelope {
   type: string;
@@ -11,6 +11,8 @@ export interface Envelope {
 export interface FeedPost {
   id: string;
   authorId: string;
+  authorRole: string;
+  audience: string[];
   kind: string;
   body: string;
   ts: string;
@@ -21,11 +23,16 @@ export interface MsgStore {
   threads: Record<string, UIMessage[]>;        // convId -> messages
   channelThreads: Record<string, UIMessage[]>; // channelId -> messages
   online: Record<string, boolean>;
-  feed: FeedPost[];
+  feed: FeedPost[];   // global
+  tribe: FeedPost[];  // role-relevant
 }
 
 export function emptyStore(): MsgStore {
-  return { threads: {}, channelThreads: {}, online: {}, feed: [] };
+  return { threads: {}, channelThreads: {}, online: {}, feed: [], tribe: [] };
+}
+
+export function inTribe(p: { authorRole: string; audience: string[] }, myRole: string): boolean {
+  return p.authorRole === myRole || (Array.isArray(p.audience) && p.audience.includes(myRole));
 }
 
 export function applyEnvelope(s: MsgStore, env: Envelope, me: string): MsgStore {
@@ -48,13 +55,21 @@ export function applyEnvelope(s: MsgStore, env: Envelope, me: string): MsgStore 
       return { ...s, online: { ...s.online, [userId]: online } };
     }
     case "post.new": {
-      const wp = d as unknown as WirePost;
-      return { ...s, feed: [{ ...wp, likeCount: 0 }, ...s.feed] };
+      const wp = d as unknown as { id: string; authorId: string; authorRole?: string; audience?: string[]; kind: string; body: string; ts: string };
+      const fp: FeedPost = {
+        id: wp.id, authorId: wp.authorId, authorRole: wp.authorRole ?? "community",
+        audience: Array.isArray(wp.audience) ? wp.audience : ["all"],
+        kind: wp.kind, body: wp.body, ts: wp.ts, likeCount: 0,
+      };
+      const next = { ...s, feed: [fp, ...s.feed] };
+      if (inTribe(fp, me)) next.tribe = [fp, ...s.tribe];
+      return next;
     }
     case "post.liked": {
       const postId = String(d.postId ?? "");
       const likeCount = Number(d.likeCount ?? 0);
-      return { ...s, feed: s.feed.map((p) => (p.id === postId ? { ...p, likeCount } : p)) };
+      const bump = (p: FeedPost) => (p.id === postId ? { ...p, likeCount } : p);
+      return { ...s, feed: s.feed.map(bump), tribe: s.tribe.map(bump) };
     }
     default:
       return s;
