@@ -1,10 +1,8 @@
-import { Button } from "./ui/button";
-import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Zap, ArrowRight, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-// import { Button } from '../../components/ui'
+import { Button } from '../../components/ui'
 
 const ROLE_ROUTES: Record<string, string> = {
   founder: "/dashboard",
@@ -202,7 +200,7 @@ export default function Login() {
               type="submit"
               size="lg"
               className="w-full"
-              loading={loading}
+             
             >
               Sign In <ArrowRight className="h-4 w-4" />
             </Button>
