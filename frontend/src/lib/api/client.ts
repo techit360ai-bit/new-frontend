@@ -6,13 +6,13 @@
 import { apiUrl, API_FALLBACK_ENABLED } from "./config";
 
 export class ApiError extends Error {
-  constructor(
-    readonly status: number,
-    message: string,
-    readonly body?: unknown
-  ) {
+  status: number;
+  body: unknown;
+  constructor(status: number, message: string, body?: unknown) {
     super(message);
     this.name = "ApiError";
+    this.status = status;
+    this.body = body;
   }
 }
 
