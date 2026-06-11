@@ -81,7 +81,7 @@ const initialTasks: Record<ColumnType, Task[]> = {
 };
 
 export function Build() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState<Record<string, any[]>>(initialTasks);
 
   const handleDrop = (column: ColumnType) => (taskId: string) => {
     setTasks((prev) => {

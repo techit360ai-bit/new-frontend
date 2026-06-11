@@ -12,7 +12,7 @@ export function Equity() {
   // Load from ai-router; initial state is the bundled mock so first paint is
   // unchanged and the screen still renders if the backend is unavailable.
   const [holdings, setHoldings] = useState(equityHoldings);
-  const [totals, setTotals] = useState(equityTotals);
+  const [totals, setTotals] = useState<any>(equityTotals);
   const [timeline, setTimeline] = useState(vestingTimeline);
 
   useEffect(() => {
