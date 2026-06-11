@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Zap, ArrowRight, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from '../../components/ui'
+import { Button } from './ui/button'
 
 const ROLE_ROUTES: Record<string, string> = {
   founder: "/dashboard",

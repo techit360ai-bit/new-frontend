@@ -6,10 +6,11 @@
 import { apiUrl, API_FALLBACK_ENABLED } from "./config";
 
 export class ApiError extends Error {
-  status: number;
-  body?: unknown;
-  constructor(status: number, message: string, body?: unknown) {
-    Object.assign(this, { status, body });
+  constructor(
+    readonly status: number,
+    message: string,
+    readonly body?: unknown
+  ) {
     super(message);
     this.name = "ApiError";
   }
