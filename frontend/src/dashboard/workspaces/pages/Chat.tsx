@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Send, Paperclip, Smile, MoreVertical, Search } from 'lucide-react';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { VoiceWaveform } from '../components/ui/voice-waveform';
+import { fetchChannelHistory, restSendChannel } from '@/lib/messaging/channels';
+import { useMessaging } from '@/contexts/MessagingProvider';
 
 interface Message {
   id: number;
@@ -61,6 +63,44 @@ export function Chat() {
   const [message, setMessage] = useState('');
   const [selectedChannel, setSelectedChannel] = useState(channels[1]);
 
+  // TODO: load real channels from /channels for real UUIDs; mock IDs fall back offline-safe.
+  const { store, socket } = useMessaging();
+  const [liveMessages, setLiveMessages] = useState<Message[]>(messages);
+  useEffect(() => {
+    const chId = String(selectedChannel.id);
+    let alive = true;
+    fetchChannelHistory(chId).then((ms) => {
+      if (!alive || ms.length === 0) return;
+      setLiveMessages(ms.slice().reverse().map((m, i) => ({
+        id: i + 1, user: m.senderId, avatar: m.senderId.slice(0, 2).toUpperCase(),
+        color: 'bg-slate-500', message: m.body, time: new Date(m.ts).toLocaleTimeString(),
+      })));
+    });
+    return () => { alive = false; };
+  }, [selectedChannel]);
+  // live channel messages from the socket store
+  useEffect(() => {
+    const chId = String(selectedChannel.id);
+    const live = store.channelThreads[chId];
+    if (!live || live.length === 0) return;
+    setLiveMessages((cur) => [
+      ...cur,
+      ...live.map((m, i) => ({ id: cur.length + i + 1, user: m.authorName, avatar: m.authorName.slice(0, 2).toUpperCase(), color: 'bg-slate-500', message: m.body, time: new Date(m.timestamp).toLocaleTimeString() })),
+    ]);
+  }, [store, selectedChannel]);
+
+  const handleChannelSend = () => {
+    if (!message.trim()) return;
+    const clientMsgId = `cm-${Date.now()}`;
+    const chId = String(selectedChannel.id);
+    if (socket) {
+      socket.send({ type: 'message.send', data: { channelId: chId, clientMsgId, type: 'text', body: message.trim() } });
+    } else {
+      void restSendChannel(chId, clientMsgId, message.trim());
+    }
+    setMessage('');
+  };
+
   return (
     <div className="h-full bg-white flex">
       {/* Channel List */}
@@ -118,7 +158,7 @@ export function Chat() {
         {/* Messages */}
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-4">
-            {messages.map((msg) => (
+            {liveMessages.map((msg) => (
               <div key={msg.id} className="flex gap-3">
                 <Avatar className="w-10 h-10 flex-shrink-0">
                   <AvatarFallback className={`${msg.color} text-white`}>
@@ -151,13 +191,14 @@ export function Chat() {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChannelSend(); } }}
               placeholder={`Message #${selectedChannel.name.toLowerCase()}`}
               className="flex-1 bg-transparent outline-none"
             />
             <button className="p-2 hover:bg-gray-200 rounded transition-colors">
               <Smile className="w-4 h-4 text-gray-600" />
             </button>
-            <button className="p-2 bg-[#2196F3] text-white rounded hover:bg-[#2196F3]/90 transition-colors">
+            <button onClick={handleChannelSend} className="p-2 bg-[#2196F3] text-white rounded hover:bg-[#2196F3]/90 transition-colors">
               <Send className="w-4 h-4" />
             </button>
           </div>

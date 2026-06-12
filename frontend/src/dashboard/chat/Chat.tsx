@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Heart,
   MessageCircle,
@@ -13,6 +13,8 @@ import MomentumWall from "@/components/chat/MomentumWall";
 import FeedPost from "@/components/chat/FeedPost";
 import PostInput from "@/components/chat/PostInput";
 import ChatTabs from "@/components/chat/ChatTabs";
+import { fetchPosts } from "@/lib/messaging/feed";
+import { useMessaging } from "@/contexts/MessagingProvider";
 
 interface Post {
   id: string;
@@ -211,9 +213,42 @@ const SAMPLE_POSTS: Post[] = [
 
 const Chat = () => {
   const [activeTab, setActiveTab] = useState("Global Pulse");
-  const [filteredPosts, setFilteredPosts] = useState(SAMPLE_POSTS);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>(SAMPLE_POSTS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [momentumOpen, setMomentumOpen] = useState(false);
+
+  const { store } = useMessaging();
+  useEffect(() => {
+    let alive = true;
+    fetchPosts().then((ps) => {
+      if (!alive || ps.length === 0) return;
+      setFilteredPosts(ps.map((p) => ({
+        id: p.id,
+        author: { name: p.authorId, role: "", avatar: p.authorId.slice(0, 2).toUpperCase(), initials: p.authorId.slice(0, 2).toUpperCase(), avatarColor: "from-slate-400 to-slate-500" },
+        timestamp: new Date(p.ts).toLocaleString(),
+        gsis: 0,
+        type: (["milestone", "insight", "problem", "question", "collab-call"].includes(p.kind) ? p.kind : "insight") as Post["type"],
+        title: p.body,
+        description: "",
+        engagement: { likes: 0, comments: 0 },
+      })));
+    });
+    return () => { alive = false; };
+  }, []);
+  // live: prepend new posts arriving over the socket
+  useEffect(() => {
+    if (store.feed.length === 0) return;
+    setFilteredPosts((cur) => {
+      const seen = new Set(cur.map((p) => p.id));
+      const fresh = store.feed.filter((p) => !seen.has(p.id)).map((p) => ({
+        id: p.id,
+        author: { name: p.authorId, role: "", avatar: p.authorId.slice(0, 2).toUpperCase(), initials: p.authorId.slice(0, 2).toUpperCase(), avatarColor: "from-slate-400 to-slate-500" },
+        timestamp: "just now", gsis: 0, type: "insight" as Post["type"], title: p.body, description: "",
+        engagement: { likes: p.likeCount, comments: 0 },
+      }));
+      return [...fresh, ...cur];
+    });
+  }, [store]);
 
   return (
     <div className="min-h-screen w-full flex items-start justify-between gap-4 lg:gap-6 bg-slate-950 dark:bg-slate-950 text-white px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
