@@ -1,17 +1,17 @@
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { createPost } from '@/lib/messaging/feed';
-import { VIEWER_ROLES } from '@/lib/messaging/roles';
+import { VIEWER_ROLES, normalizeRole } from '@/lib/messaging/roles';
+import { kindsForRole, KIND_META } from '@/lib/messaging/postKinds';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function PostComposer({ expanded, setExpanded, selectedType, setSelectedType }: { expanded: boolean; setExpanded: (v: boolean) => void; selectedType: string; setSelectedType: (v: string) => void }) {
-  const postTypes = [
-    { id: 'milestone', label: '🏆 Milestone Hit', color: 'score-green' },
-    { id: 'insight', label: '💡 Insight', color: 'accent-primary' },
-    { id: 'build', label: '📊 Build Update', color: 'score-amber' },
-    { id: 'question', label: '❓ Question', color: 'post-question' },
-    { id: 'collab', label: '🤝 Collab Call', color: 'score-purple' },
-    { id: 'problem', label: '🌍 Problem Signal', color: 'score-red' },
-  ];
+  const { profile } = useAuth();
+  const viewerRole = normalizeRole(profile?.role);
+  const postTypes = kindsForRole(viewerRole).map((k) => ({
+    id: k,
+    label: `${KIND_META[k].emoji} ${KIND_META[k].label}`,
+  }));
 
   const [body, setBody] = useState('');
   const [audience, setAudience] = useState<string[]>([]); // [] = Everyone
@@ -31,7 +31,7 @@ export function PostComposer({ expanded, setExpanded, selectedType, setSelectedT
       {expanded && (
         <div className="mb-3 flex gap-2 overflow-x-auto pb-2">
           {postTypes.map((type) => (
-            <button key={type.id} onClick={() => setSelectedType(type.id)} className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${selectedType === type.id ? `bg-${type.color}/10 border-${type.color} text-${type.color}` : 'bg-transparent border-border-default text-text-secondary hover:border-border-active'}`} style={selectedType === type.id ? { backgroundColor: `var(--${type.color})15`, borderColor: `var(--${type.color})`, color: `var(--${type.color})` } : undefined}>
+            <button key={type.id} onClick={() => setSelectedType(type.id)} className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${selectedType === type.id ? 'bg-accent-primary/10 border-accent-primary text-accent-primary' : 'bg-transparent border-border-default text-text-secondary hover:border-border-active'}`}>
               {type.label}
             </button>
           ))}
