@@ -5,20 +5,20 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/dashboard/investors/section/components/ui/card";
-import { Badge } from "@/dashboard/investors/section/components/ui/badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/dashboard/investors/section/components/ui/tabs";
+} from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/dashboard/investors/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { mockApplications, type Application as ApplicationType } from "./data";
 import { ACCENT_TEXT, ACCENT_SOFT } from "./theme";
 import { toast } from "sonner";

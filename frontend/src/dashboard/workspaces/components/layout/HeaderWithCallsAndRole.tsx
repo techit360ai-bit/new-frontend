@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Bell, Settings, Video, Phone, ChevronDown } from 'lucide-react';
-import { Badge } from '../ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel,
-} from '../ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { VideoCall } from '../calls/VideoCall';
 import { AudioCall } from '../calls/AudioCall';
 import { useNavigate } from 'react-router-dom';

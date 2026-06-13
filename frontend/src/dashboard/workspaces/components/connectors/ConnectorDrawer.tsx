@@ -1,6 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
-import { Badge } from '../ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
 import { ActivityFeed } from './ActivityFeed';
 import type { Connector, ActivityEvent } from '../../lib/types';
 

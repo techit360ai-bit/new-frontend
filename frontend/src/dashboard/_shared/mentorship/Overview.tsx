@@ -5,9 +5,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/dashboard/investors/section/components/ui/card";
-import { Progress } from "@/dashboard/investors/section/components/ui/progress";
-import { Badge } from "@/dashboard/investors/section/components/ui/badge";
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { mockRooms, mockMentees, analyticsData } from "./data";
 import { ACCENT_SOLID, ACCENT_TEXT, ACCENT_SOFT, HERO_GRADIENT } from "./theme";
 

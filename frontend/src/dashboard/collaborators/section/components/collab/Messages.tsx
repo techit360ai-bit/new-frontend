@@ -10,7 +10,7 @@ import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
 import { useMessaging } from "@/contexts/MessagingProvider";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/dashboard/collaborators/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 
 export function Messages() {
   const [convos, setConvos]       = useState<Conversation[]>(initialConvos);

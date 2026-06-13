@@ -7,7 +7,7 @@ import {
 } from "@/dashboard/collaborators/section/data/mockData";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
-} from "@/dashboard/collaborators/section/components/ui/sheet";
+} from "@/components/ui/sheet";
 
 type Filter = "all" | OpportunityDetail["type"];
 const filters: { value: Filter; label: string }[] = [

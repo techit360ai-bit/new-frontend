@@ -4,14 +4,14 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/dashboard/investors/section/components/ui/card";
-import { Badge } from "@/dashboard/investors/section/components/ui/badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/dashboard/investors/section/components/ui/tabs";
+} from "@/components/ui/tabs";
 import { ACCENT_SOLID, NEUTRAL_BTN, HUB_GRADIENT, statusBadge } from "./theme";
 
 interface CoMentor {

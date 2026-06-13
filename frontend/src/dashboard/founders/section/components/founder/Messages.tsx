@@ -6,7 +6,7 @@ import { useMessaging } from "@/contexts/MessagingProvider";
 import { Paperclip, Send } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/dashboard/collaborators/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

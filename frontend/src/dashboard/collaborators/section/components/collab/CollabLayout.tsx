@@ -5,7 +5,7 @@ import {
   Sparkles, Award, MessageSquare, Wrench, Rss, UserCircle,
   Settings as SettingsIcon, ArrowLeft,
 } from "lucide-react";
-import { Toaster } from "@/dashboard/collaborators/section/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { equityTotals } from "@/dashboard/collaborators/section/data/mockData";

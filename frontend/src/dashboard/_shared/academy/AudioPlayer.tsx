@@ -3,9 +3,9 @@ import {
   Play, Pause, Volume2, VolumeX, ChevronDown, ChevronUp, Video, Lock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Card } from "@/dashboard/collaborators/section/components/ui/card";
-import { Button } from "@/dashboard/collaborators/section/components/ui/button";
-import { Slider } from "@/dashboard/collaborators/section/components/ui/slider";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
 interface AudioPlayerProps {
   title: string;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Send, Sparkles } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { listAgents } from '../../lib/api/agents';
 import { createTask, streamTask, getTask, listTasks } from '../../lib/api/tasks';
 import { suggestTasks, flattenSuggestions } from '../../lib/api/workspaceAI';

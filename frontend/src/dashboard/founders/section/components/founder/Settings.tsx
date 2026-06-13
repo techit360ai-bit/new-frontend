@@ -13,7 +13,7 @@ import {
 import { roleDashboardPath, roleOnboardingPath } from "@/lib/roleRoutes";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/dashboard/collaborators/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 
 const sections = [
   { id: "identity",      label: "Account & Identity",  icon: User },

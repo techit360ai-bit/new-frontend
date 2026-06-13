@@ -6,18 +6,18 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/dashboard/investors/section/components/ui/card";
-import { Label } from "@/dashboard/investors/section/components/ui/label";
-import { Input } from "@/dashboard/investors/section/components/ui/input";
-import { Textarea } from "@/dashboard/investors/section/components/ui/textarea";
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/dashboard/investors/section/components/ui/select";
-import { Switch } from "@/dashboard/investors/section/components/ui/switch";
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { ACCENT_SOLID, ACCENT_SOFT, NEUTRAL_BTN } from "./theme";
 import { toast } from "sonner";
 
