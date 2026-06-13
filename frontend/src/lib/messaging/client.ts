@@ -31,6 +31,16 @@ export async function msgPost<T>(path: string, body?: unknown, init?: RequestIni
   return parse<T>(res);
 }
 
+export async function msgPatch<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
+  const res = await fetch(messagingUrl(path), {
+    method: "PATCH",
+    headers: headers(init?.headers),
+    body: body === undefined ? undefined : JSON.stringify(body),
+    ...init,
+  });
+  return parse<T>(res);
+}
+
 export async function msgDelete<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(messagingUrl(path), { method: "DELETE", headers: headers(init?.headers), ...init });
   return parse<T>(res);
