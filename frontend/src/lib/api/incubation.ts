@@ -22,3 +22,20 @@ export function runVenturePipeline(ventureData: Record<string, unknown>): Promis
     "venture pipeline",
   );
 }
+
+export interface IdeaDiagnostic {
+  /** Structured venture profile extracted by the VentureIntake agent. */
+  structured_profile?: Record<string, unknown> | null;
+  /** Recommended next actions for the founder. */
+  next_steps?: string[] | null;
+  [k: string]: unknown;
+}
+
+/** POST /api/v1/incubation/idea/diagnose — quick idea diagnostic (1 credit, Free+). */
+export function diagnoseIdea(ideaData: Record<string, unknown>): Promise<IdeaDiagnostic | null> {
+  return withFallback(
+    () => apiPost<IdeaDiagnostic>("/incubation/idea/diagnose", ideaData),
+    () => null,
+    "idea diagnostic",
+  );
+}

@@ -10,8 +10,9 @@ import {
   Briefcase, ArrowLeft, Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
-import { runVenturePipeline } from "@/lib/api/incubation";
+import { runVenturePipeline, diagnoseIdea } from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
+import { checkHealth } from "@/lib/api/health";
 
 const PROBLEM_AREAS = [
   { id: "ai", label: "AI", emoji: "🤖" },
@@ -184,16 +185,33 @@ export function MainIncubationPanel() {
   const [analyzedProjectId, setAnalyzedProjectId] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [provisioning, setProvisioning] = useState(false);
+  // Live AI-engine reachability (drives the "AI Engine" status badge).
+  const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
+  // Live next-steps from the idea diagnostic; falls back to mock insights when null.
+  const [nextSteps, setNextSteps] = useState<string[]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    checkHealth().then((h) => { if (alive) setEngineOnline(h.ok); });
+    return () => { alive = false; };
+  }, []);
 
   const handleRunAnalysis = async () => {
     if (!ideaTitle || !ideaSolution || selectedAreas.length === 0 || analyzing) return;
     setAnalyzing(true);
-    const result = await runVenturePipeline({
+    const ideaPayload = {
       startup_name: ideaTitle,
       solution: ideaSolution,
       focus_areas: selectedAreas,
-    });
+    };
+    // Quick idea diagnostic (1 credit, Free+) for live evaluation + next steps,
+    // plus the full pipeline which persists the venture and returns a project_id.
+    const [diagnostic, result] = await Promise.all([
+      diagnoseIdea(ideaPayload),
+      runVenturePipeline(ideaPayload),
+    ]);
     setAnalyzing(false);
+    setNextSteps(diagnostic?.next_steps ?? []);
     const pid = result?.project_id ?? `proj_local_${Date.now()}`;
     setAnalyzedProjectId(pid);
     toast.success("Analysis complete — venture saved. Create a workspace to start building.");
@@ -252,8 +270,10 @@ export function MainIncubationPanel() {
               </div>
             </div>
             <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border" style={{ background: "linear-gradient(135deg, #f0f9ff, #e0f2fe)", borderColor: "rgba(14,165,233,0.15)" }}>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ping-soft flex-shrink-0" />
-              <span className="text-[10px] font-semibold text-sky-700">AI Engine Active</span>
+              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${engineOnline === false ? "bg-red-400" : "bg-emerald-400 ping-soft"}`} />
+              <span className="text-[10px] font-semibold text-sky-700">
+                {engineOnline === null ? "Checking AI Engine…" : engineOnline ? "AI Engine Active" : "AI Engine Offline"}
+              </span>
               <Sparkles size={9} className="text-sky-400 ml-auto flex-shrink-0" />
             </div>
           </div>
@@ -607,6 +627,16 @@ export function MainIncubationPanel() {
             {/* Next AI Actions */}
             <div className="bg-white rounded-3xl border p-5 shadow-sm" style={{ borderColor: "rgba(14,165,233,0.12)" }}>
               <h3 className="text-sm font-bold text-sky-900 mb-3">Next AI Actions</h3>
+              {nextSteps.length > 0 && (
+                <ul className="mb-3 space-y-1.5">
+                  {nextSteps.map((step, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[11px] text-sky-700 leading-relaxed">
+                      <ChevronRight size={12} className="text-sky-400 flex-shrink-0 mt-0.5" />
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {[
                   { label: "Generate Pitch Deck", icon: <FileText size={15} />, primary: true },
