@@ -5,9 +5,9 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import confetti from "canvas-confetti";
-import { Card } from "@/dashboard/collaborators/section/components/ui/card";
-import { Button } from "@/dashboard/collaborators/section/components/ui/button";
-import { Checkbox } from "@/dashboard/collaborators/section/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AudioPlayer } from "./AudioPlayer";
 import type { Lesson } from "./curriculum";
 

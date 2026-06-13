@@ -5,8 +5,8 @@ import {
   Flame, ArrowRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Progress } from "@/dashboard/collaborators/section/components/ui/progress";
-import { Checkbox } from "@/dashboard/collaborators/section/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { HaviChat } from "./HaviChat";
 import { HaviChoices } from "./HaviChoices";
 import type { HaviRole, HaviTask, PersonalityMode } from "./haviData";

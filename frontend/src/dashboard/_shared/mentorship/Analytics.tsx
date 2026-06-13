@@ -4,7 +4,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/dashboard/investors/section/components/ui/card";
+} from "@/components/ui/card";
 import {
   LineChart,
   Line,

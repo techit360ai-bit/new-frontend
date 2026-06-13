@@ -6,7 +6,7 @@ import { tasks as initialTasks, projects } from "@/dashboard/collaborators/secti
 import type { Task } from "@/dashboard/collaborators/section/types";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/dashboard/collaborators/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 
 type SortKey = "impact" | "deadline" | "project";
 type Priority = Task["priority"];

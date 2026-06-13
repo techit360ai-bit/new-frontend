@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Video, VideoOff, Mic, MicOff, MonitorUp, Users, MoreVertical, X, Minimize2 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface VideoCallProps {
   onClose: () => void;

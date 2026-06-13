@@ -1,5 +1,5 @@
 import { ShieldAlert } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import type { ApprovalRequest } from '../../lib/types';
 
 interface Props {

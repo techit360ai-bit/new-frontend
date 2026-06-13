@@ -7,7 +7,7 @@ import {
 } from "@/dashboard/collaborators/section/data/mockData";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/dashboard/collaborators/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 
 const ADDITIONAL_TOOLS = ["Slack", "Sentry", "PostHog", "Stripe", "ClickUp", "Loom", "Cal.com", "Calendly"];
 

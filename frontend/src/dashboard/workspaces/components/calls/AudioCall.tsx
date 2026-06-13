@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, MoreVertical } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface AudioCallProps {
   onClose: () => void;

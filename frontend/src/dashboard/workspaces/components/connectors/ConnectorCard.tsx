@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { Plug, Github, Figma, FileText, Brain, Boxes, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import type { Connector, ConnectorId, ConnectorStatus } from '../../lib/types';
 
 const ICONS: Record<ConnectorId, ReactNode> = {

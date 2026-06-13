@@ -1,7 +1,7 @@
 import { Award, Lock, CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
-import { Card } from "@/dashboard/collaborators/section/components/ui/card";
-import { Badge as BadgePrimitive } from "@/dashboard/collaborators/section/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Badge as BadgePrimitive } from "@/components/ui/badge";
 import type { AcademyBadge } from "./curriculum";
 
 interface BadgeDisplayProps {

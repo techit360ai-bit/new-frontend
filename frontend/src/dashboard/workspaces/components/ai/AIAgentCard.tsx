@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Bot, Sparkles, Settings } from 'lucide-react';
-import { Switch } from '../ui/switch';
-import { Badge } from '../ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { motion } from 'motion/react';
 
 export interface AIAgent {

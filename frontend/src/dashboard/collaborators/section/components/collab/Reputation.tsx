@@ -5,7 +5,7 @@ import {
 import type { Badge } from "@/dashboard/collaborators/section/types";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/dashboard/collaborators/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 
 type Range = "month" | "quarter" | "all";
 const RANGES: { value: Range; label: string }[] = [

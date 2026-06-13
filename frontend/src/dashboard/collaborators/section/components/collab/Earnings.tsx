@@ -9,7 +9,7 @@ import {
 import { fetchCollaboratorEarnings, requestWithdrawal } from "@/lib/api/earnings";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/dashboard/collaborators/section/components/ui/dialog";
+} from "@/components/ui/dialog";
 
 export function Earnings() {
   const [earnings, setEarnings] = useState(cashEarnings);

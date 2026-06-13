@@ -6,32 +6,32 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/dashboard/investors/section/components/ui/card";
+} from "@/components/ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/dashboard/investors/section/components/ui/tabs";
-import { Badge } from "@/dashboard/investors/section/components/ui/badge";
-import { Progress } from "@/dashboard/investors/section/components/ui/progress";
+} from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/dashboard/investors/section/components/ui/dialog";
-import { Label } from "@/dashboard/investors/section/components/ui/label";
-import { Input } from "@/dashboard/investors/section/components/ui/input";
-import { Textarea } from "@/dashboard/investors/section/components/ui/textarea";
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/dashboard/investors/section/components/ui/select";
+} from "@/components/ui/select";
 import { mockMentees, mockTasks, mockRooms } from "./data";
 import { ACCENT_SOLID, ACCENT_SOFT, NEUTRAL_BTN, HERO_GRADIENT, statusBadge } from "./theme";
 

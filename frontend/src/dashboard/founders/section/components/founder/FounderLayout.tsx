@@ -6,7 +6,7 @@ import {
   Route as RouteIcon, MessageSquare, LineChart, Wallet, UserCircle,
   Settings as SettingsIcon, ArrowLeft,
 } from "lucide-react";
-import { Toaster } from "@/dashboard/collaborators/section/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";

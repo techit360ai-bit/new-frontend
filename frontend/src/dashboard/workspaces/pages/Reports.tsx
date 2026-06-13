@@ -1,7 +1,7 @@
 import { TrendingUp, TrendingDown, DollarSign, CheckCircle2, Clock, Download } from 'lucide-react';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Badge } from '../components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 const contributorData = [
   {

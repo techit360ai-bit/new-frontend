@@ -1,4 +1,4 @@
-import { Badge } from '../ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { useConsole } from '../../lib/console/ConsoleContext';
 import type { AgentTaskStatus } from '../../lib/types';
 

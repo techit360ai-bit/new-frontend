@@ -1,7 +1,7 @@
 import { useDrag } from 'react-dnd';
 import { Calendar, Clock, Flag } from 'lucide-react';
-import { Avatar, AvatarFallback } from '../ui/avatar';
-import { Badge } from '../ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 import type { Task } from './type';
 interface TaskCardProps {

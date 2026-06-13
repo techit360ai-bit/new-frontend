@@ -1,8 +1,8 @@
 import { ArrowRight, Award, Target } from "lucide-react";
 import { motion } from "motion/react";
-import { Card } from "@/dashboard/collaborators/section/components/ui/card";
-import { Progress } from "@/dashboard/collaborators/section/components/ui/progress";
-import { Button } from "@/dashboard/collaborators/section/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 
 interface ProgressCardProps {
   currentWeek: number;

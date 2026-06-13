@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Bot, Search } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIAgentCard } from '../components/ai/AIAgentCard';
 import type { AIAgent } from '../components/ai/AIAgentCard';
 import { listAgents, toggleAgent } from '../lib/api/agents';

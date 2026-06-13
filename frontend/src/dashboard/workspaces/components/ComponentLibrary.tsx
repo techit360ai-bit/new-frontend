@@ -1,8 +1,8 @@
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import { Switch } from './ui/switch';
-import { Card } from './ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
+import { Card } from '@/components/ui/card';
 import { Bell, Settings, Video, Flag, Calendar, Clock, Bot, Sparkles } from 'lucide-react';
 
 /**

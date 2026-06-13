@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Send, Sparkles, Clock, CheckCircle2, User } from 'lucide-react';
-import { Avatar, AvatarFallback } from '../ui/avatar';
-import { ScrollArea } from '../ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function RightPanel() {
   const location = useLocation();

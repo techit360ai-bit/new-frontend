@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Send, Paperclip, Smile, MoreVertical, Search } from 'lucide-react';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
-import { ScrollArea } from '../components/ui/scroll-area';
-import { VoiceWaveform } from '../components/ui/voice-waveform';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { VoiceWaveform } from '@/components/ui/voice-waveform';
 import { fetchChannelHistory, restSendChannel } from '@/lib/messaging/channels';
 import { useMessaging } from '@/contexts/MessagingProvider';
 

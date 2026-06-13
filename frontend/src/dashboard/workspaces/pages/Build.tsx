@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { KanbanColumn } from '../components/kanban/KanbanColumn';
 import type { Task } from '../components/kanban/type';
 import { Plus, Github } from 'lucide-react';
-import { Badge } from '../components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 type ColumnType = 'backlog' | 'inProgress' | 'review' | 'done';
 

@@ -4,8 +4,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { HeaderWithCallsAndRole } from './HeaderWithCallsAndRole';
 import { Sidebar } from './Sidebar';
 import { RightPanel } from './RightPanel';
-import { VideoCallPIP } from '../ui/video-pip';
-import { Toaster } from '../ui/sonner';
+import { VideoCallPIP } from '@/components/ui/video-pip';
+import { Toaster } from '@/components/ui/sonner';
 
 export function MainLayout() {
   return (
