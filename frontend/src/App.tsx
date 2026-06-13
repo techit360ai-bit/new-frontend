@@ -116,6 +116,9 @@ import { MyLogPage } from "@/dashboard/feed/pages/MyLogPage";
 import { UserProfilePage } from "@/dashboard/feed/pages/UserProfilePage";
 import { MessagingProvider } from "@/contexts/MessagingProvider";
 import { setMessagingToken } from "@/lib/messaging/config";
+import { DemoList } from "@/dashboard/demos/DemoList";
+import { DemoCreate } from "@/dashboard/demos/DemoCreate";
+import { DemoRoom } from "@/dashboard/demos/DemoRoom";
 
 setMessagingToken(() => {
   try { return localStorage.getItem("techit_token"); } catch { return null; }
@@ -282,6 +285,10 @@ const App = () => {
             }
           />
         </Route>
+
+        <Route path="/demos"     element={<DemoList />} />
+        <Route path="/demos/new" element={<DemoCreate />} />
+        <Route path="/demos/:id" element={<DemoRoom />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
