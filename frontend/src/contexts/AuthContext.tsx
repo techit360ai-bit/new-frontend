@@ -3,6 +3,7 @@ import {
   useState, useCallback, type ReactNode,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { setAuthTokenGetter } from '../lib/api/client'
 
 // ── Types ─────────────────────────────────────────────────────
 export type Role = 'founder' | 'collaborator' | 'investor' | 'organisation'
@@ -84,6 +85,11 @@ const getStored = () => ({
 })
 const saveToken = (t: string | null) => t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY)
 const saveUser  = (u: User | null)   => u ? localStorage.setItem(USER_KEY, JSON.stringify(u)) : localStorage.removeItem(USER_KEY)
+
+// Forward the stored JWT to the ai-router API client so every dashboard request
+// carries `Authorization: Bearer <token>`. Registered at module load (reads the
+// current token on each call) so it's live before <AuthProvider> even mounts.
+setAuthTokenGetter(() => getStored().token)
 
 // ── API base URL ──────────────────────────────────────────────
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
