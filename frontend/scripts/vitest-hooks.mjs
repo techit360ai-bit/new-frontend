@@ -5,9 +5,20 @@ import { resolve as resolvePath } from "node:path";
 import { existsSync } from "node:fs";
 
 const SHIM = pathToFileURL(resolvePath("scripts/vitest-runtime.mjs")).href;
+const SRC = pathToFileURL(resolvePath("src") + "/").href;
 
 export async function resolve(spec, ctx, next) {
   if (spec === "vitest") return { url: SHIM, shortCircuit: true };
+  // `@/foo` path alias -> <frontend>/src/foo, with TS extension probing.
+  if (spec.startsWith("@/")) {
+    const rel = spec.slice(2);
+    for (const ext of ["", ".ts", ".tsx", "/index.ts"]) {
+      try {
+        const base = new URL(rel + ext, SRC);
+        if (existsSync(base)) return { url: base.href, shortCircuit: true };
+      } catch { /* fall through */ }
+    }
+  }
   if (spec.startsWith(".") && !/\.[cm]?[jt]s$/.test(spec)) {
     for (const ext of [".ts", ".tsx", "/index.ts"]) {
       try {

@@ -19,6 +19,7 @@ export function expect(actual) {
     toEqual(e) { if (!eq(actual, e)) throw new Error(`expected ${JSON.stringify(actual)} to equal ${JSON.stringify(e)}`); },
     toBeTruthy() { if (!actual) throw new Error(`expected ${JSON.stringify(actual)} to be truthy`); },
     toBeFalsy() { if (actual) throw new Error(`expected ${JSON.stringify(actual)} to be falsy`); },
+    toBeNull() { if (actual !== null) throw new Error(`expected ${JSON.stringify(actual)} to be null`); },
     toContain(e) { if (!actual?.includes?.(e)) throw new Error(`expected ${JSON.stringify(actual)} to contain ${JSON.stringify(e)}`); },
     toHaveLength(n) { if (actual?.length !== n) throw new Error(`expected length ${actual?.length} to be ${n}`); },
     get not() {
