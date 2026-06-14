@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getEvent, transitionStatus, invite, respondInvite } from "@/lib/demo/client";
 import { canTransition } from "@/lib/demo/transitions";
+import { fetchRtcToken, type RtcSession } from "@/lib/demo/rtc";
 import type { DemoEvent } from "@/lib/demo/types";
+
+const DemoStage = lazy(() => import("./DemoStage"));
 
 const ROOM_ROLES = ["presenter", "judge", "audience"];
 
@@ -21,12 +24,20 @@ export function DemoRoom() {
   const [inviteUser, setInviteUser] = useState("");
   const [inviteRole, setInviteRole] = useState("judge");
   const [busy, setBusy] = useState(false);
+  const [session, setSession] = useState<RtcSession | null>(null);
 
   const refresh = useCallback(() => {
     return getEvent(id).then((e) => { setEvent(e); setLoading(false); });
   }, [id]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+
+  useEffect(() => {
+    if (event?.status !== "live") { setSession(null); return; }
+    let alive = true;
+    fetchRtcToken(id).then((s) => { if (alive) setSession(s); });
+    return () => { alive = false; };
+  }, [event?.status, id]);
 
   if (loading) return <div className="p-8 text-sm text-slate-400">Loading…</div>;
   if (!event) return (
@@ -62,6 +73,19 @@ export function DemoRoom() {
           </a>
         )}
       </div>
+
+      {/* Live stage */}
+      {event.status === "live" && (
+        session ? (
+          <Suspense fallback={<div className="text-sm text-slate-400">Connecting live video…</div>}>
+            <DemoStage session={session} />
+          </Suspense>
+        ) : (
+          <div className="border border-slate-200 bg-white rounded-xl p-6 text-sm text-slate-500">
+            Live video is unavailable right now.
+          </div>
+        )
+      )}
 
       {/* Host controls */}
       {isHost && (
