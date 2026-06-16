@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { getEvent, transitionStatus, invite, respondInvite } from "@/lib/demo/client";
 import { canTransition } from "@/lib/demo/transitions";
 import { fetchRtcToken, type RtcSession } from "@/lib/demo/rtc";
+import { useMessaging } from "@/contexts/MessagingProvider";
+import { listQuestions, askQuestion, upvoteQuestion, resolveQuestion, type Question } from "@/lib/demo/qa";
 import type { DemoEvent } from "@/lib/demo/types";
 
 const DemoStage = lazy(() => import("./DemoStage"));
@@ -25,6 +27,9 @@ export function DemoRoom() {
   const [inviteRole, setInviteRole] = useState("judge");
   const [busy, setBusy] = useState(false);
   const [session, setSession] = useState<RtcSession | null>(null);
+  const { store } = useMessaging();
+  const [seed, setSeed] = useState<Question[]>([]);
+  const [qBody, setQBody] = useState("");
 
   const refresh = useCallback(() => {
     return getEvent(id).then((e) => { setEvent(e); setLoading(false); });
@@ -38,6 +43,14 @@ export function DemoRoom() {
     fetchRtcToken(id).then((s) => { if (alive) setSession(s); });
     return () => { alive = false; };
   }, [event?.status, id]);
+
+  // seed the question list once the event is visible
+  useEffect(() => {
+    if (!event) return;
+    let alive = true;
+    listQuestions(id).then((qs) => { if (alive) setSeed(qs); });
+    return () => { alive = false; };
+  }, [event?.id, id]);
 
   if (loading) return <div className="p-8 text-sm text-slate-400">Loading…</div>;
   if (!event) return (
@@ -54,6 +67,36 @@ export function DemoRoom() {
     setBusy(true);
     try { await fn(); await refresh(); } finally { setBusy(false); }
   };
+
+  // merge REST seed with live wsReducer deltas (live wins on id collision)
+  const live = store.questions[id] ?? [];
+  const byId = new Map<string, Question>();
+  for (const q of seed) byId.set(q.id, q);
+  for (const lq of live) {
+    const existing = byId.get(lq.id);
+    byId.set(lq.id, {
+      id: lq.id, eventId: id, askerId: lq.askerId, body: lq.body,
+      state: lq.state, votes: lq.votes, mine: existing?.mine ?? false, createdAt: lq.createdAt,
+    });
+  }
+  const questions = Array.from(byId.values()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+  const submitQuestion = async () => {
+    const body = qBody.trim();
+    if (!body) return;
+    const created = await askQuestion(id, body);
+    if (created) setSeed((prev) => [...prev, created]);
+    setQBody("");
+  };
+  const toggleVote = async (qid: string) => {
+    const res = await upvoteQuestion(id, qid);
+    if (res) setSeed((prev) => prev.map((q) => (q.id === qid ? { ...q, votes: res.votes, mine: res.mine } : q)));
+  };
+  const setQState = async (qid: string, state: "answered" | "dismissed") => {
+    const updated = await resolveQuestion(id, qid, state);
+    if (updated) setSeed((prev) => prev.map((q) => (q.id === qid ? { ...q, state: updated.state } : q)));
+  };
+  const canModerate = isHost || (mine?.roomRole === "presenter");
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
@@ -86,6 +129,48 @@ export function DemoRoom() {
           </div>
         )
       )}
+
+      {/* Audience Q&A */}
+      <div className="border border-slate-200 bg-white rounded-xl p-5">
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">Audience Q&amp;A</h2>
+        {event.status === "live" ? (
+          <div className="flex items-end gap-2 mb-4">
+            <input value={qBody} onChange={(e) => setQBody(e.target.value)} placeholder="Ask a question…"
+              onKeyDown={(e) => { if (e.key === "Enter") void submitQuestion(); }}
+              className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm" />
+            <button type="button" disabled={!qBody.trim()} onClick={() => void submitQuestion()}
+              className="text-xs font-medium text-white bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 px-3 py-1.5 rounded-lg">
+              Ask
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 mb-3">Questions open when the demo goes live.</p>
+        )}
+        {questions.length === 0 ? (
+          <p className="text-xs text-slate-400">No questions yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {questions.map((q) => (
+              <li key={q.id} className={`flex items-start gap-3 text-sm rounded-lg border px-3 py-2 ${q.state === "dismissed" ? "opacity-50 line-through border-slate-100" : q.state === "answered" ? "border-emerald-200 bg-emerald-50" : "border-slate-200"}`}>
+                <button type="button" disabled={event.status !== "live"} onClick={() => void toggleVote(q.id)}
+                  className={`flex flex-col items-center px-2 py-0.5 rounded ${q.mine ? "text-violet-600" : "text-slate-400"} disabled:opacity-40`}>
+                  <span className="text-xs">▲</span>
+                  <span className="text-xs font-semibold">{q.votes}</span>
+                </button>
+                <span className="flex-1 text-slate-700">{q.body}</span>
+                {canModerate && q.state === "open" && event.status === "live" && (
+                  <span className="flex gap-1">
+                    <button type="button" onClick={() => void setQState(q.id, "answered")}
+                      className="text-[10px] font-medium text-emerald-700 hover:underline">Answered</button>
+                    <button type="button" onClick={() => void setQState(q.id, "dismissed")}
+                      className="text-[10px] font-medium text-slate-400 hover:underline">Dismiss</button>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Host controls */}
       {isHost && (

@@ -19,16 +19,26 @@ export interface FeedPost {
   likeCount: number;
 }
 
+export interface LiveQuestion {
+  id: string;
+  askerId: string;
+  body: string;
+  state: string;
+  votes: number;
+  createdAt: string;
+}
+
 export interface MsgStore {
   threads: Record<string, UIMessage[]>;        // convId -> messages
   channelThreads: Record<string, UIMessage[]>; // channelId -> messages
   online: Record<string, boolean>;
   feed: FeedPost[];   // global
   tribe: FeedPost[];  // role-relevant
+  questions: Record<string, LiveQuestion[]>; // eventId -> questions (arrival order)
 }
 
 export function emptyStore(): MsgStore {
-  return { threads: {}, channelThreads: {}, online: {}, feed: [], tribe: [] };
+  return { threads: {}, channelThreads: {}, online: {}, feed: [], tribe: [], questions: {} };
 }
 
 export function inTribe(p: { authorRole: string; audience: string[] }, myRole: string): boolean {
@@ -70,6 +80,28 @@ export function applyEnvelope(s: MsgStore, env: Envelope, me: string): MsgStore 
       const likeCount = Number(d.likeCount ?? 0);
       const bump = (p: FeedPost) => (p.id === postId ? { ...p, likeCount } : p);
       return { ...s, feed: s.feed.map(bump), tribe: s.tribe.map(bump) };
+    }
+    case "qa.new": {
+      const eventId = String(d.eventId ?? "");
+      const wq = (d.question ?? {}) as { id: string; askerId: string; body: string; state: string; votes?: number; createdAt: string };
+      const prev = s.questions[eventId] ?? [];
+      if (prev.some((q) => q.id === wq.id)) return s; // dedup
+      const lq: LiveQuestion = { id: wq.id, askerId: wq.askerId, body: wq.body, state: wq.state, votes: wq.votes ?? 0, createdAt: wq.createdAt };
+      return { ...s, questions: { ...s.questions, [eventId]: [...prev, lq] } };
+    }
+    case "qa.voted": {
+      const eventId = String(d.eventId ?? "");
+      const questionId = String(d.questionId ?? "");
+      const votes = Number(d.votes ?? 0);
+      const prev = s.questions[eventId] ?? [];
+      return { ...s, questions: { ...s.questions, [eventId]: prev.map((q) => (q.id === questionId ? { ...q, votes } : q)) } };
+    }
+    case "qa.resolved": {
+      const eventId = String(d.eventId ?? "");
+      const questionId = String(d.questionId ?? "");
+      const state = String(d.state ?? "");
+      const prev = s.questions[eventId] ?? [];
+      return { ...s, questions: { ...s.questions, [eventId]: prev.map((q) => (q.id === questionId ? { ...q, state } : q)) } };
     }
     default:
       return s;

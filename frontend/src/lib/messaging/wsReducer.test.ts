@@ -56,3 +56,28 @@ test("post.new routes into global always and tribe conditionally", () => {
   expect(s2.feed[0]?.id).toBe("p2");       // global
   expect(s2.tribe.length).toBe(0);         // not in tribe
 });
+
+test("qa.new appends a question (arrival order, deduped by id)", () => {
+  let s = emptyStore();
+  s = applyEnvelope(s, { type: "qa.new", id: "1", ts: "t", data: { eventId: "e1", question: { id: "q1", askerId: "u1", body: "first", state: "open", votes: 0, createdAt: "t1" } } }, "me");
+  s = applyEnvelope(s, { type: "qa.new", id: "2", ts: "t", data: { eventId: "e1", question: { id: "q2", askerId: "u2", body: "second", state: "open", votes: 0, createdAt: "t2" } } }, "me");
+  // duplicate q1 must not double
+  s = applyEnvelope(s, { type: "qa.new", id: "3", ts: "t", data: { eventId: "e1", question: { id: "q1", askerId: "u1", body: "first", state: "open", votes: 0, createdAt: "t1" } } }, "me");
+  expect(s.questions["e1"]).toHaveLength(2);
+  expect(s.questions["e1"][0].body).toBe("first");
+  expect(s.questions["e1"][1].body).toBe("second");
+});
+
+test("qa.voted updates a question's vote count", () => {
+  let s = emptyStore();
+  s = applyEnvelope(s, { type: "qa.new", id: "1", ts: "t", data: { eventId: "e1", question: { id: "q1", askerId: "u1", body: "x", state: "open", votes: 0, createdAt: "t1" } } }, "me");
+  s = applyEnvelope(s, { type: "qa.voted", id: "2", ts: "t", data: { eventId: "e1", questionId: "q1", votes: 5 } }, "me");
+  expect(s.questions["e1"][0].votes).toBe(5);
+});
+
+test("qa.resolved updates a question's state", () => {
+  let s = emptyStore();
+  s = applyEnvelope(s, { type: "qa.new", id: "1", ts: "t", data: { eventId: "e1", question: { id: "q1", askerId: "u1", body: "x", state: "open", votes: 0, createdAt: "t1" } } }, "me");
+  s = applyEnvelope(s, { type: "qa.resolved", id: "2", ts: "t", data: { eventId: "e1", questionId: "q1", state: "answered" } }, "me");
+  expect(s.questions["e1"][0].state).toBe("answered");
+});
