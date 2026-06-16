@@ -9,12 +9,12 @@ import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/mo
 
 const NEXT_ACTION_CTA: Record<
   ReturnType<typeof computeMomentum>["nextAction"],
-  { label: string; stage: "brief" | "build" }
+  { label: string; stage: "brief" | "build" | "submit" }
 > = {
   "submit-brief": { label: "Submit brief →", stage: "brief" },
   "log-check-in": { label: "Log check-in →", stage: "build" },
   "build":        { label: "Open team", stage: "build" },
-  "complete":     { label: "Open team", stage: "build" },
+  "complete":     { label: "View results →", stage: "submit" },
 };
 
 interface Props {

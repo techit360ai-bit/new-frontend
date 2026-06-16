@@ -195,6 +195,21 @@ export interface CheckIn {
   blocker?:  string;        // optional, only if status = "blocked"
 }
 
+export interface FinalSubmission {
+  demoUrl:     string;   // validated http(s) URL
+  deckUrl:     string;   // validated http(s) URL
+  videoUrl:    string;   // validated http(s) URL
+  summary:     string;   // min 40 chars
+  submittedAt: string;   // ISO timestamp; presence ⇒ locked + stage advanced
+}
+
+export interface JudgeFeedback {
+  placement:  number;    // 1..cohortSize (deterministic mock rank)
+  cohortSize: number;    // mock cohort size
+  comments:   string[];  // canned judge strings keyed to score signals
+  judgedAt:   string;    // ISO timestamp, pinned at submit
+}
+
 export interface HackathonRegistration {
   hackathonId: string;
   teamId: string;
@@ -210,6 +225,8 @@ export interface HackathonRegistration {
   brief?:      IdeaBrief;     // present once submitted; absence gates Build stage
   briefScore?: BriefScore;    // pinned at submit
   checkIns:    CheckIn[];     // default []
+  finalSubmission?: FinalSubmission;  // present once final pitch submitted
+  judgeFeedback?:   JudgeFeedback;    // pinned at submit, never re-runs
 }
 
 export interface FounderProfile {
@@ -276,6 +293,7 @@ interface UserContextType {
   ) => void;
   submitBrief: (teamId: string, brief: IdeaBrief, score: BriefScore) => void;
   addCheckIn: (teamId: string, checkIn: CheckIn) => void;
+  submitFinal: (teamId: string, submission: FinalSubmission, feedback: JudgeFeedback) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -461,6 +479,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const submitFinal = (teamId: string, submission: FinalSubmission, feedback: JudgeFeedback) => {
+    setFounderProfile((prev) => ({
+      ...prev,
+      hackathonRegistrations: prev.hackathonRegistrations.map((r) =>
+        r.teamId === teamId
+          ? { ...r, finalSubmission: submission, judgeFeedback: feedback, stage: "submitted-final" as const }
+          : r,
+      ),
+    }));
+  };
+
   const addHackathonMember = (teamId: string, member: HackathonTeamMember) => {
     setFounderProfile((prev) => ({
       ...prev,
@@ -504,6 +533,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         updateHackathonRegistration,
         submitBrief,
         addCheckIn,
+        submitFinal,
       }}
     >
       {children}
@@ -569,6 +599,7 @@ export function useFounderProfile() {
     updateHackathonRegistration,
     submitBrief,
     addCheckIn,
+    submitFinal,
   } = useUser();
   return {
     founderProfile,
@@ -578,5 +609,6 @@ export function useFounderProfile() {
     updateHackathonRegistration,
     submitBrief,
     addCheckIn,
+    submitFinal,
   };
 }
