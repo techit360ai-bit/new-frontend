@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Send } from "lucide-react";
 import { toast } from "sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { StagePill, type StageState } from "./hackathon/StagePill";
@@ -8,6 +7,8 @@ import { DiscoverStage } from "./hackathon/DiscoverStage";
 import { RegisterStage } from "./hackathon/RegisterStage";
 import { BriefStage } from "./hackathon/BriefStage";
 import { BuildStage } from "./hackathon/BuildStage";
+import { SubmitStage } from "./hackathon/SubmitStage";
+import { ResultsView } from "./hackathon/ResultsView";
 
 type StageId = "discover" | "register" | "brief" | "build" | "submit";
 
@@ -106,7 +107,13 @@ export function HackathonPanel() {
           ? <BuildStage registration={reg} />
           : <NoTeam onRegister={() => setStage(reg ? "brief" : "register")} />
       )}
-      {activeStage === "submit" && <ComingInPRD />}
+      {activeStage === "submit" && (
+        reg && reg.brief
+          ? (reg.stage === "submitted-final"
+              ? <ResultsView registration={reg} />
+              : <SubmitStage registration={reg} />)
+          : <NoTeam onRegister={() => setStage(reg ? "brief" : "register")} />
+      )}
     </div>
   );
 }
@@ -125,18 +132,6 @@ function NoTeam({ onRegister }: { onRegister: () => void }) {
       >
         Go to Register →
       </button>
-    </div>
-  );
-}
-
-function ComingInPRD() {
-  return (
-    <div className="border border-slate-200 bg-white rounded-xl p-12 flex flex-col items-center justify-center text-center">
-      <div className="mb-4"><Send className="w-8 h-8 text-slate-300" /></div>
-      <h2 className="text-base font-semibold text-slate-700 mb-2">Submit &amp; Pitch — coming in PR-D</h2>
-      <p className="text-sm text-slate-500 max-w-md">
-        Final submission and judging go live next. For now, submit your brief and log build check-ins in the earlier stages.
-      </p>
     </div>
   );
 }

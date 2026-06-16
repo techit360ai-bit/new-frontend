@@ -1,0 +1,130 @@
+import { Lock, Trophy, ExternalLink } from "lucide-react";
+import type { HackathonRegistration } from "@/contexts/UserContext";
+import { momentumColor } from "@/dashboard/_shared/hackathon/momentum";
+
+interface Props {
+  registration: HackathonRegistration;
+}
+
+const SUB_SCORES: { key: "problemClarity" | "innovationGap" | "initialImpact"; label: string }[] = [
+  { key: "problemClarity", label: "Problem Clarity" },
+  { key: "innovationGap",  label: "Innovation Gap" },
+  { key: "initialImpact",  label: "Initial Impact" },
+];
+
+const LINKS: { key: "demoUrl" | "deckUrl" | "videoUrl"; label: string }[] = [
+  { key: "demoUrl",  label: "Demo" },
+  { key: "deckUrl",  label: "Pitch deck" },
+  { key: "videoUrl", label: "Video" },
+];
+
+function ScoreBar({ score, label }: { score: number; label: string }) {
+  const color = momentumColor(score);
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs font-medium text-slate-700">{label}</span>
+        <span className={`text-xs font-semibold ${color.text}`}>{score}</span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-slate-100">
+        <div className={`h-1.5 rounded-full ${color.bar}`} style={{ width: `${score}%` }} />
+      </div>
+    </div>
+  );
+}
+
+// Placement standing → color band: top third emerald, middle amber, lower slate.
+function placementColor(placement: number, cohortSize: number): { text: string; ring: string } {
+  const pct = placement / cohortSize;
+  if (pct <= 1 / 3) return { text: "text-emerald-700", ring: "border-emerald-200 bg-emerald-50" };
+  if (pct <= 2 / 3) return { text: "text-amber-700", ring: "border-amber-200 bg-amber-50" };
+  return { text: "text-slate-600", ring: "border-slate-200 bg-slate-50" };
+}
+
+export function ResultsView({ registration }: Props) {
+  const { finalSubmission, judgeFeedback, briefScore } = registration;
+
+  if (!finalSubmission || !judgeFeedback) {
+    return (
+      <div className="border border-slate-200 bg-white rounded-xl p-12 text-center">
+        <h2 className="text-base font-semibold text-slate-700 mb-2">Results unavailable</h2>
+        <p className="text-sm text-slate-500">Submit your final pitch to see judging results.</p>
+      </div>
+    );
+  }
+
+  const band = placementColor(judgeFeedback.placement, judgeFeedback.cohortSize);
+  const overallColor = briefScore ? momentumColor(briefScore.overall) : null;
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Placement badge */}
+      <div className={`border rounded-xl p-6 flex items-center gap-4 ${band.ring}`}>
+        <Trophy className={`w-8 h-8 shrink-0 ${band.text}`} />
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Final results</p>
+          <p className={`text-2xl font-bold ${band.text}`}>
+            #{judgeFeedback.placement}{" "}
+            <span className="text-base font-medium text-slate-500">of {judgeFeedback.cohortSize}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Score breakdown */}
+      {briefScore && overallColor && (
+        <div className="border border-slate-200 bg-white rounded-xl p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-slate-900">Score breakdown</h3>
+            <span className={`text-2xl font-bold ${overallColor.text}`}>{briefScore.overall}</span>
+          </div>
+          {SUB_SCORES.map((s) => (
+            <ScoreBar key={s.key} score={briefScore[s.key]} label={s.label} />
+          ))}
+        </div>
+      )}
+
+      {/* Judge comments */}
+      <div className="border border-slate-200 bg-white rounded-xl p-6">
+        <h3 className="text-base font-semibold text-slate-900 mb-3">Judge feedback</h3>
+        <ul className="space-y-2">
+          {judgeFeedback.comments.map((c, i) => (
+            <li key={i} className="text-sm text-slate-700 flex gap-2">
+              <span className="text-slate-300">•</span>
+              <span>{c}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Locked submission */}
+      <div className="border border-slate-200 bg-white rounded-xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Lock className="w-4 h-4 text-slate-400" />
+          <h3 className="text-base font-semibold text-slate-900">Final submission</h3>
+          <span className="ml-auto text-xs text-slate-500">Locked</span>
+        </div>
+        <dl className="space-y-3">
+          <div>
+            <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">Summary</dt>
+            <dd className="text-sm text-slate-800 mt-0.5 whitespace-pre-wrap">{finalSubmission.summary}</dd>
+          </div>
+          {LINKS.map((l) => (
+            <div key={l.key}>
+              <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">{l.label}</dt>
+              <dd className="mt-0.5">
+                <a
+                  href={finalSubmission[l.key]}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 hover:text-violet-800 break-all"
+                >
+                  {finalSubmission[l.key]} <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                </a>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  );
+}

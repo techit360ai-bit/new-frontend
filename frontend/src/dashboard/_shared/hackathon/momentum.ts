@@ -31,6 +31,7 @@ export function computeMomentum(reg: HackathonRegistration, now: number = Date.n
   if (hasBrief) score += 25;
   score += Math.min(checkIns.length, 10) * 5;          // +5 each, cap +50
   score += Math.min(reg.members.length, 5) * 5;         // +5 per filled member, cap +25
+  if (reg.finalSubmission) score += 15;                 // final pitch shipped
 
   const last = lastCheckInMs(reg);
   if (last !== null) {
