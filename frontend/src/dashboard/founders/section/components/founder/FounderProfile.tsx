@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Github, Linkedin, Globe, Twitter, ExternalLink, Check } from "lucide-react";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { journey, endorsements } from "@/dashboard/founders/section/data/mockData";
+import { StartupPassport } from "./StartupPassport";
 
 export function FounderProfile() {
   const { founderProfile: p } = useFounderProfile();
@@ -261,6 +262,8 @@ export function FounderProfile() {
           </div>
         )}
       </div>
+
+      <StartupPassport />
 
       {/* 8. Pinned work (only if present) */}
       {p.pinnedWork.length > 0 && (
