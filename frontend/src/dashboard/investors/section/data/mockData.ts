@@ -5,6 +5,14 @@ export interface StartupAbout {
   marketSizeValue: string;
 }
 
+export interface PassportSummary {
+  hackathonsEntered: number;
+  bestPlacement?: number;
+  cohortSize?: number;
+  demosShipped: number;
+  avgBriefScore?: number;
+}
+
 export interface Startup {
   id: string;
   name: string;
@@ -28,6 +36,7 @@ export interface Startup {
   milestones: Milestone[];
   riskMetrics: RiskMetrics;
   about: StartupAbout;
+  passport?: PassportSummary;
   lat?: number;
   lng?: number;
 }
@@ -126,6 +135,7 @@ export const mockStartups: Startup[] = [
       marketSize: '$6.2B API management market growing at 23% CAGR, expanding to $28B across the broader developer tooling market by 2027.',
       marketSizeValue: '$28B',
     },
+    passport: { hackathonsEntered: 4, bestPlacement: 1, cohortSize: 12, demosShipped: 3, avgBriefScore: 88 },
   },
   {
     id: '2',
@@ -168,6 +178,7 @@ export const mockStartups: Startup[] = [
       marketSize: '$61B edge AI semiconductor market by 2028, with a $15B TAM in industrial edge inference addressable by 2026.',
       marketSizeValue: '$61B',
     },
+    passport: { hackathonsEntered: 2, bestPlacement: 6, cohortSize: 12, demosShipped: 1, avgBriefScore: 71 },
   },
   {
     id: '3',
@@ -210,6 +221,7 @@ export const mockStartups: Startup[] = [
       marketSize: '$7.2T embedded finance market globally by 2030, with $350B addressable SME lending opportunity in Southeast Asia alone.',
       marketSizeValue: '$7.2T',
     },
+    passport: { hackathonsEntered: 1, demosShipped: 0, avgBriefScore: 64 },
   },
   {
     id: '4',
