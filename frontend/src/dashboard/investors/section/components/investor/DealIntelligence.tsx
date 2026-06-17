@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { mockStartups, type Startup } from '../../data/mockData';
 import { fetchDealFlow } from '@/lib/api/dealFlow';
+import { useFounderProfile } from '@/contexts/UserContext';
+import { derivePassport } from '@/dashboard/_shared/passport/passport';
 import {
   Filter,
   Grid3x3,
@@ -9,9 +11,52 @@ import {
   Eye,
   MapPin,
   ChevronDown,
+  Trophy,
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
+
+// Build a Deal-Intelligence Startup card from the logged-in founder + their
+// derived passport, so a real hackathon track record is investor-discoverable.
+function founderToStartup(
+  fp: ReturnType<typeof useFounderProfile>["founderProfile"],
+  now: number,
+): Startup | null {
+  const passport = derivePassport(fp.hackathonRegistrations, now);
+  if (!passport.hasActivity) return null;
+  const bestMomentum = passport.records.reduce((m, r) => Math.max(m, r.momentum), 0);
+  return {
+    id: 'founder-self',
+    name: fp.startupName || fp.name,
+    sector: fp.industries[0] ?? '—',
+    region: fp.location ?? '—',
+    readinessScore: passport.avgBriefScore ?? 0,
+    executionVelocity: bestMomentum,
+    betaRetention: 0,
+    revenueGrowth: 0,
+    mrr: fp.revenueMonthly ?? 0,
+    riskLevel: 'low',
+    founderReliability: passport.avgBriefScore ?? 0,
+    complianceVerified: false,
+    aiGovernanceVerified: false,
+    burnEfficiency: 0,
+    pivotFrequency: 0,
+    experimentVelocity: 0,
+    velocityDelta: 0,
+    revenueDelta: 0,
+    investorsWatching: 0,
+    milestones: [],
+    riskMetrics: { product: 0, market: 0, team: 0, compliance: 0, financial: 0, execution: 0 },
+    about: { summary: fp.oneLiner ?? '', useCase: '', marketSize: '', marketSizeValue: '' },
+    passport: {
+      hackathonsEntered: passport.hackathonsEntered,
+      bestPlacement: passport.bestPlacement?.placement,
+      cohortSize: passport.bestPlacement?.cohortSize,
+      demosShipped: passport.demosShipped,
+      avgBriefScore: passport.avgBriefScore,
+    },
+  };
+}
 
 export function DealIntelligence() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -25,7 +70,15 @@ export function DealIntelligence() {
     region: 'all',
     sector: 'all',
     maxBurnEfficiency: 10,
+    hasTrackRecord: false,
+    minBestPlacement: 0,
   });
+
+  const { founderProfile } = useFounderProfile();
+  const allStartups = useMemo(() => {
+    const self = founderToStartup(founderProfile, Date.now());
+    return self ? [self, ...mockStartups] : mockStartups;
+  }, [founderProfile]);
 
   const [expandedFilters, setExpandedFilters] = useState({
     execution: true,
@@ -51,7 +104,7 @@ export function DealIntelligence() {
     return () => { alive = false; };
   }, []);
 
-  const filteredStartups = mockStartups.filter((startup) => {
+  const filteredStartups = allStartups.filter((startup) => {
     if (startup.readinessScore < filters.minReadiness) return false;
     if (startup.executionVelocity < filters.minExecutionVelocity) return false;
     if (startup.betaRetention < filters.minBetaRetention) return false;
@@ -61,6 +114,11 @@ export function DealIntelligence() {
     if (filters.region !== 'all' && startup.region !== filters.region) return false;
     if (filters.sector !== 'all' && startup.sector !== filters.sector) return false;
     if (startup.burnEfficiency > filters.maxBurnEfficiency) return false;
+    if (filters.hasTrackRecord && !(startup.passport && startup.passport.hackathonsEntered > 0)) return false;
+    if (
+      filters.minBestPlacement > 0 &&
+      !(startup.passport?.bestPlacement != null && startup.passport.bestPlacement <= filters.minBestPlacement)
+    ) return false;
     return true;
   });
 
@@ -204,6 +262,31 @@ export function DealIntelligence() {
               </div>
             </FilterSection>
 
+            <FilterSection
+              title="Hackathon Track Record"
+              isExpanded={expandedFilters.behavioral}
+              onToggle={() => toggleFilterSection('behavioral')}
+            >
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filters.hasTrackRecord}
+                    onChange={(e) => setFilters({ ...filters, hasTrackRecord: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-gray-900"
+                  />
+                  <span className="text-sm text-gray-300">Has hackathon track record</span>
+                </label>
+                <SliderFilter
+                  label="Top placement (≤)"
+                  value={filters.minBestPlacement}
+                  onChange={(value) => setFilters({ ...filters, minBestPlacement: value })}
+                  min={0}
+                  max={12}
+                />
+              </div>
+            </FilterSection>
+
             {/* Reset Button */}
             <button
               onClick={() =>
@@ -217,6 +300,8 @@ export function DealIntelligence() {
                   region: 'all',
                   sector: 'all',
                   maxBurnEfficiency: 10,
+                  hasTrackRecord: false,
+                  minBestPlacement: 0,
                 })
               }
               className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
@@ -233,7 +318,7 @@ export function DealIntelligence() {
             <div>
               <p className="text-gray-400 text-sm">
                 Showing <span className="text-white font-mono">{filteredStartups.length}</span> of{' '}
-                <span className="text-white font-mono">{mockStartups.length}</span> startups
+                <span className="text-white font-mono">{allStartups.length}</span> startups
               </p>
               {ranked && (
                 <p className="text-xs text-emerald-400 mt-0.5">
@@ -388,6 +473,19 @@ function StartupCard({ startup }: StartupCardProps) {
         <MetricRow label="Founder" value={startup.founderReliability} isScore />
       </div>
 
+      {startup.passport && (
+        <div className="flex items-center gap-1.5 text-xs text-amber-400 mb-3 font-mono">
+          <Trophy className="w-3.5 h-3.5" />
+          <span>
+            {startup.passport.bestPlacement != null
+              ? `Best #${startup.passport.bestPlacement} of ${startup.passport.cohortSize}`
+              : 'No placement yet'}
+            {' · '}{startup.passport.hackathonsEntered} hackathon{startup.passport.hackathonsEntered === 1 ? '' : 's'}
+            {' · '}{startup.passport.demosShipped} demo{startup.passport.demosShipped === 1 ? '' : 's'}
+          </span>
+        </div>
+      )}
+
       <div className="flex gap-2">
         <Link
           to={`/investor/risk-radar/${startup.id}`}
@@ -454,6 +552,14 @@ function StartupListItem({ startup }: StartupCardProps) {
                 {startup.riskLevel}
               </p>
             </div>
+            {startup.passport && (
+              <div className="text-center">
+                <p className="text-xs text-gray-400 mb-1">Hackathon</p>
+                <p className="text-sm font-bold font-mono text-amber-400">
+                  {startup.passport.bestPlacement != null ? `#${startup.passport.bestPlacement}` : '—'}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
