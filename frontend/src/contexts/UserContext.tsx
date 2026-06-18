@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useMemo, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { type FounderProject, FALLBACK_PROJECTS } from "@/lib/api/projects";
 
 export interface PortfolioCompany {
   id: string;
@@ -210,6 +211,24 @@ export interface JudgeFeedback {
   judgedAt:   string;    // ISO timestamp, pinned at submit
 }
 
+export interface TeamWorkspaceIdea {
+  problem: string; targetUser: string; solutionSketch: string; whyNow: string;
+  differentiator: string; risk: string; successMetric: string;
+}
+export interface TeamWorkspaceMemberRef { collaboratorId: string; name: string; role: string; }
+export interface TeamWorkspaceArtifacts { demoUrl: string; deckUrl: string; videoUrl: string; }
+export interface TeamWorkspace {
+  id: string;
+  hackathonId: string;
+  teamId: string;
+  teamName: string;
+  createdAt: string;
+  idea: TeamWorkspaceIdea | null;
+  team: TeamWorkspaceMemberRef[];
+  artifacts: TeamWorkspaceArtifacts | null;
+  projectId?: string;
+}
+
 export interface HackathonRegistration {
   hackathonId: string;
   teamId: string;
@@ -227,6 +246,8 @@ export interface HackathonRegistration {
   checkIns:    CheckIn[];     // default []
   finalSubmission?: FinalSubmission;  // present once final pitch submitted
   judgeFeedback?:   JudgeFeedback;    // pinned at submit, never re-runs
+  workspaceId?: string;
+  promotedProjectId?: string;
 }
 
 export interface FounderProfile {
@@ -274,6 +295,8 @@ export interface FounderProfile {
   notifications: FounderNotificationPrefs;
   // Hackathon participation (PR-B)
   hackathonRegistrations: HackathonRegistration[];
+  founderProjects: FounderProject[];
+  teamWorkspaces: TeamWorkspace[];
 }
 
 interface UserContextType {
@@ -294,6 +317,9 @@ interface UserContextType {
   submitBrief: (teamId: string, brief: IdeaBrief, score: BriefScore) => void;
   addCheckIn: (teamId: string, checkIn: CheckIn) => void;
   submitFinal: (teamId: string, submission: FinalSubmission, feedback: JudgeFeedback) => void;
+  addFounderProject: (project: FounderProject) => void;
+  addTeamWorkspace: (ws: TeamWorkspace) => void;
+  bindTeamWorkspaceProject: (workspaceId: string, projectId: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -439,6 +465,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       quietHours:    "off",
     },
     hackathonRegistrations: [],
+    founderProjects: [...FALLBACK_PROJECTS],
+    teamWorkspaces: [],
   });
 
   /**
@@ -490,6 +518,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const addFounderProject = (project: FounderProject) => {
+    setFounderProfile((prev) => ({ ...prev, founderProjects: [...prev.founderProjects, project] }));
+  };
+
+  const addTeamWorkspace = (ws: TeamWorkspace) => {
+    setFounderProfile((prev) => ({ ...prev, teamWorkspaces: [...prev.teamWorkspaces, ws] }));
+  };
+
+  const bindTeamWorkspaceProject = (workspaceId: string, projectId: string) => {
+    setFounderProfile((prev) => ({
+      ...prev,
+      teamWorkspaces: prev.teamWorkspaces.map((w) => (w.id === workspaceId ? { ...w, projectId } : w)),
+    }));
+  };
+
   const addHackathonMember = (teamId: string, member: HackathonTeamMember) => {
     setFounderProfile((prev) => ({
       ...prev,
@@ -534,6 +577,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         submitBrief,
         addCheckIn,
         submitFinal,
+        addFounderProject,
+        addTeamWorkspace,
+        bindTeamWorkspaceProject,
       }}
     >
       {children}
@@ -600,6 +646,9 @@ export function useFounderProfile() {
     submitBrief,
     addCheckIn,
     submitFinal,
+    addFounderProject,
+    addTeamWorkspace,
+    bindTeamWorkspaceProject,
   } = useUser();
   return {
     founderProfile,
@@ -610,5 +659,8 @@ export function useFounderProfile() {
     submitBrief,
     addCheckIn,
     submitFinal,
+    addFounderProject,
+    addTeamWorkspace,
+    bindTeamWorkspaceProject,
   };
 }
