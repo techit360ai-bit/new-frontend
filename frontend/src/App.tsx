@@ -11,6 +11,7 @@ import { Dashboard } from "@/dashboard/founders/section/components/founder/Dashb
 import { FounderProfile } from "@/dashboard/founders/section/components/founder/FounderProfile";
 import { Settings as FounderSettings } from "@/dashboard/founders/section/components/founder/Settings";
 import { Messages as FounderMessages } from "@/dashboard/founders/section/components/founder/Messages";
+import { TeamWorkspaceView } from "@/dashboard/founders/section/components/founder/TeamWorkspaceView";
 import { CollabLayout } from "@/dashboard/collaborators/section/components/collab/CollabLayout";
 import { Dashboard as CollabDashboard } from "@/dashboard/collaborators/section/components/collab/Dashboard";
 import { Equity as CollabEquity } from "@/dashboard/collaborators/section/components/collab/Equity";
@@ -205,6 +206,7 @@ const App = () => {
 
         <Route element={<FounderLayout />}>
           <Route path="/dashboard"        element={<Dashboard />} />
+          <Route path="/team-workspace/:teamId" element={<TeamWorkspaceView />} />
           <Route path="/founder/profile"  element={<FounderProfile />} />
           <Route path="/founder/settings" element={<FounderSettings />} />
           <Route path="/founder/messages" element={<FounderMessages />} />

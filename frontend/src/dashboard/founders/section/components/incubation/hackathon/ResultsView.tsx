@@ -1,6 +1,9 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Lock, Trophy, ExternalLink } from "lucide-react";
 import type { HackathonRegistration } from "@/contexts/UserContext";
 import { momentumColor } from "@/dashboard/_shared/hackathon/momentum";
+import { PromoteToStartupModal } from "./PromoteToStartupModal";
 
 interface Props {
   registration: HackathonRegistration;
@@ -43,6 +46,7 @@ function placementColor(placement: number, cohortSize: number): { text: string; 
 
 export function ResultsView({ registration }: Props) {
   const { finalSubmission, judgeFeedback, briefScore } = registration;
+  const [promoteOpen, setPromoteOpen] = useState(false);
 
   if (!finalSubmission || !judgeFeedback) {
     return (
@@ -125,6 +129,24 @@ export function ResultsView({ registration }: Props) {
           ))}
         </dl>
       </div>
+
+      {registration.promotedProjectId ? (
+        <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5">
+          <p className="text-sm font-semibold text-emerald-800 mb-2">Promoted to startup ✓</p>
+          <div className="flex flex-wrap gap-3">
+            <Link to={`/team-workspace/${registration.teamId}`} className="text-sm font-medium text-violet-700 hover:underline">Open workspace</Link>
+            <Link to="/dashboard" className="text-sm font-medium text-violet-700 hover:underline">View in portfolio</Link>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-end">
+          <button type="button" onClick={() => setPromoteOpen(true)}
+            className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700">
+            Promote to startup
+          </button>
+        </div>
+      )}
+      {promoteOpen && <PromoteToStartupModal registration={registration} onClose={() => setPromoteOpen(false)} />}
     </div>
   );
 }

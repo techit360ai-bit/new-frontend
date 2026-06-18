@@ -80,3 +80,14 @@ export function provisionTeamWorkspace(
     () => ({ ok: true }), "provision team workspace",
   );
 }
+
+export function reportTeamToOrganizers(
+  id: string, teamId: string,
+  report: { workspaceId: string; idea: unknown; team: unknown; artifacts: unknown; stage: string },
+): Promise<{ ok: boolean } | null> {
+  return withFallback(
+    () => apiPost<{ ok: boolean }>(`/hackathons/${id}/teams/${teamId}/report`, report),
+    () => ({ ok: true }),
+    "report team to organizers",
+  );
+}
