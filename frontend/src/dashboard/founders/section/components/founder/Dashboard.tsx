@@ -7,7 +7,6 @@ import { useFounderProfile } from "@/contexts/UserContext";
 import { fetchDashboardIntelligence, type DashboardIntelligence } from "@/lib/api/gsis";
 import { fetchAudioBriefing } from "@/lib/api/audio";
 import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
-import { fetchFounderProjects, type FounderProject } from "@/lib/api/projects";
 import { formatRelative } from "@/lib/formatRelative";
 import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
@@ -74,18 +73,12 @@ export function Dashboard() {
     }
   };
 
-  // S7 — founder venture portfolio (multiple separate startups).
-  const [ventures, setVentures] = useState<FounderProject[]>([]);
+  // S7 — founder venture portfolio (multiple separate startups), from context.
+  const ventures = p.founderProjects;
   const [activeVentureId, setActiveVentureId] = useState<string | null>(null);
   useEffect(() => {
-    let alive = true;
-    fetchFounderProjects().then((list) => {
-      if (!alive) return;
-      setVentures(list);
-      setActiveVentureId((list.find((v) => v.isPrimary) ?? list[0])?.id ?? null);
-    });
-    return () => { alive = false; };
-  }, []);
+    setActiveVentureId((cur) => cur ?? (ventures.find((v) => v.isPrimary) ?? ventures[0])?.id ?? null);
+  }, [ventures]);
 
   const firstName = p.name.split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
