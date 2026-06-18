@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import type { HackathonRegistration, CheckIn } from "@/contexts/UserContext";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { computeMomentum } from "@/dashboard/_shared/hackathon/momentum";
-import { logHackathonCheckIn, provisionTeamWorkspace } from "@/lib/api/hackathon";
+import { logHackathonCheckIn } from "@/lib/api/hackathon";
+import { useGenerateTeamWorkspace } from "./useGenerateTeamWorkspace";
+import { PromoteToStartupModal } from "./PromoteToStartupModal";
 
 interface Props {
   registration: HackathonRegistration;
@@ -48,8 +50,8 @@ export function BuildStage({ registration }: Props) {
   const [status, setStatus] = useState<CheckIn["status"]>("on-track");
   const [update, setUpdate] = useState("");
   const [blocker, setBlocker] = useState("");
-  const [workspace, setWorkspace] = useState<{ id: string; projectId: string } | null>(null);
-  const [provisioning, setProvisioning] = useState(false);
+  const generate = useGenerateTeamWorkspace();
+  const [promoteOpen, setPromoteOpen] = useState(false);
 
   const checkIns = registration.checkIns ?? [];
   const ordered = useMemo(
@@ -81,25 +83,6 @@ export function BuildStage({ registration }: Props) {
     setStatus("on-track");
     setUpdate("");
     setBlocker("");
-  };
-
-  // Pipe the analyzed brief into a shared team workspace (ai-router reuses
-  // WorkspaceService). Best-effort: offline the api seam falls back to { ok }.
-  const handleProvisionWorkspace = async () => {
-    setProvisioning(true);
-    try {
-      const res = await provisionTeamWorkspace(registration.hackathonId, registration.teamId);
-      if (res?.workspace) {
-        setWorkspace(res.workspace);
-        toast.success("Team workspace ready");
-      } else if (res?.ok) {
-        toast.success("Team workspace requested");
-      } else {
-        toast.error("Couldn't create the workspace — try again");
-      }
-    } finally {
-      setProvisioning(false);
-    }
   };
 
   return (
@@ -153,45 +136,33 @@ export function BuildStage({ registration }: Props) {
               <Rocket className="w-4 h-4 text-violet-600" />
               <h3 className="text-base font-semibold text-slate-900">Team workspace</h3>
             </div>
-            {workspace ? (
-              <>
-                <p className="text-xs text-slate-500 mb-3">
-                  Your brief is piped into a shared build workspace.
-                </p>
-                <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-3">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider">Workspace</p>
-                  <p className="text-sm font-medium text-slate-800 break-all">{workspace.id}</p>
-                </div>
-                <Link
-                  to="/workspaces"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 hover:text-violet-800"
-                >
-                  Open workspace <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              </>
+            <p className="text-xs text-slate-500 mb-4">
+              Pipe your analyzed brief into a shared workspace your whole team can build in.
+            </p>
+            {registration.workspaceId ? (
+              <Link to={`/team-workspace/${registration.teamId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 hover:text-violet-800">
+                Open team workspace <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
             ) : (
               <>
-                <p className="text-xs text-slate-500 mb-4">
-                  Pipe your analyzed brief into a shared workspace your whole team can build in.
-                </p>
-                <button
-                  type="button"
-                  disabled={provisioning || !registration.brief}
-                  onClick={handleProvisionWorkspace}
-                  className={`w-full text-sm font-medium px-4 py-2 rounded-lg ${
-                    !provisioning && registration.brief
-                      ? "bg-violet-600 text-white hover:bg-violet-700"
-                      : "bg-slate-100 text-slate-400 cursor-not-allowed"
-                  }`}
-                >
-                  {provisioning ? "Creating…" : "Create team workspace"}
+                <button type="button" disabled={!registration.brief}
+                  onClick={() => generate(registration)}
+                  className={`w-full text-sm font-medium px-4 py-2 rounded-lg ${registration.brief ? "bg-violet-600 text-white hover:bg-violet-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}>
+                  Create team workspace
                 </button>
-                {!registration.brief && (
-                  <p className="text-xs text-slate-400 mt-2">Submit your brief first to unlock this.</p>
-                )}
+                {!registration.brief && <p className="text-xs text-slate-400 mt-2">Submit your brief first to unlock this.</p>}
               </>
             )}
           </div>
+
+          {registration.promotedProjectId ? (
+            <p className="text-xs text-emerald-700 mt-3">Promoted to a startup ✓</p>
+          ) : (
+            <button type="button" onClick={() => setPromoteOpen(true)}
+              className="w-full text-sm font-medium px-4 py-2 rounded-lg border border-violet-300 text-violet-700 hover:bg-violet-50 mt-3">
+              Promote to startup
+            </button>
+          )}
 
           <div className="border border-slate-200 rounded-xl p-5 bg-white lg:sticky lg:top-6">
             <h3 className="text-base font-semibold text-slate-900 mb-4">Log check-in</h3>
@@ -258,6 +229,8 @@ export function BuildStage({ registration }: Props) {
           </div>
         </div>
       </div>
+
+      {promoteOpen && <PromoteToStartupModal registration={registration} onClose={() => setPromoteOpen(false)} />}
     </div>
   );
 }

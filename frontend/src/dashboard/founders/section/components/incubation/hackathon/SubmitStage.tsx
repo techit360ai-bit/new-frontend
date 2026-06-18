@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import type { HackathonRegistration, FinalSubmission } from "@/contexts/UserContext";
 import { useFounderProfile } from "@/contexts/UserContext";
@@ -65,6 +66,14 @@ export function SubmitStage({ registration }: Props) {
           Share your demo, deck, and video, plus a short summary. Submission locks and judging runs immediately.
         </p>
       </div>
+
+      {registration.workspaceId ? (
+        <Link to={`/team-workspace/${registration.teamId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 hover:text-violet-800 mb-4">
+          Open team workspace →
+        </Link>
+      ) : (
+        <p className="text-xs text-slate-400 mb-4">Create your team workspace in the Build stage.</p>
+      )}
 
       <div className="space-y-5">
         {URL_FIELDS.map((f) => {
