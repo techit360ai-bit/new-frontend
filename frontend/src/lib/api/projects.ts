@@ -14,6 +14,13 @@ export interface FounderProject {
   isPrimary: boolean;
   gsisScore: number;
   hasWorkspace: boolean;
+  origin?: ProjectOrigin;
+}
+
+export interface ProjectOrigin {
+  kind: "hackathon_promote";
+  hackathonId: string;
+  teamId: string;
 }
 
 export const FALLBACK_PROJECTS: FounderProject[] = [
@@ -32,10 +39,23 @@ export function fetchFounderProjects(): Promise<FounderProject[]> {
   );
 }
 
-/** POST /api/v1/founder/projects — create a new venture. */
+/** POST /api/v1/founder/projects — create a new venture.
+ *  Pass `hackathonId` + `teamId` when promoting from a hackathon so the venture
+ *  carries an `origin` record back to the source team (server-side persistence). */
 export function createFounderProject(
-  body: { title: string; tagline?: string; industry?: string; stage?: string },
+  body: {
+    title: string;
+    tagline?: string;
+    industry?: string;
+    stage?: string;
+    hackathonId?: string;
+    teamId?: string;
+  },
 ): Promise<{ ok: boolean; project?: FounderProject; error?: string }> {
+  const origin: ProjectOrigin | undefined =
+    body.hackathonId && body.teamId
+      ? { kind: "hackathon_promote", hackathonId: body.hackathonId, teamId: body.teamId }
+      : undefined;
   return withFallback(
     () => apiPost<{ ok: boolean; project?: FounderProject }>("/founder/projects", body),
     () => ({
@@ -44,6 +64,7 @@ export function createFounderProject(
         id: `proj_local_${Date.now()}`, title: body.title, tagline: body.tagline ?? "",
         industry: body.industry ?? "", stage: body.stage ?? "idea",
         isPrimary: false, gsisScore: 0, hasWorkspace: false,
+        ...(origin ? { origin } : {}),
       },
     }),
     "create project",
