@@ -29,7 +29,14 @@ export function PromoteToStartupModal({ registration, onClose }: Props) {
     if (!canCreate) return;
     const project = buildPromotedProject(registration, founderProfile, { title, tagline, industry, stage }, Date.now());
     addFounderProject(project);
-    void createFounderProject({ title: project.title, tagline: project.tagline, industry: project.industry, stage: project.stage });
+    void createFounderProject({
+      title: project.title,
+      tagline: project.tagline,
+      industry: project.industry,
+      stage: project.stage,
+      hackathonId: registration.hackathonId,
+      teamId: registration.teamId,
+    });
     const workspaceId = registration.workspaceId ?? generate(registration, { navigateAfter: false });
     bindTeamWorkspaceProject(workspaceId, project.id);
     updateHackathonRegistration(registration.teamId, { promotedProjectId: project.id });
