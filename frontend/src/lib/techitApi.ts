@@ -1,11 +1,12 @@
 /**
- * Client for the TechIT plugin/MCP API mounted on the Express backend
- * (see backend/src/index.js → mountTechitApi). Base URL is overridable via
- * VITE_TECHIT_API; defaults to the local backend on :3000.
+ * Client for the TechIT plugin/MCP API. The backend lives on BACKEND repo
+ * branch `feat/plugins-mcp` and mounts mountTechitApi(app, '/api/mcp') onto
+ * the platform's existing Node Express service. Base URL is overridable via
+ * VITE_TECHIT_API; defaults to the local backend's /api/mcp on :3000.
  */
 
 const BASE =
-  (import.meta.env.VITE_TECHIT_API as string | undefined) ?? "http://localhost:3000/api";
+  (import.meta.env.VITE_TECHIT_API as string | undefined) ?? "http://localhost:3000/api/mcp";
 
 export interface MCPToolMeta {
   name: string;
