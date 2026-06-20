@@ -120,6 +120,8 @@ import { setMessagingToken } from "@/lib/messaging/config";
 import { DemoList } from "@/dashboard/demos/DemoList";
 import { DemoCreate } from "@/dashboard/demos/DemoCreate";
 import { DemoRoom } from "@/dashboard/demos/DemoRoom";
+import PluginsDashboard from "@/dashboard/plugins/PluginsDashboard";
+import { RequirePluginsAccess } from "@/components/RequirePluginsAccess";
 
 setMessagingToken(() => {
   try { return localStorage.getItem("techit_token"); } catch { return null; }
@@ -131,6 +133,14 @@ const App = () => {
       <MessagingProvider>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route
+          path="/plugins"
+          element={
+            <RequirePluginsAccess>
+              <PluginsDashboard />
+            </RequirePluginsAccess>
+          }
+        />
 
         <Route path="/founder/onboarding/step-1" element={<FounderStep1 />} />
         <Route path="/founder/onboarding/step-2" element={<FounderStep2 />} />
