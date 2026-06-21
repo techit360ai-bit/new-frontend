@@ -1,4 +1,0 @@
-# Build artifacts
-backend/server
-*.log
-node_modules/
