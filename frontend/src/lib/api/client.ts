@@ -5,6 +5,22 @@
 
 import { apiUrl, API_FALLBACK_ENABLED } from "./config";
 
+// Default per-request timeout. Raw fetch() has none — a slow ai-router or a
+// hung network drops the whole UI into a loading-forever state with no
+// cancellation on unmount. AbortSignal.timeout fires AbortError after the
+// budget; withFallback below logs it cleanly. 30s is generous enough for
+// the slower agent endpoints (incubation pipeline, document generation)
+// while still bounding the wait. Override with VITE_API_TIMEOUT_MS.
+const DEFAULT_TIMEOUT_MS = Number(
+  (import.meta.env.VITE_API_TIMEOUT_MS as string | undefined) ?? "30000",
+) || 30_000;
+
+function timeoutSignal(init?: RequestInit): AbortSignal {
+  // Caller-supplied signal wins: the component owns its own cancellation
+  // (e.g. on unmount or route change).
+  return init?.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
+}
+
 export class ApiError extends Error {
   status: number;
   body: unknown;
@@ -43,6 +59,7 @@ export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
     method: "GET",
     headers: headers(init?.headers),
     ...init,
+    signal: timeoutSignal(init),
   });
   return parse<T>(res);
 }
@@ -57,6 +74,7 @@ export async function apiPost<T>(
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
     ...init,
+    signal: timeoutSignal(init),
   });
   return parse<T>(res);
 }
@@ -77,7 +95,10 @@ export async function withFallback<T>(
   } catch (err) {
     if (!API_FALLBACK_ENABLED) throw err;
     if (typeof console !== "undefined") {
-      console.warn(`[api] ${label ?? "request"} failed; using mock fallback`, err);
+      // Distinguish timeouts so ops doesn't chase a phantom 5xx.
+      const isTimeout = err instanceof DOMException && err.name === "TimeoutError";
+      const tag = isTimeout ? "[api timeout]" : "[api]";
+      console.warn(`${tag} ${label ?? "request"} failed; using mock fallback`, err);
     }
     return typeof fallback === "function" ? (fallback as () => T)() : fallback;
   }
