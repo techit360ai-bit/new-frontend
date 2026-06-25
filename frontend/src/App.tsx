@@ -91,6 +91,7 @@ import { CollabStep4 } from "@/dashboard/collaborators/onboarding/CollabStep4";
 import { CollabStep5 } from "@/dashboard/collaborators/onboarding/CollabStep5";
 import { CollabStep6 } from "@/dashboard/collaborators/onboarding/CollabStep6";
 import { UserProvider } from "@/contexts/UserContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Chat from "@/dashboard/chat/Chat";
 import Signup from "@/components/SignUp";
 import Login from "@/components/Login";
@@ -129,6 +130,7 @@ setMessagingToken(() => {
 
 const App = () => {
   return (
+    <AuthProvider>
     <UserProvider>
       <MessagingProvider>
       <Routes>
@@ -307,6 +309,7 @@ const App = () => {
       <ThemeToggle />
       </MessagingProvider>
     </UserProvider>
+    </AuthProvider>
   );
 };
 

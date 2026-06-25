@@ -10,10 +10,10 @@ import { useActiveRoles } from "@/contexts/UserContext";
  * workspace-owner personas the app actually uses today: `founder` and `org`.
  * Collaborators and investors are redirected to the home page.
  *
- * NOTE: this app has no real login wired yet (AuthProvider isn't mounted and the
- * backend has no /auth endpoints), so we gate on `useActiveRoles()` — the same
- * persona model the rest of the app uses. When real auth + RBAC
- * (Viewer/Editor/Admin/Owner) lands, tighten the `allowed` check below to
+ * NOTE: AuthProvider is now mounted (login flows through `useAuth()`), but RBAC
+ * roles (Viewer/Editor/Admin/Owner) aren't modelled yet, so we still gate on
+ * `useActiveRoles()` — the same persona model the rest of the app uses. When
+ * real RBAC lands, tighten the `allowed` check below to
  * `profile.role === 'admin' || profile.role === 'owner'`.
  */
 export function RequirePluginsAccess({ children }: { children: ReactNode }) {
