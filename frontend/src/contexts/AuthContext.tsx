@@ -2,7 +2,6 @@ import {
   createContext, useContext, useEffect, useRef,
   useState, useCallback, type ReactNode,
 } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { setAuthTokenGetter } from '../lib/api/client'
 
 // ── Types ─────────────────────────────────────────────────────
@@ -62,6 +61,7 @@ interface SignUpData {
   country: string
   countryCode: string
   role: Role
+  otpVerified?: boolean
 }
 
 interface AuthContextType {
@@ -110,8 +110,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const fetchingRef = useRef<string | null>(null)
-
-  const navigate = useNavigate()
 
   // ── fetchProfile ─────────────────────────────────────────────
   const fetchProfile = useCallback(async (userId: string) => {
@@ -176,18 +174,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Signup failed')
-      // Auto sign in after signup
-      if(res.ok == true || res.status === 201 || res.status === 200){
-        const signInResult = await signIn(data.email, data.password)
-        navigate('/founder/setup') // Redirect to dashboard after successful signup and signin
-        return signInResult
-      }
-      else{
-        return { error: new Error('Signup failed with status ' + res.status) }
-      }
-      
-      const signInResult = await signIn(data.email, data.password)
-      return signInResult
+      return await signIn(data.email, data.password)
     } catch (e) {
       return { error: e instanceof Error ? e : new Error('Signup failed') }
     }

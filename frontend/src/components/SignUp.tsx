@@ -1,4 +1,12 @@
-import { useEffect, useState, useMemo } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ClipboardEvent,
+  type KeyboardEvent,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Eye,
@@ -9,8 +17,13 @@ import {
   Check,
   AlertCircle,
   X,
+  ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 type Role = "founder" | "collaborator" | "investor" | "organisation";
 
@@ -89,16 +102,104 @@ const validatePassword = (
   return { isValid: errors.length === 0, errors };
 };
 
+const getSetupPath = (role: Role) => {
+  if (role === "organisation") return "/org/setup";
+  return `/${role}/setup`;
+};
+
+function OtpInput({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const digits = value.padEnd(6, "").split("").slice(0, 6);
+
+  const handleChange = (index: number, rawValue: string) => {
+    const digit = rawValue.replace(/\D/g, "").slice(-1);
+    const next = digits
+      .map((current, currentIndex) =>
+        currentIndex === index ? digit : current,
+      )
+      .join("")
+      .slice(0, 6);
+
+    onChange(next);
+    if (digit && index < 5) inputsRef.current[index + 1]?.focus();
+  };
+
+  const handleKeyDown = (index: number, event: KeyboardEvent) => {
+    if (event.key === "Backspace" && !digits[index] && index > 0) {
+      inputsRef.current[index - 1]?.focus();
+      onChange(
+        digits
+          .map((current, currentIndex) =>
+            currentIndex === index - 1 ? "" : current,
+          )
+          .join(""),
+      );
+    }
+  };
+
+  const handlePaste = (event: ClipboardEvent) => {
+    event.preventDefault();
+    const pasted = event.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+    onChange(pasted);
+    inputsRef.current[Math.min(pasted.length, 5)]?.focus();
+  };
+
+  return (
+    <div className="flex gap-2 justify-between" onPaste={handlePaste}>
+      {Array.from({ length: 6 }, (_, index) => (
+        <input
+          key={index}
+          ref={(element) => {
+            inputsRef.current[index] = element;
+          }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={digits[index] || ""}
+          onChange={(event) => handleChange(index, event.target.value)}
+          onKeyDown={(event) => handleKeyDown(index, event)}
+          disabled={disabled}
+          className={cn(
+            "h-14 w-12 rounded-xl border-2 bg-[color:var(--input)] text-center text-xl font-bold text-[color:var(--foreground)] transition-all",
+            "focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)] disabled:opacity-50 disabled:cursor-not-allowed",
+            digits[index]
+              ? "border-[color:var(--primary)] bg-[color:var(--primary)]/5"
+              : "border-[color:var(--border)]",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function Signup() {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const [step, setStep] = useState(1);
+  const totalSteps = 4;
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "info";
   } | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -129,6 +230,8 @@ export default function Signup() {
       );
     } else if (step === 2) {
       return validateEmail(form.email);
+    } else if (step === 3) {
+      return otpVerified;
     } else {
       return (
         form.password.length >= 8 &&
@@ -145,9 +248,104 @@ export default function Signup() {
     form.password,
     form.confirmPassword,
     form.agreeTerms,
+    otpVerified,
   ]);
 
-  const goNext = () => {
+  const startCooldown = useCallback((seconds: number) => {
+    setCooldown(seconds);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((current) => {
+        if (current <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, []);
+
+  const sendOtp = useCallback(async () => {
+    setLoading(true);
+    setOtpError("");
+    setOtpCode("");
+    setOtpVerified(false);
+
+    try {
+      const response = await fetch(`${API}/auth/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
+      const json = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) startCooldown(json.retryAfter || 60);
+        setToast({
+          message: json.error || "Failed to send verification code",
+          type: "error",
+        });
+        return;
+      }
+
+      setToast({
+        message: `Verification code sent to ${form.email}`,
+        type: "success",
+      });
+      startCooldown(60);
+      setStep(3);
+    } catch {
+      setToast({
+        message: "Network error. Is the server running?",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [form.email, startCooldown]);
+
+  const verifyOtp = async () => {
+    if (otpCode.length !== 6) {
+      setOtpError("Enter the full 6-digit code");
+      return;
+    }
+
+    setLoading(true);
+    setOtpError("");
+
+    try {
+      const response = await fetch(`${API}/auth/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, code: otpCode }),
+      });
+      const json = await response.json();
+
+      if (!response.ok) {
+        setOtpError(json.error || "Incorrect code");
+        return;
+      }
+
+      setOtpVerified(true);
+      setToast({
+        message: "Email verified. Set your password.",
+        type: "success",
+      });
+      setStep(4);
+    } catch {
+      setOtpError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const goNext = async () => {
     if (step === 1) {
       if (form.firstName.trim().length < 2) {
         setToast({
@@ -163,18 +361,27 @@ export default function Signup() {
         });
         return;
       }
-    }
-    if (step === 2 && !validateEmail(form.email)) {
-      setToast({
-        message: "Please enter a valid email address",
-        type: "error",
-      });
+      setStep(2);
       return;
     }
-    if (canNext) setStep((s) => s + 1);
+    if (step === 2) {
+      if (!validateEmail(form.email)) {
+        setToast({
+          message: "Please enter a valid email address",
+          type: "error",
+        });
+        return;
+      }
+      await sendOtp();
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!otpVerified) {
+      setToast({ message: "Please verify your email first", type: "error" });
+      return;
+    }
+
     if (form.password !== form.confirmPassword) {
       setToast({ message: "Passwords do not match", type: "error" });
       return;
@@ -198,14 +405,32 @@ export default function Signup() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+    const { error } = await signUp({
+      email: form.email,
+      password: form.password,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      phone: "",
+      country: "",
+      countryCode: "",
+      role: form.role,
+      otpVerified: true,
+    });
+
+    if (error) {
+      setToast({ message: error.message, type: "error" });
       setLoading(false);
-      setToast({
-        message: "Account created successfully! Redirecting...",
-        type: "success",
-      });
-      setTimeout(() => navigate(`/${form.role}/setup`), 1500);
-    }, 1000);
+      return;
+    }
+
+    setLoading(false);
+    setToast({
+      message: "Account created successfully! Redirecting...",
+      type: "success",
+    });
+    setTimeout(() => {
+      navigate(getSetupPath(form.role));
+    }, 1200);
   };
 
   const inputCls =
@@ -285,7 +510,7 @@ export default function Signup() {
             <p className="text-[color:var(--muted-foreground)] text-sm mt-2">
               Already a member?{" "}
               <Link
-                to="/login"
+                to="/signin"
                 className="text-[color:var(--primary)] font-medium hover:underline"
               >
                 Sign in
@@ -295,7 +520,7 @@ export default function Signup() {
 
           {/* Step indicators */}
           <div className="flex gap-2 mb-8">
-            {[1, 2, 3].map((n) => (
+            {Array.from({ length: totalSteps }, (_, index) => index + 1).map((n) => (
               <div
                 key={n}
                 className={cn(
@@ -416,7 +641,8 @@ export default function Signup() {
                   disabled={!canNext || loading}
                   className="flex-1 h-10 rounded-xl bg-[color:var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                 >
-                  Continue <ArrowRight className="h-4 w-4" />
+                  {loading ? "Sending..." : "Send Verification Code"}{" "}
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -425,8 +651,84 @@ export default function Signup() {
           {/* Step 3 */}
           {step === 3 && (
             <div className="space-y-4 animate-in fade-in duration-300">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-[color:var(--primary)]/15 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="h-5 w-5 text-[color:var(--primary)]" />
+                </div>
+                <div>
+                  <p className="font-mono text-xs text-[color:var(--primary)] uppercase tracking-widest">
+                    Step 03 — Verify Email
+                  </p>
+                  <p className="text-xs text-[color:var(--muted-foreground)] mt-0.5">
+                    Code sent to{" "}
+                    <span className="font-medium text-[color:var(--foreground)]">
+                      {form.email}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <OtpInput
+                value={otpCode}
+                onChange={(value) => {
+                  setOtpCode(value);
+                  setOtpError("");
+                }}
+                disabled={loading || otpVerified}
+              />
+
+              {otpError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-500">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  {otpError}
+                </div>
+              )}
+
+              {otpVerified && (
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-500">
+                  <Check className="h-4 w-4 flex-shrink-0" />
+                  Email verified successfully.
+                </div>
+              )}
+
+              <button
+                onClick={verifyOtp}
+                disabled={otpCode.length !== 6 || loading || otpVerified}
+                className="w-full h-10 rounded-xl bg-[color:var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? "Verifying..." : otpVerified ? "Verified" : "Verify Code"}
+              </button>
+
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="flex items-center gap-1.5 text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)] transition-colors"
+                  disabled={loading}
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Wrong email?
+                </button>
+                <button
+                  type="button"
+                  disabled={cooldown > 0 || loading}
+                  onClick={sendOtp}
+                  className="flex items-center gap-1.5 text-[color:var(--primary)] hover:opacity-80 disabled:text-[color:var(--muted-foreground)] disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  <RefreshCw
+                    className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+                  />
+                  {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4 */}
+          {step === 4 && (
+            <div className="space-y-4 animate-in fade-in duration-300">
               <p className="font-mono text-xs text-[color:var(--primary)] uppercase tracking-widest">
-                Step 03 — Secure Your Account
+                Step 04 — Secure Your Account
               </p>
               <div>
                 <div className="relative">
@@ -516,7 +818,7 @@ export default function Signup() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(3)}
                   className="w-12 flex-shrink-0 px-0 justify-center h-10 rounded-xl border border-[color:var(--border)] bg-[color:var(--input)] hover:bg-[color:var(--muted)] disabled:opacity-50 transition-all"
                   disabled={loading}
                 >

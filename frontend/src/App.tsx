@@ -185,6 +185,7 @@ const App = () => {
         <Route path="/investor/onboarding/step-3" element={<InvestorStep3 />} />
         <Route path="/investor/onboarding/step-4" element={<InvestorStep4 />} />
         <Route path="/investor/onboarding/step-5" element={<InvestorStep5 />} />
+        <Route path="/investor/setup" element={<Navigate to="/investor/onboarding/step-1" replace />} />
 
         {/* Investor section */}
         <Route path="/investor" element={<InvestorLayout />}>
@@ -255,6 +256,8 @@ const App = () => {
         <Route path="/org/onboarding/step-3" element={<OrgStep3 />} />
         <Route path="/org/onboarding/step-4" element={<OrgStep4 />} />
         <Route path="/org/onboarding/step-5" element={<OrgStep5 />} />
+        <Route path="/org/setup" element={<Navigate to="/org/onboarding/step-1" replace />} />
+        <Route path="/organisation/setup" element={<Navigate to="/org/setup" replace />} />
 
         {/* Organization section */}
         <Route path="/org" element={<OrgLayout />}>

@@ -1,6 +1,6 @@
 # Deployment notes
 
-`new-frontend` is the React/Vite SPA. It has no backend of its own; it calls three separate services. Configure these via Vite env vars at build time:
+`new-frontend` is the React/Vite SPA and the only active frontend. It has no backend of its own; it calls three separate services. Configure these via Vite env vars at build time:
 
 | Env var | Points at | Notes |
 |---|---|---|
@@ -18,3 +18,5 @@ Local dev defaults assume:
 - Go messaging on `http://localhost:8080`
 
 There is **no Node backend inside this repo** — the previous `backend/` folder was a dead stub leftover from an earlier commit and has been removed. The Node service lives in the [BACKEND repo](https://github.com/techit360ai-bit/BACKEND).
+
+`BACKEND/frontend` is reference-only migration material. Frontend fixes and deploy workflows belong in this repo.
