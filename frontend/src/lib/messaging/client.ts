@@ -1,4 +1,5 @@
 import {
+  env,
   messagingUrl,
   messagingToken,
   MESSAGING_FALLBACK_ENABLED,
@@ -9,7 +10,7 @@ import {
 // 15s is tighter than the ai-router default because messaging endpoints are
 // CRUD-only (no agent / LLM step). Override with VITE_MESSAGING_TIMEOUT_MS.
 const DEFAULT_TIMEOUT_MS = Number(
-  (import.meta.env.VITE_MESSAGING_TIMEOUT_MS as string | undefined) ?? "15000",
+  env.VITE_MESSAGING_TIMEOUT_MS ?? "15000",
 ) || 15_000;
 
 function timeoutSignal(init?: RequestInit): AbortSignal {
