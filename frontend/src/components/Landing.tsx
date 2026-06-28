@@ -3,7 +3,7 @@ import { ArrowRight, Zap, ChevronDown, Boxes } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useActiveRoles } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import "@/Landing.css";
 
 interface RoleCard {
@@ -225,10 +225,8 @@ function Reveal({
 
 function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
   const [scrolled, setScrolled] = useState(false);
-  // Plugins & MCP is an owner/admin control panel — only surface the link to
-  // workspace-owner personas (founder/org), matching the /plugins route guard.
-  const { activeRoles } = useActiveRoles();
-  const canAccessPlugins = activeRoles.has("founder") || activeRoles.has("org");
+  const { profile } = useAuth();
+  const canAccessPlugins = profile?.role === "founder" || profile?.role === "organisation";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
