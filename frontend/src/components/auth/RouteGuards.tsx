@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { type Role, useAuth } from "@/contexts/AuthContext";
-
-const ROLE_HOME: Record<Role, string> = {
-  founder: "/dashboard",
-  collaborator: "/collaborator/dashboard",
-  investor: "/investor/dashboard",
-  organisation: "/org/dashboard",
-};
+import {
+  authenticatedRedirectPath,
+  authRedirectPath,
+  homePathFor,
+  roleRedirectPath,
+  setupPathFor,
+} from "./routeGuardPaths";
 
 function AuthLoading() {
   return (
@@ -20,10 +20,15 @@ function AuthLoading() {
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const redirect = authRedirectPath({
+    loading,
+    hasUser: Boolean(user),
+    currentPath: location.pathname,
+  });
 
   if (loading) return <AuthLoading />;
-  if (!user) {
-    return <Navigate to="/signin" replace state={{ from: location.pathname }} />;
+  if (redirect) {
+    return <Navigate to={redirect.to} replace state={redirect.state} />;
   }
 
   return <>{children}</>;
@@ -38,13 +43,17 @@ export function RequireRole({
 }) {
   const { user, profile, loading } = useAuth();
   const location = useLocation();
+  const redirect = roleRedirectPath({
+    loading,
+    hasUser: Boolean(user),
+    profileRole: profile?.role ?? null,
+    allowed,
+    currentPath: location.pathname,
+  });
 
   if (loading) return <AuthLoading />;
-  if (!user) {
-    return <Navigate to="/signin" replace state={{ from: location.pathname }} />;
-  }
-  if (!profile || !allowed.includes(profile.role)) {
-    return <Navigate to={profile ? ROLE_HOME[profile.role] : "/"} replace />;
+  if (redirect) {
+    return <Navigate to={redirect.to} replace state={redirect.state} />;
   }
 
   return <>{children}</>;
@@ -52,20 +61,25 @@ export function RequireRole({
 
 export function RedirectAuthenticated({ children }: { children: ReactNode }) {
   const { user, profile, loading } = useAuth();
+  const redirect = authenticatedRedirectPath({
+    loading,
+    hasUser: Boolean(user),
+    profileRole: profile?.role ?? null,
+    isOnboarded: Boolean(profile?.isOnboarded),
+  });
 
   if (loading) return <AuthLoading />;
-  if (user && profile) {
-    return <Navigate to={profile.isOnboarded ? ROLE_HOME[profile.role] : setupPathFor(profile.role)} replace />;
+  if (redirect) {
+    return <Navigate to={redirect} replace />;
   }
 
   return <>{children}</>;
 }
 
-export function setupPathFor(role: Role) {
-  if (role === "organisation") return "/org/setup";
-  return `/${role}/setup`;
-}
-
-export function homePathFor(role: Role) {
-  return ROLE_HOME[role];
-}
+export {
+  authenticatedRedirectPath,
+  authRedirectPath,
+  homePathFor,
+  roleRedirectPath,
+  setupPathFor,
+};

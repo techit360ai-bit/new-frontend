@@ -5,6 +5,11 @@
 
 import { apiUrl, API_FALLBACK_ENABLED } from "./config";
 
+const env =
+  typeof import.meta !== "undefined"
+    ? ((import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {})
+    : {};
+
 // Default per-request timeout. Raw fetch() has none — a slow ai-router or a
 // hung network drops the whole UI into a loading-forever state with no
 // cancellation on unmount. AbortSignal.timeout fires AbortError after the
@@ -12,7 +17,7 @@ import { apiUrl, API_FALLBACK_ENABLED } from "./config";
 // the slower agent endpoints (incubation pipeline, document generation)
 // while still bounding the wait. Override with VITE_API_TIMEOUT_MS.
 const DEFAULT_TIMEOUT_MS = Number(
-  (import.meta.env.VITE_API_TIMEOUT_MS as string | undefined) ?? "30000",
+  env.VITE_API_TIMEOUT_MS ?? "30000",
 ) || 30_000;
 
 function timeoutSignal(init?: RequestInit): AbortSignal {
@@ -57,8 +62,8 @@ async function parse<T>(res: Response): Promise<T> {
 export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(apiUrl(path), {
     method: "GET",
-    headers: headers(init?.headers),
     ...init,
+    headers: headers(init?.headers),
     signal: timeoutSignal(init),
   });
   return parse<T>(res);
@@ -71,9 +76,9 @@ export async function apiPost<T>(
 ): Promise<T> {
   const res = await fetch(apiUrl(path), {
     method: "POST",
+    ...init,
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
-    ...init,
     signal: timeoutSignal(init),
   });
   return parse<T>(res);

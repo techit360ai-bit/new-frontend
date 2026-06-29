@@ -32,8 +32,8 @@ async function parse<T>(res: Response): Promise<T> {
 export async function msgGet<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(messagingUrl(path), {
     method: "GET",
-    headers: headers(init?.headers),
     ...init,
+    headers: headers(init?.headers),
     signal: timeoutSignal(init),
   });
   return parse<T>(res);
@@ -42,9 +42,9 @@ export async function msgGet<T>(path: string, init?: RequestInit): Promise<T> {
 export async function msgPost<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
   const res = await fetch(messagingUrl(path), {
     method: "POST",
+    ...init,
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
-    ...init,
     signal: timeoutSignal(init),
   });
   return parse<T>(res);
@@ -53,9 +53,9 @@ export async function msgPost<T>(path: string, body?: unknown, init?: RequestIni
 export async function msgPatch<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
   const res = await fetch(messagingUrl(path), {
     method: "PATCH",
+    ...init,
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
-    ...init,
     signal: timeoutSignal(init),
   });
   return parse<T>(res);
@@ -64,8 +64,8 @@ export async function msgPatch<T>(path: string, body?: unknown, init?: RequestIn
 export async function msgDelete<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(messagingUrl(path), {
     method: "DELETE",
-    headers: headers(init?.headers),
     ...init,
+    headers: headers(init?.headers),
     signal: timeoutSignal(init),
   });
   return parse<T>(res);
