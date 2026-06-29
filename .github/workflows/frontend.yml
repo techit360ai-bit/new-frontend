@@ -23,6 +23,16 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
 
+      - name: Validate frontend env contract
+        run: cd frontend && npm run env:check
+        env:
+          NODE_ENV: production
+          VITE_API_URL: https://techit-api-u1ek.onrender.com/api
+          VITE_API_BASE_URL: https://techit-ai-router.onrender.com
+          VITE_TECHIT_API: https://techit-api-u1ek.onrender.com/api/mcp
+          VITE_MESSAGING_BASE_URL: https://techit-messaging.onrender.com
+          VITE_MESSAGING_WS_URL: wss://techit-messaging.onrender.com/ws
+
       - name: TypeScript and Vite production build
         run: cd frontend && npm run build
         env:
