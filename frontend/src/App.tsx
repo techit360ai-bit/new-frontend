@@ -95,6 +95,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Chat from "@/dashboard/chat/Chat";
 import Signup from "@/components/SignUp";
 import Login from "@/components/Login";
+import ForgotPassword from "@/components/ForgotPassword";
+import ResetPassword from "@/components/ResetPassword";
+import { RedirectAuthenticated, RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
 import { MainLayout as WorkspacesLayout } from "@/dashboard/workspaces/components/layout/MainLayout";
 import { Build as WsBuild } from "@/dashboard/workspaces/pages/Build";
 import { Reports as WsReports } from "@/dashboard/workspaces/pages/Reports";
@@ -144,23 +147,23 @@ const App = () => {
           }
         />
 
-        <Route path="/founder/onboarding/step-1" element={<FounderStep1 />} />
-        <Route path="/founder/onboarding/step-2" element={<FounderStep2 />} />
-        <Route path="/founder/onboarding/step-3" element={<FounderStep3 />} />
-        <Route path="/founder/onboarding/step-4" element={<FounderStep4 />} />
-        <Route path="/founder/onboarding/step-5" element={<FounderStep5 />} />
-        <Route path="/founder/onboarding/step-6" element={<FounderStep6 />} />
+        <Route path="/founder/onboarding/step-1" element={<RequireRole allowed={["founder"]}><FounderStep1 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-2" element={<RequireRole allowed={["founder"]}><FounderStep2 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-3" element={<RequireRole allowed={["founder"]}><FounderStep3 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-4" element={<RequireRole allowed={["founder"]}><FounderStep4 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-5" element={<RequireRole allowed={["founder"]}><FounderStep5 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-6" element={<RequireRole allowed={["founder"]}><FounderStep6 /></RequireRole>} />
         <Route path="/founder/setup"   element={<Navigate to="/founder/onboarding/step-1" replace />} />
         <Route path="/founder/summary" element={<Navigate to="/dashboard" replace />} />
 
-        <Route path="/collaborator/onboarding/step-1" element={<CollabStep1 />} />
-        <Route path="/collaborator/onboarding/step-2" element={<CollabStep2 />} />
-        <Route path="/collaborator/onboarding/step-3" element={<CollabStep3 />} />
-        <Route path="/collaborator/onboarding/step-4" element={<CollabStep4 />} />
-        <Route path="/collaborator/onboarding/step-5" element={<CollabStep5 />} />
-        <Route path="/collaborator/onboarding/step-6" element={<CollabStep6 />} />
+        <Route path="/collaborator/onboarding/step-1" element={<RequireRole allowed={["collaborator"]}><CollabStep1 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-2" element={<RequireRole allowed={["collaborator"]}><CollabStep2 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-3" element={<RequireRole allowed={["collaborator"]}><CollabStep3 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-4" element={<RequireRole allowed={["collaborator"]}><CollabStep4 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-5" element={<RequireRole allowed={["collaborator"]}><CollabStep5 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-6" element={<RequireRole allowed={["collaborator"]}><CollabStep6 /></RequireRole>} />
 
-        <Route path="/collaborator" element={<CollabLayout />}>
+        <Route path="/collaborator" element={<RequireRole allowed={["collaborator"]}><CollabLayout /></RequireRole>}>
           <Route index element={<Navigate to="/collaborator/dashboard" replace />} />
           <Route path="dashboard" element={<CollabDashboard />} />
           <Route path="equity" element={<CollabEquity />} />
@@ -180,15 +183,15 @@ const App = () => {
         <Route path="/collaborator/setup"   element={<Navigate to="/collaborator/onboarding/step-1" replace />} />
         <Route path="/collaborator/summary" element={<Navigate to="/collaborator/dashboard" replace />} />
 
-        <Route path="/investor/onboarding/step-1" element={<InvestorStep1 />} />
-        <Route path="/investor/onboarding/step-2" element={<InvestorStep2 />} />
-        <Route path="/investor/onboarding/step-3" element={<InvestorStep3 />} />
-        <Route path="/investor/onboarding/step-4" element={<InvestorStep4 />} />
-        <Route path="/investor/onboarding/step-5" element={<InvestorStep5 />} />
+        <Route path="/investor/onboarding/step-1" element={<RequireRole allowed={["investor"]}><InvestorStep1 /></RequireRole>} />
+        <Route path="/investor/onboarding/step-2" element={<RequireRole allowed={["investor"]}><InvestorStep2 /></RequireRole>} />
+        <Route path="/investor/onboarding/step-3" element={<RequireRole allowed={["investor"]}><InvestorStep3 /></RequireRole>} />
+        <Route path="/investor/onboarding/step-4" element={<RequireRole allowed={["investor"]}><InvestorStep4 /></RequireRole>} />
+        <Route path="/investor/onboarding/step-5" element={<RequireRole allowed={["investor"]}><InvestorStep5 /></RequireRole>} />
         <Route path="/investor/setup" element={<Navigate to="/investor/onboarding/step-1" replace />} />
 
         {/* Investor section */}
-        <Route path="/investor" element={<InvestorLayout />}>
+        <Route path="/investor" element={<RequireRole allowed={["investor"]}><InvestorLayout /></RequireRole>}>
           <Route index element={<InvestorDashboard />} />
           <Route path="dashboard" element={<InvestorDashboard />} />
           <Route path="deal-intelligence" element={<InvestorDealIntelligence />} />
@@ -207,7 +210,7 @@ const App = () => {
         </Route>
 
         {/* Mentorship Hub (own focused layout, gated by role) */}
-        <Route path="/investor/mentorship" element={<MentorshipGate />}>
+        <Route path="/investor/mentorship" element={<RequireRole allowed={["investor"]}><MentorshipGate /></RequireRole>}>
           <Route index element={<MentorshipOverview />} />
           <Route path="room/:roomId" element={<MentorshipRoom />} />
           <Route path="applications" element={<MentorshipApplications />} />
@@ -217,7 +220,7 @@ const App = () => {
           <Route path="hub" element={<MentorshipAdvancedHub />} />
         </Route>
 
-        <Route element={<FounderLayout />}>
+        <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
           <Route path="/dashboard"        element={<Dashboard />} />
           <Route path="/team-workspace/:teamId" element={<TeamWorkspaceView />} />
           <Route path="/founder/profile"  element={<FounderProfile />} />
@@ -230,12 +233,14 @@ const App = () => {
           <Route path="/chat"             element={<Chat />} />
           <Route path="/matches"          element={<MatchResults />} />
         </Route>
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/signin" element={<Login />} />
+        <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+        <Route path="/signup" element={<RedirectAuthenticated><Signup /></RedirectAuthenticated>} />
+        <Route path="/signin" element={<RedirectAuthenticated><Login /></RedirectAuthenticated>} />
+        <Route path="/forgot-password" element={<RedirectAuthenticated><ForgotPassword /></RedirectAuthenticated>} />
+        <Route path="/reset-password" element={<RedirectAuthenticated><ResetPassword /></RedirectAuthenticated>} />
 
         {/* Collaborative Project Workspace */}
-        <Route path="/workspaces" element={<WorkspacesLayout />}>
+        <Route path="/workspaces" element={<RequireAuth><WorkspacesLayout /></RequireAuth>}>
           <Route index element={<Navigate to="build" replace />} />
           <Route path="build" element={<WsBuild />} />
           <Route path="connectors" element={<WsConnectors />} />
@@ -248,19 +253,19 @@ const App = () => {
           <Route path="notifications" element={<WsNotifications />} />
           <Route path="settings" element={<WsSettings />} />
         </Route>
-        <Route path="/workspaces/components" element={<WsComponentLibrary />} />
+        <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />
 
         {/* Organization onboarding (flat, outside layout) */}
-        <Route path="/org/onboarding/step-1" element={<OrgStep1 />} />
-        <Route path="/org/onboarding/step-2" element={<OrgStep2 />} />
-        <Route path="/org/onboarding/step-3" element={<OrgStep3 />} />
-        <Route path="/org/onboarding/step-4" element={<OrgStep4 />} />
-        <Route path="/org/onboarding/step-5" element={<OrgStep5 />} />
+        <Route path="/org/onboarding/step-1" element={<RequireRole allowed={["organisation"]}><OrgStep1 /></RequireRole>} />
+        <Route path="/org/onboarding/step-2" element={<RequireRole allowed={["organisation"]}><OrgStep2 /></RequireRole>} />
+        <Route path="/org/onboarding/step-3" element={<RequireRole allowed={["organisation"]}><OrgStep3 /></RequireRole>} />
+        <Route path="/org/onboarding/step-4" element={<RequireRole allowed={["organisation"]}><OrgStep4 /></RequireRole>} />
+        <Route path="/org/onboarding/step-5" element={<RequireRole allowed={["organisation"]}><OrgStep5 /></RequireRole>} />
         <Route path="/org/setup" element={<Navigate to="/org/onboarding/step-1" replace />} />
         <Route path="/organisation/setup" element={<Navigate to="/org/setup" replace />} />
 
         {/* Organization section */}
-        <Route path="/org" element={<OrgLayout />}>
+        <Route path="/org" element={<RequireRole allowed={["organisation"]}><OrgLayout /></RequireRole>}>
           <Route index element={<OrgDashboard />} />
           <Route path="dashboard" element={<OrgDashboard />} />
           <Route path="teams" element={<OrgTeams />} />
@@ -282,7 +287,7 @@ const App = () => {
         </Route>
 
         {/* Feed / Hangout */}
-        <Route path="/feed" element={<FeedLayout />}>
+        <Route path="/feed" element={<RequireAuth><FeedLayout /></RequireAuth>}>
           <Route index element={<FeedPage />} />
           <Route path="tribe" element={<TribePage />} />
           <Route path="build-log" element={<BuildLogPage />} />
@@ -303,9 +308,9 @@ const App = () => {
           />
         </Route>
 
-        <Route path="/demos"     element={<DemoList />} />
-        <Route path="/demos/new" element={<DemoCreate />} />
-        <Route path="/demos/:id" element={<DemoRoom />} />
+        <Route path="/demos"     element={<RequireAuth><DemoList /></RequireAuth>} />
+        <Route path="/demos/new" element={<RequireAuth><DemoCreate /></RequireAuth>} />
+        <Route path="/demos/:id" element={<RequireAuth><DemoRoom /></RequireAuth>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

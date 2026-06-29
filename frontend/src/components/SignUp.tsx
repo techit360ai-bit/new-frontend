@@ -197,6 +197,7 @@ export default function Signup() {
   } | null>(null);
   const [otpCode, setOtpCode] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
+  const [emailVerificationToken, setEmailVerificationToken] = useState("");
   const [otpError, setOtpError] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -276,6 +277,7 @@ export default function Signup() {
     setOtpError("");
     setOtpCode("");
     setOtpVerified(false);
+    setEmailVerificationToken("");
 
     try {
       const response = await fetch(`${API}/auth/send-otp`, {
@@ -332,6 +334,12 @@ export default function Signup() {
         return;
       }
 
+      if (!json.verificationToken) {
+        setOtpError("Verification completed, but the server did not return a signup token.");
+        return;
+      }
+
+      setEmailVerificationToken(json.verificationToken);
       setOtpVerified(true);
       setToast({
         message: "Email verified. Set your password.",
@@ -377,7 +385,7 @@ export default function Signup() {
   };
 
   const handleSubmit = async () => {
-    if (!otpVerified) {
+    if (!otpVerified || !emailVerificationToken) {
       setToast({ message: "Please verify your email first", type: "error" });
       return;
     }
@@ -414,7 +422,7 @@ export default function Signup() {
       country: "",
       countryCode: "",
       role: form.role,
-      otpVerified: true,
+      emailVerificationToken,
     });
 
     if (error) {

@@ -61,7 +61,7 @@ interface SignUpData {
   country: string
   countryCode: string
   role: Role
-  otpVerified?: boolean
+  emailVerificationToken: string
 }
 
 interface AuthContextType {
