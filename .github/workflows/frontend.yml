@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    name: Vite Build Check
+  quality:
+    name: Frontend Quality Gates
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +23,8 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
 
-      - name: Vite production build (skip tsc)
-        run: cd frontend && npx vite build
+      - name: TypeScript and Vite production build
+        run: cd frontend && npm run build
         env:
           VITE_API_URL: https://techit-api-u1ek.onrender.com/api
           VITE_API_BASE_URL: https://techit-ai-router.onrender.com
@@ -32,10 +32,19 @@ jobs:
           VITE_MESSAGING_BASE_URL: https://techit-messaging.onrender.com
           VITE_MESSAGING_WS_URL: wss://techit-messaging.onrender.com/ws
 
+      - name: Lint
+        run: cd frontend && npm run lint
+
+      - name: Vitest
+        run: cd frontend && npm test
+
+      - name: Local test harness
+        run: cd frontend && npm run test:local
+
   deploy:
     name: Deploy Frontend to Render
     runs-on: ubuntu-latest
-    needs: build
+    needs: quality
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Trigger Render deploy

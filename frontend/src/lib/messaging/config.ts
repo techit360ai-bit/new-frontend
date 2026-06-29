@@ -1,5 +1,10 @@
-// Messaging service config — a SEPARATE origin from ai-router (lib/api/config.ts).
-const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
+// Messaging service config - a SEPARATE origin from ai-router (lib/api/config.ts).
+export type ViteEnv = Record<string, string | undefined>;
+
+export const env: ViteEnv =
+  typeof import.meta !== "undefined"
+    ? ((import.meta as unknown as { env?: ViteEnv }).env ?? {})
+    : {};
 
 export const MESSAGING_BASE_URL: string =
   (env.VITE_MESSAGING_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
