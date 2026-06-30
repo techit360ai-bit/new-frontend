@@ -5,8 +5,38 @@
  * VITE_TECHIT_API; defaults to the local backend's /api/mcp on :3000.
  */
 
-const BASE =
-  (import.meta.env.VITE_TECHIT_API as string | undefined) ?? "http://localhost:3000/api/mcp";
+type ViteEnv = Record<string, string | undefined>;
+
+const env: ViteEnv =
+  typeof import.meta !== "undefined"
+    ? ((import.meta as unknown as { env?: ViteEnv }).env ?? {})
+    : {};
+
+const BASE = env.VITE_TECHIT_API ?? "http://localhost:3000/api/mcp";
+
+let tokenGetter: () => string | null = () => {
+  try {
+    return localStorage.getItem("techit_token");
+  } catch {
+    return null;
+  }
+};
+
+export function setTechitApiTokenGetter(getter: () => string | null) {
+  tokenGetter = getter;
+}
+
+export class TechitApiError extends Error {
+  status: number;
+  body: unknown;
+
+  constructor(path: string, status: number, body: unknown) {
+    super(`${path} -> ${status}`);
+    this.name = "TechitApiError";
+    this.status = status;
+    this.body = body;
+  }
+}
 
 export interface MCPToolMeta {
   name: string;
@@ -65,19 +95,35 @@ export interface ActorInput {
   toolsAllowed?: string[];
 }
 
+function headers(extra?: HeadersInit): HeadersInit {
+  const h: Record<string, string> = { "Content-Type": "application/json" };
+  const token = tokenGetter();
+  if (token) h.Authorization = `Bearer ${token}`;
+  return { ...h, ...(extra as Record<string, string>) };
+}
+
+async function parseJson<T>(path: string, res: Response): Promise<T> {
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!res.ok) throw new TechitApiError(path, res.status, data);
+  return data as T;
+}
+
 async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) throw new Error(`${path} → ${res.status}`);
-  return res.json() as Promise<T>;
+  const res = await fetch(`${BASE}${path}`, {
+    method: "GET",
+    headers: headers(),
+  });
+  return parseJson<T>(path, res);
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: headers(),
     body: JSON.stringify(body),
   });
-  return res.json() as Promise<T>;
+  return parseJson<T>(path, res);
 }
 
 export const techitApi = {
