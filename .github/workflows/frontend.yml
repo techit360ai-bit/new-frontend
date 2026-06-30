@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
 
+      - name: Validate release candidate signoff
+        run: node scripts/validate-release-candidate.mjs
+
       - name: Validate frontend env contract
         run: cd frontend && npm run env:check
         env:
