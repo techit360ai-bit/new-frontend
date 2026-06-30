@@ -14,7 +14,9 @@ export const MESSAGING_WS_URL: string =
 
 export const MESSAGING_PREFIX = "/api/v1";
 
-export const MESSAGING_FALLBACK_ENABLED: boolean = env.VITE_API_STRICT !== "1";
+export function messagingFallbackEnabled(): boolean {
+  return env.VITE_API_STRICT !== "1";
+}
 
 // Auth token getter; defaults to the AuthContext localStorage key.
 let tokenGetter: () => string | null = () => {

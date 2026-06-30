@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import { msgDelete, msgGet, msgPatch, msgPost, withFallback } from "./client";
+import { env } from "./config";
 
 function response(body: unknown, init: ResponseInit = {}) {
   return new Response(body === undefined ? null : JSON.stringify(body), {
@@ -123,6 +124,35 @@ test("messaging withFallback returns fallback data on failures", async () => {
     expect(warn.calls).toHaveLength(1);
     expect(String(warn.calls[0][0])).toContain("conversations failed; using fallback");
   } finally {
+    warn.restore();
+  }
+});
+
+test("messaging withFallback rethrows failures when strict API mode is enabled", async () => {
+  const previous = env.VITE_API_STRICT;
+  env.VITE_API_STRICT = "1";
+  const warn = captureWarn();
+
+  try {
+    let error: unknown;
+    try {
+      await withFallback(
+        async () => {
+          throw new Error("messaging unavailable");
+        },
+        [],
+        "demos",
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error instanceof Error).toBe(true);
+    expect((error as Error).message).toContain("messaging unavailable");
+    expect(warn.calls).toHaveLength(0);
+  } finally {
+    if (previous === undefined) delete env.VITE_API_STRICT;
+    else env.VITE_API_STRICT = previous;
     warn.restore();
   }
 });
