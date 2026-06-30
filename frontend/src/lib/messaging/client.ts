@@ -2,7 +2,7 @@ import {
   env,
   messagingUrl,
   messagingToken,
-  MESSAGING_FALLBACK_ENABLED,
+  messagingFallbackEnabled,
 } from "./config";
 
 // See lib/api/client.ts for the rationale — raw fetch has no timeout, and a
@@ -76,7 +76,7 @@ export async function withFallback<T>(call: () => Promise<T>, fallback: T | (() 
   try {
     return await call();
   } catch (err) {
-    if (!MESSAGING_FALLBACK_ENABLED) throw err;
+    if (!messagingFallbackEnabled()) throw err;
     if (typeof console !== "undefined") {
       const isTimeout = err instanceof DOMException && err.name === "TimeoutError";
       const tag = isTimeout ? "[msg timeout]" : "[msg]";
