@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import { ApiError, apiGet, apiPost, setAuthTokenGetter, withFallback } from "./client";
+import { env } from "./config";
 
 function response(body: unknown, init: ResponseInit = {}) {
   return new Response(body === undefined ? null : JSON.stringify(body), {
@@ -132,6 +133,36 @@ test("withFallback returns fallback data and logs when fallback mode is enabled"
     expect(warn.calls).toHaveLength(1);
     expect(String(warn.calls[0][0])).toContain("dashboard failed; using mock fallback");
   } finally {
+    warn.restore();
+    resetAuth();
+  }
+});
+
+test("withFallback rethrows failures when strict API mode is enabled", async () => {
+  const previous = env.VITE_API_STRICT;
+  env.VITE_API_STRICT = "1";
+  const warn = captureWarn();
+
+  try {
+    let error: unknown;
+    try {
+      await withFallback(
+        async () => {
+          throw new Error("ai-router unavailable");
+        },
+        () => ({ cached: true }),
+        "dashboard",
+      );
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error instanceof Error).toBe(true);
+    expect((error as Error).message).toContain("ai-router unavailable");
+    expect(warn.calls).toHaveLength(0);
+  } finally {
+    if (previous === undefined) delete env.VITE_API_STRICT;
+    else env.VITE_API_STRICT = previous;
     warn.restore();
     resetAuth();
   }
