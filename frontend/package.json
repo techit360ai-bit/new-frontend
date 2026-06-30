@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "env:check": "node scripts/validate-env.mjs",
     "workflow:check": "node scripts/validate-workflows.mjs",
+    "release:journeys": "node scripts/validate-release-journeys.mjs",
     "smoke:deploy": "node scripts/smoke.mjs",
     "test": "vitest run",
     "test:local": "node --no-warnings --experimental-strip-types scripts/run-tests.mjs src"
