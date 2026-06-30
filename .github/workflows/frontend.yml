@@ -33,6 +33,9 @@ jobs:
           VITE_MESSAGING_BASE_URL: https://techit-messaging.onrender.com
           VITE_MESSAGING_WS_URL: wss://techit-messaging.onrender.com/ws
 
+      - name: Validate frontend workflow env parity
+        run: cd frontend && npm run workflow:check
+
       - name: TypeScript and Vite production build
         run: cd frontend && npm run build
         env:
