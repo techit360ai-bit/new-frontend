@@ -36,6 +36,9 @@ jobs:
       - name: Validate frontend workflow env parity
         run: cd frontend && npm run workflow:check
 
+      - name: Validate release journey coverage
+        run: cd frontend && npm run release:journeys
+
       - name: TypeScript and Vite production build
         run: cd frontend && npm run build
         env:
