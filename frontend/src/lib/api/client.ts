@@ -3,7 +3,7 @@
 // Tiny typed fetch client for the ai-router backend. No runtime deps (the project
 // can't add packages in some environments), just native fetch + a fallback helper.
 
-import { apiUrl, API_FALLBACK_ENABLED } from "./config";
+import { apiUrl, apiFallbackEnabled } from "./config";
 
 const env =
   typeof import.meta !== "undefined"
@@ -98,7 +98,7 @@ export async function withFallback<T>(
   try {
     return await call();
   } catch (err) {
-    if (!API_FALLBACK_ENABLED) throw err;
+    if (!apiFallbackEnabled()) throw err;
     if (typeof console !== "undefined") {
       // Distinguish timeouts so ops doesn't chase a phantom 5xx.
       const isTimeout = err instanceof DOMException && err.name === "TimeoutError";

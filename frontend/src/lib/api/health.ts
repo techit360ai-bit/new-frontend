@@ -4,7 +4,7 @@
 // service root (NOT under /api/v1), so it bypasses apiUrl() and hits
 // API_BASE_URL directly. Useful for a connection indicator / pre-demo check.
 
-import { API_BASE_URL, API_FALLBACK_ENABLED } from "./config";
+import { API_BASE_URL, apiFallbackEnabled } from "./config";
 
 export interface HealthStatus {
   ok: boolean;
@@ -23,7 +23,7 @@ export async function checkHealth(): Promise<HealthStatus> {
     const detail = text ? JSON.parse(text) : null;
     return { ok: res.ok, detail };
   } catch (err) {
-    if (!API_FALLBACK_ENABLED) throw err;
+    if (!apiFallbackEnabled()) throw err;
     if (typeof console !== "undefined") {
       console.warn("[api] health check failed; backend unreachable", err);
     }
