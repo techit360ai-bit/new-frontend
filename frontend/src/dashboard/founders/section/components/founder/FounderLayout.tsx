@@ -1,5 +1,5 @@
 // frontend/src/dashboard/founders/section/components/founder/FounderLayout.tsx
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FlaskConical, PanelsTopLeft, Rss, Compass, Lightbulb,
@@ -51,6 +51,31 @@ export function FounderLayout() {
 
   const isActive = (path: string) => location.pathname === path;
   const initials = founderProfile.name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+  const haviContext = useMemo(() => ({
+    startupName: founderProfile.startupName,
+    stage: founderProfile.stage,
+    industries: founderProfile.industries,
+    currentTeamSize: founderProfile.currentTeamSize,
+    openRoles: founderProfile.openRoles,
+    users: founderProfile.users,
+    revenueMonthly: founderProfile.revenueMonthly,
+    nextMilestone: founderProfile.nextMilestone,
+    hackathonTeams: founderProfile.hackathonRegistrations.map((registration) => ({
+      teamName: registration.teamName,
+      stage: registration.stage,
+      teamSize: registration.teamSize,
+      memberCount: registration.members.length + 1,
+      openRoles: registration.openRoles,
+      checkIns: registration.checkIns.length,
+      hasWorkspace: Boolean(registration.workspaceId),
+    })),
+    teamWorkspaces: founderProfile.teamWorkspaces.map((workspace) => ({
+      teamName: workspace.teamName,
+      memberCount: workspace.team.length,
+      hasArtifacts: Boolean(workspace.artifacts),
+      projectId: workspace.projectId,
+    })),
+  }), [founderProfile]);
 
   const renderItem = (item: NavItem) => {
     const Icon = item.icon;
@@ -128,6 +153,8 @@ export function FounderLayout() {
         role="founder"
         userName={founderProfile.name.split(" ")[0]}
         stage={founderProfile.stage}
+        route={location.pathname}
+        profileContext={haviContext}
       />
     </div>
   );

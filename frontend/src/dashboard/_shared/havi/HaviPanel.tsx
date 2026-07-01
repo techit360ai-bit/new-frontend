@@ -9,8 +9,9 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { HaviChat } from "./HaviChat";
 import { HaviChoices } from "./HaviChoices";
-import type { HaviRole, HaviTask, PersonalityMode } from "./haviData";
+import { haviMessages, type HaviRole, type HaviTask, type PersonalityMode } from "./haviData";
 import type { MvpPlan, MvpProgress } from "./mvpEstimate";
+import type { TourGuideCheckIn } from "@/lib/api/tourGuide";
 
 type Tab = "today" | "ask" | "choices";
 
@@ -27,6 +28,9 @@ interface HaviPanelProps {
   plan: MvpPlan;
   progress: MvpProgress;
   personality: PersonalityMode;
+  firstLanding: boolean;
+  guidance: TourGuideCheckIn | null;
+  guidanceLoading: boolean;
   onPersonalityChange: (m: PersonalityMode) => void;
   onTargetDateChange: (date: string) => void;
 }
@@ -40,7 +44,7 @@ export function HaviPanel(props: HaviPanelProps) {
   const {
     isOpen, onClose, role, userName, tasks, onToggleTask, timeSpentToday,
     completionPercentage, momentumScore, plan, progress, personality,
-    onPersonalityChange, onTargetDateChange,
+    firstLanding, guidance, guidanceLoading, onPersonalityChange, onTargetDateChange,
   } = props;
 
   const navigate = useNavigate();
@@ -48,6 +52,9 @@ export function HaviPanel(props: HaviPanelProps) {
 
   const completedTasks = tasks.filter((t) => t.completed).length;
   const totalEstimated = tasks.reduce((sum, t) => sum + t.estimatedMinutes, 0);
+  const planItems = toTextList(guidance?.daily_plan);
+  const insightItems = toTextList(guidance?.ai_insights);
+  const alertItems = toTextList(guidance?.alerts);
 
   const goAcademy = () => {
     onClose();
@@ -120,6 +127,15 @@ export function HaviPanel(props: HaviPanelProps) {
             <div className="flex-1 overflow-y-auto px-6 py-5">
               {tab === "today" && (
                 <div className="space-y-6">
+                  {firstLanding && (
+                    <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4">
+                      <p className="text-sm font-semibold text-slate-900">Welcome, {userName}.</p>
+                      <p className="text-xs text-slate-700 leading-relaxed mt-1">
+                        {role === "founder" ? haviMessages.welcomeFounder : haviMessages.welcomeCollaborator}
+                      </p>
+                    </div>
+                  )}
+
                   {/* Momentum */}
                   <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200">
                     <div className="flex items-center justify-between mb-2">
@@ -136,7 +152,31 @@ export function HaviPanel(props: HaviPanelProps) {
                         ? "Building up. Ship one visible thing today."
                         : "Momentum is low. Pick the smallest win and start."}
                     </p>
+                    {guidanceLoading && (
+                      <p className="text-[11px] text-amber-700 mt-2">Syncing live guidance...</p>
+                    )}
+                    {!guidanceLoading && guidance && (
+                      <p className="text-[11px] text-amber-700 mt-2">
+                        Live tour guide connected
+                        {guidance.stagnation_risk ? " - stagnation risk flagged" : ""}
+                      </p>
+                    )}
                   </div>
+
+                  {(planItems.length > 0 || insightItems.length > 0 || alertItems.length > 0) && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
+                      <h3 className="font-semibold text-slate-900 text-sm">Live Guidance</h3>
+                      {insightItems.length > 0 && (
+                        <GuidanceList title="Insight" items={insightItems} />
+                      )}
+                      {planItems.length > 0 && (
+                        <GuidanceList title="Next moves" items={planItems} />
+                      )}
+                      {alertItems.length > 0 && (
+                        <GuidanceList title="Alerts" items={alertItems} tone="alert" />
+                      )}
+                    </div>
+                  )}
 
                   {/* Today's plan */}
                   <div>
@@ -218,6 +258,49 @@ export function HaviPanel(props: HaviPanelProps) {
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+function toTextList(value: unknown): string[] {
+  if (!value) return [];
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item) => toTextList(item))
+      .filter(Boolean)
+      .slice(0, 5);
+  }
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>)
+      .flatMap((item) => toTextList(item))
+      .filter(Boolean)
+      .slice(0, 5);
+  }
+  return [String(value)];
+}
+
+function GuidanceList({
+  title,
+  items,
+  tone = "default",
+}: {
+  title: string;
+  items: string[];
+  tone?: "default" | "alert";
+}) {
+  return (
+    <div>
+      <p className={`text-xs font-semibold uppercase tracking-wide ${tone === "alert" ? "text-amber-700" : "text-slate-500"}`}>
+        {title}
+      </p>
+      <ul className="mt-1 space-y-1">
+        {items.map((item) => (
+          <li key={item} className="text-xs text-slate-700 leading-relaxed">
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

@@ -4,17 +4,22 @@ import { HaviPanel } from "./HaviPanel";
 import {
   getDefaultTasks, haviMessages, type HaviRole, type HaviTask, type PersonalityMode,
 } from "./haviData";
+import { claimFirstLanding } from "./firstLanding";
 import { computeProgress, loadPlan, setTargetDate, type MvpPlan } from "./mvpEstimate";
+import { fetchTourGuideCheckIn, type TourGuideCheckIn } from "@/lib/api/tourGuide";
 
 interface HaviProps {
   role: HaviRole;
   userName?: string;
   /** Founder stage (Idea/Validation/MVP/…) used to seed the default MVP estimate. */
   stage?: string;
+  route?: string;
+  profileContext?: Record<string, unknown>;
 }
 
 const POS_KEY = (role: HaviRole) => `techit:havi:pos:${role}`;
 const PERSONA_KEY = (role: HaviRole) => `techit:havi:persona:${role}`;
+const EMPTY_PROFILE_CONTEXT: Record<string, unknown> = {};
 
 function loadPosition(role: HaviRole): { x: number; y: number } {
   try {
@@ -36,12 +41,15 @@ function loadPersona(role: HaviRole): PersonalityMode {
   return "coach";
 }
 
-export function Havi({ role, userName = "there", stage }: HaviProps) {
+export function Havi({ role, userName = "there", stage, route, profileContext = EMPTY_PROFILE_CONTEXT }: HaviProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [tasks, setTasks] = useState<HaviTask[]>(() => getDefaultTasks(role));
   const [plan, setPlan] = useState<MvpPlan>(() => loadPlan(role, stage));
   const [position, setPosition] = useState(() => loadPosition(role));
   const [personality, setPersonality] = useState<PersonalityMode>(() => loadPersona(role));
+  const [firstLanding, setFirstLanding] = useState<boolean | null>(null);
+  const [guidance, setGuidance] = useState<TourGuideCheckIn | null>(null);
+  const [guidanceLoading, setGuidanceLoading] = useState(false);
 
   const [timeSpentToday] = useState(role === "founder" ? 105 : 80);
 
@@ -52,12 +60,16 @@ export function Havi({ role, userName = "there", stage }: HaviProps) {
 
   // Momentum blends task completion with elapsed-vs-remaining health.
   const progress = useMemo(() => computeProgress(plan), [plan]);
-  const momentumScore = useMemo(() => {
+  const localMomentumScore = useMemo(() => {
     const base = 45;
     const taskBoost = Math.round(completionPercentage * 0.4); // up to +40
     const paceBoost = progress.overdue ? -15 : Math.min(15, Math.round(progress.daysRemaining / 6));
     return Math.max(0, Math.min(100, base + taskBoost + paceBoost));
   }, [completionPercentage, progress]);
+  const backendMomentum = typeof guidance?.momentum_score === "number"
+    ? Math.round(guidance.momentum_score)
+    : null;
+  const momentumScore = backendMomentum ?? localMomentumScore;
 
   const status: HaviStatus =
     completionPercentage === 100
@@ -80,6 +92,51 @@ export function Havi({ role, userName = "there", stage }: HaviProps) {
   useEffect(() => {
     try { localStorage.setItem(PERSONA_KEY(role), personality); } catch { /* ignore */ }
   }, [role, personality]);
+
+  useEffect(() => {
+    const claimed = claimFirstLanding(role);
+    setFirstLanding(claimed);
+    if (claimed) {
+      setIsOpen(true);
+    }
+  }, [role]);
+
+  useEffect(() => {
+    if (firstLanding === null) return;
+    let alive = true;
+    setGuidanceLoading(true);
+    fetchTourGuideCheckIn({
+      source: "havi",
+      role,
+      firstLanding,
+      route,
+      profile: profileContext,
+      mvp: {
+        targetDate: plan.targetDate,
+        daysRemaining: progress.daysRemaining,
+        overdue: progress.overdue,
+        completionPercentage,
+      },
+      tasks: tasks.map((task) => ({
+        id: task.id,
+        title: task.title,
+        completed: task.completed,
+        estimatedMinutes: task.estimatedMinutes,
+      })),
+    })
+      .then((nextGuidance) => {
+        if (alive) setGuidance(nextGuidance);
+      })
+      .catch(() => {
+        if (alive) setGuidance(null);
+      })
+      .finally(() => {
+        if (alive) setGuidanceLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [completionPercentage, firstLanding, plan.targetDate, profileContext, progress.daysRemaining, progress.overdue, role, route, tasks]);
 
   const toggleTask = (id: string) =>
     setTasks((cur) => cur.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
@@ -111,6 +168,9 @@ export function Havi({ role, userName = "there", stage }: HaviProps) {
         plan={plan}
         progress={progress}
         personality={personality}
+        firstLanding={Boolean(firstLanding)}
+        guidance={guidance}
+        guidanceLoading={guidanceLoading}
         onPersonalityChange={setPersonality}
         onTargetDateChange={changeTargetDate}
       />
