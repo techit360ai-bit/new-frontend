@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, CheckSquare, TrendingUp, DollarSign, PieChart,
@@ -49,6 +49,19 @@ export function CollabLayout() {
   }, [collaboratorProfile.onboardingComplete, location.pathname, navigate]);
 
   const isActive = (path: string) => location.pathname === path;
+  const haviContext = useMemo(() => ({
+    discipline: collaboratorProfile.discipline,
+    subSkills: collaboratorProfile.subSkills,
+    techStack: collaboratorProfile.techStack,
+    weeklyHours: collaboratorProfile.weeklyHours,
+    timezone: collaboratorProfile.timezone,
+    earliestStart: collaboratorProfile.earliestStart,
+    commitmentStyle: collaboratorProfile.commitmentStyle,
+    equityPreference: collaboratorProfile.equityPreference,
+    minCashFloor: collaboratorProfile.minCashFloor,
+    goals: collaboratorProfile.whyHere,
+    pinnedWorkCount: collaboratorProfile.pinnedWork.length,
+  }), [collaboratorProfile]);
 
   const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
@@ -114,7 +127,12 @@ export function CollabLayout() {
       <Toaster richColors position="bottom-right" />
 
       {/* Havi — AI build companion (founders & collaborators only) */}
-      <Havi role="collaborator" userName={collaboratorProfile.name.split(" ")[0]} />
+      <Havi
+        role="collaborator"
+        userName={collaboratorProfile.name.split(" ")[0]}
+        route={location.pathname}
+        profileContext={haviContext}
+      />
     </div>
   );
 }
