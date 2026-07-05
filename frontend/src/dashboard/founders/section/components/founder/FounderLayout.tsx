@@ -4,7 +4,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FlaskConical, PanelsTopLeft, Rss, Compass, Lightbulb,
   Route as RouteIcon, MessageSquare, LineChart, Wallet, UserCircle,
-  Settings as SettingsIcon, ArrowLeft,
+  Settings as SettingsIcon, ArrowLeft, ShieldCheck,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
@@ -18,6 +18,7 @@ const primaryNav: NavItem[] = [
   { name: "Dashboard",       path: "/dashboard",       icon: LayoutDashboard, kind: "link" },
   { name: "Incubation Hub",  path: "/incubation-hub",  icon: FlaskConical,    kind: "link" },
   { name: "Opportunity Hub", path: "/opportunity-hub", icon: Compass,         kind: "link" },
+  { name: "Trust Center",    path: "/founder/trust",  icon: ShieldCheck,     kind: "link" },
   { name: "Workspaces",      path: "/workspaces",      icon: PanelsTopLeft,   kind: "link" },
   { name: "Feed",            path: "/feed",            icon: Rss,             kind: "external" },
 ];
