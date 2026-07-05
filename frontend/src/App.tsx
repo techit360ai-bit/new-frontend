@@ -54,6 +54,7 @@ import { DealRoom as InvestorDealRoom } from "@/dashboard/investors/section/comp
 import { DealRooms as InvestorDealRooms } from "@/dashboard/investors/section/components/investor/DealRooms";
 import { Reputation as InvestorReputation } from "@/dashboard/investors/section/components/investor/Reputation";
 import { InvestorProfile } from "@/dashboard/investors/section/components/investor/InvestorProfile";
+import { InvestorTrustDashboard } from "@/dashboard/investors/section/components/investor/InvestorTrustDashboard";
 import { MentorshipGate } from "@/dashboard/_shared/mentorship/MentorshipGate";
 import { Overview as MentorshipOverview } from "@/dashboard/_shared/mentorship/Overview";
 import { Room as MentorshipRoom } from "@/dashboard/_shared/mentorship/Room";
@@ -200,6 +201,8 @@ const App = () => {
           <Route path="risk-radar/:startupId" element={<InvestorRiskRadar />} />
           <Route path="allocation" element={<InvestorAllocationEngine />} />
           <Route path="watchlist" element={<InvestorWatchlist />} />
+          <Route path="trust" element={<InvestorTrustDashboard />} />
+          <Route path="trust/:startupId" element={<InvestorTrustDashboard />} />
           <Route path="capital-pools" element={<InvestorCapitalPools />} />
           <Route path="heatmap" element={<InvestorHeatmap />} />
           <Route path="data-rooms" element={<InvestorDataRooms />} />

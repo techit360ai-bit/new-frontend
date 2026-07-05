@@ -9,6 +9,7 @@ import {
   Globe,
   Database,
   Shield,
+  ShieldCheck,
   Award,
   Rss,
   GraduationCap,
@@ -42,6 +43,7 @@ export function InvestorLayout() {
     { path: '/investor/deal-rooms', label: 'Deal Rooms', icon: Shield },
     { path: '/investor/reputation', label: 'Reputation', icon: Award },
     { path: '/investor/profile', label: 'Profile', icon: UserCircle },
+    { path: '/investor/trust', label: 'Trust Dashboard', icon: ShieldCheck },
     { path: '/investor/mentorship', label: 'Mentorship Hub', icon: GraduationCap },
     // Cross-section
     { path: '/feed', label: 'Feed', icon: Rss, external: true },
