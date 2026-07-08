@@ -7,6 +7,7 @@ type SmokeCheck = {
   statuses: number[];
   strip?: string;
   token?: string;
+  expectJson?: Record<string, string | number | boolean>;
 };
 
 type SmokeModule = {
@@ -69,6 +70,43 @@ test("frontend deploy smoke sends bearer auth on authenticated probes", async ()
     expect(calls).toHaveLength(1);
     expect(calls[0][0]).toBe("https://api.techit.example/api/mcp/health");
     expect((calls[0][1]?.headers as Record<string, string>).Authorization).toBe("Bearer jwt-smoke");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("frontend deploy smoke validates service identity from response JSON", async () => {
+  const { probe } = await loadSmokeScript();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ platform: "TechIT AI Incubation Platform" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+
+  try {
+    let thrown: Error | undefined;
+    try {
+      await probe(
+        {
+          name: "node-backend",
+          env: "VITE_API_URL",
+          strip: "/api",
+          path: "/",
+          statuses: [200],
+          expectJson: { status: "TechIT API running" },
+        },
+        {
+          VITE_API_URL: "https://api.techit.example/api",
+          SMOKE_TIMEOUT_MS: "1000",
+        },
+      );
+    } catch (error) {
+      thrown = error as Error;
+    }
+
+    expect(thrown?.message).toContain("expected TechIT API running");
   } finally {
     globalThis.fetch = originalFetch;
   }

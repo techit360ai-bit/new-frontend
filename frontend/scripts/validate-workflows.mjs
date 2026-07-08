@@ -15,9 +15,9 @@ const workflows = [
 ];
 
 const requiredBuildEnv = {
-  VITE_API_URL: "https://techit-api-u1ek.onrender.com/api",
-  VITE_API_BASE_URL: "https://techit-ai-router.onrender.com",
-  VITE_TECHIT_API: "https://techit-api-u1ek.onrender.com/api/mcp",
+  VITE_API_URL: "https://techit-backend.onrender.com/api",
+  VITE_API_BASE_URL: "https://techit-api-u1ek.onrender.com",
+  VITE_TECHIT_API: "https://techit-backend.onrender.com/api/mcp",
   VITE_MESSAGING_BASE_URL: "https://techit-messaging.onrender.com",
   VITE_MESSAGING_WS_URL: "wss://techit-messaging.onrender.com/ws",
 };
@@ -64,9 +64,17 @@ function getBuildStepEnv(filePath, content, buildStep) {
 }
 
 function assertNoBackendUrlDrift(filePath, content) {
-  const wrongAiRouter = "VITE_API_BASE_URL: https://techit-api-u1ek.onrender.com";
+  const wrongAiRouter = "VITE_API_BASE_URL: https://techit-backend.onrender.com";
+  const wrongAuthBackend = "VITE_API_URL: https://techit-api-u1ek.onrender.com/api";
+  const wrongMcpBackend = "VITE_TECHIT_API: https://techit-api-u1ek.onrender.com/api/mcp";
   if (content.includes(wrongAiRouter)) {
     fail(`${filePath} points VITE_API_BASE_URL at the Node backend instead of ai-router`);
+  }
+  if (content.includes(wrongAuthBackend)) {
+    fail(`${filePath} points VITE_API_URL at the ai-router instead of the Node backend`);
+  }
+  if (content.includes(wrongMcpBackend)) {
+    fail(`${filePath} points VITE_TECHIT_API at the ai-router instead of the Node backend`);
   }
 }
 
