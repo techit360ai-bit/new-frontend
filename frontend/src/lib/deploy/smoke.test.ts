@@ -86,8 +86,9 @@ test("frontend deploy smoke validates service identity from response JSON", asyn
   }) as typeof fetch;
 
   try {
-    await expect(
-      probe(
+    let thrown: Error | undefined;
+    try {
+      await probe(
         {
           name: "node-backend",
           env: "VITE_API_URL",
@@ -100,8 +101,12 @@ test("frontend deploy smoke validates service identity from response JSON", asyn
           VITE_API_URL: "https://api.techit.example/api",
           SMOKE_TIMEOUT_MS: "1000",
         },
-      ),
-    ).rejects.toThrow(/expected TechIT API running/);
+      );
+    } catch (error) {
+      thrown = error as Error;
+    }
+
+    expect(thrown?.message).toContain("expected TechIT API running");
   } finally {
     globalThis.fetch = originalFetch;
   }
