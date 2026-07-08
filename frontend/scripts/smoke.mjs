@@ -1,8 +1,27 @@
 export const baseChecks = [
   { name: "frontend", env: "FRONTEND_URL", path: "/", statuses: [200] },
-  { name: "node-backend", env: "VITE_API_URL", strip: "/api", path: "/", statuses: [200] },
-  { name: "mcp-auth-boundary", env: "VITE_TECHIT_API", path: "/health", statuses: [401] },
-  { name: "ai-router", env: "VITE_API_BASE_URL", path: "/health", statuses: [200] },
+  {
+    name: "node-backend",
+    env: "VITE_API_URL",
+    strip: "/api",
+    path: "/",
+    statuses: [200],
+    expectJson: { status: "TechIT API running" },
+  },
+  {
+    name: "mcp-auth-boundary",
+    env: "VITE_TECHIT_API",
+    path: "/health",
+    statuses: [401],
+    expectJson: { "error.code": "unauthenticated" },
+  },
+  {
+    name: "ai-router",
+    env: "VITE_API_BASE_URL",
+    path: "/health",
+    statuses: [200],
+    expectJson: { ai_brain: "operational" },
+  },
   { name: "messaging", env: "VITE_MESSAGING_BASE_URL", path: "/health", statuses: [200] },
 ];
 
@@ -24,6 +43,31 @@ function joinUrl(base, path) {
   return `${base.replace(/\/$/, "")}${path}`;
 }
 
+function readPath(value, path) {
+  return path.split(".").reduce((current, key) => {
+    if (current && typeof current === "object") return current[key];
+    return undefined;
+  }, value);
+}
+
+async function assertExpectedJson(check, res, url) {
+  if (!check.expectJson) return;
+
+  let body;
+  try {
+    body = await res.json();
+  } catch {
+    throw new Error(`${url} did not return JSON for ${check.name}`);
+  }
+
+  for (const [path, expected] of Object.entries(check.expectJson)) {
+    const actual = readPath(body, path);
+    if (actual !== expected) {
+      throw new Error(`${url} returned JSON ${path}=${String(actual)}; expected ${String(expected)}`);
+    }
+  }
+}
+
 export async function probe(check, env = process.env) {
   let base = env[check.env];
   if (!base) {
@@ -38,10 +82,16 @@ export async function probe(check, env = process.env) {
   const timeout = setTimeout(() => controller.abort(), Number(env.SMOKE_TIMEOUT_MS || 10_000));
   const headers = check.token ? { Authorization: `Bearer ${check.token}` } : undefined;
   try {
-    const res = await fetch(url, { headers, signal: controller.signal });
+    let res;
+    try {
+      res = await fetch(url, { headers, signal: controller.signal });
+    } catch (error) {
+      throw new Error(`${check.name} ${url} request failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
     if (!check.statuses.includes(res.status)) {
       throw new Error(`${url} returned ${res.status}; expected ${check.statuses.join("/")}`);
     }
+    await assertExpectedJson(check, res, url);
     console.log(`ok ${check.name} ${res.status}`);
   } finally {
     clearTimeout(timeout);
