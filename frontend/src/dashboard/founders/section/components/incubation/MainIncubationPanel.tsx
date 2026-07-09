@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { runVenturePipeline, diagnoseIdea } from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
 import { checkHealth } from "@/lib/api/health";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 
 const PROBLEM_AREAS = [
   { id: "ai", label: "AI", emoji: "🤖" },
@@ -254,7 +255,7 @@ export function MainIncubationPanel() {
           {/* Branding */}
           <div className="px-4 pt-5 pb-4 flex-shrink-0 border-b" style={{ borderColor: "rgba(14,165,233,0.08)" }}>
             <Link
-              to="/dashboard"
+              to={roleDashboardPath.founder}
               className="flex items-center gap-1.5 text-[10px] text-sky-500 hover:text-sky-700 font-semibold mb-3 transition-colors"
             >
               <ArrowLeft size={11} />

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Lock, Trophy, ExternalLink } from "lucide-react";
 import type { HackathonRegistration } from "@/contexts/UserContext";
 import { momentumColor } from "@/dashboard/_shared/hackathon/momentum";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { PromoteToStartupModal } from "./PromoteToStartupModal";
 
 interface Props {
@@ -135,7 +136,7 @@ export function ResultsView({ registration }: Props) {
           <p className="text-sm font-semibold text-emerald-800 mb-2">Promoted to startup ✓</p>
           <div className="flex flex-wrap gap-3">
             <Link to={`/team-workspace/${registration.teamId}`} className="text-sm font-medium text-violet-700 hover:underline">Open workspace</Link>
-            <Link to="/dashboard" className="text-sm font-medium text-violet-700 hover:underline">View in portfolio</Link>
+            <Link to={roleDashboardPath.founder} className="text-sm font-medium text-violet-700 hover:underline">View in portfolio</Link>
           </div>
         </div>
       ) : (

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { Academy } from "@/dashboard/_shared/academy/Academy";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 
 export function AcademyPage() {
   const navigate = useNavigate();
@@ -13,8 +14,7 @@ export function AcademyPage() {
       <div className="px-6 lg:px-8 pt-6">
         <button
           onClick={() => {
-            if (window.history.length > 1) navigate(-1);
-            else navigate("/collaborator/dashboard");
+            navigate(roleDashboardPath.collaborator);
           }}
           className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors"
         >

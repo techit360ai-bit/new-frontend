@@ -33,7 +33,7 @@ export function CollabStep4() {
   const persist = () => updateCollaboratorProfile({ weeklyHours: hours, timezone: tz, earliestStart, commitmentStyle });
   const handleNext = () => { persist(); navigate("/collaborator/onboarding/step-5"); };
   const handleBack = () => { persist(); navigate("/collaborator/onboarding/step-3"); };
-  const handleSaveExit = () => { persist(); navigate("/dashboard"); };
+  const handleSaveExit = () => { persist(); navigate("/collaborator/dashboard"); };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">

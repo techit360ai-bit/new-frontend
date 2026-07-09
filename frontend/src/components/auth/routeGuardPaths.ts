@@ -1,19 +1,13 @@
+import { authRoleDashboardPath, authRoleOnboardingPath } from "@/lib/roleRoutes";
+
 export type RouteGuardRole = "founder" | "collaborator" | "investor" | "organisation";
 
-const ROLE_HOME: Record<RouteGuardRole, string> = {
-  founder: "/dashboard",
-  collaborator: "/collaborator/dashboard",
-  investor: "/investor/dashboard",
-  organisation: "/org/dashboard",
-};
-
 export function setupPathFor(role: RouteGuardRole) {
-  if (role === "organisation") return "/org/setup";
-  return `/${role}/setup`;
+  return authRoleOnboardingPath(role);
 }
 
 export function homePathFor(role: RouteGuardRole) {
-  return ROLE_HOME[role];
+  return authRoleDashboardPath(role);
 }
 
 export function authRedirectPath({
@@ -45,7 +39,7 @@ export function roleRedirectPath({
   if (loading) return null;
   if (!hasUser) return { to: "/signin", state: { from: currentPath } };
   if (!profileRole) return { to: "/" };
-  if (!allowed.includes(profileRole)) return { to: ROLE_HOME[profileRole] };
+  if (!allowed.includes(profileRole)) return { to: homePathFor(profileRole) };
   return null;
 }
 
@@ -61,5 +55,5 @@ export function authenticatedRedirectPath({
   isOnboarded: boolean;
 }) {
   if (loading || !hasUser || !profileRole) return null;
-  return isOnboarded ? ROLE_HOME[profileRole] : setupPathFor(profileRole);
+  return isOnboarded ? homePathFor(profileRole) : setupPathFor(profileRole);
 }

@@ -8,15 +8,15 @@ import {
 } from "./routeGuardPaths";
 
 test("role home and setup paths stay aligned with role dashboards", () => {
-  expect(homePathFor("founder")).toBe("/dashboard");
+  expect(homePathFor("founder")).toBe("/founder/dashboard");
   expect(homePathFor("collaborator")).toBe("/collaborator/dashboard");
   expect(homePathFor("investor")).toBe("/investor/dashboard");
   expect(homePathFor("organisation")).toBe("/org/dashboard");
 
-  expect(setupPathFor("founder")).toBe("/founder/setup");
-  expect(setupPathFor("collaborator")).toBe("/collaborator/setup");
-  expect(setupPathFor("investor")).toBe("/investor/setup");
-  expect(setupPathFor("organisation")).toBe("/org/setup");
+  expect(setupPathFor("founder")).toBe("/founder/onboarding/step-1");
+  expect(setupPathFor("collaborator")).toBe("/collaborator/onboarding/step-1");
+  expect(setupPathFor("investor")).toBe("/investor/onboarding/step-1");
+  expect(setupPathFor("organisation")).toBe("/org/onboarding/step-1");
 });
 
 test("RequireAuth redirects anonymous users back to signin with return path", () => {
@@ -43,7 +43,7 @@ test("RequireRole sends anonymous users to signin and wrong roles to their own d
     profileRole: "founder",
     allowed: ["investor"],
     currentPath: "/investor/dashboard",
-  })).toEqual({ to: "/dashboard" });
+  })).toEqual({ to: "/founder/dashboard" });
 
   expect(roleRedirectPath({
     loading: false,
@@ -60,7 +60,7 @@ test("RedirectAuthenticated sends users to setup until onboarding is complete", 
     hasUser: true,
     profileRole: "organisation",
     isOnboarded: false,
-  })).toBe("/org/setup");
+  })).toBe("/org/onboarding/step-1");
 
   expect(authenticatedRedirectPath({
     loading: false,

@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { equityTotals } from "@/dashboard/collaborators/section/data/mockData";
+import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 
 interface NavItem {
@@ -40,6 +41,10 @@ export function CollabLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { collaboratorProfile } = useCollaboratorProfile();
+
+  useEffect(() => {
+    writeStoredActiveRole("collaborator");
+  }, []);
 
   // Defensive redirect: un-onboarded users go to step 1
   useEffect(() => {
@@ -88,7 +93,7 @@ export function CollabLayout() {
     <div className="flex h-screen bg-slate-50">
       <aside className="hidden lg:flex lg:flex-col w-64 bg-slate-900 border-r border-slate-800">
         <div className="p-5 border-b border-slate-800">
-          <Link to="/dashboard" className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-400 transition-colors mb-3">
+          <Link to={roleDashboardPath.collaborator} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-400 transition-colors mb-3">
             <ArrowLeft className="w-3 h-3" />
             Back to TechIT
           </Link>

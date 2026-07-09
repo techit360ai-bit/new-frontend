@@ -154,7 +154,7 @@ const App = () => {
         <Route path="/founder/onboarding/step-5" element={<RequireRole allowed={["founder"]}><FounderStep5 /></RequireRole>} />
         <Route path="/founder/onboarding/step-6" element={<RequireRole allowed={["founder"]}><FounderStep6 /></RequireRole>} />
         <Route path="/founder/setup"   element={<Navigate to="/founder/onboarding/step-1" replace />} />
-        <Route path="/founder/summary" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/founder/summary" element={<Navigate to="/founder/dashboard" replace />} />
 
         <Route path="/collaborator/onboarding/step-1" element={<RequireRole allowed={["collaborator"]}><CollabStep1 /></RequireRole>} />
         <Route path="/collaborator/onboarding/step-2" element={<RequireRole allowed={["collaborator"]}><CollabStep2 /></RequireRole>} />
@@ -221,7 +221,8 @@ const App = () => {
         </Route>
 
         <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
-          <Route path="/dashboard"        element={<Dashboard />} />
+          <Route path="/founder/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard"        element={<Navigate to="/founder/dashboard" replace />} />
           <Route path="/team-workspace/:teamId" element={<TeamWorkspaceView />} />
           <Route path="/founder/profile"  element={<FounderProfile />} />
           <Route path="/founder/settings" element={<FounderSettings />} />

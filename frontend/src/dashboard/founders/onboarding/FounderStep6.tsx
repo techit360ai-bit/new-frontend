@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { FounderProgressBar } from "./FounderProgressBar";
 
 const NEEDS_OPTIONS = [
@@ -40,7 +41,7 @@ export function FounderStep6() {
       onboardingComplete: true,
     });
     toast.success(`You're in. Welcome to TechIT, ${founderProfile.name.split(" ")[0]}.`);
-    navigate("/dashboard");
+    navigate(roleDashboardPath.founder);
   };
 
   const handleBack = () => {

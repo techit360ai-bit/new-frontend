@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bell, Globe, Users, FileText, HelpCircle, Compass } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { roleSafeReturnPath } from '@/lib/roleRoutes';
 import { NotificationsPanel } from './NotificationsPanel';
 
 // Unread count — in a real app this would come from server state
@@ -34,6 +36,12 @@ function GlobalNav({
   onNotifClick: () => void;
 }) {
   const location = useLocation();
+  const { profile } = useAuth();
+  const dashboardPath = roleSafeReturnPath({
+    currentPath: location.pathname,
+    profileRole: profile?.role ?? null,
+    secondaryRoles: profile?.secondaryRoles ?? null,
+  });
 
   return (
     <nav className="h-14 bg-bg-surface border-b border-border-default px-8 flex items-center justify-between sticky top-0 z-50">
@@ -46,7 +54,7 @@ function GlobalNav({
         </Link>
 
         <div className="hidden lg:flex items-center gap-6 text-[14px] font-medium">
-          <NavLink to="/dashboard" label="Dashboard" />
+          <NavLink to={dashboardPath} label="Dashboard" />
           <NavLink
             to="/feed"
             label="Hangout"

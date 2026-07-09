@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -17,6 +18,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useInvestorProfile } from '@/contexts/UserContext';
+import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
 
 interface NavItem {
   path: string;
@@ -29,6 +31,10 @@ interface NavItem {
 export function InvestorLayout() {
   const location = useLocation();
   const { investorProfile } = useInvestorProfile();
+
+  useEffect(() => {
+    writeStoredActiveRole('investor');
+  }, []);
 
   const navItems: NavItem[] = [
     { path: '/investor', label: 'Dashboard', icon: LayoutDashboard },
@@ -110,7 +116,7 @@ export function InvestorLayout() {
 
         <div className="p-4 border-t border-gray-800 space-y-3">
           <Link
-            to="/dashboard"
+            to={roleDashboardPath.investor}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

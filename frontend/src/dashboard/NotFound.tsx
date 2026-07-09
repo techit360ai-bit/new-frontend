@@ -1,15 +1,26 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, Home, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { roleSafeReturnPath } from "@/lib/roleRoutes";
 
 const NotFound = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, profile } = useAuth();
+  const safeHomePath = user
+    ? roleSafeReturnPath({
+        currentPath: location.pathname,
+        profileRole: profile?.role ?? null,
+        secondaryRoles: profile?.secondaryRoles ?? null,
+      })
+    : "/";
 
   const handleGoHome = () => {
-    navigate("/");
+    navigate(safeHomePath);
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate(safeHomePath);
   };
 
   return (

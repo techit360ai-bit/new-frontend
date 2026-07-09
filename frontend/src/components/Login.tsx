@@ -3,19 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Zap, ArrowRight, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from '@/components/ui/button'
-
-const ROLE_ROUTES: Record<string, string> = {
-  founder: "/dashboard",
-  collaborator: "/collaborator/dashboard",
-  investor: "/investor/dashboard",
-  organisation: "/org/dashboard",
-};
-const ROLE_SETUP: Record<string, string> = {
-  founder: "/founder/setup",
-  collaborator: "/collaborator/setup",
-  investor: "/investor/setup",
-  organisation: "/org/setup",
-};
+import { authRoleOnboardingPath, normalizeRole, roleForPath, roleSafeReturnPath } from "@/lib/roleRoutes";
 
 export default function Login() {
   const { signIn, profile, user, loading: authLoading } = useAuth();
@@ -31,11 +19,11 @@ export default function Login() {
 
   useEffect(() => {
     if (user && !authLoading) {
+      const profileRole = profile?.role ?? "founder";
       const dest =
-        from ??
         (!profile?.isOnboarded
-          ? (ROLE_SETUP[profile?.role || "founder"] ?? "/founder/setup")
-          : (ROLE_ROUTES[profile?.role || "founder"] ?? "/dashboard"));
+          ? authRoleOnboardingPath(profileRole)
+          : safePostLoginPath(from, profileRole, profile?.secondaryRoles));
       navigate(dest, { replace: true });
     }
   }, [user, profile, authLoading, navigate, from]);
@@ -209,4 +197,22 @@ export default function Login() {
       </div>
     </div>
   );
+}
+
+function safePostLoginPath(
+  from: string | undefined,
+  profileRole: string,
+  secondaryRoles: string[] | undefined,
+) {
+  if (from) {
+    const fromRole = roleForPath(from);
+    const availableRoles = [profileRole, ...(secondaryRoles ?? [])].map(normalizeRole);
+    if (!fromRole || availableRoles.some((role) => role === fromRole)) return from;
+  }
+
+  return roleSafeReturnPath({
+    currentPath: from ?? "",
+    profileRole,
+    secondaryRoles,
+  });
 }

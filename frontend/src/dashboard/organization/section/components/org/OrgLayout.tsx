@@ -21,8 +21,9 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useOrgProfile } from "@/contexts/UserContext";
+import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 
 interface NavItem {
   name: string;
@@ -54,6 +55,10 @@ export function OrgLayout() {
   const location = useLocation();
   const { orgProfile } = useOrgProfile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    writeStoredActiveRole("org");
+  }, []);
 
   const isActive = (path: string) =>
     path === "/org/hackathons"
@@ -98,7 +103,7 @@ export function OrgLayout() {
       <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-200">
         <div className="p-6 border-b border-gray-200">
           <Link
-            to="/dashboard"
+            to={roleDashboardPath.org}
             className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors mb-3"
           >
             <ArrowLeft className="w-3 h-3" />
@@ -177,7 +182,7 @@ export function OrgLayout() {
               <span className="text-sm font-medium">Profile</span>
             </Link>
             <Link
-              to="/dashboard"
+              to={roleDashboardPath.org}
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:bg-gray-50 mt-4 border-t border-gray-100 pt-4"
             >

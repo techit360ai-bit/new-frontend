@@ -23,7 +23,7 @@ export function CollabStep5() {
   const persist = () => updateCollaboratorProfile({ equityPreference: pref, minCashFloor: floor, vestingComfort: vesting });
   const handleNext = () => { persist(); navigate("/collaborator/onboarding/step-6"); };
   const handleBack = () => { persist(); navigate("/collaborator/onboarding/step-4"); };
-  const handleSaveExit = () => { persist(); navigate("/dashboard"); };
+  const handleSaveExit = () => { persist(); navigate("/collaborator/dashboard"); };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
