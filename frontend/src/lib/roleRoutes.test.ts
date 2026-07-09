@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from "vitest";
+import { expect, test } from "vitest";
 import {
   authRoleDashboardPath,
   authRoleOnboardingPath,
@@ -8,12 +8,6 @@ import {
   roleSafeReturnPath,
   writeStoredActiveRole,
 } from "./roleRoutes";
-
-beforeEach(() => {
-  if (typeof window !== "undefined") {
-    window.localStorage.removeItem("techit_active_role");
-  }
-});
 
 test("normalizes auth and UI role names", () => {
   expect(normalizeRole("organisation")).toBe("org");
