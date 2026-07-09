@@ -78,11 +78,21 @@ function assertNoBackendUrlDrift(filePath, content) {
   }
 }
 
+function assertRenderDeployIsExplicitlyEnabled(filePath, content) {
+  if (!content.includes("secrets.RENDER_FRONTEND_DEPLOY_HOOK")) return;
+
+  const enablementGate = "vars.RENDER_FRONTEND_DEPLOY_ENABLED == 'true'";
+  if (!content.includes(enablementGate)) {
+    fail(`${filePath} Render deploy job must require ${enablementGate}`);
+  }
+}
+
 try {
   for (const workflow of workflows) {
     const content = readWorkflow(workflow.filePath);
     assertBuildEnv(workflow.filePath, content, workflow.buildStep);
     assertNoBackendUrlDrift(workflow.filePath, content);
+    assertRenderDeployIsExplicitlyEnabled(workflow.filePath, content);
   }
   console.log("frontend workflow env contract OK");
 } catch (error) {
