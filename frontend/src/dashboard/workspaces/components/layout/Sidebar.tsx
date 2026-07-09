@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   Hammer,
   Bot,
@@ -11,6 +11,8 @@ import {
   Plug,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { roleSafeReturnPath } from '@/lib/roleRoutes';
 import { useState } from 'react';
 
 interface NavItem {
@@ -23,6 +25,13 @@ interface NavItem {
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+  const { profile } = useAuth();
+  const returnPath = roleSafeReturnPath({
+    currentPath: location.pathname,
+    profileRole: profile?.role ?? null,
+    secondaryRoles: profile?.secondaryRoles ?? null,
+  });
 
   const navItems: NavItem[] = [
     { path: '/workspaces/build', label: 'Build', icon: <Hammer className="w-5 h-5" /> },
@@ -101,7 +110,7 @@ export function Sidebar() {
       {/* Bottom Section */}
       <div className="p-4 border-t border-white/10 space-y-3">
         <Link
-          to="/dashboard"
+          to={returnPath}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

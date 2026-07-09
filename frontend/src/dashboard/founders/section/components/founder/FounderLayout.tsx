@@ -9,13 +9,14 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
+import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 
 type NavKind = "link" | "external" | "placeholder";
 interface NavItem { name: string; path: string; icon: typeof LayoutDashboard; kind: NavKind; }
 
 const primaryNav: NavItem[] = [
-  { name: "Dashboard",       path: "/dashboard",       icon: LayoutDashboard, kind: "link" },
+  { name: "Dashboard",       path: roleDashboardPath.founder, icon: LayoutDashboard, kind: "link" },
   { name: "Incubation Hub",  path: "/incubation-hub",  icon: FlaskConical,    kind: "link" },
   { name: "Opportunity Hub", path: "/opportunity-hub", icon: Compass,         kind: "link" },
   { name: "Workspaces",      path: "/workspaces",      icon: PanelsTopLeft,   kind: "link" },
@@ -42,6 +43,10 @@ export function FounderLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { founderProfile } = useFounderProfile();
+
+  useEffect(() => {
+    writeStoredActiveRole("founder");
+  }, []);
 
   useEffect(() => {
     if (!founderProfile.onboardingComplete && !location.pathname.startsWith("/founder/onboarding")) {

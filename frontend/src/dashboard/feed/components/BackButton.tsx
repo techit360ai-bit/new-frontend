@@ -2,8 +2,8 @@ import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * Returns to the previous page in history. Falls back to /feed when there is
- * no in-app history to go back to (e.g. the page was opened via direct link).
+ * Returns to an explicit in-app fallback instead of browser history so shared
+ * feed pages cannot jump across role dashboards.
  */
 export function BackButton({
   label = 'Back',
@@ -17,11 +17,7 @@ export function BackButton({
   const navigate = useNavigate();
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate(fallback);
-    }
+    navigate(fallback);
   };
 
   return (

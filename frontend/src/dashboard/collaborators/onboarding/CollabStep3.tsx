@@ -23,7 +23,7 @@ export function CollabStep3() {
   const persist = () => updateCollaboratorProfile({ techStack: stack });
   const handleNext = () => { persist(); navigate("/collaborator/onboarding/step-4"); };
   const handleBack = () => { persist(); navigate("/collaborator/onboarding/step-2"); };
-  const handleSaveExit = () => { persist(); navigate("/dashboard"); };
+  const handleSaveExit = () => { persist(); navigate("/collaborator/dashboard"); };
 
   const suggestions = SUGGESTIONS.filter((s) => !stack.includes(s)).slice(0, 8);
 

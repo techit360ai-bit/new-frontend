@@ -31,7 +31,7 @@ export function CollabStep2() {
   const persist = () => updateCollaboratorProfile({ discipline, subSkills });
   const handleNext = () => { persist(); navigate("/collaborator/onboarding/step-3"); };
   const handleBack = () => { persist(); navigate("/collaborator/onboarding/step-1"); };
-  const handleSaveExit = () => { persist(); navigate("/dashboard"); };
+  const handleSaveExit = () => { persist(); navigate("/collaborator/dashboard"); };
 
   const skillOptions = discipline ? subSkillsByDiscipline[discipline] : [];
 

@@ -21,7 +21,7 @@ export function CollabStep1() {
   };
   const handleSaveExit = () => {
     updateCollaboratorProfile({ name, title, location, yearsExperience: years, headline });
-    navigate("/dashboard");
+    navigate("/collaborator/dashboard");
   };
 
   return (
