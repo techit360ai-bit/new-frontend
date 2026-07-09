@@ -12,6 +12,7 @@ import { FounderProfile } from "@/dashboard/founders/section/components/founder/
 import { Settings as FounderSettings } from "@/dashboard/founders/section/components/founder/Settings";
 import { Messages as FounderMessages } from "@/dashboard/founders/section/components/founder/Messages";
 import { TeamWorkspaceView } from "@/dashboard/founders/section/components/founder/TeamWorkspaceView";
+import { TrustCenter } from "@/dashboard/founders/section/components/founder/TrustCenter";
 import { CollabLayout } from "@/dashboard/collaborators/section/components/collab/CollabLayout";
 import { Dashboard as CollabDashboard } from "@/dashboard/collaborators/section/components/collab/Dashboard";
 import { Equity as CollabEquity } from "@/dashboard/collaborators/section/components/collab/Equity";
@@ -53,6 +54,7 @@ import { DealRoom as InvestorDealRoom } from "@/dashboard/investors/section/comp
 import { DealRooms as InvestorDealRooms } from "@/dashboard/investors/section/components/investor/DealRooms";
 import { Reputation as InvestorReputation } from "@/dashboard/investors/section/components/investor/Reputation";
 import { InvestorProfile } from "@/dashboard/investors/section/components/investor/InvestorProfile";
+import { InvestorTrustDashboard } from "@/dashboard/investors/section/components/investor/InvestorTrustDashboard";
 import { MentorshipGate } from "@/dashboard/_shared/mentorship/MentorshipGate";
 import { Overview as MentorshipOverview } from "@/dashboard/_shared/mentorship/Overview";
 import { Room as MentorshipRoom } from "@/dashboard/_shared/mentorship/Room";
@@ -199,6 +201,8 @@ const App = () => {
           <Route path="risk-radar/:startupId" element={<InvestorRiskRadar />} />
           <Route path="allocation" element={<InvestorAllocationEngine />} />
           <Route path="watchlist" element={<InvestorWatchlist />} />
+          <Route path="trust" element={<InvestorTrustDashboard />} />
+          <Route path="trust/:startupId" element={<InvestorTrustDashboard />} />
           <Route path="capital-pools" element={<InvestorCapitalPools />} />
           <Route path="heatmap" element={<InvestorHeatmap />} />
           <Route path="data-rooms" element={<InvestorDataRooms />} />
@@ -224,6 +228,7 @@ const App = () => {
           <Route path="/founder/dashboard" element={<Dashboard />} />
           <Route path="/dashboard"        element={<Navigate to="/founder/dashboard" replace />} />
           <Route path="/team-workspace/:teamId" element={<TeamWorkspaceView />} />
+          <Route path="/founder/trust"    element={<TrustCenter />} />
           <Route path="/founder/profile"  element={<FounderProfile />} />
           <Route path="/founder/settings" element={<FounderSettings />} />
           <Route path="/founder/messages" element={<FounderMessages />} />
