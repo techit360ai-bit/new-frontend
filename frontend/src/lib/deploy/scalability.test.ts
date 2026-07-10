@@ -18,6 +18,7 @@ type ScalabilityPlan = {
 type ScalabilityModule = {
   buildPlan: (env?: Record<string, string | undefined>) => ScalabilityPlan;
   joinUrl: (base: string, path: string) => string;
+  normalizeBaseUrl: (base: string, strip?: string) => string;
   runScalabilityCheck: (env?: Record<string, string | undefined>) => Promise<{ mode: string; plan: ScalabilityPlan }>;
 };
 
@@ -50,13 +51,22 @@ test("scalability check caps request pressure", async () => {
 });
 
 test("scalability check builds configured target urls", async () => {
-  const { buildPlan, joinUrl } = await loadScalabilityScript();
-  const plan = buildPlan({ FRONTEND_URL: "https://app.techit.example/" });
+  const { buildPlan, joinUrl, normalizeBaseUrl } = await loadScalabilityScript();
+  const plan = buildPlan({
+    FRONTEND_URL: "https://app.techit.example/",
+    VITE_API_URL: "https://backend.techit.example/api",
+  });
   const shell = plan.targets.find((target) => target.name === "frontend-shell");
+  const backend = plan.targets.find((target) => target.name === "node-backend-root");
 
   expect(joinUrl("https://app.techit.example/", "/founder/dashboard")).toBe(
     "https://app.techit.example/founder/dashboard",
   );
+  expect(normalizeBaseUrl("https://backend.techit.example/api", "/api")).toBe(
+    "https://backend.techit.example",
+  );
   expect(shell?.configured).toBe(true);
   expect(shell?.url).toBe("https://app.techit.example/");
+  expect(backend?.configured).toBe(true);
+  expect(backend?.url).toBe("https://backend.techit.example/");
 });
