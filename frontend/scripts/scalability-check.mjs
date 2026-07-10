@@ -22,6 +22,14 @@ export const scalabilityTargets = [
     p95Ms: 1_500,
   },
   {
+    name: "node-backend-root",
+    env: "VITE_API_URL",
+    strip: "/api",
+    path: "/",
+    statuses: [200],
+    p95Ms: 1_000,
+  },
+  {
     name: "ai-router-health",
     env: "VITE_API_BASE_URL",
     path: "/health",
@@ -54,6 +62,11 @@ export function joinUrl(base, path) {
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 }
 
+export function normalizeBaseUrl(base, strip) {
+  if (!strip || !base.endsWith(strip)) return base;
+  return base.slice(0, -strip.length);
+}
+
 export function buildPlan(env = process.env) {
   const limits = {
     concurrency: readPositiveInt(env, "SCALABILITY_CONCURRENCY", DEFAULT_LIMITS.concurrency, DEFAULT_LIMITS.maxConcurrency),
@@ -67,7 +80,7 @@ export function buildPlan(env = process.env) {
   };
 
   const targets = scalabilityTargets.map((target) => {
-    const base = env[target.env];
+    const base = env[target.env] ? normalizeBaseUrl(env[target.env], target.strip) : null;
     return {
       ...target,
       configured: Boolean(base),

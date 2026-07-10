@@ -17,6 +17,7 @@ cd frontend
 SCALABILITY_PROBE_ENABLED=true \
 FRONTEND_URL=https://staging.example.com \
 VITE_API_BASE_URL=https://ai-router-staging.example.com \
+VITE_API_URL=https://backend-staging.example.com/api \
 VITE_TECHIT_API=https://backend-staging.example.com/api/mcp \
 VITE_MESSAGING_BASE_URL=https://messaging-staging.example.com \
 npm run scalability:check
@@ -31,8 +32,8 @@ The probe is intentionally capped:
 
 Evidence required before claiming frontend scalability:
 
-- Staging probe results for the shell, founder dashboard, ai-router health,
-  MCP auth boundary, and messaging health.
+- Staging probe results for the shell, founder dashboard, Node backend root,
+  ai-router health, MCP auth boundary, and messaging health.
 - Production build and frontend quality gates passing on the same commit.
 - p95 latency inside the per-target thresholds in `scripts/scalability-check.mjs`.
 - No unexpected 5xx responses during probe runs.
