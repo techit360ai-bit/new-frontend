@@ -22,8 +22,15 @@ export const scalabilityTargets = [
     p95Ms: 1_500,
   },
   {
+    name: "admin-dashboard-shell",
+    env: "ADMIN_DASHBOARD_URL",
+    path: "/",
+    statuses: [200],
+    p95Ms: 1_500,
+  },
+  {
     name: "node-backend-root",
-    env: "VITE_API_URL",
+    env: ["NODE_BACKEND_URL", "VITE_API_URL"],
     strip: "/api",
     path: "/",
     statuses: [200],
@@ -31,7 +38,7 @@ export const scalabilityTargets = [
   },
   {
     name: "ai-router-health",
-    env: "VITE_API_BASE_URL",
+    env: ["AI_ROUTER_BASE_URL", "VITE_API_BASE_URL"],
     path: "/health",
     statuses: [200],
     p95Ms: 800,
@@ -46,6 +53,14 @@ export const scalabilityTargets = [
   {
     name: "messaging-health",
     env: "VITE_MESSAGING_BASE_URL",
+    path: "/health",
+    statuses: [200],
+    p95Ms: 800,
+  },
+  {
+    name: "admin-api-health",
+    env: "ADMIN_API_BASE_URL",
+    bearerTokenEnv: ["ADMIN_API_BEARER_TOKEN", "ADMIN_SMOKE_TOKEN", "ADMIN_API_TOKEN"],
     path: "/health",
     statuses: [200],
     p95Ms: 800,
@@ -67,6 +82,19 @@ export function normalizeBaseUrl(base, strip) {
   return base.slice(0, -strip.length);
 }
 
+function asEnvList(names) {
+  if (!names) return [];
+  return Array.isArray(names) ? names : [names];
+}
+
+export function readConfiguredEnv(env, names) {
+  for (const name of asEnvList(names)) {
+    const value = env[name];
+    if (value) return { name, value };
+  }
+  return null;
+}
+
 export function buildPlan(env = process.env) {
   const limits = {
     concurrency: readPositiveInt(env, "SCALABILITY_CONCURRENCY", DEFAULT_LIMITS.concurrency, DEFAULT_LIMITS.maxConcurrency),
@@ -80,9 +108,13 @@ export function buildPlan(env = process.env) {
   };
 
   const targets = scalabilityTargets.map((target) => {
-    const base = env[target.env] ? normalizeBaseUrl(env[target.env], target.strip) : null;
+    const configuredEnv = readConfiguredEnv(env, target.env);
+    const bearerEnv = readConfiguredEnv(env, target.bearerTokenEnv);
+    const base = configuredEnv ? normalizeBaseUrl(configuredEnv.value, target.strip) : null;
     return {
       ...target,
+      configuredFrom: configuredEnv?.name ?? null,
+      authConfiguredFrom: bearerEnv?.name ?? null,
       configured: Boolean(base),
       url: base ? joinUrl(base, target.path) : null,
     };
@@ -95,12 +127,26 @@ export function buildPlan(env = process.env) {
   };
 }
 
-async function timedFetch(url, timeoutMs) {
+function requestHeadersForTarget(target, env) {
+  const bearerEnv = readConfiguredEnv(env, target.bearerTokenEnv);
+  if (!bearerEnv) return {};
+  return { Authorization: `Bearer ${bearerEnv.value}` };
+}
+
+function describeFetchError(error, timeoutMs) {
+  if (error?.name === "AbortError") return `timeout:${timeoutMs}ms`;
+  if (error?.cause?.code) return String(error.cause.code);
+  if (error?.code) return String(error.code);
+  if (error instanceof Error && error.message) return error.message.split("\n")[0].slice(0, 120);
+  return "request-error";
+}
+
+async function timedFetch(url, timeoutMs, headers = {}) {
   const started = Date.now();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, { signal: controller.signal, headers });
     return {
       status: response.status,
       durationMs: Date.now() - started,
@@ -117,24 +163,33 @@ function percentile(values, percentileValue) {
   return sorted[index];
 }
 
-async function runTarget(target, limits) {
+async function runTarget(target, limits, env) {
   const durations = [];
   let failures = 0;
   let completed = 0;
+  const failureReasons = new Map();
   const total = limits.requestsPerTarget;
   let next = 0;
+
+  function recordFailure(reason) {
+    failureReasons.set(reason, (failureReasons.get(reason) ?? 0) + 1);
+  }
 
   async function worker() {
     while (next < total) {
       next += 1;
       try {
-        const result = await timedFetch(target.url, limits.timeoutMs);
+        const result = await timedFetch(target.url, limits.timeoutMs, requestHeadersForTarget(target, env));
         completed += 1;
         durations.push(result.durationMs);
-        if (!target.statuses.includes(result.status)) failures += 1;
-      } catch {
+        if (!target.statuses.includes(result.status)) {
+          failures += 1;
+          recordFailure(`status:${result.status}`);
+        }
+      } catch (error) {
         completed += 1;
         failures += 1;
+        recordFailure(describeFetchError(error, limits.timeoutMs));
       }
     }
   }
@@ -148,9 +203,16 @@ async function runTarget(target, limits) {
     completed,
     failures,
     errorRate,
+    failureReasons: Object.fromEntries(failureReasons),
     p95Ms,
     passed: failures === 0 && p95Ms <= target.p95Ms,
   };
+}
+
+function formatFailureReasons(failureReasons) {
+  const entries = Object.entries(failureReasons);
+  if (entries.length === 0) return "";
+  return ` reasons=${entries.map(([reason, count]) => `${reason}=${count}`).join(",")}`;
 }
 
 export async function runScalabilityCheck(env = process.env) {
@@ -170,9 +232,11 @@ export async function runScalabilityCheck(env = process.env) {
 
   const results = [];
   for (const target of configuredTargets) {
-    const result = await runTarget(target, plan.limits);
+    const result = await runTarget(target, plan.limits, env);
     results.push(result);
-    console.log(`${result.passed ? "ok" : "fail"} ${target.name} p95=${result.p95Ms}ms failures=${result.failures}`);
+    console.log(
+      `${result.passed ? "ok" : "fail"} ${target.name} p95=${result.p95Ms}ms failures=${result.failures}${formatFailureReasons(result.failureReasons)}`,
+    );
   }
 
   const failed = results.filter((result) => !result.passed);
