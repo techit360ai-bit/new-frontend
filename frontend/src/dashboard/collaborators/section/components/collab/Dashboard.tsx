@@ -1,44 +1,112 @@
 // frontend/src/dashboard/collaborators/section/components/collab/Dashboard.tsx
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useMemo, useState } from "react";
 import { TrendingUp, ArrowRight, CheckCircle, GraduationCap, Headphones, Award } from "lucide-react";
-import {
-  equityHoldings, equityTotals,
-  cashTotals,
-  projects, tasks, signals, recentActivity,
-} from "@/dashboard/collaborators/section/data/mockData";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
-import { formatRelative } from "@/lib/formatRelative";
+import { EMPTY_EQUITY, fetchCollaboratorEquity, type CollaboratorEquity } from "@/lib/api/equity";
+import { EMPTY_EARNINGS, fetchCollaboratorEarnings, type CollaboratorEarnings } from "@/lib/api/earnings";
+
+interface BuildSummary {
+  id: string;
+  name: string;
+  logo: string;
+  role: string;
+  progress: number;
+  deadline: string;
+  status: "healthy" | "risk" | "critical";
+  sprintGoal: string;
+}
 
 export function Dashboard() {
   const navigate = useNavigate();
   const { collaboratorProfile } = useCollaboratorProfile();
-  const [activity, setActivity] = useState(recentActivity);
+  const [equity, setEquity] = useState<CollaboratorEquity>(EMPTY_EQUITY);
+  const [earnings, setEarnings] = useState<CollaboratorEarnings>(EMPTY_EARNINGS);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const firstName = collaboratorProfile.name.split(" ")[0];
+  useEffect(() => {
+    let alive = true;
+    Promise.all([fetchCollaboratorEquity(), fetchCollaboratorEarnings()])
+      .then(([equityData, earningsData]) => {
+        if (!alive) return;
+        setEquity(equityData);
+        setEarnings(earningsData);
+        setLoadError(null);
+      })
+      .catch((error) => {
+        if (!alive) return;
+        setEquity(EMPTY_EQUITY);
+        setEarnings(EMPTY_EARNINGS);
+        setLoadError(error instanceof Error ? error.message : "Live collaborator data is unavailable.");
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const firstName = (collaboratorProfile.name || "Collaborator").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 
-  const urgentTasks = [...tasks]
-    .filter((t) => t.status !== "completed")
-    .sort((a, b) => (b.impactScore - a.impactScore))
-    .slice(0, 3);
+  const builds = useMemo<BuildSummary[]>(() => {
+    const byProject = new Map<string, BuildSummary>();
+    for (const h of equity.holdings) {
+      byProject.set(h.projectId, {
+        id: h.projectId,
+        name: h.projectName,
+        logo: h.projectLogo || "",
+        role: "Equity contributor",
+        progress: Math.max(0, Math.min(100, Math.round(h.vestedPercent || 0))),
+        deadline: h.nextVest?.date ?? "—",
+        status: "healthy",
+        sprintGoal: h.nextVest ? `Next vest +${h.nextVest.deltaPercent}%` : "No upcoming vest recorded",
+      });
+    }
+    for (const e of earnings.cashEarnings) {
+      if (!byProject.has(e.projectId)) {
+        byProject.set(e.projectId, {
+          id: e.projectId,
+          name: e.projectName,
+          logo: "",
+          role: "Cash contributor",
+          progress: e.pending > 0 ? 50 : 100,
+          deadline: "—",
+          status: e.pending > 0 ? "risk" : "healthy",
+          sprintGoal: e.contributionNote || "No contribution note recorded",
+        });
+      }
+    }
+    return [...byProject.values()];
+  }, [equity.holdings, earnings.cashEarnings]);
 
-  const handleStandup = (projectName: string) => {
-    setActivity((cur) => [
-      { id: `ra-${Date.now()}`, projectName, projectLogo: projects.find((p) => p.name === projectName)?.logo ?? "•", message: "Standup logged", timestampISO: new Date().toISOString() },
-      ...cur,
-    ]);
-    toast("Standup logged");
-  };
+  const signals = useMemo(() => {
+    const items: Array<{ id: string; message: string; href: string }> = [];
+    if (equity.totals.nextVest) {
+      items.push({
+        id: "next-vest",
+        message: `${equity.totals.nextVest.startup} vests on ${equity.totals.nextVest.date} · +${equity.totals.nextVest.deltaPercent}%`,
+        href: "/collaborator/equity",
+      });
+    }
+    if (earnings.totals.pendingUSD > 0) {
+      items.push({
+        id: "pending-payout",
+        message: `$${earnings.totals.pendingUSD.toLocaleString()} pending payout`,
+        href: "/collaborator/earnings",
+      });
+    }
+    return items;
+  }, [equity.totals.nextVest, earnings.totals.pendingUSD]);
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Greeting */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Good morning, {firstName}.</h1>
-        <p className="text-sm text-slate-500 mt-0.5">{today} · {projects.length} active builds</p>
+        <p className="text-sm text-slate-500 mt-0.5">{today} · {builds.length} active builds</p>
       </div>
+      {loadError && (
+        <div className="border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">
+          Live collaborator records could not be loaded: {loadError}
+        </div>
+      )}
 
       {/* Equity hero + Earnings */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -50,32 +118,34 @@ export function Dashboard() {
           </div>
           <div className="flex items-baseline gap-6 mt-2">
             <div>
-              <p className="text-3xl font-bold text-slate-900 tabular-nums">${(equityTotals.totalValueUSD / 1000).toFixed(1)}K</p>
+              <p className="text-3xl font-bold text-slate-900 tabular-nums">${(equity.totals.totalValueUSD / 1000).toFixed(1)}K</p>
               <p className="text-xs text-slate-500 mt-0.5">Total ownership value</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-slate-900 tabular-nums">{equityTotals.blendedEquityPercent}%</p>
-              <p className="text-xs text-slate-500 mt-0.5">Blended equity across {equityHoldings.length} startups</p>
+              <p className="text-3xl font-bold text-slate-900 tabular-nums">{equity.totals.blendedEquityPercent}%</p>
+              <p className="text-xs text-slate-500 mt-0.5">Blended equity across {equity.holdings.length} startups</p>
             </div>
           </div>
 
           <div className="mt-5 space-y-2">
-            {equityHoldings.map((h) => (
+            {equity.holdings.length > 0 ? equity.holdings.map((h) => (
               <div key={h.projectId} className="flex items-center text-sm">
-                <span className="text-lg mr-2">{h.projectLogo}</span>
+                <span className="text-lg mr-2">{h.projectLogo || ""}</span>
                 <span className="flex-1 text-slate-700">{h.projectName}</span>
                 <span className="w-16 text-right tabular-nums text-slate-900">{h.equityPercent}%</span>
                 <span className="w-20 text-right tabular-nums text-slate-700">${(h.valueUSD / 1000).toFixed(1)}K</span>
                 <span className="w-24 text-right text-xs text-slate-500">vested {h.vestedPercent}%</span>
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-slate-500">No equity grants recorded yet.</p>
+            )}
           </div>
 
-          {equityTotals.nextVest && (
+          {equity.totals.nextVest && (
             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 text-sm">
               <TrendingUp className="w-4 h-4 text-amber-500" />
               <span className="text-slate-700">
-                Next vest <span className="font-semibold">{equityTotals.nextVest.date}</span> · +{equityTotals.nextVest.deltaPercent}% {equityTotals.nextVest.startup}
+                Next vest <span className="font-semibold">{equity.totals.nextVest.date}</span> · +{equity.totals.nextVest.deltaPercent}% {equity.totals.nextVest.startup}
               </span>
             </div>
           )}
@@ -84,11 +154,11 @@ export function Dashboard() {
         {/* Earnings — 1 col */}
         <Link to="/collaborator/earnings" className="group border border-slate-200 bg-white rounded-xl p-6 hover:border-amber-300 transition-colors">
           <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Cash earned</p>
-          <p className="text-3xl font-bold text-slate-900 tabular-nums">${(cashTotals.lifetimeUSD / 1000).toFixed(0)}K</p>
+          <p className="text-3xl font-bold text-slate-900 tabular-nums">${(earnings.totals.lifetimeUSD / 1000).toFixed(0)}K</p>
           <p className="text-xs text-slate-500">Lifetime</p>
           <div className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-slate-600">Pending payout</span><span className="font-semibold tabular-nums text-slate-900">${cashTotals.pendingUSD.toLocaleString()}</span></div>
-            <div className="flex justify-between"><span className="text-slate-600">Revenue share (TTM)</span><span className="font-semibold tabular-nums text-slate-900">${cashTotals.revenueShareTTMUsd.toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-slate-600">Pending payout</span><span className="font-semibold tabular-nums text-slate-900">${earnings.totals.pendingUSD.toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-slate-600">Revenue share (TTM)</span><span className="font-semibold tabular-nums text-slate-900">${earnings.totals.revenueShareTTMUsd.toLocaleString()}</span></div>
           </div>
           <p className="text-amber-600 text-sm mt-4 group-hover:translate-x-0.5 transition-transform">View earnings →</p>
         </Link>
@@ -98,7 +168,7 @@ export function Dashboard() {
       <div>
         <h2 className="text-sm font-semibold text-slate-700 mb-3">Active Builds</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {projects.map((p) => {
+          {builds.length > 0 ? builds.map((p) => {
             const statusStyles = p.status === "critical"
               ? "bg-red-50 text-red-700"
               : p.status === "risk"
@@ -126,12 +196,14 @@ export function Dashboard() {
                 <div className="flex gap-2">
                   <button onClick={() => navigate(`/workspaces/build?startup=${p.id}`)}
                     className="flex-1 px-3 py-1.5 text-xs bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">Open workspace</button>
-                  <button onClick={() => handleStandup(p.name)}
-                    className="px-3 py-1.5 text-xs border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">Standup</button>
                 </div>
               </div>
             );
-          })}
+          }) : (
+            <div className="border border-dashed border-slate-300 rounded-xl p-6 text-sm text-slate-500 md:col-span-3">
+              No active builds are recorded yet. Equity grants, earnings, or workspace assignments will appear here once persisted.
+            </div>
+          )}
         </div>
       </div>
 
@@ -142,25 +214,12 @@ export function Dashboard() {
             <h2 className="text-sm font-semibold text-slate-700">Today's focus</h2>
             <Link to="/collaborator/tasks" className="text-xs text-amber-600 hover:underline">View all tasks</Link>
           </div>
-          <ul className="space-y-3">
-            {urgentTasks.map((t) => (
-              <li key={t.id} className="flex items-start gap-3 text-sm">
-                <input type="checkbox" className="mt-0.5 accent-amber-500" />
-                <div className="flex-1">
-                  <p className="text-slate-900">{t.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{t.projectName} · Due {t.deadline} · Impact {t.impactScore}</p>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  t.priority === "critical" ? "bg-red-50 text-red-700" :
-                  t.priority === "high"     ? "bg-amber-50 text-amber-700" :
-                                              "bg-slate-100 text-slate-700"}`}>{t.priority}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="text-sm text-slate-500">No live task assignments yet. Workspace tasks will appear here when assigned.</p>
         </div>
 
         <div className="border border-slate-200 bg-white rounded-xl p-6">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">Signals</h2>
+          {signals.length > 0 ? (
           <ul className="space-y-2">
             {signals.map((s) => (
               <li key={s.id}>
@@ -172,23 +231,16 @@ export function Dashboard() {
               </li>
             ))}
           </ul>
+          ) : (
+            <p className="text-sm text-slate-500">No live collaborator signals yet.</p>
+          )}
         </div>
       </div>
 
       {/* Recent activity */}
       <div className="border border-slate-200 bg-white rounded-xl p-6">
         <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent activity</h2>
-        <ul className="space-y-2">
-          {activity.map((a) => (
-            <li key={a.id} className="flex items-center gap-3 text-sm py-1.5">
-              <span className="text-lg">{a.projectLogo}</span>
-              <span className="text-slate-700 font-medium">{a.projectName}</span>
-              <span className="text-slate-500">·</span>
-              <span className="text-slate-600 flex-1">{a.message}</span>
-              <span className="text-xs text-slate-400">{formatRelative(a.timestampISO)}</span>
-            </li>
-          ))}
-        </ul>
+        <p className="text-sm text-slate-500">No persisted collaborator activity yet.</p>
       </div>
 
       {/* TechIT Academy — Collaborator Learning */}

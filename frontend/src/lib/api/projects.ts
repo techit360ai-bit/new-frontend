@@ -1,9 +1,8 @@
 // frontend/src/lib/api/projects.ts
 //
-// Founder projects (multi-venture portfolio) — ai-router /api/v1/founder/projects.
-// Enables a founder to run/analyze MULTIPLE separate startups.
+// Founder projects (multi-venture portfolio) — BACKEND /api/domain/founder/projects.
 
-import { apiGet, apiPost, withFallback } from "./client";
+import { domainGet, domainPost } from "@/lib/domainApi";
 
 export interface FounderProject {
   id: string;
@@ -18,28 +17,18 @@ export interface FounderProject {
 }
 
 export interface ProjectOrigin {
-  kind: "hackathon_promote";
-  hackathonId: string;
-  teamId: string;
+  kind: "hackathon_promote" | "hackathon" | "venture_intake";
+  hackathonId?: string;
+  teamId?: string;
+  intakeId?: string;
 }
 
-export const FALLBACK_PROJECTS: FounderProject[] = [
-  { id: "proj_demo_001", title: "AI Task Manager", tagline: "Execution OS for builders",
-    industry: "saas", stage: "mvp", isPrimary: true, gsisScore: 88, hasWorkspace: true },
-  { id: "proj_demo_002", title: "MicroMint", tagline: "Stablecoin rails for SMEs",
-    industry: "fintech", stage: "idea", isPrimary: false, gsisScore: 72, hasWorkspace: false },
-];
-
-/** GET /api/v1/founder/projects — the founder's portfolio of ventures. */
+/** GET /api/domain/founder/projects — the founder's persisted portfolio of ventures. */
 export function fetchFounderProjects(): Promise<FounderProject[]> {
-  return withFallback(
-    async () => (await apiGet<{ projects: FounderProject[] }>("/founder/projects")).projects,
-    FALLBACK_PROJECTS,
-    "founder projects",
-  );
+  return domainGet<{ projects: FounderProject[] }>("/founder/projects").then((data) => data.projects);
 }
 
-/** POST /api/v1/founder/projects — create a new venture.
+/** POST /api/domain/founder/projects — create a new venture.
  *  Pass `hackathonId` + `teamId` when promoting from a hackathon so the venture
  *  carries an `origin` record back to the source team (server-side persistence). */
 export function createFounderProject(
@@ -56,17 +45,6 @@ export function createFounderProject(
     body.hackathonId && body.teamId
       ? { kind: "hackathon_promote", hackathonId: body.hackathonId, teamId: body.teamId }
       : undefined;
-  return withFallback(
-    () => apiPost<{ ok: boolean; project?: FounderProject }>("/founder/projects", body),
-    () => ({
-      ok: true,
-      project: {
-        id: `proj_local_${Date.now()}`, title: body.title, tagline: body.tagline ?? "",
-        industry: body.industry ?? "", stage: body.stage ?? "idea",
-        isPrimary: false, gsisScore: 0, hasWorkspace: false,
-        ...(origin ? { origin } : {}),
-      },
-    }),
-    "create project",
-  );
+  return domainPost<{ project: FounderProject }>("/founder/projects", { ...body, ...(origin ? { origin } : {}) })
+    .then(({ project }) => ({ ok: true, project }));
 }

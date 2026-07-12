@@ -43,9 +43,13 @@ export function setAuthTokenGetter(fn: () => string | null) {
   authTokenGetter = fn;
 }
 
+export function getAuthToken(): string | null {
+  return authTokenGetter?.() ?? null;
+}
+
 function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
-  const token = authTokenGetter?.();
+  const token = getAuthToken();
   if (token) h.Authorization = `Bearer ${token}`;
   return { ...h, ...(extra as Record<string, string>) };
 }
@@ -88,7 +92,7 @@ export async function apiPost<T>(
  * Run an API call, falling back to bundled mock data on failure (unless strict
  * mode is on). Keeps dashboards rendering when the backend is unavailable.
  *
- *   const holdings = await withFallback(() => fetchEquity(), equityHoldings);
+ *   const data = await withFallback(() => fetchOptionalTelemetry(), { events: [] });
  */
 export async function withFallback<T>(
   call: () => Promise<T>,

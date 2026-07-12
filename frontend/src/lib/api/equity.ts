@@ -1,16 +1,30 @@
 // frontend/src/lib/api/equity.ts
 //
-// Collaborator equity domain — talks to ai-router GET/POST /api/v1/collaborator/equity.
-// Falls back to bundled mock data so the Equity dashboard renders offline.
+// Collaborator equity domain — BACKEND /api/domain/collaborator/equity.
 
-import { apiGet, apiPost, withFallback } from "./client";
-import {
-  equityHoldings,
-  equityTotals,
-  vestingTimeline,
-  type EquityHolding,
-  type VestingTimelineSeries,
-} from "@/dashboard/collaborators/section/data/mockData";
+import { domainGet, domainPost } from "@/lib/domainApi";
+
+export interface CapTableRow {
+  label: string;
+  percent: number;
+  highlighted?: boolean;
+}
+
+export interface EquityHolding {
+  projectId: string;
+  projectName: string;
+  projectLogo?: string;
+  equityPercent: number;
+  valueUSD: number;
+  vestedPercent: number;
+  vestingSchedule?: { years: number; cliffMonths: number };
+  grantDate?: string;
+  nextVest: { date: string; deltaPercent: number } | null;
+  capTable?: CapTableRow[];
+}
+
+export interface VestingTimelinePoint { monthIso: string; vestedPercent: number; }
+export interface VestingTimelineSeries { projectId: string; projectName: string; points: VestingTimelinePoint[]; }
 
 export interface EquityTotals {
   totalValueUSD: number;
@@ -25,19 +39,20 @@ export interface CollaboratorEquity {
   vestingTimeline: VestingTimelineSeries[];
 }
 
-const FALLBACK: CollaboratorEquity = {
-  holdings: equityHoldings,
-  totals: equityTotals as EquityTotals,
-  vestingTimeline,
+export const EMPTY_EQUITY: CollaboratorEquity = {
+  holdings: [],
+  totals: {
+    totalValueUSD: 0,
+    blendedEquityPercent: 0,
+    vestedThisQuarterUSD: 0,
+    nextVest: null,
+  },
+  vestingTimeline: [],
 };
 
-/** GET /api/v1/collaborator/equity — holdings + totals + vesting timeline. */
+/** GET /api/domain/collaborator/equity — holdings + totals + vesting timeline. */
 export function fetchCollaboratorEquity(): Promise<CollaboratorEquity> {
-  return withFallback(
-    () => apiGet<CollaboratorEquity>("/collaborator/equity"),
-    FALLBACK,
-    "collaborator equity",
-  );
+  return domainGet<CollaboratorEquity>("/collaborator/equity");
 }
 
 export interface DilutionRequest {
@@ -55,17 +70,7 @@ export interface DilutionResult {
   shieldedEquity: number;
 }
 
-/** POST /api/v1/collaborator/equity/dilution — apply dilution honoring protection. */
+/** POST /api/domain/collaborator/equity/dilution — apply dilution honoring protection. */
 export function applyDilution(body: DilutionRequest): Promise<DilutionResult> {
-  return withFallback(
-    () => apiPost<DilutionResult>("/collaborator/equity/dilution", body),
-    () => ({
-      ...body,
-      protectedApplied: !body.consentGiven,
-      equityBefore: 0,
-      equityAfter: 0,
-      shieldedEquity: 0,
-    }),
-    "apply dilution",
-  );
+  return domainPost<DilutionResult>("/collaborator/equity/dilution", body);
 }

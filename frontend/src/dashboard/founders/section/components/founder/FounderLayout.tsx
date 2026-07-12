@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
@@ -44,19 +45,23 @@ export function FounderLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { founderProfile } = useFounderProfile();
+  const { profile } = useAuth();
 
   useEffect(() => {
     writeStoredActiveRole("founder");
   }, []);
 
   useEffect(() => {
-    if (!founderProfile.onboardingComplete && !location.pathname.startsWith("/founder/onboarding")) {
+    const onboarded = profile?.isOnboarded ?? founderProfile.onboardingComplete;
+    if (!onboarded && !location.pathname.startsWith("/founder/onboarding")) {
       navigate("/founder/onboarding/step-1", { replace: true });
     }
-  }, [founderProfile.onboardingComplete, location.pathname, navigate]);
+  }, [profile?.isOnboarded, founderProfile.onboardingComplete, location.pathname, navigate]);
 
   const isActive = (path: string) => location.pathname === path;
-  const initials = founderProfile.name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+  const displayName = founderProfile.name || "Founder";
+  const startupLabel = founderProfile.startupName || "No venture yet";
+  const initials = displayName.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
   const haviContext = useMemo(() => ({
     startupName: founderProfile.startupName,
     stage: founderProfile.stage,
@@ -136,8 +141,8 @@ export function FounderLayout() {
         <Link to="/founder/profile" className="m-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200 flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-violet-600 text-white text-sm font-semibold flex items-center justify-center">{initials}</div>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">{founderProfile.name}</p>
-            <p className="text-xs text-slate-500 truncate">Founder · {founderProfile.startupName} · {founderProfile.stage}</p>
+            <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
+            <p className="text-xs text-slate-500 truncate">Founder · {startupLabel} · {founderProfile.stage}</p>
           </div>
         </Link>
       </aside>
@@ -157,7 +162,7 @@ export function FounderLayout() {
       {/* Havi — AI build companion (founders & collaborators only) */}
       <Havi
         role="founder"
-        userName={founderProfile.name.split(" ")[0]}
+        userName={displayName.split(" ")[0]}
         stage={founderProfile.stage}
         route={location.pathname}
         profileContext={haviContext}

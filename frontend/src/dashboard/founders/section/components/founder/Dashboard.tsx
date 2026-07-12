@@ -3,19 +3,46 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { ArrowRight, CheckCircle, TrendingUp, Plus } from "lucide-react";
-import { useFounderProfile } from "@/contexts/UserContext";
+import { useFounderProfile, type FounderStage } from "@/contexts/UserContext";
 import { fetchDashboardIntelligence, type DashboardIntelligence } from "@/lib/api/gsis";
 import { fetchAudioBriefing } from "@/lib/api/audio";
 import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
-import { formatRelative } from "@/lib/formatRelative";
 import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
-import {
-  signals, tasks as initialTasks, activeBuilds as initialBuilds,
-  recentActivity, journey,
-  type Build,
-} from "@/dashboard/founders/section/data/mockData";
+
+interface Signal {
+  id: string;
+  message: string;
+  href: string;
+}
+
+interface FounderTask {
+  id: string;
+  title: string;
+  detail: string;
+  priority: "overdue" | "due-soon" | "this-week";
+  href: string;
+  done: boolean;
+}
+
+interface JourneyStage {
+  id: string;
+  label: string;
+  status: "complete" | "active" | "upcoming";
+  progress: number;
+  detail: string;
+}
+
+interface Build {
+  id: string;
+  name: string;
+  logoEmoji: string;
+  stage: FounderStage;
+  oneLiner: string;
+  progress: number;
+  isPrimary: boolean;
+}
 
 // Captured at module load — stable reference, satisfies react-hooks/purity
 const NOW_MS = Date.now();
@@ -34,11 +61,25 @@ const priorityStyles: Record<string, string> = {
   "this-week": "bg-slate-100 text-slate-700",
 };
 
+function normalizedStage(stage: string | undefined): FounderStage {
+  const lower = String(stage ?? "").toLowerCase();
+  if (lower === "mvp") return "MVP";
+  if (lower === "beta") return "Beta";
+  if (lower === "launch") return "Launch";
+  if (lower === "growth") return "Growth";
+  return "Idea";
+}
+
+const EMPTY_SIGNALS: Signal[] = [];
+const EMPTY_TASKS: FounderTask[] = [];
+const EMPTY_JOURNEY: JourneyStage[] = [];
+
 export function Dashboard() {
   const navigate = useNavigate();
   const { founderProfile: p } = useFounderProfile();
-  const [tasks, setTasks]     = useState(initialTasks);
-  const [builds, setBuilds]   = useState(initialBuilds);
+  const [tasks, setTasks]     = useState<FounderTask[]>(EMPTY_TASKS);
+  const [signals] = useState<Signal[]>(EMPTY_SIGNALS);
+  const [journey] = useState<JourneyStage[]>(EMPTY_JOURNEY);
   const [openStage, setOpenStage] = useState<string | null>(null);
 
   // GSIS master score + alerts from ai-router (surfaced for the first time).
@@ -75,12 +116,25 @@ export function Dashboard() {
 
   // S7 — founder venture portfolio (multiple separate startups), from context.
   const ventures = p.founderProjects;
+  const builds: Build[] = useMemo(
+    () => ventures.map((v) => ({
+      id: v.id,
+      name: v.title,
+      logoEmoji: p.logoEmoji || "",
+      stage: normalizedStage(v.stage),
+      oneLiner: v.tagline,
+      progress: Math.max(0, Math.min(100, Math.round(v.gsisScore || 0))),
+      isPrimary: v.isPrimary,
+    })),
+    [ventures, p.logoEmoji],
+  );
   const [activeVentureId, setActiveVentureId] = useState<string | null>(null);
   useEffect(() => {
     setActiveVentureId((cur) => cur ?? (ventures.find((v) => v.isPrimary) ?? ventures[0])?.id ?? null);
   }, [ventures]);
+  const activeVenture = ventures.find((v) => v.id === activeVentureId) ?? ventures[0] ?? null;
 
-  const firstName = p.name.split(" ")[0];
+  const firstName = (p.name || "Founder").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   const weeksBuilding = useMemo(
     () => Math.max(1, Math.floor((NOW_MS - new Date(`${p.foundingYear}-01-01`).getTime()) / (7 * 86_400_000))),
@@ -92,20 +146,6 @@ export function Dashboard() {
     toast("Marked complete");
   };
 
-  const startSideBet = () => {
-    const newBuild: Build = {
-      id: `b-${Date.now()}`,
-      name: "New side bet",
-      logoEmoji: "✨",
-      stage: "Idea",
-      oneLiner: "",
-      progress: 0,
-      isPrimary: false,
-    };
-    setBuilds((cur) => [...cur, newBuild]);
-    toast("Side bet started");
-  };
-
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Greeting */}
@@ -115,18 +155,18 @@ export function Dashboard() {
       </div>
 
       {/* Your ventures — multi-project portfolio (S7) */}
-      {ventures.length > 0 && (
-        <div className="border border-slate-200 bg-white rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-700">Your ventures</h2>
-            <button
-              type="button"
-              onClick={() => navigate("/incubation-hub")}
-              className="text-xs text-violet-600 hover:underline"
-            >
-              + Analyze a new idea
-            </button>
-          </div>
+      <div className="border border-slate-200 bg-white rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-slate-700">Your ventures</h2>
+          <button
+            type="button"
+            onClick={() => navigate("/incubation-hub")}
+            className="text-xs text-violet-600 hover:underline"
+          >
+            + Analyze a new idea
+          </button>
+        </div>
+        {ventures.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {ventures.map((v) => (
               <button
@@ -144,28 +184,33 @@ export function Dashboard() {
                   {v.isPrimary && <span className="text-[10px] uppercase tracking-wide text-violet-600">Primary</span>}
                 </div>
                 <div className="flex items-center gap-3 mt-0.5">
-                  <span className="text-xs text-slate-500 capitalize">{v.stage}</span>
-                  <span className="text-xs text-slate-400">GSIS {Math.round(v.gsisScore)}</span>
+                  <span className="text-xs text-slate-500 capitalize">{v.stage || "idea"}</span>
+                  <span className="text-xs text-slate-400">GSIS {Math.round(v.gsisScore || 0)}</span>
                   <span className={`text-xs ${v.hasWorkspace ? "text-emerald-600" : "text-slate-400"}`}>
-                    {v.hasWorkspace ? "● workspace" : "no workspace"}
+                    {v.hasWorkspace ? "workspace" : "no workspace"}
                   </span>
                 </div>
               </button>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-slate-500">No persisted ventures yet. Analyze an idea or promote an intake to create your first project.</p>
+        )}
+      </div>
 
       {/* Startup hero */}
+      {p.startupName || activeVenture ? (
       <Link to="/incubation-hub" className="block group border border-slate-200 bg-white rounded-xl p-6 hover:border-violet-300 transition-colors">
         <div className="flex items-start gap-4">
           <span className="text-4xl">{p.logoEmoji}</span>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-xl font-bold text-slate-900">{p.startupName}</h2>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[p.stage] ?? "bg-slate-100 text-slate-700"}`}>{p.stage}</span>
+              <h2 className="text-xl font-bold text-slate-900">{activeVenture?.title ?? p.startupName}</h2>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? "bg-slate-100 text-slate-700"}`}>
+                {activeVenture ? normalizedStage(activeVenture.stage) : p.stage}
+              </span>
             </div>
-            <p className="text-sm text-slate-600 mb-3">{p.oneLiner}</p>
+            <p className="text-sm text-slate-600 mb-3">{activeVenture?.tagline ?? p.oneLiner}</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <p className="text-2xl font-bold text-slate-900 tabular-nums">{p.users.toLocaleString()}</p>
@@ -203,6 +248,7 @@ export function Dashboard() {
           </button>
         </div>
       </Link>
+      ) : null}
 
       {/* GSIS — Global Startup Intelligence Score (from ai-router) */}
       {intel?.gsis && (
@@ -320,6 +366,7 @@ export function Dashboard() {
             <h2 className="text-sm font-semibold text-slate-700">Today's focus</h2>
             <Link to="/incubation-hub" className="text-xs text-violet-600 hover:underline">View all tasks →</Link>
           </div>
+          {tasks.length > 0 ? (
           <ul className="space-y-3">
             {tasks.map((t) => (
               <li key={t.id} className="flex items-center gap-3">
@@ -337,9 +384,13 @@ export function Dashboard() {
               </li>
             ))}
           </ul>
+          ) : (
+            <p className="text-sm text-slate-500">No live focus tasks yet. Workspace tasks will appear here when they are assigned.</p>
+          )}
         </div>
         <div className="border border-slate-200 bg-white rounded-xl p-6">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">Signals</h2>
+          {signals.length > 0 ? (
           <ul className="space-y-3">
             {signals.map((s) => (
               <li key={s.id}>
@@ -351,6 +402,9 @@ export function Dashboard() {
               </li>
             ))}
           </ul>
+          ) : (
+            <p className="text-sm text-slate-500">No live signals yet.</p>
+          )}
         </div>
       </div>
 
@@ -382,11 +436,11 @@ export function Dashboard() {
           ))}
           <button
             type="button"
-            onClick={startSideBet}
+            onClick={() => navigate("/incubation-hub")}
             className="border border-dashed border-slate-300 rounded-xl p-4 text-sm text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Start a side bet
+            Analyze a new idea
           </button>
         </div>
       </div>
@@ -394,17 +448,7 @@ export function Dashboard() {
       {/* Recent activity */}
       <div className="border border-slate-200 bg-white rounded-xl p-6">
         <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent activity</h2>
-        <ul className="space-y-2">
-          {recentActivity.map((a) => (
-            <li key={a.id} className="flex items-center gap-3 text-sm">
-              <span className="text-base">{a.buildLogo}</span>
-              <span className="font-medium text-slate-900">{a.buildName}</span>
-              <span className="text-slate-400">·</span>
-              <span className="text-slate-700 flex-1 truncate">{a.message}</span>
-              <span className="text-xs text-slate-500 shrink-0">{formatRelative(a.timestampISO)}</span>
-            </li>
-          ))}
-        </ul>
+        <p className="text-sm text-slate-500">No persisted activity yet.</p>
       </div>
 
       {/* Hackathon Momentum */}
