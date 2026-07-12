@@ -1,62 +1,50 @@
 import type { AgentTask, TaskEvent } from '../types';
-import { tasksFixture, scriptedStream } from '../fixtures/tasks';
-import { delay, nextId } from './client';
+import { workspaceGet, workspacePost } from './client';
 
-let tasks: AgentTask[] = tasksFixture.map((t) => ({ ...t, events: [...t.events] }));
+function normalizeTask(row: Partial<AgentTask> & Record<string, unknown>): AgentTask {
+  return {
+    id: String(row.id),
+    agentId: String(row.agentId ?? row.agent_id ?? ''),
+    prompt: String(row.prompt ?? row.title ?? ''),
+    status: (row.status as AgentTask['status']) ?? 'queued',
+    createdAt: String(row.createdAt ?? row.created_at ?? ''),
+    events: Array.isArray(row.events) ? row.events as TaskEvent[] : [],
+  };
+}
 
-// GET /api/agent/tasks
 export async function listTasks(): Promise<AgentTask[]> {
-  await delay();
-  return tasks.map((t) => ({ ...t }));
+  const data = await workspaceGet<{ tasks: Array<Partial<AgentTask> & Record<string, unknown>> }>('/tasks');
+  return data?.tasks.map(normalizeTask) ?? [];
 }
 
-// GET /api/agent/tasks/:id
 export async function getTask(id: string): Promise<AgentTask | undefined> {
-  const t = tasks.find((x) => x.id === id);
-  return t ? { ...t } : undefined;
+  return (await listTasks()).find((task) => task.id === id);
 }
 
-// POST /api/agent/tasks  — creates the task record, returns its id.
 export async function createTask(agentId: string, prompt: string): Promise<string> {
-  await delay();
-  const id = nextId('task');
-  tasks = [{ id, agentId, prompt, status: 'queued', createdAt: '', events: [] }, ...tasks];
-  return id;
+  const data = await workspacePost<{ task: Partial<AgentTask> & Record<string, unknown> }>('/tasks', {
+    agentId,
+    prompt,
+    status: 'queued',
+    events: [],
+  });
+  if (!data?.task?.id) throw new Error('No active workspace is available for task creation.');
+  return String(data.task.id);
 }
 
-// Pending approval resolver bridge: streamTask waits on this promise.
-const approvalWaiters: Record<string, (decision: 'approved' | 'rejected') => void> = {};
-
-// POST /api/agent/tasks/:id/approvals/:aid
 export async function resolveApproval(taskId: string, approvalId: string, decision: 'approved' | 'rejected'): Promise<void> {
-  const key = `${taskId}:${approvalId}`;
-  approvalWaiters[key]?.(decision);
-  delete approvalWaiters[key];
+  await workspacePost('/tasks', {
+    taskId,
+    approvalId,
+    decision,
+    status: decision === 'approved' ? 'running' : 'cancelled',
+    type: 'approval_resolved',
+  });
 }
 
-// GET /api/agent/tasks/:id/stream (SSE in real backend).
-// Mock: async generator replaying the scripted stream with delays, pausing on approval.
 export async function* streamTask(taskId: string): AsyncGenerator<TaskEvent> {
-  const task = tasks.find((t) => t.id === taskId);
-  if (!task) return;
-  const script = scriptedStream(task.agentId, task.prompt);
-  let stamp = 0;
-  for (const ev of script) {
-    await delay(450);
-    const event: TaskEvent = { ...ev, at: `mock+${++stamp}` };
-    if (event.type === 'approval_request' && event.approval) {
-      // Surface the approval card FIRST so the user can act on it, THEN block
-      // waiting for their decision (delivered via resolveApproval()).
-      yield event;
-      const decision = await new Promise<'approved' | 'rejected'>((resolve) => {
-        approvalWaiters[`${taskId}:${event.approval!.id}`] = resolve;
-      });
-      if (decision === 'rejected') {
-        yield { id: nextId('e'), type: 'status', at: `mock+${++stamp}`, text: 'Cancelled by user' };
-        return;
-      }
-      continue;
-    }
+  const task = await getTask(taskId);
+  for (const event of task?.events ?? []) {
     yield event;
   }
 }

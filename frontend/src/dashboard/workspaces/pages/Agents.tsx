@@ -12,10 +12,32 @@ import { Composer } from '../components/console/Composer';
 export function Agents() {
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [query, setQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => { listAgents().then(setAgents); }, []);
+  useEffect(() => {
+    let alive = true;
+    listAgents()
+      .then((rows) => {
+        if (!alive) return;
+        setAgents(rows);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setAgents([]);
+        setError(err instanceof Error ? err.message : 'Live workspace agents are unavailable.');
+      });
+    return () => { alive = false; };
+  }, []);
 
-  const handleToggle = async (id: string) => setAgents(await toggleAgent(id));
+  const handleToggle = async (id: string) => {
+    try {
+      setAgents(await toggleAgent(id));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Agent update failed.');
+    }
+  };
 
   const filtered = agents.filter((a) => a.name.toLowerCase().includes(query.toLowerCase()));
 
@@ -40,6 +62,11 @@ export function Agents() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
               {filtered.map((a) => (<AIAgentCard key={a.id} agent={a} onToggle={handleToggle} />))}
+              {filtered.length === 0 && (
+                <div className="md:col-span-2 lg:col-span-3 rounded-lg border border-dashed border-gray-300 bg-white px-4 py-8 text-sm text-gray-500">
+                  {error ? `Live workspace agents could not be loaded: ${error}` : 'No workspace agents are recorded yet.'}
+                </div>
+              )}
             </div>
           </TabsContent>
 

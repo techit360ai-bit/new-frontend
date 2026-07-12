@@ -1,87 +1,68 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { KanbanColumn } from '../components/kanban/KanbanColumn';
 import type { Task } from '../components/kanban/type';
 import { Plus, Github } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { listTasks } from '../lib/api/tasks';
+import type { AgentTask } from '../lib/types';
 
 type ColumnType = 'backlog' | 'inProgress' | 'review' | 'done';
+const COLUMNS: ColumnType[] = ['backlog', 'inProgress', 'review', 'done'];
 
-const initialTasks: Record<ColumnType, Task[]> = {
-  backlog: [
-    {
-      id: '1',
-      title: 'Design new dashboard layout',
-      assignee: { name: 'Sarah Chen', avatar: 'SC', color: 'bg-blue-500' },
-      priority: 'high',
-      dueDate: 'Feb 20',
-      timeTracked: '0h',
-      labels: ['Design', 'UI/UX'],
-    },
-    {
-      id: '2',
-      title: 'Update API documentation',
-      assignee: { name: 'Mike Johnson', avatar: 'MJ', color: 'bg-green-500' },
-      priority: 'medium',
-      dueDate: 'Feb 22',
-      timeTracked: '0h',
-      labels: ['Docs'],
-    },
-  ],
-  inProgress: [
-    {
-      id: '3',
-      title: 'Implement user authentication',
-      assignee: { name: 'Alex Kim', avatar: 'AK', color: 'bg-purple-500' },
-      priority: 'high',
-      dueDate: 'Feb 18',
-      timeTracked: '5.5h',
-      labels: ['Backend', 'Security'],
-    },
-    {
-      id: '4',
-      title: 'Build responsive navigation',
-      assignee: { name: 'Emma Wilson', avatar: 'EW', color: 'bg-pink-500' },
-      priority: 'medium',
-      dueDate: 'Feb 19',
-      timeTracked: '3h',
-      labels: ['Frontend'],
-    },
-  ],
-  review: [
-    {
-      id: '5',
-      title: 'Database migration script',
-      assignee: { name: 'Sarah Chen', avatar: 'SC', color: 'bg-blue-500' },
-      priority: 'high',
-      dueDate: 'Feb 17',
-      timeTracked: '8h',
-      labels: ['Database'],
-    },
-  ],
-  done: [
-    {
-      id: '6',
-      title: 'Setup CI/CD pipeline',
-      assignee: { name: 'Mike Johnson', avatar: 'MJ', color: 'bg-green-500' },
-      priority: 'medium',
-      dueDate: 'Feb 15',
-      timeTracked: '6h',
-      labels: ['DevOps'],
-    },
-    {
-      id: '7',
-      title: 'Create project wireframes',
-      assignee: { name: 'Alex Kim', avatar: 'AK', color: 'bg-purple-500' },
-      priority: 'low',
-      dueDate: 'Feb 14',
-      timeTracked: '4h',
-      labels: ['Design'],
-    },
-  ],
+const EMPTY_COLUMNS: Record<ColumnType, Task[]> = {
+  backlog: [],
+  inProgress: [],
+  review: [],
+  done: [],
 };
 
+function columnForStatus(status: AgentTask['status']): ColumnType {
+  if (status === 'running' || status === 'needs_approval') return 'inProgress';
+  if (status === 'done') return 'done';
+  if (status === 'failed' || status === 'cancelled') return 'review';
+  return 'backlog';
+}
+
+function normalizeTask(task: AgentTask): Task {
+  return {
+    id: task.id,
+    title: task.prompt || 'Workspace task',
+    assignee: { name: task.agentId || 'Workspace', avatar: (task.agentId || 'WS').slice(0, 2).toUpperCase(), color: 'bg-blue-500' },
+    priority: task.status === 'failed' ? 'high' : 'medium',
+    dueDate: task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—',
+    timeTracked: '0h',
+    labels: [task.status],
+  };
+}
+
 export function Build() {
-  const [tasks, setTasks] = useState<Record<string, any[]>>(initialTasks);
+  const [tasks, setTasks] = useState<Record<ColumnType, Task[]>>(EMPTY_COLUMNS);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    listTasks()
+      .then((rows) => {
+        if (!alive) return;
+        const next: Record<ColumnType, Task[]> = { backlog: [], inProgress: [], review: [], done: [] };
+        rows.forEach((row) => {
+          next[columnForStatus(row.status)].push(normalizeTask(row));
+        });
+        setTasks(next);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setTasks(EMPTY_COLUMNS);
+        setError(err instanceof Error ? err.message : 'Live workspace tasks are unavailable.');
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const totalTasks = useMemo(
+    () => Object.values(tasks).reduce((sum, column) => sum + column.length, 0),
+    [tasks],
+  );
 
   const handleDrop = (column: ColumnType) => (taskId: string) => {
     setTasks((prev) => {
@@ -89,21 +70,24 @@ export function Build() {
       let movedTask: Task | null = null;
       let sourceColumn: ColumnType | null = null;
 
-      Object.entries(prev).forEach(([col, taskList]) => {
-        const task = taskList.find((t) => t.id === taskId);
+      for (const col of COLUMNS) {
+        const task = prev[col].find((item) => item.id === taskId);
         if (task) {
           movedTask = task;
-          sourceColumn = col as ColumnType;
+          sourceColumn = col;
+          break;
         }
-      });
+      }
 
       if (!movedTask || !sourceColumn || sourceColumn === column) return prev;
 
       // Remove from source and add to destination
+      const from = sourceColumn;
+      const taskToMove = movedTask;
       return {
         ...prev,
-        [sourceColumn]: prev[sourceColumn].filter((t) => t.id !== taskId),
-        [column]: [...prev[column], movedTask],
+        [from]: prev[from].filter((task) => task.id !== taskId),
+        [column]: [...prev[column], taskToMove],
       };
     });
   };
@@ -118,14 +102,14 @@ export function Build() {
               Build
             </h1>
             <p className="text-sm text-gray-600 mt-1">
-              Sprint 12 • Feb 10 - Feb 24, 2026
+              Live workspace tasks
             </p>
           </div>
           <div className="flex items-center gap-3">
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               <Github className="w-4 h-4" />
               <span className="text-sm font-medium">GitHub</span>
-              <Badge className="bg-[#10B981] text-white text-xs">3 PRs</Badge>
+              <Badge className="bg-[#10B981] text-white text-xs">Live</Badge>
             </button>
             <button className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
               <Plus className="w-4 h-4" />
@@ -137,6 +121,16 @@ export function Build() {
 
       {/* Kanban Board */}
       <div className="flex-1 overflow-auto p-6">
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            Live workspace tasks could not be loaded: {error}
+          </div>
+        )}
+        {totalTasks === 0 && !error && (
+          <div className="mb-4 rounded-lg border border-dashed border-gray-300 bg-white px-4 py-6 text-sm text-gray-500">
+            No workspace tasks are recorded yet.
+          </div>
+        )}
         <div className="flex gap-6 h-full">
           <KanbanColumn
             title="Backlog"

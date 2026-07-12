@@ -1,28 +1,45 @@
 import type { AIAgent } from '../../components/ai/AIAgentCard';
-import { agentsFixture } from '../fixtures/agents';
-import { delay, nextId } from './client';
+import { workspaceGet, workspacePost } from './client';
 
-let agents: AIAgent[] = agentsFixture.map((a) => ({ ...a }));
+function normalizeAgent(row: Partial<AIAgent> & Record<string, unknown>): AIAgent {
+  return {
+    id: String(row.id),
+    name: String(row.name ?? 'Agent'),
+    description: String(row.description ?? ''),
+    fullDescription: String(row.fullDescription ?? row.full_description ?? row.description ?? ''),
+    category: String(row.category ?? 'Workspace'),
+    isPremium: Boolean(row.isPremium ?? row.is_premium),
+    icon: String(row.icon ?? 'bot'),
+    enabled: Boolean(row.enabled),
+  };
+}
 
-// GET /api/agents
 export async function listAgents(): Promise<AIAgent[]> {
-  await delay();
-  return agents.map((a) => ({ ...a }));
+  const data = await workspaceGet<{ agents: Array<Partial<AIAgent> & Record<string, unknown>> }>('/agents');
+  const byId = new Map<string, AIAgent>();
+  for (const agent of data?.agents.map(normalizeAgent) ?? []) {
+    if (!byId.has(agent.id)) byId.set(agent.id, agent);
+  }
+  return [...byId.values()];
 }
 
-// POST /api/agents/:id/toggle
 export async function toggleAgent(id: string): Promise<AIAgent[]> {
-  await delay();
-  agents = agents.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
-  return agents.map((a) => ({ ...a }));
+  const current = await listAgents();
+  const agent = current.find((item) => item.id === id);
+  if (!agent) return current;
+  await workspacePost('/agents', { ...agent, enabled: !agent.enabled, sourceAgentId: id });
+  return listAgents();
 }
 
-// POST /api/agents
 export async function addCustomAgent(input: { name: string; endpoint: string }): Promise<AIAgent[]> {
-  await delay();
-  agents = [
-    ...agents,
-    { id: nextId('agent'), name: input.name, description: 'Custom API-integrated agent', fullDescription: `Custom agent via ${input.endpoint}`, category: 'Builder', isPremium: false, icon: 'code', enabled: true },
-  ];
-  return agents.map((a) => ({ ...a }));
+  await workspacePost('/agents', {
+    name: input.name,
+    description: 'Custom API-integrated agent',
+    fullDescription: `Custom agent via ${input.endpoint}`,
+    category: 'Builder',
+    isPremium: false,
+    icon: 'code',
+    enabled: true,
+  });
+  return listAgents();
 }

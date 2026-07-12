@@ -1,39 +1,68 @@
 import type { Connector, ConnectorId, ActivityEvent } from '../types';
-import { connectorsFixture } from '../fixtures/connectors';
-import { activityFixture } from '../fixtures/activity';
-import { delay } from './client';
+import { workspaceGet, workspacePost } from './client';
 
-let connectors: Connector[] = connectorsFixture.map((c) => ({ ...c }));
+function normalizeConnector(row: Partial<Connector> & Record<string, unknown>): Connector {
+  return {
+    id: String(row.id) as ConnectorId,
+    name: String(row.name ?? 'Connector'),
+    category: String(row.category ?? 'Workspace'),
+    status: (row.status as Connector['status']) ?? 'disconnected',
+    authType: (row.authType as Connector['authType']) ?? (row.auth_type as Connector['authType']) ?? 'api_key',
+    capabilities: Array.isArray(row.capabilities) ? row.capabilities as Connector['capabilities'] : [],
+    tools: Array.isArray(row.tools) ? row.tools as Connector['tools'] : [],
+    resources: Array.isArray(row.resources) ? row.resources as string[] : [],
+    deepLink: typeof row.deepLink === 'string' ? row.deepLink : typeof row.deep_link === 'string' ? row.deep_link : undefined,
+    lastSync: typeof row.lastSync === 'string' ? row.lastSync : typeof row.last_sync === 'string' ? row.last_sync : undefined,
+  };
+}
 
-// GET /api/connectors
+function normalizeActivity(row: Partial<ActivityEvent> & Record<string, unknown>): ActivityEvent {
+  return {
+    id: String(row.id),
+    connectorId: String(row.connectorId ?? row.connector_id ?? '') as ConnectorId,
+    kind: (row.kind as ActivityEvent['kind']) ?? 'sync',
+    summary: String(row.summary ?? ''),
+    at: String(row.at ?? row.createdAt ?? row.created_at ?? ''),
+  };
+}
+
 export async function listConnectors(): Promise<Connector[]> {
-  await delay();
-  return connectors.map((c) => ({ ...c }));
+  const data = await workspaceGet<{ connectors: Array<Partial<Connector> & Record<string, unknown>> }>('/connectors');
+  const byId = new Map<string, Connector>();
+  for (const connector of data?.connectors.map(normalizeConnector) ?? []) {
+    if (!byId.has(connector.id)) byId.set(connector.id, connector);
+  }
+  return [...byId.values()];
 }
 
-// GET /api/connectors/:id
 export async function getConnector(id: ConnectorId): Promise<Connector | undefined> {
-  await delay();
-  const c = connectors.find((x) => x.id === id);
-  return c ? { ...c } : undefined;
+  return (await listConnectors()).find((connector) => connector.id === id);
 }
 
-// POST /api/connectors/:id/connect  → real backend returns { redirectUrl } (OAuth)
 export async function connect(id: ConnectorId): Promise<Connector | undefined> {
-  await delay();
-  connectors = connectors.map((c) => (c.id === id ? { ...c, status: 'connected' } : c));
-  return connectors.find((c) => c.id === id);
+  const current = await getConnector(id);
+  if (!current) return undefined;
+  const data = await workspacePost<{ connector: Partial<Connector> & Record<string, unknown> }>('/connectors', {
+    ...current,
+    status: 'connected',
+    sourceConnectorId: id,
+  });
+  return data?.connector ? normalizeConnector(data.connector) : undefined;
 }
 
-// POST /api/connectors/:id/disconnect
 export async function disconnect(id: ConnectorId): Promise<Connector | undefined> {
-  await delay();
-  connectors = connectors.map((c) => (c.id === id ? { ...c, status: 'disconnected' } : c));
-  return connectors.find((c) => c.id === id);
+  const current = await getConnector(id);
+  if (!current) return undefined;
+  const data = await workspacePost<{ connector: Partial<Connector> & Record<string, unknown> }>('/connectors', {
+    ...current,
+    status: 'disconnected',
+    sourceConnectorId: id,
+  });
+  return data?.connector ? normalizeConnector(data.connector) : undefined;
 }
 
-// GET /api/activity?connector=:id
 export async function listActivity(id?: ConnectorId): Promise<ActivityEvent[]> {
-  await delay();
-  return id ? activityFixture.filter((a) => a.connectorId === id) : activityFixture;
+  const data = await workspaceGet<{ reports: Array<Partial<ActivityEvent> & Record<string, unknown>> }>('/reports');
+  const rows = data?.reports.map(normalizeActivity) ?? [];
+  return id ? rows.filter((row) => row.connectorId === id) : rows;
 }
