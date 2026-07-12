@@ -11,56 +11,24 @@ import {
   Play,
   ShoppingCart,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import PaymentModal from "../components/PaymentModal";
-
-const recentUsage = [
-  {
-    id: 1,
-    icon: Sparkles,
-    title: "AI code generation",
-    time: "2 min ago",
-    credits: "-12",
-    color: "bg-violet-500/20",
-    iconColor: "text-violet-400",
-  },
-  {
-    id: 2,
-    icon: Rocket,
-    title: "Deploy pipeline",
-    time: "15 min ago",
-    credits: "-10",
-    color: "bg-cyan-500/20",
-    iconColor: "text-cyan-400",
-  },
-  {
-    id: 3,
-    icon: Zap,
-    title: "Automation run",
-    time: "1 hour ago",
-    credits: "-8",
-    color: "bg-teal-500/20",
-    iconColor: "text-teal-400",
-  },
-  {
-    id: 4,
-    icon: Database,
-    title: "Database backup",
-    time: "3 hours ago",
-    credits: "-5",
-    color: "bg-rose-500/20",
-    iconColor: "text-rose-400",
-  },
-  {
-    id: 5,
-    icon: BarChart3,
-    title: "API analytics",
-    time: "5 hours ago",
-    credits: "-3",
-    color: "bg-violet-500/20",
-    iconColor: "text-violet-400",
-  },
-];
+import { formatRelative } from "@/lib/formatRelative";
+import {
+  EMPTY_WALLET_SUMMARY,
+  createWalletPaymentIntent,
+  fetchBillingPlans,
+  fetchCreditPackages,
+  fetchWalletSummary,
+  fetchWalletTransactions,
+  fetchWalletUsage,
+  type BillingPlan,
+  type CreditPackage,
+  type WalletSummary,
+  type WalletTransaction,
+  type WalletUsageEvent,
+} from "@/lib/api/wallet";
 
 const bottomCards = [
   {
@@ -80,105 +48,6 @@ const bottomCards = [
     description: "Preview credit cost",
     icon: Clock,
     color: "border-teal-500/50",
-  },
-];
-
-const creditPackages = [
-  {
-    id: 1,
-    name: "Starter",
-    credits: 200,
-    price: "₦2,000",
-    usdPrice: "$2",
-    popular: false,
-  },
-  {
-    id: 2,
-    name: "Builder",
-    credits: 550,
-    price: "₦5,000",
-    usdPrice: "$5",
-    popular: true,
-  },
-  {
-    id: 3,
-    name: "Pro",
-    credits: 1200,
-    price: "₦10,000",
-    usdPrice: "$10",
-    popular: false,
-  },
-  {
-    id: 4,
-    name: "Studio",
-    credits: 7500,
-    price: "₦50,000",
-    usdPrice: "$50",
-    popular: false,
-  },
-];
-
-const pricingPlans = [
-  {
-    id: 1,
-    name: "Free",
-    priceNGN: "₦0",
-    priceUSD: "$0",
-    credits: "50 credits",
-    popular: false,
-    features: [
-      "50 credits monthly",
-      "Basic AI features",
-      "Community support",
-      "1 active project",
-    ],
-  },
-  {
-    id: 2,
-    name: "Maker",
-    priceNGN: "₦3,000",
-    priceUSD: "$3",
-    credits: "300 credits",
-    popular: false,
-    features: [
-      "300 credits monthly",
-      "All AI features",
-      "Priority support",
-      "5 active projects",
-      "Advanced analytics",
-    ],
-  },
-  {
-    id: 3,
-    name: "Team",
-    priceNGN: "₦10,000",
-    priceUSD: "$10",
-    credits: "1,200 credits",
-    popular: true,
-    features: [
-      "1,200 credits monthly",
-      "Everything in Maker",
-      "Team collaboration",
-      "Unlimited projects",
-      "Custom automations",
-      "API access",
-    ],
-  },
-  {
-    id: 4,
-    name: "Studio",
-    priceNGN: "₦30,000",
-    priceUSD: "$30",
-    credits: "5,000 credits",
-    popular: false,
-    features: [
-      "5,000 credits monthly",
-      "Everything in Team",
-      "Dedicated support",
-      "Custom integrations",
-      "SLA guarantee",
-      "Advanced security",
-    ],
   },
 ];
 
@@ -203,17 +72,112 @@ const pricingFeatures = [
   },
 ];
 
-// Type for a pricing plan (used by PaymentModal)
-type PricingPlan = (typeof pricingPlans)[0];
+type PricingPlan = BillingPlan & {
+  id: string;
+  name: string;
+  priceNGN: string;
+  priceUSD: string;
+  credits: string;
+  features: string[];
+};
+
+type DisplayPackage = CreditPackage & {
+  id: string;
+  name: string;
+  credits: number;
+  price: string;
+  usdPrice: string;
+};
+
+function moneyLabel(value: unknown, currency = "USD") {
+  if (typeof value === "string" && value.trim()) return value;
+  const amount = Number(value ?? 0);
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+  }).format(amount);
+}
+
+function normalizePackage(pkg: CreditPackage): DisplayPackage {
+  return {
+    ...pkg,
+    id: String(pkg.id),
+    name: pkg.name || "Credit package",
+    credits: Number(pkg.credits || 0),
+    price: pkg.priceNGN || pkg.price || moneyLabel(pkg.amount, pkg.currency || "USD"),
+    usdPrice: pkg.priceUSD || pkg.usdPrice || moneyLabel(pkg.amount, "USD"),
+    popular: Boolean(pkg.popular),
+  };
+}
+
+function normalizePlan(plan: BillingPlan): PricingPlan {
+  const credits = typeof plan.credits === "string" ? plan.credits : `${Number(plan.credits ?? 0).toLocaleString()} credits`;
+  return {
+    ...plan,
+    id: String(plan.id),
+    name: plan.name || "Billing plan",
+    priceNGN: plan.priceNGN || moneyLabel(plan.amount, plan.currency || "USD"),
+    priceUSD: plan.priceUSD || moneyLabel(plan.amount, "USD"),
+    credits,
+    features: plan.features ?? [],
+    popular: Boolean(plan.popular),
+  };
+}
 
 export default function Wallet() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewUsageOpen, setIsViewUsageOpen] = useState(false);
   const [isPlansOpen, setIsPlansOpen] = useState(false);
   const [currency, setCurrency] = useState<"NGN" | "USD">("NGN");
+  const [summary, setSummary] = useState<WalletSummary>(EMPTY_WALLET_SUMMARY);
+  const [usage, setUsage] = useState<WalletUsageEvent[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [packages, setPackages] = useState<DisplayPackage[]>([]);
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [walletError, setWalletError] = useState<string | null>(null);
 
   // PaymentModal state — holds the plan the user clicked "Get Started" on
   const [paymentPlan, setPaymentPlan] = useState<PricingPlan | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    Promise.all([
+      fetchWalletSummary(),
+      fetchWalletUsage(),
+      fetchWalletTransactions(),
+      fetchCreditPackages(),
+      fetchBillingPlans(),
+    ])
+      .then(([summaryData, usageData, transactionData, packageData, planData]) => {
+        if (!alive) return;
+        setSummary(summaryData);
+        setUsage(usageData);
+        setTransactions(transactionData);
+        setPackages(packageData.map(normalizePackage));
+        setPlans(planData.map(normalizePlan));
+        setWalletError(null);
+      })
+      .catch((error) => {
+        if (!alive) return;
+        setSummary(EMPTY_WALLET_SUMMARY);
+        setUsage([]);
+        setTransactions([]);
+        setPackages([]);
+        setPlans([]);
+        setWalletError(error instanceof Error ? error.message : "Live wallet data is unavailable.");
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const recentUsage = useMemo(() => usage.slice(0, 5).map((item) => ({
+    id: item.id,
+    title: item.title || item.feature || item.description || "Credit usage",
+    time: item.createdAt || item.timestamp ? formatRelative(String(item.createdAt || item.timestamp)) : "Recorded",
+    credits: `-${Math.abs(Number(item.credits || 0)).toLocaleString()}`,
+  })), [usage]);
+
+  const usageTotal = usage.reduce((sum, item) => sum + Math.abs(Number(item.credits || 0)), 0);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -226,6 +190,21 @@ export default function Wallet() {
   const handleGetStarted = (plan: PricingPlan) => {
     closePlans();
     setPaymentPlan(plan);
+  };
+
+  const handleSelectPackage = async (pkg: DisplayPackage) => {
+    try {
+      await createWalletPaymentIntent({
+        amount: Number(pkg.amount || 0),
+        currency: pkg.currency || "USD",
+        credits: pkg.credits,
+        provider: "wallet",
+        idemKey: `wallet-${pkg.id}-${Date.now()}`,
+      });
+      toast("Payment intent created. Complete payment from your billing provider.");
+    } catch (error) {
+      toast(`Could not create payment intent: ${error instanceof Error ? error.message : "backend unavailable"}.`);
+    }
   };
 
   return (
@@ -257,13 +236,18 @@ export default function Wallet() {
             </div>
             <div className="flex items-center gap-3 bg-linear-to-r from-violet-100 to-cyan-100 dark:from-violet-950/40 dark:to-cyan-950/40 px-4 py-2 rounded-full border border-violet-300 dark:border-violet-800/50">
               <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                1,240 Credits
+                {summary.creditBalance.toLocaleString()} Credits
               </span>
             </div>
           </div>
         </div>
 
         <div className="max-w-6xl mx-auto px-4 lg:px-8 py-8 space-y-8">
+          {walletError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              Live wallet records could not be loaded: {walletError}
+            </div>
+          )}
           {/* Main Credit Card */}
           <div className="rounded-3xl bg-linear-to-br from-violet-600 via-violet-500 to-cyan-500 border border-violet-400/50 dark:border-violet-600/50 px-8 py-8 space-y-6 shadow-xl shadow-violet-500/20">
             <div className="flex items-start justify-between">
@@ -272,16 +256,16 @@ export default function Wallet() {
                   <CreditCard className="h-5 w-5 text-cyan-400" />
                   <span className="text-sm text-slate-300">TechIT Credits</span>
                 </div>
-                <h2 className="text-5xl font-bold text-white">1,240</h2>
+                <h2 className="text-5xl font-bold text-white">{summary.creditBalance.toLocaleString()}</h2>
               </div>
               <div className="flex items-center gap-6">
                 <div className="text-right">
-                  <p className="text-xs text-slate-400 mb-1">Monthly</p>
-                  <p className="text-2xl font-bold text-cyan-400">320</p>
+                  <p className="text-xs text-slate-400 mb-1">Used</p>
+                  <p className="text-2xl font-bold text-cyan-400">{summary.lifetimeCreditsUsed.toLocaleString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-400 mb-1">Bonus</p>
-                  <p className="text-2xl font-bold text-emerald-400">180</p>
+                  <p className="text-xs text-slate-400 mb-1">Pending</p>
+                  <p className="text-2xl font-bold text-emerald-400">{summary.pendingPayments.toLocaleString()}</p>
                 </div>
               </div>
             </div>
@@ -325,118 +309,35 @@ export default function Wallet() {
                 <TrendingUp className="h-5 w-5 text-emerald-400" />
               </div>
 
-              <div className="h-64 w-full">
-                <svg viewBox="0 0 700 250" className="w-full h-full">
-                  <line
-                    x1="0"
-                    y1="50"
-                    x2="700"
-                    y2="50"
-                    stroke="#334155"
-                    strokeWidth="1"
-                    strokeDasharray="5,5"
-                  />
-                  <line
-                    x1="0"
-                    y1="100"
-                    x2="700"
-                    y2="100"
-                    stroke="#334155"
-                    strokeWidth="1"
-                    strokeDasharray="5,5"
-                  />
-                  <line
-                    x1="0"
-                    y1="150"
-                    x2="700"
-                    y2="150"
-                    stroke="#334155"
-                    strokeWidth="1"
-                    strokeDasharray="5,5"
-                  />
-                  <line
-                    x1="0"
-                    y1="200"
-                    x2="700"
-                    y2="200"
-                    stroke="#334155"
-                    strokeWidth="1"
-                    strokeDasharray="5,5"
-                  />
-                  <defs>
-                    <linearGradient
-                      id="lineGradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="0%"
-                      y2="100%"
-                    >
-                      <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3" />
-                      <stop
-                        offset="100%"
-                        stopColor="#06b6d4"
-                        stopOpacity="0.05"
-                      />
-                    </linearGradient>
-                  </defs>
-                  <polyline
-                    points="50,87.5 150,80 250,142.5 350,125 450,75 550,35 650,87.5"
-                    fill="none"
-                    stroke="#06b6d4"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <polygon
-                    points="50,87.5 150,80 250,142.5 350,125 450,75 550,35 650,87.5 650,250 50,250"
-                    fill="url(#lineGradient)"
-                  />
-                  {[
-                    { x: 50, y: 87.5, value: 150 },
-                    { x: 150, y: 80, value: 140 },
-                    { x: 250, y: 142.5, value: 95 },
-                    { x: 350, y: 125, value: 110 },
-                    { x: 450, y: 75, value: 160 },
-                    { x: 550, y: 35, value: 180 },
-                    { x: 650, y: 87.5, value: 150 },
-                  ].map((point, idx) => (
-                    <g key={idx} className="group cursor-pointer">
-                      <circle cx={point.x} cy={point.y} r="5" fill="#06b6d4" />
-                      <circle
-                        cx={point.x}
-                        cy={point.y}
-                        r="7"
-                        fill="none"
-                        stroke="#06b6d4"
-                        strokeWidth="2"
-                        opacity="0"
-                        className="group-hover:opacity-100 transition-opacity"
-                      />
-                      <text
-                        x={point.x}
-                        y={point.y - 15}
-                        textAnchor="middle"
-                        fill="white"
-                        fontSize="12"
-                        opacity="0"
-                        className="group-hover:opacity-100 transition-opacity"
-                      >
-                        {point.value}
-                      </text>
-                    </g>
-                  ))}
-                </svg>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-                <span>Feb 13</span>
-                <span>Feb 14</span>
-                <span>Feb 15</span>
-                <span>Feb 16</span>
-                <span>Feb 17</span>
-                <span>Feb 18</span>
-                <span>Feb 19</span>
-              </div>
+              {usage.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Total credits used</p>
+                    <p className="text-4xl font-bold text-cyan-400 mt-2">{usageTotal.toLocaleString()}</p>
+                  </div>
+                  <div className="space-y-2">
+                    {usage.slice(0, 7).map((event) => {
+                      const credits = Math.abs(Number(event.credits || 0));
+                      const width = usageTotal > 0 ? Math.max(4, Math.round((credits / usageTotal) * 100)) : 4;
+                      return (
+                        <div key={event.id} className="space-y-1">
+                          <div className="flex items-center justify-between text-xs text-slate-400">
+                            <span>{event.title || event.feature || "Usage event"}</span>
+                            <span>{credits.toLocaleString()} credits</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+                            <div className="h-full bg-cyan-500" style={{ width: `${width}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="h-64 flex items-center justify-center rounded-xl border border-dashed border-slate-700 text-sm text-slate-400">
+                  No credit usage has been recorded yet.
+                </div>
+              )}
             </div>
 
             {/* Recent Usage */}
@@ -448,19 +349,15 @@ export default function Wallet() {
                 </h3>
               </div>
               <div className="space-y-3">
-                {recentUsage.map((item) => {
-                  const IconComponent = item.icon;
-                  return (
+                {recentUsage.length > 0 ? recentUsage.map((item) => (
                     <div
                       key={item.id}
-                      className={`flex items-center gap-3 rounded-lg ${item.color} px-3 py-3 border border-slate-700/50`}
+                      className="flex items-center gap-3 rounded-lg bg-cyan-500/10 px-3 py-3 border border-slate-700/50"
                     >
                       <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${item.color}`}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10"
                       >
-                        <IconComponent
-                          className={`h-4 w-4 ${item.iconColor}`}
-                        />
+                        <Clock className="h-4 w-4 text-cyan-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white truncate">
@@ -472,8 +369,9 @@ export default function Wallet() {
                         {item.credits}
                       </span>
                     </div>
-                  );
-                })}
+                )) : (
+                  <p className="text-sm text-slate-400">No recent usage recorded.</p>
+                )}
               </div>
             </div>
           </div>
@@ -531,7 +429,7 @@ export default function Wallet() {
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {creditPackages.map((pkg) => (
+                {packages.length > 0 ? packages.map((pkg) => (
                   <div
                     key={pkg.id}
                     className={`relative rounded-xl border p-6 space-y-4 transition-all ${
@@ -563,6 +461,8 @@ export default function Wallet() {
                       <p className="text-xs text-slate-400">/ {pkg.usdPrice}</p>
                     </div>
                     <button
+                      type="button"
+                      onClick={() => void handleSelectPackage(pkg)}
                       className={`w-full rounded-lg py-2.5 font-semibold transition-colors ${
                         pkg.popular
                           ? "bg-cyan-500 hover:bg-cyan-600 text-white"
@@ -572,7 +472,11 @@ export default function Wallet() {
                       Select Pack
                     </button>
                   </div>
-                ))}
+                )) : (
+                  <div className="sm:col-span-2 rounded-xl border border-dashed border-slate-700 p-6 text-sm text-slate-400">
+                    No credit packages are available for this account.
+                  </div>
+                )}
               </div>
               <div className="rounded-lg bg-slate-800/50 border border-slate-700 px-4 py-3 flex items-start gap-3">
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 mt-0.5 shrink-0">
@@ -614,23 +518,35 @@ export default function Wallet() {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">
-                    AI Data Processing
+                    Usage Details
                   </h2>
                   <p className="text-sm text-slate-400 mt-2">
-                    This automation will analyze and process your dataset
+                    Persisted credit usage and wallet transactions for this account.
                   </p>
                 </div>
               </div>
               <div className="rounded-lg border border-cyan-500/50 bg-slate-800/50 px-6 py-4 text-center space-y-1">
-                <p className="text-sm text-slate-400">This automation costs</p>
-                <p className="text-4xl font-bold text-cyan-400">12 credits</p>
-                <p className="text-xs text-slate-400">≈ ₦120 / $0.12</p>
+                <p className="text-sm text-slate-400">Current balance</p>
+                <p className="text-4xl font-bold text-cyan-400">{summary.creditBalance.toLocaleString()} credits</p>
+                <p className="text-xs text-slate-400">{summary.lifetimeCreditsUsed.toLocaleString()} credits used lifetime</p>
               </div>
-              <div className="space-y-3">
-                <button className="w-full rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 transition-colors flex items-center justify-center gap-2">
-                  <Play className="h-4 w-4 fill-white" />
-                  Run Automation
-                </button>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {[...usage, ...transactions].slice(0, 8).map((item) => {
+                  const credits = Number("credits" in item ? item.credits ?? ("deltaCredits" in item ? item.deltaCredits : 0) : 0);
+                  const label = "title" in item ? item.title : undefined;
+                  const timestamp = "createdAt" in item ? item.createdAt : undefined;
+                  return (
+                    <div key={item.id} className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-left">
+                      <p className="text-sm font-medium text-white">{label || item.description || "Wallet record"}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {timestamp ? formatRelative(String(timestamp)) : "Recorded"} · {credits ? `${credits.toLocaleString()} credits` : "No credit delta"}
+                      </p>
+                    </div>
+                  );
+                })}
+                {usage.length === 0 && transactions.length === 0 && (
+                  <p className="text-sm text-slate-400 text-center">No wallet usage or transactions are recorded yet.</p>
+                )}
                 <button
                   onClick={closeViewUsage}
                   className="w-full rounded-xl border border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-white font-semibold py-3 transition-colors"
@@ -646,7 +562,7 @@ export default function Wallet() {
                 <p className="text-xs text-slate-400">
                   Current balance:{" "}
                   <span className="text-white font-semibold">
-                    1,240 credits
+                    {summary.creditBalance.toLocaleString()} credits
                   </span>
                 </p>
               </div>
@@ -711,7 +627,7 @@ export default function Wallet() {
 
                 {/* Pricing Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-6">
-                  {pricingPlans.map((plan) => (
+                  {plans.length > 0 ? plans.map((plan) => (
                     <div
                       key={plan.id}
                       className={`relative rounded-2xl border p-5 space-y-4 transition-all ${
@@ -764,7 +680,11 @@ export default function Wallet() {
                         Get Started
                       </button>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="sm:col-span-2 rounded-2xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">
+                      No billing plans are available for this account.
+                    </div>
+                  )}
                 </div>
 
                 {/* Features Section */}
