@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import {
-  opportunities as initialOpps,
-  type OpportunityDetail,
-} from "@/dashboard/collaborators/section/data/mockData";
+  fetchCollaboratorOpportunities,
+  type CollaboratorOpportunity,
+} from "@/lib/api/opportunities";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
 
-type Filter = "all" | OpportunityDetail["type"];
+type Filter = "all" | CollaboratorOpportunity["type"];
 const filters: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "project", label: "Project" },
@@ -19,9 +19,35 @@ const filters: { value: Filter; label: string }[] = [
 ];
 
 export function Opportunities() {
-  const [opps, setOpps]   = useState<OpportunityDetail[]>(initialOpps.map((o) => ({ ...o, status: o.status ?? "open" })));
+  const [opps, setOpps]   = useState<CollaboratorOpportunity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
-  const [detail, setDetail] = useState<OpportunityDetail | null>(null);
+  const [detail, setDetail] = useState<CollaboratorOpportunity | null>(null);
+
+  const loadOpportunities = useCallback(async (silent = false) => {
+    if (silent) setRefreshing(true);
+    else setLoading(true);
+    setError(null);
+    try {
+      const rows = await fetchCollaboratorOpportunities();
+      setOpps(rows);
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to load opportunities.";
+      setError(message);
+      toast.error("Could not load live opportunities");
+      return false;
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadOpportunities();
+  }, [loadOpportunities]);
 
   const visible = filter === "all" ? opps : opps.filter((o) => o.type === filter);
 
@@ -41,16 +67,17 @@ export function Opportunities() {
   };
 
   const handleRefresh = () => {
-    setOpps((cur) => [...cur].sort(() => Math.random() - 0.5));
-    toast("Matches updated");
+    void loadOpportunities(true).then((ok) => {
+      if (ok) toast("Matches updated");
+    });
   };
 
-  const compLabel = (o: OpportunityDetail): string => {
+  const compLabel = (o: CollaboratorOpportunity): string => {
     const parts: string[] = [];
     if (o.cashCompMonthly > 0)  parts.push(`$${(o.cashCompMonthly / 1000).toFixed(0)}K/mo`);
     if (o.cashCompOneTime > 0)  parts.push(`$${o.cashCompOneTime.toLocaleString()} one-time`);
     if (o.equityPercent > 0)    parts.push(`${o.equityPercent}% equity`);
-    return parts.join(" + ");
+    return parts.join(" + ") || "Compensation TBD";
   };
 
   return (
@@ -60,9 +87,9 @@ export function Opportunities() {
           <h1 className="text-2xl font-bold text-slate-900">Opportunities</h1>
           <p className="text-sm text-slate-500 mt-0.5">Matched against your stack, equity preference, and availability.</p>
         </div>
-        <button onClick={handleRefresh}
+        <button onClick={handleRefresh} disabled={loading || refreshing}
           className="h-9 px-3 text-sm text-slate-700 hover:bg-slate-100 rounded-lg flex items-center gap-1.5">
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh matches
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh matches
         </button>
       </div>
 
@@ -79,8 +106,21 @@ export function Opportunities() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {visible.length === 0 && <p className="text-sm text-slate-500 col-span-3">No opportunities in this category.</p>}
-        {visible.map((o) => {
+        {loading && <p className="text-sm text-slate-500 col-span-3">Loading live opportunities...</p>}
+        {!loading && error && (
+          <div className="col-span-3 border border-red-200 bg-red-50 rounded-xl p-5">
+            <p className="text-sm font-semibold text-red-700">Live opportunities are unavailable.</p>
+            <p className="text-sm text-red-600 mt-1">{error}</p>
+            <button onClick={() => void loadOpportunities(true)}
+              className="mt-3 text-xs px-3 py-1.5 border border-red-300 rounded-lg text-red-700 hover:bg-red-100">
+              Try again
+            </button>
+          </div>
+        )}
+        {!loading && !error && visible.length === 0 && (
+          <p className="text-sm text-slate-500 col-span-3">No live opportunities in this category yet.</p>
+        )}
+        {!loading && !error && visible.map((o) => {
           const applied = o.status === "applied";
           return (
             <div key={o.id} className={`border rounded-xl p-5 ${applied ? "bg-emerald-50/40 border-emerald-200" : "bg-white border-slate-200"}`}>
