@@ -1,46 +1,76 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Paperclip, Send } from "lucide-react";
-import {
-  conversations as initialConvos, projects,
-  type Conversation, type ConversationMessage,
-} from "@/dashboard/collaborators/section/data/mockData";
-import { fetchConversations, fetchHistory, restSendDM } from "@/lib/messaging/conversations";
+import { createConversation, fetchConversations, fetchHistory, restSendDM } from "@/lib/messaging/conversations";
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
+import type { UIConversation, UIMessage } from "@/lib/messaging/types";
 import { useMessaging } from "@/contexts/MessagingProvider";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 
+function currentUserId(): string {
+  try {
+    return JSON.parse(localStorage.getItem("techit_user") || "{}").id || "";
+  } catch {
+    return "";
+  }
+}
+
+function metaLine(conversation: Pick<UIConversation, "projectName" | "subject">): string {
+  return [conversation.projectName, conversation.subject].filter(Boolean).join(" · ");
+}
+
 export function Messages() {
-  const [convos, setConvos]       = useState<Conversation[]>(initialConvos);
-  const [activeId, setActiveId]   = useState<string>(initialConvos[0]?.id ?? "");
+  const [convos, setConvos]       = useState<UIConversation[]>([]);
+  const [activeId, setActiveId]   = useState<string>("");
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
+  const [sending, setSending]     = useState(false);
   const [draft, setDraft]         = useState("");
   const [composeOpen, setComposeOpen] = useState(false);
 
   // Compose state
   const [cRecipient, setCRecipient] = useState("");
-  const [cProject,   setCProject]   = useState<string>(projects[0]?.name ?? "");
   const [cSubject,   setCSubject]   = useState("");
   const [cBody,      setCBody]      = useState("");
 
   const { store, socket } = useMessaging();
   useEffect(() => {
     let alive = true;
-    fetchConversations().then((list) => {
-      if (alive && list.length > 0) setConvos(list.map(mapConvSummary));
-    });
+    setLoading(true);
+    setError(null);
+    fetchConversations()
+      .then((list) => {
+        if (!alive) return;
+        const mapped = list.map(mapConvSummary);
+        setConvos(mapped);
+        setActiveId((current) => current || mapped[0]?.id || "");
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setConvos([]);
+        setActiveId("");
+        setError(err instanceof Error ? err.message : "Live conversations are unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
     return () => { alive = false; };
   }, []);
   useEffect(() => {
     if (!activeId) return;
     let alive = true;
-    fetchHistory(activeId).then((msgs) => {
-      if (!alive || msgs.length === 0) return;
-      const me = (() => { try { return JSON.parse(localStorage.getItem("techit_user") || "{}").id || ""; } catch { return ""; } })();
-      const thread = msgs.slice().reverse().map((m) => mapMessage(m, me));
-      setConvos((cur) => cur.map((c) => (c.id === activeId ? { ...c, thread } : c)));
-    });
+    fetchHistory(activeId)
+      .then((msgs) => {
+        if (!alive || msgs.length === 0) return;
+        const me = currentUserId();
+        const thread = msgs.slice().reverse().map((m) => mapMessage(m, me));
+        setConvos((cur) => cur.map((c) => (c.id === activeId ? { ...c, thread } : c)));
+      })
+      .catch((err) => {
+        if (alive) toast.error(err instanceof Error ? err.message : "Could not load conversation history.");
+      });
     return () => { alive = false; };
   }, [activeId]);
   useEffect(() => {
@@ -63,43 +93,81 @@ export function Messages() {
     setConvos((cur) => cur.map((c) => c.id === id ? { ...c, unread: false } : c));
   };
 
-  const handleSend = () => {
+  const appendMessage = (convId: string, msg: UIMessage) => {
+    setConvos((cur) => cur.map((c) => c.id === convId ? { ...c, thread: [...c.thread, msg], subject: msg.body } : c));
+  };
+
+  const handleSend = async () => {
     if (!draft.trim() || !activeId) return;
     const clientMsgId = `cm-${Date.now()}`;
-    const msg: ConversationMessage = {
+    const msg: UIMessage = {
       id: clientMsgId, fromMe: true, authorName: "You",
       body: draft.trim(), timestamp: new Date().toISOString(),
     };
-    setConvos((cur) => cur.map((c) => c.id === activeId ? { ...c, thread: [...c.thread, msg] } : c));
-    if (socket) {
-      socket.send({ type: "message.send", data: { convId: activeId, clientMsgId, type: "text", body: draft.trim() } });
-    } else {
-      void restSendDM(activeId, clientMsgId, draft.trim());
+    const body = draft.trim();
+    setSending(true);
+    try {
+      if (socket) {
+        socket.send({ type: "message.send", data: { convId: activeId, clientMsgId, type: "text", body } });
+        appendMessage(activeId, msg);
+        setDraft("");
+      } else {
+        const sent = await restSendDM(activeId, clientMsgId, body);
+        if (!sent) {
+          toast.error("Message was not sent.");
+        } else {
+          appendMessage(activeId, { ...msg, id: sent.msgId || clientMsgId });
+          setDraft("");
+        }
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Message was not sent.");
+    } finally {
+      setSending(false);
     }
-    setDraft("");
   };
 
-  const handleAttach = () => toast("Attachment uploaded (mock)");
+  const handleAttach = () => toast("Attachment uploads are not available yet.");
 
-  const canCompose = cRecipient.trim() && cSubject.trim() && cBody.trim();
-  const resetCompose = () => { setCRecipient(""); setCSubject(""); setCBody(""); setCProject(projects[0]?.name ?? ""); };
+  const canCompose = Boolean(cRecipient.trim() && cSubject.trim() && cBody.trim());
+  const resetCompose = () => { setCRecipient(""); setCSubject(""); setCBody(""); };
 
-  const handleCompose = () => {
-    const initials = cRecipient.trim().split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
-    const newConvo: Conversation = {
-      id: `c-${Date.now()}`,
-      participantName: cRecipient.trim(),
-      participantAvatar: initials,
-      projectName: cProject,
-      subject: cSubject.trim(),
-      unread: false,
-      thread: [{ id: `m-${Date.now()}`, fromMe: true, authorName: "You", body: cBody.trim(), timestamp: new Date().toISOString() }],
-    };
-    setConvos((cur) => [newConvo, ...cur]);
-    setActiveId(newConvo.id);
-    setComposeOpen(false);
-    resetCompose();
-    toast("Message sent");
+  const handleCompose = async () => {
+    if (!canCompose) return;
+    setSending(true);
+    try {
+      const recipient = cRecipient.trim();
+      const convo = await createConversation(recipient);
+      if (!convo?.id) {
+        toast.error("Conversation was not created.");
+        return;
+      }
+      const clientMsgId = `cm-${Date.now()}`;
+      const sent = await restSendDM(convo.id, clientMsgId, cBody.trim());
+      if (!sent) {
+        toast.error("Message was not sent.");
+        return;
+      }
+      const initials = cRecipient.trim().split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2) || "?";
+      const newConvo: UIConversation = {
+        id: convo.id,
+        participantName: recipient,
+        participantAvatar: initials,
+        projectName: "",
+        subject: cSubject.trim(),
+        unread: false,
+        thread: [{ id: sent.msgId || clientMsgId, fromMe: true, authorName: "You", body: cBody.trim(), timestamp: new Date().toISOString() }],
+      };
+      setConvos((cur) => [newConvo, ...cur]);
+      setActiveId(newConvo.id);
+      setComposeOpen(false);
+      resetCompose();
+      toast("Message sent");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Message was not sent.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -107,7 +175,7 @@ export function Messages() {
       <div className="p-6 lg:p-8 pb-4 max-w-6xl mx-auto w-full flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{convos.length} conversations · {unreadCount} unread</p>
+          <p className="text-sm text-slate-500 mt-0.5">{loading ? "Loading live conversations..." : `${convos.length} conversations · ${unreadCount} unread`}</p>
         </div>
         <button onClick={() => setComposeOpen(true)}
           className="h-9 px-4 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-sm font-semibold">Compose</button>
@@ -118,6 +186,13 @@ export function Messages() {
           {/* Inbox */}
           <div className="border border-slate-200 bg-white rounded-xl overflow-y-auto">
             <ul className="divide-y divide-slate-100">
+              {loading && <li className="p-4 text-sm text-slate-500">Loading live conversations...</li>}
+              {!loading && error && (
+                <li className="p-4 text-sm text-red-600">Live conversations are unavailable: {error}</li>
+              )}
+              {!loading && !error && convos.length === 0 && (
+                <li className="p-4 text-sm text-slate-500">No live conversations yet.</li>
+              )}
               {convos.map((c) => (
                 <li key={c.id}>
                   <button onClick={() => handleSelect(c.id)}
@@ -129,7 +204,7 @@ export function Messages() {
                           {c.unread && <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>}
                           <p className="text-sm font-semibold text-slate-900 truncate">{c.participantName}</p>
                         </div>
-                        <p className="text-xs text-slate-500 truncate">{c.projectName} · {c.subject}</p>
+                        <p className="text-xs text-slate-500 truncate">{metaLine(c) || "Conversation"}</p>
                         <p className="text-xs text-slate-400 truncate mt-0.5">{c.thread[c.thread.length - 1]?.body}</p>
                       </div>
                     </div>
@@ -147,7 +222,7 @@ export function Messages() {
               <>
                 <div className="px-5 py-3 border-b border-slate-100">
                   <p className="font-semibold text-slate-900">{active.participantName}</p>
-                  <p className="text-xs text-slate-500">{active.projectName} · {active.subject}</p>
+                  <p className="text-xs text-slate-500">{metaLine(active) || "Conversation"}</p>
                 </div>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   {active.thread.map((m) => (
@@ -164,7 +239,7 @@ export function Messages() {
                     rows={2}
                     className="flex-1 resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
                   <button onClick={handleAttach} className="h-9 w-9 text-slate-500 hover:bg-slate-100 rounded-lg flex items-center justify-center"><Paperclip className="w-4 h-4" /></button>
-                  <button onClick={handleSend} disabled={!draft.trim()}
+                  <button onClick={() => void handleSend()} disabled={!draft.trim() || sending}
                     className="h-9 px-4 bg-amber-500 text-slate-900 font-semibold rounded-lg hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-400 flex items-center gap-1.5">
                     <Send className="w-3.5 h-3.5" /> Send
                   </button>
@@ -181,15 +256,8 @@ export function Messages() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">To</label>
-              <input value={cRecipient} onChange={(e) => setCRecipient(e.target.value)} placeholder="Sarah Kim"
+              <input value={cRecipient} onChange={(e) => setCRecipient(e.target.value)} placeholder="Recipient user ID"
                 className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm focus:outline-none focus:border-amber-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Project</label>
-              <select value={cProject} onChange={(e) => setCProject(e.target.value)}
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm bg-white">
-                {projects.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
-              </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Subject</label>
@@ -204,8 +272,8 @@ export function Messages() {
           </div>
           <DialogFooter>
             <button onClick={() => setComposeOpen(false)} className="px-4 py-2 text-sm rounded-lg text-slate-700 hover:bg-slate-100">Cancel</button>
-            <button onClick={handleCompose} disabled={!canCompose}
-              className="px-4 py-2 text-sm rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-400">Send</button>
+            <button onClick={() => void handleCompose()} disabled={!canCompose || sending}
+              className="px-4 py-2 text-sm rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-400">{sending ? "Sending..." : "Send"}</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
