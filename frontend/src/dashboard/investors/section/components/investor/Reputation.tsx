@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Award, TrendingUp, Star, Clock, Heart, Zap, Shield } from 'lucide-react';
-import { fetchInvestorReputation, FALLBACK_REPUTATION } from '@/lib/api/investorReputation';
+import { EMPTY_REPUTATION, fetchInvestorReputation } from '@/lib/api/investorReputation';
 
 // Map metric keys to their icon + accent color (presentation stays in the FE).
 const METRIC_STYLE: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string }> = {
@@ -12,17 +12,36 @@ const METRIC_STYLE: Record<string, { icon: React.ComponentType<{ className?: str
 };
 
 export function Reputation() {
-  // Load from ai-router; initial state = bundled fallback so first paint is
-  // unchanged and the screen survives the backend being unavailable.
-  const [rep, setRep] = useState(FALLBACK_REPUTATION);
+  const [rep, setRep] = useState(EMPTY_REPUTATION);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     let alive = true;
-    fetchInvestorReputation().then((data) => { if (alive) setRep(data); });
+    fetchInvestorReputation()
+      .then((data) => {
+        if (!alive) return;
+        setRep(data);
+        setError(null);
+      })
+      .catch(() => {
+        if (alive) setError('Unable to load live investor reputation.');
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
+      });
     return () => { alive = false; };
   }, []);
 
   const investorScore = rep.score;
   const scoreLevel = rep.level;
+  const hasReputation =
+    investorScore > 0 ||
+    rep.metrics.length > 0 ||
+    rep.reviews.length > 0 ||
+    rep.progression.length > 0 ||
+    rep.leaderboard.rank > 0;
+  const benefitsUnlocked = investorScore >= 80;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -35,6 +54,18 @@ export function Reputation() {
       </div>
 
       <div className="p-8">
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="mb-6 rounded-lg border border-gray-800 bg-[#111111] p-5 text-center text-gray-400">
+            Loading live reputation...
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Score Overview */}
           <div className="lg:col-span-2 space-y-6">
@@ -61,7 +92,9 @@ export function Reputation() {
                 </span>
                 <div className="flex items-center gap-1 text-emerald-400">
                   <TrendingUp className="w-4 h-4" />
-                  <span className="text-sm font-medium">+{rep.monthChange} this month</span>
+                  <span className="text-sm font-medium">
+                    {rep.monthChange >= 0 ? `+${rep.monthChange}` : rep.monthChange} this month
+                  </span>
                 </div>
               </div>
               
@@ -76,8 +109,13 @@ export function Reputation() {
             {/* Score Breakdown */}
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-xl font-semibold text-white mb-6">Reputation Metrics</h3>
-              <div className="space-y-4">
-                {rep.metrics.map((m) => {
+              {rep.metrics.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  Reputation metrics will appear after founders submit feedback and engagement events are persisted.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {rep.metrics.map((m) => {
                   const style = METRIC_STYLE[m.key] ?? { icon: Star, color: 'text-emerald-400' };
                   return (
                     <ScoreMetric
@@ -89,15 +127,21 @@ export function Reputation() {
                       color={style.color}
                     />
                   );
-                })}
-              </div>
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Founder Reviews */}
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-xl font-semibold text-white mb-6">Recent Founder Reviews</h3>
-              <div className="space-y-4">
-                {rep.reviews.map((r, i) => (
+              {rep.reviews.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  Founder reviews will appear here once live review records are available.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {rep.reviews.map((r, i) => (
                   <ReviewCard
                     key={`${r.founderName}-${i}`}
                     founderName={r.founderName}
@@ -106,8 +150,9 @@ export function Reputation() {
                     comment={r.comment}
                     date={r.date}
                   />
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -122,22 +167,22 @@ export function Reputation() {
               <div className="space-y-3">
                 <BenefitItem 
                   label="Early Access Deals"
-                  status="active"
+                  status={benefitsUnlocked ? 'active' : 'locked'}
                   description="See startups 48h before general investors"
                 />
                 <BenefitItem 
                   label="Exclusive Cohorts"
-                  status="active"
+                  status={benefitsUnlocked ? 'active' : 'locked'}
                   description="Invitation to private funding rounds"
                 />
                 <BenefitItem 
                   label="Allocation Priority"
-                  status="active"
+                  status={benefitsUnlocked ? 'active' : 'locked'}
                   description="Preferential allocation in high-demand deals"
                 />
                 <BenefitItem 
                   label="Direct Founder Intro"
-                  status="active"
+                  status={benefitsUnlocked ? 'active' : 'locked'}
                   description="Skip the queue for top startups"
                 />
               </div>
@@ -146,11 +191,17 @@ export function Reputation() {
             {/* Score History */}
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Score Progression</h3>
-              <div className="space-y-3">
-                {rep.progression.map((p) => (
+              {rep.progression.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  Score progression will appear as monthly reputation snapshots are stored.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {rep.progression.map((p) => (
                   <ProgressItem key={p.month} month={p.month} score={p.score} change={p.change} />
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Tips to Improve */}
@@ -176,9 +227,15 @@ export function Reputation() {
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Leaderboard Position</h3>
               <div className="text-center py-4">
-                <p className="text-5xl font-bold font-mono text-emerald-400 mb-2">#{rep.leaderboard.rank}</p>
-                <p className="text-sm text-gray-400">out of {rep.leaderboard.total} investors</p>
-                <p className="text-xs text-gray-500 mt-2">Top {rep.leaderboard.percentile}%</p>
+                <p className="text-5xl font-bold font-mono text-emerald-400 mb-2">
+                  {hasReputation && rep.leaderboard.rank > 0 ? `#${rep.leaderboard.rank}` : '—'}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {hasReputation && rep.leaderboard.total > 0 ? `out of ${rep.leaderboard.total} investors` : 'No ranking yet'}
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  {hasReputation && rep.leaderboard.percentile > 0 ? `Top ${rep.leaderboard.percentile}%` : 'Live ranking unavailable'}
+                </p>
               </div>
               <button className="w-full mt-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-sm font-medium rounded transition-all">
                 View Full Leaderboard

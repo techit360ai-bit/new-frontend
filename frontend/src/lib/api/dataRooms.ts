@@ -1,10 +1,8 @@
 // frontend/src/lib/api/dataRooms.ts
 //
-// Investor Data Rooms domain — ai-router /api/v1/investor/data-rooms.
-// Falls back to mock-derived metadata so the screens render offline.
+// Investor Data Rooms domain — BACKEND /api/domain/investor/data-rooms.
 
-import { apiGet, apiPost, withFallback } from "./client";
-import { mockStartups } from "@/dashboard/investors/section/data/mockData";
+import { domainGet, domainPost } from "@/lib/domainApi";
 
 export const SECTION_LABELS = [
   "Metrics Dashboard", "Financials", "Testing Reports",
@@ -18,6 +16,8 @@ export interface DataRoomMeta {
   complianceVerified: boolean;
   aiGovernanceVerified: boolean;
   updatedLabel: string;
+  startupName?: string;
+  sector?: string;
 }
 
 export interface DataRoomsResponse {
@@ -31,45 +31,44 @@ export interface DataRoomsResponse {
   };
 }
 
-function fallback(): DataRoomsResponse {
-  const rooms: DataRoomMeta[] = mockStartups.map((s) => ({
-    projectId: s.id,
-    sections: SECTION_LABELS,
-    docCount: SECTION_LABELS.length,
-    complianceVerified: !!s.complianceVerified,
-    aiGovernanceVerified: !!s.aiGovernanceVerified,
-    updatedLabel: "today",
-  }));
+function normalizeRoom(row: Partial<DataRoomMeta> & Record<string, unknown>): DataRoomMeta {
   return {
-    rooms,
-    sections: SECTION_LABELS,
-    totals: {
-      activeRooms: rooms.length,
-      totalDocs: rooms.length * SECTION_LABELS.length,
-      complianceVerified: rooms.filter((r) => r.complianceVerified).length,
-      aiSummaries: rooms.length,
-    },
+    projectId: String(row.projectId ?? row.startupId ?? row.id),
+    startupName: typeof row.startupName === "string" ? row.startupName : undefined,
+    sector: typeof row.sector === "string" ? row.sector : undefined,
+    sections: Array.isArray(row.sections) ? row.sections as string[] : [],
+    docCount: Number(row.docCount ?? row.doc_count ?? 0),
+    complianceVerified: Boolean(row.complianceVerified ?? row.compliance_verified),
+    aiGovernanceVerified: Boolean(row.aiGovernanceVerified ?? row.ai_governance_verified),
+    updatedLabel: String(row.updatedLabel ?? row.updatedAt ?? "—"),
   };
 }
 
-/** GET /api/v1/investor/data-rooms — per-startup vault metadata + totals. */
-export function fetchDataRooms(): Promise<DataRoomsResponse> {
-  return withFallback(
-    () => apiGet<DataRoomsResponse>("/investor/data-rooms"),
-    fallback,
-    "data rooms",
-  );
+function totalsFor(rooms: DataRoomMeta[]) {
+  return {
+    activeRooms: rooms.length,
+    totalDocs: rooms.reduce((sum, room) => sum + room.docCount, 0),
+    complianceVerified: rooms.filter((room) => room.complianceVerified).length,
+    aiSummaries: rooms.filter((room) => room.aiGovernanceVerified).length,
+  };
 }
 
-/** POST /api/v1/investor/data-rooms/{projectId}/access — share with an investor. */
+/** GET /api/domain/investor/data-rooms — per-startup vault metadata + totals. */
+export function fetchDataRooms(): Promise<DataRoomsResponse> {
+  return domainGet<{ dataRooms: Array<Partial<DataRoomMeta> & Record<string, unknown>> }>("/investor/data-rooms")
+    .then(({ dataRooms }) => {
+      const rooms = (dataRooms ?? []).map(normalizeRoom);
+      const sections = Array.from(new Set(rooms.flatMap((room) => room.sections)));
+      return { rooms, sections: sections.length ? sections : SECTION_LABELS, totals: totalsFor(rooms) };
+    });
+}
+
+/** POST /api/domain/investor/data-rooms — record a data-room access request. */
 export function grantDataRoomAccess(
   projectId: string,
   investorId: string,
   canDownload = false,
 ): Promise<{ ok: boolean }> {
-  return withFallback(
-    () => apiPost<{ ok: boolean }>(`/investor/data-rooms/${projectId}/access`, { investorId, canDownload }),
-    { ok: true },
-    "grant data room access",
-  );
+  return domainPost("/investor/data-rooms", { projectId, investorId, canDownload, accessRequestedAt: new Date().toISOString() })
+    .then(() => ({ ok: true }));
 }

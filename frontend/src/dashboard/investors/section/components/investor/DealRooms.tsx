@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { mockStartups } from '../../data/mockData';
-import { fetchDealRooms, fallbackDealMeta } from '@/lib/api/dealRooms';
+import {
+  fetchDealRooms,
+  stageOrder,
+  type DealMeta,
+  type DealRoomRecord,
+  type DealStatus,
+} from '@/lib/api/dealRooms';
 import {
   Shield,
   MessageSquare,
@@ -18,24 +23,39 @@ import {
   Eye,
 } from 'lucide-react';
 
-type DealStatus = 'active' | 'pending' | 'closed';
-
-interface DealMeta {
-  status: DealStatus;
-  stage: string;
-  daysOpen: number;
-  messages: number;
-  docs: number;
-  lastActivity: string;
-}
-
 const statusConfig = {
   active: { label: 'Active', color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', icon: CheckCircle },
   pending: { label: 'Pending', color: 'text-amber-400', bg: 'bg-amber-500/15', border: 'border-amber-500/30', icon: Clock },
   closed: { label: 'Closed', color: 'text-blue-400', bg: 'bg-blue-500/15', border: 'border-blue-500/30', icon: Lock },
 };
 
-const stageOrder = ['Intro Call', 'NDA Signed', 'Due Diligence', 'Term Sheet', 'Negotiation', 'Deal Closed'];
+function asString(value: unknown, fallback = '—') {
+  return typeof value === 'string' && value.trim() ? value : fallback;
+}
+
+function asNumber(value: unknown, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function roomKey(room: DealRoomRecord) {
+  return asString(room.projectId ?? room.startupId ?? room.id, room.id);
+}
+
+function roomName(room: DealRoomRecord) {
+  return asString(room.startupName ?? room.name ?? room.projectName, 'Untitled deal room');
+}
+
+function metaForRoom(room: DealRoomRecord, metaById: Record<string, DealMeta>): DealMeta {
+  return metaById[roomKey(room)] ?? {
+    status: room.status ?? 'pending',
+    stage: room.stage ?? 'Intro Call',
+    daysOpen: asNumber(room.daysOpen),
+    messages: asNumber(room.messages),
+    docs: asNumber(room.docs),
+    lastActivity: room.lastActivity ?? room.updatedAt ?? '—',
+  };
+}
 
 function StageProgress({ stage }: { stage: string }) {
   const idx = stageOrder.indexOf(stage);
@@ -58,19 +78,33 @@ function StageProgress({ stage }: { stage: string }) {
 export function DealRooms() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | DealStatus>('all');
+  const [rooms, setRooms] = useState<DealRoomRecord[]>([]);
+  const [dealMeta, setDealMeta] = useState<Record<string, DealMeta>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Deal-room metadata from ai-router; initial state = bundled fallback so the
-  // screen renders unchanged on first paint and survives the backend being down.
-  const [dealMeta, setDealMeta] = useState<Record<string, DealMeta>>(fallbackDealMeta);
   useEffect(() => {
     let alive = true;
-    fetchDealRooms().then((data) => { if (alive) setDealMeta(data.dealMeta); });
+    fetchDealRooms()
+      .then((data) => {
+        if (!alive) return;
+        setRooms(data.rooms);
+        setDealMeta(data.dealMeta);
+        setError(null);
+      })
+      .catch(() => {
+        if (alive) setError('Unable to load live deal rooms.');
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
+      });
     return () => { alive = false; };
   }, []);
 
-  const filtered = mockStartups.filter((s) => {
-    const meta = dealMeta[s.id];
-    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
+  const filtered = rooms.filter((room) => {
+    const meta = metaForRoom(room, dealMeta);
+    const searchable = `${roomName(room)} ${asString(room.sector, '')} ${asString(room.region, '')}`.toLowerCase();
+    const matchSearch = searchable.includes(search.toLowerCase());
     const matchStatus = filterStatus === 'all' || (meta && meta.status === filterStatus);
     return matchSearch && matchStatus;
   });
@@ -102,7 +136,7 @@ export function DealRooms() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Total Rooms</p>
-            <p className="text-3xl font-bold font-mono text-white">{mockStartups.length}</p>
+            <p className="text-3xl font-bold font-mono text-white">{rooms.length}</p>
           </div>
           <div className="bg-[#111111] border border-emerald-500/20 rounded-lg p-5">
             <p className="text-xs text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1">
@@ -157,23 +191,48 @@ export function DealRooms() {
           <span className="text-sm text-gray-400 ml-auto">{filtered.length} rooms</span>
         </div>
 
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         {/* Deal Room Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filtered.map((startup) => {
-            const meta = dealMeta[startup.id] ?? {
-              status: 'pending' as DealStatus,
-              stage: 'Intro Call',
-              daysOpen: 0,
-              messages: 0,
-              docs: 0,
-              lastActivity: 'just now',
-            };
+        {isLoading ? (
+          <div className="rounded-lg border border-gray-800 bg-[#111111] p-8 text-center text-gray-400">
+            Loading live deal rooms...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-lg border border-gray-800 bg-[#111111] p-8 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
+              <Shield className="h-6 w-6 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No live deal rooms found</h3>
+            <p className="text-gray-400 text-sm">
+              Deal rooms will appear after persisted investor-founder deal spaces are created.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {filtered.map((room) => {
+            const meta = metaForRoom(room, dealMeta);
             const cfg = statusConfig[meta.status];
             const StatusIcon = cfg.icon;
+            const id = roomKey(room);
+            const readinessScore = asNumber(room.readinessScore);
+            const riskLevel = asString(room.riskLevel, 'not scored');
+            const riskColor =
+              riskLevel === 'low'
+                ? 'text-emerald-400'
+                : riskLevel === 'moderate'
+                ? 'text-amber-400'
+                : riskLevel === 'high'
+                ? 'text-red-400'
+                : 'text-gray-400';
 
             return (
               <div
-                key={startup.id}
+                key={id}
                 className={`bg-[#111111] border rounded-lg p-6 transition-all hover:border-gray-700 ${
                   meta.status === 'active' ? 'border-gray-700' : 'border-gray-800'
                 }`}
@@ -182,7 +241,7 @@ export function DealRooms() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-white text-lg">{startup.name}</h3>
+                      <h3 className="font-semibold text-white text-lg">{roomName(room)}</h3>
                       <span
                         className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${cfg.bg} ${cfg.color} border ${cfg.border}`}
                       >
@@ -191,7 +250,7 @@ export function DealRooms() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-400">
-                      {startup.sector} · {startup.region}
+                      {asString(room.sector, 'Uncategorized')} · {asString(room.region, 'Region unavailable')}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs font-mono text-blue-400 font-semibold">
@@ -217,7 +276,7 @@ export function DealRooms() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5" />
-                    <span>{startup.investorsWatching} watching</span>
+                    <span>{asNumber(room.investorsWatching)} watching</span>
                   </div>
                   <div className="flex items-center gap-1.5 ml-auto">
                     <Clock className="w-3.5 h-3.5" />
@@ -229,20 +288,12 @@ export function DealRooms() {
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   <div className="bg-gray-800/50 rounded-lg p-2.5 text-center">
                     <p className="text-xs text-gray-500 mb-1">Readiness</p>
-                    <p className="font-mono font-bold text-white">{startup.readinessScore}</p>
+                    <p className="font-mono font-bold text-white">{readinessScore > 0 ? readinessScore : '—'}</p>
                   </div>
                   <div className="bg-gray-800/50 rounded-lg p-2.5 text-center">
                     <p className="text-xs text-gray-500 mb-1">Risk</p>
-                    <p
-                      className={`font-mono font-bold capitalize ${
-                        startup.riskLevel === 'low'
-                          ? 'text-emerald-400'
-                          : startup.riskLevel === 'moderate'
-                          ? 'text-amber-400'
-                          : 'text-red-400'
-                      }`}
-                    >
-                      {startup.riskLevel}
+                    <p className={`font-mono font-bold capitalize ${riskColor}`}>
+                      {riskLevel}
                     </p>
                   </div>
                   <div className="bg-gray-800/50 rounded-lg p-2.5 text-center">
@@ -262,7 +313,7 @@ export function DealRooms() {
                 {/* Actions */}
                 <div className="flex gap-2">
                   <Link
-                    to={`/investor/deal-room/${startup.id}`}
+                    to={`/investor/deal-room/${id}`}
                     className="flex-1 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2"
                   >
                     Enter Deal Room
@@ -277,7 +328,7 @@ export function DealRooms() {
                     Sign
                   </button>
                   <Link
-                    to={`/investor/data-room/${startup.id}`}
+                    to={`/investor/data-room/${id}`}
                     className="px-3 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded-lg transition-all flex items-center gap-1.5"
                   >
                     <Eye className="w-3.5 h-3.5" />
@@ -286,8 +337,9 @@ export function DealRooms() {
                 </div>
               </div>
             );
-          })}
-        </div>
+            })}
+          </div>
+        )}
 
         {/* Security banner */}
         <div className="mt-8 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
