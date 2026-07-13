@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import {
   fetchCollaboratorOpportunities,
+  patchCollaboratorOpportunityStatus,
   type CollaboratorOpportunity,
 } from "@/lib/api/opportunities";
 import {
@@ -51,19 +52,37 @@ export function Opportunities() {
 
   const visible = filter === "all" ? opps : opps.filter((o) => o.type === filter);
 
-  const handleInterest = (id: string) => {
-    setOpps((cur) => cur.map((o) => o.id === id ? { ...o, status: "applied" as const } : o));
+  const handleInterest = async (id: string) => {
     const o = opps.find((x) => x.id === id);
-    if (o) toast.success(`Application sent to ${o.company}`);
+    if (!o) return;
+    try {
+      const updated = await patchCollaboratorOpportunityStatus(id, "applied");
+      setOpps((cur) => cur.map((row) => row.id === id ? updated : row));
+      toast.success(`Application sent to ${o.company}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not update opportunity status.");
+    }
   };
 
-  const handlePass = (id: string) => {
+  const handlePass = async (id: string) => {
     const removed = opps.find((o) => o.id === id);
-    setOpps((cur) => cur.filter((o) => o.id !== id));
     if (!removed) return;
-    toast("Removed", {
-      action: { label: "Undo", onClick: () => setOpps((cur) => [...cur, removed]) },
-    });
+    try {
+      await patchCollaboratorOpportunityStatus(id, "passed");
+      setOpps((cur) => cur.filter((o) => o.id !== id));
+      toast("Removed", {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void patchCollaboratorOpportunityStatus(id, "open").then((updated) => {
+              setOpps((cur) => [...cur, updated]);
+            });
+          },
+        },
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not update opportunity status.");
+    }
   };
 
   const handleRefresh = () => {
@@ -145,8 +164,8 @@ export function Opportunities() {
               ) : (
                 <div className="flex gap-2">
                   <button onClick={() => setDetail(o)} className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">View details</button>
-                  <button onClick={() => handleInterest(o.id)} className="flex-1 text-xs px-3 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded-lg hover:bg-amber-400">Express interest</button>
-                  <button onClick={() => handlePass(o.id)} className="text-xs px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg">Pass</button>
+                  <button onClick={() => void handleInterest(o.id)} className="flex-1 text-xs px-3 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded-lg hover:bg-amber-400">Express interest</button>
+                  <button onClick={() => void handlePass(o.id)} className="text-xs px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg">Pass</button>
                 </div>
               )}
             </div>
@@ -183,7 +202,7 @@ export function Opportunities() {
                     ))}
                   </ul>
                 </div>
-                <button onClick={() => { handleInterest(detail.id); setDetail(null); }}
+                <button onClick={() => { void handleInterest(detail.id); setDetail(null); }}
                   className="w-full h-10 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg">
                   Express interest
                 </button>

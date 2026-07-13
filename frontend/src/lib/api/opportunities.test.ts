@@ -1,6 +1,10 @@
 import { expect, test } from "vitest";
 import { setAuthTokenGetter } from "./client";
-import { fetchCollaboratorOpportunities, normalizeCollaboratorOpportunity } from "./opportunities";
+import {
+  fetchCollaboratorOpportunities,
+  normalizeCollaboratorOpportunity,
+  patchCollaboratorOpportunityStatus,
+} from "./opportunities";
 
 function response(body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -74,6 +78,26 @@ test("collaborator opportunities return empty live state without fixture records
 
   try {
     await expect(fetchCollaboratorOpportunities()).resolves.toEqual([]);
+  } finally {
+    fetchMock.restore();
+  }
+});
+
+test("collaborator opportunity status persists through BACKEND domain endpoint", async () => {
+  const fetchMock = stubFetch(async () => response({
+    opportunity: { id: "opp_1", title: "Live Opportunity", company: "LiveCo", status: "applied" },
+  }));
+
+  try {
+    await expect(patchCollaboratorOpportunityStatus("opp_1", "applied")).resolves.toMatchObject({
+      id: "opp_1",
+      status: "applied",
+    });
+
+    const [url, init] = fetchMock.calls[0] as [string, RequestInit];
+    expect(url).toBe("http://localhost:3000/api/domain/opportunities/opp_1");
+    expect(init.method).toBe("PATCH");
+    expect(init.body).toBe(JSON.stringify({ status: "applied" }));
   } finally {
     fetchMock.restore();
   }

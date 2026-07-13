@@ -2,7 +2,7 @@
 //
 // Collaborator opportunities - BACKEND /api/domain/opportunities.
 
-import { domainGet } from "@/lib/domainApi";
+import { domainGet, domainPatch } from "@/lib/domainApi";
 
 export type CollaboratorOpportunityType = "project" | "advisory" | "gig" | "testing";
 export type CollaboratorOpportunityRisk = "low" | "medium" | "high";
@@ -106,4 +106,14 @@ export function fetchCollaboratorOpportunities(): Promise<CollaboratorOpportunit
     const rows = Array.isArray(data.opportunities) ? data.opportunities : [];
     return rows.map(normalizeCollaboratorOpportunity);
   });
+}
+
+/** PATCH /api/domain/opportunities/{id} - persist collaborator opportunity status. */
+export function patchCollaboratorOpportunityStatus(
+  opportunityId: string,
+  status: CollaboratorOpportunityStatus,
+): Promise<CollaboratorOpportunity> {
+  return domainPatch<{ opportunity?: unknown }>(`/opportunities/${opportunityId}`, { status }).then((data) => (
+    normalizeCollaboratorOpportunity(data.opportunity)
+  ));
 }
