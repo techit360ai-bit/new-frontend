@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell, Settings, Video, Phone, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,20 +13,51 @@ import {
 import { VideoCall } from '../calls/VideoCall';
 import { AudioCall } from '../calls/AudioCall';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { fetchWorkspaces, type WorkspaceRef } from '@/lib/api/workspaces';
+import { listNotifications } from '@/lib/api/notifications';
+import { listTasks } from '../../lib/api/tasks';
+import type { AgentTask } from '../../lib/types';
+
+interface ShellMember {
+  name: string;
+  avatar: string;
+  color: string;
+}
+
+const MEMBER_COLORS = ['bg-blue-500', 'bg-green-500', 'bg-slate-500', 'bg-cyan-500'];
+
+function initials(value: string): string {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'WS';
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
+}
+
+function displayName(profile: ReturnType<typeof useAuth>['profile']): string {
+  if (!profile) return 'Workspace User';
+  const name = `${profile.firstName ?? ''} ${profile.lastName ?? ''}`.trim();
+  return name || profile.username || profile.email || 'Workspace User';
+}
+
+function buildMembers(tasks: AgentTask[]): ShellMember[] {
+  const agentIds = [...new Set(tasks.map((task) => task.agentId).filter(Boolean))];
+  return agentIds.slice(0, 4).map((agentId, index) => ({
+    name: agentId,
+    avatar: initials(agentId),
+    color: MEMBER_COLORS[index % MEMBER_COLORS.length],
+  }));
+}
 
 export function HeaderWithCallsAndRole() {
   const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [showAudioCall, setShowAudioCall] = useState(false);
   const [isVideoPIP, setIsVideoPIP] = useState(false);
   const [currentRole, setCurrentRole] = useState<'developer' | 'designer' | 'manager' | 'admin'>('developer');
-
-  const teamMembers = [
-    { name: 'Sarah Chen', avatar: 'SC', color: 'bg-blue-500' },
-    { name: 'Mike Johnson', avatar: 'MJ', color: 'bg-green-500' },
-    { name: 'Alex Kim', avatar: 'AK', color: 'bg-purple-500' },
-    { name: 'Emma Wilson', avatar: 'EW', color: 'bg-pink-500' },
-  ];
+  const [workspaces, setWorkspaces] = useState<WorkspaceRef[]>([]);
+  const [tasks, setTasks] = useState<AgentTask[]>([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const roles = [
     { id: 'developer' as const, name: 'Software Developer', icon: '💻' },
@@ -39,22 +70,41 @@ export function HeaderWithCallsAndRole() {
     setCurrentRole(role);
   };
 
+  useEffect(() => {
+    let alive = true;
+    Promise.allSettled([fetchWorkspaces(), listTasks(), listNotifications()]).then((results) => {
+      if (!alive) return;
+      const [workspaceResult, taskResult, notificationResult] = results;
+      setWorkspaces(workspaceResult.status === 'fulfilled' ? workspaceResult.value : []);
+      setTasks(taskResult.status === 'fulfilled' ? taskResult.value : []);
+      setUnreadNotifications(
+        notificationResult.status === 'fulfilled'
+          ? notificationResult.value.filter((notification) => !notification.read).length
+          : 0,
+      );
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const activeWorkspace = workspaces[0];
+  const teamMembers = useMemo(() => buildMembers(tasks), [tasks]);
+  const userName = displayName(profile);
+  const userInitials = initials(userName);
+
   return (
     <>
       <header className="h-[60px] border-b border-gray-200 bg-white flex items-center justify-between px-6">
-        {/* Left: Project name and stage */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              TechIT Platform
+              {activeWorkspace?.name ?? 'Workspace'}
             </h1>
             <Badge className="bg-[#10B981] text-white hover:bg-[#10B981]/90">
-              Active Development
+              {activeWorkspace?.status ?? 'No live workspace'}
             </Badge>
           </div>
         </div>
 
-        {/* Center: Project Switcher */}
         <div className="flex-1 max-w-xs mx-8">
           <DropdownMenu>
             <DropdownMenuTrigger className="w-full">
@@ -64,22 +114,24 @@ export function HeaderWithCallsAndRole() {
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[280px]">
-              <DropdownMenuItem>TechIT Platform (Current)</DropdownMenuItem>
-              <DropdownMenuItem>Mobile App Redesign</DropdownMenuItem>
-              <DropdownMenuItem>API Integration Hub</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>+ Create New Project</DropdownMenuItem>
+              {workspaces.length > 0 ? (
+                workspaces.map((workspace, index) => (
+                  <DropdownMenuItem key={workspace.id}>
+                    {workspace.name}{index === 0 ? ' (Current)' : ''}
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <DropdownMenuItem>No persisted workspaces</DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        {/* Right: Team avatars and actions */}
         <div className="flex items-center gap-4">
-          {/* Team Avatars */}
           <div className="flex -space-x-2">
             {teamMembers.map((member, idx) => (
               <Avatar
-                key={idx}
+                key={member.name}
                 className="w-8 h-8 border-2 border-white hover:z-10 transition-all hover:scale-110 cursor-pointer"
               >
                 <AvatarFallback className={`${member.color} text-white text-xs`}>
@@ -88,10 +140,12 @@ export function HeaderWithCallsAndRole() {
               </Avatar>
             ))}
           </div>
+          {teamMembers.length === 0 && (
+            <span className="text-xs text-gray-500">No live contributors</span>
+          )}
 
           <div className="h-6 w-px bg-gray-200" />
 
-          {/* Action Icons */}
           <button
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             onClick={() => {
@@ -112,7 +166,9 @@ export function HeaderWithCallsAndRole() {
             onClick={() => navigate('/workspaces/notifications')}
           >
             <Bell className="w-5 h-5 text-gray-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#F59E0B] rounded-full" />
+            {unreadNotifications > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#F59E0B] rounded-full" />
+            )}
           </button>
           <button
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -123,20 +179,19 @@ export function HeaderWithCallsAndRole() {
 
           <div className="h-6 w-px bg-gray-200" />
 
-          {/* User Profile with Role */}
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-[#2196F3] text-white">
-                    JD
+                    {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <ChevronDown className="w-4 h-4 text-gray-500" />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>John Doe</DropdownMenuLabel>
+              <DropdownMenuLabel>{userName}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-xs text-gray-500 font-normal">
                 Switch Role
@@ -156,23 +211,29 @@ export function HeaderWithCallsAndRole() {
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/workspaces/settings')}>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Sign Out</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { void signOut(); }}>Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
-      {/* Video Call Component */}
       {showVideoCall && (
         <VideoCall
+          participants={teamMembers.map((member) => ({ name: member.name, avatar: member.avatar }))}
+          self={{ name: userName, avatar: userInitials }}
           onClose={() => setShowVideoCall(false)}
           isPIP={isVideoPIP}
           onTogglePIP={() => setIsVideoPIP(!isVideoPIP)}
         />
       )}
 
-      {/* Audio Call Component */}
-      {showAudioCall && <AudioCall onClose={() => setShowAudioCall(false)} />}
+      {showAudioCall && (
+        <AudioCall
+          participant={teamMembers[0] ? { name: teamMembers[0].name, avatar: teamMembers[0].avatar } : undefined}
+          self={{ name: userName, avatar: userInitials }}
+          onClose={() => setShowAudioCall(false)}
+        />
+      )}
     </>
   );
 }
