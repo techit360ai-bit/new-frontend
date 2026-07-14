@@ -1,130 +1,177 @@
-import { useState } from 'react';
-import { Bell, Check, Trash2, Filter, Video, MessageSquare, GitPullRequest, Users, Code, AlertCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Bell, Check, Code, Filter, GitPullRequest, MessageSquare, Trash2, Users, Video } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import {
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type WorkspaceNotification,
+  type WorkspaceNotificationType,
+} from '@/lib/api/notifications';
 
-type NotificationType = 'message' | 'mention' | 'pr' | 'build' | 'meeting' | 'system';
+function getIcon(type: WorkspaceNotificationType) {
+  switch (type) {
+    case 'message':
+      return <MessageSquare className="w-5 h-5" />;
+    case 'mention':
+      return <Users className="w-5 h-5" />;
+    case 'pr':
+      return <GitPullRequest className="w-5 h-5" />;
+    case 'build':
+      return <Code className="w-5 h-5" />;
+    case 'meeting':
+      return <Video className="w-5 h-5" />;
+    case 'system':
+      return <AlertCircle className="w-5 h-5" />;
+  }
+}
 
-interface Notification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  avatar?: string;
-  action?: string;
+function getIconColor(type: WorkspaceNotificationType): string {
+  switch (type) {
+    case 'message':
+      return 'bg-blue-500/10 text-blue-500';
+    case 'mention':
+      return 'bg-purple-500/10 text-purple-500';
+    case 'pr':
+      return 'bg-green-500/10 text-green-500';
+    case 'build':
+      return 'bg-orange-500/10 text-orange-500';
+    case 'meeting':
+      return 'bg-pink-500/10 text-pink-500';
+    case 'system':
+      return 'bg-gray-500/10 text-gray-500';
+  }
+}
+
+function EmptyState({ children }: { children: string }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+      <Bell className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+      <p className="text-sm text-gray-600">{children}</p>
+    </div>
+  );
+}
+
+function NotificationCard({
+  notification,
+  onRead,
+  onDelete,
+  compact = false,
+}: {
+  notification: WorkspaceNotification;
+  onRead?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={`bg-white border rounded-lg p-4 transition-all hover:shadow-md ${
+        !notification.read ? 'border-[#2196F3] bg-[#2196F3]/5' : 'border-gray-200'
+      }`}
+    >
+      <div className="flex items-start gap-4">
+        <div className={`p-2 rounded-lg ${getIconColor(notification.type)}`}>
+          {getIcon(notification.type)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
+              <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
+              <span className="text-xs text-gray-400">{notification.timestamp}</span>
+            </div>
+            {!notification.read && !compact && (
+              <Badge className="bg-[#2196F3] text-white shrink-0">New</Badge>
+            )}
+          </div>
+        </div>
+        {!compact && (
+          <div className="flex gap-1">
+            {!notification.read && onRead && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRead(notification.id)}
+                aria-label="Mark notification read"
+              >
+                <Check className="w-4 h-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(notification.id)}
+                aria-label="Delete notification"
+              >
+                <Trash2 className="w-4 h-4 text-red-500" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function Notifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'pr',
-      title: 'Sarah Chen reviewed your PR',
-      message: 'API Integration: Authentication Flow - Approved with minor comments',
-      timestamp: '5 minutes ago',
-      read: false,
-      avatar: 'SC',
-    },
-    {
-      id: '2',
-      type: 'mention',
-      title: 'Mike Johnson mentioned you',
-      message: '@you Can you review the new dashboard design?',
-      timestamp: '12 minutes ago',
-      read: false,
-      avatar: 'MJ',
-    },
-    {
-      id: '3',
-      type: 'meeting',
-      title: 'Upcoming Meeting',
-      message: 'Sprint Planning - starts in 30 minutes',
-      timestamp: '30 minutes',
-      read: false,
-    },
-    {
-      id: '4',
-      type: 'build',
-      title: 'Build completed successfully',
-      message: 'Production deployment #247 completed in 4m 32s',
-      timestamp: '1 hour ago',
-      read: true,
-    },
-    {
-      id: '5',
-      type: 'message',
-      title: 'New message from Alex Kim',
-      message: 'Hey, I uploaded the latest designs to the Files section',
-      timestamp: '2 hours ago',
-      read: true,
-      avatar: 'AK',
-    },
-    {
-      id: '6',
-      type: 'system',
-      title: 'System Update',
-      message: 'New AI Agent "Claude Code" is now available in your workspace',
-      timestamp: '3 hours ago',
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<WorkspaceNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getIcon = (type: NotificationType) => {
-    switch (type) {
-      case 'message':
-        return <MessageSquare className="w-5 h-5" />;
-      case 'mention':
-        return <Users className="w-5 h-5" />;
-      case 'pr':
-        return <GitPullRequest className="w-5 h-5" />;
-      case 'build':
-        return <Code className="w-5 h-5" />;
-      case 'meeting':
-        return <Video className="w-5 h-5" />;
-      case 'system':
-        return <AlertCircle className="w-5 h-5" />;
-    }
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    listNotifications()
+      .then(setNotifications)
+      .catch((err) => {
+        setNotifications([]);
+        setError(err instanceof Error ? err.message : 'Live notifications are unavailable.');
+      })
+      .finally(() => setLoading(false));
   };
 
-  const getIconColor = (type: NotificationType) => {
-    switch (type) {
-      case 'message':
-        return 'bg-blue-500/10 text-blue-500';
-      case 'mention':
-        return 'bg-purple-500/10 text-purple-500';
-      case 'pr':
-        return 'bg-green-500/10 text-green-500';
-      case 'build':
-        return 'bg-orange-500/10 text-orange-500';
-      case 'meeting':
-        return 'bg-pink-500/10 text-pink-500';
-      case 'system':
-        return 'bg-gray-500/10 text-gray-500';
-    }
-  };
+  useEffect(() => {
+    load();
+  }, []);
 
   const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n))
-    );
+    markNotificationRead(id)
+      .then((updated) => {
+        setNotifications((prev) => prev.map((row) => (row.id === id ? updated : row)));
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Notification update failed.'));
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const markEveryNotificationRead = () => {
+    markAllNotificationsRead()
+      .then(() => setNotifications((prev) => prev.map((row) => ({ ...row, read: true }))))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Notification update failed.'));
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const deleteNotification = () => {
+    toast('Notification deletion requires a persisted delete endpoint.');
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const unreadNotifications = useMemo(
+    () => notifications.filter((notification) => !notification.read),
+    [notifications],
+  );
+  const mentionNotifications = useMemo(
+    () => notifications.filter((notification) => notification.type === 'mention'),
+    [notifications],
+  );
+  const pullRequestNotifications = useMemo(
+    () => notifications.filter((notification) => notification.type === 'pr'),
+    [notifications],
+  );
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -141,11 +188,11 @@ export function Notifications() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={markAllAsRead}>
+            <Button variant="outline" size="sm" onClick={markEveryNotificationRead} disabled={loading || notifications.length === 0}>
               <Check className="w-4 h-4 mr-2" />
               Mark all as read
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast('Notification filters require persisted preferences.')}>
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
@@ -153,8 +200,14 @@ export function Notifications() {
         </div>
       </div>
 
-      {/* Notifications List */}
       <div className="flex-1 overflow-auto px-8 py-6">
+        {loading && <p className="text-sm text-gray-500 mb-4">Loading live notifications...</p>}
+        {!loading && error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+            Notifications could not be loaded: {error}
+          </div>
+        )}
+
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="all">All</TabsTrigger>
@@ -164,94 +217,44 @@ export function Notifications() {
           </TabsList>
 
           <TabsContent value="all" className="space-y-3">
-            {notifications.map(notification => (
-              <div
+            {notifications.map((notification) => (
+              <NotificationCard
                 key={notification.id}
-                className={`bg-white border rounded-lg p-4 transition-all hover:shadow-md ${
-                  !notification.read ? 'border-[#2196F3] bg-[#2196F3]/5' : 'border-gray-200'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`p-2 rounded-lg ${getIconColor(notification.type)}`}>
-                    {getIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-                        <span className="text-xs text-gray-400">{notification.timestamp}</span>
-                      </div>
-                      {!notification.read && (
-                        <Badge className="bg-[#2196F3] text-white shrink-0">New</Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    {!notification.read && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteNotification(notification.id)}
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                notification={notification}
+                onRead={markAsRead}
+                onDelete={deleteNotification}
+              />
             ))}
+            {!loading && notifications.length === 0 && (
+              <EmptyState>No live notifications are recorded yet.</EmptyState>
+            )}
           </TabsContent>
 
           <TabsContent value="unread" className="space-y-3">
-            {notifications
-              .filter(n => !n.read)
-              .map(notification => (
-                <div
-                  key={notification.id}
-                  className="bg-white border border-[#2196F3] bg-[#2196F3]/5 rounded-lg p-4"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`p-2 rounded-lg ${getIconColor(notification.type)}`}>
-                      {getIcon(notification.type)}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-                      <span className="text-xs text-gray-400">{notification.timestamp}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {unreadNotifications.map((notification) => (
+              <NotificationCard key={notification.id} notification={notification} onRead={markAsRead} compact />
+            ))}
+            {!loading && unreadNotifications.length === 0 && (
+              <EmptyState>No unread notifications.</EmptyState>
+            )}
           </TabsContent>
 
-          <TabsContent value="mentions">
-            {notifications
-              .filter(n => n.type === 'mention')
-              .map(notification => (
-                <div key={notification.id} className="bg-white border rounded-lg p-4 mb-3">
-                  <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
-                  <p className="text-sm text-gray-600">{notification.message}</p>
-                </div>
-              ))}
+          <TabsContent value="mentions" className="space-y-3">
+            {mentionNotifications.map((notification) => (
+              <NotificationCard key={notification.id} notification={notification} compact />
+            ))}
+            {!loading && mentionNotifications.length === 0 && (
+              <EmptyState>No live mention notifications are recorded yet.</EmptyState>
+            )}
           </TabsContent>
 
-          <TabsContent value="prs">
-            {notifications
-              .filter(n => n.type === 'pr')
-              .map(notification => (
-                <div key={notification.id} className="bg-white border rounded-lg p-4 mb-3">
-                  <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
-                  <p className="text-sm text-gray-600">{notification.message}</p>
-                </div>
-              ))}
+          <TabsContent value="prs" className="space-y-3">
+            {pullRequestNotifications.map((notification) => (
+              <NotificationCard key={notification.id} notification={notification} compact />
+            ))}
+            {!loading && pullRequestNotifications.length === 0 && (
+              <EmptyState>No live pull request notifications are recorded yet.</EmptyState>
+            )}
           </TabsContent>
         </Tabs>
       </div>
