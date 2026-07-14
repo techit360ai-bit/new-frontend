@@ -1,242 +1,198 @@
-import { useParams, Link } from 'react-router-dom';
-import { MessageCircle, Share2, Mail, MapPin, Calendar, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { Calendar, ExternalLink, Mail, MapPin, MessageCircle, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  connectWithUser,
+  fetchPublicUserProfile,
+  type PublicUserProfile,
+} from '@/lib/api/users';
 import { BackButton } from '../components/BackButton';
+import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+}
+
+function ProfileAvatar({ profile }: { profile: PublicUserProfile }) {
+  if (/^(https?:)?\//.test(profile.avatar)) {
+    return <img src={profile.avatar} alt="" className="h-24 w-24 rounded-full object-cover" />;
+  }
+  return <div className={`h-24 w-24 rounded-full bg-gradient-to-br ${profile.avatar}`} />;
+}
+
+function settingsPath(role: string): string {
+  if (role === 'collaborator') return '/collaborator/settings';
+  if (role === 'organisation') return '/org/settings';
+  if (role === 'investor') return '/investor/profile';
+  return '/founder/settings';
+}
 
 export function UserProfilePage() {
-  const { userId } = useParams();
+  const { userId = 'me' } = useParams();
+  const [profile, setProfile] = useState<PublicUserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
+  const [connected, setConnected] = useState(false);
 
-  // Mock user data
-  const user = {
-    id: userId,
-    name: userId === 'me' ? 'Adaeze Okonkwo' : 'Kwame Mensah',
-    role: 'Co-founder',
-    category: userId === 'me' ? 'HealthTech' : 'FinTech',
-    stage: userId === 'me' ? 'MVP' : 'Beta',
-    gsis: userId === 'me' ? 68 : 74,
-    location: userId === 'me' ? 'Lagos, Nigeria' : 'Lagos, Nigeria',
-    joinedDate: 'Jan 2026',
-    email: userId === 'me' ? 'adaeze@mediconnect.africa' : 'kwame@example.com',
-    bio: userId === 'me'
-      ? 'Building MediConnect Africa - Patient record management for rural clinics. Passionate about healthcare access and digital transformation in Africa. Former product manager at Flutterwave.'
-      : 'Building payment infrastructure for rural Africa. Former Google engineer with 8 years of experience. Focused on financial inclusion.',
-    website: userId === 'me' ? 'mediconnect.africa' : 'paymentapp.com',
-    avatar: userId === 'me' ? 'from-score-green to-score-amber' : 'from-accent-primary to-score-blue',
-    stats: {
-      decay: 0.91,
-      stageProgress: 42,
-      posts: 12,
-      answers: 8,
-      connections: 24,
-    },
-    skills: userId === 'me'
-      ? ['React', 'Node.js', 'Supabase', 'Mobile', 'Healthcare', 'B2B SaaS']
-      : ['Python', 'Django', 'Mobile Money APIs', 'Fintech', 'Payment Systems'],
-    recentActivity: [
-      {
-        id: '1',
-        type: 'milestone',
-        title: 'Shipped MVP with 50 beta users',
-        date: '2 days ago',
-      },
-      {
-        id: '2',
-        type: 'post',
-        title: 'Shared pricing insights from customer interviews',
-        date: '5 days ago',
-      },
-      {
-        id: '3',
-        type: 'answer',
-        title: 'Answered question about rural market validation',
-        date: '1 week ago',
-      },
-    ],
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    fetchPublicUserProfile(userId)
+      .then((liveProfile) => {
+        if (alive) setProfile(liveProfile);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setProfile(null);
+        setError(err instanceof Error ? err.message : 'Live profile is unavailable.');
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, [userId]);
+
+  const connect = async () => {
+    setConnecting(true);
+    try {
+      await connectWithUser(userId);
+      setConnected(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Connection request could not be saved.');
+    } finally {
+      setConnecting(false);
+    }
   };
 
-  const gsisColor = user.gsis > 70 ? 'score-green' : user.gsis > 60 ? 'score-amber' : 'score-red';
-  const isOwnProfile = userId === 'me';
+  if (loading) return <FeedLoadingState label="Loading live profile..." />;
+  if (error) return <FeedErrorState message={error} />;
+  if (!profile) {
+    return (
+      <FeedEmptyState
+        title="Profile not found"
+        detail="This persisted profile is no longer available."
+      />
+    );
+  }
+
+  const website = profile.website
+    ? (/^https?:\/\//.test(profile.website) ? profile.website : `https://${profile.website}`)
+    : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 pb-20 lg:pb-6">
-      {/* Back Button */}
-      {!isOwnProfile && <BackButton label="Back" className="mb-6" />}
+    <div className="mx-auto max-w-4xl px-4 py-6 pb-20 lg:pb-6">
+      {!profile.isOwnProfile && <BackButton label="Back" className="mb-6" />}
 
-      {/* Profile Header */}
-      <div className="bg-bg-surface border border-border-default rounded-xl p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Avatar */}
-          <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${user.avatar} flex-shrink-0`}></div>
-
-          {/* Info */}
-          <div className="flex-1">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
+      <section className="mb-6 border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+        <div className="flex flex-col gap-6 md:flex-row">
+          <ProfileAvatar profile={profile} />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
-                <h1 className="text-2xl font-semibold text-text-primary mb-1">{user.name}</h1>
-                <p className="text-text-secondary mb-2">
-                  {user.role} · {user.category} · {user.stage} Stage
+                <h1 className="text-2xl font-semibold text-text-primary">{profile.name}</h1>
+                <p className="mt-1 text-text-secondary">
+                  {profile.role} · {profile.category} · {profile.stage}
                 </p>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-text-muted">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4" />
-                    {user.location}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" />
-                    Joined {user.joinedDate}
-                  </div>
-                  {user.website && (
-                    <a
-                      href={`https://${user.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-accent-primary hover:underline"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      {user.website}
+                <div className="mt-3 flex flex-wrap gap-3 text-sm text-text-muted">
+                  <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{profile.location}</span>
+                  <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />Joined {formatDate(profile.joinedDate)}</span>
+                  {website && (
+                    <a href={website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-accent-primary hover:underline">
+                      <ExternalLink className="h-4 w-4" />Website
                     </a>
                   )}
                 </div>
               </div>
-
-              {/* GSIS Badge */}
-              <div
-                className="px-4 py-2 rounded-lg border text-center mt-4 md:mt-0"
-                style={{
-                  backgroundColor: `var(--${gsisColor})/15`,
-                  borderColor: `var(--${gsisColor})`,
-                }}
-              >
-                <p className="text-xs text-text-muted uppercase tracking-wide mb-1">GSIS</p>
-                <p
-                  className="font-mono text-3xl font-bold"
-                  style={{ color: `var(--${gsisColor})` }}
-                >
-                  {user.gsis}
-                </p>
+              <div className="shrink-0 text-left md:text-right">
+                <p className="font-mono text-3xl font-bold text-accent-primary">{profile.gsis}</p>
+                <p className="text-xs text-text-muted">GSIS</p>
               </div>
             </div>
 
-            {/* Bio */}
-            <p className="text-sm text-text-primary leading-relaxed mb-4">{user.bio}</p>
-
-            {/* Actions */}
-            {!isOwnProfile && (
-              <div className="flex gap-3">
-                <button className="flex-1 md:flex-initial bg-accent-primary text-white px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-medium">
-                  Connect
-                </button>
-                <Link
-                  to={`/feed/messages/${userId}`}
-                  className="flex items-center justify-center gap-2 bg-bg-elevated border border-border-default text-text-primary px-6 py-2.5 rounded-lg hover:border-accent-primary hover:text-accent-primary transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Message
-                </Link>
-                <button className="flex items-center justify-center bg-bg-elevated border border-border-default text-text-secondary px-4 py-2.5 rounded-lg hover:border-accent-primary hover:text-accent-primary transition-colors">
-                  <Share2 className="w-4 h-4" />
-                </button>
-              </div>
+            {profile.bio ? (
+              <p className="mt-4 text-sm leading-relaxed text-text-primary">{profile.bio}</p>
+            ) : (
+              <p className="mt-4 text-sm text-text-muted">No persisted bio has been added.</p>
             )}
 
-            {isOwnProfile && (
-              <div className="flex gap-3">
-                <button className="bg-bg-elevated border border-border-default text-text-primary px-6 py-2.5 rounded-lg hover:border-accent-primary transition-colors font-medium">
-                  Edit Profile
-                </button>
-                <Link
-                  to="/feed/build-log"
-                  className="flex items-center gap-2 bg-accent-primary text-white px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity font-medium"
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share Build Log
+            <div className="mt-5 flex flex-wrap gap-3">
+              {profile.isOwnProfile ? (
+                <Link to={settingsPath(profile.role)} className="rounded-lg border border-border-default px-5 py-2.5 text-sm font-medium text-text-primary hover:border-accent-primary">
+                  Edit profile
                 </Link>
-              </div>
-            )}
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => { void connect(); }}
+                    disabled={connecting || connected}
+                    className="flex items-center gap-2 rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    {connected ? 'Requested' : connecting ? 'Saving...' : 'Connect'}
+                  </button>
+                  <Link
+                    to={`/feed/messages/${encodeURIComponent(profile.id)}`}
+                    className="flex items-center gap-2 rounded-lg border border-border-default px-5 py-2.5 text-sm text-text-primary hover:border-accent-primary"
+                  >
+                    <MessageCircle className="h-4 w-4" />Message
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-border-default">
-          <StatCard label="Decay Factor" value="0.91" color="amber" />
-          <StatCard label="Stage Progress" value="42%" color="blue" />
-          <StatCard label="Posts" value={user.stats.posts.toString()} color="green" />
-          <StatCard label="Answers" value={user.stats.answers.toString()} color="purple" />
-          <StatCard label="Connections" value={user.stats.connections.toString()} color="blue" />
+        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border-default pt-6 md:grid-cols-5">
+          <Metric label="Stage progress" value={`${profile.stats.stageProgress}%`} />
+          <Metric label="Posts" value={profile.stats.posts} />
+          <Metric label="Answers" value={profile.stats.answers} />
+          <Metric label="Connections" value={profile.stats.connections} />
+          <Metric label="Decay" value={profile.stats.decay} />
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Recent Activity */}
-          <div className="bg-bg-surface border border-border-default rounded-xl p-6">
-            <h2 className="text-lg font-semibold text-text-primary mb-4">Recent Activity</h2>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6 lg:col-span-2">
+          <h2 className="mb-4 text-lg font-semibold text-text-primary">Recent activity</h2>
+          {profile.recentActivity.length > 0 ? (
             <div className="space-y-3">
-              {user.recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-bg-elevated transition-colors cursor-pointer"
-                >
-                  <div
-                    className="w-2 h-2 rounded-full mt-2"
-                    style={{
-                      backgroundColor:
-                        activity.type === 'milestone'
-                          ? 'var(--score-green)'
-                          : activity.type === 'post'
-                          ? 'var(--accent-primary)'
-                          : 'var(--score-purple)',
-                    }}
-                  ></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-text-primary font-medium mb-1">{activity.title}</p>
-                    <p className="text-xs text-text-muted">{activity.date}</p>
-                  </div>
+              {profile.recentActivity.map((activity) => (
+                <div key={activity.id} className="border-b border-border-default pb-3 last:border-b-0">
+                  <p className="text-sm font-medium text-text-primary">{activity.title}</p>
+                  <p className="mt-1 text-xs text-text-muted">{activity.type} · {activity.date}</p>
                 </div>
               ))}
             </div>
-            <Link
-              to="/feed/build-log"
-              className="block text-center text-accent-primary text-sm hover:underline mt-4"
-            >
-              View Full Build Log →
-            </Link>
-          </div>
-        </div>
+          ) : (
+            <p className="text-sm text-text-muted">No persisted profile activity yet.</p>
+          )}
+        </section>
 
-        {/* Right Column */}
         <div className="space-y-6">
-          {/* Skills */}
-          <div className="bg-bg-surface border border-border-default rounded-xl p-6">
-            <h3 className="text-base font-semibold text-text-primary mb-4">Skills & Interests</h3>
+          <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+            <h2 className="mb-4 text-base font-semibold text-text-primary">Skills & interests</h2>
             <div className="flex flex-wrap gap-2">
-              {user.skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="text-xs bg-bg-elevated border border-border-default text-text-secondary px-3 py-1.5 rounded-lg"
-                >
+              {profile.skills.map((skill) => (
+                <span key={skill} className="rounded-lg border border-border-default bg-bg-elevated px-3 py-1.5 text-xs text-text-secondary">
                   {skill}
                 </span>
               ))}
+              {profile.skills.length === 0 && <p className="text-sm text-text-muted">No persisted skills listed.</p>}
             </div>
-          </div>
+          </section>
 
-          {/* Contact */}
-          {!isOwnProfile && (
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6">
-              <h3 className="text-base font-semibold text-text-primary mb-4">Contact</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <Mail className="w-4 h-4 text-text-muted" />
-                  <a
-                    href={`mailto:${user.email}`}
-                    className="text-accent-primary hover:underline"
-                  >
-                    {user.email}
-                  </a>
-                </div>
-              </div>
-            </div>
+          {profile.email && (
+            <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+              <h2 className="mb-4 text-base font-semibold text-text-primary">Contact</h2>
+              <a href={`mailto:${profile.email}`} className="flex items-center gap-3 text-sm text-accent-primary hover:underline">
+                <Mail className="h-4 w-4" />{profile.email}
+              </a>
+            </section>
           )}
         </div>
       </div>
@@ -244,28 +200,11 @@ export function UserProfilePage() {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color: 'green' | 'amber' | 'blue' | 'purple';
-}) {
-  const colors = {
-    green: 'var(--score-green)',
-    amber: 'var(--score-amber)',
-    blue: 'var(--accent-primary)',
-    purple: 'var(--score-purple)',
-  };
-
+function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="text-center">
-      <p className="text-text-muted text-xs uppercase tracking-wide mb-1">{label}</p>
-      <p className="font-mono text-xl font-bold" style={{ color: colors[color] }}>
-        {value}
-      </p>
+    <div>
+      <p className="text-xs uppercase text-text-muted">{label}</p>
+      <p className="mt-1 font-mono text-lg font-semibold text-text-primary">{value}</p>
     </div>
   );
 }

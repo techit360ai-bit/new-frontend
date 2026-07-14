@@ -11,6 +11,7 @@ const BACKEND_API_BASE_URL =
   (env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/$/, '');
 
 export type WorkspaceNotificationType = 'message' | 'mention' | 'pr' | 'build' | 'meeting' | 'system';
+export type FeedNotificationType = 'fire' | 'comment' | 'collab' | 'gsis' | 'milestone' | 'mention' | 'answer';
 
 export interface WorkspaceNotification {
   id: string;
@@ -21,6 +22,18 @@ export interface WorkspaceNotification {
   read: boolean;
   avatar?: string;
   linkTo?: string;
+  createdAt?: string;
+}
+
+export interface FeedNotification {
+  id: string;
+  type: FeedNotificationType;
+  read: boolean;
+  content: string;
+  author: string;
+  avatar: string;
+  timeAgo: string;
+  linkTo: string;
   createdAt?: string;
 }
 
@@ -35,6 +48,16 @@ interface BackendNotification {
   linkTo?: string;
   createdAt?: string;
 }
+
+const FEED_NOTIFICATION_TYPES = new Set<FeedNotificationType>([
+  'fire',
+  'comment',
+  'collab',
+  'gsis',
+  'milestone',
+  'mention',
+  'answer',
+]);
 
 function timeoutSignal(init?: RequestInit): AbortSignal {
   return init?.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
@@ -96,9 +119,40 @@ export function normalizeNotification(row: BackendNotification): WorkspaceNotifi
   };
 }
 
+export function normalizeFeedNotification(row: BackendNotification): FeedNotification {
+  const type = FEED_NOTIFICATION_TYPES.has(row.type as FeedNotificationType)
+    ? row.type as FeedNotificationType
+    : 'milestone';
+  const content = String(row.content ?? '');
+  const rawLink = String(row.linkTo ?? '/feed');
+  const linkTo = rawLink.startsWith('/post/')
+    ? `/feed${rawLink}`
+    : rawLink === '/my-log'
+      ? '/feed/my-log'
+      : rawLink === '/tribe'
+        ? '/feed/tribe'
+        : rawLink;
+  return {
+    id: String(row.id ?? (content || 'notification')),
+    type,
+    read: Boolean(row.read),
+    content,
+    author: String(row.author ?? 'TechIT Platform'),
+    avatar: String(row.avatar ?? 'from-accent-primary to-score-purple'),
+    timeAgo: String(row.timeAgo ?? row.createdAt ?? ''),
+    linkTo,
+    createdAt: typeof row.createdAt === 'string' ? row.createdAt : undefined,
+  };
+}
+
 export async function listNotifications(): Promise<WorkspaceNotification[]> {
   const data = await request<{ notifications?: BackendNotification[] }>('/');
   return (data.notifications ?? []).map(normalizeNotification);
+}
+
+export async function listFeedNotifications(): Promise<FeedNotification[]> {
+  const data = await request<{ notifications?: BackendNotification[] }>('/');
+  return (data.notifications ?? []).map(normalizeFeedNotification);
 }
 
 export async function markNotificationRead(id: string): Promise<WorkspaceNotification> {

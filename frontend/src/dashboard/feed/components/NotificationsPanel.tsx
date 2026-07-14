@@ -1,358 +1,141 @@
-import { useState } from 'react';
-import { X, Flame, MessageCircle, Users, ArrowUp, Zap, CheckCheck, Bell, AtSign, Star } from 'lucide-react';
+import { X, Bell, CheckCheck, Flame, MessageCircle, Users, ArrowUp, Zap, AtSign, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
+import type { FeedNotification, FeedNotificationType } from '@/lib/api/notifications';
 
-type NotifType = 'fire' | 'comment' | 'collab' | 'gsis' | 'milestone' | 'mention' | 'answer';
-
-interface Notification {
-  id: string;
-  type: NotifType;
-  read: boolean;
-  content: string;
-  author: string;
-  avatar: string;
-  timeAgo: string;
-  linkTo: string;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'fire',
-    read: false,
-    content: 'reacted 🔥 to your milestone post "Shipped MVP"',
-    author: 'Kwame Mensah',
-    avatar: 'from-accent-primary to-score-blue',
-    timeAgo: '2m ago',
-    linkTo: '/post/1',
-  },
-  {
-    id: '2',
-    type: 'comment',
-    read: false,
-    content: 'commented: "Congrats! The first 50 users are the hardest."',
-    author: 'Chioma Eze',
-    avatar: 'from-score-green to-score-amber',
-    timeAgo: '15m ago',
-    linkTo: '/post/1',
-  },
-  {
-    id: '3',
-    type: 'collab',
-    read: false,
-    content: 'expressed interest in your Collab Call — Technical Co-founder role',
-    author: 'Tunde Balogun',
-    avatar: 'from-score-purple to-accent-primary',
-    timeAgo: '1h ago',
-    linkTo: '/post/3',
-  },
-  {
-    id: '4',
-    type: 'gsis',
-    read: false,
-    content: 'Your GSIS score jumped to 68 (+7 pts) after your MVP milestone 🚀',
-    author: 'TechIT Platform',
-    avatar: 'from-accent-primary to-score-purple',
-    timeAgo: '2h ago',
-    linkTo: '/my-log',
-  },
-  {
-    id: '5',
-    type: 'mention',
-    read: false,
-    content: 'mentioned you: "@you Great insight on healthcare pricing in Africa!"',
-    author: 'David Osei',
-    avatar: 'from-score-amber to-score-red',
-    timeAgo: '3h ago',
-    linkTo: '/post/2',
-  },
-  {
-    id: '6',
-    type: 'answer',
-    read: true,
-    content: 'answered your question about rural market validation strategies',
-    author: 'Fatima Al-Hassan',
-    avatar: 'from-score-purple to-accent-primary',
-    timeAgo: '1d ago',
-    linkTo: '/post/6',
-  },
-  {
-    id: '7',
-    type: 'milestone',
-    read: true,
-    content: "You're 42% to Beta stage. Post a Build Update to accelerate your score!",
-    author: 'TechIT Platform',
-    avatar: 'from-score-green to-accent-primary',
-    timeAgo: '1d ago',
-    linkTo: '/my-log',
-  },
-  {
-    id: '8',
-    type: 'fire',
-    read: true,
-    content: 'and 12 others reacted 🔥 to your Insight post',
-    author: 'Adaeze Okonkwo',
-    avatar: 'from-score-green to-score-amber',
-    timeAgo: '2d ago',
-    linkTo: '/post/2',
-  },
-  {
-    id: '9',
-    type: 'collab',
-    read: true,
-    content: 'wants to connect with you — 92% compatibility match!',
-    author: 'Yemi Adebayo',
-    avatar: 'from-score-blue to-score-purple',
-    timeAgo: '3d ago',
-    linkTo: '/tribe',
-  },
-];
-
-function NotifIcon({ type }: { type: NotifType }) {
-  const map: Record<NotifType, { icon: React.ReactNode; bg: string; color: string }> = {
-    fire: {
-      icon: <Flame className="w-3 h-3" />,
-      bg: 'rgba(239,68,68,0.2)',
-      color: 'var(--score-red)',
-    },
-    comment: {
-      icon: <MessageCircle className="w-3 h-3" />,
-      bg: 'rgba(79,110,247,0.15)',
-      color: 'var(--accent-primary)',
-    },
-    collab: {
-      icon: <Users className="w-3 h-3" />,
-      bg: 'rgba(168,85,247,0.15)',
-      color: 'var(--score-purple)',
-    },
-    gsis: {
-      icon: <ArrowUp className="w-3 h-3" />,
-      bg: 'rgba(34,197,94,0.15)',
-      color: 'var(--score-green)',
-    },
-    milestone: {
-      icon: <Zap className="w-3 h-3" />,
-      bg: 'rgba(245,158,11,0.15)',
-      color: 'var(--score-amber)',
-    },
-    mention: {
-      icon: <AtSign className="w-3 h-3" />,
-      bg: 'rgba(236,72,153,0.15)',
-      color: '#EC4899',
-    },
-    answer: {
-      icon: <Star className="w-3 h-3" />,
-      bg: 'rgba(34,197,94,0.15)',
-      color: 'var(--score-green)',
-    },
+function NotificationIcon({ type }: { type: FeedNotificationType }) {
+  const icons: Record<FeedNotificationType, React.ReactNode> = {
+    fire: <Flame className="h-3 w-3" />,
+    comment: <MessageCircle className="h-3 w-3" />,
+    collab: <Users className="h-3 w-3" />,
+    gsis: <ArrowUp className="h-3 w-3" />,
+    milestone: <Zap className="h-3 w-3" />,
+    mention: <AtSign className="h-3 w-3" />,
+    answer: <Star className="h-3 w-3" />,
   };
-
-  const { icon, bg, color } = map[type];
-
   return (
-    <div
-      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-      style={{ backgroundColor: bg, color }}
-    >
-      {icon}
+    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-primary/15 text-accent-primary">
+      {icons[type]}
     </div>
   );
 }
 
 function NotificationItem({
-  notif,
+  notification,
   onRead,
   onClose,
 }: {
-  notif: Notification;
+  notification: FeedNotification;
   onRead: (id: string) => void;
   onClose: () => void;
 }) {
   return (
     <Link
-      to={notif.linkTo}
+      to={notification.linkTo}
       onClick={() => {
-        onRead(notif.id);
+        onRead(notification.id);
         onClose();
       }}
-      className="flex items-start gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors border-b border-border-default/40 block"
-      style={{
-        backgroundColor: !notif.read ? 'rgba(79,110,247,0.04)' : undefined,
-      }}
+      className="flex items-start gap-3 border-b border-border-default/40 px-4 py-3 transition-colors hover:bg-bg-elevated"
+      style={{ backgroundColor: !notification.read ? 'rgba(79,110,247,0.04)' : undefined }}
     >
-      {/* Avatar + type icon */}
-      <div className="relative flex-shrink-0 mt-0.5">
-        <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${notif.avatar}`} />
-        <div className="absolute -bottom-1 -right-1">
-          <NotifIcon type={notif.type} />
-        </div>
+      <div className="relative mt-0.5 shrink-0">
+        <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${notification.avatar}`} />
+        <div className="absolute -bottom-1 -right-1"><NotificationIcon type={notification.type} /></div>
       </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-text-primary leading-snug">
-          <span className="font-medium">{notif.author}</span>{' '}
-          <span className="text-text-secondary">{notif.content}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs leading-snug text-text-primary">
+          <span className="font-medium">{notification.author}</span>{' '}
+          <span className="text-text-secondary">{notification.content}</span>
         </p>
-        <p className="text-[11px] text-text-muted mt-0.5">{notif.timeAgo}</p>
+        <p className="mt-0.5 text-[11px] text-text-muted">{notification.timeAgo}</p>
       </div>
-
-      {/* Unread dot */}
-      {!notif.read && (
-        <div
-          className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5"
-          style={{ backgroundColor: 'var(--accent-primary)' }}
-        />
-      )}
+      {!notification.read && <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent-primary" />}
     </Link>
   );
 }
 
-interface NotificationsPanelProps {
+export function NotificationsPanel({
+  open,
+  onClose,
+  notifications,
+  loading,
+  error,
+  onRead,
+  onMarkAllRead,
+}: {
   open: boolean;
   onClose: () => void;
-}
-
-export function NotificationsPanel({ open, onClose }: NotificationsPanelProps) {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const unread = notifications.filter((n) => !n.read);
-  const read = notifications.filter((n) => n.read);
-
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const markRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
-
+  notifications: FeedNotification[];
+  loading: boolean;
+  error: string | null;
+  onRead: (id: string) => void;
+  onMarkAllRead: () => void;
+}) {
   if (!open) return null;
+  const unread = notifications.filter((notification) => !notification.read);
+  const read = notifications.filter((notification) => notification.read);
 
   return createPortal(
     <div className="fixed inset-0 z-[150] flex">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0"
-        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-        onClick={onClose}
-      />
-
-      {/* Slide-in Panel */}
-      <div
-        className="absolute right-0 top-0 h-full w-full max-w-[380px] flex flex-col"
-        style={{
-          backgroundColor: 'var(--bg-surface)',
-          borderLeft: '1px solid var(--border-default)',
-          boxShadow: '-8px 0 40px rgba(0,0,0,0.4)',
-          animation: 'slideInRight 200ms ease-out',
-        }}
-      >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-          style={{ borderBottom: '1px solid var(--border-default)' }}
-        >
+      <button type="button" className="absolute inset-0 bg-black/50" onClick={onClose} aria-label="Close notifications" />
+      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[380px] flex-col border-l border-border-default bg-bg-surface shadow-2xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-border-default px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <Bell className="w-4 h-4 text-text-secondary" />
-            <h3 className="text-sm font-semibold text-text-primary">Notifications</h3>
-            {unreadCount > 0 && (
-              <span
-                className="text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                style={{ backgroundColor: 'var(--accent-primary)' }}
-              >
-                {unreadCount}
+            <Bell className="h-4 w-4 text-text-secondary" />
+            <h2 className="text-sm font-semibold text-text-primary">Notifications</h2>
+            {unread.length > 0 && (
+              <span className="rounded-full bg-accent-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {unread.length}
               </span>
             )}
           </div>
           <div className="flex items-center gap-3">
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllRead}
-                className="flex items-center gap-1 text-[11px] text-text-secondary hover:text-accent-primary transition-colors"
-              >
-                <CheckCheck className="w-3.5 h-3.5" />
-                Mark all read
+            {unread.length > 0 && (
+              <button type="button" onClick={onMarkAllRead} className="flex items-center gap-1 text-[11px] text-text-secondary hover:text-accent-primary">
+                <CheckCheck className="h-3.5 w-3.5" />Mark all read
               </button>
             )}
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted hover:text-text-primary transition-colors"
-            >
-              <X className="w-4 h-4" />
+            <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1.5 text-text-muted hover:bg-bg-elevated hover:text-text-primary">
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        {/* Notifications list */}
         <div className="flex-1 overflow-y-auto">
-          {unread.length > 0 && (
+          {loading && <p className="px-4 py-8 text-center text-sm text-text-muted">Loading live notifications...</p>}
+          {!loading && error && <p className="px-4 py-8 text-center text-sm text-red-300">{error}</p>}
+          {!loading && !error && unread.length > 0 && (
             <>
-              <div className="px-4 pt-3 pb-1.5">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-                  New · {unreadCount}
-                </p>
-              </div>
-              {unread.map((notif) => (
-                <NotificationItem
-                  key={notif.id}
-                  notif={notif}
-                  onRead={markRead}
-                  onClose={onClose}
-                />
+              <p className="px-4 pb-1.5 pt-3 text-[10px] font-medium uppercase text-text-muted">New · {unread.length}</p>
+              {unread.map((notification) => (
+                <NotificationItem key={notification.id} notification={notification} onRead={onRead} onClose={onClose} />
               ))}
             </>
           )}
-
-          {read.length > 0 && (
+          {!loading && !error && read.length > 0 && (
             <>
-              <div className="px-4 pt-4 pb-1.5">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-                  Earlier
-                </p>
-              </div>
-              {read.map((notif) => (
-                <NotificationItem
-                  key={notif.id}
-                  notif={notif}
-                  onRead={markRead}
-                  onClose={onClose}
-                />
+              <p className="px-4 pb-1.5 pt-4 text-[10px] font-medium uppercase text-text-muted">Earlier</p>
+              {read.map((notification) => (
+                <NotificationItem key={notification.id} notification={notification} onRead={onRead} onClose={onClose} />
               ))}
             </>
           )}
-
-          {notifications.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-40 gap-2">
-              <Bell className="w-8 h-8 text-text-muted" />
-              <p className="text-sm text-text-muted">No notifications yet</p>
+          {!loading && !error && notifications.length === 0 && (
+            <div className="flex h-40 flex-col items-center justify-center gap-2">
+              <Bell className="h-8 w-8 text-text-muted" />
+              <p className="text-sm text-text-muted">No live notifications yet</p>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div
-          className="px-5 py-3 flex-shrink-0 flex items-center justify-between"
-          style={{ borderTop: '1px solid var(--border-default)' }}
-        >
-          <p className="text-[11px] text-text-muted">
-            Based on your activity and posts
-          </p>
-          <Link
-            to="/feed/notifications"
-            onClick={onClose}
-            className="text-[11px] font-medium transition-colors"
-            style={{ color: 'var(--accent-primary)' }}
-          >
-            View all →
+        <div className="shrink-0 border-t border-border-default px-5 py-3 text-right">
+          <Link to="/feed/notifications" onClick={onClose} className="text-[11px] font-medium text-accent-primary">
+            View all
           </Link>
         </div>
-      </div>
+      </aside>
     </div>,
-    document.body
+    document.body,
   );
 }

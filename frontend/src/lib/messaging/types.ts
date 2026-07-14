@@ -27,6 +27,13 @@ export interface WirePost {
   body: string;
   ts: string;
 }
+export interface WireComment {
+  id: string;
+  postId: string;
+  authorId: string;
+  body: string;
+  ts: string;
+}
 
 // UI shapes the screens already use (kept identical to the existing mock types).
 export interface UIMessage {

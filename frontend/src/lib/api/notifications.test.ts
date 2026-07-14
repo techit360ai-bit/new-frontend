@@ -1,9 +1,11 @@
 import { expect, test } from 'vitest';
 import { setAuthTokenGetter } from './client';
 import {
+  listFeedNotifications,
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  normalizeFeedNotification,
   normalizeNotification,
 } from './notifications';
 
@@ -119,4 +121,44 @@ test('workspace notification normalizer tolerates partial live rows', () => {
     timestamp: '2026-07-14T10:00:00Z',
     read: false,
   });
+});
+
+test('feed notifications preserve persisted notification categories and links', async () => {
+  const fetchMock = stubFetch(async () => response({
+    notifications: [{
+      id: 'feed_notif_1',
+      type: 'answer',
+      content: 'answered your question',
+      author: 'Live User',
+      avatar: 'from-score-green to-score-amber',
+      timeAgo: '2m ago',
+      linkTo: '/feed/post/post_1',
+      read: false,
+    }],
+  }));
+
+  try {
+    await expect(listFeedNotifications()).resolves.toEqual([
+      expect.objectContaining({
+        id: 'feed_notif_1',
+        type: 'answer',
+        linkTo: '/feed/post/post_1',
+        read: false,
+      }),
+    ]);
+  } finally {
+    fetchMock.restore();
+  }
+});
+
+test('feed notification normalizer tolerates partial live rows', () => {
+  expect(normalizeFeedNotification({ content: 'Live update' })).toMatchObject({
+    id: 'Live update',
+    type: 'milestone',
+    author: 'TechIT Platform',
+    linkTo: '/feed',
+    read: false,
+  });
+  expect(normalizeFeedNotification({ content: 'Legacy link', linkTo: '/post/post_2' }).linkTo)
+    .toBe('/feed/post/post_2');
 });
