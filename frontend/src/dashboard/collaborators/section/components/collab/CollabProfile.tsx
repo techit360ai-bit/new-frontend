@@ -1,17 +1,89 @@
 // frontend/src/dashboard/collaborators/section/components/collab/CollabProfile.tsx
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Github, Linkedin, Globe, Twitter, ExternalLink } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import {
-  equityHoldings, cashEarnings, endorsements, badges, projects,
-} from "@/dashboard/collaborators/section/data/mockData";
+  EMPTY_EQUITY,
+  fetchCollaboratorEquity,
+  type CollaboratorEquity,
+} from "@/lib/api/equity";
+import {
+  EMPTY_EARNINGS,
+  fetchCollaboratorEarnings,
+  type CollaboratorEarnings,
+} from "@/lib/api/earnings";
+import {
+  fetchCollaboratorSummary,
+  type CollaboratorLiveSummary,
+} from "@/lib/api/collaboratorSummary";
 
 export function CollabProfile() {
   const { collaboratorProfile: p } = useCollaboratorProfile();
+  const [summary, setSummary] = useState<CollaboratorLiveSummary | null>(null);
+  const [equity, setEquity] = useState<CollaboratorEquity>(EMPTY_EQUITY);
+  const [earnings, setEarnings] = useState<CollaboratorEarnings>(EMPTY_EARNINGS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const initials = p.name.split(" ").map((x) => x[0]).join("").toUpperCase().slice(0, 2);
-  const earnedBadges = badges.filter((b) => b.earned);
-  const topEndorsements = endorsements.slice(0, 3);
-  const totalCashLifetime = cashEarnings.reduce((s, c) => s + c.earned, 0);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      fetchCollaboratorSummary(),
+      fetchCollaboratorEquity(),
+      fetchCollaboratorEarnings(),
+    ])
+      .then(([summaryData, equityData, earningsData]) => {
+        if (!alive) return;
+        setSummary(summaryData);
+        setEquity(equityData);
+        setEarnings(earningsData);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setSummary(null);
+        setEquity(EMPTY_EQUITY);
+        setEarnings(EMPTY_EARNINGS);
+        setError(err instanceof Error ? err.message : "Live collaborator profile data is unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const earnedAchievements = (summary?.achievements ?? []).filter((achievement) => achievement.earned);
+  const execution = summary?.metrics.find((metric) => metric.name === "Execution Velocity")?.value ?? 0;
+  const completedTasks = summary?.tasks.filter((task) => task.status === "completed").length ?? 0;
+  const builds = useMemo(() => {
+    const byId = new Map<string, { id: string; name: string; equityPercent: number; valueUSD: number; shipped: number; impactAvg: number }>();
+    for (const holding of equity.holdings) {
+      byId.set(holding.projectId, {
+        id: holding.projectId,
+        name: holding.projectName,
+        equityPercent: Number(holding.equityPercent || 0),
+        valueUSD: Number(holding.valueUSD || 0),
+        shipped: 0,
+        impactAvg: 0,
+      });
+    }
+    for (const contribution of summary?.perProject ?? []) {
+      const current = byId.get(contribution.id);
+      byId.set(contribution.id, {
+        id: contribution.id,
+        name: contribution.name,
+        equityPercent: current?.equityPercent ?? 0,
+        valueUSD: current?.valueUSD ?? 0,
+        shipped: contribution.shipped,
+        impactAvg: contribution.impactAvg,
+      });
+    }
+    return [...byId.values()];
+  }, [equity.holdings, summary?.perProject]);
 
   const commitmentLabel: Record<typeof p.commitmentStyle, string> = {
     deep: "One startup deeply",
@@ -39,11 +111,19 @@ export function CollabProfile() {
 
       {/* Reputation strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Stat label="Reputation" value="94" />
-        <Stat label="Execution"  value="87" />
-        <Stat label="Completed"  value="12" />
-        <Stat label="Endorsements" value={String(endorsements.length)} />
+        <Stat label="Reputation" value={String(summary?.compositeScore ?? 0)} />
+        <Stat label="Execution"  value={String(execution)} />
+        <Stat label="Completed"  value={String(completedTasks)} />
+        <Stat label="Endorsements" value="0" />
       </div>
+
+      {loading && <p className="text-sm text-slate-500">Loading live profile data...</p>}
+      {!loading && error && (
+        <div className="border border-red-200 bg-red-50 rounded-xl p-4">
+          <p className="text-sm font-semibold text-red-700">Live profile data is unavailable.</p>
+          <p className="text-sm text-red-600 mt-1">{error}</p>
+        </div>
+      )}
 
       {/* Discipline & skills */}
       <div className="border border-slate-200 bg-white rounded-xl p-6">
@@ -75,23 +155,24 @@ export function CollabProfile() {
       <div>
         <h2 className="text-sm font-semibold text-slate-700 mb-3">Active builds</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {projects.map((proj) => {
-            const equity = equityHoldings.find((h) => h.projectId === proj.id);
-            return (
-              <div key={proj.id} className="border border-slate-200 bg-white rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">{proj.logo}</span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{proj.name}</p>
-                    <p className="text-xs text-slate-500">{proj.role}</p>
-                  </div>
+          {builds.map((build) => (
+            <div key={build.id} className="border border-slate-200 bg-white rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900">{build.name}</p>
+                  <p className="text-xs text-slate-500">{build.shipped} tasks shipped · impact {build.impactAvg}</p>
                 </div>
-                {equity && (
-                  <p className="text-xs text-amber-700 mt-2">{equity.equityPercent}% equity · ${(equity.valueUSD / 1000).toFixed(1)}K</p>
-                )}
               </div>
-            );
-          })}
+              {build.equityPercent > 0 && (
+                <p className="text-xs text-amber-700 mt-2">{build.equityPercent}% equity · ${(build.valueUSD / 1000).toFixed(1)}K</p>
+              )}
+            </div>
+          ))}
+          {!loading && !error && builds.length === 0 && (
+            <div className="border border-dashed border-slate-300 bg-white rounded-xl p-4 text-sm text-slate-500 md:col-span-3">
+              No live active builds are recorded yet.
+            </div>
+          )}
         </div>
       </div>
 
@@ -111,34 +192,29 @@ export function CollabProfile() {
         </div>
       )}
 
-      {/* Top endorsements */}
-      {topEndorsements.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-700">Recent endorsements</h2>
-            <Link to="/collaborator/reputation" className="text-xs text-amber-600 hover:underline">See all {endorsements.length} →</Link>
-          </div>
-          <ul className="space-y-2">
-            {topEndorsements.map((e) => (
-              <li key={e.id} className="border border-slate-200 bg-white rounded-xl p-4">
-                <p className="text-sm text-slate-900">"{e.quote}"</p>
-                <p className="text-xs text-slate-500 mt-2">— {e.fromName} · {e.fromRole} · {e.projectName}</p>
-              </li>
-            ))}
-          </ul>
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-slate-700">Recent endorsements</h2>
+          <Link to="/collaborator/reputation" className="text-xs text-amber-600 hover:underline">View reputation</Link>
         </div>
-      )}
+        <div className="border border-dashed border-slate-300 bg-white rounded-xl p-4 text-sm text-slate-500">
+          No live endorsements are recorded yet.
+        </div>
+      </div>
 
       {/* Badges earned */}
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Badges earned</h2>
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">Live achievements earned</h2>
         <div className="flex flex-wrap gap-2">
-          {earnedBadges.map((b) => (
+          {earnedAchievements.map((b) => (
             <span key={b.id} className="border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm flex items-center gap-2">
               <span>{b.icon}</span>
               <span className="text-slate-900">{b.title}</span>
             </span>
           ))}
+          {!loading && !error && earnedAchievements.length === 0 && (
+            <span className="text-sm text-slate-500">No live achievements earned yet.</span>
+          )}
         </div>
       </div>
 
@@ -150,7 +226,7 @@ export function CollabProfile() {
         {p.links.twitter   && <span className="flex items-center gap-1.5 text-slate-700"><Twitter  className="w-4 h-4" /> {p.links.twitter}</span>}
       </div>
 
-      <p className="text-xs text-slate-400 text-center pt-4">${totalCashLifetime.toLocaleString()} cash lifetime · See <Link to="/collaborator/equity" className="underline hover:text-amber-600">Equity</Link> and <Link to="/collaborator/earnings" className="underline hover:text-amber-600">Earnings</Link></p>
+      <p className="text-xs text-slate-400 text-center pt-4">${earnings.totals.lifetimeUSD.toLocaleString()} cash lifetime · See <Link to="/collaborator/equity" className="underline hover:text-amber-600">Equity</Link> and <Link to="/collaborator/earnings" className="underline hover:text-amber-600">Earnings</Link></p>
     </div>
   );
 }

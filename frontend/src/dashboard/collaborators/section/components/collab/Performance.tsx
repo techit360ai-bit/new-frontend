@@ -1,30 +1,45 @@
 // frontend/src/dashboard/collaborators/section/components/collab/Performance.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import {
-  performanceMetrics, weeklyVelocity, tasks, projects,
-} from "@/dashboard/collaborators/section/data/mockData";
+  fetchCollaboratorSummary,
+  type CollaboratorLiveSummary,
+} from "@/lib/api/collaboratorSummary";
 
 type Range = "30" | "90" | "365";
 
 export function Performance() {
   const navigate = useNavigate();
   const [range, setRange] = useState<Range>("90");
+  const [summary, setSummary] = useState<CollaboratorLiveSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Per-project contribution: derive tasks shipped + impact avg + last contribution
-  const perProject = useMemo(() => {
-    return projects.map((p) => {
-      const projTasks = tasks.filter((t) => t.projectId === p.id);
-      const shipped = projTasks.filter((t) => t.status === "completed").length;
-      const impactAvg = projTasks.length === 0 ? 0 : Math.round(projTasks.reduce((s, t) => s + t.impactScore, 0) / projTasks.length);
-      const lastContribution = projTasks.length === 0
-        ? "—"
-        : projTasks.map((t) => t.deadline).sort().reverse()[0];
-      return { ...p, shipped, impactAvg, lastContribution };
-    });
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    fetchCollaboratorSummary()
+      .then((snapshot) => {
+        if (!alive) return;
+        setSummary(snapshot);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setSummary(null);
+        setError(err instanceof Error ? err.message : "Live performance data is unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
   }, []);
+
+  const metrics = summary?.metrics ?? [];
+  const weeklyVelocity = summary?.weeklyVelocity ?? [];
+  const perProject = summary?.perProject ?? [];
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
@@ -41,9 +56,17 @@ export function Performance() {
         </select>
       </div>
 
+      {loading && <p className="text-sm text-slate-500">Loading live performance data...</p>}
+      {!loading && error && (
+        <div className="border border-red-200 bg-red-50 rounded-xl p-4">
+          <p className="text-sm font-semibold text-red-700">Live performance data is unavailable.</p>
+          <p className="text-sm text-red-600 mt-1">{error}</p>
+        </div>
+      )}
+
       {/* Five core metrics */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {performanceMetrics.map((m) => {
+        {metrics.map((m) => {
           const Arrow = m.trend === "up" ? TrendingUp : m.trend === "down" ? TrendingDown : Minus;
           const arrowColor = m.trend === "up" ? "text-emerald-600" : m.trend === "down" ? "text-red-600" : "text-slate-400";
           return (
@@ -59,20 +82,27 @@ export function Performance() {
             </div>
           );
         })}
+        {!loading && !error && metrics.length === 0 && (
+          <p className="text-sm text-slate-500 col-span-full">No live task activity is available yet.</p>
+        )}
       </div>
 
       {/* Velocity chart */}
       <div className="border border-slate-200 bg-white rounded-xl p-6">
         <h2 className="text-sm font-semibold text-slate-700 mb-4">Velocity over time</h2>
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={weeklyVelocity}>
-              <XAxis dataKey="week" tick={{ fontSize: 11, fill: "#64748b" }} />
-              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
-              <Tooltip />
-              <Line type="monotone" dataKey="tasks" stroke="#f59e0b" strokeWidth={2} dot={{ fill: "#f59e0b", r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          {weeklyVelocity.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-slate-500">No dated live tasks yet.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weeklyVelocity}>
+                <XAxis dataKey="week" tick={{ fontSize: 11, fill: "#64748b" }} />
+                <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="tasks" stroke="#f59e0b" strokeWidth={2} dot={{ fill: "#f59e0b", r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
@@ -85,7 +115,6 @@ export function Performance() {
           <thead>
             <tr className="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-100">
               <th className="text-left px-5 py-3 font-semibold">Project</th>
-              <th className="text-left px-5 py-3 font-semibold">Role</th>
               <th className="text-right px-5 py-3 font-semibold">Tasks shipped</th>
               <th className="text-right px-5 py-3 font-semibold">Impact avg</th>
               <th className="text-right px-5 py-3 font-semibold">Last contribution</th>
@@ -95,13 +124,15 @@ export function Performance() {
             {perProject.map((p) => (
               <tr key={p.id} onClick={() => navigate(`/workspaces/build?startup=${p.id}`)}
                 className="cursor-pointer hover:bg-slate-50">
-                <td className="px-5 py-3"><span className="mr-2 text-lg">{p.logo}</span>{p.name}</td>
-                <td className="px-5 py-3 text-slate-600">{p.role}</td>
+                <td className="px-5 py-3">{p.name}</td>
                 <td className="px-5 py-3 text-right tabular-nums">{p.shipped}</td>
                 <td className="px-5 py-3 text-right tabular-nums">{p.impactAvg}</td>
                 <td className="px-5 py-3 text-right text-slate-500">{p.lastContribution}</td>
               </tr>
             ))}
+            {!loading && !error && perProject.length === 0 && (
+              <tr><td className="px-5 py-4 text-sm text-slate-500" colSpan={4}>No live workspace contributions yet.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
