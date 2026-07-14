@@ -50,5 +50,6 @@ export interface UIConversation {
   projectName: string;
   subject: string;
   unread: boolean;
+  lastMessageId?: string;
   thread: UIMessage[];
 }
