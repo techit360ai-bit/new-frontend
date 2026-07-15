@@ -1,14 +1,110 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Send, Sparkles, Clock, CheckCircle2, User } from 'lucide-react';
+import { CheckCircle2, Clock, Send, Sparkles } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { toast } from 'sonner';
+import { listActivity } from '../../lib/api/connectors';
+import { listTasks } from '../../lib/api/tasks';
+import type { ActivityEvent, AgentTask, TaskEvent } from '../../lib/types';
+
+interface ActivityRow {
+  id: string;
+  actor: string;
+  action: string;
+  detail: string;
+  at: string;
+  avatar: string;
+}
+
+function initials(value: string): string {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'WS';
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
+}
+
+function formatTimestamp(value: string): string {
+  if (!value) return 'No timestamp';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+}
+
+function eventDetail(event: TaskEvent, task: AgentTask): string {
+  if (event.text) return event.text;
+  if (event.approval?.summary) return event.approval.summary;
+  if (event.tool?.name) return event.tool.name;
+  return task.prompt;
+}
+
+function buildActivityRows(tasks: AgentTask[], reports: ActivityEvent[]): ActivityRow[] {
+  const taskRows = tasks.flatMap((task) => task.events.map((event) => {
+    const actor = task.agentId || 'Workspace';
+    return {
+      id: `${task.id}-${event.id}`,
+      actor,
+      action: event.type.replace(/_/g, ' '),
+      detail: eventDetail(event, task),
+      at: event.at || task.createdAt,
+      avatar: initials(actor),
+    };
+  }));
+
+  const reportRows = reports.map((report) => {
+    const actor = report.connectorId || 'Workspace';
+    return {
+      id: report.id,
+      actor,
+      action: report.kind.replace(/_/g, ' '),
+      detail: report.summary,
+      at: report.at,
+      avatar: initials(actor),
+    };
+  });
+
+  return [...taskRows, ...reportRows]
+    .sort((a, b) => {
+      const left = new Date(a.at).getTime();
+      const right = new Date(b.at).getTime();
+      return (Number.isNaN(right) ? 0 : right) - (Number.isNaN(left) ? 0 : left);
+    })
+    .slice(0, 6);
+}
 
 export function RightPanel() {
   const location = useLocation();
   const [message, setMessage] = useState('');
+  const [tasks, setTasks] = useState<AgentTask[]>([]);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Show AI Copilot for AI Agents page
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    Promise.all([listTasks(), listActivity()])
+      .then(([taskRows, activityRows]) => {
+        if (!alive) return;
+        setTasks(taskRows);
+        setActivity(activityRows);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setTasks([]);
+        setActivity([]);
+        setError(err instanceof Error ? err.message : 'Live workspace activity is unavailable.');
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const activities = useMemo(() => buildActivityRows(tasks, activity), [tasks, activity]);
+  const completedTasks = tasks.filter((task) => task.status === 'done').length;
+  const progress = tasks.length === 0 ? 0 : Math.round((completedTasks / tasks.length) * 100);
+
   if (location.pathname === '/workspaces/ai-agents') {
     return (
       <div className="w-[320px] bg-white border-l border-gray-200 flex flex-col">
@@ -19,28 +115,16 @@ export function RightPanel() {
             </div>
             <div>
               <h3 className="font-semibold text-sm">AI Copilot</h3>
-              <p className="text-xs text-gray-500">Always here to help</p>
+              <p className="text-xs text-gray-500">Live thread unavailable</p>
             </div>
           </div>
         </div>
 
         <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-700">
-                Hi! I'm your AI assistant. I can help you configure agents, answer questions, or suggest the best tools for your workflow.
-              </p>
-            </div>
-            <div className="bg-[#2196F3]/10 p-3 rounded-lg ml-8">
-              <p className="text-sm">
-                What's the difference between Basic and Premium agents?
-              </p>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-700">
-                Premium agents offer advanced capabilities like multi-step reasoning, custom training, and priority processing. They're perfect for complex tasks!
-              </p>
-            </div>
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-700">
+              No persisted copilot conversation is attached to this workspace yet.
+            </p>
           </div>
         </ScrollArea>
 
@@ -53,7 +137,10 @@ export function RightPanel() {
               placeholder="Ask me anything..."
               className="flex-1 px-3 py-2 bg-gray-50 rounded-lg text-sm border border-gray-200 focus:border-[#2196F3] focus:ring-1 focus:ring-[#2196F3] outline-none"
             />
-            <button className="p-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors">
+            <button
+              className="p-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors"
+              onClick={() => toast('Copilot chat requires a persisted agent conversation endpoint.')}
+            >
               <Send className="w-4 h-4" />
             </button>
           </div>
@@ -62,49 +149,50 @@ export function RightPanel() {
     );
   }
 
-  // Show Activity Feed for Build page
   if (
     location.pathname === '/workspaces/build' ||
     location.pathname === '/workspaces' ||
     location.pathname === '/workspaces/'
   ) {
-    const activities = [
-      { user: 'Sarah Chen', action: 'moved task to Review', task: 'Homepage redesign', time: '2 min ago', avatar: 'SC', color: 'bg-blue-500' },
-      { user: 'Mike Johnson', action: 'completed', task: 'API integration', time: '15 min ago', avatar: 'MJ', color: 'bg-green-500' },
-      { user: 'Alex Kim', action: 'commented on', task: 'Database schema', time: '1 hour ago', avatar: 'AK', color: 'bg-purple-500' },
-      { user: 'Emma Wilson', action: 'started working on', task: 'Mobile responsive', time: '2 hours ago', avatar: 'EW', color: 'bg-pink-500' },
-    ];
-
     return (
       <div className="w-[320px] bg-white border-l border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
           <h3 className="font-semibold">Team Activity</h3>
-          <p className="text-xs text-gray-500 mt-1">Real-time updates</p>
+          <p className="text-xs text-gray-500 mt-1">Live workspace updates</p>
         </div>
 
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-4">
-            {activities.map((activity, idx) => (
-              <div key={idx} className="flex gap-3 group hover:bg-gray-50 p-2 rounded-lg -mx-2 transition-colors">
+            {loading && <p className="text-sm text-gray-500">Loading live activity...</p>}
+            {!loading && error && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                {error}
+              </div>
+            )}
+            {!loading && activities.map((activityRow) => (
+              <div key={activityRow.id} className="flex gap-3 group hover:bg-gray-50 p-2 rounded-lg -mx-2 transition-colors">
                 <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarFallback className={`${activity.color} text-white text-xs`}>
-                    {activity.avatar}
+                  <AvatarFallback className="bg-[#2196F3] text-white text-xs">
+                    {activityRow.avatar}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm">
-                    <span className="font-medium">{activity.user}</span>
+                    <span className="font-medium">{activityRow.actor}</span>
                     {' '}
-                    <span className="text-gray-600">{activity.action}</span>
+                    <span className="text-gray-600">{activityRow.action}</span>
                   </p>
-                  <p className="text-sm text-[#2196F3] truncate">{activity.task}</p>
+                  <p className="text-sm text-[#2196F3] truncate">{activityRow.detail}</p>
                   <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
                     <Clock className="w-3 h-3" />
-                    {activity.time}
+                    {formatTimestamp(activityRow.at)}
                   </div>
                 </div>
               </div>
             ))}
+            {!loading && !error && activities.length === 0 && (
+              <p className="text-sm text-gray-500">No live workspace activity is recorded yet.</p>
+            )}
           </div>
         </ScrollArea>
 
@@ -112,23 +200,26 @@ export function RightPanel() {
           <div className="bg-gradient-to-r from-[#2196F3]/10 to-purple-500/10 p-3 rounded-lg border border-[#2196F3]/20">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-              <span className="text-sm font-medium">Sprint Progress</span>
+              <span className="text-sm font-medium">Task Progress</span>
             </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-600">12 of 18 tasks</span>
-                <span className="font-medium">67%</span>
+            {tasks.length > 0 ? (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">{completedTasks} of {tasks.length} tasks</span>
+                  <span className="font-medium">{progress}%</span>
+                </div>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#10B981] rounded-full" style={{ width: `${progress}%` }} />
+                </div>
               </div>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-[#10B981] rounded-full" style={{ width: '67%' }} />
-              </div>
-            </div>
+            ) : (
+              <p className="text-xs text-gray-500">No live task progress yet.</p>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
-  // Default: No right panel
   return null;
 }

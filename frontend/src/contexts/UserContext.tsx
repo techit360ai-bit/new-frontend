@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
-import { type FounderProject, FALLBACK_PROJECTS } from "@/lib/api/projects";
+import { fetchFounderProjects, type FounderProject } from "@/lib/api/projects";
+import { fetchHackathonRegistrations } from "@/lib/api/hackathon";
+import { useAuth, type Profile as AuthProfile } from "@/contexts/AuthContext";
 
 export interface PortfolioCompany {
   id: string;
@@ -309,7 +311,6 @@ interface UserContextType {
   founderProfile: FounderProfile;
   updateFounderProfile: (updates: Partial<FounderProfile>) => void;
   registerForHackathon: (reg: HackathonRegistration) => void;
-  addHackathonMember: (teamId: string, member: HackathonTeamMember) => void;
   updateHackathonRegistration: (
     teamId: string,
     updates: Partial<Omit<HackathonRegistration, "hackathonId" | "teamId" | "registeredAt">>,
@@ -322,86 +323,330 @@ interface UserContextType {
   bindTeamWorkspaceProject: (workspaceId: string, projectId: string) => void;
 }
 
+const DEFAULT_NOTIFICATIONS: NotificationPrefs = {
+  opportunities: { email: true, inApp: true },
+  deadlines:     { email: true, inApp: true },
+  payments:      { email: true, inApp: true },
+  equityEvents:  { email: true, inApp: true },
+  quietHours:    "off",
+};
+
+const DEFAULT_FOUNDER_NOTIFICATIONS: FounderNotificationPrefs = {
+  applications:  { email: true, inApp: true },
+  investors:     { email: true, inApp: true },
+  workspace:     { email: true, inApp: true },
+  opportunities: { email: true, inApp: true },
+  quietHours:    "off",
+};
+
+function displayName(profile: AuthProfile | null): string {
+  if (!profile) return "";
+  const fullName = `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim();
+  return fullName || profile.username || profile.email?.split("@")[0] || "";
+}
+
+function hasRole(profile: AuthProfile | null, role: Role): boolean {
+  if (!profile) return false;
+  const authRole = role === "org" ? "organisation" : role;
+  return profile.role === authRole || profile.secondaryRoles.includes(authRole as AuthProfile["role"]);
+}
+
+function normalizedFounderStage(stage: string | null | undefined): FounderStage {
+  if (stage === "Idea" || stage === "MVP" || stage === "Beta" || stage === "Launch" || stage === "Growth") return stage;
+  const lower = String(stage ?? "").toLowerCase();
+  if (lower === "mvp") return "MVP";
+  if (lower === "beta") return "Beta";
+  if (lower === "launch") return "Launch";
+  if (lower === "growth") return "Growth";
+  return "Idea";
+}
+
+function normalizedFounderExperience(value: string | null | undefined): FounderExperience {
+  return value === "serial" || value === "some-experience" ? value : "first-time";
+}
+
+function normalizedCollaboratorDiscipline(value: string | null | undefined): CollaboratorDiscipline | "" {
+  return [
+    "Engineering", "Design", "Product", "Data & ML",
+    "DevOps", "Security", "Marketing", "Research",
+  ].includes(String(value))
+    ? value as CollaboratorDiscipline
+    : "";
+}
+
+function emptyInvestorProfile(profile: AuthProfile | null = null): InvestorProfile {
+  return {
+    investorType: "",
+    location: profile?.country ?? "",
+    fundSize: "",
+    yearsInvesting: 0,
+    industries: profile?.investmentFocus ?? [],
+    stage: "",
+    checkSize: profile?.ticketSize ?? "",
+    portfolio: [],
+    riskAppetite: profile?.riskTolerance ?? "",
+    dashboardMetrics: [],
+  };
+}
+
+function emptyOrgProfile(profile: AuthProfile | null = null): OrgProfile {
+  return {
+    orgName: profile?.orgName ?? "",
+    orgType: profile?.orgType ?? "",
+    location: profile?.country ?? "",
+    registrationNumber: "",
+    foundingYear: new Date().getFullYear(),
+    website: profile?.website ?? "",
+    verificationStatus: profile?.isVerified ? "verified" : "unverified",
+    verificationDocs: [],
+    businessEmailDomain: profile?.website ? profile.website.replace(/^https?:\/\//, "").split("/")[0] : "",
+    programmes: [],
+    sectors: profile?.industries ?? [],
+    geographies: profile?.country ? [profile.country] : [],
+    teamMembers: [],
+    plan: "free",
+  };
+}
+
+function emptyCollaboratorProfile(profile: AuthProfile | null = null): CollaboratorProfile {
+  return {
+    name: displayName(profile),
+    title: profile?.title ?? "",
+    location: profile?.country ?? "",
+    yearsExperience: profile?.yearsExperience ?? 0,
+    headline: profile?.bio ?? "",
+    avatarUrl: profile?.avatarUrl ?? "",
+    discipline: normalizedCollaboratorDiscipline(profile?.discipline),
+    subSkills: profile?.subSkills ?? profile?.skills ?? [],
+    techStack: profile?.techStack ?? profile?.skills ?? [],
+    weeklyHours: profile?.weeklyHours ?? 0,
+    timezone: profile?.timezone ?? "",
+    earliestStart:
+      profile?.earliestStart === "2-weeks" || profile?.earliestStart === "1-month"
+        ? profile.earliestStart
+        : "this-week",
+    commitmentStyle:
+      profile?.commitmentStyle === "parallel" || profile?.commitmentStyle === "many"
+        ? profile.commitmentStyle
+        : "deep",
+    equityPreference: profile?.equityPreference ?? 0,
+    minCashFloor: profile?.minCashFloor ?? 0,
+    vestingComfort:
+      profile?.vestingComfort === "1y-cliff-4y" || profile?.vestingComfort === "custom"
+        ? profile.vestingComfort
+        : "standard",
+    links: {
+      github: profile?.githubUrl ?? "",
+      linkedin: profile?.linkedinUrl ?? "",
+      portfolio: profile?.portfolioUrl ?? "",
+      twitter: "",
+    },
+    whyHere: "",
+    pinnedWork: [],
+    onboardingComplete: Boolean(profile?.isOnboarded && hasRole(profile, "collaborator")),
+    notifications: DEFAULT_NOTIFICATIONS,
+  };
+}
+
+function emptyFounderProfile(profile: AuthProfile | null = null): FounderProfile {
+  return {
+    name: displayName(profile),
+    title: profile?.title ?? "",
+    location: profile?.country ?? "",
+    yearsBuilding: profile?.yearsBuilding ?? 0,
+    founderType: normalizedFounderExperience(profile?.founderType),
+    headline: profile?.bio ?? "",
+    avatarUrl: profile?.avatarUrl ?? "",
+    startupName: profile?.orgName ?? "",
+    oneLiner: profile?.oneLiner ?? "",
+    stage: normalizedFounderStage(profile?.startupStage),
+    industries: profile?.industries ?? [],
+    foundingYear: profile?.foundingYear ?? new Date().getFullYear(),
+    website: profile?.website ?? "",
+    logoEmoji: profile?.logoEmoji ?? "",
+    currentTeamSize: profile?.currentTeamSize ?? 0,
+    openRoles: (profile?.openRoles ?? []) as OpenRole[],
+    compensationOffered:
+      profile?.compensationOffered === "cash-equity-mix" || profile?.compensationOffered === "cash-heavy"
+        ? profile.compensationOffered
+        : "equity-heavy",
+    equityRangeMin: profile?.equityRangeMin ?? 0,
+    equityRangeMax: profile?.equityRangeMax ?? 0,
+    launchStatus:
+      profile?.launchStatus === "private-beta" || profile?.launchStatus === "public"
+        ? profile.launchStatus
+        : "pre-launch",
+    users: profile?.users ?? 0,
+    revenueMonthly: profile?.revenueMonthly ?? 0,
+    fundingRaised: profile?.fundingRaised ?? 0,
+    leadInvestor: profile?.leadInvestor ?? "",
+    nextMilestone: profile?.nextMilestone ?? "",
+    whyBuilding: profile?.whyBuilding ?? "",
+    winningIn3Years: profile?.winningIn3Years ?? "",
+    unfairAdvantage: profile?.unfairAdvantage ?? "",
+    ownershipPhilosophy:
+      profile?.ownershipPhilosophy === "cash-first-equity-later" || profile?.ownershipPhilosophy === "custom"
+        ? profile.ownershipPhilosophy
+        : "equity-day-one",
+    links: {
+      github: profile?.githubUrl ?? "",
+      linkedin: profile?.linkedinUrl ?? "",
+      twitter: profile?.twitterUrl ?? "",
+      personal: profile?.portfolioUrl ?? profile?.website ?? "",
+    },
+    needsFromTechIT: [],
+    pinnedWork: [],
+    onboardingComplete: Boolean(profile?.isOnboarded && hasRole(profile, "founder")),
+    verification: {
+      twitter:      { handle: profile?.twitterUrl ?? "", verified: Boolean(profile?.twitterUrl && profile.isVerified) },
+      linkedin:     { url: profile?.linkedinUrl ?? "", verified: Boolean(profile?.linkedinUrl && profile.isVerified) },
+      personalSite: { url: profile?.website ?? "", verified: Boolean(profile?.website && profile.isVerified) },
+      github:       { username: profile?.githubUrl ?? "", verified: Boolean(profile?.githubUrl && profile.isVerified) },
+      nin: { country: profile?.country ?? "", docType: "nin", docNumber: "", status: "unverified" },
+    },
+    notifications: DEFAULT_FOUNDER_NOTIFICATIONS,
+    hackathonRegistrations: [],
+    founderProjects: [],
+    teamWorkspaces: [],
+  };
+}
+
+function mergeAuthFounderProfile(prev: FounderProfile, profile: AuthProfile): FounderProfile {
+  const base = emptyFounderProfile(profile);
+  return {
+    ...prev,
+    name: prev.name || base.name,
+    title: prev.title || base.title,
+    location: prev.location || base.location,
+    yearsBuilding: prev.yearsBuilding || base.yearsBuilding,
+    founderType: base.founderType,
+    headline: prev.headline || base.headline,
+    avatarUrl: prev.avatarUrl || base.avatarUrl,
+    startupName: prev.startupName || base.startupName,
+    oneLiner: prev.oneLiner || base.oneLiner,
+    stage: base.stage,
+    industries: prev.industries.length ? prev.industries : base.industries,
+    foundingYear: base.foundingYear,
+    website: prev.website || base.website,
+    logoEmoji: prev.logoEmoji || base.logoEmoji,
+    currentTeamSize: prev.currentTeamSize || base.currentTeamSize,
+    openRoles: prev.openRoles.length ? prev.openRoles : base.openRoles,
+    compensationOffered: base.compensationOffered,
+    equityRangeMin: base.equityRangeMin,
+    equityRangeMax: base.equityRangeMax,
+    launchStatus: base.launchStatus,
+    users: base.users,
+    revenueMonthly: base.revenueMonthly,
+    fundingRaised: base.fundingRaised,
+    leadInvestor: base.leadInvestor,
+    nextMilestone: base.nextMilestone,
+    whyBuilding: base.whyBuilding,
+    winningIn3Years: base.winningIn3Years,
+    unfairAdvantage: base.unfairAdvantage,
+    ownershipPhilosophy: base.ownershipPhilosophy,
+    links: {
+      github: prev.links.github || base.links.github,
+      linkedin: prev.links.linkedin || base.links.linkedin,
+      twitter: prev.links.twitter || base.links.twitter,
+      personal: prev.links.personal || base.links.personal,
+    },
+    onboardingComplete: prev.onboardingComplete || base.onboardingComplete,
+    verification: {
+      ...prev.verification,
+      twitter: {
+        handle: prev.verification.twitter.handle || base.verification.twitter.handle,
+        verified: prev.verification.twitter.verified || base.verification.twitter.verified,
+      },
+      linkedin: {
+        url: prev.verification.linkedin.url || base.verification.linkedin.url,
+        verified: prev.verification.linkedin.verified || base.verification.linkedin.verified,
+      },
+      personalSite: {
+        url: prev.verification.personalSite.url || base.verification.personalSite.url,
+        verified: prev.verification.personalSite.verified || base.verification.personalSite.verified,
+      },
+      github: {
+        username: prev.verification.github.username || base.verification.github.username,
+        verified: prev.verification.github.verified || base.verification.github.verified,
+      },
+      nin: { ...prev.verification.nin, country: prev.verification.nin.country || base.verification.nin.country },
+    },
+  };
+}
+
+function mergeAuthCollaboratorProfile(prev: CollaboratorProfile, profile: AuthProfile): CollaboratorProfile {
+  const base = emptyCollaboratorProfile(profile);
+  return {
+    ...prev,
+    name: prev.name || base.name,
+    title: prev.title || base.title,
+    location: prev.location || base.location,
+    yearsExperience: prev.yearsExperience || base.yearsExperience,
+    headline: prev.headline || base.headline,
+    avatarUrl: prev.avatarUrl || base.avatarUrl,
+    discipline: prev.discipline || base.discipline,
+    subSkills: prev.subSkills.length ? prev.subSkills : base.subSkills,
+    techStack: prev.techStack.length ? prev.techStack : base.techStack,
+    weeklyHours: prev.weeklyHours || base.weeklyHours,
+    timezone: prev.timezone || base.timezone,
+    earliestStart: base.earliestStart,
+    commitmentStyle: base.commitmentStyle,
+    equityPreference: prev.equityPreference || base.equityPreference,
+    minCashFloor: prev.minCashFloor || base.minCashFloor,
+    vestingComfort: base.vestingComfort,
+    links: {
+      github: prev.links.github || base.links.github,
+      linkedin: prev.links.linkedin || base.links.linkedin,
+      portfolio: prev.links.portfolio || base.links.portfolio,
+      twitter: prev.links.twitter,
+    },
+    onboardingComplete: prev.onboardingComplete || base.onboardingComplete,
+  };
+}
+
+function mergeAuthInvestorProfile(prev: InvestorProfile, profile: AuthProfile): InvestorProfile {
+  const base = emptyInvestorProfile(profile);
+  return {
+    ...prev,
+    location: prev.location || base.location,
+    industries: prev.industries.length ? prev.industries : base.industries,
+    checkSize: prev.checkSize || base.checkSize,
+    riskAppetite: prev.riskAppetite || base.riskAppetite,
+  };
+}
+
+function mergeAuthOrgProfile(prev: OrgProfile, profile: AuthProfile): OrgProfile {
+  const base = emptyOrgProfile(profile);
+  return {
+    ...prev,
+    orgName: prev.orgName || base.orgName,
+    orgType: prev.orgType || base.orgType,
+    location: prev.location || base.location,
+    website: prev.website || base.website,
+    verificationStatus: prev.verificationStatus !== "unverified" ? prev.verificationStatus : base.verificationStatus,
+    businessEmailDomain: prev.businessEmailDomain || base.businessEmailDomain,
+    sectors: prev.sectors.length ? prev.sectors : base.sectors,
+    geographies: prev.geographies.length ? prev.geographies : base.geographies,
+  };
+}
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [investorProfile, setInvestorProfile] = useState<InvestorProfile>({
-    investorType: "Institutional", // Default value so dashboard is accessible
-    location: "North America",
-    fundSize: "$10M - $50M",
-    yearsInvesting: 1,
-    industries: [],
-    stage: "",
-    checkSize: "",
-    portfolio: [],
-    riskAppetite: "Validated Prototypes",
-    dashboardMetrics: [
-      "Execution Velocity",
-      "Market Readiness",
-      "Revenue Traction",
-      "Beta Retention",
-    ],
-  });
+  const { user, profile } = useAuth();
+  const [investorProfile, setInvestorProfile] = useState<InvestorProfile>(() => emptyInvestorProfile(profile));
 
   const updateInvestorProfile = (updates: Partial<InvestorProfile>) => {
     setInvestorProfile((prev) => ({ ...prev, ...updates }));
   };
 
-  const [orgProfile, setOrgProfile] = useState<OrgProfile>({
-    orgName: "TechIT Innovation Hub",
-    orgType: "Innovation Hub",
-    location: "Lagos, Nigeria",
-    registrationNumber: "",
-    foundingYear: 2022,
-    website: "",
-    verificationStatus: "unverified",
-    verificationDocs: [],
-    businessEmailDomain: "",
-    programmes: ["Hackathons", "Mentorship"],
-    sectors: ["AI", "FinTech"],
-    geographies: ["West Africa"],
-    teamMembers: [],
-    plan: "growth",
-  });
+  const [orgProfile, setOrgProfile] = useState<OrgProfile>(() => emptyOrgProfile(profile));
 
   const updateOrgProfile = (updates: Partial<OrgProfile>) => {
     setOrgProfile((prev) => ({ ...prev, ...updates }));
   };
 
-  const [collaboratorProfile, setCollaboratorProfile] = useState<CollaboratorProfile>({
-    name: "Alex Chen",
-    title: "Senior Frontend Engineer",
-    location: "Lagos, Nigeria",
-    yearsExperience: 7,
-    headline: "I ship product-grade React systems quickly.",
-    avatarUrl: "",
-    discipline: "Engineering",
-    subSkills: ["React", "TypeScript", "Node.js", "System design", "Performance"],
-    techStack: ["React", "Next.js", "Postgres", "Vercel", "Tailwind", "tRPC"],
-    weeklyHours: 20,
-    timezone: "WAT",
-    earliestStart: "this-week",
-    commitmentStyle: "parallel",
-    equityPreference: 65,
-    minCashFloor: 2000,
-    vestingComfort: "standard",
-    links: {
-      github: "github.com/alexchen",
-      linkedin: "linkedin.com/in/alexchen",
-      portfolio: "alexchen.dev",
-      twitter: "@alexchen",
-    },
-    whyHere: "A product that becomes someone's daily tool, with skin in the game.",
-    pinnedWork: [],
-    onboardingComplete: true,
-    notifications: {
-      opportunities: { email: true, inApp: true },
-      deadlines:     { email: true, inApp: true },
-      payments:      { email: true, inApp: true },
-      equityEvents:  { email: true, inApp: true },
-      quietHours:    "off",
-    },
-  });
+  const [collaboratorProfile, setCollaboratorProfile] = useState<CollaboratorProfile>(() => emptyCollaboratorProfile(profile));
 
   /**
    * Shallow merge — for nested fields like `notifications` or `links`, callers must spread the
@@ -411,63 +656,53 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setCollaboratorProfile((prev) => ({ ...prev, ...updates }));
   };
 
-  const [founderProfile, setFounderProfile] = useState<FounderProfile>({
-    name: "Sarah Chen",
-    title: "Founder & CEO",
-    location: "Lagos, Nigeria",
-    yearsBuilding: 5,
-    founderType: "first-time",
-    headline: "Building the operating system for African SMEs.",
-    avatarUrl: "",
-    startupName: "AI Task Manager",
-    oneLiner: "AI that turns Slack chaos into a Kanban board.",
-    stage: "MVP",
-    industries: ["AI/ML", "SaaS"],
-    foundingYear: 2026,
-    website: "techit.ai",
-    logoEmoji: "🧠",
-    currentTeamSize: 2,
-    openRoles: ["Frontend Engineer", "ML Engineer", "Designer (Product)"],
-    compensationOffered: "equity-heavy",
-    equityRangeMin: 0.5,
-    equityRangeMax: 2.5,
-    launchStatus: "private-beta",
-    users: 240,
-    revenueMonthly: 0,
-    fundingRaised: 0,
-    leadInvestor: "",
-    nextMilestone: "Hit 1,000 active users by August.",
-    whyBuilding: "I watched my mother's bakery drown in WhatsApp orders. There's nothing built for African SMEs that talks the way they actually work.",
-    winningIn3Years: "Default SaaS for any African SME under 50 employees. $10M ARR.",
-    unfairAdvantage: "I ran SME ops for 4 years. I know the broken workflows by name.",
-    ownershipPhilosophy: "equity-day-one",
-    links: {
-      github: "github.com/sarahchen",
-      linkedin: "linkedin.com/in/sarahchen",
-      twitter: "@sarahchen",
-      personal: "sarahchen.com",
-    },
-    needsFromTechIT: ["Find collaborators", "Customer interviews"],
-    pinnedWork: [],
-    onboardingComplete: true,
-    verification: {
-      twitter:      { handle: "@sarahchen", verified: false },
-      linkedin:     { url: "linkedin.com/in/sarahchen", verified: true },
-      personalSite: { url: "sarahchen.com", verified: false },
-      github:       { username: "sarahchen", verified: true },
-      nin: { country: "Nigeria", docType: "nin", docNumber: "", status: "unverified" },
-    },
-    notifications: {
-      applications:  { email: true, inApp: true },
-      investors:     { email: true, inApp: true },
-      workspace:     { email: false, inApp: true },
-      opportunities: { email: true, inApp: true },
-      quietHours:    "off",
-    },
-    hackathonRegistrations: [],
-    founderProjects: [...FALLBACK_PROJECTS],
-    teamWorkspaces: [],
-  });
+  const [founderProfile, setFounderProfile] = useState<FounderProfile>(() => emptyFounderProfile(profile));
+
+  useEffect(() => {
+    if (!user) {
+      setInvestorProfile(emptyInvestorProfile());
+      setOrgProfile(emptyOrgProfile());
+      setCollaboratorProfile(emptyCollaboratorProfile());
+      setFounderProfile(emptyFounderProfile());
+      return;
+    }
+    if (!profile) return;
+
+    setInvestorProfile((prev) => mergeAuthInvestorProfile(prev, profile));
+    setOrgProfile((prev) => mergeAuthOrgProfile(prev, profile));
+    setCollaboratorProfile((prev) => mergeAuthCollaboratorProfile(prev, profile));
+    setFounderProfile((prev) => mergeAuthFounderProfile(prev, profile));
+  }, [user, profile]);
+
+  useEffect(() => {
+    if (!user || !profile || !hasRole(profile, "founder")) return;
+    let alive = true;
+    fetchFounderProjects()
+      .then((projects) => {
+        if (alive) setFounderProfile((prev) => ({ ...prev, founderProjects: projects }));
+      })
+      .catch((error) => {
+        if (typeof console !== "undefined") console.warn("[UserContext] founder projects unavailable", error);
+      });
+    return () => { alive = false; };
+  }, [user, profile]);
+
+  useEffect(() => {
+    if (!user || !profile) return;
+    let alive = true;
+    fetchHackathonRegistrations()
+      .then((registrations) => {
+        if (alive) {
+          setFounderProfile((prev) => ({ ...prev, hackathonRegistrations: registrations }));
+        }
+      })
+      .catch((error) => {
+        if (typeof console !== "undefined") {
+          console.warn("[UserContext] hackathon registrations unavailable", error);
+        }
+      });
+    return () => { alive = false; };
+  }, [user, profile]);
 
   /**
    * Shallow merge — for nested fields like `verification`, `notifications`, or `links`,
@@ -481,7 +716,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const registerForHackathon = (reg: HackathonRegistration) => {
     setFounderProfile((prev) => ({
       ...prev,
-      hackathonRegistrations: [...prev.hackathonRegistrations, { ...reg, checkIns: reg.checkIns ?? [] }],
+      hackathonRegistrations: [
+        ...prev.hackathonRegistrations.filter((item) => item.teamId !== reg.teamId),
+        { ...reg, checkIns: reg.checkIns ?? [] },
+      ],
     }));
   };
 
@@ -533,21 +771,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const addHackathonMember = (teamId: string, member: HackathonTeamMember) => {
-    setFounderProfile((prev) => ({
-      ...prev,
-      hackathonRegistrations: prev.hackathonRegistrations.map((r) =>
-        r.teamId === teamId
-          ? {
-              ...r,
-              members: [...r.members, member],
-              openRoles: r.openRoles.filter((role) => role !== member.role),
-            }
-          : r,
-      ),
-    }));
-  };
-
   const updateHackathonRegistration = (
     teamId: string,
     updates: Partial<Omit<HackathonRegistration, "hackathonId" | "teamId" | "registeredAt">>,
@@ -572,7 +795,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         founderProfile,
         updateFounderProfile,
         registerForHackathon,
-        addHackathonMember,
         updateHackathonRegistration,
         submitBrief,
         addCheckIn,
@@ -615,16 +837,23 @@ export function useCollaboratorProfile() {
 
 export function useActiveRoles(): { activeRoles: Set<Role>; currentRole: Role } {
   const { founderProfile, collaboratorProfile, investorProfile, orgProfile } = useUser();
+  const { profile } = useAuth();
   const location = useLocation();
 
   const activeRoles = useMemo(() => {
     const s = new Set<Role>();
+    if (profile?.isOnboarded) {
+      if (hasRole(profile, "founder")) s.add("founder");
+      if (hasRole(profile, "collaborator")) s.add("collaborator");
+      if (hasRole(profile, "investor")) s.add("investor");
+      if (hasRole(profile, "org")) s.add("org");
+    }
     if (founderProfile.onboardingComplete)              s.add("founder");
     if (collaboratorProfile.onboardingComplete)         s.add("collaborator");
     if (investorProfile.industries.length > 0)          s.add("investor");
     if (orgProfile.verificationStatus !== "unverified") s.add("org");
     return s;
-  }, [founderProfile.onboardingComplete, collaboratorProfile.onboardingComplete, investorProfile.industries.length, orgProfile.verificationStatus]);
+  }, [profile, founderProfile.onboardingComplete, collaboratorProfile.onboardingComplete, investorProfile.industries.length, orgProfile.verificationStatus]);
 
   const path = location.pathname;
   let currentRole: Role = "founder";
@@ -641,7 +870,6 @@ export function useFounderProfile() {
     founderProfile,
     updateFounderProfile,
     registerForHackathon,
-    addHackathonMember,
     updateHackathonRegistration,
     submitBrief,
     addCheckIn,
@@ -654,7 +882,6 @@ export function useFounderProfile() {
     founderProfile,
     updateFounderProfile,
     registerForHackathon,
-    addHackathonMember,
     updateHackathonRegistration,
     submitBrief,
     addCheckIn,

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { mockStartups } from '../../data/mockData';
+import { fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
 import {
   Eye,
   TrendingUp,
@@ -17,13 +17,32 @@ import {
 } from 'lucide-react';
 
 export function Watchlist() {
-  const watchedStartups = mockStartups.slice(0, 4);
+  const [watchedStartups, setWatchedStartups] = useState<InvestorStartup[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [alertStates, setAlertStates] = useState<Record<string, boolean>>({
     velocity: true,
     risk: true,
     milestone: false,
   });
+
+  useEffect(() => {
+    let alive = true;
+    fetchDealFlow()
+      .then((data) => {
+        if (!alive) return;
+        setWatchedStartups(data.ranking.filter((startup) => startup.watchlisted));
+        setError(null);
+      })
+      .catch(() => {
+        if (alive) setError('Unable to load live watchlist.');
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
 
   const toggleExpanded = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -50,6 +69,12 @@ export function Watchlist() {
       </div>
 
       <div className="p-8">
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         <div className="bg-[#111111] border border-gray-800 rounded-lg overflow-hidden">
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-800/50 border-b border-gray-800 text-sm font-medium text-gray-400">
@@ -66,12 +91,25 @@ export function Watchlist() {
 
           {/* Table Body */}
           <div className="divide-y divide-gray-800">
+            {isLoading && (
+              <div className="px-6 py-10 text-center text-sm text-gray-400">
+                Loading live watchlist...
+              </div>
+            )}
+
+            {!isLoading && watchedStartups.length === 0 && (
+              <div className="px-6 py-10 text-center">
+                <Eye className="mx-auto mb-3 h-8 w-8 text-gray-500" />
+                <h3 className="text-lg font-semibold text-white mb-1">No live watchlist records</h3>
+                <p className="text-sm text-gray-400">
+                  Startups will appear after persisted investor watchlist records are created.
+                </p>
+              </div>
+            )}
+
             {watchedStartups.map((startup) => {
-              const readinessDelta =
-                startup.velocityDelta > 20
-                  ? Math.floor(startup.velocityDelta / 4)
-                  : -Math.floor(Math.random() * 3 + 1);
-              const riskDelta = startup.riskLevel === 'low' ? 'improved' : 'stable';
+              const readinessDelta = startup.readinessDelta || startup.velocityDelta;
+              const riskDelta = startup.riskDelta;
               const isExpanded = expandedId === startup.id;
 
               return (
@@ -136,7 +174,9 @@ export function Watchlist() {
                             ? 'text-emerald-400'
                             : startup.riskLevel === 'moderate'
                             ? 'text-amber-400'
-                            : 'text-red-400'
+                            : startup.riskLevel === 'high'
+                            ? 'text-red-400'
+                            : 'text-gray-400'
                         }`}
                       >
                         {startup.riskLevel}
@@ -209,7 +249,7 @@ export function Watchlist() {
                               </span>
                             </div>
                             <p className="text-sm text-gray-300 leading-relaxed">
-                              {startup.about.summary}
+                              {startup.about.summary || 'No live project overview is available yet.'}
                             </p>
                           </div>
 
@@ -224,7 +264,7 @@ export function Watchlist() {
                               </span>
                             </div>
                             <p className="text-sm text-gray-300 leading-relaxed">
-                              {startup.about.useCase}
+                              {startup.about.useCase || 'No live use-case summary is available yet.'}
                             </p>
                           </div>
 
@@ -240,12 +280,12 @@ export function Watchlist() {
                             </div>
                             <div className="mb-2">
                               <span className="text-2xl font-bold font-mono text-emerald-400">
-                                {startup.about.marketSizeValue}
+                                {startup.about.marketSizeValue || '—'}
                               </span>
                               <span className="text-xs text-gray-500 ml-1">TAM</span>
                             </div>
                             <p className="text-sm text-gray-300 leading-relaxed">
-                              {startup.about.marketSize}
+                              {startup.about.marketSize || 'No live market-size note is available yet.'}
                             </p>
                           </div>
                         </div>

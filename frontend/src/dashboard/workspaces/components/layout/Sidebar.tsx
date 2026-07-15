@@ -37,7 +37,7 @@ export function Sidebar() {
     { path: '/workspaces/build', label: 'Build', icon: <Hammer className="w-5 h-5" /> },
     { path: '/workspaces/connectors', label: 'Connectors', icon: <Plug className="w-5 h-5" /> },
     { path: '/workspaces/agents', label: 'Agents', icon: <Bot className="w-5 h-5" />, glow: true },
-    { path: '/workspaces/chat', label: 'Chat', icon: <MessageCircle className="w-5 h-5" />, badge: 3 },
+    { path: '/workspaces/chat', label: 'Chat', icon: <MessageCircle className="w-5 h-5" /> },
     { path: '/workspaces/files', label: 'Files', icon: <FolderOpen className="w-5 h-5" /> },
     { path: '/workspaces/github', label: 'GitHub', icon: <Github className="w-5 h-5" /> },
     { path: '/workspaces/reports', label: 'Reports', icon: <BarChart3 className="w-5 h-5" /> },

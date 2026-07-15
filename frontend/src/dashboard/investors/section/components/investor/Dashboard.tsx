@@ -1,35 +1,65 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { investorMetrics, mockStartups } from '../../data/mockData';
 import { TrendingUp, Shield, DollarSign, Activity, Zap, ArrowRight, Sparkles, X } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useInvestorProfile } from '@/contexts/UserContext';
-import { useState } from 'react';
+import { fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
 
 export function Dashboard() {
   const { investorProfile } = useInvestorProfile();
   const onboardingIncomplete =
     investorProfile.industries.length === 0 || !investorProfile.stage;
   const [bannerDismissed, setBannerDismissed] = useState(false);
-  const highMomentumStartups = mockStartups
-    .filter((s) => s.velocityDelta > 20)
+  const [startups, setStartups] = useState<InvestorStartup[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetchDealFlow()
+      .then((data) => {
+        if (!alive) return;
+        setStartups(data.ranking);
+        setError(null);
+      })
+      .catch(() => {
+        if (alive) setError('Unable to load live investor deal flow.');
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const metrics = useMemo(() => ({
+    totalStartups: startups.length,
+    watchlistedStartups: startups.filter((s) => s.watchlisted).length,
+    highReadiness: startups.filter((s) => s.readinessScore >= 80).length,
+    highExecution: startups.filter((s) => s.executionVelocity >= 75).length,
+    revenueValidated: startups.filter((s) => s.mrr > 0 || s.revenueGrowth > 0).length,
+    aiGovernanceVerified: startups.filter((s) => s.aiGovernanceVerified).length,
+  }), [startups]);
+
+  const highMomentumStartups = startups
+    .filter((s) => s.velocityDelta > 0 || s.readinessDelta > 0)
+    .sort((a, b) => Math.max(b.velocityDelta, b.readinessDelta) - Math.max(a.velocityDelta, a.readinessDelta))
     .slice(0, 5);
 
-  const portfolioData = [
-    { week: 'W1', readiness: 72, conversion: 12 },
-    { week: 'W2', readiness: 74, conversion: 15 },
-    { week: 'W3', readiness: 76, conversion: 18 },
-    { week: 'W4', readiness: 79, conversion: 22 },
-    { week: 'W5', readiness: 82, conversion: 26 },
-    { week: 'W6', readiness: 84, conversion: 31 },
-  ];
+  const portfolioData = startups.slice(0, 8).map((startup, index) => ({
+    rank: startup.rank ? `#${startup.rank}` : `${index + 1}`,
+    readiness: startup.readinessScore,
+    execution: startup.executionVelocity,
+  }));
 
   const riskDistribution = {
-    low: mockStartups.filter((s) => s.riskLevel === 'low').length,
-    moderate: mockStartups.filter((s) => s.riskLevel === 'moderate').length,
-    high: mockStartups.filter((s) => s.riskLevel === 'high').length,
+    low: startups.filter((s) => s.riskLevel === 'low').length,
+    moderate: startups.filter((s) => s.riskLevel === 'moderate').length,
+    high: startups.filter((s) => s.riskLevel === 'high').length,
   };
 
-  const totalStartups = mockStartups.length;
+  const totalStartups = metrics.totalStartups;
+  const percent = (count: number) => totalStartups > 0 ? Math.round((count / totalStartups) * 100) : 0;
+  const momentumNames = highMomentumStartups.slice(0, 2).map((startup) => startup.name).join(' and ');
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -72,11 +102,17 @@ export function Dashboard() {
           </div>
         )}
 
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         {/* Top Metrics Bar */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <MetricCard
             label="Watchlisted Startups"
-            value={investorMetrics.watchlistedStartups}
+            value={metrics.watchlistedStartups}
             icon={Activity}
             color="text-blue-400"
             bgColor="bg-blue-500/10"
@@ -84,7 +120,7 @@ export function Dashboard() {
           />
           <MetricCard
             label="80+ Readiness"
-            value={investorMetrics.highReadiness}
+            value={metrics.highReadiness}
             icon={TrendingUp}
             color="text-emerald-400"
             bgColor="bg-emerald-500/10"
@@ -92,7 +128,7 @@ export function Dashboard() {
           />
           <MetricCard
             label="75+ Execution Velocity"
-            value={investorMetrics.highExecution}
+            value={metrics.highExecution}
             icon={Zap}
             color="text-purple-400"
             bgColor="bg-purple-500/10"
@@ -100,7 +136,7 @@ export function Dashboard() {
           />
           <MetricCard
             label="Revenue Validated"
-            value={investorMetrics.revenueValidated}
+            value={metrics.revenueValidated}
             icon={DollarSign}
             color="text-amber-400"
             bgColor="bg-amber-500/10"
@@ -108,7 +144,7 @@ export function Dashboard() {
           />
           <MetricCard
             label="AI Governance Verified"
-            value={investorMetrics.aiGovernanceVerified}
+            value={metrics.aiGovernanceVerified}
             icon={Shield}
             color="text-cyan-400"
             bgColor="bg-cyan-500/10"
@@ -122,46 +158,58 @@ export function Dashboard() {
             {/* Execution Momentum Graph */}
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Execution Momentum</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={portfolioData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis dataKey="week" stroke="#666" />
-                    <YAxis stroke="#666" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1a1a1a',
-                        border: '1px solid #333',
-                        borderRadius: '8px',
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="readiness"
-                      stroke="#10b981"
-                      strokeWidth={2}
-                      name="Avg Portfolio Readiness"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="conversion"
-                      stroke="#3b82f6"
-                      strokeWidth={2}
-                      name="Beta-to-Revenue %"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex gap-6 mt-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-emerald-500 rounded"></div>
-                  <span className="text-gray-400">Avg Portfolio Readiness</span>
+              {isLoading ? (
+                <div className="flex h-64 items-center justify-center rounded-lg border border-gray-800 bg-gray-800/30 text-sm text-gray-400">
+                  Loading live deal-flow signals...
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                  <span className="text-gray-400">Beta-to-Revenue %</span>
+              ) : portfolioData.length === 0 ? (
+                <div className="flex h-64 items-center justify-center rounded-lg border border-gray-800 bg-gray-800/30 text-center text-sm text-gray-400">
+                  Live execution momentum will appear after deal-flow snapshots are persisted.
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={portfolioData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                        <XAxis dataKey="rank" stroke="#666" />
+                        <YAxis stroke="#666" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#1a1a1a',
+                            border: '1px solid #333',
+                            borderRadius: '8px',
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="readiness"
+                          stroke="#10b981"
+                          strokeWidth={2}
+                          name="Readiness"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="execution"
+                          stroke="#3b82f6"
+                          strokeWidth={2}
+                          name="Execution Velocity"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex gap-6 mt-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-emerald-500 rounded"></div>
+                      <span className="text-gray-400">Readiness</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                      <span className="text-gray-400">Execution Velocity</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Risk Distribution */}
@@ -169,26 +217,32 @@ export function Dashboard() {
               <h3 className="text-lg font-semibold text-white mb-4">Portfolio Risk Distribution</h3>
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <div className="flex gap-2 h-12 rounded-lg overflow-hidden">
+                  {totalStartups === 0 ? (
+                    <div className="flex h-12 items-center justify-center rounded-lg bg-gray-800/50 text-sm text-gray-400">
+                      No live risk distribution yet
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 h-12 rounded-lg overflow-hidden">
                     <div
                       className="bg-emerald-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
-                      style={{ width: `${(riskDistribution.low / totalStartups) * 100}%` }}
+                      style={{ width: `${percent(riskDistribution.low)}%` }}
                     >
-                      {Math.round((riskDistribution.low / totalStartups) * 100)}%
+                      {percent(riskDistribution.low)}%
                     </div>
                     <div
                       className="bg-amber-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
-                      style={{ width: `${(riskDistribution.moderate / totalStartups) * 100}%` }}
+                      style={{ width: `${percent(riskDistribution.moderate)}%` }}
                     >
-                      {Math.round((riskDistribution.moderate / totalStartups) * 100)}%
+                      {percent(riskDistribution.moderate)}%
                     </div>
                     <div
                       className="bg-red-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
-                      style={{ width: `${(riskDistribution.high / totalStartups) * 100}%` }}
+                      style={{ width: `${percent(riskDistribution.high)}%` }}
                     >
-                      {Math.round((riskDistribution.high / totalStartups) * 100)}%
+                      {percent(riskDistribution.high)}%
                     </div>
-                  </div>
+                    </div>
+                  )}
                   <div className="flex gap-6 mt-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-emerald-500 rounded"></div>
@@ -215,13 +269,20 @@ export function Dashboard() {
                 </div>
                 <div className="flex-1">
                   <h4 className="text-sm font-semibold text-blue-300 mb-2">AI INSIGHTS</h4>
-                  <p className="text-white mb-2">
-                    3 startups in your watchlist increased milestone velocity by 24% this week.
-                  </p>
-                  <p className="text-gray-300">
-                    2 projects moved from 78 to 84 readiness. QuantumAPI and CloudMesh show strong
-                    revenue acceleration patterns.
-                  </p>
+                  {highMomentumStartups.length > 0 ? (
+                    <>
+                      <p className="text-white mb-2">
+                        {highMomentumStartups.length} live startup{highMomentumStartups.length === 1 ? '' : 's'} show positive execution momentum.
+                      </p>
+                      <p className="text-gray-300">
+                        {momentumNames || 'The leading records'} currently have the strongest persisted velocity signals in your deal flow.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-gray-300">
+                      No live momentum insight is available yet. New persisted deal-flow snapshots will populate this panel.
+                    </p>
+                  )}
                   <button className="mt-3 text-blue-400 text-sm font-medium hover:text-blue-300 flex items-center gap-1">
                     View detailed analysis <ArrowRight className="w-4 h-4" />
                   </button>
@@ -234,8 +295,17 @@ export function Dashboard() {
           <div className="space-y-6">
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">High Momentum This Week</h3>
-              <div className="space-y-3">
-                {highMomentumStartups.map((startup) => (
+              {isLoading ? (
+                <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-4 text-sm text-gray-400">
+                  Loading live momentum...
+                </div>
+              ) : highMomentumStartups.length === 0 ? (
+                <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-4 text-sm text-gray-400">
+                  No positive momentum signals are persisted yet.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {highMomentumStartups.map((startup) => (
                   <Link
                     key={startup.id}
                     to={`/investor/risk-radar/${startup.id}`}
@@ -253,7 +323,7 @@ export function Dashboard() {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Velocity Spike</span>
                         <span className="text-emerald-400 font-mono font-medium">
-                          +{startup.velocityDelta}%
+                          +{Math.max(startup.velocityDelta, startup.readinessDelta)}%
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -279,8 +349,9 @@ export function Dashboard() {
                       Analyze <ArrowRight className="w-4 h-4" />
                     </button>
                   </Link>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

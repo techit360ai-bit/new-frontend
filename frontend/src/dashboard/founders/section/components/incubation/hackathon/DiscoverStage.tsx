@@ -1,7 +1,8 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useFounderProfile } from "@/contexts/UserContext";
-import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
+import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { OpportunityCard } from "@/dashboard/founders/section/components/founder/OpportunityCard";
 import { RegisteredTeamCard } from "./RegisteredTeamCard";
 
@@ -12,9 +13,36 @@ function isHackathon(o: { type: string }): o is Hackathon {
 export function DiscoverStage() {
   const { founderProfile } = useFounderProfile();
   const registrations = founderProfile.hackathonRegistrations;
-  const allHackathons = OPPORTUNITIES.filter(isHackathon);
+  const [opportunities, setOpportunities] = useState<Hackathon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchFounderOpportunityCatalog()
+      .then((rows) => {
+        if (alive) setOpportunities(rows.filter(isHackathon));
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setOpportunities([]);
+        setError(err instanceof Error ? err.message : "Live hackathons are unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+  const allHackathons = useMemo(() => opportunities, [opportunities]);
   const registeredIds = new Set(registrations.map((r) => r.hackathonId));
   const otherHackathons = allHackathons.filter((h) => !registeredIds.has(h.id));
+
+  if (loading) {
+    return <p className="text-sm text-slate-500">Loading live hackathons...</p>;
+  }
+
+  if (error) {
+    return <p className="text-sm text-red-600">Live hackathons are unavailable: {error}</p>;
+  }
 
   if (registrations.length === 0) {
     return (
@@ -44,8 +72,8 @@ export function DiscoverStage() {
       <div>
         <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Your teams</h2>
         <div className="space-y-3">
-          {registrations.map((reg) => {
-            const hackathon = allHackathons.find((h) => h.id === reg.hackathonId);
+            {registrations.map((reg) => {
+              const hackathon = allHackathons.find((h) => h.id === reg.hackathonId);
             if (!hackathon) return null;
             return <RegisteredTeamCard key={reg.teamId} registration={reg} hackathon={hackathon} />;
           })}

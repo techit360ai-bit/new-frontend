@@ -1,246 +1,278 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { fetchConversations, fetchHistory, restSendDM } from "@/lib/messaging/conversations";
-import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
-import { useMessaging } from "@/contexts/MessagingProvider";
 import { Paperclip, Send } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  createConversation,
+  fetchConversations,
+  fetchHistory,
+  markConvRead,
+  restSendDM,
+} from "@/lib/messaging/conversations";
+import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
+import type { UIConversation, UIMessage } from "@/lib/messaging/types";
+import { useMessaging } from "@/contexts/MessagingProvider";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ConversationMessage {
-  id: string;
-  fromMe: boolean;
-  authorName: string;
-  body: string;
-  timestamp: string;
+function conversationMeta(conversation: Pick<UIConversation, "projectName" | "subject">): string {
+  return [conversation.projectName, conversation.subject].filter(Boolean).join(" · ");
 }
-
-interface Conversation {
-  id: string;
-  participantName: string;
-  participantAvatar: string;
-  projectName: string;
-  subject: string;
-  unread: boolean;
-  thread: ConversationMessage[];
-}
-
-// ─── Mock data (founder-specific conversations) ──────────────────────────────
-
-const founderProjects = [
-  { id: "p1", name: "MediConnect Africa" },
-  { id: "p2", name: "RuralPay" },
-  { id: "p3", name: "HealthTrack Pro" },
-];
-
-const initialConversations: Conversation[] = [
-  {
-    id: "c1",
-    participantName: "Mike Zhang",
-    participantAvatar: "MZ",
-    projectName: "MediConnect Africa",
-    subject: "Series A intro — SeedClub VC",
-    unread: true,
-    thread: [
-      {
-        id: "m1", fromMe: false, authorName: "Mike Zhang",
-        body: "Hey! SeedClub loved your pitch deck. They want to schedule a follow-up call this Thursday. Are you available 2pm WAT?",
-        timestamp: "2026-06-03T08:12:00Z",
-      },
-      {
-        id: "m2", fromMe: false, authorName: "Mike Zhang",
-        body: "They mentioned the 50 beta users metric was the strongest signal. Be ready to talk about your retention numbers too.",
-        timestamp: "2026-06-03T08:14:00Z",
-      },
-    ],
-  },
-  {
-    id: "c2",
-    participantName: "Amina Diallo",
-    participantAvatar: "AD",
-    projectName: "MediConnect Africa",
-    subject: "Collaboration on patient data pipeline",
-    unread: true,
-    thread: [
-      {
-        id: "m3", fromMe: false, authorName: "Amina Diallo",
-        body: "I saw your build log — really impressive progress on the patient records system. We're building something complementary in the data pipeline space. Could we sync next week?",
-        timestamp: "2026-06-02T15:30:00Z",
-      },
-    ],
-  },
-  {
-    id: "c3",
-    participantName: "David Osei",
-    participantAvatar: "DO",
-    projectName: "RuralPay",
-    subject: "Mobile money integration tips",
-    unread: false,
-    thread: [
-      {
-        id: "m4", fromMe: false, authorName: "David Osei",
-        body: "Re: mobile money in West Africa — we found MTN Mobile Money has the best API docs. MTN Mobile Money has the best API docs. Happy to share our integration guide.",
-        timestamp: "2026-06-01T11:45:00Z",
-      },
-      {
-        id: "m5", fromMe: true, authorName: "You",
-        body: "That would be amazing, thanks David! We're targeting Ghana and Nigeria first.",
-        timestamp: "2026-06-01T12:20:00Z",
-      },
-      {
-        id: "m6", fromMe: false, authorName: "David Osei",
-        body: "Smart move. I'll send over the guide — it covers both markets. One caveat: Nigeria's USSD fallback is essential for rural coverage.",
-        timestamp: "2026-06-01T12:35:00Z",
-      },
-    ],
-  },
-  {
-    id: "c4",
-    participantName: "TechIT Ops",
-    participantAvatar: "TO",
-    projectName: "TechIT",
-    subject: "Weekly performance summary",
-    unread: false,
-    thread: [
-      {
-        id: "m7", fromMe: false, authorName: "TechIT Ops",
-        body: "Your execution velocity improved by 6 points this week. Across builds: 4 PRs merged, 15 tasks closed. GSIS now at 68 (+3 from last week). Keep pushing!",
-        timestamp: "2026-06-02T10:00:00Z",
-      },
-    ],
-  },
-];
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export function Messages() {
-  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
-  const [activeId, setActiveId] = useState<string>(initialConversations[0]?.id ?? "");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<UIConversation[]>([]);
+  const [activeId, setActiveId] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const [draft, setDraft] = useState("");
   const [composeOpen, setComposeOpen] = useState(false);
-
-  // Compose state
-  const [cRecipient, setCRecipient] = useState("");
-  const [cProject, setCProject] = useState<string>(founderProjects[0]?.name ?? "");
-  const [cSubject, setCSubject] = useState("");
-  const [cBody, setCBody] = useState("");
+  const [recipientId, setRecipientId] = useState("");
+  const [composeBody, setComposeBody] = useState("");
 
   const { store, socket } = useMessaging();
-  useEffect(() => {
-    let alive = true;
-    fetchConversations().then((list) => {
-      if (alive && list.length > 0) setConversations(list.map(mapConvSummary));
-    });
-    return () => { alive = false; };
-  }, []);
-  // when a conversation is selected, load its history once
-  useEffect(() => {
-    if (!activeId) return;
-    let alive = true;
-    fetchHistory(activeId).then((msgs) => {
-      if (!alive || msgs.length === 0) return;
-      const me = (() => { try { return JSON.parse(localStorage.getItem("techit_user") || "{}").id || ""; } catch { return ""; } })();
-      const thread = msgs.slice().reverse().map((m) => mapMessage(m, me));
-      setConversations((cur) => cur.map((c) => (c.id === activeId ? { ...c, thread } : c)));
-    });
-    return () => { alive = false; };
-  }, [activeId]);
-  // live: when the socket store gains messages for the active conversation, merge
-  useEffect(() => {
-    if (!activeId) return;
-    const live = store.threads[activeId];
-    if (!live || live.length === 0) return;
-    setConversations((cur) => cur.map((c) => {
-      if (c.id !== activeId) return c;
-      const seen = new Set(c.thread.map((m) => m.id));
-      const merged = [...c.thread, ...live.filter((m) => !seen.has(m.id))];
-      return { ...c, thread: merged };
-    }));
-  }, [store, activeId]);
 
-  const active = conversations.find((c) => c.id === activeId);
-  const unreadCount = conversations.filter((c) => c.unread).length;
+  useEffect(() => {
+    const recipient = searchParams.get("recipient")?.trim();
+    if (!recipient) return;
+    setRecipientId(recipient);
+    setComposeOpen(true);
+  }, [searchParams]);
 
-  const handleSelect = (id: string) => {
-    setActiveId(id);
-    setConversations((cur) => cur.map((c) => (c.id === id ? { ...c, unread: false } : c)));
+  const clearComposeRecipient = () => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete("recipient");
+      return next;
+    }, { replace: true });
   };
 
-  const handleSend = () => {
-    if (!draft.trim() || !activeId) return;
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    fetchConversations()
+      .then((list) => {
+        if (!alive) return;
+        const mapped = list.map(mapConvSummary);
+        setConversations(mapped);
+        setActiveId((current) => current || mapped[0]?.id || "");
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setConversations([]);
+        setActiveId("");
+        setError(err instanceof Error ? err.message : "Live conversations are unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!activeId) return;
+    let alive = true;
+    fetchHistory(activeId)
+      .then((messages) => {
+        if (!alive || messages.length === 0) return;
+        const thread = messages
+          .slice()
+          .reverse()
+          .map((message) => mapMessage(message, user?.id ?? ""));
+        const lastMessageId = thread[thread.length - 1]?.id;
+        setConversations((current) =>
+          current.map((conversation) =>
+            conversation.id === activeId
+              ? { ...conversation, thread, lastMessageId }
+              : conversation,
+          ),
+        );
+      })
+      .catch((err) => {
+        if (alive) {
+          toast.error(err instanceof Error ? err.message : "Could not load conversation history.");
+        }
+      });
+    return () => {
+      alive = false;
+    };
+  }, [activeId, user?.id]);
+
+  useEffect(() => {
+    if (!activeId) return;
+    const liveMessages = store.threads[activeId];
+    if (!liveMessages || liveMessages.length === 0) return;
+    setConversations((current) =>
+      current.map((conversation) => {
+        if (conversation.id !== activeId) return conversation;
+        const seen = new Set(conversation.thread.map((message) => message.id));
+        const additions = liveMessages.filter((message) => !seen.has(message.id));
+        const thread = [...conversation.thread, ...additions];
+        return {
+          ...conversation,
+          thread,
+          subject: thread[thread.length - 1]?.body || conversation.subject,
+          lastMessageId: thread[thread.length - 1]?.id || conversation.lastMessageId,
+        };
+      }),
+    );
+  }, [store, activeId]);
+
+  const active = conversations.find((conversation) => conversation.id === activeId);
+  const unreadCount = conversations.filter((conversation) => conversation.unread).length;
+
+  const handleSelect = (id: string) => {
+    const selected = conversations.find((conversation) => conversation.id === id);
+    setActiveId(id);
+    setConversations((current) =>
+      current.map((conversation) =>
+        conversation.id === id ? { ...conversation, unread: false } : conversation,
+      ),
+    );
+    if (selected?.unread && selected.lastMessageId) {
+      void markConvRead(id, selected.lastMessageId);
+    }
+  };
+
+  const appendMessage = (conversationId: string, message: UIMessage) => {
+    setConversations((current) =>
+      current.map((conversation) =>
+        conversation.id === conversationId
+          ? {
+              ...conversation,
+              thread: [...conversation.thread, message],
+              subject: message.body,
+              lastMessageId: message.id,
+            }
+          : conversation,
+      ),
+    );
+  };
+
+  const handleSend = async () => {
+    const body = draft.trim();
+    if (!body || !activeId) return;
     const clientMsgId = `cm-${Date.now()}`;
-    const msg: ConversationMessage = {
+    const optimisticMessage: UIMessage = {
       id: clientMsgId,
       fromMe: true,
       authorName: "You",
-      body: draft.trim(),
+      body,
       timestamp: new Date().toISOString(),
     };
-    setConversations((cur) =>
-      cur.map((c) => (c.id === activeId ? { ...c, thread: [...c.thread, msg] } : c)),
-    );
-    // emit to backend: socket if connected, else REST fallback
-    if (socket) {
-      socket.send({ type: "message.send", data: { convId: activeId, clientMsgId, type: "text", body: draft.trim() } });
-    } else {
-      void restSendDM(activeId, clientMsgId, draft.trim());
+
+    setSending(true);
+    try {
+      if (socket) {
+        socket.send({
+          type: "message.send",
+          data: { convId: activeId, clientMsgId, type: "text", body },
+        });
+        appendMessage(activeId, optimisticMessage);
+        setDraft("");
+      } else {
+        const sent = await restSendDM(activeId, clientMsgId, body);
+        if (!sent) {
+          toast.error("Message was not sent.");
+          return;
+        }
+        appendMessage(activeId, { ...optimisticMessage, id: sent.msgId || clientMsgId });
+        setDraft("");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Message was not sent.");
+    } finally {
+      setSending(false);
     }
-    setDraft("");
   };
 
-  const handleAttach = () => toast("Attachment uploaded (mock)");
+  const handleAttach = () => toast("Attachment uploads are not available yet.");
+  const canCompose = Boolean(recipientId.trim() && composeBody.trim());
 
-  const canCompose = cRecipient.trim() && cSubject.trim() && cBody.trim();
   const resetCompose = () => {
-    setCRecipient("");
-    setCSubject("");
-    setCBody("");
-    setCProject(founderProjects[0]?.name ?? "");
+    setRecipientId("");
+    setComposeBody("");
   };
 
-  const handleCompose = () => {
-    const initials = cRecipient
-      .trim()
-      .split(" ")
-      .map((p) => p[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-    const newConvo: Conversation = {
-      id: `c-${Date.now()}`,
-      participantName: cRecipient.trim(),
-      participantAvatar: initials,
-      projectName: cProject,
-      subject: cSubject.trim(),
-      unread: false,
-      thread: [
-        {
-          id: `m-${Date.now()}`,
-          fromMe: true,
-          authorName: "You",
-          body: cBody.trim(),
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    };
-    setConversations((cur) => [newConvo, ...cur]);
-    setActiveId(newConvo.id);
-    setComposeOpen(false);
-    resetCompose();
-    toast("Message sent");
+  const handleCompose = async () => {
+    if (!canCompose) return;
+    setSending(true);
+    try {
+      const recipient = recipientId.trim();
+      const conversation = await createConversation(recipient);
+      if (!conversation?.id) {
+        toast.error("Conversation was not created.");
+        return;
+      }
+
+      const body = composeBody.trim();
+      const clientMsgId = `cm-${Date.now()}`;
+      const sent = await restSendDM(conversation.id, clientMsgId, body);
+      if (!sent) {
+        toast.error("Message was not sent.");
+        return;
+      }
+
+      const newConversation: UIConversation = {
+        id: conversation.id,
+        participantName: recipient,
+        participantAvatar:
+          recipient
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part[0]?.toUpperCase())
+            .join("") || "?",
+        projectName: "",
+        subject: body,
+        unread: false,
+        lastMessageId: sent.msgId || clientMsgId,
+        thread: [
+          {
+            id: sent.msgId || clientMsgId,
+            fromMe: true,
+            authorName: "You",
+            body,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      };
+      setConversations((current) => [
+        newConversation,
+        ...current.filter((item) => item.id !== newConversation.id),
+      ]);
+      setActiveId(newConversation.id);
+      setComposeOpen(false);
+      resetCompose();
+      clearComposeRecipient();
+      toast("Message sent");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Message was not sent.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
       <div className="p-6 lg:p-8 pb-4 max-w-6xl mx-auto w-full flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            {conversations.length} conversations · {unreadCount} unread
+            {loading
+              ? "Loading live conversations..."
+              : `${conversations.length} conversations · ${unreadCount} unread`}
           </p>
         </div>
         <button
@@ -253,35 +285,46 @@ export function Messages() {
 
       <div className="flex-1 px-6 lg:px-8 pb-6 max-w-6xl mx-auto w-full overflow-hidden">
         <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Inbox */}
           <div className="border border-slate-200 bg-white rounded-xl overflow-y-auto">
             <ul className="divide-y divide-slate-100">
-              {conversations.map((c) => (
-                <li key={c.id}>
+              {loading && (
+                <li className="p-4 text-sm text-slate-500">Loading live conversations...</li>
+              )}
+              {!loading && error && (
+                <li className="p-4 text-sm text-red-600">
+                  Live conversations are unavailable: {error}
+                </li>
+              )}
+              {!loading && !error && conversations.length === 0 && (
+                <li className="p-4 text-sm text-slate-500">No live conversations yet.</li>
+              )}
+              {conversations.map((conversation) => (
+                <li key={conversation.id}>
                   <button
-                    onClick={() => handleSelect(c.id)}
+                    onClick={() => handleSelect(conversation.id)}
                     className={`w-full text-left p-4 hover:bg-slate-50 transition-colors ${
-                      c.id === activeId ? "bg-violet-50" : ""
+                      conversation.id === activeId ? "bg-violet-50" : ""
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-9 h-9 rounded-full bg-violet-100 text-violet-700 font-semibold flex items-center justify-center text-sm shrink-0">
-                        {c.participantAvatar}
+                        {conversation.participantAvatar}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          {c.unread && (
+                          {conversation.unread && (
                             <span className="w-2 h-2 rounded-full bg-violet-500 shrink-0" />
                           )}
                           <p className="text-sm font-semibold text-slate-900 truncate">
-                            {c.participantName}
+                            {conversation.participantName}
                           </p>
                         </div>
                         <p className="text-xs text-slate-500 truncate">
-                          {c.projectName} · {c.subject}
+                          {conversationMeta(conversation) || "Conversation"}
                         </p>
                         <p className="text-xs text-slate-400 truncate mt-0.5">
-                          {c.thread[c.thread.length - 1]?.body}
+                          {conversation.thread[conversation.thread.length - 1]?.body ||
+                            conversation.subject}
                         </p>
                       </div>
                     </div>
@@ -291,40 +334,42 @@ export function Messages() {
             </ul>
           </div>
 
-          {/* Conversation pane */}
           <div className="md:col-span-2 border border-slate-200 bg-white rounded-xl flex flex-col overflow-hidden">
             {!active ? (
               <div className="flex-1 flex items-center justify-center text-sm text-slate-500">
-                Select a conversation
+                {loading ? "Loading conversation..." : "Select a conversation"}
               </div>
             ) : (
               <>
                 <div className="px-5 py-3 border-b border-slate-100">
                   <p className="font-semibold text-slate-900">{active.participantName}</p>
                   <p className="text-xs text-slate-500">
-                    {active.projectName} · {active.subject}
+                    {conversationMeta(active) || "Conversation"}
                   </p>
                 </div>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
-                  {active.thread.map((m) => (
+                  {active.thread.length === 0 && (
+                    <p className="text-sm text-slate-500">No persisted messages in this conversation.</p>
+                  )}
+                  {active.thread.map((message) => (
                     <div
-                      key={m.id}
-                      className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}
+                      key={message.id}
+                      className={`flex ${message.fromMe ? "justify-end" : "justify-start"}`}
                     >
                       <div
                         className={`max-w-md px-3 py-2 rounded-lg text-sm ${
-                          m.fromMe
+                          message.fromMe
                             ? "bg-violet-600 text-white"
                             : "bg-slate-100 text-slate-900"
                         }`}
                       >
-                        <p>{m.body}</p>
+                        <p>{message.body}</p>
                         <p
                           className={`text-[10px] mt-1 ${
-                            m.fromMe ? "text-violet-200" : "text-slate-500"
+                            message.fromMe ? "text-violet-200" : "text-slate-500"
                           }`}
                         >
-                          {new Date(m.timestamp).toLocaleTimeString([], {
+                          {new Date(message.timestamp).toLocaleTimeString([], {
                             hour: "numeric",
                             minute: "2-digit",
                           })}
@@ -336,29 +381,31 @@ export function Messages() {
                 <div className="border-t border-slate-100 p-3 flex items-end gap-2">
                   <textarea
                     value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder="Reply…"
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder="Reply..."
                     rows={2}
                     className="flex-1 resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend();
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        void handleSend();
                       }
                     }}
                   />
                   <button
                     onClick={handleAttach}
+                    aria-label="Attach file"
                     className="h-9 w-9 text-slate-500 hover:bg-slate-100 rounded-lg flex items-center justify-center"
                   >
                     <Paperclip className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={handleSend}
-                    disabled={!draft.trim()}
+                    onClick={() => void handleSend()}
+                    disabled={!draft.trim() || sending}
                     className="h-9 px-4 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 flex items-center gap-1.5 transition-colors"
                   >
-                    <Send className="w-3.5 h-3.5" /> Send
+                    <Send className="w-3.5 h-3.5" />
+                    {sending ? "Sending..." : "Send"}
                   </button>
                 </div>
               </>
@@ -367,12 +414,14 @@ export function Messages() {
         </div>
       </div>
 
-      {/* Compose dialog */}
       <Dialog
         open={composeOpen}
-        onOpenChange={(o) => {
-          setComposeOpen(o);
-          if (!o) resetCompose();
+        onOpenChange={(open) => {
+          setComposeOpen(open);
+          if (!open) {
+            resetCompose();
+            clearComposeRecipient();
+          }
         }}
       >
         <DialogContent className="max-w-md">
@@ -383,41 +432,18 @@ export function Messages() {
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">To</label>
               <input
-                value={cRecipient}
-                onChange={(e) => setCRecipient(e.target.value)}
-                placeholder="Mike Zhang"
+                value={recipientId}
+                onChange={(event) => setRecipientId(event.target.value)}
+                placeholder="Recipient user ID"
                 className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm focus:outline-none focus:border-violet-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Project</label>
-              <select
-                value={cProject}
-                onChange={(e) => setCProject(e.target.value)}
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:border-violet-500"
-              >
-                {founderProjects.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Subject</label>
-              <input
-                value={cSubject}
-                onChange={(e) => setCSubject(e.target.value)}
-                placeholder="Quick question"
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm focus:outline-none focus:border-violet-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Body</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Message</label>
               <textarea
-                value={cBody}
-                onChange={(e) => setCBody(e.target.value)}
-                rows={4}
+                value={composeBody}
+                onChange={(event) => setComposeBody(event.target.value)}
+                rows={5}
                 className="w-full resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
               />
             </div>
@@ -430,11 +456,11 @@ export function Messages() {
               Cancel
             </button>
             <button
-              onClick={handleCompose}
-              disabled={!canCompose}
+              onClick={() => void handleCompose()}
+              disabled={!canCompose || sending}
               className="px-4 py-2 text-sm rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
             >
-              Send
+              {sending ? "Sending..." : "Send"}
             </button>
           </DialogFooter>
         </DialogContent>

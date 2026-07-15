@@ -1,13 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
 import { Copy, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
-import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
+import { ApiError } from "@/lib/api/client";
+import { acceptHackathonInvite, fetchHackathonInvite } from "@/lib/api/hackathon";
+import { normalizePublishedHackathon } from "@/lib/api/opportunities";
 
 type InviteState =
-  | { kind: "ok"; hackathon: Hackathon; teamName: string; leaderName: string; openRoles: string[]; memberCount: number; teamSize: number }
+  | { kind: "loading" }
+  | { kind: "ok"; hackathon: Hackathon; teamName: string; leaderName: string; openRoles: string[]; invitedRole: string; memberCount: number; teamSize: number }
   | { kind: "leader"; hackathonId: string; teamId: string; inviteToken: string }
   | { kind: "token-mismatch" }
   | { kind: "not-found" }
@@ -20,36 +23,58 @@ export default function InviteAcceptPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const navigate = useNavigate();
-  const { founderProfile, addHackathonMember } = useFounderProfile();
+  const { registerForHackathon } = useFounderProfile();
+  const [state, setState] = useState<InviteState>({ kind: "loading" });
 
-  const state = useMemo<InviteState>(() => {
-    if (!hackathonId || !teamId) return { kind: "not-found" };
-    const hackathon = OPPORTUNITIES.find(
-      (o): o is Hackathon => o.type === "hackathon" && o.id === hackathonId,
-    );
-    const reg = founderProfile.hackathonRegistrations.find(
-      (r) => r.hackathonId === hackathonId && r.teamId === teamId,
-    );
-    if (!reg) return { kind: "not-found" };
-    if (!hackathon) return { kind: "hackathon-missing" };
-    if (reg.inviteToken !== token) return { kind: "token-mismatch" };
-    if (reg.role === "leader") {
-      return { kind: "leader", hackathonId, teamId, inviteToken: reg.inviteToken };
+  useEffect(() => {
+    let alive = true;
+    if (!hackathonId || !teamId || !token) {
+      setState({ kind: "not-found" });
+      return;
     }
-    if (reg.rosterClosed) return { kind: "roster-closed" };
-    const memberCount = reg.members.length + 1;
-    const teamSize = memberCount + reg.openRoles.length;
-    if (memberCount >= teamSize) return { kind: "team-full", hackathonId };
-    return {
-      kind: "ok",
-      hackathon,
-      teamName: reg.teamName,
-      leaderName: founderProfile.name,
-      openRoles: reg.openRoles,
-      memberCount,
-      teamSize,
-    };
-  }, [hackathonId, teamId, token, founderProfile.hackathonRegistrations, founderProfile.name]);
+    setState({ kind: "loading" });
+    fetchHackathonInvite(hackathonId, teamId, token)
+      .then((invite) => {
+        if (!alive) return;
+        const hackathon = normalizePublishedHackathon(invite.hackathon);
+        if (!hackathon) {
+          setState({ kind: "hackathon-missing" });
+        } else if (invite.isLeader) {
+          setState({ kind: "leader", hackathonId, teamId, inviteToken: token });
+        } else if (invite.rosterClosed) {
+          setState({ kind: "roster-closed" });
+        } else if (invite.memberCount >= invite.teamSize) {
+          setState({ kind: "team-full", hackathonId });
+        } else {
+          setState({
+            kind: "ok",
+            hackathon,
+            teamName: invite.teamName,
+            leaderName: invite.leaderName,
+            openRoles: invite.openRoles,
+            invitedRole: invite.invitedRole ?? "",
+            memberCount: invite.memberCount,
+            teamSize: invite.teamSize,
+          });
+        }
+      })
+      .catch((error) => {
+        if (!alive) return;
+        const code = error instanceof ApiError
+          ? String((error.body as { error?: string } | null)?.error || "")
+          : "";
+        setState(code === "invite_token_invalid" ? { kind: "token-mismatch" } : { kind: "not-found" });
+      });
+    return () => { alive = false; };
+  }, [hackathonId, teamId, token]);
+
+  if (state.kind === "loading") {
+    return (
+      <Wrapper>
+        <p className="text-sm text-slate-500">Loading live team invite...</p>
+      </Wrapper>
+    );
+  }
 
   if (state.kind === "leader") {
     const url = `https://techit.ai/h/${state.hackathonId}/team/${state.teamId}?token=${state.inviteToken}`;
@@ -77,10 +102,19 @@ export default function InviteAcceptPage() {
   }
 
   if (state.kind === "ok") {
-    return <AcceptForm state={state} teamId={teamId!} addHackathonMember={addHackathonMember} navigate={navigate} />;
+    return (
+      <AcceptForm
+        state={state}
+        hackathonId={hackathonId!}
+        teamId={teamId!}
+        token={token}
+        registerForHackathon={registerForHackathon}
+        navigate={navigate}
+      />
+    );
   }
 
-  const messages: Record<Exclude<InviteState["kind"], "ok" | "leader">, { title: string; body: React.ReactNode }> = {
+  const messages: Record<Exclude<InviteState["kind"], "ok" | "leader" | "loading">, { title: string; body: React.ReactNode }> = {
     "token-mismatch":     { title: "This invite link is invalid or has expired.", body: <BackLink to="/opportunity-hub" /> },
     "not-found":          { title: "We can't find that team.", body: <p className="text-sm text-slate-600 mt-2">The invite link may be from a hackathon you're not signed in for. <BackLink to="/opportunity-hub" /></p> },
     "team-full":          { title: "This team is already full.", body: <Link to={`/opportunity-hub/${(state as { hackathonId: string }).hackathonId}`} className="inline-block mt-4 text-sm font-medium text-violet-700 hover:underline">Find another team in the hackathon →</Link> },
@@ -98,25 +132,45 @@ export default function InviteAcceptPage() {
 
 function AcceptForm({
   state,
+  hackathonId,
   teamId,
-  addHackathonMember,
+  token,
+  registerForHackathon,
   navigate,
 }: {
   state: Extract<InviteState, { kind: "ok" }>;
+  hackathonId: string;
   teamId: string;
-  addHackathonMember: (teamId: string, m: { collaboratorId: string; name: string; role: string; acceptedAt: string }) => void;
+  token: string;
+  registerForHackathon: ReturnType<typeof useFounderProfile>["registerForHackathon"];
   navigate: (path: string) => void;
 }) {
-  const [selectedRole, setSelectedRole] = useState<string>(state.openRoles[0] ?? "");
-  const handleJoin = () => {
-    addHackathonMember(teamId, {
-      collaboratorId: "mock_self",
-      name: "Sample Collaborator",
-      role: selectedRole,
-      acceptedAt: new Date().toISOString(),
-    });
-    toast.success(`Joined ${state.teamName} for ${state.hackathon.title}.`);
-    navigate("/incubation-hub?panel=hackathon");
+  const [selectedRole, setSelectedRole] = useState<string>(
+    state.invitedRole || state.openRoles[0] || "",
+  );
+  const [joining, setJoining] = useState(false);
+  const handleJoin = async () => {
+    if (!selectedRole) return;
+    setJoining(true);
+    try {
+      const registration = await acceptHackathonInvite(
+        hackathonId,
+        teamId,
+        token,
+        selectedRole,
+      );
+      if (!registration) {
+        toast.error("The team membership was not persisted.");
+        return;
+      }
+      registerForHackathon(registration);
+      toast.success(`Joined ${state.teamName} for ${state.hackathon.title}.`);
+      navigate("/incubation-hub?panel=hackathon");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "The invite could not be accepted.");
+    } finally {
+      setJoining(false);
+    }
   };
   const handleDecline = () => {
     toast.info("Invite declined.");
@@ -158,8 +212,13 @@ function AcceptForm({
         <button type="button" onClick={handleDecline} className="text-sm font-medium px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
           Decline
         </button>
-        <button type="button" onClick={handleJoin} className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700">
-          Join team & continue →
+        <button
+          type="button"
+          onClick={() => void handleJoin()}
+          disabled={!selectedRole || joining}
+          className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:bg-slate-300"
+        >
+          {joining ? "Joining..." : "Join team & continue →"}
         </button>
       </div>
     </Wrapper>

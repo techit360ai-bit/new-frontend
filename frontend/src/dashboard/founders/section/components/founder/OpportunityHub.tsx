@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Opportunity, OpportunityType, OpportunityStatus } from "@/dashboard/_shared/opportunities/types";
+import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { OpportunityCard } from "./OpportunityCard";
 
 type TypeFilter = "all" | OpportunityType;
@@ -18,13 +18,33 @@ const TYPE_LABELS: Record<TypeFilter, string> = {
 const STATUS_RANK: Record<OpportunityStatus, number> = { open: 0, "closing-soon": 1, closed: 2 };
 
 export default function OpportunityHub() {
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("open");
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    let alive = true;
+    fetchFounderOpportunityCatalog()
+      .then((rows) => {
+        if (alive) setOpportunities(rows);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setOpportunities([]);
+        setError(err instanceof Error ? err.message : "Live opportunities are unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return OPPORTUNITIES
+    return opportunities
       .filter((o) => typeFilter === "all" || o.type === typeFilter)
       .filter((o) => statusFilter === "all" || o.status === statusFilter)
       .filter((o) => {
@@ -40,7 +60,7 @@ export default function OpportunityHub() {
         if (r !== 0) return r;
         return new Date(a.applyDeadline).getTime() - new Date(b.applyDeadline).getTime();
       });
-  }, [typeFilter, statusFilter, search]);
+  }, [opportunities, typeFilter, statusFilter, search]);
 
   const featured: Opportunity | null = useMemo(() => {
     return filtered.find((o) => o.featured && o.status === "open") ?? filtered.find((o) => o.status === "open") ?? filtered[0] ?? null;
@@ -50,13 +70,13 @@ export default function OpportunityHub() {
 
   const counts = useMemo(() => {
     const c: Record<TypeFilter, number> = { all: 0, hackathon: 0, program: 0, funding: 0, event: 0 };
-    for (const o of OPPORTUNITIES) {
+    for (const o of opportunities) {
       if (statusFilter !== "all" && o.status !== statusFilter) continue;
       c.all++;
       c[o.type]++;
     }
     return c;
-  }, [statusFilter]);
+  }, [opportunities, statusFilter]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -108,10 +128,18 @@ export default function OpportunityHub() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="border border-dashed border-slate-300 rounded-xl p-10 text-center">
+          <p className="text-sm text-slate-500">Loading live opportunities...</p>
+        </div>
+      ) : error ? (
+        <div className="border border-red-200 bg-red-50 rounded-xl p-10 text-center">
+          <p className="text-sm text-red-700">Live opportunities are unavailable: {error}</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="border border-dashed border-slate-300 rounded-xl p-10 text-center">
           <p className="text-sm text-slate-600">
-            {OPPORTUNITIES.length === 0
+            {opportunities.length === 0
               ? "Organizations haven't published any opportunities yet."
               : `No ${typeFilter === "all" ? "" : TYPE_LABELS[typeFilter].toLowerCase() + " "}opportunities match. Try a different filter.`}
           </p>

@@ -1,10 +1,8 @@
 // frontend/src/lib/api/heatmap.ts
 //
-// Investor Global Heatmap geo signal — ai-router /api/v1/investor/heatmap.
-// Provides the per-region readiness the engine previously lacked. Falls back to
-// the prior hardcoded values offline.
+// Investor Global Heatmap geo signal — BACKEND /api/domain/investor/heatmap.
 
-import { apiGet, withFallback } from "./client";
+import { domainGet } from "@/lib/domainApi";
 
 export interface RegionSignal {
   name: string;
@@ -21,16 +19,13 @@ export interface HeatmapSignal {
   sectors: SectorSignal[];
 }
 
-export const FALLBACK_HEATMAP: HeatmapSignal = {
-  regions: [
-    { name: "North America", avgReadiness: 84, complianceRate: 78, color: "text-emerald-400" },
-    { name: "Europe",        avgReadiness: 86, complianceRate: 82, color: "text-blue-400" },
-    { name: "Asia",          avgReadiness: 78, complianceRate: 64, color: "text-purple-400" },
-  ],
+export const EMPTY_HEATMAP: HeatmapSignal = {
+  regions: [],
   sectors: [],
 };
 
-/** GET /api/v1/investor/heatmap — per-region readiness/compliance + sector growth. */
+/** GET /api/domain/investor/heatmap — per-region readiness/compliance + sector growth. */
 export function fetchHeatmap(): Promise<HeatmapSignal> {
-  return withFallback(() => apiGet<HeatmapSignal>("/investor/heatmap"), FALLBACK_HEATMAP, "heatmap");
+  return domainGet<{ heatmap: HeatmapSignal | HeatmapSignal[] }>("/investor/heatmap")
+    .then(({ heatmap }) => Array.isArray(heatmap) ? heatmap[0] ?? EMPTY_HEATMAP : heatmap ?? EMPTY_HEATMAP);
 }

@@ -1,39 +1,50 @@
 import { useEffect, useState } from 'react';
-import { mockStartups } from '../../data/mockData';
 import { Globe, Filter, MapPin, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { fetchHeatmap, FALLBACK_HEATMAP } from '@/lib/api/heatmap';
+import { EMPTY_HEATMAP, fetchHeatmap, type RegionSignal, type SectorSignal } from '@/lib/api/heatmap';
+
+const REGION_COLORS: Record<string, string> = {
+  'North America': 'text-emerald-400',
+  Europe: 'text-blue-400',
+  Asia: 'text-purple-400',
+};
 
 export function GlobalHeatmap() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedSector, setSelectedSector] = useState<string>('all');
+  const [regionSignal, setRegionSignal] = useState<RegionSignal[]>(EMPTY_HEATMAP.regions);
+  const [sectorSignal, setSectorSignal] = useState<SectorSignal[]>(EMPTY_HEATMAP.sectors);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Per-region readiness comes from ai-router (the engine's geo signal); counts
-  // stay client-derived from the pipeline. Initial = fallback so first paint is
-  // unchanged and the screen survives the backend being unavailable.
-  const [regionSignal, setRegionSignal] = useState(FALLBACK_HEATMAP.regions);
   useEffect(() => {
     let alive = true;
-    fetchHeatmap().then((data) => { if (alive && data.regions?.length) setRegionSignal(data.regions); });
+    fetchHeatmap()
+      .then((data) => {
+        if (!alive) return;
+        setRegionSignal(data.regions ?? []);
+        setSectorSignal(data.sectors ?? []);
+        setError(null);
+      })
+      .catch(() => {
+        if (alive) setError('Unable to load live heatmap signals.');
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
+      });
     return () => { alive = false; };
   }, []);
 
-  const readinessFor = (name: string) =>
-    regionSignal.find((r) => r.name === name)?.avgReadiness ?? 0;
-
-  const regions = [
-    { name: 'North America', startups: mockStartups.filter(s => s.region === 'North America').length, avgReadiness: readinessFor('North America'), color: 'text-emerald-400' },
-    { name: 'Europe', startups: mockStartups.filter(s => s.region === 'Europe').length, avgReadiness: readinessFor('Europe'), color: 'text-blue-400' },
-    { name: 'Asia', startups: mockStartups.filter(s => s.region === 'Asia').length, avgReadiness: readinessFor('Asia'), color: 'text-purple-400' },
-  ];
-
-  const sectors = ['all', 'SaaS', 'AI/ML', 'FinTech', 'BioTech', 'Infrastructure', 'Security'];
-
-  const filteredStartups = mockStartups.filter(startup => {
-    if (selectedRegion && startup.region !== selectedRegion) return false;
-    if (selectedSector !== 'all' && startup.sector !== selectedSector) return false;
-    return true;
-  });
+  const regions = regionSignal.map((region) => ({
+    ...region,
+    color: region.color || REGION_COLORS[region.name] || 'text-emerald-400',
+  }));
+  const sectors = ['all', ...sectorSignal.map((signal) => signal.sector)];
+  const visibleSectors = selectedSector === 'all'
+    ? sectorSignal
+    : sectorSignal.filter((signal) => signal.sector === selectedSector);
+  const visibleRegions = selectedRegion
+    ? regions.filter((region) => region.name === selectedRegion)
+    : regions;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -65,6 +76,12 @@ export function GlobalHeatmap() {
           </select>
         </div>
 
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         {/* Heatmap Visual */}
         <div className="bg-[#111111] border border-gray-800 rounded-lg p-8 mb-6">
           <div className="flex items-center gap-2 mb-6">
@@ -72,8 +89,21 @@ export function GlobalHeatmap() {
             <h3 className="text-lg font-semibold text-white">Regional Distribution</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {regions.map((region) => (
+          {isLoading ? (
+            <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-8 text-center text-gray-400">
+              Loading live heatmap signals...
+            </div>
+          ) : regions.length === 0 ? (
+            <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-8 text-center">
+              <Globe className="mx-auto mb-3 h-8 w-8 text-gray-500" />
+              <h3 className="text-lg font-semibold text-white mb-1">No regional signals yet</h3>
+              <p className="text-sm text-gray-400">
+                Regional readiness and compliance data will appear after live deal-flow snapshots are persisted.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {regions.map((region) => (
               <button
                 key={region.name}
                 onClick={() => setSelectedRegion(selectedRegion === region.name ? null : region.name)}
@@ -89,10 +119,6 @@ export function GlobalHeatmap() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-400">Startups</span>
-                    <span className="text-2xl font-bold font-mono text-white">{region.startups}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-400">Avg Readiness</span>
                     <span className={`text-2xl font-bold font-mono ${region.color}`}>{region.avgReadiness}</span>
                   </div>
@@ -102,114 +128,113 @@ export function GlobalHeatmap() {
                       style={{ width: `${region.avgReadiness}%` }}
                     ></div>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-400">Compliance</span>
+                    <span className="text-2xl font-bold font-mono text-emerald-400">{region.complianceRate}%</span>
+                  </div>
                 </div>
               </button>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Sector Growth Patterns */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Sector Growth Patterns</h3>
-            <div className="space-y-3">
-              {['SaaS', 'AI/ML', 'FinTech', 'BioTech', 'Infrastructure', 'Security'].map((sector) => {
-                const sectorStartups = mockStartups.filter(s => s.sector === sector);
-                const avgGrowth = sectorStartups.reduce((acc, s) => acc + s.revenueGrowth, 0) / sectorStartups.length;
-                return (
-                  <div key={sector} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+            {visibleSectors.length === 0 ? (
+              <p className="text-sm text-gray-400">
+                Sector growth signals will appear after live heatmap snapshots are recorded.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {visibleSectors.map((signal) => (
+                  <div key={signal.sector} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      <span className="text-white font-medium">{sector}</span>
+                      <span className="text-white font-medium">{signal.sector}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-sm text-gray-400">{sectorStartups.length} startups</span>
                       <div className="flex items-center gap-1 text-emerald-400">
                         <TrendingUp className="w-4 h-4" />
-                        <span className="font-mono text-sm">+{avgGrowth.toFixed(0)}%</span>
+                        <span className="font-mono text-sm">
+                          {signal.avgGrowth >= 0 ? '+' : ''}{signal.avgGrowth.toFixed(0)}%
+                        </span>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Compliance Readiness by Region</h3>
-            <div className="space-y-4">
-              {regions.map((region) => {
-                const regionStartups = mockStartups.filter(s => s.region === region.name);
-                const compliantCount = regionStartups.filter(s => s.complianceVerified).length;
-                const complianceRate = (compliantCount / regionStartups.length) * 100;
-                
-                return (
+            {visibleRegions.length === 0 ? (
+              <p className="text-sm text-gray-400">
+                Regional compliance rates are not available yet.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {visibleRegions.map((region) => (
                   <div key={region.name}>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-white">{region.name}</span>
-                      <span className="text-sm font-mono text-emerald-400">{complianceRate.toFixed(0)}%</span>
+                      <span className="text-sm font-mono text-emerald-400">{region.complianceRate.toFixed(0)}%</span>
                     </div>
                     <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-emerald-500"
-                        style={{ width: `${complianceRate}%` }}
+                        style={{ width: `${region.complianceRate}%` }}
                       ></div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Filtered Startups List */}
+        {/* Live Signal Summary */}
         <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-white mb-4">
-            {selectedRegion ? `Startups in ${selectedRegion}` : 'All Startups'} 
+            {selectedRegion ? `Signals in ${selectedRegion}` : 'All Regional Signals'}
             {selectedSector !== 'all' && ` - ${selectedSector}`}
-            <span className="ml-2 text-gray-400 font-normal">({filteredStartups.length})</span>
+            <span className="ml-2 text-gray-400 font-normal">({visibleRegions.length})</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredStartups.map((startup) => (
-              <Link
-                key={startup.id}
-                to={`/investor/risk-radar/${startup.id}`}
-                className="p-4 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg transition-all group"
+          {visibleRegions.length === 0 ? (
+            <p className="text-sm text-gray-400">
+              No live heatmap records match the selected filters.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {visibleRegions.map((region) => (
+              <div
+                key={region.name}
+                className="p-4 bg-gray-800/50 border border-gray-700 rounded-lg"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h4 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
-                      {startup.name}
-                    </h4>
-                    <p className="text-sm text-gray-400">{startup.sector}</p>
+                    <h4 className="font-semibold text-white">{region.name}</h4>
+                    <p className="text-sm text-gray-400">Live regional aggregate</p>
                   </div>
                   <MapPin className="w-4 h-4 text-gray-400" />
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Readiness</span>
-                    <span className="font-mono text-emerald-400">{startup.readinessScore}</span>
+                    <span className="font-mono text-emerald-400">{region.avgReadiness}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Revenue</span>
-                    <span className="font-mono text-white">${(startup.mrr / 1000).toFixed(0)}K</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Risk</span>
-                    <span className={`capitalize ${
-                      startup.riskLevel === 'low'
-                        ? 'text-emerald-400'
-                        : startup.riskLevel === 'moderate'
-                        ? 'text-amber-400'
-                        : 'text-red-400'
-                    }`}>
-                      {startup.riskLevel}
-                    </span>
+                    <span className="text-gray-400">Compliance</span>
+                    <span className="font-mono text-white">{region.complianceRate}%</span>
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
+              </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

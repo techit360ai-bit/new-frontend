@@ -6,20 +6,18 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 interface VideoCallProps {
   onClose: () => void;
   participants?: Array<{ name: string; avatar: string; isMuted?: boolean; isVideoOff?: boolean }>;
+  self?: { name: string; avatar: string };
   isPIP?: boolean;
   onTogglePIP?: () => void;
 }
 
-export function VideoCall({ onClose, participants, isPIP = false, onTogglePIP }: VideoCallProps) {
+export function VideoCall({ onClose, participants, self, isPIP = false, onTogglePIP }: VideoCallProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
 
-  const defaultParticipants = participants || [
-    { name: 'Sarah Chen', avatar: 'SC', isMuted: false, isVideoOff: false },
-    { name: 'Mike Johnson', avatar: 'MJ', isMuted: true, isVideoOff: false },
-    { name: 'Alex Kim', avatar: 'AK', isMuted: false, isVideoOff: false },
-  ];
+  const liveParticipants = participants ?? [];
+  const currentUser = self ?? { name: 'You', avatar: 'YU' };
 
   if (isPIP) {
     return (
@@ -27,7 +25,7 @@ export function VideoCall({ onClose, participants, isPIP = false, onTogglePIP }:
         <div className="relative">
           <div className="aspect-video bg-gray-900 flex items-center justify-center">
             <Avatar className="w-16 h-16">
-              <AvatarFallback className="bg-[#2196F3] text-white text-xl">SC</AvatarFallback>
+              <AvatarFallback className="bg-[#2196F3] text-white text-xl">{currentUser.avatar}</AvatarFallback>
             </Avatar>
           </div>
           <div className="absolute top-3 right-3 flex gap-2">
@@ -80,8 +78,8 @@ export function VideoCall({ onClose, participants, isPIP = false, onTogglePIP }:
             <Video className="w-5 h-5 text-[#2196F3]" />
           </div>
           <div>
-            <h2 className="text-white font-semibold">Sprint Planning Meeting</h2>
-            <p className="text-sm text-gray-400">{defaultParticipants.length} participants</p>
+            <h2 className="text-white font-semibold">Workspace Call</h2>
+            <p className="text-sm text-gray-400">{liveParticipants.length + 1} participants</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -104,9 +102,9 @@ export function VideoCall({ onClose, participants, isPIP = false, onTogglePIP }:
 
       {/* Main Video Area */}
       <div className="flex-1 grid grid-cols-2 gap-4 p-6">
-        {defaultParticipants.map((participant, idx) => (
+        {liveParticipants.map((participant) => (
           <div
-            key={idx}
+            key={participant.name}
             className="bg-gray-900 rounded-lg relative overflow-hidden flex items-center justify-center"
           >
             {participant.isVideoOff ? (
@@ -126,7 +124,7 @@ export function VideoCall({ onClose, participants, isPIP = false, onTogglePIP }:
             )}
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
               <div className="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full">
-                <span className="text-white text-sm font-medium">{participant.name}</span>
+              <span className="text-white text-sm font-medium">{participant.name}</span>
                 {participant.isMuted && <MicOff className="w-4 h-4 text-red-400" />}
               </div>
               <Button variant="ghost" size="sm" className="w-8 h-8 p-0 bg-black/50 hover:bg-black/70">
@@ -139,18 +137,18 @@ export function VideoCall({ onClose, participants, isPIP = false, onTogglePIP }:
         <div className="col-span-2 bg-gray-900 rounded-lg relative overflow-hidden flex items-center justify-center">
           {isVideoOff ? (
             <Avatar className="w-32 h-32">
-              <AvatarFallback className="bg-[#2196F3] text-white text-4xl">JD</AvatarFallback>
+              <AvatarFallback className="bg-[#2196F3] text-white text-4xl">{currentUser.avatar}</AvatarFallback>
             </Avatar>
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-cyan-900 to-blue-900 flex items-center justify-center">
               <Avatar className="w-32 h-32">
-                <AvatarFallback className="bg-[#2196F3] text-white text-4xl">JD</AvatarFallback>
+                <AvatarFallback className="bg-[#2196F3] text-white text-4xl">{currentUser.avatar}</AvatarFallback>
               </Avatar>
             </div>
           )}
           <div className="absolute bottom-4 left-4">
             <div className="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full">
-              <span className="text-white font-medium">You</span>
+              <span className="text-white font-medium">{currentUser.name}</span>
               {isMuted && <MicOff className="w-4 h-4 text-red-400" />}
             </div>
           </div>

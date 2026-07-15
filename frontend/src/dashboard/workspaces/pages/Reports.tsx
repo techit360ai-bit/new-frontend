@@ -1,84 +1,114 @@
-import { TrendingUp, TrendingDown, DollarSign, CheckCircle2, Clock, Download } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Activity, CheckCircle2, Clock, Download, TrendingDown, TrendingUp } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { listTasks } from '../lib/api/tasks';
+import { listActivity } from '../lib/api/connectors';
+import type { ActivityEvent, AgentTask, AgentTaskStatus } from '../lib/types';
 
-const contributorData = [
-  {
-    id: 1,
-    name: 'Sarah Chen',
-    avatar: 'SC',
-    color: 'bg-blue-500',
-    timeSpent: 87,
-    tasksCompleted: 23,
-    powerScore: 94,
-    trend: 'up',
-    revenue: 12540,
-  },
-  {
-    id: 2,
-    name: 'Mike Johnson',
-    avatar: 'MJ',
-    color: 'bg-green-500',
-    timeSpent: 76,
-    tasksCompleted: 19,
-    powerScore: 88,
-    trend: 'up',
-    revenue: 10890,
-  },
-  {
-    id: 3,
-    name: 'Alex Kim',
-    avatar: 'AK',
-    color: 'bg-purple-500',
-    timeSpent: 68,
-    tasksCompleted: 17,
-    powerScore: 82,
-    trend: 'down',
-    revenue: 9760,
-  },
-  {
-    id: 4,
-    name: 'Emma Wilson',
-    avatar: 'EW',
-    color: 'bg-pink-500',
-    timeSpent: 64,
-    tasksCompleted: 15,
-    powerScore: 79,
-    trend: 'up',
-    revenue: 9120,
-  },
-  {
-    id: 5,
-    name: 'David Lee',
-    avatar: 'DL',
-    color: 'bg-yellow-500',
-    timeSpent: 52,
-    tasksCompleted: 12,
-    powerScore: 71,
-    trend: 'up',
-    revenue: 7480,
-  },
-];
+interface ContributorRow {
+  id: string;
+  name: string;
+  avatar: string;
+  tasksTotal: number;
+  tasksCompleted: number;
+  eventCount: number;
+  powerScore: number;
+  trend: 'up' | 'down';
+}
 
-const activityData = [
-  { day: 'Mon', hours: 7.5 },
-  { day: 'Tue', hours: 8.2 },
-  { day: 'Wed', hours: 6.8 },
-  { day: 'Thu', hours: 9.1 },
-  { day: 'Fri', hours: 7.9 },
-  { day: 'Sat', hours: 3.5 },
-  { day: 'Sun', hours: 2.0 },
-];
+const STATUS_ORDER: AgentTaskStatus[] = ['queued', 'running', 'needs_approval', 'done', 'failed', 'cancelled'];
+const STATUS_COLORS: Record<AgentTaskStatus, string> = {
+  queued: '#94A3B8',
+  running: '#2196F3',
+  needs_approval: '#F59E0B',
+  done: '#10B981',
+  failed: '#EF4444',
+  cancelled: '#64748B',
+};
+
+function initials(value: string): string {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'WS';
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
+}
+
+function contributorName(agentId: string): string {
+  return agentId || 'Workspace';
+}
+
+function buildContributors(tasks: AgentTask[]): ContributorRow[] {
+  const groups = new Map<string, AgentTask[]>();
+  for (const task of tasks) {
+    const key = task.agentId || 'workspace';
+    groups.set(key, [...(groups.get(key) ?? []), task]);
+  }
+
+  return [...groups.entries()]
+    .map(([id, rows]) => {
+      const completed = rows.filter((task) => task.status === 'done').length;
+      const failed = rows.filter((task) => task.status === 'failed' || task.status === 'cancelled').length;
+      const eventCount = rows.reduce((sum, task) => sum + task.events.length, 0);
+      const trend: ContributorRow['trend'] = failed > 0 ? 'down' : 'up';
+      return {
+        id,
+        name: contributorName(id),
+        avatar: initials(contributorName(id)),
+        tasksTotal: rows.length,
+        tasksCompleted: completed,
+        eventCount,
+        powerScore: rows.length === 0 ? 0 : Math.round((completed / rows.length) * 100),
+        trend,
+      };
+    })
+    .sort((a, b) => b.powerScore - a.powerScore || b.tasksCompleted - a.tasksCompleted);
+}
+
+function buildStatusData(tasks: AgentTask[]): Array<{ status: AgentTaskStatus; count: number }> {
+  return STATUS_ORDER.map((status) => ({
+    status,
+    count: tasks.filter((task) => task.status === status).length,
+  })).filter((row) => row.count > 0);
+}
 
 export function Reports() {
-  const totalContributions = contributorData.reduce((sum, c) => sum + c.tasksCompleted, 0);
-  const totalRevenue = contributorData.reduce((sum, c) => sum + c.revenue, 0);
-  const totalHours = contributorData.reduce((sum, c) => sum + c.timeSpent, 0);
+  const [tasks, setTasks] = useState<AgentTask[]>([]);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    Promise.all([listTasks(), listActivity()])
+      .then(([taskRows, activityRows]) => {
+        if (!alive) return;
+        setTasks(taskRows);
+        setActivity(activityRows);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setTasks([]);
+        setActivity([]);
+        setError(err instanceof Error ? err.message : 'Live workspace reports are unavailable.');
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const contributorData = useMemo(() => buildContributors(tasks), [tasks]);
+  const statusData = useMemo(() => buildStatusData(tasks), [tasks]);
+  const completedTasks = tasks.filter((task) => task.status === 'done').length;
+  const openTasks = tasks.filter((task) => task.status !== 'done' && task.status !== 'cancelled').length;
+  const totalEvents = tasks.reduce((sum, task) => sum + task.events.length, 0) + activity.length;
 
   return (
     <div className="h-full bg-gray-50 overflow-auto">
-      {/* Page Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
@@ -86,10 +116,10 @@ export function Reports() {
               Contribution Dashboard
             </h1>
             <p className="text-sm text-gray-600 mt-1">
-              Team performance metrics for February 2026
+              Live workspace task and activity metrics
             </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
+          <button onClick={() => toast('Report export requires a persisted export endpoint.')} className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
             <Download className="w-4 h-4" />
             <span className="text-sm font-medium">Export Report</span>
           </button>
@@ -97,63 +127,65 @@ export function Reports() {
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Top Metrics Cards */}
+        {loading && <p className="text-sm text-gray-500">Loading live workspace report...</p>}
+        {!loading && error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            Live workspace report could not be loaded: {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Total Contributions */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-[#2196F3]/10 rounded-lg flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6 text-[#2196F3]" />
               </div>
-              <Badge className="bg-[#10B981] text-white">+12%</Badge>
+              <Badge className="bg-[#10B981] text-white">Live</Badge>
             </div>
-            <div className="text-3xl font-bold mb-1">{totalContributions}</div>
-            <div className="text-sm text-gray-600">Total Contributions</div>
-            <div className="text-xs text-gray-500 mt-2">This month</div>
+            <div className="text-3xl font-bold mb-1">{completedTasks}</div>
+            <div className="text-sm text-gray-600">Completed Tasks</div>
+            <div className="text-xs text-gray-500 mt-2">{tasks.length} total recorded</div>
           </div>
 
-          {/* Revenue Share */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#10B981]/10 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-[#10B981]" />
-              </div>
-              <Badge className="bg-[#10B981] text-white">+8%</Badge>
-            </div>
-            <div className="text-3xl font-bold mb-1">${(totalRevenue / 1000).toFixed(1)}k</div>
-            <div className="text-sm text-gray-600">Revenue Share</div>
-            <div className="text-xs text-gray-500 mt-2">Total allocated</div>
-          </div>
-
-          {/* Active Hours */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-[#F59E0B]/10 rounded-lg flex items-center justify-center">
                 <Clock className="w-6 h-6 text-[#F59E0B]" />
               </div>
-              <Badge className="bg-[#F59E0B] text-white">+5%</Badge>
+              <Badge className="bg-[#F59E0B] text-white">Open</Badge>
             </div>
-            <div className="text-3xl font-bold mb-1">{totalHours}h</div>
-            <div className="text-sm text-gray-600">Active Hours</div>
-            <div className="text-xs text-gray-500 mt-2">Team total</div>
+            <div className="text-3xl font-bold mb-1">{openTasks}</div>
+            <div className="text-sm text-gray-600">Open Workflow Items</div>
+            <div className="text-xs text-gray-500 mt-2">Queued, running, approval, or failed</div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-[#10B981]/10 rounded-lg flex items-center justify-center">
+                <Activity className="w-6 h-6 text-[#10B981]" />
+              </div>
+              <Badge className="bg-[#10B981] text-white">Events</Badge>
+            </div>
+            <div className="text-3xl font-bold mb-1">{totalEvents}</div>
+            <div className="text-sm text-gray-600">Activity Events</div>
+            <div className="text-xs text-gray-500 mt-2">Task transcript events + workspace reports</div>
           </div>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Leaderboard */}
           <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="font-semibold text-lg">Contribution Leaderboard</h2>
-              <p className="text-sm text-gray-600 mt-1">Top performers this month</p>
+              <h2 className="font-semibold text-lg">Contributor Summary</h2>
+              <p className="text-sm text-gray-600 mt-1">Grouped by live agent or workspace owner</p>
             </div>
-            <div className="p-6">
+            <div className="p-6 overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-sm text-gray-600 border-b">
                     <th className="pb-3 font-medium">Contributor</th>
-                    <th className="pb-3 font-medium">Time Spent</th>
-                    <th className="pb-3 font-medium">Tasks</th>
+                    <th className="pb-3 font-medium">Completed</th>
+                    <th className="pb-3 font-medium">Total Tasks</th>
+                    <th className="pb-3 font-medium">Activity Events</th>
                     <th className="pb-3 font-medium">Power Score</th>
                     <th className="pb-3 font-medium">Trend</th>
                   </tr>
@@ -165,7 +197,7 @@ export function Reports() {
                         <div className="flex items-center gap-3">
                           <div className="relative">
                             <Avatar className="w-10 h-10">
-                              <AvatarFallback className={`${contributor.color} text-white`}>
+                              <AvatarFallback className="bg-[#2196F3] text-white">
                                 {contributor.avatar}
                               </AvatarFallback>
                             </Avatar>
@@ -177,53 +209,19 @@ export function Reports() {
                           </div>
                           <div>
                             <div className="font-medium">{contributor.name}</div>
-                            <div className="text-xs text-gray-500">${(contributor.revenue / 1000).toFixed(1)}k revenue</div>
+                            <div className="text-xs text-gray-500">{contributor.id}</div>
                           </div>
                         </div>
                       </td>
+                      <td className="py-4"><span className="font-medium">{contributor.tasksCompleted}</span></td>
+                      <td className="py-4"><span className="font-medium">{contributor.tasksTotal}</span></td>
+                      <td className="py-4"><span className="font-medium">{contributor.eventCount}</span></td>
                       <td className="py-4">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 max-w-[100px] h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-[#2196F3] rounded-full"
-                              style={{ width: `${contributor.timeSpent}%` }}
-                            />
+                            <div className="h-full bg-[#2196F3] rounded-full" style={{ width: `${contributor.powerScore}%` }} />
                           </div>
-                          <span className="text-sm font-medium">{contributor.timeSpent}h</span>
-                        </div>
-                      </td>
-                      <td className="py-4">
-                        <span className="font-medium">{contributor.tasksCompleted}</span>
-                      </td>
-                      <td className="py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="relative w-12 h-12">
-                            <svg className="w-12 h-12 transform -rotate-90">
-                              <circle
-                                cx="24"
-                                cy="24"
-                                r="20"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                                className="text-gray-200"
-                              />
-                              <circle
-                                cx="24"
-                                cy="24"
-                                r="20"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                                strokeDasharray={`${2 * Math.PI * 20}`}
-                                strokeDashoffset={`${2 * Math.PI * 20 * (1 - contributor.powerScore / 100)}`}
-                                className="text-[#2196F3]"
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex items-center justify-center text-xs font-bold">
-                              {contributor.powerScore}
-                            </div>
-                          </div>
+                          <span className="text-sm font-medium">{contributor.powerScore}</span>
                         </div>
                       </td>
                       <td className="py-4">
@@ -235,49 +233,58 @@ export function Reports() {
                       </td>
                     </tr>
                   ))}
+                  {!loading && !error && contributorData.length === 0 && (
+                    <tr><td className="py-6 text-sm text-gray-500" colSpan={6}>No live task contributors are recorded yet.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* Activity Chart */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="font-semibold text-lg">Weekly Activity</h2>
-              <p className="text-sm text-gray-600 mt-1">Hours logged per day</p>
+              <h2 className="font-semibold text-lg">Task Status</h2>
+              <p className="text-sm text-gray-600 mt-1">Live workspace task distribution</p>
             </div>
             <div className="p-6">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={activityData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      padding: '8px 12px',
-                    }}
-                  />
-                  <Bar dataKey="hours" radius={[8, 8, 0, 0]}>
-                    {activityData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill="#2196F3" />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {statusData.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">No live tasks yet.</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={statusData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="status" tick={{ fontSize: 12 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                      {statusData.map((entry) => (
+                        <Cell key={entry.status} fill={STATUS_COLORS[entry.status]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
 
-              {/* Activity Heatmap Legend */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium mb-2">Activity Level</div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gradient-to-r from-gray-200 via-[#2196F3]/50 to-[#2196F3] rounded-full" />
-                  <div className="flex gap-2 text-xs text-gray-600">
-                    <span>Low</span>
-                    <span>High</span>
-                  </div>
-                </div>
+                <div className="text-sm font-medium mb-2">Recent Activity Reports</div>
+                {activity.slice(0, 4).length > 0 ? (
+                  <ul className="space-y-2">
+                    {activity.slice(0, 4).map((item) => (
+                      <li key={item.id} className="text-xs text-gray-600">
+                        {item.summary || item.kind} <span className="text-gray-400">{item.at}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-gray-500">No live activity reports yet.</p>
+                )}
               </div>
             </div>
           </div>

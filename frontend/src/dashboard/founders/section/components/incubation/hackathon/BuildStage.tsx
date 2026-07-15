@@ -13,16 +13,6 @@ interface Props {
   registration: HackathonRegistration;
 }
 
-const BASE32_ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";
-
-function randomToken(length: number): string {
-  const bytes = new Uint8Array(length);
-  crypto.getRandomValues(bytes);
-  let out = "";
-  for (let i = 0; i < length; i++) out += BASE32_ALPHABET[bytes[i] % 32];
-  return out;
-}
-
 const STATUS_META: Record<CheckIn["status"], { label: string; pill: string }> = {
   "on-track": { label: "On track", pill: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
   "blocked":  { label: "Blocked",  pill: "bg-amber-50 text-amber-700 border border-amber-200" },
@@ -44,12 +34,13 @@ function relativeTime(iso: string, now: number): string {
 const MAX_UPDATE = 140;
 
 export function BuildStage({ registration }: Props) {
-  const { addCheckIn } = useFounderProfile();
+  const { registerForHackathon } = useFounderProfile();
   const now = useMemo(() => Date.now(), [registration.checkIns.length]);
 
   const [status, setStatus] = useState<CheckIn["status"]>("on-track");
   const [update, setUpdate] = useState("");
   const [blocker, setBlocker] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const generate = useGenerateTeamWorkspace();
   const [promoteOpen, setPromoteOpen] = useState(false);
 
@@ -63,26 +54,31 @@ export function BuildStage({ registration }: Props) {
   const lastCheckIn = ordered[0];
   const showReminder = momentum.nextAction === "log-check-in" && !!registration.brief && checkIns.length > 0;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (update.trim().length === 0) return;
-    const checkIn: CheckIn = {
-      id: randomToken(8),
-      loggedAt: new Date().toISOString(),
-      status,
-      update: update.trim(),
-      ...(status === "blocked" && blocker.trim() ? { blocker: blocker.trim() } : {}),
-    };
-    addCheckIn(registration.teamId, checkIn);
-    // Feed the org build-velocity heatmap on ai-router (best-effort).
-    void logHackathonCheckIn(registration.hackathonId, {
-      teamId: registration.teamId,
-      note: checkIn.update,
-      progressDelta: status === "on-track" ? 15 : status === "blocked" ? 3 : 8,
-    });
-    toast.success("Check-in logged");
-    setStatus("on-track");
-    setUpdate("");
-    setBlocker("");
+    setSubmitting(true);
+    try {
+      const result = await logHackathonCheckIn(registration.hackathonId, {
+        teamId: registration.teamId,
+        note: update.trim(),
+        status,
+        blocker: status === "blocked" ? blocker.trim() : "",
+        progressDelta: status === "on-track" ? 15 : status === "blocked" ? 3 : 8,
+      });
+      if (!result.ok || !result.registration) {
+        toast.error("The check-in was not persisted.");
+        return;
+      }
+      registerForHackathon(result.registration);
+      toast.success("Check-in logged");
+      setStatus("on-track");
+      setUpdate("");
+      setBlocker("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The check-in could not be logged.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -146,7 +142,7 @@ export function BuildStage({ registration }: Props) {
             ) : (
               <>
                 <button type="button" disabled={!registration.brief}
-                  onClick={() => generate(registration)}
+                  onClick={() => { void generate(registration); }}
                   className={`w-full text-sm font-medium px-4 py-2 rounded-lg ${registration.brief ? "bg-violet-600 text-white hover:bg-violet-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}>
                   Create team workspace
                 </button>
@@ -216,15 +212,15 @@ export function BuildStage({ registration }: Props) {
 
             <button
               type="button"
-              disabled={update.trim().length === 0}
-              onClick={handleSubmit}
+              disabled={update.trim().length === 0 || submitting}
+              onClick={() => void handleSubmit()}
               className={`w-full text-sm font-medium px-4 py-2 rounded-lg ${
                 update.trim().length > 0
                   ? "bg-violet-600 text-white hover:bg-violet-700"
                   : "bg-slate-100 text-slate-400 cursor-not-allowed"
               }`}
             >
-              Log check-in
+              {submitting ? "Logging..." : "Log check-in"}
             </button>
           </div>
         </div>

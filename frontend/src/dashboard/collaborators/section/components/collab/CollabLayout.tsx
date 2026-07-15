@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
-import { equityTotals } from "@/dashboard/collaborators/section/data/mockData";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 
@@ -41,6 +41,7 @@ export function CollabLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { collaboratorProfile } = useCollaboratorProfile();
+  const { profile } = useAuth();
 
   useEffect(() => {
     writeStoredActiveRole("collaborator");
@@ -48,10 +49,11 @@ export function CollabLayout() {
 
   // Defensive redirect: un-onboarded users go to step 1
   useEffect(() => {
-    if (!collaboratorProfile.onboardingComplete && !location.pathname.startsWith("/collaborator/onboarding")) {
+    const onboarded = profile?.isOnboarded ?? collaboratorProfile.onboardingComplete;
+    if (!onboarded && !location.pathname.startsWith("/collaborator/onboarding")) {
       navigate("/collaborator/onboarding/step-1", { replace: true });
     }
-  }, [collaboratorProfile.onboardingComplete, location.pathname, navigate]);
+  }, [profile?.isOnboarded, collaboratorProfile.onboardingComplete, location.pathname, navigate]);
 
   const isActive = (path: string) => location.pathname === path;
   const haviContext = useMemo(() => ({
@@ -67,6 +69,8 @@ export function CollabLayout() {
     goals: collaboratorProfile.whyHere,
     pinnedWorkCount: collaboratorProfile.pinnedWork.length,
   }), [collaboratorProfile]);
+
+  const displayName = collaboratorProfile.name || "Collaborator";
 
   const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
@@ -109,9 +113,7 @@ export function CollabLayout() {
 
         <Link to="/collaborator/equity" className="m-3 p-3 rounded-lg bg-slate-800 hover:bg-slate-800/70 transition-colors border border-slate-700">
           <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Building for Equity</p>
-          <p className="text-sm text-white mt-1 tabular-nums">
-            ${(equityTotals.totalValueUSD / 1000).toFixed(1)}K ownership across 3 startups
-          </p>
+          <p className="text-sm text-white mt-1">View your persisted ownership ledger</p>
           <p className="text-xs text-amber-400 mt-1">View equity →</p>
         </Link>
       </aside>
@@ -134,7 +136,7 @@ export function CollabLayout() {
       {/* Havi — AI build companion (founders & collaborators only) */}
       <Havi
         role="collaborator"
-        userName={collaboratorProfile.name.split(" ")[0]}
+        userName={displayName.split(" ")[0]}
         route={location.pathname}
         profileContext={haviContext}
       />

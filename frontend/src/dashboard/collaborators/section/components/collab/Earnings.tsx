@@ -3,39 +3,51 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import {
-  cashEarnings, cashTotals as initialTotals, payouts as initialPayouts,
-} from "@/dashboard/collaborators/section/data/mockData";
-import { fetchCollaboratorEarnings, requestWithdrawal } from "@/lib/api/earnings";
+import { EMPTY_EARNINGS, fetchCollaboratorEarnings, requestWithdrawal } from "@/lib/api/earnings";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 
 export function Earnings() {
-  const [earnings, setEarnings] = useState(cashEarnings);
-  const [totals, setTotals]     = useState(initialTotals);
-  const [payoutList, setPayoutList] = useState(initialPayouts);
+  const [earnings, setEarnings] = useState(EMPTY_EARNINGS.cashEarnings);
+  const [totals, setTotals]     = useState(EMPTY_EARNINGS.totals);
+  const [payoutList, setPayoutList] = useState(EMPTY_EARNINGS.payouts);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [amount, setAmount] = useState<number>(totals.pendingUSD);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load from ai-router; initial state is the bundled mock so the screen renders
-  // unchanged on first paint and survives the backend being unavailable.
   useEffect(() => {
     let alive = true;
-    fetchCollaboratorEarnings().then((data) => {
-      if (!alive) return;
-      setEarnings(data.cashEarnings);
-      setPayoutList(data.payouts);
-      setTotals(data.totals);
-      setAmount(data.totals.pendingUSD);
-    });
+    fetchCollaboratorEarnings()
+      .then((data) => {
+        if (!alive) return;
+        setEarnings(data.cashEarnings);
+        setPayoutList(data.payouts);
+        setTotals(data.totals);
+        setAmount(data.totals.pendingUSD);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setEarnings(EMPTY_EARNINGS.cashEarnings);
+        setPayoutList(EMPTY_EARNINGS.payouts);
+        setTotals(EMPTY_EARNINGS.totals);
+        setAmount(0);
+        setError(err instanceof Error ? err.message : "Live earnings records are unavailable.");
+      });
     return () => { alive = false; };
   }, []);
 
   const handleWithdraw = async () => {
     if (amount <= 0 || amount > totals.pendingUSD) return;
     const month = new Date().toISOString().slice(0, 7);
-    const res = await requestWithdrawal({ amount, monthIso: month, idemKey: `p-${Date.now()}` });
+    let res;
+    try {
+      res = await requestWithdrawal({ amount, monthIso: month, idemKey: `p-${Date.now()}` });
+    } catch (err) {
+      toast(`Withdrawal failed — ${err instanceof Error ? err.message : "backend unavailable"}.`);
+      return;
+    }
     if (!res.ok) {
       toast(`Withdrawal failed${res.available != null ? ` — up to $${res.available.toLocaleString()} available` : ""}.`);
       return;
@@ -60,6 +72,11 @@ export function Earnings() {
           Withdraw funds
         </button>
       </div>
+      {error && (
+        <div className="border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">
+          Live earnings records could not be loaded: {error}
+        </div>
+      )}
 
       {/* Three stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -85,7 +102,7 @@ export function Earnings() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {earnings.map((c) => (
+            {earnings.length > 0 ? earnings.map((c) => (
               <tr key={c.projectId} className="hover:bg-slate-50">
                 <td className="px-5 py-3 text-slate-900">{c.projectName}</td>
                 <td className="px-5 py-3 text-right tabular-nums">${c.earned.toLocaleString()}</td>
@@ -99,7 +116,13 @@ export function Earnings() {
                   </Link>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-500">
+                  No cash earnings have been recorded yet.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -107,6 +130,9 @@ export function Earnings() {
       {/* Payout history chart */}
       <div className="border border-slate-200 bg-white rounded-xl p-6">
         <h2 className="text-sm font-semibold text-slate-700 mb-4">Payout history</h2>
+        {payoutList.length === 0 ? (
+          <p className="text-sm text-slate-500">No payout history has been recorded yet.</p>
+        ) : (
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={[...payoutList].reverse()}>
@@ -121,8 +147,9 @@ export function Earnings() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        )}
 
-        <ul className="mt-6 divide-y divide-slate-100">
+        {payoutList.length > 0 && <ul className="mt-6 divide-y divide-slate-100">
           {payoutList.map((p) => (
             <li key={p.id} className="py-2.5 flex items-center justify-between text-sm">
               <span className="text-slate-700">{p.monthIso}</span>
@@ -132,7 +159,7 @@ export function Earnings() {
               </span>
             </li>
           ))}
-        </ul>
+        </ul>}
       </div>
 
       {/* Withdraw dialog */}

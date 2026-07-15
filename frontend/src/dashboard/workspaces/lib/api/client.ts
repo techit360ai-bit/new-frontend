@@ -1,9 +1,25 @@
-// Mock-mode API client. Flip USE_MOCKS to false once a real backend exists;
-// each api/*.ts function then swaps its body for a fetch() to the listed endpoint.
-export const USE_MOCKS = true;
+import { domainGet, domainPost } from '@/lib/domainApi';
+import { fetchWorkspaces } from '@/lib/api/workspaces';
 
-export const delay = (ms = 250) => new Promise<void>((r) => setTimeout(r, ms));
+let activeWorkspaceId: string | null | undefined;
 
-// Deterministic id helper (avoids Date.now()/Math.random in shared code paths).
-let counter = 0;
-export const nextId = (prefix: string) => `${prefix}_${++counter}`;
+export async function resolveWorkspaceId(): Promise<string | null> {
+  if (activeWorkspaceId !== undefined) return activeWorkspaceId;
+  const workspaces = await fetchWorkspaces();
+  activeWorkspaceId = workspaces[0]?.id ?? null;
+  return activeWorkspaceId;
+}
+
+export async function workspaceGet<T>(path: string): Promise<T | null> {
+  const workspaceId = await resolveWorkspaceId();
+  if (!workspaceId) return null;
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  return domainGet<T>(`/workspaces/${workspaceId}${clean}`);
+}
+
+export async function workspacePost<T>(path: string, body: unknown): Promise<T | null> {
+  const workspaceId = await resolveWorkspaceId();
+  if (!workspaceId) return null;
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  return domainPost<T>(`/workspaces/${workspaceId}${clean}`, body);
+}

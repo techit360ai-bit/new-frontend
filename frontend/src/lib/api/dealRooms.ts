@@ -1,9 +1,8 @@
 // frontend/src/lib/api/dealRooms.ts
 //
-// Investor Deal Rooms domain — ai-router /api/v1/investor/deal-rooms[/{projectId}].
-// Falls back to bundled metadata so the screens render offline.
+// Investor Deal Rooms domain — BACKEND /api/domain/investor/deal-rooms.
 
-import { apiGet, apiPost, withFallback } from "./client";
+import { domainGet } from "@/lib/domainApi";
 
 export type DealStatus = "active" | "pending" | "closed";
 
@@ -16,31 +15,54 @@ export interface DealMeta {
   lastActivity: string;
 }
 
-export const fallbackStageOrder = [
+export const stageOrder = [
   "Intro Call", "NDA Signed", "Due Diligence", "Term Sheet", "Negotiation", "Deal Closed",
 ];
-
-export const fallbackDealMeta: Record<string, DealMeta> = {
-  "1": { status: "active",  stage: "Term Sheet",    daysOpen: 12, messages: 34,  docs: 7,  lastActivity: "2h ago" },
-  "2": { status: "active",  stage: "Due Diligence", daysOpen: 8,  messages: 52,  docs: 11, lastActivity: "45m ago" },
-  "3": { status: "pending", stage: "NDA Signed",    daysOpen: 3,  messages: 9,   docs: 2,  lastActivity: "1d ago" },
-  "4": { status: "active",  stage: "Negotiation",   daysOpen: 21, messages: 78,  docs: 14, lastActivity: "3h ago" },
-  "5": { status: "closed",  stage: "Deal Closed",   daysOpen: 45, messages: 120, docs: 22, lastActivity: "5d ago" },
-  "6": { status: "pending", stage: "Intro Call",    daysOpen: 1,  messages: 4,   docs: 1,  lastActivity: "6h ago" },
-};
 
 export interface DealRoomsResponse {
   dealMeta: Record<string, DealMeta>;
   stageOrder: string[];
+  rooms: DealRoomRecord[];
 }
 
-/** GET /api/v1/investor/deal-rooms */
+export interface DealRoomRecord {
+  id: string;
+  projectId?: string;
+  startupId?: string;
+  startupName?: string;
+  sector?: string;
+  status?: DealStatus;
+  stage?: string;
+  daysOpen?: number;
+  messages?: number;
+  docs?: number;
+  lastActivity?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+}
+
+function metaFor(room: DealRoomRecord): DealMeta {
+  return {
+    status: room.status ?? "pending",
+    stage: room.stage ?? "Intro Call",
+    daysOpen: Number(room.daysOpen ?? 0),
+    messages: Number(room.messages ?? 0),
+    docs: Number(room.docs ?? 0),
+    lastActivity: room.lastActivity ?? room.updatedAt ?? "—",
+  };
+}
+
+/** GET /api/domain/investor/deal-rooms */
 export function fetchDealRooms(): Promise<DealRoomsResponse> {
-  return withFallback(
-    () => apiGet<DealRoomsResponse>("/investor/deal-rooms"),
-    { dealMeta: fallbackDealMeta, stageOrder: fallbackStageOrder },
-    "deal rooms",
-  );
+  return domainGet<{ dealRooms: DealRoomRecord[] }>("/investor/deal-rooms")
+    .then(({ dealRooms }) => {
+      const rooms = dealRooms ?? [];
+      return {
+        rooms,
+        stageOrder,
+        dealMeta: Object.fromEntries(rooms.map((room) => [room.projectId ?? room.startupId ?? room.id, metaFor(room)])),
+      };
+    });
 }
 
 export interface DealRoomDetail {
@@ -58,14 +80,31 @@ export interface DealRoomDetail {
   stageOrder: string[];
 }
 
-/** POST /api/v1/investor/deal-rooms/{projectId} — detail (term sheet, milestones, docs). */
+/** GET /api/domain/investor/deal-rooms — detail selected from persisted rooms. */
 export function fetchDealRoom(
   projectId: string,
-  startup?: Record<string, unknown>,
+  _legacyStartup?: Record<string, unknown>,
 ): Promise<DealRoomDetail | null> {
-  return withFallback(
-    () => apiPost<DealRoomDetail>(`/investor/deal-rooms/${projectId}`, startup ?? {}),
-    () => null,
-    "deal room detail",
-  );
+  return fetchDealRooms().then(({ rooms }) => {
+    const room = rooms.find((item) => item.projectId === projectId || item.startupId === projectId || item.id === projectId);
+    if (!room) return null;
+    return {
+      projectId,
+      meta: metaFor(room),
+      valuationUSD: Number(room.valuationUSD ?? 0),
+      termSheet: (room.termSheet as DealRoomDetail["termSheet"]) ?? {
+        valuationUSD: 0,
+        investmentUSD: 0,
+        equityPercent: 0,
+        instrument: "",
+        discountPercent: 0,
+        valuationCapUSD: 0,
+        extraTerms: {},
+      },
+      milestones: Array.isArray(room.milestones) ? room.milestones as DealRoomDetail["milestones"] : [],
+      documents: Array.isArray(room.documents) ? room.documents as DealRoomDetail["documents"] : [],
+      negotiation: Array.isArray(room.negotiation) ? room.negotiation as DealRoomDetail["negotiation"] : [],
+      stageOrder,
+    };
+  });
 }

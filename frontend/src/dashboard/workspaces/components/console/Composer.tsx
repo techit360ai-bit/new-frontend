@@ -15,49 +15,72 @@ export function Composer() {
   const [busy, setBusy] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   // B6 — pull AI task suggestions from ai-router WorkspaceAIService.
   const fetchSuggestions = async () => {
     if (suggesting) return;
     setSuggesting(true);
-    const res = await suggestTasks({ agentId, currentPrompt: prompt });
-    setSuggestions(flattenSuggestions(res).slice(0, 5));
-    setSuggesting(false);
+    try {
+      const res = await suggestTasks({ agentId, currentPrompt: prompt });
+      setSuggestions(flattenSuggestions(res).slice(0, 5));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Task suggestions are unavailable.');
+    } finally {
+      setSuggesting(false);
+    }
   };
 
   useEffect(() => {
-    listAgents().then((all) => {
-      const enabled = all.filter((a) => a.enabled);
-      setAgents(enabled);
-      if (enabled[0]) setAgentId(enabled[0].id);
-    });
-    // Hydrate the rail with any existing (seeded) tasks on mount.
-    listTasks().then((tasks) => dispatch({ type: 'set_tasks', tasks }));
+    let alive = true;
+    listAgents()
+      .then((all) => {
+        if (!alive) return;
+        const enabled = all.filter((a) => a.enabled);
+        setAgents(enabled);
+        if (enabled[0]) setAgentId(enabled[0].id);
+      })
+      .catch((err) => {
+        if (alive) setError(err instanceof Error ? err.message : 'Live workspace agents are unavailable.');
+      });
+    listTasks()
+      .then((tasks) => { if (alive) dispatch({ type: 'set_tasks', tasks }); })
+      .catch((err) => {
+        if (alive) setError(err instanceof Error ? err.message : 'Live workspace tasks are unavailable.');
+      });
+    return () => { alive = false; };
   }, [dispatch]);
 
   const submit = async () => {
     if (!prompt.trim() || !agentId || busy) return;
     setBusy(true);
-    const id = await createTask(agentId, prompt.trim());
-    const created = await getTask(id);
-    if (created) dispatch({ type: 'add_task', task: created });
-    setPrompt('');
-    dispatch({ type: 'set_status', taskId: id, status: 'running' });
-    for await (const event of streamTask(id)) {
-      dispatch({ type: 'append_event', taskId: id, event });
-      if (event.type === 'approval_request') dispatch({ type: 'set_status', taskId: id, status: 'needs_approval' });
-      if (event.type === 'approval_resolved' || event.type === 'tool_call') dispatch({ type: 'set_status', taskId: id, status: 'running' });
-      if (event.type === 'status' && event.text === 'Completed') dispatch({ type: 'set_status', taskId: id, status: 'done' });
-      if (event.type === 'status' && event.text === 'Cancelled by user') dispatch({ type: 'set_status', taskId: id, status: 'cancelled' });
-      if (event.type === 'error') dispatch({ type: 'set_status', taskId: id, status: 'failed' });
+    try {
+      const id = await createTask(agentId, prompt.trim());
+      const created = await getTask(id);
+      if (created) dispatch({ type: 'add_task', task: created });
+      setPrompt('');
+      dispatch({ type: 'set_status', taskId: id, status: 'running' });
+      for await (const event of streamTask(id)) {
+        dispatch({ type: 'append_event', taskId: id, event });
+        if (event.type === 'approval_request') dispatch({ type: 'set_status', taskId: id, status: 'needs_approval' });
+        if (event.type === 'approval_resolved' || event.type === 'tool_call') dispatch({ type: 'set_status', taskId: id, status: 'running' });
+        if (event.type === 'status' && event.text === 'Completed') dispatch({ type: 'set_status', taskId: id, status: 'done' });
+        if (event.type === 'status' && event.text === 'Cancelled by user') dispatch({ type: 'set_status', taskId: id, status: 'cancelled' });
+        if (event.type === 'error') dispatch({ type: 'set_status', taskId: id, status: 'failed' });
+      }
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Workspace task creation failed.');
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   };
 
   return (
     <div className="border-t border-gray-200 p-4 bg-white">
       <div className="flex items-center gap-2 mb-2">
         <select value={agentId} onChange={(e) => setAgentId(e.target.value)} className="text-sm border border-gray-200 rounded-lg px-2 py-1.5">
+          {agents.length === 0 && <option value="">No live agents</option>}
           {agents.map((a) => (<option key={a.id} value={a.id}>{a.name}</option>))}
         </select>
         <button
@@ -86,11 +109,12 @@ export function Composer() {
           ))}
         </div>
       )}
+      {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
       <div className="flex gap-2">
         <input value={prompt} onChange={(e) => setPrompt(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()}
           placeholder="Ask an agent to carry out a task..."
           className="flex-1 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#2196F3]" />
-        <Button className="bg-[#2196F3] hover:bg-[#1976D2]" onClick={submit} disabled={busy}><Send className="w-4 h-4" /></Button>
+        <Button className="bg-[#2196F3] hover:bg-[#1976D2]" onClick={submit} disabled={busy || agents.length === 0}><Send className="w-4 h-4" /></Button>
       </div>
     </div>
   );

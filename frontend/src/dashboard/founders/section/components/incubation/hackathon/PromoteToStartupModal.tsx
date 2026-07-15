@@ -25,23 +25,42 @@ export function PromoteToStartupModal({ registration, onClose }: Props) {
 
   const canCreate = title.trim().length > 0;
 
-  const handleConfirm = () => {
+  const [creating, setCreating] = useState(false);
+
+  const handleConfirm = async () => {
     if (!canCreate) return;
-    const project = buildPromotedProject(registration, founderProfile, { title, tagline, industry, stage }, Date.now());
-    addFounderProject(project);
-    void createFounderProject({
-      title: project.title,
-      tagline: project.tagline,
-      industry: project.industry,
-      stage: project.stage,
-      hackathonId: registration.hackathonId,
-      teamId: registration.teamId,
-    });
-    const workspaceId = registration.workspaceId ?? generate(registration, { navigateAfter: false });
-    bindTeamWorkspaceProject(workspaceId, project.id);
-    updateHackathonRegistration(registration.teamId, { promotedProjectId: project.id });
-    toast.success("Promoted to startup — added to your ventures");
-    onClose();
+    setCreating(true);
+    try {
+      const draft = buildPromotedProject(
+        registration,
+        founderProfile,
+        { title, tagline, industry, stage },
+        Date.now(),
+      );
+      const result = await createFounderProject({
+        title: draft.title,
+        tagline: draft.tagline,
+        industry: draft.industry,
+        stage: draft.stage,
+        hackathonId: registration.hackathonId,
+        teamId: registration.teamId,
+      });
+      if (!result.ok || !result.project) {
+        toast.error(result.error || "The startup was not persisted.");
+        return;
+      }
+      const workspaceId = registration.workspaceId ?? await generate(registration, { navigateAfter: false });
+      if (!workspaceId) return;
+      addFounderProject(result.project);
+      bindTeamWorkspaceProject(workspaceId, result.project.id);
+      updateHackathonRegistration(registration.teamId, { promotedProjectId: result.project.id });
+      toast.success("Promoted to startup — added to your ventures");
+      onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "The startup could not be created.");
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
@@ -81,9 +100,9 @@ export function PromoteToStartupModal({ registration, onClose }: Props) {
 
         <div className="flex justify-end gap-2 mt-6">
           <button type="button" onClick={onClose} className="text-sm font-medium px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
-          <button type="button" disabled={!canCreate} onClick={handleConfirm}
+          <button type="button" disabled={!canCreate || creating} onClick={() => { void handleConfirm(); }}
             className={`text-sm font-medium px-4 py-2 rounded-lg ${canCreate ? "bg-violet-600 text-white hover:bg-violet-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}>
-            Create startup
+            {creating ? "Creating..." : "Create startup"}
           </button>
         </div>
       </div>

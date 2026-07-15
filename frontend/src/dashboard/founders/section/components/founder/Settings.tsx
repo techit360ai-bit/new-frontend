@@ -3,17 +3,17 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  User, Briefcase, BadgeCheck, Bell, UserCog, LogOut, Github, Check, Upload,
+  User, Briefcase, BadgeCheck, Bell, UserCog, LogOut, Github, Check,
 } from "lucide-react";
 import {
   useFounderProfile, useActiveRoles,
   type Role, type FounderExperience, type FounderStage, type LaunchStatus,
-  type CompModel, type OwnershipPhilosophy, type OpenRole, type FounderVerification,
+  type CompModel, type OwnershipPhilosophy, type OpenRole,
+  type FounderNotificationPrefs,
 } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { roleDashboardPath, roleOnboardingPath } from "@/lib/roleRoutes";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
+import { fetchNotificationPreferences, saveNotificationPreferences } from "@/lib/api/settings";
 
 const sections = [
   { id: "identity",      label: "Account & Identity",  icon: User },
@@ -76,6 +76,8 @@ export function Settings() {
   const navigate = useNavigate();
   const { founderProfile, updateFounderProfile } = useFounderProfile();
   const { activeRoles, currentRole } = useActiveRoles();
+  const { profile, updateProfile, changePassword, signOut } = useAuth();
+  const [saving, setSaving] = useState<string | null>(null);
 
   // Identity state
   const [iName, setIName]         = useState(founderProfile.name);
@@ -85,11 +87,12 @@ export function Settings() {
   const [iType, setIType]         = useState<FounderExperience>(founderProfile.founderType);
   const [iHeadline, setIHeadline] = useState(founderProfile.headline);
   const [iAvatar, setIAvatar]     = useState(founderProfile.avatarUrl);
-  const [iEmail, setIEmail]       = useState("sarah.chen@example.com");
+  const iEmail                    = profile?.email ?? "";
   const [iGithub, setIGithub]     = useState(founderProfile.links.github);
   const [iLinkedin, setILinkedin] = useState(founderProfile.links.linkedin);
   const [iTwitter, setITwitter]   = useState(founderProfile.links.twitter);
   const [iPersonal, setIPersonal] = useState(founderProfile.links.personal);
+  const [iCurrentPw, setICurrentPw] = useState("");
   const [iPw1, setIPw1]           = useState("");
   const [iPw2, setIPw2]           = useState("");
 
@@ -118,8 +121,7 @@ export function Settings() {
   const [sPhilosophy, setSPhilosophy]   = useState<OwnershipPhilosophy>(founderProfile.ownershipPhilosophy);
 
   // Verification state
-  const [ver, setVer] = useState<FounderVerification>(founderProfile.verification);
-  const [githubDialogOpen, setGithubDialogOpen] = useState(false);
+  const ver = founderProfile.verification;
 
   // Notifications state
   const [nPrefs, setNPrefs] = useState(founderProfile.notifications);
@@ -141,18 +143,53 @@ export function Settings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    let alive = true;
+    fetchNotificationPreferences<FounderNotificationPrefs>("founder")
+      .then((preferences) => {
+        if (!alive || Object.keys(preferences).length === 0) return;
+        setNPrefs((current) => ({ ...current, ...preferences }));
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
   // Save handlers
-  const saveIdentity = () => {
-    updateFounderProfile({
+  const saveIdentity = async () => {
+    setSaving("identity");
+    const [firstName, ...rest] = iName.trim().split(/\s+/);
+    const lastName = rest.join(" ");
+    const updates = {
       name: iName, title: iTitle, location: iLocation, yearsBuilding: iYears,
       founderType: iType, headline: iHeadline, avatarUrl: iAvatar,
       links: { github: iGithub, linkedin: iLinkedin, twitter: iTwitter, personal: iPersonal },
+    };
+    const result = await updateProfile({
+      firstName: firstName || profile?.firstName || "",
+      lastName,
+      title: iTitle,
+      country: iLocation,
+      yearsBuilding: iYears,
+      founderType: iType,
+      bio: iHeadline,
+      avatarUrl: iAvatar || null,
+      githubUrl: iGithub || null,
+      linkedinUrl: iLinkedin || null,
+      twitterUrl: iTwitter || null,
+      portfolioUrl: iPersonal || null,
     });
+    setSaving(null);
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+    updateFounderProfile(updates);
     toast.success("Profile saved");
   };
 
-  const saveStartup = () => {
-    updateFounderProfile({
+  const saveStartup = async () => {
+    setSaving("startup");
+    const updates = {
       startupName: sName, oneLiner: sOneLiner, stage: sStage, industries: sIndustries,
       foundingYear: sFoundingYear, website: sWebsite, logoEmoji: sLogoEmoji,
       currentTeamSize: sTeamSize, openRoles: sRoles, compensationOffered: sComp,
@@ -161,69 +198,67 @@ export function Settings() {
       leadInvestor: sInvestor, nextMilestone: sMilestone,
       whyBuilding: sWhy, winningIn3Years: sWinning, unfairAdvantage: sAdvantage,
       ownershipPhilosophy: sPhilosophy,
+    };
+    const result = await updateProfile({
+      orgName: sName || null,
+      oneLiner: sOneLiner,
+      startupStage: sStage,
+      industries: sIndustries,
+      foundingYear: sFoundingYear,
+      website: sWebsite || null,
+      logoEmoji: sLogoEmoji,
+      currentTeamSize: sTeamSize,
+      openRoles: sRoles,
+      compensationOffered: sComp,
+      equityRangeMin: sEqMin,
+      equityRangeMax: sEqMax,
+      launchStatus: sLaunch,
+      users: sUsers,
+      revenueMonthly: sRevenue,
+      fundingRaised: sFunding,
+      leadInvestor: sInvestor,
+      nextMilestone: sMilestone,
+      whyBuilding: sWhy,
+      winningIn3Years: sWinning,
+      unfairAdvantage: sAdvantage,
+      ownershipPhilosophy: sPhilosophy,
     });
+    setSaving(null);
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+    updateFounderProfile(updates);
     toast.success("Startup details saved");
   };
 
-  const saveNotifications = () => {
-    updateFounderProfile({ notifications: nPrefs });
-    toast.success("Notification preferences saved");
+  const saveNotifications = async () => {
+    setSaving("notifications");
+    try {
+      const persisted = await saveNotificationPreferences("founder", nPrefs);
+      updateFounderProfile({ notifications: persisted });
+      toast.success("Notification preferences saved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Notification preferences could not be saved.");
+    } finally {
+      setSaving(null);
+    }
   };
 
-  const updatePassword = () => {
-    if (!iPw1 || iPw1 !== iPw2) {
+  const updatePassword = async () => {
+    if (!iCurrentPw || !iPw1 || iPw1 !== iPw2) {
       toast.error("Passwords don't match");
       return;
     }
-    setIPw1(""); setIPw2("");
-    toast.success("Password updated (mock)");
-  };
-
-  // Verification handlers
-  const flipSocial = (key: "twitter" | "linkedin" | "personalSite", verified: boolean) => {
-    setVer((cur) => {
-      const next = { ...cur, [key]: { ...cur[key], verified } } as FounderVerification;
-      updateFounderProfile({ verification: next });
-      return next;
-    });
-    toast(verified ? `${labelFor(key)} verified` : `${labelFor(key)} unverified`);
-  };
-
-  const connectGithub = () => {
-    setVer((cur) => {
-      const next: FounderVerification = { ...cur, github: { ...cur.github, verified: true, username: cur.github.username || "sarahchen" } };
-      updateFounderProfile({ verification: next });
-      return next;
-    });
-    setGithubDialogOpen(false);
-    toast.success("GitHub connected");
-  };
-
-  const disconnectGithub = () => {
-    setVer((cur) => {
-      const next: FounderVerification = { ...cur, github: { ...cur.github, verified: false } };
-      updateFounderProfile({ verification: next });
-      return next;
-    });
-    toast("GitHub disconnected");
-  };
-
-  const submitNin = () => {
-    setVer((cur) => {
-      const next: FounderVerification = { ...cur, nin: { ...cur.nin, status: "pending" } };
-      updateFounderProfile({ verification: next });
-      return next;
-    });
-    toast("Submitted — under review");
-    // DEMO ONLY: auto-verify after 5s. Remove when a real verification API lands.
-    setTimeout(() => {
-      setVer((cur) => {
-        const next: FounderVerification = { ...cur, nin: { ...cur.nin, status: "verified" } };
-        updateFounderProfile({ verification: next });
-        return next;
-      });
-      toast.success("Identity verified");
-    }, 5000);
+    setSaving("password");
+    const result = await changePassword(iCurrentPw, iPw1);
+    setSaving(null);
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+    setICurrentPw(""); setIPw1(""); setIPw2("");
+    toast.success("Password updated");
   };
 
   // Notification toggle — full nested spread
@@ -283,14 +318,7 @@ export function Settings() {
             <h2 className="text-lg font-semibold text-slate-900 mb-1">Account & Identity</h2>
             <p className="text-sm text-slate-500 mb-6">Edit your name, role, and contact details.</p>
             <div className="space-y-4">
-              <Row label="Avatar">
-                <label className="flex items-center gap-3 text-sm text-slate-600 cursor-pointer">
-                  <Upload className="w-4 h-4 text-slate-500" />
-                  <span>Upload a photo</span>
-                  <input type="file" className="hidden" onChange={(e) => setIAvatar(e.target.files?.[0]?.name ?? "")} />
-                </label>
-                {iAvatar && <p className="text-xs text-slate-500 mt-1 ml-7">Selected: {iAvatar}</p>}
-              </Row>
+              <Row label="Avatar URL"><Input value={iAvatar} onChange={setIAvatar} type="url" /></Row>
               <Row label="Name"><Input value={iName} onChange={setIName} /></Row>
               <Row label="Professional title"><Input value={iTitle} onChange={setITitle} /></Row>
               <Row label="Location"><Input value={iLocation} onChange={setILocation} /></Row>
@@ -306,22 +334,33 @@ export function Settings() {
                 </div>
               </Row>
               <Row label="Headline"><Input value={iHeadline} onChange={setIHeadline} /></Row>
-              <Row label="Contact email"><Input value={iEmail} onChange={setIEmail} type="email" /></Row>
+              <Row label="Contact email">
+                <input
+                  value={iEmail}
+                  readOnly
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-slate-50 text-slate-500"
+                />
+              </Row>
               <Row label="GitHub"><Input value={iGithub} onChange={setIGithub} /></Row>
               <Row label="LinkedIn"><Input value={iLinkedin} onChange={setILinkedin} /></Row>
               <Row label="X / Twitter"><Input value={iTwitter} onChange={setITwitter} /></Row>
               <Row label="Personal site"><Input value={iPersonal} onChange={setIPersonal} /></Row>
               <Row label="Change password">
                 <div className="space-y-2">
+                  <Input value={iCurrentPw} onChange={setICurrentPw} type="password" placeholder="Current password" />
                   <Input value={iPw1} onChange={setIPw1} type="password" placeholder="New password" />
                   <Input value={iPw2} onChange={setIPw2} type="password" placeholder="Confirm new password" />
-                  <button type="button" onClick={updatePassword} disabled={!iPw1 || iPw1 !== iPw2}
-                    className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">Update password</button>
+                  <button type="button" onClick={() => void updatePassword()} disabled={!iCurrentPw || !iPw1 || iPw1 !== iPw2 || saving === "password"}
+                    className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">
+                    {saving === "password" ? "Updating..." : "Update password"}
+                  </button>
                 </div>
               </Row>
             </div>
             <div className="mt-6 flex justify-end">
-              <button type="button" onClick={saveIdentity} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-lg">Save</button>
+              <button type="button" disabled={saving === "identity"} onClick={() => void saveIdentity()} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 text-white font-semibold rounded-lg">
+                {saving === "identity" ? "Saving..." : "Save"}
+              </button>
             </div>
           </section>
 
@@ -436,7 +475,9 @@ export function Settings() {
               </div>
             </div>
             <div className="mt-6 flex justify-end">
-              <button type="button" onClick={saveStartup} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-lg">Save</button>
+              <button type="button" disabled={saving === "startup"} onClick={() => void saveStartup()} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 text-white font-semibold rounded-lg">
+                {saving === "startup" ? "Saving..." : "Save"}
+              </button>
             </div>
           </section>
           {/* VERIFICATION */}
@@ -444,124 +485,48 @@ export function Settings() {
             <h2 className="text-lg font-semibold text-slate-900 mb-1">Verification</h2>
             <p className="text-sm text-slate-500 mb-6">Verified founders see more matches and can receive prize money / equity grants.</p>
 
-            <div className="space-y-6">
-              {/* Social */}
-              <div className="border border-slate-200 rounded-lg p-4">
-                <p className="text-sm font-semibold text-slate-900 mb-3">Social media</p>
-                <div className="space-y-3">
-                  {(["twitter", "linkedin", "personalSite"] as const).map((key) => {
-                    const v = ver[key];
-                    return (
-                      <div key={key} className="flex items-center justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-700">{labelFor(key)}</p>
-                          <p className="text-xs text-slate-500 truncate">
-                            {v.verified
-                              ? (key === "twitter" ? (v as { handle: string }).handle : (v as { url: string }).url)
-                              : "Not verified"}
-                          </p>
-                        </div>
-                        {v.verified ? (
-                          <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-                              <Check className="w-3 h-3" /> Verified
-                            </span>
-                            <button type="button" onClick={() => flipSocial(key, false)} className="text-xs text-slate-500 hover:text-red-600">Unverify</button>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => flipSocial(key, true)} className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">Verify</button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* GitHub */}
-              <div className="border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <Github className="w-5 h-5 text-slate-700" />
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">GitHub</p>
-                      <p className="text-xs text-slate-500">{ver.github.verified ? `@${ver.github.username}` : "Verifies code ownership and contribution history."}</p>
+            <div className="space-y-4">
+              {(["twitter", "linkedin", "personalSite"] as const).map((key) => {
+                const value = ver[key];
+                const address = key === "twitter"
+                  ? ver.twitter.handle
+                  : key === "linkedin"
+                    ? ver.linkedin.url
+                    : ver.personalSite.url;
+                return (
+                  <div key={key} className="border border-slate-200 rounded-lg p-4 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-900">{labelFor(key)}</p>
+                      <p className="text-xs text-slate-500 truncate">{address || "No profile linked"}</p>
                     </div>
+                    {value.verified ? (
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                        <Check className="w-3 h-3" /> Verified
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-500">Provider verification unavailable</span>
+                    )}
                   </div>
-                  {ver.github.verified ? (
-                    <button type="button" onClick={disconnectGithub} className="text-xs text-red-600 hover:underline">Disconnect</button>
-                  ) : (
-                    <button type="button" onClick={() => setGithubDialogOpen(true)} className="text-xs px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg">Continue to GitHub →</button>
-                  )}
+                );
+              })}
+
+              <div className="border border-slate-200 rounded-lg p-4 flex items-center gap-3">
+                <Github className="w-5 h-5 text-slate-700" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">GitHub</p>
+                  <p className="text-xs text-slate-500">
+                    {ver.github.username || "GitHub OAuth verification is not configured."}
+                  </p>
                 </div>
-                {ver.github.verified && (
-                  <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-slate-100 text-xs text-slate-600">
-                    <div>1.2K followers</div>
-                    <div>340 stars</div>
-                    <div>top: techit-ai</div>
-                    <div>last commit 2h ago</div>
-                  </div>
-                )}
               </div>
 
-              {/* NIN */}
               <div className="border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">Identity (NIN / passport)</p>
-                    <p className="text-xs text-slate-500">Required for prize payouts and equity grants.</p>
-                  </div>
-                  {ver.nin.status === "verified" && (
-                    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-                      <Check className="w-3 h-3" /> Verified
-                    </span>
-                  )}
-                  {ver.nin.status === "pending" && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Under review</span>
-                  )}
-                </div>
-                {ver.nin.status === "unverified" && (
-                  <div className="space-y-3">
-                    <Row label="Country">
-                      <Input value={ver.nin.country} onChange={(v) => setVer((cur) => ({ ...cur, nin: { ...cur.nin, country: v } }))} />
-                    </Row>
-                    <Row label="Document type">
-                      <div className="grid grid-cols-3 gap-2">
-                        {(["nin", "passport", "driver-license"] as const).map((dt) => (
-                          <button key={dt} type="button" onClick={() => setVer((cur) => ({ ...cur, nin: { ...cur.nin, docType: dt } }))}
-                            className={`px-3 py-2 rounded-lg border text-sm capitalize ${ver.nin.docType === dt ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
-                            {dt.replace(/-/g, " ")}
-                          </button>
-                        ))}
-                      </div>
-                    </Row>
-                    <Row label="Document number">
-                      <Input value={ver.nin.docNumber} onChange={(v) => setVer((cur) => ({ ...cur, nin: { ...cur.nin, docNumber: v } }))} />
-                    </Row>
-                    <button type="button" onClick={submitNin} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-lg">
-                      Submit for verification
-                    </button>
-                  </div>
-                )}
-                {ver.nin.status === "pending" && (
-                  <p className="text-sm text-slate-600">Usually 1–3 business days. We'll notify you when it's done.</p>
-                )}
+                <p className="text-sm font-semibold text-slate-900">Identity verification</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Document verification is not configured. No identity document is collected by this screen.
+                </p>
               </div>
             </div>
-
-            <Dialog open={githubDialogOpen} onOpenChange={setGithubDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Continue to GitHub</DialogTitle>
-                </DialogHeader>
-                <p className="text-sm text-slate-600">
-                  TechIT will request read access to your public profile and repositories to verify code ownership. This is a mock OAuth flow — no real authorization happens.
-                </p>
-                <DialogFooter>
-                  <button type="button" onClick={() => setGithubDialogOpen(false)} className="px-4 py-2 text-sm rounded-lg border border-slate-300 hover:bg-slate-50">Cancel</button>
-                  <button type="button" onClick={connectGithub} className="px-4 py-2 text-sm bg-slate-900 text-white hover:bg-slate-800 rounded-lg">Continue</button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </section>
 
           {/* NOTIFICATIONS */}
@@ -607,7 +572,9 @@ export function Settings() {
               </div>
             </div>
             <div className="mt-6 flex justify-end">
-              <button type="button" onClick={saveNotifications} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-lg">Save</button>
+              <button type="button" disabled={saving === "notifications"} onClick={() => void saveNotifications()} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 text-white font-semibold rounded-lg">
+                {saving === "notifications" ? "Saving..." : "Save"}
+              </button>
             </div>
           </section>
 
@@ -642,7 +609,7 @@ export function Settings() {
             </div>
 
             <div className="mt-6 pt-6 border-t border-slate-100">
-              <button type="button" onClick={() => toast("Signed out (mock)")}
+              <button type="button" onClick={() => { void signOut(); }}
                 className="text-sm text-red-600 hover:text-red-700 inline-flex items-center gap-1.5">
                 <LogOut className="w-4 h-4" /> Sign out
               </button>

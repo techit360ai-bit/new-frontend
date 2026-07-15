@@ -6,14 +6,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 interface AudioCallProps {
   onClose: () => void;
   participant?: { name: string; avatar: string };
+  self?: { name: string; avatar: string };
 }
 
-export function AudioCall({ onClose, participant }: AudioCallProps) {
+export function AudioCall({ onClose, participant, self }: AudioCallProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [callDuration, setCallDuration] = useState('00:00');
 
-  const defaultParticipant = participant || { name: 'Sarah Chen', avatar: 'SC' };
+  const activeParticipant = participant ?? self ?? { name: 'Workspace audio room', avatar: 'WS' };
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#0A1929] via-[#1a2942] to-[#2196F3]/20 z-50 flex items-center justify-center">
@@ -24,7 +25,7 @@ export function AudioCall({ onClose, participant }: AudioCallProps) {
             <div className="relative inline-block mb-6">
               <Avatar className="w-32 h-32 ring-4 ring-white/20">
                 <AvatarFallback className="bg-gradient-to-br from-[#2196F3] to-[#1976D2] text-white text-4xl">
-                  {defaultParticipant.avatar}
+                  {activeParticipant.avatar}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
@@ -33,7 +34,7 @@ export function AudioCall({ onClose, participant }: AudioCallProps) {
                 </div>
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">{defaultParticipant.name}</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">{activeParticipant.name}</h2>
             <p className="text-white/60">{callDuration}</p>
           </div>
 

@@ -224,6 +224,8 @@ const App = () => {
           <Route path="hub" element={<MentorshipAdvancedHub />} />
         </Route>
 
+        <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
+
         <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
           <Route path="/founder/dashboard" element={<Dashboard />} />
           <Route path="/dashboard"        element={<Navigate to="/founder/dashboard" replace />} />
@@ -235,7 +237,6 @@ const App = () => {
           <Route path="/incubation-hub"   element={<IncubationHub />} />
           <Route path="/opportunity-hub"  element={<OpportunityHub />} />
           <Route path="/opportunity-hub/:opportunityId" element={<OpportunityDetail />} />
-          <Route path="/h/:hackathonId/team/:teamId" element={<InviteAcceptPage />} />
           <Route path="/chat"             element={<Chat />} />
           <Route path="/matches"          element={<MatchResults />} />
         </Route>

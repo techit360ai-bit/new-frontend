@@ -50,8 +50,9 @@ function ScoreBar({ score, label }: { score: number; label: string }) {
 
 export function BriefStage({ registration }: Props) {
   const [, setSearchParams] = useSearchParams();
-  const { submitBrief } = useFounderProfile();
+  const { registerForHackathon } = useFounderProfile();
   const [values, setValues] = useState<Record<string, string>>(EMPTY);
+  const [submitting, setSubmitting] = useState(false);
 
   // Live score preview — debounced via useMemo on the 7 field values.
   // Hoisted above the early return so hook order stays stable across locked/unlocked.
@@ -129,7 +130,7 @@ export function BriefStage({ registration }: Props) {
   const allValid = FIELDS.every((f) => values[f.key].trim().length >= MIN_CHARS);
   const color = momentumColor(previewScore.overall);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!allValid) return;
     const brief: IdeaBrief = {
       problem: values.problem.trim(),
@@ -141,17 +142,29 @@ export function BriefStage({ registration }: Props) {
       successMetric: values.successMetric.trim(),
       submittedAt: new Date().toISOString(),
     };
-    submitBrief(registration.teamId, brief, scoreBrief(brief));
-    // Persist + score on ai-router so the org command-centre sees this idea
-    // (best-effort; local flow still works offline).
-    void submitHackathonBrief(registration.hackathonId, {
-      teamId: registration.teamId,
-      problem: brief.problem,
-      solution: brief.solutionSketch,
-      fields: brief,
-    });
-    toast.success("Brief submitted — Build stage unlocked");
-    goToBuild();
+    const briefScore = scoreBrief(brief);
+    setSubmitting(true);
+    try {
+      const result = await submitHackathonBrief(registration.hackathonId, {
+        teamId: registration.teamId,
+        problem: brief.problem,
+        solution: brief.solutionSketch,
+        fields: brief,
+        briefScore,
+        composite: briefScore.overall,
+      });
+      if (!result.ok || !result.registration) {
+        toast.error("The brief was not persisted.");
+        return;
+      }
+      registerForHackathon(result.registration);
+      toast.success("Brief submitted — Build stage unlocked");
+      goToBuild();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The brief could not be submitted.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -202,15 +215,15 @@ export function BriefStage({ registration }: Props) {
       <div className="flex justify-end mt-6">
         <button
           type="button"
-          disabled={!allValid}
-          onClick={handleSubmit}
+          disabled={!allValid || submitting}
+          onClick={() => void handleSubmit()}
           className={`text-sm font-medium px-4 py-2 rounded-lg ${
             allValid
               ? "bg-violet-600 text-white hover:bg-violet-700"
               : "bg-slate-100 text-slate-400 cursor-not-allowed"
           }`}
         >
-          Submit brief
+          {submitting ? "Submitting..." : "Submit brief"}
         </button>
       </div>
     </div>

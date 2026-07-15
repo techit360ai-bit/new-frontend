@@ -39,6 +39,37 @@ export interface Profile {
   githubUrl: string | null
   portfolioUrl: string | null
   timezone: string | null
+  title?: string | null
+  twitterUrl?: string | null
+  yearsBuilding?: number
+  founderType?: string
+  oneLiner?: string
+  foundingYear?: number
+  logoEmoji?: string
+  currentTeamSize?: number
+  openRoles?: string[]
+  compensationOffered?: string
+  equityRangeMin?: number
+  equityRangeMax?: number
+  launchStatus?: string
+  users?: number
+  revenueMonthly?: number
+  fundingRaised?: number
+  leadInvestor?: string
+  nextMilestone?: string
+  whyBuilding?: string
+  winningIn3Years?: string
+  unfairAdvantage?: string
+  ownershipPhilosophy?: string
+  yearsExperience?: number
+  discipline?: string
+  subSkills?: string[]
+  techStack?: string[]
+  earliestStart?: string
+  commitmentStyle?: string
+  equityPreference?: number
+  minCashFloor?: number
+  vestingComfort?: string
   certifications: Array<{
     id: string; name: string; issuer: string; verified: boolean; issued_at: string
   }>
@@ -71,6 +102,7 @@ interface AuthContextType {
   signUp: (data: SignUpData) => Promise<{ error: Error | null }>
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: Error | null }>
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>
   refreshProfile: () => Promise<void>
 }
@@ -209,6 +241,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null); setProfile(null)
   }
 
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ error: Error | null }> => {
+    try {
+      const res = await apiFetch('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Password update failed')
+      return { error: null }
+    } catch (e) {
+      return { error: e instanceof Error ? e : new Error('Password update failed') }
+    }
+  }
+
   // ── updateProfile ─────────────────────────────────────────────
   const updateProfile = async (updates: Partial<Profile>): Promise<{ error: Error | null }> => {
     if (!user) return { error: new Error('Not authenticated') }
@@ -234,7 +283,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, fetchProfile])
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, updateProfile, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, changePassword, updateProfile, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

@@ -24,5 +24,6 @@ test("mapConvSummary builds a UI Conversation with derived avatar", () => {
   expect(c.participantName).toBe("Sarah Kim");
   expect(c.participantAvatar).toBe("SK");
   expect(c.unread).toBe(true);
+  expect(c.lastMessageId).toBe("m1");
   expect(c.thread).toEqual([]);
 });

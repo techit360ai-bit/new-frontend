@@ -12,7 +12,7 @@ interface ShareModalProps {
 export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
 
-  const postUrl = `${window.location.origin}/post/${postId}`;
+  const postUrl = `${window.location.origin}/feed/post/${postId}`;
 
   const handleCopyLink = async () => {
     try {

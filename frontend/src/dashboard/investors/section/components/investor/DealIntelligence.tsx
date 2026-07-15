@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { mockStartups, type Startup } from '../../data/mockData';
-import { fetchDealFlow } from '@/lib/api/dealFlow';
-import { useFounderProfile } from '@/contexts/UserContext';
-import { derivePassport } from '@/dashboard/_shared/passport/passport';
+import {
+  addToWatchlist,
+  fetchDealFlow,
+  type InvestorStartup,
+  type RiskLevel,
+} from '@/lib/api/dealFlow';
 import {
   Filter,
   Grid3x3,
@@ -16,95 +19,73 @@ import {
 
 type ViewMode = 'grid' | 'list';
 
-// Build a Deal-Intelligence Startup card from the logged-in founder + their
-// derived passport, so a real hackathon track record is investor-discoverable.
-function founderToStartup(
-  fp: ReturnType<typeof useFounderProfile>["founderProfile"],
-  now: number,
-): Startup | null {
-  const passport = derivePassport(fp.hackathonRegistrations, now);
-  if (!passport.hasActivity) return null;
-  const bestMomentum = passport.records.reduce((m, r) => Math.max(m, r.momentum), 0);
-  return {
-    id: 'founder-self',
-    name: fp.startupName || fp.name,
-    sector: fp.industries[0] ?? '—',
-    region: fp.location ?? '—',
-    readinessScore: passport.avgBriefScore ?? 0,
-    executionVelocity: bestMomentum,
-    betaRetention: 0,
-    revenueGrowth: 0,
-    mrr: fp.revenueMonthly ?? 0,
-    riskLevel: 'low',
-    founderReliability: passport.avgBriefScore ?? 0,
-    complianceVerified: false,
-    aiGovernanceVerified: false,
-    burnEfficiency: 0,
-    pivotFrequency: 0,
-    experimentVelocity: 0,
-    velocityDelta: 0,
-    revenueDelta: 0,
-    investorsWatching: 0,
-    milestones: [],
-    riskMetrics: { product: 0, market: 0, team: 0, compliance: 0, financial: 0, execution: 0 },
-    about: { summary: fp.oneLiner ?? '', useCase: '', marketSize: '', marketSizeValue: '' },
-    passport: {
-      hackathonsEntered: passport.hackathonsEntered,
-      bestPlacement: passport.bestPlacement?.placement,
-      cohortSize: passport.bestPlacement?.cohortSize,
-      demosShipped: passport.demosShipped,
-      avgBriefScore: passport.avgBriefScore,
-    },
-  };
+const DEFAULT_FILTERS = {
+  minReadiness: 0,
+  minExecutionVelocity: 0,
+  minBetaRetention: 0,
+  minRevenueGrowth: 0,
+  complianceVerified: false,
+  minFounderReliability: 0,
+  region: 'all',
+  sector: 'all',
+  maxBurnEfficiency: 10,
+  hasTrackRecord: false,
+  minBestPlacement: 0,
+};
+
+function riskColor(riskLevel: RiskLevel) {
+  if (riskLevel === 'low') return 'text-emerald-400';
+  if (riskLevel === 'moderate') return 'text-amber-400';
+  if (riskLevel === 'high') return 'text-red-400';
+  return 'text-gray-400';
+}
+
+function formatMoney(value: number) {
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
+  return `$${value}`;
 }
 
 export function DealIntelligence() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [filters, setFilters] = useState({
-    minReadiness: 0,
-    minExecutionVelocity: 0,
-    minBetaRetention: 0,
-    minRevenueGrowth: 0,
-    complianceVerified: false,
-    minFounderReliability: 0,
-    region: 'all',
-    sector: 'all',
-    maxBurnEfficiency: 10,
-    hasTrackRecord: false,
-    minBestPlacement: 0,
-  });
-
-  const { founderProfile } = useFounderProfile();
-  const allStartups = useMemo(() => {
-    const self = founderToStartup(founderProfile, Date.now());
-    return self ? [self, ...mockStartups] : mockStartups;
-  }, [founderProfile]);
-
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [expandedFilters, setExpandedFilters] = useState({
     execution: true,
     risk: false,
     behavioral: false,
+    trackRecord: false,
   });
+  const [startups, setStartups] = useState<InvestorStartup[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Real EVI-I / IIS / WCRS deal-flow ranking from ai-router. When available it
-  // drives ordering; otherwise the screen falls back to its mock order.
-  const [rankMap, setRankMap] = useState<Record<string, number>>({});
-  const ranked = Object.keys(rankMap).length > 0;
   useEffect(() => {
     let alive = true;
-    fetchDealFlow().then((data) => {
-      if (!alive || !data?.ranking?.length) return;
-      const map: Record<string, number> = {};
-      data.ranking.forEach((e, i) => {
-        const id = e.projectId ?? e.name;
-        if (id) map[String(id)] = e.rank ?? i + 1;
+    fetchDealFlow()
+      .then((data) => {
+        if (!alive) return;
+        setStartups(data.ranking);
+        setError(null);
+      })
+      .catch(() => {
+        if (alive) setError('Unable to load live deal intelligence.');
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
       });
-      setRankMap(map);
-    });
     return () => { alive = false; };
   }, []);
 
-  const filteredStartups = allStartups.filter((startup) => {
+  const regions = useMemo(
+    () => ['all', ...Array.from(new Set(startups.map((startup) => startup.region).filter(Boolean)))],
+    [startups],
+  );
+  const sectors = useMemo(
+    () => ['all', ...Array.from(new Set(startups.map((startup) => startup.sector).filter(Boolean)))],
+    [startups],
+  );
+
+  const filteredStartups = startups.filter((startup) => {
     if (startup.readinessScore < filters.minReadiness) return false;
     if (startup.executionVelocity < filters.minExecutionVelocity) return false;
     if (startup.betaRetention < filters.minBetaRetention) return false;
@@ -122,15 +103,26 @@ export function DealIntelligence() {
     return true;
   });
 
-  // Order by backend EVI-I rank when present, else keep mock order.
-  const sortedStartups = ranked
-    ? [...filteredStartups].sort(
-        (a, b) => (rankMap[a.id] ?? 999) - (rankMap[b.id] ?? 999),
-      )
-    : filteredStartups;
+  const sortedStartups = [...filteredStartups].sort(
+    (a, b) => (a.rank ?? 9999) - (b.rank ?? 9999) || b.rankScore - a.rankScore,
+  );
 
   const toggleFilterSection = (section: keyof typeof expandedFilters) => {
     setExpandedFilters((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleWatch = (projectId: string) => {
+    addToWatchlist(projectId)
+      .then(() => {
+        setStartups((current) =>
+          current.map((startup) =>
+            startup.id === projectId ? { ...startup, watchlisted: true } : startup,
+          ),
+        );
+      })
+      .catch(() => {
+        setError('Unable to persist watchlist item.');
+      });
   };
 
   return (
@@ -152,7 +144,6 @@ export function DealIntelligence() {
           </div>
 
           <div className="space-y-4">
-            {/* Execution Metrics */}
             <FilterSection
               title="Execution Metrics"
               isExpanded={expandedFilters.execution}
@@ -188,7 +179,6 @@ export function DealIntelligence() {
               />
             </FilterSection>
 
-            {/* Risk Controls */}
             <FilterSection
               title="Risk Controls"
               isExpanded={expandedFilters.risk}
@@ -223,7 +213,6 @@ export function DealIntelligence() {
               </div>
             </FilterSection>
 
-            {/* Behavioral Patterns */}
             <FilterSection
               title="Behavioral Patterns"
               isExpanded={expandedFilters.behavioral}
@@ -237,10 +226,11 @@ export function DealIntelligence() {
                     onChange={(e) => setFilters({ ...filters, region: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="all">All Regions</option>
-                    <option value="North America">North America</option>
-                    <option value="Europe">Europe</option>
-                    <option value="Asia">Asia</option>
+                    {regions.map((region) => (
+                      <option key={region} value={region}>
+                        {region === 'all' ? 'All Regions' : region}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -250,13 +240,11 @@ export function DealIntelligence() {
                     onChange={(e) => setFilters({ ...filters, sector: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="all">All Sectors</option>
-                    <option value="SaaS">SaaS</option>
-                    <option value="AI/ML">AI/ML</option>
-                    <option value="FinTech">FinTech</option>
-                    <option value="BioTech">BioTech</option>
-                    <option value="Infrastructure">Infrastructure</option>
-                    <option value="Security">Security</option>
+                    {sectors.map((sector) => (
+                      <option key={sector} value={sector}>
+                        {sector === 'all' ? 'All Sectors' : sector}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -264,8 +252,8 @@ export function DealIntelligence() {
 
             <FilterSection
               title="Hackathon Track Record"
-              isExpanded={expandedFilters.behavioral}
-              onToggle={() => toggleFilterSection('behavioral')}
+              isExpanded={expandedFilters.trackRecord}
+              onToggle={() => toggleFilterSection('trackRecord')}
             >
               <div className="space-y-3">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -287,23 +275,8 @@ export function DealIntelligence() {
               </div>
             </FilterSection>
 
-            {/* Reset Button */}
             <button
-              onClick={() =>
-                setFilters({
-                  minReadiness: 0,
-                  minExecutionVelocity: 0,
-                  minBetaRetention: 0,
-                  minRevenueGrowth: 0,
-                  complianceVerified: false,
-                  minFounderReliability: 0,
-                  region: 'all',
-                  sector: 'all',
-                  maxBurnEfficiency: 10,
-                  hasTrackRecord: false,
-                  minBestPlacement: 0,
-                })
-              }
+              onClick={() => setFilters(DEFAULT_FILTERS)}
               className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
             >
               Reset Filters
@@ -313,16 +286,21 @@ export function DealIntelligence() {
 
         {/* Results Panel */}
         <div className="flex-1 overflow-y-auto p-8">
-          {/* Top Bar */}
+          {error && (
+            <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {error}
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-gray-400 text-sm">
                 Showing <span className="text-white font-mono">{filteredStartups.length}</span> of{' '}
-                <span className="text-white font-mono">{allStartups.length}</span> startups
+                <span className="text-white font-mono">{startups.length}</span> startups
               </p>
-              {ranked && (
+              {startups.length > 0 && (
                 <p className="text-xs text-emerald-400 mt-0.5">
-                  ● Ranked by EVI-I / WCRS · live from engine
+                  ● Ranked by live EVI-I / WCRS domain projections
                 </p>
               )}
             </div>
@@ -334,6 +312,7 @@ export function DealIntelligence() {
                     ? 'bg-emerald-500/20 text-emerald-400'
                     : 'bg-gray-800 text-gray-400 hover:text-white'
                 }`}
+                aria-label="Grid view"
               >
                 <Grid3x3 className="w-5 h-5" />
               </button>
@@ -344,32 +323,42 @@ export function DealIntelligence() {
                     ? 'bg-emerald-500/20 text-emerald-400'
                     : 'bg-gray-800 text-gray-400 hover:text-white'
                 }`}
+                aria-label="List view"
               >
                 <List className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* Results Grid/List */}
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {sortedStartups.map((startup) => (
-                <StartupCard key={startup.id} startup={startup} />
-              ))}
+          {isLoading ? (
+            <div className="rounded-lg border border-gray-800 bg-[#111111] p-10 text-center text-gray-400">
+              Loading live deal intelligence...
             </div>
+          ) : sortedStartups.length > 0 ? (
+            viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                {sortedStartups.map((startup) => (
+                  <StartupCard key={startup.id} startup={startup} onWatch={handleWatch} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sortedStartups.map((startup) => (
+                  <StartupListItem key={startup.id} startup={startup} onWatch={handleWatch} />
+                ))}
+              </div>
+            )
           ) : (
-            <div className="space-y-3">
-              {sortedStartups.map((startup) => (
-                <StartupListItem key={startup.id} startup={startup} />
-              ))}
-            </div>
-          )}
-
-          {filteredStartups.length === 0 && (
             <div className="text-center py-16">
               <Filter className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No startups match your filters</h3>
-              <p className="text-gray-400">Try adjusting your filter criteria</p>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                {startups.length === 0 ? 'No live deal-flow records yet' : 'No startups match your filters'}
+              </h3>
+              <p className="text-gray-400">
+                {startups.length === 0
+                  ? 'Persisted deal-flow snapshots will appear here once the backend has live investor projections.'
+                  : 'Try adjusting your filter criteria.'}
+              </p>
             </div>
           )}
         </div>
@@ -382,7 +371,7 @@ interface FilterSectionProps {
   title: string;
   isExpanded: boolean;
   onToggle: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function FilterSection({ title, isExpanded, onToggle, children }: FilterSectionProps) {
@@ -430,10 +419,11 @@ function SliderFilter({ label, value, onChange, min, max }: SliderFilterProps) {
 }
 
 interface StartupCardProps {
-  startup: Startup;
+  startup: InvestorStartup;
+  onWatch: (projectId: string) => void;
 }
 
-function StartupCard({ startup }: StartupCardProps) {
+function StartupCard({ startup, onWatch }: StartupCardProps) {
   return (
     <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-all">
       <div className="flex items-start justify-between mb-3">
@@ -456,19 +446,13 @@ function StartupCard({ startup }: StartupCardProps) {
         <MetricRow label="EVI" value={startup.executionVelocity} isScore />
         <MetricRow
           label="Revenue"
-          value={`$${(startup.mrr / 1000).toFixed(0)}K MRR`}
+          value={`${formatMoney(startup.mrr)} MRR`}
           valueColor="text-emerald-400"
         />
         <MetricRow
           label="Risk Level"
           value={startup.riskLevel}
-          valueColor={
-            startup.riskLevel === 'low'
-              ? 'text-emerald-400'
-              : startup.riskLevel === 'moderate'
-              ? 'text-amber-400'
-              : 'text-red-400'
-          }
+          valueColor={riskColor(startup.riskLevel)}
         />
         <MetricRow label="Founder" value={startup.founderReliability} isScore />
       </div>
@@ -493,9 +477,13 @@ function StartupCard({ startup }: StartupCardProps) {
         >
           Analyze
         </Link>
-        <button className="flex-1 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded transition-all flex items-center justify-center gap-1">
+        <button
+          onClick={() => onWatch(startup.id)}
+          disabled={startup.watchlisted}
+          className="flex-1 py-2 bg-blue-500/10 hover:bg-blue-500/20 disabled:hover:bg-blue-500/10 text-blue-400 disabled:text-blue-300 text-sm font-medium rounded transition-all flex items-center justify-center gap-1"
+        >
           <Eye className="w-4 h-4" />
-          Watch
+          {startup.watchlisted ? 'Watching' : 'Watch'}
         </button>
         <Link
           to="/investor/allocation"
@@ -508,7 +496,7 @@ function StartupCard({ startup }: StartupCardProps) {
   );
 }
 
-function StartupListItem({ startup }: StartupCardProps) {
+function StartupListItem({ startup, onWatch }: StartupCardProps) {
   return (
     <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-all">
       <div className="flex items-center justify-between">
@@ -524,31 +512,12 @@ function StartupListItem({ startup }: StartupCardProps) {
           </div>
 
           <div className="flex gap-8 flex-1">
-            <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">Readiness</p>
-              <p className="text-lg font-bold font-mono text-emerald-400">{startup.readinessScore}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">EVI</p>
-              <p className="text-lg font-bold font-mono text-purple-400">{startup.executionVelocity}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">Revenue</p>
-              <p className="text-lg font-bold font-mono text-emerald-400">
-                ${(startup.mrr / 1000).toFixed(0)}K
-              </p>
-            </div>
+            <SignalValue label="Readiness" value={startup.readinessScore} color="text-emerald-400" />
+            <SignalValue label="EVI" value={startup.executionVelocity} color="text-purple-400" />
+            <SignalValue label="Revenue" value={formatMoney(startup.mrr)} color="text-emerald-400" />
             <div className="text-center">
               <p className="text-xs text-gray-400 mb-1">Risk</p>
-              <p
-                className={`text-sm font-medium capitalize ${
-                  startup.riskLevel === 'low'
-                    ? 'text-emerald-400'
-                    : startup.riskLevel === 'moderate'
-                    ? 'text-amber-400'
-                    : 'text-red-400'
-                }`}
-              >
+              <p className={`text-sm font-medium capitalize ${riskColor(startup.riskLevel)}`}>
                 {startup.riskLevel}
               </p>
             </div>
@@ -570,12 +539,31 @@ function StartupListItem({ startup }: StartupCardProps) {
           >
             Analyze
           </Link>
-          <button className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded transition-all flex items-center gap-1">
+          <button
+            onClick={() => onWatch(startup.id)}
+            disabled={startup.watchlisted}
+            className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 disabled:hover:bg-blue-500/10 text-blue-400 disabled:text-blue-300 text-sm font-medium rounded transition-all flex items-center gap-1"
+          >
             <Eye className="w-4 h-4" />
-            Watch
+            {startup.watchlisted ? 'Watching' : 'Watch'}
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+interface SignalValueProps {
+  label: string;
+  value: string | number;
+  color: string;
+}
+
+function SignalValue({ label, value, color }: SignalValueProps) {
+  return (
+    <div className="text-center">
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <p className={`text-lg font-bold font-mono ${color}`}>{value}</p>
     </div>
   );
 }

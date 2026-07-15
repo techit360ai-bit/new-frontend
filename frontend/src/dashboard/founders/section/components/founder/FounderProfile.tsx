@@ -1,12 +1,90 @@
 // frontend/src/dashboard/founders/section/components/founder/FounderProfile.tsx
 import { Link } from "react-router-dom";
 import { Github, Linkedin, Globe, Twitter, ExternalLink, Check } from "lucide-react";
-import { useFounderProfile } from "@/contexts/UserContext";
-import { journey, endorsements } from "@/dashboard/founders/section/data/mockData";
+import { useEffect, useMemo, useState } from "react";
+import {
+  useFounderProfile,
+  type FounderProfile as FounderProfileData,
+  type FounderStage,
+} from "@/contexts/UserContext";
+import { fetchEndorsements, type Endorsement } from "@/lib/api/endorsements";
 import { StartupPassport } from "./StartupPassport";
+
+interface JourneyStage {
+  id: string;
+  label: string;
+  status: "complete" | "active" | "upcoming";
+  progress: number;
+  detail: string;
+}
+
+const FOUNDER_STAGES: FounderStage[] = ["Idea", "MVP", "Beta", "Launch", "Growth"];
+
+function clampProgress(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function buildJourney(profile: FounderProfileData): JourneyStage[] {
+  const activeIndex = Math.max(0, FOUNDER_STAGES.indexOf(profile.stage));
+  const primaryProject =
+    profile.founderProjects.find((project) => project.isPrimary) ??
+    profile.founderProjects[0];
+  const activeProgress = primaryProject ? clampProgress(primaryProject.gsisScore) : 0;
+  const details: Record<FounderStage, string> = {
+    Idea:
+      profile.founderProjects.length > 0
+        ? `${profile.founderProjects.length} persisted venture${profile.founderProjects.length === 1 ? "" : "s"} in your portfolio.`
+        : "No persisted venture has been added yet.",
+    MVP:
+      profile.openRoles.length > 0
+        ? `${profile.currentTeamSize} team members and ${profile.openRoles.length} open role${profile.openRoles.length === 1 ? "" : "s"}.`
+        : `${profile.currentTeamSize} team members and no open roles.`,
+    Beta: primaryProject
+      ? `${primaryProject.title} has a GSIS score of ${clampProgress(primaryProject.gsisScore)}.`
+      : "Add a persisted venture to track execution progress.",
+    Launch: `Launch status: ${profile.launchStatus.replace(/-/g, " ")}.`,
+    Growth: profile.nextMilestone
+      ? `Next milestone: ${profile.nextMilestone}`
+      : "No next milestone has been recorded.",
+  };
+
+  return FOUNDER_STAGES.map((stage, index) => ({
+    id: stage.toLowerCase(),
+    label: stage,
+    status: index < activeIndex ? "complete" : index === activeIndex ? "active" : "upcoming",
+    progress: index < activeIndex ? 100 : index === activeIndex ? activeProgress : 0,
+    detail: details[stage],
+  }));
+}
 
 export function FounderProfile() {
   const { founderProfile: p } = useFounderProfile();
+  const [endorsements, setEndorsements] = useState<Endorsement[]>([]);
+  const [endorsementsLoading, setEndorsementsLoading] = useState(true);
+  const [endorsementsError, setEndorsementsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    setEndorsementsLoading(true);
+    setEndorsementsError(null);
+    fetchEndorsements()
+      .then((rows) => {
+        if (alive) setEndorsements(rows);
+      })
+      .catch((error) => {
+        if (!alive) return;
+        setEndorsements([]);
+        setEndorsementsError(
+          error instanceof Error ? error.message : "Live endorsements are unavailable.",
+        );
+      })
+      .finally(() => {
+        if (alive) setEndorsementsLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const initials = p.name
     .split(" ")
@@ -55,7 +133,7 @@ export function FounderProfile() {
   const matchresultsHref =
     p.openRoles.length > 0 ? `/matchresults?roles=${rolesQuery}` : "/matchresults";
 
-  const topEndorsements = endorsements.slice(0, 3);
+  const journey = useMemo(() => buildJourney(p), [p]);
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
@@ -239,23 +317,29 @@ export function FounderProfile() {
 
       {/* 7. Recent endorsements (top 3) */}
       <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-700">Recent endorsements</h2>
-          <Link to="/matchresults" className="text-xs text-violet-600 hover:underline">
-            See all {endorsements.length} →
-          </Link>
-        </div>
-        {endorsements.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            No endorsements yet. They appear after you complete an engagement with a collaborator.
+        <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent endorsements</h2>
+        {endorsementsLoading && (
+          <p className="text-sm text-slate-500">Loading live endorsements...</p>
+        )}
+        {!endorsementsLoading && endorsementsError && (
+          <p className="text-sm text-red-600">
+            Live endorsements are unavailable: {endorsementsError}
           </p>
-        ) : (
+        )}
+        {!endorsementsLoading && !endorsementsError && endorsements.length === 0 && (
+          <p className="text-sm text-slate-500">No live endorsements are recorded yet.</p>
+        )}
+        {!endorsementsLoading && !endorsementsError && endorsements.length > 0 && (
           <div className="space-y-3">
-            {topEndorsements.map((e) => (
-              <div key={e.id} className="border border-slate-200 bg-white rounded-lg p-4">
-                <p className="text-sm text-slate-700">"{e.quote}"</p>
+            {endorsements.slice(0, 3).map((endorsement) => (
+              <div key={endorsement.id} className="border border-slate-200 bg-white rounded-lg p-4">
+                <p className="text-sm text-slate-700">"{endorsement.quote}"</p>
                 <p className="text-xs text-slate-500 mt-2">
-                  — {e.fromName} · {e.fromRole} · {e.buildName} · {e.date}
+                  {endorsement.authorName} · {endorsement.authorRole}
+                  {endorsement.projectName ? ` · ${endorsement.projectName}` : ""}
+                  {endorsement.createdAt
+                    ? ` · ${new Date(endorsement.createdAt).toLocaleDateString()}`
+                    : ""}
                 </p>
               </div>
             ))}

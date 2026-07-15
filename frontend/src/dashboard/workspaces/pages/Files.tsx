@@ -1,28 +1,34 @@
 import { FileText, FolderOpen, Image, FileCode, Download, MoreVertical, Upload } from 'lucide-react';
-import { useState } from 'react';
-
-interface FileItem {
-  id: number;
-  name: string;
-  type: 'folder' | 'file';
-  size?: string;
-  modified: string;
-  fileType?: 'document' | 'image' | 'code';
-}
-
-const filesData: FileItem[] = [
-  { id: 1, name: 'Project Documents', type: 'folder', modified: '2 days ago' },
-  { id: 2, name: 'Design Assets', type: 'folder', modified: '1 week ago' },
-  { id: 3, name: 'README.md', type: 'file', size: '4.2 KB', modified: '3 hours ago', fileType: 'code' },
-  { id: 4, name: 'Project Proposal.pdf', type: 'file', size: '2.4 MB', modified: '1 day ago', fileType: 'document' },
-  { id: 5, name: 'Dashboard_mockup.png', type: 'file', size: '856 KB', modified: '2 days ago', fileType: 'image' },
-  { id: 6, name: 'API_documentation.md', type: 'file', size: '12.8 KB', modified: '5 days ago', fileType: 'code' },
-];
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { fetchDomainFiles, type DomainFileItem } from '@/lib/api/files';
 
 export function Files() {
-  const [selectedFiles, setSelectedFiles] = useState<number[]>([]);
+  const [files, setFiles] = useState<DomainFileItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getFileIcon = (item: FileItem) => {
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    fetchDomainFiles()
+      .then((rows) => {
+        if (!alive) return;
+        setFiles(rows);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setFiles([]);
+        setError(err instanceof Error ? err.message : 'Live files are unavailable.');
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+
+  const getFileIcon = (item: DomainFileItem) => {
     if (item.type === 'folder') {
       return <FolderOpen className="w-5 h-5 text-[#2196F3]" />;
     }
@@ -49,7 +55,7 @@ export function Files() {
               Manage and organize your project files
             </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
+          <button onClick={() => toast('File uploads require a persisted upload endpoint.')} className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
             <Upload className="w-4 h-4" />
             <span className="text-sm font-medium">Upload Files</span>
           </button>
@@ -69,7 +75,16 @@ export function Files() {
               </tr>
             </thead>
             <tbody>
-              {filesData.map((file) => (
+              {loading && (
+                <tr><td className="py-6 px-6 text-sm text-gray-500" colSpan={4}>Loading live files...</td></tr>
+              )}
+              {!loading && error && (
+                <tr><td className="py-6 px-6 text-sm text-red-600" colSpan={4}>Live files could not be loaded: {error}</td></tr>
+              )}
+              {!loading && !error && files.length === 0 && (
+                <tr><td className="py-6 px-6 text-sm text-gray-500" colSpan={4}>No live files are recorded yet.</td></tr>
+              )}
+              {files.map((file) => (
                 <tr
                   key={file.id}
                   className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -104,16 +119,17 @@ export function Files() {
           </table>
         </div>
 
-        {/* Storage Info */}
-        <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">Storage Usage</h3>
-            <span className="text-sm text-gray-600">24.3 GB of 100 GB used</span>
+        {!loading && !error && files.length > 0 && (
+          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold">Storage Records</h3>
+              <span className="text-sm text-gray-600">{files.filter((file) => file.type === 'file').length} files recorded</span>
+            </div>
+            <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-full bg-[#2196F3] rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
+            </div>
           </div>
-          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-[#2196F3] to-purple-500 rounded-full" style={{ width: '24.3%' }} />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

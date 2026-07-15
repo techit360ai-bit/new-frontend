@@ -1,16 +1,24 @@
 // frontend/src/lib/api/earnings.ts
 //
-// Collaborator earnings/payouts domain — ai-router /api/v1/collaborator/earnings.
-// Falls back to bundled mock data so the Earnings dashboard renders offline.
+// Collaborator earnings/payouts domain — BACKEND /api/domain/collaborator/earnings.
 
-import { apiGet, apiPost, withFallback } from "./client";
-import {
-  cashEarnings,
-  cashTotals,
-  payouts,
-  type CashEarning,
-  type Payout,
-} from "@/dashboard/collaborators/section/data/mockData";
+import { domainGet, domainPost } from "@/lib/domainApi";
+
+export interface CashEarning {
+  projectId: string;
+  projectName: string;
+  earned: number;
+  pending: number;
+  revenueSharePercent: number;
+  contributionNote: string;
+}
+
+export interface Payout {
+  id: string;
+  monthIso: string;
+  amount: number;
+  status: "paid" | "processing";
+}
 
 export interface CashTotals {
   lifetimeUSD: number;
@@ -24,19 +32,19 @@ export interface CollaboratorEarnings {
   totals: CashTotals;
 }
 
-const FALLBACK: CollaboratorEarnings = {
-  cashEarnings,
-  payouts,
-  totals: cashTotals as CashTotals,
+export const EMPTY_EARNINGS: CollaboratorEarnings = {
+  cashEarnings: [],
+  payouts: [],
+  totals: {
+    lifetimeUSD: 0,
+    pendingUSD: 0,
+    revenueShareTTMUsd: 0,
+  },
 };
 
-/** GET /api/v1/collaborator/earnings — per-project earnings + payout ledger + totals. */
+/** GET /api/domain/collaborator/earnings — per-project earnings + payout ledger + totals. */
 export function fetchCollaboratorEarnings(): Promise<CollaboratorEarnings> {
-  return withFallback(
-    () => apiGet<CollaboratorEarnings>("/collaborator/earnings"),
-    FALLBACK,
-    "collaborator earnings",
-  );
+  return domainGet<CollaboratorEarnings>("/collaborator/earnings");
 }
 
 export interface WithdrawRequest {
@@ -54,21 +62,7 @@ export interface WithdrawResult {
   newPendingUSD?: number;
 }
 
-/** POST /api/v1/collaborator/earnings/withdraw — request a withdrawal of pending funds. */
+/** POST /api/domain/collaborator/earnings/withdraw — request a withdrawal of pending funds. */
 export function requestWithdrawal(body: WithdrawRequest): Promise<WithdrawResult> {
-  return withFallback(
-    () => apiPost<WithdrawResult>("/collaborator/earnings/withdraw", body),
-    // Offline fallback: optimistic local success so the existing UX still works.
-    () => ({
-      ok: true,
-      payout: {
-        id: body.idemKey ?? `p-local`,
-        monthIso: body.monthIso ?? new Date().toISOString().slice(0, 7),
-        amount: body.amount,
-        status: "processing" as const,
-      },
-      destination: body.destination ?? "•••1234",
-    }),
-    "request withdrawal",
-  );
+  return domainPost<WithdrawResult>("/collaborator/earnings/withdraw", body);
 }

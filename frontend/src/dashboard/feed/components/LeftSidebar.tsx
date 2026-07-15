@@ -1,132 +1,67 @@
-import { Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFeedPosts } from '../useFeedPosts';
 
 export function LeftSidebar() {
+  const { profile, user } = useAuth();
+  const { posts, loading } = useFeedPosts('global');
+  const ownerId = profile?.id || user?.id;
+  const ownPosts = posts.filter((post) => post.authorId === ownerId);
+  const name = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
+    || profile?.username
+    || profile?.email
+    || 'User';
+
   return (
-    <aside className="hidden lg:block w-[260px] bg-bg-surface border-r border-border-default h-[calc(100vh-56px)] sticky top-14 overflow-y-auto p-5">
-      {/* My Startup Section */}
-      <div>
-        <h4 className="text-text-muted text-[11px] font-medium uppercase tracking-[1.5px] mb-3">
-          MY STARTUP
-        </h4>
-        <Link to="/feed/my-log">
-          <h3 className="text-text-primary text-[15px] font-medium mb-2 hover:text-accent-primary transition-colors">
-            MediConnect Africa
-          </h3>
+    <aside className="sticky top-14 hidden h-[calc(100vh-56px)] w-[260px] overflow-y-auto border-r border-border-default bg-bg-surface p-5 lg:block">
+      <section className="mb-6">
+        <p className="mb-2 text-[11px] font-medium uppercase text-text-muted">Your profile</p>
+        <Link to="/feed/profile/me" className="text-[15px] font-medium text-text-primary hover:text-accent-primary">
+          {name}
         </Link>
-        <div className="inline-block bg-bg-elevated text-accent-primary text-[11px] font-medium px-2.5 py-1 rounded-full mb-3">
-          MVP
+        <p className="mt-1 text-xs capitalize text-text-secondary">
+          {profile?.role || 'Role unavailable'} · {profile?.startupStage || 'Stage not set'}
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border-default pt-4">
+          <Metric label="GSIS" value={profile?.credibilityScore ?? 0} />
+          <Metric label="Posts" value={loading ? '...' : ownPosts.length} />
         </div>
+      </section>
 
-        {/* GSIS and Decay */}
-        <div className="space-y-2 mb-3">
-          <div className="flex items-center justify-between">
-            <span className="text-text-muted text-xs">GSIS</span>
-            <span className="font-mono text-[18px] font-semibold text-score-amber">68</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-text-muted text-xs">Decay</span>
-            <div className="flex items-center gap-1.5">
-              <span className="font-mono text-xs text-score-amber">0.91</span>
-              <div className="w-2 h-2 rounded-full bg-score-amber animate-pulse-amber"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-text-muted text-[11px]">Progress</span>
-            <span className="text-text-muted text-[11px]">42% to Beta</span>
-          </div>
-          <div className="h-1 bg-bg-elevated rounded-full overflow-hidden">
-            <div className="h-full bg-accent-primary rounded-full" style={{ width: '42%' }}></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Hangout Menu */}
-      <div className="mb-6">
-        <h4 className="text-text-muted text-[11px] font-medium uppercase tracking-[1.5px] mb-2">
-          HANGOUT
-        </h4>
+      <section className="mb-6">
+        <p className="mb-2 text-[11px] font-medium uppercase text-text-muted">Hangout</p>
         <div className="space-y-1">
-          <MenuItem to="/feed" icon="🌍" label="Global Pulse" unread={12} />
-          <MenuItem to="/feed/tribe" icon="👥" label="Your Tribe" unread={3} />
-          <MenuItem to="/feed/build-log" icon="📋" label="Build Logs" />
-          <MenuItem to="/feed/questions" icon="❓" label="Questions" unread={5} />
-          <MenuItem to="/feed/problems" icon="🔴" label="Problem Signals" unread={2} />
+          <MenuItem to="/feed" label="Global Pulse" />
+          <MenuItem to="/feed/tribe" label="Your Tribe" />
+          <MenuItem to="/feed/build-log" label="Build Logs" />
+          <MenuItem to="/feed/questions" label="Questions" />
+          <MenuItem to="/feed/problems" label="Problem Signals" />
         </div>
-      </div>
+      </section>
 
-      {/* Active Now */}
-      <div className="mb-6">
-        <h4 className="text-text-muted text-[11px] font-medium uppercase tracking-[1.5px] mb-2">
-          ACTIVE NOW
-        </h4>
-        <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="w-6 h-6 rounded-full bg-gradient-to-br from-accent-primary to-score-purple border-2 border-bg-surface relative"
-              >
-                <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-score-green rounded-full border border-bg-surface"></div>
-              </div>
-            ))}
-          </div>
-          <span className="text-text-secondary text-xs">+18 online</span>
-        </div>
-      </div>
-
-      {/* My Progress Shortcuts */}
-      <div>
-        <h4 className="text-text-muted text-[11px] font-medium uppercase tracking-[1.5px] mb-2">
-          SHORTCUTS
-        </h4>
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-score-amber" />
-            <span className="text-text-primary text-xs flex-1 truncate">First paying customer</span>
-            <span className="font-mono text-[11px] text-score-amber">~14d</span>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-text-secondary text-xs">Community Score</span>
-              <span className="font-mono text-xs text-score-amber">45/100</span>
-            </div>
-            <div className="h-0.5 bg-bg-elevated rounded-full overflow-hidden">
-              <div className="h-full bg-score-amber rounded-full" style={{ width: '45%' }}></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <section className="border-t border-border-default pt-4">
+        <p className="mb-2 text-[11px] font-medium uppercase text-text-muted">Live data</p>
+        <p className="text-xs leading-relaxed text-text-muted">
+          Presence and unread counts will appear when the messaging service exposes persisted read models for them.
+        </p>
+      </section>
     </aside>
   );
 }
 
-function MenuItem({
-  to,
-  icon,
-  label,
-  unread,
-}: {
-  to: string;
-  icon: string;
-  label: string;
-  unread?: number;
-}) {
+function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <Link to={to}>
-      <button className="w-full h-10 flex items-center gap-3 px-3 rounded-lg transition-colors hover:bg-bg-elevated border-l-2 border-transparent hover:border-accent-primary">
-        <span className="text-sm">{icon}</span>
-        <span className="text-sm flex-1 text-left">{label}</span>
-        {unread && (
-          <span className="text-[11px] font-medium text-accent-primary bg-accent-glow px-1.5 py-0.5 rounded">
-            {unread}
-          </span>
-        )}
-      </button>
+    <div>
+      <p className="text-[11px] text-text-muted">{label}</p>
+      <p className="mt-1 font-mono text-base font-semibold text-text-primary">{value}</p>
+    </div>
+  );
+}
+
+function MenuItem({ to, label }: { to: string; label: string }) {
+  return (
+    <Link to={to} className="block rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary">
+      {label}
     </Link>
   );
 }

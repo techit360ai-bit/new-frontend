@@ -18,9 +18,7 @@ export interface DashboardIntelligence {
 }
 
 const FALLBACK_INTEL: DashboardIntelligence = {
-  // Mirrors the founder Incubation panel's existing sub-scores so the card has
-  // sensible values when the backend is unavailable.
-  gsis: { gsis: 88, classification: "High Potential", components: { unicorn: 91, marketFit: 88, feasibility: 84 } },
+  gsis: null,
   alerts: [],
 };
 
@@ -35,9 +33,5 @@ export function fetchDashboardIntelligence(): Promise<DashboardIntelligence> {
 
 /** POST /api/v1/gsis/compute — compute GSIS from component scores. */
 export function computeGsis(componentScores: Record<string, number>): Promise<GsisScore> {
-  return withFallback(
-    () => apiPost<GsisScore>("/gsis/compute", { component_scores: componentScores }),
-    FALLBACK_INTEL.gsis as GsisScore,
-    "compute gsis",
-  );
+  return apiPost<GsisScore>("/gsis/compute", { component_scores: componentScores });
 }

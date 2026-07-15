@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Copy, Check, Mail, Send, ArrowLeft, Trophy } from "lucide-react";
 import { toast } from "sonner";
-import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { useFounderProfile, type OpenRole } from "@/contexts/UserContext";
+import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
+import { registerHackathonTeam } from "@/lib/api/hackathon";
 
 const BASE32_ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";
 
@@ -25,24 +26,48 @@ export function RegisterStage() {
   const navigate = useNavigate();
   const { founderProfile, registerForHackathon } = useFounderProfile();
 
-  const allHackathons = useMemo(() => OPPORTUNITIES.filter(isHackathon), []);
+  const [allHackathons, setAllHackathons] = useState<Hackathon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchFounderOpportunityCatalog()
+      .then((rows) => {
+        if (alive) setAllHackathons(rows.filter(isHackathon));
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setAllHackathons([]);
+        setLoadError(err instanceof Error ? err.message : "Live hackathons are unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
   const initialHackathonId = searchParams.get("h") ?? "";
   const [hackathonId, setHackathonId] = useState(initialHackathonId);
-  const hackathon = useMemo(
-    () => allHackathons.find((h) => h.id === hackathonId),
-    [allHackathons, hackathonId],
-  );
+  const hackathon = allHackathons.find((h) => h.id === hackathonId);
 
   const [teamName, setTeamName] = useState("");
   const [teamSize, setTeamSize] = useState(3);
   const [selectedRoles, setSelectedRoles] = useState<OpenRole[]>(founderProfile.openRoles);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{
     teamId: string;
     inviteToken: string;
     teamName: string;
     hackathonId: string;
   } | null>(null);
+
+  if (loading) {
+    return <p className="text-sm text-slate-500">Loading live hackathons...</p>;
+  }
+
+  if (loadError) {
+    return <p className="text-sm text-red-600">Live hackathons are unavailable: {loadError}</p>;
+  }
 
   if (!hackathon && !success) {
     return (
@@ -80,25 +105,34 @@ export function RegisterStage() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate() || !hackathon) return;
-    const teamId = `team_${randomToken(6)}`;
     const inviteToken = randomToken(8);
-    registerForHackathon({
-      hackathonId: hackathon.id,
-      teamId,
-      teamName: teamName.trim(),
-      teamSize,
-      role: "leader",
-      inviteToken,
-      registeredAt: new Date().toISOString(),
-      members: [],
-      openRoles: selectedRoles,
-      stage: "registered",
-      checkIns: [],
-    });
-    setSuccess({ teamId, inviteToken, teamName: teamName.trim(), hackathonId: hackathon.id });
-    toast.success("Registered for " + hackathon.title);
+    setSubmitting(true);
+    try {
+      const registration = await registerHackathonTeam(hackathon.id, {
+        teamName: teamName.trim(),
+        teamSize,
+        inviteToken,
+        openRoles: selectedRoles,
+      });
+      if (!registration) {
+        toast.error("The team registration was not persisted.");
+        return;
+      }
+      registerForHackathon(registration);
+      setSuccess({
+        teamId: registration.teamId,
+        inviteToken: registration.inviteToken,
+        teamName: registration.teamName,
+        hackathonId: registration.hackathonId,
+      });
+      toast.success("Registered for " + hackathon.title);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The team registration failed.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (success) {
@@ -186,10 +220,11 @@ export function RegisterStage() {
           </Link>
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={() => void handleSubmit()}
+            disabled={submitting}
             className="text-xs font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
           >
-            Confirm & generate invite link
+            {submitting ? "Registering..." : "Confirm & generate invite link"}
           </button>
         </div>
       </div>
