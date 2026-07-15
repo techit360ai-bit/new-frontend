@@ -3,8 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { User, Briefcase, Bell, UserCog, LogOut } from "lucide-react";
-import { useCollaboratorProfile, useActiveRoles, type CollaboratorDiscipline, type Role } from "@/contexts/UserContext";
+import {
+  useCollaboratorProfile,
+  useActiveRoles,
+  type CollaboratorDiscipline,
+  type NotificationPrefs,
+  type Role,
+} from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { roleDashboardPath, roleOnboardingPath } from "@/lib/roleRoutes";
+import { fetchNotificationPreferences, saveNotificationPreferences } from "@/lib/api/settings";
 
 const disciplines: CollaboratorDiscipline[] = [
   "Engineering", "Design", "Product", "Data & ML",
@@ -47,6 +55,8 @@ export function Settings() {
   const navigate = useNavigate();
   const { collaboratorProfile, updateCollaboratorProfile } = useCollaboratorProfile();
   const { activeRoles, currentRole } = useActiveRoles();
+  const { profile, updateProfile, changePassword, signOut } = useAuth();
+  const [saving, setSaving] = useState<string | null>(null);
 
   // Identity form state
   const [iName,      setIName]      = useState(collaboratorProfile.name);
@@ -55,7 +65,8 @@ export function Settings() {
   const [iYears,     setIYears]     = useState(collaboratorProfile.yearsExperience);
   const [iHeadline,  setIHeadline]  = useState(collaboratorProfile.headline);
   const [iAvatar,    setIAvatar]    = useState(collaboratorProfile.avatarUrl);
-  const [iEmail,     setIEmail]     = useState("alex.chen@example.com");
+  const iEmail                       = profile?.email ?? "";
+  const [iCurrentPw, setICurrentPw] = useState("");
   const [iPw1, setIPw1]             = useState("");
   const [iPw2, setIPw2]             = useState("");
 
@@ -90,32 +101,94 @@ export function Settings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const saveIdentity = () => {
-    updateCollaboratorProfile({
+  useEffect(() => {
+    let alive = true;
+    fetchNotificationPreferences<NotificationPrefs>("collaborator")
+      .then((preferences) => {
+        if (!alive || Object.keys(preferences).length === 0) return;
+        setNPrefs((current) => ({ ...current, ...preferences }));
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const saveIdentity = async () => {
+    setSaving("identity");
+    const [firstName, ...rest] = iName.trim().split(/\s+/);
+    const lastName = rest.join(" ");
+    const updates = {
       name: iName, title: iTitle, location: iLocation,
       yearsExperience: iYears, headline: iHeadline, avatarUrl: iAvatar,
+    };
+    const result = await updateProfile({
+      firstName: firstName || profile?.firstName || "",
+      lastName,
+      title: iTitle,
+      country: iLocation,
+      yearsExperience: iYears,
+      bio: iHeadline,
+      avatarUrl: iAvatar || null,
     });
+    setSaving(null);
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+    updateCollaboratorProfile(updates);
     toast.success("Profile saved");
   };
 
-  const saveSkills = () => {
-    updateCollaboratorProfile({
+  const saveSkills = async () => {
+    setSaving("skills");
+    const updates = {
       discipline: sDisc, subSkills: sSub, techStack: sStack,
       weeklyHours: sHours, commitmentStyle: sCommit,
       equityPreference: sPref, minCashFloor: sFloor, vestingComfort: sVesting,
+    };
+    const result = await updateProfile({
+      discipline: sDisc,
+      subSkills: sSub,
+      techStack: sStack,
+      skills: [...new Set([...sSub, ...sStack])],
+      weeklyHours: sHours,
+      commitmentStyle: sCommit,
+      equityPreference: sPref,
+      minCashFloor: sFloor,
+      vestingComfort: sVesting,
     });
+    setSaving(null);
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+    updateCollaboratorProfile(updates);
     toast.success("Skills & availability saved");
   };
 
-  const saveNotifications = () => {
-    updateCollaboratorProfile({ notifications: nPrefs });
-    toast.success("Notification preferences saved");
+  const saveNotifications = async () => {
+    setSaving("notifications");
+    try {
+      const persisted = await saveNotificationPreferences("collaborator", nPrefs);
+      updateCollaboratorProfile({ notifications: persisted });
+      toast.success("Notification preferences saved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Notification preferences could not be saved.");
+    } finally {
+      setSaving(null);
+    }
   };
 
-  const changePassword = () => {
-    if (!iPw1 || iPw1 !== iPw2) { toast.error("Passwords don't match"); return; }
-    setIPw1(""); setIPw2("");
-    toast.success("Password updated (mock)");
+  const updatePassword = async () => {
+    if (!iCurrentPw || !iPw1 || iPw1 !== iPw2) { toast.error("Passwords don't match"); return; }
+    setSaving("password");
+    const result = await changePassword(iCurrentPw, iPw1);
+    setSaving(null);
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+    setICurrentPw(""); setIPw1(""); setIPw2("");
+    toast.success("Password updated");
   };
 
   const addStackChip = (v: string) => {
@@ -130,8 +203,6 @@ export function Settings() {
     if (activeRoles.has(role)) navigate(roleDashboardPath[role]);
     else                       navigate(roleOnboardingPath[role]);
   };
-
-  const handleSignOut = () => toast("Signed out (mock)");
 
   const updateNotifGroup = (key: "opportunities" | "deadlines" | "payments" | "equityEvents", channel: "email" | "inApp", value: boolean) => {
     setNPrefs((cur) => ({ ...cur, [key]: { ...cur[key], [channel]: value } }));
@@ -165,24 +236,31 @@ export function Settings() {
           <section ref={identityRef} id="identity" className="border border-slate-200 bg-white rounded-xl p-6">
             <h2 className="text-sm font-semibold text-slate-700 mb-4">Account & Identity</h2>
             <div className="space-y-4">
-              <Row label="Avatar"><input type="file" accept="image/*" onChange={(e) => setIAvatar(e.target.files?.[0]?.name ?? "")} className="text-sm" />{iAvatar && <p className="text-xs text-slate-500 mt-1">Selected: {iAvatar}</p>}</Row>
+              <Row label="Avatar URL"><Input value={iAvatar} onChange={setIAvatar} type="url" /></Row>
               <Row label="Name"><Input value={iName} onChange={setIName} /></Row>
               <Row label="Professional title"><Input value={iTitle} onChange={setITitle} /></Row>
               <Row label="Location"><Input value={iLocation} onChange={setILocation} /></Row>
               <Row label="Years of experience"><Input value={String(iYears)} onChange={(v) => setIYears(Number(v) || 0)} type="number" /></Row>
               <Row label="Headline"><Input value={iHeadline} onChange={setIHeadline} /></Row>
-              <Row label="Contact email"><Input value={iEmail} onChange={setIEmail} type="email" /></Row>
+              <Row label="Contact email">
+                <input value={iEmail} readOnly className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm bg-slate-50 text-slate-500" />
+              </Row>
               <Row label="Change password">
                 <div className="space-y-2">
+                  <Input value={iCurrentPw} onChange={setICurrentPw} type="password" placeholder="Current password" />
                   <Input value={iPw1} onChange={setIPw1} type="password" placeholder="New password" />
                   <Input value={iPw2} onChange={setIPw2} type="password" placeholder="Confirm new password" />
-                  <button onClick={changePassword} disabled={!iPw1 || iPw1 !== iPw2}
-                    className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">Update password</button>
+                  <button onClick={() => void updatePassword()} disabled={!iCurrentPw || !iPw1 || iPw1 !== iPw2 || saving === "password"}
+                    className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">
+                    {saving === "password" ? "Updating..." : "Update password"}
+                  </button>
                 </div>
               </Row>
             </div>
             <div className="mt-6 flex justify-end">
-              <button onClick={saveIdentity} className="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg">Save</button>
+              <button disabled={saving === "identity"} onClick={() => void saveIdentity()} className="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-400 disabled:bg-slate-300 text-slate-900 font-semibold rounded-lg">
+                {saving === "identity" ? "Saving..." : "Save"}
+              </button>
             </div>
           </section>
 
@@ -272,7 +350,9 @@ export function Settings() {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <button onClick={saveSkills} className="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg">Save</button>
+              <button disabled={saving === "skills"} onClick={() => void saveSkills()} className="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-400 disabled:bg-slate-300 text-slate-900 font-semibold rounded-lg">
+                {saving === "skills" ? "Saving..." : "Save"}
+              </button>
             </div>
           </section>
 
@@ -303,7 +383,9 @@ export function Settings() {
               </select>
             </div>
             <div className="mt-6 flex justify-end">
-              <button onClick={saveNotifications} className="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg">Save</button>
+              <button disabled={saving === "notifications"} onClick={() => void saveNotifications()} className="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-400 disabled:bg-slate-300 text-slate-900 font-semibold rounded-lg">
+                {saving === "notifications" ? "Saving..." : "Save"}
+              </button>
             </div>
           </section>
 
@@ -339,7 +421,7 @@ export function Settings() {
               })}
             </div>
             <div className="mt-6 pt-6 border-t border-slate-100 flex justify-end">
-              <button onClick={handleSignOut} className="flex items-center gap-1.5 text-sm text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg">
+              <button onClick={() => { void signOut(); }} className="flex items-center gap-1.5 text-sm text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg">
                 <LogOut className="w-4 h-4" /> Sign out
               </button>
             </div>

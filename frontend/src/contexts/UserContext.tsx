@@ -361,6 +361,19 @@ function normalizedFounderStage(stage: string | null | undefined): FounderStage 
   return "Idea";
 }
 
+function normalizedFounderExperience(value: string | null | undefined): FounderExperience {
+  return value === "serial" || value === "some-experience" ? value : "first-time";
+}
+
+function normalizedCollaboratorDiscipline(value: string | null | undefined): CollaboratorDiscipline | "" {
+  return [
+    "Engineering", "Design", "Product", "Data & ML",
+    "DevOps", "Security", "Marketing", "Research",
+  ].includes(String(value))
+    ? value as CollaboratorDiscipline
+    : "";
+}
+
 function emptyInvestorProfile(profile: AuthProfile | null = null): InvestorProfile {
   return {
     investorType: "",
@@ -398,21 +411,30 @@ function emptyOrgProfile(profile: AuthProfile | null = null): OrgProfile {
 function emptyCollaboratorProfile(profile: AuthProfile | null = null): CollaboratorProfile {
   return {
     name: displayName(profile),
-    title: "",
+    title: profile?.title ?? "",
     location: profile?.country ?? "",
-    yearsExperience: 0,
+    yearsExperience: profile?.yearsExperience ?? 0,
     headline: profile?.bio ?? "",
     avatarUrl: profile?.avatarUrl ?? "",
-    discipline: "",
-    subSkills: profile?.skills ?? [],
-    techStack: profile?.skills ?? [],
+    discipline: normalizedCollaboratorDiscipline(profile?.discipline),
+    subSkills: profile?.subSkills ?? profile?.skills ?? [],
+    techStack: profile?.techStack ?? profile?.skills ?? [],
     weeklyHours: profile?.weeklyHours ?? 0,
     timezone: profile?.timezone ?? "",
-    earliestStart: "this-week",
-    commitmentStyle: "deep",
-    equityPreference: 0,
-    minCashFloor: 0,
-    vestingComfort: "standard",
+    earliestStart:
+      profile?.earliestStart === "2-weeks" || profile?.earliestStart === "1-month"
+        ? profile.earliestStart
+        : "this-week",
+    commitmentStyle:
+      profile?.commitmentStyle === "parallel" || profile?.commitmentStyle === "many"
+        ? profile.commitmentStyle
+        : "deep",
+    equityPreference: profile?.equityPreference ?? 0,
+    minCashFloor: profile?.minCashFloor ?? 0,
+    vestingComfort:
+      profile?.vestingComfort === "1y-cliff-4y" || profile?.vestingComfort === "custom"
+        ? profile.vestingComfort
+        : "standard",
     links: {
       github: profile?.githubUrl ?? "",
       linkedin: profile?.linkedinUrl ?? "",
@@ -429,45 +451,54 @@ function emptyCollaboratorProfile(profile: AuthProfile | null = null): Collabora
 function emptyFounderProfile(profile: AuthProfile | null = null): FounderProfile {
   return {
     name: displayName(profile),
-    title: "",
+    title: profile?.title ?? "",
     location: profile?.country ?? "",
-    yearsBuilding: 0,
-    founderType: "first-time",
+    yearsBuilding: profile?.yearsBuilding ?? 0,
+    founderType: normalizedFounderExperience(profile?.founderType),
     headline: profile?.bio ?? "",
     avatarUrl: profile?.avatarUrl ?? "",
     startupName: profile?.orgName ?? "",
-    oneLiner: "",
+    oneLiner: profile?.oneLiner ?? "",
     stage: normalizedFounderStage(profile?.startupStage),
     industries: profile?.industries ?? [],
-    foundingYear: new Date().getFullYear(),
+    foundingYear: profile?.foundingYear ?? new Date().getFullYear(),
     website: profile?.website ?? "",
-    logoEmoji: "",
-    currentTeamSize: 0,
-    openRoles: [],
-    compensationOffered: "equity-heavy",
-    equityRangeMin: 0,
-    equityRangeMax: 0,
-    launchStatus: "pre-launch",
-    users: 0,
-    revenueMonthly: 0,
-    fundingRaised: 0,
-    leadInvestor: "",
-    nextMilestone: "",
-    whyBuilding: "",
-    winningIn3Years: "",
-    unfairAdvantage: "",
-    ownershipPhilosophy: "equity-day-one",
+    logoEmoji: profile?.logoEmoji ?? "",
+    currentTeamSize: profile?.currentTeamSize ?? 0,
+    openRoles: (profile?.openRoles ?? []) as OpenRole[],
+    compensationOffered:
+      profile?.compensationOffered === "cash-equity-mix" || profile?.compensationOffered === "cash-heavy"
+        ? profile.compensationOffered
+        : "equity-heavy",
+    equityRangeMin: profile?.equityRangeMin ?? 0,
+    equityRangeMax: profile?.equityRangeMax ?? 0,
+    launchStatus:
+      profile?.launchStatus === "private-beta" || profile?.launchStatus === "public"
+        ? profile.launchStatus
+        : "pre-launch",
+    users: profile?.users ?? 0,
+    revenueMonthly: profile?.revenueMonthly ?? 0,
+    fundingRaised: profile?.fundingRaised ?? 0,
+    leadInvestor: profile?.leadInvestor ?? "",
+    nextMilestone: profile?.nextMilestone ?? "",
+    whyBuilding: profile?.whyBuilding ?? "",
+    winningIn3Years: profile?.winningIn3Years ?? "",
+    unfairAdvantage: profile?.unfairAdvantage ?? "",
+    ownershipPhilosophy:
+      profile?.ownershipPhilosophy === "cash-first-equity-later" || profile?.ownershipPhilosophy === "custom"
+        ? profile.ownershipPhilosophy
+        : "equity-day-one",
     links: {
       github: profile?.githubUrl ?? "",
       linkedin: profile?.linkedinUrl ?? "",
-      twitter: "",
-      personal: profile?.website ?? "",
+      twitter: profile?.twitterUrl ?? "",
+      personal: profile?.portfolioUrl ?? profile?.website ?? "",
     },
     needsFromTechIT: [],
     pinnedWork: [],
     onboardingComplete: Boolean(profile?.isOnboarded && hasRole(profile, "founder")),
     verification: {
-      twitter:      { handle: "", verified: false },
+      twitter:      { handle: profile?.twitterUrl ?? "", verified: Boolean(profile?.twitterUrl && profile.isVerified) },
       linkedin:     { url: profile?.linkedinUrl ?? "", verified: Boolean(profile?.linkedinUrl && profile.isVerified) },
       personalSite: { url: profile?.website ?? "", verified: Boolean(profile?.website && profile.isVerified) },
       github:       { username: profile?.githubUrl ?? "", verified: Boolean(profile?.githubUrl && profile.isVerified) },
@@ -485,22 +516,47 @@ function mergeAuthFounderProfile(prev: FounderProfile, profile: AuthProfile): Fo
   return {
     ...prev,
     name: prev.name || base.name,
+    title: prev.title || base.title,
     location: prev.location || base.location,
+    yearsBuilding: prev.yearsBuilding || base.yearsBuilding,
+    founderType: base.founderType,
     headline: prev.headline || base.headline,
     avatarUrl: prev.avatarUrl || base.avatarUrl,
     startupName: prev.startupName || base.startupName,
-    stage: prev.stage || base.stage,
+    oneLiner: prev.oneLiner || base.oneLiner,
+    stage: base.stage,
     industries: prev.industries.length ? prev.industries : base.industries,
+    foundingYear: base.foundingYear,
     website: prev.website || base.website,
+    logoEmoji: prev.logoEmoji || base.logoEmoji,
+    currentTeamSize: prev.currentTeamSize || base.currentTeamSize,
+    openRoles: prev.openRoles.length ? prev.openRoles : base.openRoles,
+    compensationOffered: base.compensationOffered,
+    equityRangeMin: base.equityRangeMin,
+    equityRangeMax: base.equityRangeMax,
+    launchStatus: base.launchStatus,
+    users: base.users,
+    revenueMonthly: base.revenueMonthly,
+    fundingRaised: base.fundingRaised,
+    leadInvestor: base.leadInvestor,
+    nextMilestone: base.nextMilestone,
+    whyBuilding: base.whyBuilding,
+    winningIn3Years: base.winningIn3Years,
+    unfairAdvantage: base.unfairAdvantage,
+    ownershipPhilosophy: base.ownershipPhilosophy,
     links: {
       github: prev.links.github || base.links.github,
       linkedin: prev.links.linkedin || base.links.linkedin,
-      twitter: prev.links.twitter,
+      twitter: prev.links.twitter || base.links.twitter,
       personal: prev.links.personal || base.links.personal,
     },
     onboardingComplete: prev.onboardingComplete || base.onboardingComplete,
     verification: {
       ...prev.verification,
+      twitter: {
+        handle: prev.verification.twitter.handle || base.verification.twitter.handle,
+        verified: prev.verification.twitter.verified || base.verification.twitter.verified,
+      },
       linkedin: {
         url: prev.verification.linkedin.url || base.verification.linkedin.url,
         verified: prev.verification.linkedin.verified || base.verification.linkedin.verified,
@@ -523,13 +579,21 @@ function mergeAuthCollaboratorProfile(prev: CollaboratorProfile, profile: AuthPr
   return {
     ...prev,
     name: prev.name || base.name,
+    title: prev.title || base.title,
     location: prev.location || base.location,
+    yearsExperience: prev.yearsExperience || base.yearsExperience,
     headline: prev.headline || base.headline,
     avatarUrl: prev.avatarUrl || base.avatarUrl,
+    discipline: prev.discipline || base.discipline,
     subSkills: prev.subSkills.length ? prev.subSkills : base.subSkills,
     techStack: prev.techStack.length ? prev.techStack : base.techStack,
     weeklyHours: prev.weeklyHours || base.weeklyHours,
     timezone: prev.timezone || base.timezone,
+    earliestStart: base.earliestStart,
+    commitmentStyle: base.commitmentStyle,
+    equityPreference: prev.equityPreference || base.equityPreference,
+    minCashFloor: prev.minCashFloor || base.minCashFloor,
+    vestingComfort: base.vestingComfort,
     links: {
       github: prev.links.github || base.links.github,
       linkedin: prev.links.linkedin || base.links.linkedin,
