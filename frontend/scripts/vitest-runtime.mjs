@@ -51,7 +51,7 @@ function matches(actual, expected, partial = false) {
   if (Array.isArray(expected)) {
     return Array.isArray(actual)
       && actual.length === expected.length
-      && expected.every((value, index) => matches(actual[index], value));
+      && expected.every((value, index) => matches(actual[index], value, partial));
   }
   if (!isObject(actual) || !isObject(expected)) return false;
 

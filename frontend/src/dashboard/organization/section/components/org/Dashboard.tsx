@@ -1,311 +1,293 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Users,
-  FolderKanban,
-  Rocket,
-  GraduationCap,
-  DollarSign,
   Activity,
   AlertCircle,
   CheckCircle2,
+  GraduationCap,
+  RefreshCw,
+  Rocket,
+  Trophy,
+  Users,
+  type LucideIcon,
 } from "lucide-react";
 import {
-  BarChart,
   Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
+import {
+  fetchOrganizationDashboard,
+  type OrganizationActivity,
+  type OrganizationDashboardData,
+} from "@/lib/api/organization";
 
-const stats = [
+interface MetricCard {
+  key: keyof OrganizationDashboardData["metrics"];
+  label: string;
+  icon: LucideIcon;
+  iconClass: string;
+  iconBackground: string;
+}
+
+const METRIC_CARDS: MetricCard[] = [
   {
-    name: "Active Projects",
-    value: "127",
-    change: "+12%",
-    icon: FolderKanban,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-  },
-  {
-    name: "Active Team Members",
-    value: "342",
-    change: "+8%",
-    icon: Users,
-    color: "text-green-600",
-    bg: "bg-green-50",
-  },
-  {
-    name: "AI Credits Used",
-    value: "45.2K",
-    change: "+23%",
-    icon: Activity,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
-  },
-  {
-    name: "Market Ready Startups",
-    value: "34",
-    change: "+6",
-    icon: Rocket,
-    color: "text-orange-600",
-    bg: "bg-orange-50",
-  },
-  {
-    name: "Incubator Cohorts",
-    value: "8",
-    change: "+2",
+    key: "activePrograms",
+    label: "Active Programs",
     icon: GraduationCap,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
+    iconClass: "text-blue-700",
+    iconBackground: "bg-blue-50",
   },
   {
-    name: "Monthly Revenue",
-    value: "$127K",
-    change: "+18%",
-    icon: DollarSign,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    key: "hackathons",
+    label: "Hackathons",
+    icon: Trophy,
+    iconClass: "text-amber-700",
+    iconBackground: "bg-amber-50",
+  },
+  {
+    key: "members",
+    label: "Members",
+    icon: Users,
+    iconClass: "text-emerald-700",
+    iconBackground: "bg-emerald-50",
+  },
+  {
+    key: "opportunities",
+    label: "Opportunities",
+    icon: Rocket,
+    iconClass: "text-rose-700",
+    iconBackground: "bg-rose-50",
   },
 ];
 
-const projectHealthData = [
-  { name: "Progressing", value: 78, color: "#10b981" },
-  { name: "Stalled", value: 14, color: "#ef4444" },
-  { name: "Market Ready", value: 27, color: "#f59e0b" },
-];
+function formatTimestamp(value: string): string {
+  if (!value) return "No timestamp";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
 
-const talentActivityData = [
-  { skill: "Engineering", count: 145 },
-  { skill: "Product", count: 87 },
-  { skill: "Design", count: 62 },
-  { skill: "Marketing", count: 48 },
-];
+function ActivityIcon({ row }: { row: OrganizationActivity }) {
+  if (row.type === "success" || row.type === "completed") {
+    return <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />;
+  }
+  if (row.type === "warning" || row.type === "risk") {
+    return <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />;
+  }
+  return <Activity className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />;
+}
 
-const aiOperationsData = [
-  { month: "Jan", automated: 1240, manual: 3200 },
-  { month: "Feb", automated: 1890, manual: 2850 },
-  { month: "Mar", automated: 2340, manual: 2100 },
-  { month: "Apr", automated: 2890, manual: 1450 },
-];
-
-const recentActivity = [
-  {
-    type: "success",
-    message: "Project Alpha launched to market",
-    time: "2 hours ago",
-  },
-  {
-    type: "info",
-    message: "New cohort Q2-2026 started with 12 startups",
-    time: "4 hours ago",
-  },
-  {
-    type: "success",
-    message: "15 new contributors joined talent pool",
-    time: "6 hours ago",
-  },
-  {
-    type: "warning",
-    message: "Project Beta needs attention - 7 days behind",
-    time: "8 hours ago",
-  },
-];
+function EmptyPanel({ children }: { children: string }) {
+  return (
+    <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 text-center text-sm text-gray-500">
+      {children}
+    </div>
+  );
+}
 
 export function Dashboard() {
+  const [dashboard, setDashboard] = useState<OrganizationDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setDashboard(await fetchOrganizationDashboard());
+    } catch (loadError) {
+      setDashboard(null);
+      setError(loadError instanceof Error ? loadError.message : "Organization dashboard is unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadDashboard();
+  }, [loadDashboard]);
+
+  const hasLiveData = useMemo(() => {
+    if (!dashboard) return false;
+    return Object.values(dashboard.metrics).some((value) => value > 0)
+      || dashboard.projectHealth.length > 0
+      || dashboard.talentActivity.length > 0
+      || dashboard.automation.length > 0
+      || dashboard.activity.length > 0;
+  }, [dashboard]);
+
   return (
-    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Organization Dashboard
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Where Institutions Build, Manage, and Scale Innovation
-        </p>
+    <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Organization Dashboard</h1>
+          <p className="mt-2 text-gray-600">Persisted programs, members, opportunities, and operations.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void loadDashboard()}
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
       </div>
 
-      {/* Top Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.name}
-              className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`${stat.bg} p-3 rounded-lg`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
+      {error && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Live organization data could not be loaded.</p>
+            <p className="mt-1">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {loading && !dashboard ? (
+        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+          Loading organization data...
+        </div>
+      ) : dashboard ? (
+        <>
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {METRIC_CARDS.map((metric) => {
+              const Icon = metric.icon;
+              return (
+                <div key={metric.key} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">{metric.label}</p>
+                      <p className="mt-2 text-3xl font-bold text-gray-900">
+                        {dashboard?.metrics[metric.key] ?? 0}
+                      </p>
+                    </div>
+                    <div className={`rounded-lg p-3 ${metric.iconBackground}`}>
+                      <Icon className={`h-6 w-6 ${metric.iconClass}`} />
+                    </div>
+                  </div>
                 </div>
-                <span className="text-sm font-medium text-green-600">
-                  {stat.change}
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
-              <p className="text-sm text-gray-600 mt-1">{stat.name}</p>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
 
-      {/* Middle Section - 3 Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Project Health Panel */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Project Health
-          </h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={projectHealthData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {projectHealthData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="space-y-2 mt-4">
-            {projectHealthData.map((item) => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm text-gray-700">{item.name}</span>
+          {!error && dashboard && !hasLiveData && (
+            <div className="mb-8 rounded-lg border border-dashed border-gray-300 bg-white px-6 py-8 text-center">
+              <p className="font-medium text-gray-900">No organization activity is recorded yet.</p>
+              <p className="mt-1 text-sm text-gray-500">
+                Programs, members, opportunities, and operational charts will appear as persisted records are created.
+              </p>
+            </div>
+          )}
+
+          <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-gray-900">Project Health</h2>
+              {dashboard && dashboard.projectHealth.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie
+                        data={dashboard.projectHealth}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={58}
+                        outerRadius={82}
+                        paddingAngle={4}
+                        dataKey="value"
+                      >
+                        {dashboard.projectHealth.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="mt-4 space-y-2">
+                    {dashboard.projectHealth.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between gap-4 text-sm">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="h-3 w-3 flex-shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                          <span className="truncate text-gray-700">{item.name}</span>
+                        </div>
+                        <span className="font-medium text-gray-900">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <EmptyPanel>No persisted project health series is available.</EmptyPanel>
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-gray-900">Talent Activity</h2>
+              {dashboard && dashboard.talentActivity.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={dashboard.talentActivity}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="skill" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyPanel>No persisted talent activity series is available.</EmptyPanel>
+              )}
+            </section>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-gray-900">Automation Trends</h2>
+              {dashboard && dashboard.automation.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={dashboard.automation}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="automated" stroke="#2563eb" strokeWidth={3} name="Automated" />
+                    <Line type="monotone" dataKey="manual" stroke="#64748b" strokeWidth={3} name="Manual" />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyPanel>No persisted automation trend is available.</EmptyPanel>
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-gray-900">Recent Activity</h2>
+              {dashboard && dashboard.activity.length > 0 ? (
+                <div className="space-y-4">
+                  {dashboard.activity.map((row) => (
+                    <div key={row.id} className="flex items-start gap-3 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                      <ActivityIcon row={row} />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-gray-900">{row.message}</p>
+                        <p className="mt-1 text-xs text-gray-500">{formatTimestamp(row.at)}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <span className="text-sm font-medium text-gray-900">
-                  {item.value}
-                </span>
-              </div>
-            ))}
+              ) : (
+                <EmptyPanel>No persisted organization activity is available.</EmptyPanel>
+              )}
+            </section>
           </div>
-        </div>
-
-        {/* Talent Activity */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Talent Activity
-          </h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={talentActivityData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="skill" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#6366f1" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Total Contributors</span>
-              <span className="font-bold text-gray-900">342</span>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Operations Summary */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            AI Operations
-          </h2>
-          <div className="space-y-4">
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Tasks Automated</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">7,360</p>
-              <p className="text-xs text-green-600 mt-1">+34% vs last month</p>
-            </div>
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">AI Actions Taken</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">12.4K</p>
-              <p className="text-xs text-green-600 mt-1">+28% vs last month</p>
-            </div>
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Efficiency Gain</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">67%</p>
-              <p className="text-xs text-green-600 mt-1">+12% vs last month</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Section - 2 Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* AI vs Manual Trend */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Automation Trends
-          </h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={aiOperationsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="automated"
-                stroke="#8b5cf6"
-                strokeWidth={3}
-                name="Automated Tasks"
-              />
-              <Line
-                type="monotone"
-                dataKey="manual"
-                stroke="#94a3b8"
-                strokeWidth={3}
-                name="Manual Tasks"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Recent Activity
-          </h2>
-          <div className="space-y-4">
-            {recentActivity.map((activity, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0"
-              >
-                {activity.type === "success" && (
-                  <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
-                )}
-                {activity.type === "info" && (
-                  <Activity className="w-5 h-5 text-blue-500 mt-0.5" />
-                )}
-                {activity.type === "warning" && (
-                  <AlertCircle className="w-5 h-5 text-orange-500 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <p className="text-sm text-gray-900">{activity.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+        </>
+      ) : null}
     </div>
   );
 }
