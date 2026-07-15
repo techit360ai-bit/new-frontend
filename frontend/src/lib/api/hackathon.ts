@@ -1,4 +1,6 @@
 import { domainGet, domainPatch, domainPost } from "@/lib/domainApi";
+import { normalizePublishedHackathon } from "@/lib/api/opportunities";
+import type { Hackathon as PublishedHackathon } from "@/dashboard/_shared/opportunities/types";
 import type {
   BriefScore as UiBriefScore,
   CheckIn,
@@ -78,6 +80,39 @@ export interface HackathonInvitation {
   updatedAt: string;
 }
 
+export interface HackathonPrize {
+  rank: string;
+  amount: string;
+}
+
+export interface OrganizerHackathon extends PublishedHackathon {
+  eligibility: string;
+  prizes: HackathonPrize[];
+  judgingDimensions: string[];
+  mentorPool: number;
+  stillSolo: number;
+}
+
+export interface CreateOrganizerHackathonInput {
+  title: string;
+  theme: string;
+  summary: string;
+  visibility: "public" | "private";
+  status: "draft" | "upcoming" | "live";
+  hackathonStatus: "upcoming" | "live";
+  applyDeadline: string;
+  startDate: string;
+  endDate: string;
+  durationHours: number;
+  prizePool: string;
+  eligibility: string;
+  prizes: HackathonPrize[];
+  judgingDimensions: string[];
+  partners: string[];
+  mentorPool: number;
+  organizerName: string;
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -96,6 +131,52 @@ function stringList(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
     : [];
+}
+
+function normalizePrizes(value: unknown): HackathonPrize[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const record = asRecord(item);
+      return {
+        rank: stringValue(record.rank),
+        amount: stringValue(record.amount),
+      };
+    })
+    .filter((prize) => prize.rank || prize.amount);
+}
+
+export function normalizeOrganizerHackathon(value: unknown): OrganizerHackathon | null {
+  const published = normalizePublishedHackathon(value);
+  if (!published) return null;
+  const record = asRecord(value);
+  return {
+    ...published,
+    eligibility: stringValue(record.eligibility),
+    prizes: normalizePrizes(record.prizes),
+    judgingDimensions: stringList(record.judgingDimensions),
+    mentorPool: numberValue(record.mentorPool),
+    stillSolo: numberValue(record.stillSolo),
+  };
+}
+
+export async function fetchOrganizerHackathons(): Promise<OrganizerHackathon[]> {
+  const data = await domainGet<{ hackathons?: unknown[] }>("/hackathons?scope=owned");
+  return (data.hackathons ?? [])
+    .map(normalizeOrganizerHackathon)
+    .filter((hackathon): hackathon is OrganizerHackathon => Boolean(hackathon));
+}
+
+export async function fetchOrganizerHackathon(id: string): Promise<OrganizerHackathon | null> {
+  const data = await domainGet<{ hackathon?: unknown }>(`/hackathons/${encodeURIComponent(id)}`);
+  return normalizeOrganizerHackathon(data.hackathon);
+}
+
+export async function createOrganizerHackathon(
+  input: CreateOrganizerHackathonInput,
+): Promise<OrganizerHackathon | null> {
+  const data = await domainPost<{ hackathon?: unknown }>("/hackathons", input);
+  return normalizeOrganizerHackathon(data.hackathon);
 }
 
 function normalizeBrief(value: unknown): IdeaBrief | undefined {

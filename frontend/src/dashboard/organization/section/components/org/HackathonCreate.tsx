@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Trophy,
@@ -12,6 +13,8 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
+import { useOrgProfile } from "@/contexts/UserContext";
+import { createOrganizerHackathon } from "@/lib/api/hackathon";
 
 const judgingDimensions = [
   { id: "problem_clarity", label: "Problem Clarity" },
@@ -21,28 +24,36 @@ const judgingDimensions = [
   { id: "commercial_viability", label: "Commercial Viability" },
 ];
 
-const defaultPrizes = [
-  { rank: "1st place", amount: "$25,000" },
-  { rank: "2nd place", amount: "$15,000" },
-  { rank: "3rd place", amount: "$10,000" },
-];
+const defaultPrizes = [{ rank: "1st place", amount: "" }];
+
+function prizePoolLabel(prizes: Array<{ amount: string }>): string {
+  const amounts = prizes.map((prize) => prize.amount.trim()).filter(Boolean);
+  if (amounts.length === 0) return "";
+  const numeric = amounts.map((amount) => Number(amount.replace(/[^0-9.]/g, "")));
+  if (numeric.every((amount) => Number.isFinite(amount) && amount > 0)) {
+    return `$${numeric.reduce((sum, amount) => sum + amount, 0).toLocaleString()}`;
+  }
+  return amounts.join(", ");
+}
 
 export function HackathonCreate() {
   const navigate = useNavigate();
+  const { orgProfile } = useOrgProfile();
 
   const [title, setTitle] = useState("");
   const [theme, setTheme] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [duration, setDuration] = useState(48);
-  const [eligibility, setEligibility] = useState("Open to all builders worldwide");
+  const [eligibility, setEligibility] = useState("");
   const [prizes, setPrizes] = useState(defaultPrizes);
   const [selectedDimensions, setSelectedDimensions] = useState<string[]>(
     judgingDimensions.map((d) => d.id),
   );
-  const [partners, setPartners] = useState<string[]>(["TechIT"]);
+  const [partners, setPartners] = useState<string[]>([]);
   const [partnerInput, setPartnerInput] = useState("");
-  const [mentorPool, setMentorPool] = useState(12);
+  const [mentorPool, setMentorPool] = useState(0);
+  const [publishing, setPublishing] = useState(false);
 
   const toggleDimension = (id: string) =>
     setSelectedDimensions((prev) =>
@@ -78,10 +89,42 @@ export function HackathonCreate() {
     endDate &&
     selectedDimensions.length >= 3;
 
-  const handlePublish = () => {
-    // In a real app this would POST to the API and return an id.
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    navigate(`/org/hackathons/${slug || "new-event"}`);
+  const handlePublish = async () => {
+    if (!canPublish || publishing) return;
+    setPublishing(true);
+    try {
+      const hackathon = await createOrganizerHackathon({
+        title: title.trim(),
+        theme: theme.trim(),
+        summary: theme.trim(),
+        visibility: "public",
+        status: "upcoming",
+        hackathonStatus: "upcoming",
+        applyDeadline: startDate,
+        startDate,
+        endDate,
+        durationHours: duration,
+        prizePool: prizePoolLabel(prizes),
+        eligibility: eligibility.trim(),
+        prizes: prizes
+          .map((prize) => ({ rank: prize.rank.trim(), amount: prize.amount.trim() }))
+          .filter((prize) => prize.rank || prize.amount),
+        judgingDimensions: selectedDimensions,
+        partners,
+        mentorPool,
+        organizerName: orgProfile.orgName,
+      });
+      if (!hackathon) {
+        toast.error("The hackathon was not persisted.");
+        return;
+      }
+      toast.success("Hackathon published");
+      navigate(`/org/hackathons/${hackathon.id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Hackathon publishing failed.");
+    } finally {
+      setPublishing(false);
+    }
   };
 
   return (
@@ -294,18 +337,18 @@ export function HackathonCreate() {
         </Section>
 
         {/* Publish row */}
-        <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-5">
+        <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-5">
           <div className="text-sm text-gray-500">
             On publish, the event will be routed to matching builders on the
             Opportunities Board.
           </div>
           <button
-            onClick={handlePublish}
-            disabled={!canPublish}
+            onClick={() => void handlePublish()}
+            disabled={!canPublish || publishing}
             className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors"
           >
             <Send className="w-4 h-4" />
-            Publish hackathon
+            {publishing ? "Publishing..." : "Publish hackathon"}
           </button>
         </div>
       </div>
@@ -323,7 +366,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
+    <div className="bg-white border border-gray-200 rounded-lg p-6">
       <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
         <Icon className="w-5 h-5 text-indigo-600" />
         {title}
