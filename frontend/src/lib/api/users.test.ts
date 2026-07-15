@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { setAuthTokenGetter } from './client';
-import { connectWithUser, fetchPublicUserProfile } from './users';
+import { connectWithUser, fetchCollaboratorDirectory, fetchPublicUserProfile } from './users';
 
 function response(body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -66,5 +66,35 @@ test('connect action writes through the persisted BACKEND endpoint', async () =>
     expect(init.method).toBe('POST');
   } finally {
     fetchMock.restore();
+  }
+});
+
+test('collaborator directory reads safe authenticated user records without fallback rows', async () => {
+  setAuthTokenGetter(() => 'jwt-directory');
+  const fetchMock = stubFetch(async () => response({
+    users: [{
+      id: 'user_2',
+      name: 'Live Builder',
+      role: 'collaborator',
+      title: 'Backend Engineer',
+      headline: '',
+      skills: ['Node.js'],
+      weeklyHours: 20,
+      timezone: 'UTC+1',
+      location: 'Nigeria',
+      avatarUrl: '',
+      credibilityScore: 80,
+      isVerified: true,
+    }],
+  }));
+  try {
+    const users = await fetchCollaboratorDirectory();
+    const [url, init] = fetchMock.calls[0] as [string, RequestInit];
+    expect(url).toBe('http://localhost:3000/api/users?role=collaborator');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer jwt-directory');
+    expect(users.map((user) => user.id)).toEqual(['user_2']);
+  } finally {
+    fetchMock.restore();
+    setAuthTokenGetter(() => null);
   }
 });

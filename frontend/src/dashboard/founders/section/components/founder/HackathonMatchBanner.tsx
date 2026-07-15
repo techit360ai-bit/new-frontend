@@ -32,8 +32,8 @@ export function HackathonMatchBanner({ hackathon, teamName }: Props) {
           <Trophy className="w-4 h-4" /> Filtering for {hackathon.title}
         </p>
         <p className="text-xs mt-1">
-          Showing collaborators available {hackathon.startDate}–{hackathon.endDate}
-          {teamName ? `, in roles you listed for team ${teamName}` : ""}.
+          Showing live collaborator profiles whose skills or title match
+          {teamName ? ` the open roles for team ${teamName}` : " this hackathon"}.
         </p>
       </div>
       <Link to="/matches" className="text-xs font-medium px-2 py-1 rounded border border-amber-300 hover:bg-amber-100 inline-flex items-center gap-1 shrink-0">

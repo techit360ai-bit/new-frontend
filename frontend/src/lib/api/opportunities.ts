@@ -3,6 +3,7 @@
 // Collaborator opportunities - BACKEND /api/domain/opportunities.
 
 import { domainGet, domainPatch } from "@/lib/domainApi";
+import type { Event, Funding, Hackathon, Opportunity, Program } from "@/dashboard/_shared/opportunities/types";
 
 export type CollaboratorOpportunityType = "project" | "advisory" | "gig" | "testing";
 export type CollaboratorOpportunityRisk = "low" | "medium" | "high";
@@ -116,4 +117,160 @@ export function patchCollaboratorOpportunityStatus(
   return domainPatch<{ opportunity?: unknown }>(`/opportunities/${opportunityId}`, { status }).then((data) => (
     normalizeCollaboratorOpportunity(data.opportunity)
   ));
+}
+
+type PublishedRecord = Record<string, unknown>;
+
+function publishedRecord(value: unknown): PublishedRecord {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as PublishedRecord)
+    : {};
+}
+
+function valueString(record: PublishedRecord, keys: string[], fallback = ""): string {
+  for (const key of keys) {
+    if (typeof record[key] === "string" && String(record[key]).trim()) return String(record[key]).trim();
+  }
+  return fallback;
+}
+
+function valueNumber(record: PublishedRecord, keys: string[], fallback = 0): number {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) return Number(value);
+  }
+  return fallback;
+}
+
+function valueList(record: PublishedRecord, keys: string[]): string[] {
+  for (const key of keys) {
+    if (Array.isArray(record[key])) {
+      return record[key].filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+    }
+  }
+  return [];
+}
+
+function recordObject(value: unknown): PublishedRecord {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as PublishedRecord)
+    : {};
+}
+
+function organizer(record: PublishedRecord): { id: string; name: string; logoEmoji?: string } {
+  const raw = recordObject(record.organizer);
+  const logoEmoji = valueString(raw, ["logoEmoji"]);
+  return {
+    id: valueString(raw, ["id"], valueString(record, ["organizerId", "ownerId"], "organization")),
+    name: valueString(raw, ["name"], valueString(record, ["organizerName", "organizationName"], "Organization")),
+    ...(logoEmoji ? { logoEmoji } : {}),
+  };
+}
+
+function baseOpportunity(record: PublishedRecord, type: Opportunity["type"]) {
+  const rawStatus = valueString(record, ["status"]);
+  const status: Opportunity["status"] =
+    rawStatus === "closing-soon" || rawStatus === "closed"
+      ? rawStatus
+      : rawStatus === "draft" || rawStatus === "completed" || rawStatus === "judging"
+        ? "closed"
+        : "open";
+  return {
+    id: valueString(record, ["id", "opportunityId"]),
+    type,
+    title: valueString(record, ["title", "name"], "Untitled opportunity"),
+    organizer: organizer(record),
+    poster: valueString(record, ["poster"]),
+    summary: valueString(record, ["summary", "description", "theme"]),
+    status,
+    applyDeadline: valueString(record, ["applyDeadline", "deadline"]),
+    publishedAt: valueString(record, ["publishedAt", "createdAt"]),
+    tags: valueList(record, ["tags"]),
+    featured: Boolean(record.featured),
+  };
+}
+
+export function normalizePublishedOpportunity(value: unknown): Opportunity | null {
+  const record = publishedRecord(value);
+  const type = valueString(record, ["type"]);
+  if (!["hackathon", "program", "funding", "event"].includes(type)) return null;
+  const base = baseOpportunity(record, type as Opportunity["type"]);
+  if (!base.id) return null;
+
+  if (type === "hackathon") {
+    const rawStatus = valueString(record, ["hackathonStatus", "status"]);
+    const hackathonStatus: Hackathon["hackathonStatus"] =
+      rawStatus === "live" || rawStatus === "judging" || rawStatus === "completed"
+        ? rawStatus
+        : "upcoming";
+    return {
+      ...base,
+      type: "hackathon",
+      theme: valueString(record, ["theme"]),
+      startDate: valueString(record, ["startDate"]),
+      endDate: valueString(record, ["endDate"]),
+      durationHours: valueNumber(record, ["durationHours"]),
+      prizePool: valueString(record, ["prizePool"]),
+      partners: valueList(record, ["partners"]),
+      registrants: valueNumber(record, ["registrants"]),
+      teamsFormed: valueNumber(record, ["teamsFormed"]),
+      hackathonStatus,
+    };
+  }
+  if (type === "program") {
+    const format = valueString(record, ["format"]);
+    return {
+      ...base,
+      type: "program",
+      format: format === "accelerator" || format === "mentorship" ? format : "incubator",
+      durationWeeks: valueNumber(record, ["durationWeeks"]),
+      cohortSize: valueNumber(record, ["cohortSize"]),
+      perks: valueList(record, ["perks"]),
+      startDate: valueString(record, ["startDate"]),
+    } satisfies Program;
+  }
+  if (type === "funding") {
+    const format = valueString(record, ["format"]);
+    return {
+      ...base,
+      type: "funding",
+      format: format === "rfp" || format === "pilot" ? format : "grant",
+      amountRange: valueString(record, ["amountRange", "amount"]),
+      equityRequired: Boolean(record.equityRequired),
+      audienceStage: valueList(record, ["audienceStage"]) as Funding["audienceStage"],
+    } satisfies Funding;
+  }
+  const format = valueString(record, ["format"]);
+  return {
+    ...base,
+    type: "event",
+    format: ["masterclass", "ama", "panel", "workshop"].includes(format) ? format as Event["format"] : "demo-day",
+    startDate: valueString(record, ["startDate"]),
+    durationMinutes: valueNumber(record, ["durationMinutes"]),
+    hostedBy: valueString(record, ["hostedBy"]),
+    isVirtual: Boolean(record.isVirtual),
+  } satisfies Event;
+}
+
+export function normalizePublishedHackathon(value: unknown): Hackathon | null {
+  const record = publishedRecord(value);
+  return normalizePublishedOpportunity({ ...record, type: "hackathon" }) as Hackathon | null;
+}
+
+export async function fetchFounderOpportunityCatalog(): Promise<Opportunity[]> {
+  const [opportunityData, hackathonData] = await Promise.all([
+    domainGet<{ opportunities?: unknown[] }>("/opportunities"),
+    domainGet<{ hackathons?: unknown[] }>("/hackathons"),
+  ]);
+  const normalized = [
+    ...(hackathonData.hackathons ?? []).map(normalizePublishedHackathon),
+    ...(opportunityData.opportunities ?? []).map(normalizePublishedOpportunity),
+  ].filter((item): item is Opportunity => Boolean(item));
+  return [...new Map(normalized.map((item) => [item.id, item])).values()];
+}
+
+export async function fetchFounderOpportunity(id: string): Promise<Opportunity | null> {
+  const rows = await fetchFounderOpportunityCatalog();
+  return rows.find((item) => item.id === id) ?? null;
 }

@@ -7,8 +7,8 @@ import { useFounderProfile, type FounderStage } from "@/contexts/UserContext";
 import { fetchDashboardIntelligence, type DashboardIntelligence } from "@/lib/api/gsis";
 import { fetchAudioBriefing } from "@/lib/api/audio";
 import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
-import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
+import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
 
 interface Signal {
@@ -102,6 +102,7 @@ export function Dashboard() {
   // B5 — momentum audio briefing (TTS) on demand.
   const [briefingUrl, setBriefingUrl] = useState<string | null>(null);
   const [briefingLoading, setBriefingLoading] = useState(false);
+  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
   const playBriefing = async () => {
     setBriefingLoading(true);
     const b = await fetchAudioBriefing(`Momentum briefing for ${firstName}: keep your build moving.`);
@@ -113,6 +114,18 @@ export function Dashboard() {
       toast("Audio briefing unavailable right now.");
     }
   };
+
+  useEffect(() => {
+    let alive = true;
+    fetchFounderOpportunityCatalog()
+      .then((rows) => {
+        if (alive) setHackathons(rows.filter((row): row is Hackathon => row.type === "hackathon"));
+      })
+      .catch(() => {
+        if (alive) setHackathons([]);
+      });
+    return () => { alive = false; };
+  }, []);
 
   // S7 — founder venture portfolio (multiple separate startups), from context.
   const ventures = p.founderProjects;
@@ -487,13 +500,17 @@ export function Dashboard() {
             </div>
             <ul className="space-y-3">
               {regs.map((r) => {
-                const h = OPPORTUNITIES.find((o): o is Hackathon => o.type === "hackathon" && o.id === r.hackathonId);
+                const h = hackathons.find((o) => o.id === r.hackathonId);
                 if (!h) return null;
                 const memberCount = r.members.length + 1;
-                const teamSize = memberCount + r.openRoles.length;
+                const teamSize = r.teamSize;
                 const startMs = new Date(h.startDate).getTime() - Date.now();
                 const days = Math.max(0, Math.ceil(startMs / (1000 * 60 * 60 * 24)));
-                const startsLabel = days <= 7 ? `Starts in ${days} days` : `Starts ${h.startDate}`;
+                const startsLabel = Number.isNaN(startMs)
+                  ? "Start date unavailable"
+                  : days <= 7
+                    ? `Starts in ${days} days`
+                    : `Starts ${h.startDate}`;
                 const momentum = computeMomentum(r, Date.now());
                 const momColor = momentumColor(momentum.score);
                 const ctaLabel =

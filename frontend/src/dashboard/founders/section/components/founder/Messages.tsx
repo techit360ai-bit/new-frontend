@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Paperclip, Send } from "lucide-react";
 import {
@@ -11,6 +12,7 @@ import {
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
 import type { UIConversation, UIMessage } from "@/lib/messaging/types";
 import { useMessaging } from "@/contexts/MessagingProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -19,19 +21,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-function currentUserId(): string {
-  try {
-    return JSON.parse(localStorage.getItem("techit_user") || "{}").id || "";
-  } catch {
-    return "";
-  }
-}
-
 function conversationMeta(conversation: Pick<UIConversation, "projectName" | "subject">): string {
   return [conversation.projectName, conversation.subject].filter(Boolean).join(" · ");
 }
 
 export function Messages() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<UIConversation[]>([]);
   const [activeId, setActiveId] = useState("");
   const [loading, setLoading] = useState(true);
@@ -43,6 +39,21 @@ export function Messages() {
   const [composeBody, setComposeBody] = useState("");
 
   const { store, socket } = useMessaging();
+
+  useEffect(() => {
+    const recipient = searchParams.get("recipient")?.trim();
+    if (!recipient) return;
+    setRecipientId(recipient);
+    setComposeOpen(true);
+  }, [searchParams]);
+
+  const clearComposeRecipient = () => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete("recipient");
+      return next;
+    }, { replace: true });
+  };
 
   useEffect(() => {
     let alive = true;
@@ -78,7 +89,7 @@ export function Messages() {
         const thread = messages
           .slice()
           .reverse()
-          .map((message) => mapMessage(message, currentUserId()));
+          .map((message) => mapMessage(message, user?.id ?? ""));
         const lastMessageId = thread[thread.length - 1]?.id;
         setConversations((current) =>
           current.map((conversation) =>
@@ -96,7 +107,7 @@ export function Messages() {
     return () => {
       alive = false;
     };
-  }, [activeId]);
+  }, [activeId, user?.id]);
 
   useEffect(() => {
     if (!activeId) return;
@@ -244,6 +255,7 @@ export function Messages() {
       setActiveId(newConversation.id);
       setComposeOpen(false);
       resetCompose();
+      clearComposeRecipient();
       toast("Message sent");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Message was not sent.");
@@ -406,7 +418,10 @@ export function Messages() {
         open={composeOpen}
         onOpenChange={(open) => {
           setComposeOpen(open);
-          if (!open) resetCompose();
+          if (!open) {
+            resetCompose();
+            clearComposeRecipient();
+          }
         }}
       >
         <DialogContent className="max-w-md">

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   Mail,
@@ -13,101 +13,126 @@ import {
   X,
   CheckCircle2,
 } from "lucide-react";
-import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
-import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { HackathonMatchBanner } from "@/dashboard/founders/section/components/founder/HackathonMatchBanner";
+import { inviteHackathonCollaborator } from "@/lib/api/hackathon";
+import { fetchFounderOpportunity } from "@/lib/api/opportunities";
+import {
+  connectWithUser,
+  fetchCollaboratorDirectory,
+  type CollaboratorDirectoryEntry,
+} from "@/lib/api/users";
 
 interface Match {
+  id: string;
   name: string;
   role: string;
-  match: number;
   skills: string[];
   avatar: string;
-  risk: string;
-  hours: string;
+  weeklyHours: number;
+  timezone: string;
+  location: string;
+  credibilityScore: number;
+  isVerified: boolean;
 }
 
-const matches: Match[] = [
-  {
-    name: "Sarah Chen",
-    role: "Full-Stack Developer",
-    match: 94,
-    skills: ["React", "Node.js", "AWS"],
-    avatar: "SC",
-    risk: "Medium",
-    hours: "30h/week",
-  },
-  {
-    name: "Alex Rivera",
-    role: "Product Designer",
-    match: 89,
-    skills: ["UI/UX", "Figma", "Research"],
-    avatar: "AR",
-    risk: "Low",
-    hours: "20h/week",
-  },
-  {
-    name: "Jordan Lee",
-    role: "Marketing Specialist",
-    match: 87,
-    skills: ["SEO", "Content", "Analytics"],
-    avatar: "JL",
-    risk: "High",
-    hours: "25h/week",
-  },
-  {
-    name: "Morgan Taylor",
-    role: "DevOps Engineer",
-    match: 85,
-    skills: ["Docker", "K8s", "CI/CD"],
-    avatar: "MT",
-    risk: "Medium",
-    hours: "40h/week",
-  },
-];
+function initials(value: string): string {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  return parts.length
+    ? parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("")
+    : "CO";
+}
 
-const DEFAULT_EQUITY: Record<string, number> = {
-  "Sarah Chen": 8,
-  "Alex Rivera": 5,
-  "Jordan Lee": 3,
-  "Morgan Taylor": 4,
-};
+function roleTokens(value: string): string[] {
+  return value.toLowerCase().split(/[^a-z0-9+#.]+/).filter((word) => word.length > 1);
+}
+
+function directoryMatch(profile: CollaboratorDirectoryEntry): Match {
+  return {
+    id: profile.id,
+    name: profile.name,
+    role: profile.title || "Collaborator",
+    skills: profile.skills,
+    avatar: initials(profile.name),
+    weeklyHours: profile.weeklyHours,
+    timezone: profile.timezone,
+    location: profile.location,
+    credibilityScore: profile.credibilityScore,
+    isVerified: profile.isVerified,
+  };
+}
+
+function matchingOpenRole(match: Match, openRoles: string[]): string {
+  const profileWords = new Set(roleTokens([match.role, ...match.skills].join(" ")));
+  return openRoles.find((role) => roleTokens(role).some((word) => profileWords.has(word)))
+    ?? openRoles[0]
+    ?? "";
+}
 
 export default function MatchResults() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const hackathonId = searchParams.get("hackathon");
-  const { founderProfile, addHackathonMember } = useFounderProfile();
-
-  const hackathon: Hackathon | null = hackathonId
-    ? (OPPORTUNITIES.find((o): o is Hackathon => o.type === "hackathon" && o.id === hackathonId) ?? null)
-    : null;
+  const { founderProfile } = useFounderProfile();
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [hackathon, setHackathon] = useState<Hackathon | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const registration = hackathonId
     ? founderProfile.hackathonRegistrations.find((r) => r.hackathonId === hackathonId) ?? null
     : null;
 
-  const [invitedNames, setInvitedNames] = useState<Set<string>>(new Set());
+  const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
+  const [invitingIds, setInvitingIds] = useState<Set<string>>(new Set());
+  const [equity, setEquity] = useState<Record<string, number>>({});
+  const [contractFor, setContractFor] = useState<Match | null>(null);
+  const [projectName, setProjectName] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      fetchCollaboratorDirectory(),
+      hackathonId ? fetchFounderOpportunity(hackathonId) : Promise.resolve(null),
+    ])
+      .then(([profiles, opportunity]) => {
+        if (!alive) return;
+        setMatches(profiles.map(directoryMatch));
+        setHackathon(opportunity?.type === "hackathon" ? opportunity : null);
+      })
+      .catch((loadError) => {
+        if (!alive) return;
+        setMatches([]);
+        setHackathon(null);
+        setError(loadError instanceof Error ? loadError.message : "Live collaborator profiles are unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, [hackathonId]);
+
+  useEffect(() => {
+    if (!projectName) {
+      setProjectName(registration?.teamName || founderProfile.startupName || "");
+    }
+  }, [founderProfile.startupName, projectName, registration?.teamName]);
 
   const visibleMatches = useMemo(() => {
     if (!hackathonId || !registration) return matches;
+    if (registration.openRoles.length === 0) return [];
     const openRoleWords = new Set(
-      registration.openRoles.flatMap((r) => r.toLowerCase().split(/[\s()/]+/).filter(Boolean)),
+      registration.openRoles.flatMap(roleTokens),
     );
     return matches.filter((m) => {
-      const matchWords = m.role.toLowerCase().split(/[\s()/]+/).filter(Boolean);
+      const matchWords = roleTokens([m.role, ...m.skills].join(" "));
       return matchWords.some((w) => openRoleWords.has(w));
     });
-  }, [hackathonId, registration]);
-
-  const [equity, setEquity] =
-    useState<Record<string, number>>(DEFAULT_EQUITY);
-  const [contractFor, setContractFor] = useState<Match | null>(null);
-  const [projectName, setProjectName] = useState(
-    "Untitled Project",
-  );
+  }, [hackathonId, matches, registration]);
 
   const totalEquity = useMemo(
     () => Object.values(equity).reduce((a, b) => a + b, 0),
@@ -116,12 +141,48 @@ export default function MatchResults() {
   const founderRetained = Math.max(0, 100 - totalEquity);
   const over = totalEquity > 100;
 
-  const handleInvite = () => {
-    confetti({
-      particleCount: 50,
-      spread: 60,
-      origin: { y: 0.7 },
-    });
+  const handleHackathonInvite = async (match: Match, role: string) => {
+    if (!hackathonId || !registration || !role) return;
+    setInvitingIds((current) => new Set(current).add(match.id));
+    try {
+      const invitation = await inviteHackathonCollaborator(
+        hackathonId,
+        registration.teamId,
+        match.id,
+        role,
+      );
+      if (invitation.status !== "pending") {
+        toast.error("The invitation was not persisted as pending.");
+        return;
+      }
+      setInvitedIds((current) => new Set(current).add(match.id));
+      toast.success(`Invited ${match.name} to ${registration.teamName} as ${role}.`);
+    } catch (inviteError) {
+      toast.error(inviteError instanceof Error ? inviteError.message : "The invitation could not be sent.");
+    } finally {
+      setInvitingIds((current) => {
+        const next = new Set(current);
+        next.delete(match.id);
+        return next;
+      });
+    }
+  };
+
+  const handleConnect = async (match: Match) => {
+    setInvitingIds((current) => new Set(current).add(match.id));
+    try {
+      await connectWithUser(match.id);
+      setInvitedIds((current) => new Set(current).add(match.id));
+      toast.success(`Connection request sent to ${match.name}.`);
+    } catch (connectError) {
+      toast.error(connectError instanceof Error ? connectError.message : "The connection request could not be sent.");
+    } finally {
+      setInvitingIds((current) => {
+        const next = new Set(current);
+        next.delete(match.id);
+        return next;
+      });
+    }
   };
 
   return (
@@ -131,10 +192,10 @@ export default function MatchResults() {
           {/* Header */}
           <div className="mb-6 lg:mb-8">
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-              Your Top Matches
+              Collaborator Directory
             </h1>
             <p className="text-sm lg:text-base text-muted-foreground">
-              AI-curated collaborators based on your profile and project needs
+              Live collaborator profiles from the authenticated TechIT directory
             </p>
           </div>
 
@@ -149,6 +210,7 @@ export default function MatchResults() {
                   type="text"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="Project name"
                   className="w-full bg-transparent text-lg font-semibold text-foreground border-b border-border focus:border-indigo-500 outline-none pb-1"
                 />
               </div>
@@ -180,8 +242,8 @@ export default function MatchResults() {
 
             {/* Allocation bar */}
             <div className="mt-4 h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
-              {matches.map((m, i) => {
-                const pct = equity[m.name] ?? 0;
+              {visibleMatches.map((m, i) => {
+                const pct = equity[m.id] ?? 0;
                 const colors = [
                   "bg-indigo-500",
                   "bg-cyan-500",
@@ -190,7 +252,7 @@ export default function MatchResults() {
                 ];
                 return (
                   <div
-                    key={m.name}
+                    key={m.id}
                     className={`${colors[i % colors.length]} transition-all`}
                     style={{ width: `${Math.min(pct, 100)}%` }}
                     title={`${m.name}: ${pct}%`}
@@ -205,40 +267,35 @@ export default function MatchResults() {
             )}
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 lg:mb-8">
-            <select className="px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm flex-1 sm:flex-none">
-              <option>All Availability</option>
-              <option>Full-time</option>
-              <option>Part-time</option>
-            </select>
-            <select className="px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm flex-1 sm:flex-none">
-              <option>All Risk Levels</option>
-              <option>Low</option>
-              <option>Medium</option>
-              <option>High</option>
-            </select>
-            <select className="px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm flex-1 sm:flex-none">
-              <option>All Time Zones</option>
-              <option>PST</option>
-              <option>EST</option>
-            </select>
-          </div>
-
           {/* Match Cards Grid */}
           {hackathonId && <HackathonMatchBanner hackathon={hackathon} teamName={registration?.teamName ?? null} />}
-          {hackathonId && visibleMatches.length === 0 && (
+          {loading && (
+            <div className="border border-border rounded-xl bg-card p-8 text-center">
+              <p className="text-sm text-muted-foreground">Loading live collaborator profiles...</p>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="border border-red-200 rounded-xl bg-red-50 p-6 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+          {!loading && !error && visibleMatches.length === 0 && (
             <div className="border border-slate-200 rounded-xl bg-white p-8 text-center">
-              <p className="text-sm text-slate-700 font-medium">No collaborators match the open roles for this hackathon.</p>
-              <p className="text-xs text-slate-500 mt-1">Try widening your role list or sharing the invite link directly.</p>
+              <p className="text-sm text-slate-700 font-medium">
+                {hackathonId
+                  ? "No live collaborator profiles match the team's open roles."
+                  : "No collaborator profiles are available yet."}
+              </p>
             </div>
           )}
           <div className="grid gap-6">
             {visibleMatches.map((match, index) => {
-              const pct = equity[match.name] ?? 0;
+              const pct = equity[match.id] ?? 0;
+              const invitationRole = registration ? matchingOpenRole(match, registration.openRoles) : "";
+              const inviting = invitingIds.has(match.id);
               return (
                 <motion.div
-                  key={match.name}
+                  key={match.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -252,7 +309,7 @@ export default function MatchResults() {
                       </div>
                       {/* Match Badge */}
                       <div className="px-3 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 rounded-full text-xs sm:text-sm font-medium text-center">
-                        {match.match}% Match
+                        {match.isVerified ? "Verified profile" : "Live profile"}
                       </div>
                     </div>
 
@@ -269,24 +326,18 @@ export default function MatchResults() {
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Award className="size-4" />
-                              {match.hours}
+                              {match.weeklyHours > 0 ? `${match.weeklyHours}h/week` : "Availability not specified"}
                             </span>
-                            <span>•</span>
-                            <span>{match.risk} Risk</span>
+                            {(match.location || match.timezone) && <span>•</span>}
+                            <span>{[match.location, match.timezone].filter(Boolean).join(" · ")}</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`size-3 sm:size-4 ${
-                                i < 4
-                                  ? "fill-amber-400 text-amber-400"
-                                  : "text-slate-300 dark:text-slate-700"
-                              }`}
-                            />
-                          ))}
+                        <div className="flex items-center gap-1 shrink-0 text-xs text-muted-foreground">
+                          <Star className="size-4 text-amber-500" />
+                          {match.credibilityScore > 0
+                            ? `${match.credibilityScore} credibility`
+                            : "No credibility score"}
                         </div>
                       </div>
 
@@ -322,7 +373,7 @@ export default function MatchResults() {
                           onChange={(e) =>
                             setEquity((prev) => ({
                               ...prev,
-                              [match.name]: parseFloat(e.target.value),
+                              [match.id]: parseFloat(e.target.value),
                             }))
                           }
                           className="w-full accent-indigo-600"
@@ -338,7 +389,7 @@ export default function MatchResults() {
                       {/* Actions */}
                       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                         {hackathonId && registration ? (
-                          invitedNames.has(match.name) ? (
+                          invitedIds.has(match.id) ? (
                             <button
                               type="button"
                               disabled
@@ -350,43 +401,39 @@ export default function MatchResults() {
                           ) : (
                             <button
                               type="button"
-                              onClick={() => {
-                                const role = registration.openRoles[0];
-                                if (!role) return;
-                                addHackathonMember(registration.teamId, {
-                                  collaboratorId: `mock_${match.name.replace(/\s+/g, "_").toLowerCase()}`,
-                                  name: match.name,
-                                  role,
-                                  acceptedAt: new Date().toISOString(),
-                                });
-                                setInvitedNames((s) => new Set(s).add(match.name));
-                                toast.success(`Invited ${match.name} to ${registration.teamName}`);
-                              }}
+                              onClick={() => void handleHackathonInvite(match, invitationRole)}
+                              disabled={!invitationRole || inviting}
                               className="flex-1 sm:flex-none py-2 px-4 rounded-lg bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center gap-2 text-sm"
                             >
                               <Mail className="size-4" />
-                              <span>Invite to {registration.teamName}</span>
+                              <span>{inviting ? "Sending..." : `Invite as ${invitationRole || "open role"}`}</span>
                             </button>
                           )
                         ) : (
                           <button
-                            onClick={() => handleInvite()}
-                            className="flex-1 sm:flex-none py-2 px-4 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
+                            onClick={() => void handleConnect(match)}
+                            disabled={invitedIds.has(match.id) || inviting}
+                            className="flex-1 sm:flex-none py-2 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
                           >
-                            <Mail className="size-4" />
-                            <span>Invite</span>
+                            {invitedIds.has(match.id) ? <CheckCircle2 className="size-4" /> : <Mail className="size-4" />}
+                            <span>{invitedIds.has(match.id) ? "Request sent" : inviting ? "Sending..." : "Connect"}</span>
                           </button>
                         )}
-                        <button className="flex-1 sm:flex-none py-2 px-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-white rounded-lg flex items-center justify-center gap-2 transition-colors text-sm">
+                        <button
+                          onClick={() => navigate(`/founder/messages?recipient=${encodeURIComponent(match.id)}`)}
+                          className="flex-1 sm:flex-none py-2 px-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-white rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                        >
                           <MessageCircle className="size-4" />
                           <span>Message</span>
                         </button>
                         <button
                           onClick={() => setContractFor(match)}
-                          disabled={pct <= 0 || over}
+                          disabled={pct <= 0 || over || !projectName.trim()}
                           className="flex-1 sm:flex-none py-2 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                           title={
-                            pct <= 0
+                            !projectName.trim()
+                              ? "Set a project name first"
+                              : pct <= 0
                               ? "Set an equity proposal first"
                               : over
                                 ? "Total equity exceeds 100%"
@@ -411,7 +458,7 @@ export default function MatchResults() {
         <ContractModal
           match={contractFor}
           projectName={projectName}
-          equity={equity[contractFor.name] ?? 0}
+          equity={equity[contractFor.id] ?? 0}
           onClose={() => setContractFor(null)}
         />
       )}
@@ -435,7 +482,7 @@ function ContractModal({
     month: "long",
     day: "numeric",
   });
-  const weeklyHours = parseInt(match.hours, 10) || 0;
+  const weeklyHours = match.weeklyHours;
 
   return (
     <div
@@ -536,7 +583,7 @@ function ContractModal({
               {match.name} is engaged as <strong>{match.role}</strong> on{" "}
               <strong>{projectName}</strong>, committing approximately{" "}
               <strong>{weeklyHours} hours per week</strong>. Areas of focus
-              include {match.skills.join(", ")}. Specific deliverables and
+              include {match.skills.length ? match.skills.join(", ") : "the agreed project scope"}. Specific deliverables and
               milestones will be tracked through the TechIT workspace.
             </p>
           </section>

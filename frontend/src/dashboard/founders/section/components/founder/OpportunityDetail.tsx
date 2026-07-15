@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { OPPORTUNITIES } from "@/dashboard/_shared/opportunities/data";
 import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
+import { fetchFounderOpportunity } from "@/lib/api/opportunities";
 
 const TYPE_LABEL: Record<Opportunity["type"], string> = {
   hackathon: "HACKATHON",
@@ -13,7 +14,44 @@ const TYPE_LABEL: Record<Opportunity["type"], string> = {
 export default function OpportunityDetail() {
   const { opportunityId } = useParams<{ opportunityId: string }>();
   const navigate = useNavigate();
-  const opp = OPPORTUNITIES.find((o) => o.id === opportunityId);
+  const [opp, setOpp] = useState<Opportunity | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    if (!opportunityId) {
+      setLoading(false);
+      return;
+    }
+    fetchFounderOpportunity(opportunityId)
+      .then((item) => {
+        if (alive) setOpp(item);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setOpp(null);
+        setError(err instanceof Error ? err.message : "Live opportunity data is unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, [opportunityId]);
+
+  if (loading) {
+    return <div className="p-6 text-center text-sm text-slate-500">Loading live opportunity...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto text-center py-16 border border-red-200 rounded-xl bg-red-50">
+          <p className="text-sm text-red-700">Live opportunity data is unavailable: {error}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!opp) {
     return (

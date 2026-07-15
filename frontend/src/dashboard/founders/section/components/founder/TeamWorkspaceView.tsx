@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { Users, ExternalLink, FileText, CheckCircle2 } from "lucide-react";
 import { useFounderProfile } from "@/contexts/UserContext";
+import { buildTeamWorkspace } from "@/dashboard/_shared/hackathon/workspace";
 
 const IDEA_FIELDS: { key: "problem" | "targetUser" | "solutionSketch" | "whyNow" | "differentiator" | "risk" | "successMetric"; label: string }[] = [
   { key: "problem", label: "Problem" },
@@ -15,8 +16,13 @@ const IDEA_FIELDS: { key: "problem" | "targetUser" | "solutionSketch" | "whyNow"
 export function TeamWorkspaceView() {
   const { teamId } = useParams();
   const { founderProfile } = useFounderProfile();
-  const ws = founderProfile.teamWorkspaces.find((w) => w.teamId === teamId);
   const reg = founderProfile.hackathonRegistrations.find((r) => r.teamId === teamId);
+  const localWorkspace = founderProfile.teamWorkspaces.find((w) => w.teamId === teamId);
+  const ws = localWorkspace ?? (
+    reg?.workspaceId
+      ? { ...buildTeamWorkspace(reg, new Date(reg.registeredAt).getTime()), id: reg.workspaceId }
+      : undefined
+  );
 
   if (!ws) {
     return (

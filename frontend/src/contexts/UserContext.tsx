@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { fetchFounderProjects, type FounderProject } from "@/lib/api/projects";
+import { fetchHackathonRegistrations } from "@/lib/api/hackathon";
 import { useAuth, type Profile as AuthProfile } from "@/contexts/AuthContext";
 
 export interface PortfolioCompany {
@@ -310,7 +311,6 @@ interface UserContextType {
   founderProfile: FounderProfile;
   updateFounderProfile: (updates: Partial<FounderProfile>) => void;
   registerForHackathon: (reg: HackathonRegistration) => void;
-  addHackathonMember: (teamId: string, member: HackathonTeamMember) => void;
   updateHackathonRegistration: (
     teamId: string,
     updates: Partial<Omit<HackathonRegistration, "hackathonId" | "teamId" | "registeredAt">>,
@@ -623,6 +623,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return () => { alive = false; };
   }, [user, profile]);
 
+  useEffect(() => {
+    if (!user || !profile) return;
+    let alive = true;
+    fetchHackathonRegistrations()
+      .then((registrations) => {
+        if (alive) {
+          setFounderProfile((prev) => ({ ...prev, hackathonRegistrations: registrations }));
+        }
+      })
+      .catch((error) => {
+        if (typeof console !== "undefined") {
+          console.warn("[UserContext] hackathon registrations unavailable", error);
+        }
+      });
+    return () => { alive = false; };
+  }, [user, profile]);
+
   /**
    * Shallow merge — for nested fields like `verification`, `notifications`, or `links`,
    * callers must spread the existing sub-object themselves,
@@ -635,7 +652,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const registerForHackathon = (reg: HackathonRegistration) => {
     setFounderProfile((prev) => ({
       ...prev,
-      hackathonRegistrations: [...prev.hackathonRegistrations, { ...reg, checkIns: reg.checkIns ?? [] }],
+      hackathonRegistrations: [
+        ...prev.hackathonRegistrations.filter((item) => item.teamId !== reg.teamId),
+        { ...reg, checkIns: reg.checkIns ?? [] },
+      ],
     }));
   };
 
@@ -687,21 +707,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const addHackathonMember = (teamId: string, member: HackathonTeamMember) => {
-    setFounderProfile((prev) => ({
-      ...prev,
-      hackathonRegistrations: prev.hackathonRegistrations.map((r) =>
-        r.teamId === teamId
-          ? {
-              ...r,
-              members: [...r.members, member],
-              openRoles: r.openRoles.filter((role) => role !== member.role),
-            }
-          : r,
-      ),
-    }));
-  };
-
   const updateHackathonRegistration = (
     teamId: string,
     updates: Partial<Omit<HackathonRegistration, "hackathonId" | "teamId" | "registeredAt">>,
@@ -726,7 +731,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         founderProfile,
         updateFounderProfile,
         registerForHackathon,
-        addHackathonMember,
         updateHackathonRegistration,
         submitBrief,
         addCheckIn,
@@ -802,7 +806,6 @@ export function useFounderProfile() {
     founderProfile,
     updateFounderProfile,
     registerForHackathon,
-    addHackathonMember,
     updateHackathonRegistration,
     submitBrief,
     addCheckIn,
@@ -815,7 +818,6 @@ export function useFounderProfile() {
     founderProfile,
     updateFounderProfile,
     registerForHackathon,
-    addHackathonMember,
     updateHackathonRegistration,
     submitBrief,
     addCheckIn,

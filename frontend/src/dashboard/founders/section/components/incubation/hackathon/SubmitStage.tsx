@@ -5,6 +5,7 @@ import type { HackathonRegistration, FinalSubmission } from "@/contexts/UserCont
 import { useFounderProfile } from "@/contexts/UserContext";
 import { deriveJudgeFeedback } from "@/dashboard/_shared/hackathon/results";
 import { ResultsView } from "./ResultsView";
+import { submitHackathonFinal } from "@/lib/api/hackathon";
 
 interface Props {
   registration: HackathonRegistration;
@@ -30,8 +31,9 @@ function isHttpUrl(s: string): boolean {
 }
 
 export function SubmitStage({ registration }: Props) {
-  const { submitFinal } = useFounderProfile();
+  const { registerForHackathon } = useFounderProfile();
   const [values, setValues] = useState<typeof EMPTY>(EMPTY);
+  const [submitting, setSubmitting] = useState(false);
 
   // Locked once a final submission exists → show results.
   if (registration.finalSubmission) {
@@ -42,7 +44,7 @@ export function SubmitStage({ registration }: Props) {
   const summaryValid = values.summary.trim().length >= MIN_SUMMARY;
   const canSubmit = urlsValid && summaryValid;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit) return;
     const submission: FinalSubmission = {
       demoUrl: values.demoUrl.trim(),
@@ -54,8 +56,25 @@ export function SubmitStage({ registration }: Props) {
     // Merge the submission in before deriving so demo credit + momentum bump count.
     const merged: HackathonRegistration = { ...registration, finalSubmission: submission };
     const feedback = deriveJudgeFeedback(merged, Date.now(), submission.submittedAt);
-    submitFinal(registration.teamId, submission, feedback);
-    toast.success("Pitch submitted — results are in");
+    setSubmitting(true);
+    try {
+      const result = await submitHackathonFinal(
+        registration.hackathonId,
+        registration.teamId,
+        submission,
+        feedback,
+      );
+      if (!result.ok || !result.registration) {
+        toast.error("The final submission was not persisted.");
+        return;
+      }
+      registerForHackathon(result.registration);
+      toast.success("Pitch submitted — results are in");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The final submission failed.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -121,15 +140,15 @@ export function SubmitStage({ registration }: Props) {
       <div className="flex justify-end mt-6">
         <button
           type="button"
-          disabled={!canSubmit}
-          onClick={handleSubmit}
+          disabled={!canSubmit || submitting}
+          onClick={() => void handleSubmit()}
           className={`text-sm font-medium px-4 py-2 rounded-lg ${
             canSubmit
               ? "bg-violet-600 text-white hover:bg-violet-700"
               : "bg-slate-100 text-slate-400 cursor-not-allowed"
           }`}
         >
-          Submit pitch
+          {submitting ? "Submitting..." : "Submit pitch"}
         </button>
       </div>
     </div>

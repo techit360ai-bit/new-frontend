@@ -41,6 +41,21 @@ export interface PublicUserProfile {
   recentActivity: PublicUserActivity[];
 }
 
+export interface CollaboratorDirectoryEntry {
+  id: string;
+  name: string;
+  role: string;
+  title: string;
+  headline: string;
+  skills: string[];
+  weeklyHours: number;
+  timezone: string;
+  location: string;
+  avatarUrl: string;
+  credibilityScore: number;
+  isVerified: boolean;
+}
+
 function timeoutSignal(init?: RequestInit): AbortSignal {
   return init?.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
 }
@@ -62,7 +77,7 @@ async function parse<T>(res: Response): Promise<T> {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const clean = path.startsWith('/') ? path : `/${path}`;
+  const clean = path.startsWith('?') || path.startsWith('/') ? path : `/${path}`;
   const res = await fetch(`${BACKEND_API_BASE_URL}/users${clean}`, {
     method: 'GET',
     ...init,
@@ -74,6 +89,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function fetchPublicUserProfile(userId: string): Promise<PublicUserProfile> {
   return request<PublicUserProfile>(`/${encodeURIComponent(userId)}`);
+}
+
+export function fetchCollaboratorDirectory(): Promise<CollaboratorDirectoryEntry[]> {
+  return request<{ users?: CollaboratorDirectoryEntry[] }>('?role=collaborator')
+    .then((data) => Array.isArray(data.users) ? data.users : []);
 }
 
 export async function connectWithUser(userId: string): Promise<void> {

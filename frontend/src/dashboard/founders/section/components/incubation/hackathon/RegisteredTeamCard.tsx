@@ -6,6 +6,7 @@ import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import type { HackathonRegistration } from "@/contexts/UserContext";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
+import { patchHackathonTeam } from "@/lib/api/hackathon";
 
 const NEXT_ACTION_CTA: Record<
   ReturnType<typeof computeMomentum>["nextAction"],
@@ -33,9 +34,10 @@ function inviteUrl(reg: HackathonRegistration): string {
 
 export function RegisteredTeamCard({ registration, hackathon }: Props) {
   const navigate = useNavigate();
-  const { updateHackathonRegistration } = useFounderProfile();
+  const { registerForHackathon } = useFounderProfile();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [updatingRoster, setUpdatingRoster] = useState(false);
 
   const days = daysUntil(hackathon.startDate);
   const memberCount = registration.members.length + 1; // +1 for the leader
@@ -52,11 +54,25 @@ export function RegisteredTeamCard({ registration, hackathon }: Props) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleToggleRoster = () => {
-    updateHackathonRegistration(registration.teamId, {
-      rosterClosed: !registration.rosterClosed,
-    });
-    toast.success(registration.rosterClosed ? "Roster reopened" : "Roster closed");
+  const handleToggleRoster = async () => {
+    setUpdatingRoster(true);
+    try {
+      const persisted = await patchHackathonTeam(
+        registration.hackathonId,
+        registration.teamId,
+        { rosterClosed: !registration.rosterClosed },
+      );
+      if (!persisted) {
+        toast.error("The roster state was not persisted.");
+        return;
+      }
+      registerForHackathon(persisted);
+      toast.success(registration.rosterClosed ? "Roster reopened" : "Roster closed");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The roster could not be updated.");
+    } finally {
+      setUpdatingRoster(false);
+    }
   };
 
   return (
@@ -169,10 +185,15 @@ export function RegisteredTeamCard({ registration, hackathon }: Props) {
               <div>
                 <button
                   type="button"
-                  onClick={handleToggleRoster}
+                  onClick={() => void handleToggleRoster()}
+                  disabled={updatingRoster}
                   className="text-xs font-medium px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
                 >
-                  {registration.rosterClosed ? "Reopen roster" : "Close roster"}
+                  {updatingRoster
+                    ? "Saving..."
+                    : registration.rosterClosed
+                      ? "Reopen roster"
+                      : "Close roster"}
                 </button>
                 <p className="text-xs text-slate-500 mt-1.5">
                   {registration.rosterClosed
