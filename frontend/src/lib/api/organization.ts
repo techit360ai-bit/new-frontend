@@ -1,4 +1,4 @@
-import { domainGet } from "@/lib/domainApi";
+import { domainGet, domainPatch, domainPost } from "@/lib/domainApi";
 
 export interface OrganizationMetrics {
   activePrograms: number;
@@ -39,6 +39,37 @@ export interface OrganizationDashboardData {
   activity: OrganizationActivity[];
 }
 
+export interface OrganizationProject {
+  id: string;
+  title: string;
+  tagline: string;
+  industry: string;
+  stage: string;
+  status: string;
+  progress: number;
+  teamName: string;
+  memberCount: number;
+  marketReadyScore: number;
+  aiLevel: string;
+  hasWorkspace: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrganizationProjectInput {
+  title: string;
+  tagline?: string;
+  industry?: string;
+  stage?: string;
+  status?: string;
+  progress?: number;
+  teamName?: string;
+  memberCount?: number;
+  marketReadyScore?: number;
+  aiLevel?: string;
+  hasWorkspace?: boolean;
+}
+
 type UnknownRecord = Record<string, unknown>;
 
 const PROJECT_HEALTH_COLORS = ["#10b981", "#f59e0b", "#ef4444", "#2563eb"];
@@ -60,6 +91,14 @@ function asNumber(value: unknown): number {
 
 function asText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function asBoolean(value: unknown): boolean {
+  return value === true || value === "true";
+}
+
+function asPercent(value: unknown): number {
+  return Math.min(100, Math.max(0, asNumber(value)));
 }
 
 function chartRows(charts: UnknownRecord, ...keys: string[]): UnknownRecord[] {
@@ -127,4 +166,56 @@ export function normalizeOrganizationDashboard(payload: unknown): OrganizationDa
 export async function fetchOrganizationDashboard(): Promise<OrganizationDashboardData> {
   const payload = await domainGet<unknown>("/organization/dashboard");
   return normalizeOrganizationDashboard(payload);
+}
+
+export function normalizeOrganizationProject(value: unknown): OrganizationProject | null {
+  const row = asRecord(value);
+  const id = asText(row.id);
+  const title = asText(row.title);
+  if (!id || !title) return null;
+
+  return {
+    id,
+    title,
+    tagline: asText(row.tagline),
+    industry: asText(row.industry),
+    stage: asText(row.stage) || "idea",
+    status: asText(row.status) || "planned",
+    progress: asPercent(row.progress),
+    teamName: asText(row.teamName),
+    memberCount: Math.max(0, asNumber(row.memberCount)),
+    marketReadyScore: asPercent(row.marketReadyScore),
+    aiLevel: asText(row.aiLevel),
+    hasWorkspace: asBoolean(row.hasWorkspace),
+    createdAt: asText(row.createdAt),
+    updatedAt: asText(row.updatedAt),
+  };
+}
+
+export async function fetchOrganizationProjects(): Promise<OrganizationProject[]> {
+  const payload = asRecord(await domainGet<unknown>("/organization/projects"));
+  return asRows(payload.projects)
+    .map(normalizeOrganizationProject)
+    .filter((project): project is OrganizationProject => project !== null);
+}
+
+export async function createOrganizationProject(
+  input: OrganizationProjectInput,
+): Promise<OrganizationProject> {
+  const payload = asRecord(await domainPost<unknown>("/organization/projects", input));
+  const project = normalizeOrganizationProject(payload.project);
+  if (!project) throw new Error("The organization project response was invalid.");
+  return project;
+}
+
+export async function updateOrganizationProject(
+  projectId: string,
+  input: Partial<OrganizationProjectInput>,
+): Promise<OrganizationProject> {
+  const payload = asRecord(
+    await domainPatch<unknown>(`/organization/projects/${encodeURIComponent(projectId)}`, input),
+  );
+  const project = normalizeOrganizationProject(payload.project);
+  if (!project) throw new Error("The organization project response was invalid.");
+  return project;
 }
