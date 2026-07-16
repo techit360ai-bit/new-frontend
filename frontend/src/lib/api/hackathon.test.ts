@@ -2,8 +2,13 @@ import { afterEach, expect, test, vi } from "vitest";
 import { setAuthTokenGetter } from "./client";
 import {
   createOrganizerHackathon,
+  fetchHackathonLeaderboard,
+  fetchHackathonOverview,
+  fetchHackathonPipeline,
   fetchOrganizerHackathons,
+  fetchOrganizerHackathon,
   fetchHackathonRegistrations,
+  fetchHackathonVelocity,
   inviteHackathonCollaborator,
 } from "./hackathon";
 
@@ -118,6 +123,60 @@ test("organizer hackathon publishing persists the complete configured payload", 
       body: JSON.stringify(input),
     }),
   );
+});
+
+test("organizer hackathon detail reads persisted metadata and aggregate endpoints", async () => {
+  const fetchMock = vi.fn(async (url: string) => {
+    if (url.endsWith("/overview")) {
+      return response({
+        hackathonId: "hack_detail",
+        status: "live",
+        registrants: 3,
+        teamsFormed: 1,
+        stillSolo: 0,
+        ideaSubmissions: 1,
+        totalTeams: 1,
+        avgBuildVelocity: 72,
+      });
+    }
+    if (url.endsWith("/velocity")) {
+      return response({ teams: [{ teamId: "team_1", name: "Persisted Team", activityScore: 72 }] });
+    }
+    if (url.endsWith("/leaderboard")) {
+      return response({ leaderboard: [{ teamId: "team_1", name: "Persisted Team", composite: 81 }] });
+    }
+    if (url.endsWith("/pipeline")) {
+      return response({ buckets: { incubationInvites: 1, prototypeTrack: 0, backToLearning: 0 } });
+    }
+    return response({
+      hackathon: {
+        id: "hack_detail",
+        title: "Persisted Detail",
+        type: "hackathon",
+        status: "live",
+        hackathonStatus: "live",
+        prizes: [],
+        partners: [],
+        judgingDimensions: [],
+      },
+    });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  const [event, overview, velocity, leaderboard, pipeline] = await Promise.all([
+    fetchOrganizerHackathon("hack_detail"),
+    fetchHackathonOverview("hack_detail"),
+    fetchHackathonVelocity("hack_detail"),
+    fetchHackathonLeaderboard("hack_detail"),
+    fetchHackathonPipeline("hack_detail"),
+  ]);
+
+  expect(event).toMatchObject({ id: "hack_detail", title: "Persisted Detail" });
+  expect(overview).toMatchObject({ registrants: 3, totalTeams: 1 });
+  expect(velocity).toEqual([{ teamId: "team_1", name: "Persisted Team", activity: 72 }]);
+  expect(leaderboard).toMatchObject([{ teamId: "team_1", composite: 81 }]);
+  expect(pipeline).toEqual({ incubationInvites: 1, prototypeTrack: 0, backToLearning: 0 });
+  expect(fetchMock.mock.calls).toHaveLength(5);
 });
 
 test("collaborator invitations write to the persisted team invitation endpoint", async () => {

@@ -1,35 +1,54 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-  ArrowLeft,
-  Trophy,
-  Calendar,
-  Users,
-  Sparkles,
-  DollarSign,
   Activity,
-  Gavel,
-  FileText,
-  ClipboardList,
-  CheckCircle2,
-  TrendingUp,
-  AlertTriangle,
-  UserPlus,
-  Mail,
-  Flame,
-  Layers,
-  ArrowUpRight,
-  ArrowDownRight,
+  AlertCircle,
+  ArrowLeft,
   Award,
+  Calendar,
+  CheckCircle2,
+  ClipboardList,
+  FileText,
+  Flame,
+  Gavel,
+  RefreshCw,
+  Sparkles,
+  Trophy,
+  Users,
+  type LucideIcon,
 } from "lucide-react";
 import {
-  fetchHackathonOverview, fetchHackathonVelocity,
-  type HackathonOverview, type VelocityCell,
+  fetchHackathonLeaderboard,
+  fetchHackathonOverview,
+  fetchHackathonPipeline,
+  fetchHackathonVelocity,
+  fetchOrganizerHackathon,
+  type HackathonOverview,
+  type LeaderboardEntry,
+  type OrganizerHackathon,
+  type PipelineBuckets,
+  type VelocityCell,
 } from "@/lib/api/hackathon";
 
 type TabId = "overview" | "registration" | "live" | "judging" | "report";
 
-const tabs: { id: TabId; label: string; icon: typeof Trophy }[] = [
+interface DetailData {
+  event: OrganizerHackathon;
+  overview: HackathonOverview;
+  velocity: VelocityCell[];
+  leaderboard: LeaderboardEntry[];
+  pipeline: PipelineBuckets;
+}
+
+interface TeamRow {
+  id: string;
+  name: string;
+  activity: number;
+  composite: number;
+  crsBand: string;
+}
+
+const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
   { id: "overview", label: "Overview", icon: ClipboardList },
   { id: "registration", label: "Registration & Teams", icon: Users },
   { id: "live", label: "Live Command Centre", icon: Activity },
@@ -37,845 +56,574 @@ const tabs: { id: TabId; label: string; icon: typeof Trophy }[] = [
   { id: "report", label: "Intelligence Report", icon: FileText },
 ];
 
+const statusStyles: Record<OrganizerHackathon["hackathonStatus"], string> = {
+  upcoming: "bg-blue-50 text-blue-700",
+  live: "bg-emerald-50 text-emerald-700",
+  judging: "bg-amber-50 text-amber-700",
+  completed: "bg-gray-100 text-gray-700",
+};
+
+function dateLabel(value: string): string {
+  if (!value) return "Not set";
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString();
+}
+
+function titleLabel(value: string): string {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function buildTeamRows(velocity: VelocityCell[], leaderboard: LeaderboardEntry[]): TeamRow[] {
+  const rows = new Map<string, TeamRow>();
+  for (const team of velocity) {
+    if (!team.teamId) continue;
+    rows.set(team.teamId, {
+      id: team.teamId,
+      name: team.name || "Untitled team",
+      activity: team.activity,
+      composite: 0,
+      crsBand: "unscored",
+    });
+  }
+  for (const team of leaderboard) {
+    if (!team.teamId) continue;
+    const current = rows.get(team.teamId);
+    rows.set(team.teamId, {
+      id: team.teamId,
+      name: team.name || current?.name || "Untitled team",
+      activity: current?.activity ?? 0,
+      composite: team.composite,
+      crsBand: team.crsBand || "unscored",
+    });
+  }
+  return [...rows.values()].sort((left, right) => right.composite - left.composite);
+}
+
 export function HackathonDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { id = "" } = useParams<{ id: string }>();
   const [tab, setTab] = useState<TabId>("overview");
+  const [data, setData] = useState<DetailData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock event metadata — in production this comes from the API by id
-  const event = {
-    id: id ?? "ai-for-africa-2026",
-    title: id?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "Hackathon",
-    theme: "AI agents that solve a real African problem",
-    startDate: "2026-06-12",
-    endDate: "2026-06-14",
-    durationHours: 48,
-    registrants: 420,
-    teamsFormed: 87,
-    soloRegistrants: 64,
-    prizePool: "$50,000",
-    partners: ["TechIT", "Google for Startups", "Lagos Innovation Hub"],
-    status: "live" as "upcoming" | "live" | "judging" | "completed",
-  };
+  const load = useCallback(async () => {
+    if (!id) {
+      setError("Hackathon ID is missing.");
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const [event, overview, velocity, leaderboard, pipeline] = await Promise.all([
+        fetchOrganizerHackathon(id),
+        fetchHackathonOverview(id),
+        fetchHackathonVelocity(id),
+        fetchHackathonLeaderboard(id),
+        fetchHackathonPipeline(id),
+      ]);
+      if (!event) throw new Error("Hackathon not found.");
+      setData({ event, overview, velocity, leaderboard, pipeline });
+    } catch (loadError) {
+      setData(null);
+      setError(loadError instanceof Error ? loadError.message : "Hackathon data is unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const teams = useMemo(
+    () => buildTeamRows(data?.velocity ?? [], data?.leaderboard ?? []),
+    [data],
+  );
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
-      <Link
-        to="/org/hackathons"
-        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 transition-colors mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        All hackathons
-      </Link>
+    <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <Link
+          to="/org/hackathons"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          All hackathons
+        </Link>
+        <button
+          type="button"
+          onClick={() => void load()}
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+      </div>
 
-      {/* Event header */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 flex-wrap mb-2">
-              <span className="bg-indigo-100 p-2 rounded-lg">
-                <Trophy className="w-6 h-6 text-indigo-600" />
-              </span>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {event.title}
-              </h1>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">{event.theme}</p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500">
-              <span className="inline-flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" />
-                {event.startDate} → {event.endDate} ({event.durationHours}h)
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" />
-                {event.registrants} registrants
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                {event.teamsFormed} teams
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5" />
-                {event.prizePool} prizes
-              </span>
-            </div>
+      {error && (
+        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Live hackathon data could not be loaded.</p>
+            <p className="mt-1">{error}</p>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-gray-400">
-              Partners
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {event.partners.map((p) => (
-                <span
-                  key={p}
-                  className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-medium"
+        </div>
+      )}
+
+      {loading && !data ? (
+        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+          Loading persisted hackathon data...
+        </div>
+      ) : data ? (
+        <>
+          <EventHeader event={data.event} overview={data.overview} />
+
+          <div className="mb-6 flex gap-1 overflow-x-auto border-b border-gray-200">
+            {tabs.map((item) => {
+              const Icon = item.icon;
+              const active = tab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setTab(item.id)}
+                  className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold ${
+                    active
+                      ? "border-indigo-600 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-900"
+                  }`}
                 >
-                  {p}
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {tab === "overview" && <OverviewTab event={data.event} />}
+          {tab === "registration" && <RegistrationTab overview={data.overview} teams={teams} />}
+          {tab === "live" && <LiveTab overview={data.overview} velocity={data.velocity} />}
+          {tab === "judging" && <JudgingTab event={data.event} leaderboard={data.leaderboard} />}
+          {tab === "report" && (
+            <ReportTab
+              event={data.event}
+              overview={data.overview}
+              leaderboard={data.leaderboard}
+              pipeline={data.pipeline}
+            />
+          )}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function EventHeader({
+  event,
+  overview,
+}: {
+  event: OrganizerHackathon;
+  overview: HackathonOverview;
+}) {
+  return (
+    <section className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-3">
+            <span className="rounded-lg bg-indigo-100 p-2">
+              <Trophy className="h-6 w-6 text-indigo-600" />
+            </span>
+            <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
+            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[event.hackathonStatus]}`}>
+              {titleLabel(event.hackathonStatus)}
+            </span>
+          </div>
+          <p className="text-sm text-gray-600">{event.theme || "No theme has been persisted."}</p>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500">
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              {dateLabel(event.startDate)} to {dateLabel(event.endDate)}
+              {event.durationHours > 0 ? ` (${event.durationHours}h)` : ""}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5" />
+              {overview.registrants} registrants
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              {overview.totalTeams} teams
+            </span>
+          </div>
+        </div>
+        <div className="max-w-md">
+          <p className="mb-2 text-xs font-medium text-gray-500">Partners</p>
+          {event.partners.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {event.partners.map((partner) => (
+                <span key={partner} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                  {partner}
                 </span>
               ))}
             </div>
-          </div>
+          ) : (
+            <p className="text-sm text-gray-500">No partners are attached.</p>
+          )}
         </div>
       </div>
-
-      {/* Tab nav */}
-      <div className="flex overflow-x-auto gap-1 mb-6 border-b border-gray-200 -mb-px">
-        {tabs.map((t) => {
-          const Icon = t.icon;
-          const active = tab === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
-                active
-                  ? "border-indigo-600 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tab content */}
-      {tab === "overview" && <OverviewTab />}
-      {tab === "registration" && <RegistrationTab hackathonId={event.id} />}
-      {tab === "live" && <LiveCommandCentreTab hackathonId={event.id} />}
-      {tab === "judging" && <JudgingTab />}
-      {tab === "report" && <IntelligenceReportTab />}
-    </div>
+    </section>
   );
 }
 
-// ─── Overview ─────────────────────────────────────────────────
-
-function OverviewTab() {
+function OverviewTab({ event }: { event: OrganizerHackathon }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card className="lg:col-span-2" title="Event timeline" icon={Calendar}>
-        <ol className="space-y-3">
-          {[
-            { time: "T−7 days", event: "Registration opens" },
-            { time: "T−24h", event: "Team formation deadline" },
-            { time: "T0", event: "Build window begins" },
-            { time: "T+12h", event: "First mentor check-in" },
-            { time: "T+24h", event: "Mid-event problem brief due" },
-            { time: "T+48h", event: "Prototype demo submission" },
-            { time: "T+50h", event: "Judging begins" },
-          ].map((row, i) => (
-            <li key={i} className="flex gap-3 items-start text-sm">
-              <span className="w-16 flex-shrink-0 text-[10px] font-mono uppercase tracking-wider text-indigo-600 font-semibold pt-0.5">
-                {row.time}
-              </span>
-              <span className="text-gray-700">{row.event}</span>
-            </li>
-          ))}
-        </ol>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <Card title="Event configuration" icon={Calendar}>
+        <Definition label="Eligibility" value={event.eligibility || "Not configured"} />
+        <Definition label="Build window" value={event.durationHours > 0 ? `${event.durationHours} hours` : "Not configured"} />
+        <Definition label="Mentor pool" value={event.mentorPool > 0 ? String(event.mentorPool) : "Not configured"} />
+        <Definition label="Prize pool" value={event.prizePool || "Not configured"} />
       </Card>
 
-      <Card title="Prize structure" icon={DollarSign}>
-        <ul className="space-y-2.5">
-          {[
-            { rank: "1st place", amount: "$25,000", color: "text-amber-600" },
-            { rank: "2nd place", amount: "$15,000", color: "text-gray-600" },
-            { rank: "3rd place", amount: "$10,000", color: "text-orange-600" },
-          ].map((p) => (
-            <li
-              key={p.rank}
-              className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
-            >
-              <span className={`text-sm font-semibold ${p.color}`}>
-                {p.rank}
+      <Card title="Prize structure" icon={Award}>
+        {event.prizes.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {event.prizes.map((prize, index) => (
+              <div key={`${prize.rank}-${index}`} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                <span className="text-sm font-medium text-gray-700">{prize.rank || "Prize tier"}</span>
+                <span className="text-sm font-bold text-gray-900">{prize.amount || "Amount not set"}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState>No prize tiers have been persisted.</EmptyState>
+        )}
+      </Card>
+
+      <Card title="Judging dimensions" icon={Gavel}>
+        {event.judgingDimensions.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {event.judgingDimensions.map((dimension) => (
+              <span key={dimension} className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700">
+                {titleLabel(dimension)}
               </span>
-              <span className="text-sm font-bold text-gray-900">
-                {p.amount}
-              </span>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        ) : (
+          <EmptyState>No judging dimensions have been persisted.</EmptyState>
+        )}
+      </Card>
+
+      <Card title="Event summary" icon={ClipboardList}>
+        <p className="text-sm leading-6 text-gray-700">
+          {event.summary || event.theme || "No event summary has been persisted."}
+        </p>
       </Card>
     </div>
   );
 }
 
-// ─── Stage 1: Registration & Teams ────────────────────────────
-
-function RegistrationTab({ hackathonId }: { hackathonId: string }) {
-  // Real registrant/team/solo counts from ai-router, polled for live-ness.
-  const [overview, setOverview] = useState<HackathonOverview | null>(null);
-  useEffect(() => {
-    let alive = true;
-    const load = () => fetchHackathonOverview(hackathonId).then((o) => { if (alive) setOverview(o); });
-    load();
-    const t = setInterval(load, 15000);
-    return () => { alive = false; clearInterval(t); };
-  }, [hackathonId]);
-
-  const soloRegistrants = [
-    { name: "Adaeze O.", role: "Backend Dev", cbs: 82, tss: "React, Node", crs: 91 },
-    { name: "Liam W.", role: "Product Designer", cbs: 78, tss: "Figma, UX", crs: 88 },
-    { name: "Noor K.", role: "ML Engineer", cbs: 85, tss: "PyTorch, NLP", crs: 86 },
-  ];
-  const teams = [
-    {
-      name: "Loom Health",
-      members: ["AO", "LW", "NK"],
-      avgCBS: 82,
-      avgCRS: 88,
-      formed: "12 mins ago",
-    },
-    {
-      name: "Solaris",
-      members: ["SR", "MH", "TC", "JL"],
-      avgCBS: 76,
-      avgCRS: 81,
-      formed: "1 hour ago",
-    },
-    {
-      name: "Verdant",
-      members: ["RB", "EF"],
-      avgCBS: 71,
-      avgCRS: 92,
-      formed: "3 hours ago",
-    },
-  ];
-
+function RegistrationTab({
+  overview,
+  teams,
+}: {
+  overview: HackathonOverview;
+  teams: TeamRow[];
+}) {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Stat label="Total registrants" value={String(overview?.registrants ?? 420)} delta="live" />
-        <Stat label="Teams formed" value={String(overview?.teamsFormed ?? 87)} delta="solo → team 64% conv." />
-        <Stat label="Still solo" value={String(overview?.stillSolo ?? 64)} delta="needs match" tone="warn" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat label="Registrants" value={overview.registrants} />
+        <Stat label="Registered teams" value={overview.totalTeams} />
+        <Stat label="Still solo" value={overview.stillSolo} tone={overview.stillSolo > 0 ? "warn" : "neutral"} />
+        <Stat label="Idea submissions" value={overview.ideaSubmissions} />
       </div>
 
-      <Card title="MatchScore — solo registrants" icon={UserPlus}>
-        <p className="text-xs text-gray-500 mb-4">
-          Same algorithm used for startup team matching. Builders are paired by
-          complementary skills and platform scores.
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                <th className="text-left font-semibold py-2 px-3">Builder</th>
-                <th className="text-left font-semibold py-2 px-3">Role</th>
-                <th className="text-left font-semibold py-2 px-3">CBS</th>
-                <th className="text-left font-semibold py-2 px-3">TSS</th>
-                <th className="text-left font-semibold py-2 px-3">CRS</th>
-                <th className="text-left font-semibold py-2 px-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {soloRegistrants.map((r) => (
-                <tr key={r.name} className="border-b border-gray-100">
-                  <td className="py-3 px-3 font-semibold text-gray-900">
-                    {r.name}
-                  </td>
-                  <td className="py-3 px-3 text-gray-700">{r.role}</td>
-                  <td className="py-3 px-3 text-emerald-600 font-bold tabular-nums">
-                    {r.cbs}
-                  </td>
-                  <td className="py-3 px-3 text-gray-700">{r.tss}</td>
-                  <td className="py-3 px-3 text-blue-600 font-bold tabular-nums">
-                    {r.crs}
-                  </td>
-                  <td className="py-3 px-3">
-                    <button className="text-xs font-semibold px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors inline-flex items-center gap-1">
-                      Suggest matches
-                    </button>
-                  </td>
+      <Card title="Persisted teams" icon={Users}>
+        {teams.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-left text-xs font-semibold uppercase text-gray-500">
+                  <th className="px-3 py-2">Team</th>
+                  <th className="px-3 py-2">Build velocity</th>
+                  <th className="px-3 py-2">Composite score</th>
+                  <th className="px-3 py-2">CRS band</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card title="Teams formalised on the platform" icon={Users}>
-        <p className="text-xs text-gray-500 mb-4">
-          Team composition is recorded. Every member's CBS, TSS and CRS are
-          visible before commit — no more discovering an unreliable teammate on
-          day three.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {teams.map((t) => (
-            <div
-              key={t.name}
-              className="rounded-lg border border-gray-200 p-4 hover:border-indigo-200 transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-bold text-gray-900">{t.name}</h4>
-                <span className="text-[10px] text-gray-400 font-mono uppercase tracking-wider">
-                  {t.formed}
-                </span>
-              </div>
-              <div className="flex -space-x-2 mb-3">
-                {t.members.map((m) => (
-                  <span
-                    key={m}
-                    className="w-7 h-7 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-700"
-                  >
-                    {m}
-                  </span>
+              </thead>
+              <tbody>
+                {teams.map((team) => (
+                  <tr key={team.id} className="border-b border-gray-100 last:border-0">
+                    <td className="px-3 py-3 font-semibold text-gray-900">{team.name}</td>
+                    <td className="px-3 py-3 tabular-nums text-gray-700">{team.activity}</td>
+                    <td className="px-3 py-3 tabular-nums text-gray-700">{team.composite}</td>
+                    <td className="px-3 py-3 text-gray-700">{titleLabel(team.crsBand)}</td>
+                  </tr>
                 ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-[10px]">
-                <div className="rounded-md bg-emerald-50 px-2 py-1.5">
-                  <p className="text-emerald-700 font-mono uppercase tracking-wider">
-                    Avg CBS
-                  </p>
-                  <p className="text-base font-bold text-emerald-900">
-                    {t.avgCBS}
-                  </p>
-                </div>
-                <div className="rounded-md bg-blue-50 px-2 py-1.5">
-                  <p className="text-blue-700 font-mono uppercase tracking-wider">
-                    Avg CRS
-                  </p>
-                  <p className="text-base font-bold text-blue-900">{t.avgCRS}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState>No teams are registered for this hackathon yet.</EmptyState>
+        )}
       </Card>
     </div>
   );
 }
 
-// ─── Live Command Centre ──────────────────────────────────────
-
-function LiveCommandCentreTab({ hackathonId }: { hackathonId: string }) {
-  // Real build-velocity from ai-router check-ins, polled every 10s for live-ness.
-  // Replaces the previous Math.random() placeholder.
-  const [velocity, setVelocity] = useState<VelocityCell[]>([]);
-  const [overview, setOverview] = useState<HackathonOverview | null>(null);
-  useEffect(() => {
-    let alive = true;
-    const load = () => {
-      fetchHackathonVelocity(hackathonId).then((v) => { if (alive) setVelocity(v); });
-      fetchHackathonOverview(hackathonId).then((o) => { if (alive) setOverview(o); });
-    };
-    load();
-    const t = setInterval(load, 10000);
-    return () => { alive = false; clearInterval(t); };
-  }, [hackathonId]);
-
-  // Build the heatmap from real cells; fall back to a deterministic placeholder
-  // grid (no randomness) when the backend has no data yet.
-  const heatmap = velocity.length
-    ? velocity.map((c, i) => ({ team: c.name?.slice(0, 6) || `T${i + 1}`, activity: c.activity }))
-    : Array.from({ length: 30 }, (_, i) => ({
-        team: `T${(i + 1).toString().padStart(2, "0")}`,
-        activity: (i * 37) % 100,
-      }));
-
-  const avgVelocity = overview ? Math.round(overview.avgBuildVelocity) : 64;
-  const ideaSubs = overview ? `${overview.ideaSubmissions} / ${overview.totalTeams}` : "58 / 87";
+function LiveTab({
+  overview,
+  velocity,
+}: {
+  overview: HackathonOverview;
+  velocity: VelocityCell[];
+}) {
+  const stalled = velocity.filter((team) => team.activity <= 33).length;
+  const pendingIdeas = Math.max(overview.totalTeams - overview.ideaSubmissions, 0);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Stat
-          label="Team formation rate"
-          value="78%"
-          delta="+12% in last hour"
-          tone="good"
-        />
-        <Stat
-          label="Idea submissions"
-          value={ideaSubs}
-          delta="live"
-          tone="warn"
-        />
-        <Stat
-          label="Mentor sessions booked"
-          value="34"
-          delta="71% completed"
-        />
-        <Stat
-          label="Avg build velocity"
-          value={String(avgVelocity)}
-          delta="live from check-ins"
-          tone="good"
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat label="Average build velocity" value={Math.round(overview.avgBuildVelocity)} />
+        <Stat label="Idea submissions" value={`${overview.ideaSubmissions} / ${overview.totalTeams}`} />
+        <Stat label="Teams reporting" value={velocity.length} />
+        <Stat label="Stalled teams" value={stalled} tone={stalled > 0 ? "warn" : "neutral"} />
       </div>
 
-      <Card title="Build velocity heatmap" icon={Flame}>
-        <p className="text-xs text-gray-500 mb-4">
-          Each cell is a team's 4-hour check-in score. Green = high activity,
-          amber = medium, red = stalled. Mentors are auto-routed to red cells.
-        </p>
-        <div className="grid grid-cols-10 gap-1.5">
-          {heatmap.map((c) => {
-            const color =
-              c.activity > 66
-                ? "bg-emerald-500"
-                : c.activity > 33
-                  ? "bg-amber-400"
-                  : "bg-red-500";
-            return (
-              <div
-                key={c.team}
-                className={`aspect-square rounded ${color} flex items-center justify-center text-[8px] font-mono text-white font-bold`}
-                title={`${c.team}: ${c.activity}%`}
-              >
-                {c.team}
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-4 mt-4 text-[10px] text-gray-500 font-mono uppercase tracking-wider">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded bg-emerald-500" /> High
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded bg-amber-400" /> Medium
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded bg-red-500" /> Stalled
-          </span>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Idea submission progress" icon={ClipboardList}>
-          <div className="space-y-3">
-            <Progress label="Submitted" value={58} total={87} color="bg-emerald-500" />
-            <Progress label="Draft in progress" value={20} total={87} color="bg-amber-400" />
-            <Progress label="Not started" value={9} total={87} color="bg-red-500" />
-          </div>
-          <button className="mt-4 text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
-            <Mail className="w-3.5 h-3.5" />
-            Nudge teams without submission
-          </button>
-        </Card>
-
-        <Card title="Problem diversity" icon={Layers}>
-          <p className="text-xs text-gray-500 mb-3">
-            Clustering of submitted ideas by sector.
-          </p>
-          <ul className="space-y-2">
-            {[
-              { sector: "FinTech", count: 22, pct: 30 },
-              { sector: "Health", count: 18, pct: 24 },
-              { sector: "Climate", count: 11, pct: 15 },
-              { sector: "Logistics", count: 9, pct: 12 },
-              { sector: "Education", count: 8, pct: 11 },
-              { sector: "Other", count: 6, pct: 8 },
-            ].map((s) => (
-              <li key={s.sector} className="flex items-center gap-3">
-                <span className="w-20 text-sm text-gray-700 font-medium">
-                  {s.sector}
-                </span>
-                <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+      <Card title="Build velocity" icon={Flame}>
+        {velocity.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+              {velocity.map((team) => {
+                const color = team.activity > 66
+                  ? "bg-emerald-500"
+                  : team.activity > 33
+                    ? "bg-amber-400"
+                    : "bg-red-500";
+                return (
                   <div
-                    className="h-full bg-indigo-500"
-                    style={{ width: `${s.pct}%` }}
-                  />
-                </div>
-                <span className="text-xs text-gray-500 tabular-nums w-12 text-right">
-                  {s.count}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
-
-      <Card title="Mentor utilisation" icon={Award}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          <Stat label="Sessions booked" value="34" />
-          <Stat label="Completed" value="24" />
-          <Stat label="Avg rating" value="4.6 / 5" />
-        </div>
-        <div className="rounded-md bg-amber-50 border border-amber-200 p-3 flex items-start gap-2.5">
-          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-900">
-            <span className="font-semibold">8 teams</span> have not booked any
-            mentor session. Historically this correlates with lower conversion —
-            consider routing a mentor proactively.
-          </p>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-// ─── Stage 4: Judging ─────────────────────────────────────────
-
-function JudgingTab() {
-  const sampleTeam = {
-    name: "Loom Health",
-    judgeScores: {
-      problem_clarity: 8.5,
-      solution_innovation: 9.2,
-      technical_execution: 7.8,
-      team_communication: 8.0,
-      commercial_viability: 8.7,
-    },
-    platformScores: {
-      problem_clarity_score: 91,
-      team_momentum_score: 84,
-      demo_readiness_hours: 6, // hours before deadline
-    },
-  };
-
-  // Composite Hackathon Score formula (illustrative weighting)
-  const judgeAvg =
-    Object.values(sampleTeam.judgeScores).reduce((a, b) => a + b, 0) /
-    Object.values(sampleTeam.judgeScores).length;
-  const judgePct = (judgeAvg / 10) * 100;
-  const platformAvg =
-    (sampleTeam.platformScores.problem_clarity_score +
-      sampleTeam.platformScores.team_momentum_score +
-      Math.min(100, sampleTeam.platformScores.demo_readiness_hours * 6)) /
-    3;
-  const composite = Math.round(judgePct * 0.5 + platformAvg * 0.5);
-
-  return (
-    <div className="space-y-6">
-      <Card title="Composite Hackathon Score — formula" icon={Gavel}>
-        <p className="text-xs text-gray-500 mb-4">
-          A team that pivoted three times, had low build velocity and finished
-          their prototype in the last hour gets scored lower on the platform
-          metrics even if judges loved the demo.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-lg bg-indigo-50 border border-indigo-100 p-4">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-indigo-600 mb-2">
-              50% — Judge scores
-            </p>
-            <ul className="space-y-1.5 text-sm">
-              <li className="flex justify-between">
-                <span className="text-gray-700">Problem Clarity</span>
-                <span className="font-bold text-gray-900">1–10</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-gray-700">Solution Innovation</span>
-                <span className="font-bold text-gray-900">1–10</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-gray-700">Technical Execution</span>
-                <span className="font-bold text-gray-900">1–10</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-gray-700">Team Communication</span>
-                <span className="font-bold text-gray-900">1–10</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-gray-700">Commercial Viability</span>
-                <span className="font-bold text-gray-900">1–10</span>
-              </li>
-            </ul>
-          </div>
-          <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-4">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 mb-2">
-              50% — Platform-computed
-            </p>
-            <ul className="space-y-1.5 text-sm">
-              <li className="flex justify-between">
-                <span className="text-gray-700">Problem Clarity Score</span>
-                <span className="font-bold text-gray-900">0–100</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-gray-700">Team Momentum Score</span>
-                <span className="font-bold text-gray-900">0–100</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-gray-700">Demo Readiness time</span>
-                <span className="font-bold text-gray-900">earlier = higher</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </Card>
-
-      <Card
-        title={`Composite score example — ${sampleTeam.name}`}
-        icon={Sparkles}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-          <div className="rounded-lg border border-gray-200 p-4 bg-white">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
-              Judge average
-            </p>
-            <p className="text-3xl font-bold text-indigo-600">
-              {judgeAvg.toFixed(1)}
-              <span className="text-base text-gray-400">/10</span>
-            </p>
-          </div>
-          <div className="rounded-lg border border-gray-200 p-4 bg-white">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
-              Platform metrics avg
-            </p>
-            <p className="text-3xl font-bold text-emerald-600">
-              {platformAvg.toFixed(0)}
-              <span className="text-base text-gray-400">/100</span>
-            </p>
-          </div>
-          <div className="rounded-lg border-2 border-indigo-300 p-4 bg-gradient-to-br from-indigo-50 to-emerald-50">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-indigo-600 mb-1">
-              Composite Hackathon Score
-            </p>
-            <p className="text-3xl font-bold text-gray-900">
-              {composite}
-              <span className="text-base text-gray-400">/100</span>
-            </p>
-          </div>
-        </div>
-        <p className="text-xs text-gray-500">
-          Prototype submitted{" "}
-          <span className="font-semibold">
-            {sampleTeam.platformScores.demo_readiness_hours}h before deadline
-          </span>{" "}
-          — counted positively against last-hour scramblers.
-        </p>
-      </Card>
-    </div>
-  );
-}
-
-// ─── Post-Event Intelligence Report ───────────────────────────
-
-function IntelligenceReportTab() {
-  return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 flex items-start gap-3">
-        <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-emerald-900">
-            Auto-generated within 24 hours of the event ending
-          </p>
-          <p className="text-xs text-emerald-700 mt-0.5">
-            A real ROI document — not a thank-you slide deck. Refreshes every
-            6 months for cohort trajectory.
-          </p>
-        </div>
-      </div>
-
-      <Card title="Participation summary" icon={Users}>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <Stat label="Registrants" value="420" />
-          <Stat label="Teams formed" value="87" />
-          <Stat label="Solo → team conv." value="64%" tone="good" />
-          <Stat label="Dropout rate" value="11%" tone="warn" />
-          <Stat label="Completion rate" value="79%" tone="good" />
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Problem landscape" icon={Layers}>
-          <p className="text-xs text-gray-500 mb-3">
-            Thematic clustering of all submitted ideas by sector.
-          </p>
-          <ul className="space-y-2">
-            {[
-              { sector: "FinTech", count: 22, score: 78 },
-              { sector: "Health", count: 18, score: 81 },
-              { sector: "Climate", count: 11, score: 72 },
-              { sector: "Logistics", count: 9, score: 69 },
-              { sector: "Education", count: 8, score: 64 },
-            ].map((s) => (
-              <li
-                key={s.sector}
-                className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50"
-              >
-                <span className="text-sm font-medium text-gray-700">
-                  {s.sector}
-                </span>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 tabular-nums">
-                    {s.count} ideas
-                  </span>
-                  <span className="text-xs font-semibold text-indigo-600 tabular-nums">
-                    impact {s.score}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card title="Execution quality distribution" icon={TrendingUp}>
-          <p className="text-xs text-gray-500 mb-3">
-            Histogram of Team Momentum Scores. Skewed low? Problem statement
-            was too vague or the window too short.
-          </p>
-          <div className="space-y-2.5">
-            {[
-              { range: "80–100", count: 14, color: "bg-emerald-500" },
-              { range: "60–79", count: 31, color: "bg-emerald-400" },
-              { range: "40–59", count: 24, color: "bg-amber-400" },
-              { range: "20–39", count: 13, color: "bg-orange-400" },
-              { range: "0–19", count: 5, color: "bg-red-500" },
-            ].map((b) => (
-              <div key={b.range} className="flex items-center gap-3">
-                <span className="w-14 text-xs text-gray-500 font-mono">
-                  {b.range}
-                </span>
-                <div className="flex-1 h-5 rounded-md bg-gray-100 overflow-hidden">
-                  <div
-                    className={`h-full ${b.color}`}
-                    style={{ width: `${(b.count / 31) * 100}%` }}
-                  />
-                </div>
-                <span className="w-8 text-xs text-gray-700 tabular-nums text-right font-semibold">
-                  {b.count}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      <Card title="Conversion pipeline" icon={ArrowUpRight}>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <PipelineCell label="CRS > 7" value="14 teams" delta="incubation invites" />
-          <PipelineCell label="CRS 4–6" value="31 teams" delta="prototype track" />
-          <PipelineCell label="CRS < 4" value="42 teams" delta="back to learning" tone="dim" />
-          <PipelineCell
-            label="Accepted incubation"
-            value="9 of 14"
-            delta="64% close rate"
-            tone="good"
-          />
-        </div>
-      </Card>
-
-      <Card title="Cohort trajectory tracking" icon={Activity}>
-        <p className="text-xs text-gray-500 mb-3">
-          6 months after this event the platform tracks every team from this
-          cohort: still active, current stage, current GSIS.
-        </p>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-200">
-              <th className="text-left font-semibold py-2">Team</th>
-              <th className="text-left font-semibold py-2">Status</th>
-              <th className="text-left font-semibold py-2">Stage</th>
-              <th className="text-left font-semibold py-2">GSIS</th>
-              <th className="text-left font-semibold py-2">Trend</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { name: "Loom Health", status: "Active", stage: "MVP", gsis: 82, up: true },
-              { name: "Solaris", status: "Active", stage: "Seed", gsis: 76, up: true },
-              { name: "Verdant", status: "Stalled", stage: "Idea", gsis: 41, up: false },
-              { name: "Northwind", status: "Acquired", stage: "—", gsis: 91, up: true },
-            ].map((row) => (
-              <tr key={row.name} className="border-b border-gray-100">
-                <td className="py-3 font-semibold text-gray-900">{row.name}</td>
-                <td className="py-3 text-gray-700">{row.status}</td>
-                <td className="py-3 text-gray-700">{row.stage}</td>
-                <td className="py-3 font-bold tabular-nums text-gray-900">
-                  {row.gsis}
-                </td>
-                <td className="py-3">
-                  {row.up ? (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold">
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                      up
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-xs text-red-600 font-semibold">
-                      <ArrowDownRight className="w-3.5 h-3.5" />
-                      down
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-
-      <Card title="Sponsor & partner reporting" icon={Award}>
-        <p className="text-xs text-gray-500 mb-3">
-          Auto-generated for each sponsor. The honest ROI document — what their
-          money produced.
-        </p>
-        <div className="space-y-3">
-          {[
-            { partner: "Google for Startups", teams: 87, ideas: 87, prototypes: 68, launched: 4 },
-            { partner: "Lagos Innovation Hub", teams: 87, ideas: 87, prototypes: 68, launched: 4 },
-          ].map((s) => (
-            <div
-              key={s.partner}
-              className="rounded-lg border border-gray-200 p-4 bg-white"
-            >
-              <p className="font-semibold text-gray-900 mb-2">{s.partner}</p>
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <PartnerStat label="Teams formed" value={s.teams} />
-                <PartnerStat label="Ideas submitted" value={s.ideas} />
-                <PartnerStat label="Prototypes built" value={s.prototypes} />
-                <PartnerStat label="Companies launched" value={s.launched} tone="good" />
-              </div>
+                    key={team.teamId}
+                    className={`flex min-h-20 flex-col items-center justify-center rounded-lg px-2 text-center text-white ${color}`}
+                    title={`${team.name}: ${team.activity}`}
+                  >
+                    <span className="line-clamp-2 text-xs font-semibold">{team.name || "Untitled team"}</span>
+                    <span className="mt-1 text-sm font-bold tabular-nums">{team.activity}</span>
+                  </div>
+                );
+              })}
             </div>
-          ))}
+            <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
+              <Legend color="bg-emerald-500" label="High" />
+              <Legend color="bg-amber-400" label="Medium" />
+              <Legend color="bg-red-500" label="Stalled" />
+            </div>
+          </>
+        ) : (
+          <EmptyState>No persisted check-in velocity is available.</EmptyState>
+        )}
+      </Card>
+
+      <Card title="Idea submission progress" icon={ClipboardList}>
+        <Progress label="Submitted" value={overview.ideaSubmissions} total={overview.totalTeams} color="bg-emerald-500" />
+        <div className="mt-4">
+          <Progress label="Not submitted" value={pendingIdeas} total={overview.totalTeams} color="bg-amber-400" />
         </div>
+      </Card>
+
+      <UnavailablePanel>
+        Mentor utilisation and problem-sector clustering are unavailable because those records are not attached to the persisted hackathon contract.
+      </UnavailablePanel>
+    </div>
+  );
+}
+
+function JudgingTab({
+  event,
+  leaderboard,
+}: {
+  event: OrganizerHackathon;
+  leaderboard: LeaderboardEntry[];
+}) {
+  return (
+    <div className="space-y-6">
+      <Card title="Configured judging dimensions" icon={Gavel}>
+        {event.judgingDimensions.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {event.judgingDimensions.map((dimension) => (
+              <span key={dimension} className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700">
+                {titleLabel(dimension)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <EmptyState>No judging framework is configured.</EmptyState>
+        )}
+      </Card>
+
+      <Card title="Persisted leaderboard" icon={Award}>
+        {leaderboard.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-left text-xs font-semibold uppercase text-gray-500">
+                  <th className="px-3 py-2">Rank</th>
+                  <th className="px-3 py-2">Team</th>
+                  <th className="px-3 py-2">Composite</th>
+                  <th className="px-3 py-2">CRS band</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboard.map((team, index) => (
+                  <tr key={team.teamId} className="border-b border-gray-100 last:border-0">
+                    <td className="px-3 py-3 font-bold text-gray-900">{index + 1}</td>
+                    <td className="px-3 py-3 font-semibold text-gray-900">{team.name || "Untitled team"}</td>
+                    <td className="px-3 py-3 font-bold tabular-nums text-indigo-700">{team.composite}</td>
+                    <td className="px-3 py-3 text-gray-700">{titleLabel(team.crsBand)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState>No persisted scores are available yet.</EmptyState>
+        )}
       </Card>
     </div>
   );
 }
 
-// ─── Small primitives ─────────────────────────────────────────
+function ReportTab({
+  event,
+  overview,
+  leaderboard,
+  pipeline,
+}: {
+  event: OrganizerHackathon;
+  overview: HackathonOverview;
+  leaderboard: LeaderboardEntry[];
+  pipeline: PipelineBuckets;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat label="Registrants" value={overview.registrants} />
+        <Stat label="Teams" value={overview.totalTeams} />
+        <Stat label="Submissions" value={overview.ideaSubmissions} />
+        <Stat label="Average velocity" value={Math.round(overview.avgBuildVelocity)} />
+      </div>
+
+      <Card title="Conversion pipeline" icon={Activity}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <PipelineMetric label="Incubation invites" value={pipeline.incubationInvites} />
+          <PipelineMetric label="Prototype track" value={pipeline.prototypeTrack} />
+          <PipelineMetric label="Back to learning" value={pipeline.backToLearning} />
+        </div>
+      </Card>
+
+      <Card title="Scored teams" icon={CheckCircle2}>
+        {leaderboard.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {leaderboard.slice(0, 10).map((team, index) => (
+              <div key={team.teamId} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-gray-900">{index + 1}. {team.name || "Untitled team"}</p>
+                  <p className="text-xs text-gray-500">{titleLabel(team.crsBand)}</p>
+                </div>
+                <span className="text-lg font-bold tabular-nums text-indigo-700">{team.composite}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState>No scored teams are available for this report.</EmptyState>
+        )}
+      </Card>
+
+      <Card title="Partners" icon={Award}>
+        {event.partners.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {event.partners.map((partner) => (
+              <span key={partner} className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700">
+                {partner}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <EmptyState>No partner records are attached to this event.</EmptyState>
+        )}
+        <p className="mt-4 text-xs text-gray-500">
+          Sponsor-specific attribution is not recorded, so this report does not assign event-wide outcomes to individual partners.
+        </p>
+      </Card>
+
+      <UnavailablePanel>
+        Cohort trajectory and sector-level impact analytics are unavailable until persisted tracking records are linked to this hackathon.
+      </UnavailablePanel>
+    </div>
+  );
+}
 
 function Card({
   icon: Icon,
   title,
   children,
-  className = "",
 }: {
-  icon: typeof Trophy;
+  icon: LucideIcon;
   title: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <div
-      className={`bg-white border border-gray-200 rounded-xl p-5 ${className}`}
-    >
-      <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-        <Icon className="w-5 h-5 text-indigo-600" />
+    <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-gray-900">
+        <Icon className="h-5 w-5 text-indigo-600" />
         {title}
-      </h3>
+      </h2>
       {children}
-    </div>
+    </section>
   );
 }
 
 function Stat({
   label,
   value,
-  delta,
   tone = "neutral",
 }: {
   label: string;
   value: string | number;
-  delta?: string;
-  tone?: "good" | "warn" | "neutral";
+  tone?: "warn" | "neutral";
 }) {
-  const toneColor =
-    tone === "good"
-      ? "text-emerald-600"
-      : tone === "warn"
-        ? "text-amber-600"
-        : "text-gray-500";
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4">
-      <p className="text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-1">
-        {label}
+    <div className="rounded-lg border border-gray-200 bg-white p-4">
+      <p className="text-xs font-medium uppercase text-gray-500">{label}</p>
+      <p className={`mt-1 text-2xl font-bold tabular-nums ${tone === "warn" ? "text-amber-700" : "text-gray-900"}`}>
+        {value}
       </p>
-      <p className="text-2xl font-bold text-gray-900 tabular-nums">{value}</p>
-      {delta && <p className={`text-xs mt-1 ${toneColor}`}>{delta}</p>}
+    </div>
+  );
+}
+
+function Definition({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-gray-100 py-3 first:pt-0 last:border-0 last:pb-0">
+      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-right text-sm font-medium text-gray-900">{value}</span>
+    </div>
+  );
+}
+
+function EmptyState({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center text-sm text-gray-500">
+      {children}
+    </div>
+  );
+}
+
+function UnavailablePanel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-500" />
+      <p>{children}</p>
     </div>
   );
 }
@@ -891,69 +639,34 @@ function Progress({
   total: number;
   color: string;
 }) {
-  const pct = (value / total) * 100;
+  const percent = total > 0 ? Math.min(100, Math.max(0, (value / total) * 100)) : 0;
   return (
     <div>
-      <div className="flex justify-between text-xs text-gray-600 mb-1">
+      <div className="mb-1 flex justify-between gap-4 text-xs text-gray-600">
         <span className="font-medium">{label}</span>
-        <span className="tabular-nums">
-          {value} / {total}
-        </span>
+        <span className="tabular-nums">{value} / {total}</span>
       </div>
-      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-        <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
+      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+        <div className={`h-full ${color}`} style={{ width: `${percent}%` }} />
       </div>
     </div>
   );
 }
 
-function PipelineCell({
-  label,
-  value,
-  delta,
-  tone = "neutral",
-}: {
-  label: string;
-  value: string;
-  delta: string;
-  tone?: "good" | "dim" | "neutral";
-}) {
-  const valueColor =
-    tone === "good"
-      ? "text-emerald-700"
-      : tone === "dim"
-        ? "text-gray-500"
-        : "text-indigo-700";
+function Legend({ color, label }: { color: string; label: string }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 text-center">
-      <p className="text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-1">
-        {label}
-      </p>
-      <p className={`text-lg font-bold ${valueColor}`}>{value}</p>
-      <p className="text-[10px] text-gray-500 mt-1">{delta}</p>
-    </div>
+    <span className="inline-flex items-center gap-1.5">
+      <span className={`h-2.5 w-2.5 rounded ${color}`} />
+      {label}
+    </span>
   );
 }
 
-function PartnerStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone?: "good";
-}) {
+function PipelineMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-md bg-gray-50 p-2">
-      <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
-        {label}
-      </p>
-      <p
-        className={`text-lg font-bold tabular-nums ${tone === "good" ? "text-emerald-600" : "text-gray-900"}`}
-      >
-        {value}
-      </p>
+    <div className="border-l-2 border-indigo-200 pl-4">
+      <p className="text-xs font-medium uppercase text-gray-500">{label}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">{value}</p>
     </div>
   );
 }
