@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { useOrgProfile, type OrgPlan } from "@/contexts/UserContext";
+import { persistOnboardingCompletion } from "@/lib/onboarding";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { OrgProgressBar } from "./OrgProgressBar";
 import { CheckCircle2, Sparkles, Rocket, Building2 } from "lucide-react";
 
@@ -56,12 +59,25 @@ const plans: {
 
 export function OrgStep5() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
   const [plan, setPlan] = useState<OrgPlan>(orgProfile.plan);
+  const [finishing, setFinishing] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (finishing) return;
     updateOrgProfile({ plan });
-    navigate("/org/profile");
+    setFinishing(true);
+    setCompletionError(null);
+    try {
+      await persistOnboardingCompletion(updateProfile);
+    } catch (error) {
+      setCompletionError(error instanceof Error ? error.message : "Profile update failed.");
+      setFinishing(false);
+      return;
+    }
+    navigate(roleDashboardPath.org, { replace: true });
   };
   const handleBack = () => navigate("/org/onboarding/step-4");
 
@@ -138,12 +154,18 @@ export function OrgStep5() {
             Back
           </button>
           <button
-            onClick={handleComplete}
-            className="px-12 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            onClick={() => void handleComplete()}
+            disabled={finishing}
+            className="px-12 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
-            Complete setup
+            {finishing ? "Completing..." : "Complete setup"}
           </button>
         </div>
+        {completionError && (
+          <p role="alert" className="mt-3 text-right text-sm text-red-600 dark:text-red-400">
+            {completionError}
+          </p>
+        )}
       </div>
     </div>
   );

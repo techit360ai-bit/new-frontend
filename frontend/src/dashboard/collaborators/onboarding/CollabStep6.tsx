@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
+import { persistOnboardingCompletion } from "@/lib/onboarding";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { CollabProgressBar } from "./CollabProgressBar";
 
 export function CollabStep6() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
   const { collaboratorProfile, updateCollaboratorProfile } = useCollaboratorProfile();
   const [github, setGithub]       = useState(collaboratorProfile.links.github);
   const [linkedin, setLinkedin]   = useState(collaboratorProfile.links.linkedin);
@@ -13,6 +17,8 @@ export function CollabStep6() {
   const [twitter, setTwitter]     = useState(collaboratorProfile.links.twitter);
   const [whyHere, setWhyHere]     = useState(collaboratorProfile.whyHere);
   const [pinned, setPinned]       = useState<string[]>(collaboratorProfile.pinnedWork);
+  const [finishing, setFinishing] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
 
   const addPinned = () => { if (pinned.length < 3) setPinned((cur) => [...cur, ""]); };
   const removePinned = (i: number) => setPinned((cur) => cur.filter((_, idx) => idx !== i));
@@ -24,15 +30,26 @@ export function CollabStep6() {
     pinnedWork: pinned.filter((u) => u.trim()),
   });
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    if (finishing) return;
     updateCollaboratorProfile({
       links: { github, linkedin, portfolio, twitter },
       whyHere,
       pinnedWork: pinned.filter((u) => u.trim()),
-      onboardingComplete: true,
     });
+    setFinishing(true);
+    setCompletionError(null);
+    try {
+      await persistOnboardingCompletion(updateProfile);
+    } catch (error) {
+      setCompletionError(error instanceof Error ? error.message : "Profile update failed.");
+      setFinishing(false);
+      toast.error("Onboarding could not be completed. Please try again.");
+      return;
+    }
+    updateCollaboratorProfile({ onboardingComplete: true });
     toast.success("You're in. Welcome to TechIT.");
-    navigate("/collaborator/dashboard");
+    navigate(roleDashboardPath.collaborator, { replace: true });
   };
 
   const handleBack = () => { persist(); navigate("/collaborator/onboarding/step-5"); };
@@ -112,11 +129,16 @@ export function CollabStep6() {
 
         <div className="flex justify-between mt-10">
           <button onClick={handleBack} className="px-6 py-3 rounded-lg text-slate-700 hover:bg-slate-100 font-semibold transition-colors">← Back</button>
-          <button onClick={handleFinish}
-            className="px-6 py-3 rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 transition-colors">
-            Finish →
+          <button onClick={() => void handleFinish()} disabled={finishing}
+            className="px-6 py-3 rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-200 transition-colors">
+            {finishing ? "Finishing..." : "Finish →"}
           </button>
         </div>
+        {completionError && (
+          <p role="alert" className="mt-3 text-right text-sm text-red-600">
+            {completionError}
+          </p>
+        )}
       </div>
     </div>
   );

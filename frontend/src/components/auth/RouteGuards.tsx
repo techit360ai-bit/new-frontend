@@ -47,6 +47,7 @@ export function RequireRole({
     loading,
     hasUser: Boolean(user),
     profileRole: profile?.role ?? null,
+    isOnboarded: Boolean(profile?.isOnboarded),
     allowed,
     currentPath: location.pathname,
   });

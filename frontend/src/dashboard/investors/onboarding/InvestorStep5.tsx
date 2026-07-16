@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { useInvestorProfile } from "@/contexts/UserContext";
+import { persistOnboardingCompletion } from "@/lib/onboarding";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { InvestorProgressBar } from "./InvestorProgressBar";
 import { Button } from "@/components/ui/button";
 import { Gauge, Globe, DollarSign, Users } from "lucide-react";
@@ -34,10 +37,13 @@ const metrics = [
 
 export function InvestorStep5() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
   const { investorProfile, updateInvestorProfile } = useInvestorProfile();
   const [dashboardMetrics, setDashboardMetrics] = useState<string[]>(
     investorProfile.dashboardMetrics,
   );
+  const [finishing, setFinishing] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
 
   const toggleMetric = (metricId: string) => {
     setDashboardMetrics((prev) =>
@@ -47,9 +53,19 @@ export function InvestorStep5() {
     );
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (finishing) return;
     updateInvestorProfile({ dashboardMetrics });
-    navigate("/investor/profile");
+    setFinishing(true);
+    setCompletionError(null);
+    try {
+      await persistOnboardingCompletion(updateProfile);
+    } catch (error) {
+      setCompletionError(error instanceof Error ? error.message : "Profile update failed.");
+      setFinishing(false);
+      return;
+    }
+    navigate(roleDashboardPath.investor, { replace: true });
   };
 
   const handleBack = () => {
@@ -145,12 +161,18 @@ export function InvestorStep5() {
             Back
           </Button>
           <Button
-            onClick={handleComplete}
+            onClick={() => void handleComplete()}
+            disabled={finishing}
             className="px-10 py-6 text-lg bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 dark:from-teal-500 dark:to-cyan-500 dark:hover:from-teal-600 dark:hover:to-cyan-600 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            Complete Setup
+            {finishing ? "Completing..." : "Complete Setup"}
           </Button>
         </div>
+        {completionError && (
+          <p role="alert" className="mt-3 text-right text-sm text-red-600 dark:text-red-400">
+            {completionError}
+          </p>
+        )}
       </div>
     </div>
   );
