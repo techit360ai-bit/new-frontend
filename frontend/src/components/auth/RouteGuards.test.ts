@@ -54,6 +54,26 @@ test("RequireRole sends anonymous users to signin and wrong roles to their own d
   })).toBeNull();
 });
 
+test("RequireRole keeps completed users out of onboarding history", () => {
+  expect(roleRedirectPath({
+    loading: false,
+    hasUser: true,
+    profileRole: "organisation",
+    isOnboarded: true,
+    allowed: ["organisation"],
+    currentPath: "/org/onboarding/step-5",
+  })).toEqual({ to: "/org/dashboard" });
+
+  expect(roleRedirectPath({
+    loading: false,
+    hasUser: true,
+    profileRole: "organisation",
+    isOnboarded: true,
+    allowed: ["organisation"],
+    currentPath: "/org/dashboard",
+  })).toBeNull();
+});
+
 test("RedirectAuthenticated sends users to setup until onboarding is complete", () => {
   expect(authenticatedRedirectPath({
     loading: false,

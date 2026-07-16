@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import { useFounderProfile } from "@/contexts/UserContext";
+import { persistOnboardingCompletion } from "@/lib/onboarding";
 import { roleDashboardPath } from "@/lib/roleRoutes";
 import { FounderProgressBar } from "./FounderProgressBar";
 
@@ -13,6 +15,7 @@ const NEEDS_OPTIONS = [
 
 export function FounderStep6() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
   const { founderProfile, updateFounderProfile } = useFounderProfile();
   const [github, setGithub]     = useState(founderProfile.links.github);
   const [linkedin, setLinkedin] = useState(founderProfile.links.linkedin);
@@ -20,6 +23,8 @@ export function FounderStep6() {
   const [personal, setPersonal] = useState(founderProfile.links.personal);
   const [needs, setNeeds]       = useState<string[]>(founderProfile.needsFromTechIT);
   const [pinned, setPinned]     = useState<string[]>(founderProfile.pinnedWork);
+  const [finishing, setFinishing] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
 
   const toggleNeed = (n: string) => {
     setNeeds((cur) => {
@@ -33,15 +38,26 @@ export function FounderStep6() {
   const removePinned = (i: number) => setPinned((cur) => cur.filter((_, idx) => idx !== i));
   const addPinned = () => { if (pinned.length < 3) setPinned((cur) => [...cur, ""]); };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    if (finishing) return;
     updateFounderProfile({
       links: { github, linkedin, twitter, personal },
       needsFromTechIT: needs,
       pinnedWork: pinned.filter((u) => u.trim()),
-      onboardingComplete: true,
     });
+    setFinishing(true);
+    setCompletionError(null);
+    try {
+      await persistOnboardingCompletion(updateProfile);
+    } catch (error) {
+      setCompletionError(error instanceof Error ? error.message : "Profile update failed.");
+      setFinishing(false);
+      toast.error("Onboarding could not be completed. Please try again.");
+      return;
+    }
+    updateFounderProfile({ onboardingComplete: true });
     toast.success(`You're in. Welcome to TechIT, ${founderProfile.name.split(" ")[0]}.`);
-    navigate(roleDashboardPath.founder);
+    navigate(roleDashboardPath.founder, { replace: true });
   };
 
   const handleBack = () => {
@@ -145,11 +161,16 @@ export function FounderStep6() {
 
         <div className="flex justify-between mt-10">
           <button onClick={handleBack} className="px-6 py-3 rounded-lg text-slate-700 hover:bg-slate-100 font-semibold transition-colors">← Back</button>
-          <button onClick={handleFinish}
-            className="px-6 py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 transition-colors">
-            Finish →
+          <button onClick={() => void handleFinish()} disabled={finishing}
+            className="px-6 py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-violet-300 transition-colors">
+            {finishing ? "Finishing..." : "Finish →"}
           </button>
         </div>
+        {completionError && (
+          <p role="alert" className="mt-3 text-right text-sm text-red-600">
+            {completionError}
+          </p>
+        )}
       </div>
     </div>
   );

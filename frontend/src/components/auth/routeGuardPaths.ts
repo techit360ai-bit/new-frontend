@@ -27,12 +27,14 @@ export function roleRedirectPath({
   loading,
   hasUser,
   profileRole,
+  isOnboarded = false,
   allowed,
   currentPath,
 }: {
   loading: boolean;
   hasUser: boolean;
   profileRole: RouteGuardRole | null;
+  isOnboarded?: boolean;
   allowed: RouteGuardRole[];
   currentPath: string;
 }) {
@@ -40,6 +42,10 @@ export function roleRedirectPath({
   if (!hasUser) return { to: "/signin", state: { from: currentPath } };
   if (!profileRole) return { to: "/" };
   if (!allowed.includes(profileRole)) return { to: homePathFor(profileRole) };
+  const onboardingRoot = setupPathFor(profileRole).replace(/\/step-1$/, "");
+  if (isOnboarded && currentPath.startsWith(onboardingRoot)) {
+    return { to: homePathFor(profileRole) };
+  }
   return null;
 }
 
