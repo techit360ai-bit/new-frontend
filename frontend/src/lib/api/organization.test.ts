@@ -1,8 +1,11 @@
 import { expect, test } from "vitest";
 import { setAuthTokenGetter } from "./client";
 import {
+  createOrganizationProject,
   fetchOrganizationDashboard,
+  fetchOrganizationProjects,
   normalizeOrganizationDashboard,
+  updateOrganizationProject,
 } from "./organization";
 
 function response(body: unknown): Response {
@@ -91,4 +94,81 @@ test("organization dashboard normalizes persisted chart and activity aliases", (
     automation: [{ label: "July", automated: 9, manual: 3 }],
     activity: [{ message: "New program created", at: "2026-07-15T10:00:00Z" }],
   });
+});
+
+test("organization projects use authenticated organization persistence endpoints", async () => {
+  setAuthTokenGetter(() => "jwt-organization");
+  const fetchMock = stubFetch(async (_url, init) => {
+    const body = init?.body ? JSON.parse(String(init.body)) : {};
+    if (init?.method === "POST") {
+      return response({
+        project: {
+          id: "project-live",
+          title: body.title,
+          stage: body.stage,
+          status: "planned",
+          progress: 0,
+          createdAt: "2026-07-16T08:00:00Z",
+          updatedAt: "2026-07-16T08:00:00Z",
+        },
+      });
+    }
+    if (init?.method === "PATCH") {
+      return response({
+        project: {
+          id: "project-live",
+          title: "Persisted Portfolio",
+          stage: "development",
+          status: "on-track",
+          progress: body.progress,
+          updatedAt: "2026-07-16T09:00:00Z",
+        },
+      });
+    }
+    return response({
+      projects: [{
+        id: "project-live",
+        title: "Persisted Portfolio",
+        stage: "validation",
+        status: "planned",
+        progress: 25,
+      }],
+    });
+  });
+
+  try {
+    const projects = await fetchOrganizationProjects();
+    const created = await createOrganizationProject({
+      title: "Persisted Portfolio",
+      stage: "validation",
+    });
+    const updated = await updateOrganizationProject("project-live", { progress: 68 });
+
+    expect(projects).toMatchObject([{ id: "project-live", progress: 25 }]);
+    expect(created).toMatchObject({ id: "project-live", title: "Persisted Portfolio" });
+    expect(updated).toMatchObject({ id: "project-live", progress: 68 });
+    expect(fetchMock.calls.map(([url, init]) => [url, init?.method])).toEqual([
+      ["http://localhost:3000/api/domain/organization/projects", "GET"],
+      ["http://localhost:3000/api/domain/organization/projects", "POST"],
+      ["http://localhost:3000/api/domain/organization/projects/project-live", "PATCH"],
+    ]);
+    for (const [, init] of fetchMock.calls) {
+      expect((init?.headers as Record<string, string>).Authorization).toBe(
+        "Bearer jwt-organization",
+      );
+    }
+  } finally {
+    fetchMock.restore();
+    setAuthTokenGetter(() => null);
+  }
+});
+
+test("organization projects preserve persisted empty states", async () => {
+  const fetchMock = stubFetch(async () => response({ projects: [] }));
+
+  try {
+    await expect(fetchOrganizationProjects()).resolves.toEqual([]);
+  } finally {
+    fetchMock.restore();
+  }
 });
