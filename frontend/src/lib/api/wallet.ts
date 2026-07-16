@@ -60,6 +60,36 @@ export interface BillingPlan {
   currency?: string;
 }
 
+export interface WalletSubscription {
+  id: string;
+  planId?: string;
+  planName?: string;
+  status?: string;
+  amount?: number;
+  currency?: string;
+  currentPeriodStart?: string;
+  currentPeriodEnd?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export interface WalletInvoice {
+  id: string;
+  number?: string;
+  invoiceNumber?: string;
+  amount?: number;
+  total?: number;
+  currency?: string;
+  status?: string;
+  issuedAt?: string;
+  dueAt?: string;
+  createdAt?: string;
+  invoiceUrl?: string;
+  downloadUrl?: string;
+  receiptUrl?: string;
+  [key: string]: unknown;
+}
+
 export interface PaymentIntentRequest {
   amount: number;
   currency: string;
@@ -104,6 +134,16 @@ export function fetchCreditPackages(): Promise<CreditPackage[]> {
 
 export function fetchBillingPlans(): Promise<BillingPlan[]> {
   return domainGet<{ plans: BillingPlan[] }>("/wallet/plans").then((data) => data.plans);
+}
+
+export function fetchWalletSubscriptions(): Promise<WalletSubscription[]> {
+  return domainGet<{ subscriptions: WalletSubscription[] }>("/wallet/subscriptions")
+    .then((data) => data.subscriptions);
+}
+
+export function fetchWalletInvoices(): Promise<WalletInvoice[]> {
+  return domainGet<{ invoices: WalletInvoice[] }>("/wallet/invoices")
+    .then((data) => data.invoices);
 }
 
 export function createWalletPaymentIntent(body: PaymentIntentRequest): Promise<PaymentIntentResponse> {

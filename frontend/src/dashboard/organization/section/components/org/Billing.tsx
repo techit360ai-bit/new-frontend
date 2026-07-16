@@ -1,282 +1,624 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  CreditCard,
-  TrendingUp,
-  Download,
-  DollarSign,
-  Zap,
   AlertCircle,
   CheckCircle2,
-  ArrowUpRight,
+  CreditCard,
+  Download,
+  FileText,
+  Gauge,
+  Receipt,
+  RefreshCw,
+  WalletCards,
+  Zap,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  EMPTY_WALLET_SUMMARY,
+  fetchBillingPlans,
+  fetchWalletInvoices,
+  fetchWalletSubscriptions,
+  fetchWalletSummary,
+  fetchWalletTransactions,
+  fetchWalletUsage,
+  type BillingPlan,
+  type WalletInvoice,
+  type WalletSubscription,
+  type WalletSummary,
+  type WalletTransaction,
+  type WalletUsageEvent,
+} from "@/lib/api/wallet";
 
-const usageData = [
-  { month: "Oct", ai: 8400, testing: 2100, marketplace: 1200 },
-  { month: "Nov", ai: 9800, testing: 2400, marketplace: 1500 },
-  { month: "Dec", ai: 11200, testing: 2800, marketplace: 1800 },
-  { month: "Jan", ai: 13400, testing: 3200, marketplace: 2100 },
-  { month: "Feb", ai: 15600, testing: 3600, marketplace: 2400 },
-  { month: "Mar", ai: 18200, testing: 4100, marketplace: 2800 },
-];
+interface UsageTrend {
+  key: string;
+  label: string;
+  credits: number;
+}
 
-const currentPeriod = {
-  aiCredits: 18200,
-  testing: 4100,
-  marketplace: 2800,
-  total: 25100,
-};
+interface UsageCategory {
+  name: string;
+  credits: number;
+}
 
-const billingHistory = [
-  {
-    date: "Mar 1, 2026",
-    amount: "$2,510",
-    status: "Paid",
-    invoice: "INV-2026-03",
-  },
-  {
-    date: "Feb 1, 2026",
-    amount: "$2,160",
-    status: "Paid",
-    invoice: "INV-2026-02",
-  },
-  {
-    date: "Jan 1, 2026",
-    amount: "$1,870",
-    status: "Paid",
-    invoice: "INV-2026-01",
-  },
-  {
-    date: "Dec 1, 2025",
-    amount: "$1,560",
-    status: "Paid",
-    invoice: "INV-2025-12",
-  },
-];
+interface PaymentMethodView {
+  brand: string;
+  last4: string;
+  expiry: string;
+}
 
-const usageBreakdown = [
-  { category: "AI Credits", usage: 18200, limit: 50000, cost: "$1,820" },
-  { category: "Testing Campaigns", usage: 4100, limit: 10000, cost: "$410" },
-  { category: "Marketplace Spend", usage: 2800, limit: "∞", cost: "$280" },
-];
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
+function asText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function asNumber(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function moneyLabel(value: unknown, currency = "USD"): string {
+  if (typeof value === "string" && value.trim() && !Number.isFinite(Number(value))) {
+    return value;
+  }
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: currency || "USD",
+    maximumFractionDigits: 2,
+  }).format(asNumber(value));
+}
+
+function dateLabel(value: unknown): string {
+  const text = asText(value);
+  if (!text) return "No date";
+  const date = new Date(text);
+  return Number.isNaN(date.getTime()) ? text : date.toLocaleDateString();
+}
+
+function usageDate(event: WalletUsageEvent): Date | null {
+  const value = event.createdAt || event.timestamp;
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function usageCredits(event: WalletUsageEvent): number {
+  return Math.abs(asNumber(event.credits));
+}
+
+function buildUsageTrend(events: WalletUsageEvent[]): UsageTrend[] {
+  const months = new Map<string, UsageTrend>();
+  for (const event of events) {
+    const date = usageDate(event);
+    if (!date) continue;
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const current = months.get(key) ?? {
+      key,
+      label: date.toLocaleDateString(undefined, { month: "short", year: "2-digit" }),
+      credits: 0,
+    };
+    current.credits += usageCredits(event);
+    months.set(key, current);
+  }
+  return [...months.values()].sort((left, right) => left.key.localeCompare(right.key)).slice(-6);
+}
+
+function buildUsageCategories(events: WalletUsageEvent[]): UsageCategory[] {
+  const categories = new Map<string, number>();
+  for (const event of events) {
+    const name = event.feature || event.title || event.description || "Credit usage";
+    categories.set(name, (categories.get(name) ?? 0) + usageCredits(event));
+  }
+  return [...categories.entries()]
+    .map(([name, credits]) => ({ name, credits }))
+    .sort((left, right) => right.credits - left.credits)
+    .slice(0, 6);
+}
+
+function currentMonthUsage(events: WalletUsageEvent[]): number {
+  const now = new Date();
+  return events.reduce((total, event) => {
+    const date = usageDate(event);
+    return date &&
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth()
+      ? total + usageCredits(event)
+      : total;
+  }, 0);
+}
+
+function subscriptionPlan(
+  subscription: WalletSubscription | null,
+  plans: BillingPlan[],
+): BillingPlan | null {
+  if (!subscription) return null;
+  const planId = asText(subscription.planId);
+  const planName = asText(subscription.planName).toLowerCase();
+  return plans.find((plan) =>
+    (planId && String(plan.id) === planId) ||
+    (planName && plan.name.toLowerCase() === planName)
+  ) ?? null;
+}
+
+function paymentMethodFrom(summary: WalletSummary): PaymentMethodView | null {
+  const account = asRecord(summary.account);
+  const nested = asRecord(account.paymentMethod || account.defaultPaymentMethod);
+  const last4 = asText(nested.last4 || account.last4);
+  if (!last4) return null;
+  const brand = asText(nested.brand || account.cardBrand) || "Card";
+  const month = asText(nested.expiryMonth || nested.expMonth || account.expiryMonth);
+  const year = asText(nested.expiryYear || nested.expYear || account.expiryYear);
+  return {
+    brand,
+    last4,
+    expiry: month && year ? `${month}/${year}` : "No expiry recorded",
+  };
+}
+
+function invoiceDownloadUrl(invoice: WalletInvoice): string {
+  return asText(invoice.invoiceUrl || invoice.downloadUrl || invoice.receiptUrl);
+}
+
+function statusTone(status: string): string {
+  const value = status.toLowerCase();
+  if (value.includes("paid") || value.includes("active") || value.includes("complete")) {
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  }
+  if (value.includes("pending") || value.includes("processing")) {
+    return "border-amber-200 bg-amber-50 text-amber-700";
+  }
+  if (value.includes("failed") || value.includes("past") || value.includes("cancel")) {
+    return "border-red-200 bg-red-50 text-red-700";
+  }
+  return "border-gray-200 bg-gray-50 text-gray-700";
+}
 
 export function Billing() {
+  const navigate = useNavigate();
+  const [summary, setSummary] = useState<WalletSummary>(EMPTY_WALLET_SUMMARY);
+  const [usage, setUsage] = useState<WalletUsageEvent[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [plans, setPlans] = useState<BillingPlan[]>([]);
+  const [subscriptions, setSubscriptions] = useState<WalletSubscription[]>([]);
+  const [invoices, setInvoices] = useState<WalletInvoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadBilling = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [summaryData, usageData, transactionData, planData, subscriptionData, invoiceData] =
+        await Promise.all([
+          fetchWalletSummary(),
+          fetchWalletUsage(),
+          fetchWalletTransactions(),
+          fetchBillingPlans(),
+          fetchWalletSubscriptions(),
+          fetchWalletInvoices(),
+        ]);
+      setSummary(summaryData);
+      setUsage(usageData);
+      setTransactions(transactionData);
+      setPlans(planData);
+      setSubscriptions(subscriptionData);
+      setInvoices(invoiceData);
+    } catch (loadError) {
+      setSummary(EMPTY_WALLET_SUMMARY);
+      setUsage([]);
+      setTransactions([]);
+      setPlans([]);
+      setSubscriptions([]);
+      setInvoices([]);
+      setError(loadError instanceof Error ? loadError.message : "Live billing data is unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadBilling();
+  }, []);
+
+  const activeSubscription =
+    subscriptions.find((subscription) => asText(subscription.status).toLowerCase() === "active") ??
+    subscriptions[0] ??
+    null;
+  const activePlan = subscriptionPlan(activeSubscription, plans);
+  const usageTrend = useMemo(() => buildUsageTrend(usage), [usage]);
+  const usageCategories = useMemo(() => buildUsageCategories(usage), [usage]);
+  const usedThisMonth = useMemo(() => currentMonthUsage(usage), [usage]);
+  const paymentMethod = paymentMethodFrom(summary);
+  const account = asRecord(summary.account);
+  const monthlyLimit = asNumber(account.monthlyCreditLimit || account.creditLimit);
+  const usagePercent = monthlyLimit > 0
+    ? Math.min(100, Math.round((usedThisMonth / monthlyLimit) * 100))
+    : null;
+  const planCurrency =
+    asText(activeSubscription?.currency) ||
+    asText(activePlan?.currency) ||
+    "USD";
+  const planPrice =
+    (planCurrency.toUpperCase() === "NGN"
+      ? activePlan?.priceNGN || activePlan?.priceUSD
+      : activePlan?.priceUSD || activePlan?.priceNGN) ||
+    (activeSubscription ? moneyLabel(activeSubscription.amount, planCurrency) : "");
+
   return (
-    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Billing & Usage</h1>
-          <p className="text-gray-600 mt-2">
-            Manage subscription, track usage, and view billing history
+          <h1 className="text-3xl font-bold text-gray-900">Billing &amp; Usage</h1>
+          <p className="mt-2 text-gray-600">
+            Persisted subscription, credit usage, invoices, and payment status
           </p>
         </div>
-        <button className="mt-4 sm:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-          <CreditCard className="w-5 h-5" />
-          Update Payment
+        <button
+          type="button"
+          onClick={() => navigate("/wallet")}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700"
+        >
+          <WalletCards className="h-5 w-5" />
+          Open Wallet
         </button>
       </div>
 
-      {/* Current Plan */}
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 p-8 mb-8">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-2xl font-bold text-gray-900">Enterprise Plan</h2>
-              <span className="px-3 py-1 bg-indigo-600 text-white rounded-full text-xs font-medium">
-                Active
-              </span>
-            </div>
-            <p className="text-gray-700 mb-4">
-              Unlimited projects, teams, and AI operations
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-gray-900">$2,510</span>
-              <span className="text-gray-600">/month</span>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button className="px-6 py-3 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium border border-gray-200">
-              View All Plans
-            </button>
-            <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
-              Upgrade Plan
-            </button>
-          </div>
+      {loading && (
+        <div className="rounded-lg border border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
+          Loading persisted billing data...
         </div>
-      </div>
+      )}
 
-      {/* Current Usage Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <Zap className="w-6 h-6 text-purple-600 mb-3" />
-          <p className="text-3xl font-bold text-gray-900">
-            {currentPeriod.aiCredits.toLocaleString()}
-          </p>
-          <p className="text-sm text-gray-600 mt-1">AI Credits Used</p>
+      {!loading && error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
+          <AlertCircle className="mx-auto mb-3 h-7 w-7 text-red-500" />
+          <p className="text-sm text-red-700">{error}</p>
+          <button
+            type="button"
+            onClick={() => void loadBilling()}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </button>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <CheckCircle2 className="w-6 h-6 text-green-600 mb-3" />
-          <p className="text-3xl font-bold text-gray-900">
-            {currentPeriod.testing.toLocaleString()}
-          </p>
-          <p className="text-sm text-gray-600 mt-1">Testing Credits</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <DollarSign className="w-6 h-6 text-blue-600 mb-3" />
-          <p className="text-3xl font-bold text-gray-900">
-            ${(currentPeriod.marketplace / 100).toFixed(0)}
-          </p>
-          <p className="text-sm text-gray-600 mt-1">Marketplace Spend</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <TrendingUp className="w-6 h-6 text-orange-600 mb-3" />
-          <p className="text-3xl font-bold text-gray-900">
-            ${(currentPeriod.total / 100).toFixed(0)}
-          </p>
-          <p className="text-sm text-gray-600 mt-1">Total This Month</p>
-        </div>
-      </div>
+      )}
 
-      {/* Usage Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-        <h2 className="text-lg font-bold text-gray-900 mb-6">Usage Trends</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={usageData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Bar dataKey="ai" stackId="a" fill="#8b5cf6" name="AI Credits" />
-            <Bar dataKey="testing" stackId="a" fill="#10b981" name="Testing" />
-            <Bar dataKey="marketplace" stackId="a" fill="#3b82f6" name="Marketplace" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Usage Breakdown */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-        <h2 className="text-lg font-bold text-gray-900 mb-6">Usage Breakdown</h2>
-        <div className="space-y-6">
-          {usageBreakdown.map((item) => (
-            <div key={item.category}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-900">
-                      {item.category}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      {item.usage.toLocaleString()}
-                      {item.limit !== "∞" && ` / ${item.limit.toLocaleString()}`}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${
-                        item.category === "AI Credits"
-                          ? "bg-purple-500"
-                          : item.category === "Testing Campaigns"
-                          ? "bg-green-500"
-                          : "bg-blue-500"
-                      }`}
-                      style={{
-                        width:
-                          item.limit === "∞"
-                            ? "100%"
-                            : `${(item.usage / Number(item.limit)) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-                <span className="ml-6 text-sm font-bold text-gray-900">
-                  {item.cost}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Billing History */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-gray-900">Billing History</h2>
-            <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-              View All
-            </button>
-          </div>
-          <div className="space-y-4">
-            {billingHistory.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0"
-              >
+      {!loading && !error && (
+        <>
+          <section className="mb-8 rounded-lg border border-indigo-200 bg-indigo-50 p-6 lg:p-8">
+            {activeSubscription ? (
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="font-medium text-gray-900">{item.amount}</p>
-                  <p className="text-xs text-gray-600 mt-1">{item.date}</p>
+                  <div className="mb-2 flex flex-wrap items-center gap-3">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {activePlan?.name || activeSubscription.planName || "Persisted subscription"}
+                    </h2>
+                    <span className={`rounded-full border px-3 py-1 text-xs font-medium ${statusTone(asText(activeSubscription.status))}`}>
+                      {asText(activeSubscription.status) || "Status unavailable"}
+                    </span>
+                  </div>
+                  {activePlan?.features?.length ? (
+                    <p className="max-w-2xl text-sm text-gray-700">
+                      {activePlan.features.slice(0, 3).join(" · ")}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      No persisted plan feature summary is available.
+                    </p>
+                  )}
+                  <div className="mt-4 flex flex-wrap items-baseline gap-2">
+                    <span className="text-3xl font-bold text-gray-900">
+                      {planPrice || "Price unavailable"}
+                    </span>
+                    {activeSubscription.currentPeriodEnd && (
+                      <span className="text-sm text-gray-600">
+                        renews {dateLabel(activeSubscription.currentPeriodEnd)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
-                    {item.status}
-                  </span>
-                  <button className="p-1.5 hover:bg-gray-100 rounded">
-                    <Download className="w-4 h-4 text-gray-600" />
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/wallet")}
+                  className="rounded-lg border border-indigo-200 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
+                >
+                  View Plans
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">No active subscription</h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {plans.length > 0
+                      ? `${plans.length} persisted billing plan${plans.length === 1 ? "" : "s"} available.`
+                      : "No billing plans are available for this account."}
+                  </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/wallet")}
+                  className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                >
+                  Manage Plans
+                </button>
               </div>
-            ))}
-          </div>
-        </div>
+            )}
+          </section>
 
-        {/* Payment Method */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Payment Method</h2>
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-6 text-white mb-4">
-            <div className="flex items-start justify-between mb-8">
-              <div>
-                <p className="text-xs opacity-80 mb-1">Card Number</p>
-                <p className="font-mono">•••• •••• •••• 4242</p>
-              </div>
-              <CreditCard className="w-8 h-8" />
-            </div>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-xs opacity-80 mb-1">Cardholder</p>
-                <p className="font-medium">Organization Admin</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs opacity-80 mb-1">Expires</p>
-                <p className="font-medium">12/28</p>
-              </div>
-            </div>
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              label="Credit Balance"
+              value={summary.creditBalance.toLocaleString()}
+              icon={Zap}
+              tone="purple"
+            />
+            <MetricCard
+              label="Used This Month"
+              value={usedThisMonth.toLocaleString()}
+              icon={Gauge}
+              tone="orange"
+            />
+            <MetricCard
+              label="Lifetime Credits Used"
+              value={summary.lifetimeCreditsUsed.toLocaleString()}
+              icon={CheckCircle2}
+              tone="green"
+            />
+            <MetricCard
+              label="Pending Payments"
+              value={summary.pendingPayments.toLocaleString()}
+              icon={Receipt}
+              tone="blue"
+            />
           </div>
-          <button className="w-full px-4 py-3 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-            Update Payment Method
-          </button>
-        </div>
-      </div>
 
-      {/* Usage Alert */}
-      <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-          <div className="flex-1">
-            <h3 className="font-medium text-yellow-900 mb-1">
-              Approaching Usage Limit
-            </h3>
-            <p className="text-sm text-yellow-800">
-              Your AI credits usage is at 36% of your monthly limit. Consider
-              upgrading if you need more capacity.
+          <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <h2 className="mb-1 text-lg font-bold text-gray-900">Usage Trends</h2>
+              <p className="mb-6 text-sm text-gray-500">Persisted credit usage by month</p>
+              {usageTrend.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={usageTrend}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Bar dataKey="credits" fill="#4f46e5" name="Credits" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptySection
+                  icon={Gauge}
+                  title="No usage trend yet"
+                  detail="Credit usage will appear here after persisted usage events are recorded."
+                />
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <h2 className="mb-1 text-lg font-bold text-gray-900">Usage Breakdown</h2>
+              <p className="mb-6 text-sm text-gray-500">Credits grouped by persisted feature labels</p>
+              {usageCategories.length > 0 ? (
+                <div className="space-y-5">
+                  {usageCategories.map((category) => {
+                    const total = usageCategories.reduce((sum, item) => sum + item.credits, 0);
+                    const width = total > 0 ? Math.max(4, Math.round((category.credits / total) * 100)) : 0;
+                    return (
+                      <div key={category.name}>
+                        <div className="mb-2 flex items-center justify-between gap-4 text-sm">
+                          <span className="truncate font-medium text-gray-900">{category.name}</span>
+                          <span className="flex-shrink-0 text-gray-600">
+                            {category.credits.toLocaleString()} credits
+                          </span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                          <div className="h-full rounded-full bg-cyan-500" style={{ width: `${width}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptySection
+                  icon={Zap}
+                  title="No usage categories"
+                  detail="No persisted feature usage has been recorded for this account."
+                />
+              )}
+            </section>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">Billing History</h2>
+                  <p className="mt-1 text-sm text-gray-500">Persisted invoices</p>
+                </div>
+                <span className="text-xs font-medium text-gray-500">{invoices.length} records</span>
+              </div>
+              {invoices.length > 0 ? (
+                <div className="space-y-4">
+                  {invoices.slice(0, 8).map((invoice) => {
+                    const downloadUrl = invoiceDownloadUrl(invoice);
+                    const currency = asText(invoice.currency) || "USD";
+                    const amount = invoice.total ?? invoice.amount ?? 0;
+                    const status = asText(invoice.status);
+                    return (
+                      <div
+                        key={invoice.id}
+                        className="flex items-center justify-between gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900">
+                            {moneyLabel(amount, currency)}
+                          </p>
+                          <p className="mt-1 truncate text-xs text-gray-500">
+                            {invoice.invoiceNumber || invoice.number || invoice.id}
+                            {" · "}
+                            {dateLabel(invoice.issuedAt || invoice.createdAt)}
+                          </p>
+                        </div>
+                        <div className="flex flex-shrink-0 items-center gap-3">
+                          <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone(status)}`}>
+                            {status || "Unknown"}
+                          </span>
+                          {downloadUrl ? (
+                            <a
+                              href={downloadUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Download invoice"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          ) : (
+                            <span
+                              title="No invoice download is persisted"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-300"
+                            >
+                              <Download className="h-4 w-4" />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptySection
+                  icon={FileText}
+                  title="No persisted invoices"
+                  detail="Invoices will appear after a completed billing event."
+                />
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <h2 className="mb-1 text-lg font-bold text-gray-900">Payment Method</h2>
+              <p className="mb-6 text-sm text-gray-500">Canonical wallet account payment details</p>
+              {paymentMethod ? (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-medium uppercase text-gray-500">{paymentMethod.brand}</p>
+                      <p className="mt-2 font-mono text-lg text-gray-900">•••• {paymentMethod.last4}</p>
+                    </div>
+                    <CreditCard className="h-7 w-7 text-indigo-600" />
+                  </div>
+                  <p className="mt-6 text-sm text-gray-600">Expires {paymentMethod.expiry}</p>
+                </div>
+              ) : (
+                <EmptySection
+                  icon={CreditCard}
+                  title="No persisted payment method"
+                  detail="This screen will not display a placeholder card."
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => navigate("/wallet")}
+                className="mt-4 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Manage in Wallet
+              </button>
+            </section>
+          </div>
+
+          {summary.pendingPayments > 0 && (
+            <div className="mt-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+              <div>
+                <h3 className="font-medium text-amber-900">Payment action pending</h3>
+                <p className="mt-1 text-sm text-amber-800">
+                  {summary.pendingPayments} persisted payment
+                  {summary.pendingPayments === 1 ? "" : "s"} still require completion.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {usagePercent !== null && usagePercent >= 80 && (
+            <div className="mt-4 flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
+              <Gauge className="mt-0.5 h-5 w-5 flex-shrink-0 text-orange-600" />
+              <div>
+                <h3 className="font-medium text-orange-900">Monthly credit limit</h3>
+                <p className="mt-1 text-sm text-orange-800">
+                  Persisted usage is at {usagePercent}% of the account limit.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {transactions.length > 0 && (
+            <p className="mt-6 text-xs text-gray-500">
+              {transactions.length} persisted wallet transaction
+              {transactions.length === 1 ? "" : "s"} are available in Wallet.
             </p>
-          </div>
-          <button className="inline-flex items-center gap-1 text-sm font-medium text-yellow-900 hover:text-yellow-950">
-            Upgrade
-            <ArrowUpRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  icon: typeof Zap;
+  tone: "purple" | "orange" | "green" | "blue";
+}) {
+  const tones = {
+    purple: "bg-purple-50 text-purple-600",
+    orange: "bg-orange-50 text-orange-600",
+    green: "bg-emerald-50 text-emerald-600",
+    blue: "bg-blue-50 text-blue-600",
+  };
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-5">
+      <span className={`mb-4 flex h-9 w-9 items-center justify-center rounded-lg ${tones[tone]}`}>
+        <Icon className="h-5 w-5" />
+      </span>
+      <p className="text-3xl font-bold text-gray-900">{value}</p>
+      <p className="mt-1 text-sm text-gray-600">{label}</p>
+    </div>
+  );
+}
+
+function EmptySection({
+  icon: Icon,
+  title,
+  detail,
+}: {
+  icon: typeof Zap;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 px-6 py-8 text-center">
+      <Icon className="mb-3 h-7 w-7 text-gray-400" />
+      <p className="font-medium text-gray-900">{title}</p>
+      <p className="mt-1 max-w-sm text-sm text-gray-500">{detail}</p>
     </div>
   );
 }
