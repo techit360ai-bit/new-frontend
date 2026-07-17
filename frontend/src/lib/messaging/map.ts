@@ -21,7 +21,7 @@ export function mapMessage(m: WireMessage, currentUserId: string, authorName = "
 
 /** Map a backend conversation summary to the UI conversation list item.
  * projectName/subject have no backend source in Phase 1 — left blank (UI shows
- * the participant + last message), consistent with the mock-metadata approach. */
+ * the participant + last persisted message), consistent with the live contract. */
 export function mapConvSummary(s: WireConvSummary): UIConversation {
   return {
     id: s.id,
