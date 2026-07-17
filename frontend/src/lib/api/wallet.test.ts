@@ -5,6 +5,8 @@ import {
   fetchBillingPlans,
   fetchCreditPackages,
   fetchWalletSummary,
+  fetchWalletSubscriptions,
+  fetchWalletInvoices,
   fetchWalletTransactions,
   fetchWalletUsage,
 } from "./wallet";
@@ -40,6 +42,8 @@ test("wallet API reads canonical BACKEND domain wallet endpoints", async () => {
     if (url.endsWith("/wallet/transactions")) return response({ transactions: [] });
     if (url.endsWith("/wallet/credit-packages")) return response({ creditPackages: [] });
     if (url.endsWith("/wallet/plans")) return response({ plans: [] });
+    if (url.endsWith("/wallet/subscriptions")) return response({ subscriptions: [] });
+    if (url.endsWith("/wallet/invoices")) return response({ invoices: [] });
     throw new Error(`unexpected ${url}`);
   });
 
@@ -49,6 +53,8 @@ test("wallet API reads canonical BACKEND domain wallet endpoints", async () => {
     await fetchWalletTransactions();
     await fetchCreditPackages();
     await fetchBillingPlans();
+    await fetchWalletSubscriptions();
+    await fetchWalletInvoices();
 
     expect(fetchMock.calls.map(([url]) => url)).toEqual([
       "http://localhost:3000/api/domain/wallet/summary",
@@ -56,6 +62,8 @@ test("wallet API reads canonical BACKEND domain wallet endpoints", async () => {
       "http://localhost:3000/api/domain/wallet/transactions",
       "http://localhost:3000/api/domain/wallet/credit-packages",
       "http://localhost:3000/api/domain/wallet/plans",
+      "http://localhost:3000/api/domain/wallet/subscriptions",
+      "http://localhost:3000/api/domain/wallet/invoices",
     ]);
     const [, init] = fetchMock.calls[0] as [string, RequestInit];
     expect((init.headers as Record<string, string>).Authorization).toBe("Bearer jwt-wallet");
