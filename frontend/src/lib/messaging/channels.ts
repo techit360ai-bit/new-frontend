@@ -22,3 +22,11 @@ export function restSendChannel(channelId: string, clientMsgId: string, body: st
     "rest send channel",
   );
 }
+
+export function markChannelRead(channelId: string, msgId: string): Promise<unknown> {
+  return withFallback(
+    () => msgPost(`/channels/${channelId}/read`, { msgId }),
+    () => null,
+    "mark channel read",
+  );
+}

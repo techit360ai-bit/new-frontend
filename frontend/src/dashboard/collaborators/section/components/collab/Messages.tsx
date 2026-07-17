@@ -1,21 +1,14 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Paperclip, Send } from "lucide-react";
-import { createConversation, fetchConversations, fetchHistory, restSendDM } from "@/lib/messaging/conversations";
+import { createConversation, fetchConversations, fetchHistory, markConvRead, restSendDM } from "@/lib/messaging/conversations";
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
 import type { UIConversation, UIMessage } from "@/lib/messaging/types";
 import { useMessaging } from "@/contexts/MessagingProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-
-function currentUserId(): string {
-  try {
-    return JSON.parse(localStorage.getItem("techit_user") || "{}").id || "";
-  } catch {
-    return "";
-  }
-}
 
 function metaLine(conversation: Pick<UIConversation, "projectName" | "subject">): string {
   return [conversation.projectName, conversation.subject].filter(Boolean).join(" · ");
@@ -36,6 +29,7 @@ export function Messages() {
   const [cBody,      setCBody]      = useState("");
 
   const { store, socket } = useMessaging();
+  const { user } = useAuth();
   useEffect(() => {
     let alive = true;
     setLoading(true);
@@ -64,15 +58,23 @@ export function Messages() {
     fetchHistory(activeId)
       .then((msgs) => {
         if (!alive || msgs.length === 0) return;
-        const me = currentUserId();
-        const thread = msgs.slice().reverse().map((m) => mapMessage(m, me));
+        const thread = msgs.slice().reverse().map((m) => mapMessage(m, user?.id ?? ""));
         setConvos((cur) => cur.map((c) => (c.id === activeId ? { ...c, thread } : c)));
+        const latestMessageId = msgs[0]?.id;
+        if (latestMessageId) {
+          void markConvRead(activeId, latestMessageId).then(() => {
+            if (!alive) return;
+            setConvos((cur) => cur.map((c) => (c.id === activeId ? { ...c, unread: false } : c)));
+          }).catch((err) => {
+            if (alive) toast.error(err instanceof Error ? err.message : "Could not persist read state.");
+          });
+        }
       })
       .catch((err) => {
         if (alive) toast.error(err instanceof Error ? err.message : "Could not load conversation history.");
       });
     return () => { alive = false; };
-  }, [activeId]);
+  }, [activeId, user?.id]);
   useEffect(() => {
     if (!activeId) return;
     const live = store.threads[activeId];
@@ -90,7 +92,6 @@ export function Messages() {
 
   const handleSelect = (id: string) => {
     setActiveId(id);
-    setConvos((cur) => cur.map((c) => c.id === id ? { ...c, unread: false } : c));
   };
 
   const appendMessage = (convId: string, msg: UIMessage) => {

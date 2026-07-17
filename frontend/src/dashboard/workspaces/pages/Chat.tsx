@@ -2,20 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { MoreVertical, Paperclip, Search, Send, Smile } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { fetchChannelHistory, fetchChannels, restSendChannel } from '@/lib/messaging/channels';
+import { fetchChannelHistory, fetchChannels, markChannelRead, restSendChannel } from '@/lib/messaging/channels';
 import { initials as messageInitials, mapMessage } from '@/lib/messaging/map';
 import type { UIMessage, WireChannel } from '@/lib/messaging/types';
 import { useMessaging } from '@/contexts/MessagingProvider';
-
-function currentUserId(): string {
-  try {
-    const raw = localStorage.getItem('techit_user');
-    if (raw) return (JSON.parse(raw) as { id?: string }).id ?? '';
-  } catch {
-    // Ignore malformed local auth state; messages will render with sender ids.
-  }
-  return '';
-}
+import { useAuth } from '@/contexts/AuthContext';
 
 function formatTime(value: string): string {
   const date = new Date(value);
@@ -44,6 +35,7 @@ export function Chat() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { store } = useMessaging();
+  const { user } = useAuth();
 
   useEffect(() => {
     let alive = true;
@@ -81,8 +73,13 @@ export function Chat() {
     fetchChannelHistory(selectedChannelId)
       .then((rows) => {
         if (!alive) return;
-        const me = currentUserId();
-        setLiveMessages(rows.map((message) => mapMessage(message, me)));
+        setLiveMessages(rows.map((message) => mapMessage(message, user?.id ?? '')));
+        const latestMessageId = rows[0]?.id;
+        if (latestMessageId) {
+          void markChannelRead(selectedChannelId, latestMessageId).catch((err) => {
+            if (alive) setError(err instanceof Error ? err.message : 'Could not persist channel read state.');
+          });
+        }
       })
       .catch((err) => {
         if (!alive) return;
@@ -93,7 +90,7 @@ export function Chat() {
         if (alive) setLoadingMessages(false);
       });
     return () => { alive = false; };
-  }, [selectedChannelId]);
+  }, [selectedChannelId, user?.id]);
 
   useEffect(() => {
     if (!selectedChannelId) return;
