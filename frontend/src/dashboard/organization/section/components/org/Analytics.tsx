@@ -1,332 +1,441 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Users,
-  Clock,
+  AlertCircle,
   Award,
+  FolderKanban,
+  Gauge,
+  RefreshCw,
+  Rocket,
+  type LucideIcon,
 } from "lucide-react";
 import {
-  LineChart,
-  Line,
-  BarChart,
   Bar,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
+import {
+  fetchOrganizationDashboard,
+  fetchOrganizationProjects,
+  type OrganizationDashboardData,
+  type OrganizationProject,
+} from "@/lib/api/organization";
+import { deriveOrganizationAnalytics } from "@/lib/api/organizationAnalytics";
 
-const keyMetrics = [
-  {
-    name: "Project Success Rate",
-    value: "73%",
-    change: "+8%",
-    trend: "up",
-    icon: Award,
-  },
-  {
-    name: "Avg Time to Market",
-    value: "8.2 weeks",
-    change: "-12%",
-    trend: "up",
-    icon: Clock,
-  },
-  {
-    name: "Cost Efficiency",
-    value: "$12.4K",
-    change: "-18%",
-    trend: "up",
-    icon: DollarSign,
-  },
-  {
-    name: "Talent Performance",
-    value: "89%",
-    change: "+5%",
-    trend: "up",
-    icon: Users,
-  },
-];
+interface MetricCard {
+  label: string;
+  value: string;
+  detail: string;
+  icon: LucideIcon;
+  iconClass: string;
+  iconBackground: string;
+}
 
-const growthTrend = [
-  { month: "Oct", projects: 95, revenue: 89, talent: 280 },
-  { month: "Nov", projects: 103, revenue: 98, talent: 295 },
-  { month: "Dec", projects: 112, revenue: 107, talent: 312 },
-  { month: "Jan", projects: 118, revenue: 115, talent: 325 },
-  { month: "Feb", projects: 121, revenue: 119, talent: 334 },
-  { month: "Mar", projects: 127, revenue: 127, talent: 342 },
-];
+const EMPTY_DASHBOARD: OrganizationDashboardData = {
+  metrics: { activePrograms: 0, hackathons: 0, members: 0, opportunities: 0 },
+  projectHealth: [],
+  talentActivity: [],
+  automation: [],
+  activity: [],
+};
 
-const projectLifecycle = [
-  { stage: "Idea", count: 18, percentage: 14 },
-  { stage: "Validation", count: 23, percentage: 18 },
-  { stage: "Development", count: 42, percentage: 33 },
-  { stage: "Testing", count: 24, percentage: 19 },
-  { stage: "Market Ready", count: 20, percentage: 16 },
-];
+function EmptyPanel({
+  title,
+  detail,
+}: {
+  title: string;
+  detail: string;
+}) {
+  return (
+    <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 text-center">
+      <p className="font-medium text-gray-900">{title}</p>
+      <p className="mt-2 max-w-md text-sm text-gray-500">{detail}</p>
+    </div>
+  );
+}
 
-const velocityTrends = [
-  { week: "W1", velocity: 72 },
-  { week: "W2", velocity: 75 },
-  { week: "W3", velocity: 78 },
-  { week: "W4", velocity: 81 },
-  { week: "W5", velocity: 79 },
-  { week: "W6", velocity: 84 },
-  { week: "W7", velocity: 86 },
-  { week: "W8", velocity: 89 },
-];
-
-const revenueByCategory = [
-  { name: "AI/ML", value: 3240, color: "#8b5cf6" },
-  { name: "Web3", value: 2890, color: "#06b6d4" },
-  { name: "SaaS", value: 2120, color: "#10b981" },
-  { name: "FinTech", value: 1450, color: "#f59e0b" },
-  { name: "Other", value: 980, color: "#6b7280" },
-];
-
-const aiImpact = [
-  { metric: "Projects with AI", value: 89, total: 127 },
-  { metric: "AI-Driven Success", value: 67, total: 89 },
-  { metric: "Automation Rate", value: 67, total: 100 },
-];
+function SourceError({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+      <div>
+        <p className="font-medium">{title}</p>
+        <p className="mt-1">{message}</p>
+      </div>
+    </div>
+  );
+}
 
 export function Analytics() {
+  const [dashboard, setDashboard] = useState<OrganizationDashboardData | null>(null);
+  const [projects, setProjects] = useState<OrganizationProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [projectsError, setProjectsError] = useState<string | null>(null);
+
+  const loadAnalytics = useCallback(async () => {
+    setLoading(true);
+    setDashboardError(null);
+    setProjectsError(null);
+
+    const [dashboardResult, projectsResult] = await Promise.allSettled([
+      fetchOrganizationDashboard(),
+      fetchOrganizationProjects(),
+    ]);
+
+    if (dashboardResult.status === "fulfilled") {
+      setDashboard(dashboardResult.value);
+    } else {
+      setDashboard(null);
+      setDashboardError(
+        dashboardResult.reason instanceof Error
+          ? dashboardResult.reason.message
+          : "Organization dashboard analytics are unavailable.",
+      );
+    }
+
+    if (projectsResult.status === "fulfilled") {
+      setProjects(projectsResult.value);
+    } else {
+      setProjects([]);
+      setProjectsError(
+        projectsResult.reason instanceof Error
+          ? projectsResult.reason.message
+          : "Organization project analytics are unavailable.",
+      );
+    }
+
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void loadAnalytics();
+  }, [loadAnalytics]);
+
+  const analytics = useMemo(
+    () => deriveOrganizationAnalytics(dashboard ?? EMPTY_DASHBOARD, projects),
+    [dashboard, projects],
+  );
+  const automation = dashboard?.automation ?? [];
+  const latestAutomation = automation[Math.max(0, automation.length - 1)];
+  const latestAutomationTotal = latestAutomation
+    ? latestAutomation.automated + latestAutomation.manual
+    : 0;
+  const latestAutomationRate = latestAutomationTotal > 0
+    ? Math.round((latestAutomation?.automated ?? 0) / latestAutomationTotal * 100)
+    : null;
+  const projectValue = (value: string) => projectsError ? "Unavailable" : value;
+
+  const metricStyles = [
+    {
+      icon: FolderKanban,
+      iconClass: "text-blue-700",
+      iconBackground: "bg-blue-50",
+    },
+    {
+      icon: Rocket,
+      iconClass: "text-emerald-700",
+      iconBackground: "bg-emerald-50",
+    },
+    {
+      icon: Gauge,
+      iconClass: "text-amber-700",
+      iconBackground: "bg-amber-50",
+    },
+    {
+      icon: Award,
+      iconClass: "text-rose-700",
+      iconBackground: "bg-rose-50",
+    },
+  ];
+  const keyMetrics: MetricCard[] = analytics.metrics.map((metric, index) => ({
+    ...metric,
+    value: projectValue(metric.value),
+    detail: projectsError ? "Project source failed" : metric.detail,
+    ...metricStyles[index],
+  }));
+
   return (
-    <div className="p-6 lg:p-8 max-w-[1800px] mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-        <p className="text-gray-600 mt-2">
-          Deep insights into performance, growth, and efficiency
-        </p>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {keyMetrics.map((metric) => {
-          const Icon = metric.icon;
-          const TrendIcon = metric.trend === "up" ? TrendingUp : TrendingDown;
-          return (
-            <div
-              key={metric.name}
-              className="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <Icon className="w-6 h-6 text-indigo-600" />
-                <div className="flex items-center gap-1 text-green-600">
-                  <TrendIcon className="w-4 h-4" />
-                  <span className="text-sm font-medium">{metric.change}</span>
-                </div>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{metric.value}</p>
-              <p className="text-sm text-gray-600 mt-1">{metric.name}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Growth Trends */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-        <h2 className="text-lg font-bold text-gray-900 mb-6">Growth Trends</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={growthTrend}>
-            <defs>
-              <linearGradient id="colorProjects" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorTalent" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Legend />
-            <Area
-              type="monotone"
-              dataKey="projects"
-              stroke="#6366f1"
-              fillOpacity={1}
-              fill="url(#colorProjects)"
-              name="Projects"
-            />
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="#10b981"
-              fillOpacity={1}
-              fill="url(#colorRevenue)"
-              name="Revenue ($K)"
-            />
-            <Area
-              type="monotone"
-              dataKey="talent"
-              stroke="#8b5cf6"
-              fillOpacity={1}
-              fill="url(#colorTalent)"
-              name="Talent"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Middle Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Project Lifecycle Distribution */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Project Lifecycle Distribution
-          </h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={projectLifecycle} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis type="number" tick={{ fontSize: 12 }} />
-              <YAxis dataKey="stage" type="category" tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#6366f1" radius={[0, 8, 8, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <p className="text-sm text-gray-600">Most Common</p>
-              <p className="font-bold text-gray-900">Development</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">Total Projects</p>
-              <p className="font-bold text-gray-900">127</p>
-            </div>
-          </div>
+    <div className="mx-auto max-w-[1800px] p-6 lg:p-8">
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="mt-2 text-gray-600">
+            Persisted portfolio, operations, and talent analytics.
+          </p>
         </div>
-
-        {/* Execution Velocity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Execution Velocity Trends
-          </h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={velocityTrends}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="week" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="velocity"
-                stroke="#8b5cf6"
-                strokeWidth={3}
-                dot={{ fill: "#8b5cf6", r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Current Velocity</p>
-              <p className="text-2xl font-bold text-gray-900">89</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Trend</p>
-              <div className="flex items-center gap-1 text-green-600">
-                <TrendingUp className="w-4 h-4" />
-                <span className="font-bold">+17%</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => void loadAnalytics()}
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
       </div>
 
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue by Category */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Revenue by Category
-          </h2>
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-full md:w-1/2">
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={revenueByCategory}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {revenueByCategory.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="w-full md:w-1/2 space-y-3">
-              {revenueByCategory.map((item) => (
-                <div key={item.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-sm text-gray-700">{item.name}</span>
+      {(dashboardError || projectsError) && (
+        <div className="mb-6 grid gap-3">
+          {dashboardError && (
+            <SourceError
+              title="Live organization dashboard data could not be loaded."
+              message={dashboardError}
+            />
+          )}
+          {projectsError && (
+            <SourceError
+              title="Live organization project data could not be loaded."
+              message={projectsError}
+            />
+          )}
+        </div>
+      )}
+
+      {loading && !dashboard && projects.length === 0 ? (
+        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+          Loading organization analytics...
+        </div>
+      ) : (
+        <>
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {keyMetrics.map((metric) => {
+              const Icon = metric.icon;
+              return (
+                <div
+                  key={metric.label}
+                  className="min-h-36 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm text-gray-600">{metric.label}</p>
+                      <p className="mt-2 break-words text-3xl font-bold text-gray-900">
+                        {metric.value}
+                      </p>
+                      <p className="mt-2 text-xs text-gray-500">{metric.detail}</p>
+                    </div>
+                    <div className={`flex-shrink-0 rounded-lg p-3 ${metric.iconBackground}`}>
+                      <Icon className={`h-6 w-6 ${metric.iconClass}`} />
+                    </div>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">
-                    ${(item.value / 1000).toFixed(1)}K
-                  </span>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </div>
 
-        {/* AI Impact Metrics */}
-        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border border-purple-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">AI Impact</h2>
-          <div className="space-y-6">
-            {aiImpact.map((item) => (
-              <div key={item.metric}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-700">{item.metric}</span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {item.value}/{item.total}
-                  </span>
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-gray-900">
+                Project Lifecycle Distribution
+              </h2>
+              {!projectsError && analytics.lifecycle.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <BarChart data={analytics.lifecycle} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                      <YAxis
+                        dataKey="stage"
+                        type="category"
+                        width={92}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#2563eb" radius={[0, 6, 6, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="mt-4 grid grid-cols-2 gap-4 border-t border-gray-100 pt-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Most Common</p>
+                      <p className="mt-1 font-semibold text-gray-900">
+                        {analytics.mostCommonStage}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Total Projects</p>
+                      <p className="mt-1 font-semibold text-gray-900">
+                        {analytics.totalProjects}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <EmptyPanel
+                  title={projectsError ? "Project lifecycle unavailable" : "No project lifecycle data"}
+                  detail={
+                    projectsError
+                      ? "The persisted project source could not be loaded."
+                      : "Lifecycle distribution will appear after organization projects are created."
+                  }
+                />
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-gray-900">Project Health</h2>
+              {dashboard && dashboard.projectHealth.length > 0 ? (
+                <div className="grid items-center gap-5 sm:grid-cols-2">
+                  <ResponsiveContainer width="100%" height={240}>
+                    <PieChart>
+                      <Pie
+                        data={dashboard.projectHealth}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={58}
+                        outerRadius={84}
+                        paddingAngle={4}
+                        dataKey="value"
+                      >
+                        {dashboard.projectHealth.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-3">
+                    {dashboard.projectHealth.map((item) => (
+                      <div
+                        key={item.name}
+                        className="flex items-center justify-between gap-4 text-sm"
+                      >
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span
+                            className="h-3 w-3 flex-shrink-0 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="truncate text-gray-700">{item.name}</span>
+                        </div>
+                        <span className="font-medium text-gray-900">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="h-3 bg-white rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
-                    style={{ width: `${(item.value / item.total) * 100}%` }}
-                  />
+              ) : (
+                <EmptyPanel
+                  title={dashboardError ? "Project health unavailable" : "No project health series"}
+                  detail={
+                    dashboardError
+                      ? "The persisted organization dashboard source could not be loaded."
+                      : "Project health will appear when the organization dashboard records it."
+                  }
+                />
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">Automation Trends</h2>
+                  <p className="mt-1 text-sm text-gray-500">Persisted automated and manual operations.</p>
                 </div>
-                <p className="text-xs text-gray-600 mt-1">
-                  {Math.round((item.value / item.total) * 100)}% effectiveness
-                </p>
+                {latestAutomationRate !== null && (
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-blue-700">{latestAutomationRate}%</p>
+                    <p className="text-xs text-gray-500">Latest automation share</p>
+                  </div>
+                )}
               </div>
-            ))}
+              {dashboard && dashboard.automation.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={dashboard.automation}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="automated"
+                      stroke="#2563eb"
+                      strokeWidth={3}
+                      name="Automated"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="manual"
+                      stroke="#64748b"
+                      strokeWidth={3}
+                      name="Manual"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyPanel
+                  title={dashboardError ? "Automation analytics unavailable" : "No automation trend"}
+                  detail={
+                    dashboardError
+                      ? "The persisted organization dashboard source could not be loaded."
+                      : "Automation trends will appear when operational periods are recorded."
+                  }
+                />
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-gray-900">Talent Activity</h2>
+              {dashboard && dashboard.talentActivity.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={dashboard.talentActivity}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="skill" tick={{ fontSize: 12 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#059669" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyPanel
+                  title={dashboardError ? "Talent analytics unavailable" : "No talent activity series"}
+                  detail={
+                    dashboardError
+                      ? "The persisted organization dashboard source could not be loaded."
+                      : "Talent activity will appear when skills and participation are recorded."
+                  }
+                />
+              )}
+            </section>
           </div>
-          <div className="mt-6 pt-4 border-t border-purple-200">
-            <p className="text-sm text-gray-700">
-              AI is driving <span className="font-bold text-purple-900">67%</span> of
-              successful outcomes
-            </p>
-          </div>
-        </div>
-      </div>
+
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-gray-900">Analytics Availability</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                These views require persisted historical or financial datasets.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <EmptyPanel
+                title="Historical growth unavailable"
+                detail="The organization API does not currently expose longitudinal project, revenue, or talent snapshots."
+              />
+              <EmptyPanel
+                title="Execution velocity unavailable"
+                detail="No persisted delivery history or weekly velocity series is attached to organization projects."
+              />
+              <EmptyPanel
+                title="Revenue by category unavailable"
+                detail="No organization revenue analytics contract is currently available."
+              />
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }
