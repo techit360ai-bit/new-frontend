@@ -1,298 +1,425 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Plus,
-  Settings,
-  TrendingUp,
-  Activity,
-  Crown,
-  Shield,
-  UserCog,
+  AlertCircle,
+  ArrowRight,
   Briefcase,
+  Clock,
+  FolderKanban,
+  Gauge,
+  RefreshCw,
+  Rocket,
+  Search,
+  UserMinus,
+  Users,
 } from "lucide-react";
+import {
+  fetchOrganizationProjects,
+  type OrganizationProject,
+} from "@/lib/api/organization";
+import { deriveOrganizationTeams } from "@/lib/api/organizationTeams";
 
-const teams = [
-  {
-    id: 1,
-    name: "Engineering",
-    members: 87,
-    projects: 34,
-    performance: 92,
-    role: "Core Development",
-    activeMembers: 82,
-    color: "bg-blue-500",
-  },
-  {
-    id: 2,
-    name: "Product",
-    members: 45,
-    projects: 28,
-    performance: 88,
-    role: "Product Strategy",
-    activeMembers: 43,
-    color: "bg-purple-500",
-  },
-  {
-    id: 3,
-    name: "Growth",
-    members: 32,
-    projects: 19,
-    performance: 85,
-    role: "Marketing & Sales",
-    activeMembers: 30,
-    color: "bg-green-500",
-  },
-  {
-    id: 4,
-    name: "Research",
-    members: 28,
-    projects: 15,
-    performance: 90,
-    role: "Innovation & R&D",
-    activeMembers: 25,
-    color: "bg-orange-500",
-  },
-  {
-    id: 5,
-    name: "Design",
-    members: 24,
-    projects: 21,
-    performance: 89,
-    role: "UX/UI Design",
-    activeMembers: 24,
-    color: "bg-pink-500",
-  },
-  {
-    id: 6,
-    name: "Operations",
-    members: 19,
-    projects: 12,
-    performance: 87,
-    role: "Business Operations",
-    activeMembers: 18,
-    color: "bg-indigo-500",
-  },
-];
+type TeamSort = "projects" | "progress" | "name";
 
-const roles = [
-  { name: "Admin", icon: Crown, description: "Full access", count: 12 },
-  { name: "Manager", icon: Shield, description: "Team oversight", count: 34 },
-  { name: "Contributor", icon: UserCog, description: "Project work", count: 267 },
-  {
-    name: "External",
-    icon: Briefcase,
-    description: "Collaborator",
-    count: 29,
-  },
-];
+function timestampLabel(value: string): string {
+  if (!value) return "No persisted update";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
 
-const topPerformers = [
-  { name: "Sarah Chen", team: "Engineering", score: 98, projects: 8 },
-  { name: "Marcus Johnson", team: "Product", score: 96, projects: 12 },
-  { name: "Elena Rodriguez", team: "Design", score: 95, projects: 9 },
-  { name: "David Kim", team: "Growth", score: 94, projects: 7 },
-  { name: "Aisha Patel", team: "Research", score: 93, projects: 6 },
-];
+function labelFor(value: string, fallback: string): string {
+  if (!value.trim()) return fallback;
+  return value
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function statusTone(value: string): string {
+  const status = value.toLowerCase();
+  if (status.includes("risk") || status.includes("blocked")) {
+    return "border-orange-200 bg-orange-50 text-orange-700";
+  }
+  if (status.includes("complete") || status.includes("done")) {
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  }
+  if (status.includes("track") || status.includes("active")) {
+    return "border-blue-200 bg-blue-50 text-blue-700";
+  }
+  return "border-gray-200 bg-gray-50 text-gray-700";
+}
 
 export function Teams() {
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState<OrganizationProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<TeamSort>("projects");
+
+  const loadTeams = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setProjects(await fetchOrganizationProjects());
+    } catch (loadError) {
+      setProjects([]);
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Organization team assignments are unavailable.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadTeams();
+  }, [loadTeams]);
+
+  const teamData = useMemo(() => deriveOrganizationTeams(projects), [projects]);
+  const visibleTeams = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return teamData.teams
+      .filter((team) =>
+        !query ||
+        team.name.toLowerCase().includes(query) ||
+        team.industries.some((industry) => industry.toLowerCase().includes(query)))
+      .sort((left, right) => {
+        if (sort === "name") return left.name.localeCompare(right.name);
+        if (sort === "progress") {
+          return right.averageProgress - left.averageProgress || left.name.localeCompare(right.name);
+        }
+        return right.projectCount - left.projectCount || left.name.localeCompare(right.name);
+      });
+  }, [search, sort, teamData.teams]);
+
+  const metricCards = [
+    {
+      label: "Assigned Teams",
+      value: teamData.teams.length,
+      detail: "Distinct persisted team names",
+      icon: Users,
+      tone: "bg-indigo-50 text-indigo-700",
+    },
+    {
+      label: "Assigned Projects",
+      value: teamData.assignedProjects,
+      detail: `${projects.length} total projects`,
+      icon: FolderKanban,
+      tone: "bg-blue-50 text-blue-700",
+    },
+    {
+      label: "Recorded Project Seats",
+      value: teamData.recordedSeats,
+      detail: "Sum of persisted member counts",
+      icon: Briefcase,
+      tone: "bg-emerald-50 text-emerald-700",
+    },
+    {
+      label: "Unassigned Projects",
+      value: teamData.unassignedProjects.length,
+      detail: "Projects without a team name",
+      icon: UserMinus,
+      tone: "bg-orange-50 text-orange-700",
+    },
+  ];
+
   return (
-    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Teams Management</h1>
-          <p className="text-gray-600 mt-2">
-            Organize, assign, and monitor team performance
+          <h1 className="text-3xl font-bold text-gray-900">Team Assignments</h1>
+          <p className="mt-2 text-gray-600">
+            Persisted project ownership, capacity, progress, and risk by assigned team
           </p>
         </div>
-        <button className="mt-4 sm:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-          <Plus className="w-5 h-5" />
-          Create Team
-        </button>
-      </div>
-
-      {/* Role Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {roles.map((role) => {
-          const Icon = role.icon;
-          return (
-            <div
-              key={role.name}
-              className="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-indigo-50 p-2 rounded-lg">
-                  <Icon className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">{role.name}</h3>
-                  <p className="text-xs text-gray-500">{role.description}</p>
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{role.count}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Teams Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-        {teams.map((team) => (
-          <div
-            key={team.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => void loadTeams()}
+            disabled={loading}
+            title="Refresh team assignments"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <div className={`h-2 ${team.color}`} />
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    {team.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">{team.role}</p>
-                </div>
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                  <Settings className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/org/projects")}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
+          >
+            Manage Assignments
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <p className="text-sm text-gray-600">Members</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {team.members}
-                  </p>
-                  <p className="text-xs text-green-600">
-                    {team.activeMembers} active
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Projects</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {team.projects}
-                  </p>
-                  <p className="text-xs text-gray-500">assigned</p>
-                </div>
-              </div>
+      {loading && (
+        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center text-sm text-gray-500">
+          Loading persisted team assignments...
+        </div>
+      )}
 
-              <div className="mb-2">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-gray-600">Performance</span>
-                  <span className="font-bold text-gray-900">
-                    {team.performance}%
+      {!loading && error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
+          <AlertCircle className="mx-auto mb-3 h-7 w-7 text-red-500" />
+          <p className="text-sm text-red-700">{error}</p>
+          <button
+            type="button"
+            onClick={() => void loadTeams()}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && projects.length === 0 && (
+        <div className="rounded-lg border border-dashed border-gray-300 bg-white p-12 text-center">
+          <Users className="mx-auto mb-3 h-8 w-8 text-gray-400" />
+          <h2 className="font-semibold text-gray-900">No persisted team assignments</h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-gray-500">
+            Teams on this screen are derived from organization project assignments. Create a
+            project and record its team name to populate this view.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/org/projects")}
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+          >
+            Open Projects
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && projects.length > 0 && (
+        <>
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {metricCards.map((metric) => {
+              const Icon = metric.icon;
+              return (
+                <div key={metric.label} className="rounded-lg border border-gray-200 bg-white p-5">
+                  <span className={`mb-4 flex h-9 w-9 items-center justify-center rounded-lg ${metric.tone}`}>
+                    <Icon className="h-5 w-5" />
                   </span>
+                  <p className="text-3xl font-bold text-gray-900">{metric.value}</p>
+                  <p className="mt-1 text-sm font-medium text-gray-700">{metric.label}</p>
+                  <p className="mt-1 text-xs text-gray-500">{metric.detail}</p>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${team.color}`}
-                    style={{ width: `${team.performance}%` }}
-                  />
-                </div>
-              </div>
+              );
+            })}
+          </div>
 
-              <div className="flex gap-2 mt-4">
-                <button className="flex-1 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium">
-                  View Team
-                </button>
-                <button className="flex-1 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium">
-                  Assign Project
-                </button>
-              </div>
+          <div className="mb-6 flex flex-col gap-3 border-y border-gray-200 bg-white py-4 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search teams or industries"
+                className="h-10 w-full rounded-lg border border-gray-300 pl-9 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
             </div>
+            <select
+              value={sort}
+              onChange={(event) => setSort(event.target.value as TeamSort)}
+              aria-label="Sort teams"
+              className="h-10 min-w-48 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            >
+              <option value="projects">Most projects</option>
+              <option value="progress">Highest progress</option>
+              <option value="name">Team name</option>
+            </select>
           </div>
-        ))}
-      </div>
 
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Performers */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-gray-900">Top Performers</h2>
-            <TrendingUp className="w-5 h-5 text-green-500" />
-          </div>
-          <div className="space-y-4">
-            {topPerformers.map((performer, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-4 pb-4 border-b border-gray-100 last:border-0"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {performer.name.charAt(0)}
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">{performer.name}</h4>
-                  <p className="text-sm text-gray-600">{performer.team}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">{performer.score}</p>
-                  <p className="text-xs text-gray-500">
-                    {performer.projects} projects
-                  </p>
-                </div>
+          <section className="mb-8">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Assigned Teams</h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Aggregated from persisted project team names
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
+              <span className="text-xs font-medium text-gray-500">
+                {visibleTeams.length} visible
+              </span>
+            </div>
 
-        {/* Activity Log */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-gray-900">Recent Activity</h2>
-            <Activity className="w-5 h-5 text-blue-500" />
+            {teamData.teams.length === 0 ? (
+              <EmptyPanel
+                icon={Users}
+                title="No projects have team assignments"
+                detail="Use Projects to record a team name on persisted organization projects."
+              />
+            ) : visibleTeams.length === 0 ? (
+              <EmptyPanel
+                icon={Search}
+                title="No teams match this search"
+                detail="Adjust the team or industry search to see other assignments."
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
+                {visibleTeams.map((team) => (
+                  <article key={team.key} className="rounded-lg border border-gray-200 bg-white p-5">
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-lg font-bold text-gray-900">{team.name}</h3>
+                        <p className="mt-1 truncate text-sm text-gray-500">
+                          {team.industries.length > 0
+                            ? team.industries.join(" | ")
+                            : "No persisted industry labels"}
+                        </p>
+                      </div>
+                      <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                        {team.projectCount} project{team.projectCount === 1 ? "" : "s"}
+                      </span>
+                    </div>
+
+                    <div className="mb-5 grid grid-cols-3 gap-3">
+                      <TeamStat label="Project seats" value={team.recordedSeats} />
+                      <TeamStat label="Market ready" value={team.marketReadyCount} />
+                      <TeamStat label="At risk" value={team.atRiskCount} />
+                    </div>
+
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Average progress</span>
+                        <span className="font-semibold text-gray-900">{team.averageProgress}%</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                        <div
+                          className="h-full rounded-full bg-indigo-600"
+                          style={{ width: `${team.averageProgress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
+                      <p className="min-w-0 truncate text-xs text-gray-500">
+                        Updated {timestampLabel(team.latestUpdatedAt)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/org/projects")}
+                        className="flex-shrink-0 text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+                      >
+                        View projects
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">Unassigned Projects</h2>
+                  <p className="mt-1 text-sm text-gray-500">Persisted projects without a team name</p>
+                </div>
+                <UserMinus className="h-5 w-5 text-orange-600" />
+              </div>
+              {teamData.unassignedProjects.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {teamData.unassignedProjects.slice(0, 8).map((project) => (
+                    <div key={project.id} className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-gray-900">{project.title}</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {labelFor(project.stage, "No stage")} | {project.progress}% progress
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/org/projects")}
+                        className="flex-shrink-0 text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+                      >
+                        Assign
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyPanel
+                  icon={Rocket}
+                  title="Every project has a team"
+                  detail="No persisted organization project is currently unassigned."
+                />
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">Recent Project Updates</h2>
+                  <p className="mt-1 text-sm text-gray-500">Latest persisted team-linked project records</p>
+                </div>
+                <Clock className="h-5 w-5 text-blue-600" />
+              </div>
+              {teamData.activity.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {teamData.activity.slice(0, 8).map((item) => (
+                    <div key={item.id} className="py-4 first:pt-0 last:pb-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-gray-900">{item.projectTitle}</p>
+                          <p className="mt-1 truncate text-xs text-gray-500">
+                            {item.teamName} | {item.progress}% progress
+                          </p>
+                        </div>
+                        <span className={`flex-shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone(item.status)}`}>
+                          {labelFor(item.status, "Unknown")}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs text-gray-400">{timestampLabel(item.updatedAt)}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyPanel
+                  icon={Clock}
+                  title="No project updates"
+                  detail="Update timestamps will appear after persisted projects change."
+                />
+              )}
+            </section>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
-              <div>
-                <p className="text-sm text-gray-900">
-                  <span className="font-medium">Engineering</span> completed 3
-                  projects
-                </p>
-                <p className="text-xs text-gray-500">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
-              <div>
-                <p className="text-sm text-gray-900">
-                  <span className="font-medium">Sarah Chen</span> joined Product
-                  team
-                </p>
-                <p className="text-xs text-gray-500">4 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-purple-500 rounded-full mt-2" />
-              <div>
-                <p className="text-sm text-gray-900">
-                  <span className="font-medium">Growth</span> assigned to new
-                  incubator program
-                </p>
-                <p className="text-xs text-gray-500">6 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-orange-500 rounded-full mt-2" />
-              <div>
-                <p className="text-sm text-gray-900">
-                  <span className="font-medium">Research</span> published new
-                  findings
-                </p>
-                <p className="text-xs text-gray-500">8 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-pink-500 rounded-full mt-2" />
-              <div>
-                <p className="text-sm text-gray-900">
-                  <span className="font-medium">Design</span> completed UI for 5
-                  projects
-                </p>
-                <p className="text-xs text-gray-500">10 hours ago</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function TeamStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg bg-gray-50 px-3 py-3 text-center">
+      <p className="text-lg font-bold text-gray-900">{value}</p>
+      <p className="mt-1 text-xs text-gray-500">{label}</p>
+    </div>
+  );
+}
+
+function EmptyPanel({
+  icon: Icon,
+  title,
+  detail,
+}: {
+  icon: typeof Gauge;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <div className="flex min-h-44 flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 px-6 py-8 text-center">
+      <Icon className="mb-3 h-7 w-7 text-gray-400" />
+      <p className="font-medium text-gray-900">{title}</p>
+      <p className="mt-1 max-w-sm text-sm text-gray-500">{detail}</p>
     </div>
   );
 }
