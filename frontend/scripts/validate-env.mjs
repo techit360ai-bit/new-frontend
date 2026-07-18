@@ -46,9 +46,20 @@ function assertNoPublicSecrets() {
   }
 }
 
+function assertProductionStrictness() {
+  if (process.env.NODE_ENV !== "production") return;
+  if (process.env.VITE_API_STRICT !== "1") {
+    throw new Error("VITE_API_STRICT=1 is required in production");
+  }
+  if (process.env.VITE_API_FALLBACK === "1") {
+    throw new Error("VITE_API_FALLBACK=1 is forbidden in production");
+  }
+}
+
 try {
   for (const name of requiredUrls) requireUrl(name);
   assertNoPublicSecrets();
+  assertProductionStrictness();
   console.log("frontend env contract OK");
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

@@ -51,7 +51,7 @@ export function Havi({ role, userName = "there", stage, route, profileContext = 
   const [guidance, setGuidance] = useState<TourGuideCheckIn | null>(null);
   const [guidanceLoading, setGuidanceLoading] = useState(false);
 
-  const [timeSpentToday] = useState(role === "founder" ? 105 : 80);
+  const [timeSpentToday] = useState(0);
 
   const completedTasks = tasks.filter((t) => t.completed).length;
   const completionPercentage = tasks.length
@@ -60,16 +60,10 @@ export function Havi({ role, userName = "there", stage, route, profileContext = 
 
   // Momentum blends task completion with elapsed-vs-remaining health.
   const progress = useMemo(() => computeProgress(plan), [plan]);
-  const localMomentumScore = useMemo(() => {
-    const base = 45;
-    const taskBoost = Math.round(completionPercentage * 0.4); // up to +40
-    const paceBoost = progress.overdue ? -15 : Math.min(15, Math.round(progress.daysRemaining / 6));
-    return Math.max(0, Math.min(100, base + taskBoost + paceBoost));
-  }, [completionPercentage, progress]);
   const backendMomentum = typeof guidance?.momentum_score === "number"
     ? Math.round(guidance.momentum_score)
     : null;
-  const momentumScore = backendMomentum ?? localMomentumScore;
+  const momentumScore = backendMomentum ?? 0;
 
   const status: HaviStatus =
     completionPercentage === 100
@@ -78,8 +72,11 @@ export function Havi({ role, userName = "there", stage, route, profileContext = 
       ? "alert"
       : "active";
 
-  const widgetMessage =
-    completionPercentage === 100
+  const widgetMessage = guidanceLoading
+    ? "Syncing live guidance..."
+    : !guidance
+    ? "Live guidance unavailable"
+    : completionPercentage === 100
       ? haviMessages.celebration
       : progress.overdue
       ? "Past your MVP target — let's rebalance."

@@ -35,6 +35,7 @@ jobs:
           VITE_TECHIT_API: https://techit-backend.onrender.com/api/mcp
           VITE_MESSAGING_BASE_URL: https://techit-messaging.onrender.com
           VITE_MESSAGING_WS_URL: wss://techit-messaging.onrender.com/ws
+          VITE_API_STRICT: "1"
 
       - name: Validate frontend workflow env parity
         run: cd frontend && npm run workflow:check
@@ -53,6 +54,10 @@ jobs:
           VITE_TECHIT_API: https://techit-backend.onrender.com/api/mcp
           VITE_MESSAGING_BASE_URL: https://techit-messaging.onrender.com
           VITE_MESSAGING_WS_URL: wss://techit-messaging.onrender.com/ws
+          VITE_API_STRICT: "1"
+
+      - name: Audit production live-data sources
+        run: cd frontend && npm run live-data:audit
 
       - name: Lint
         run: cd frontend && npm run lint

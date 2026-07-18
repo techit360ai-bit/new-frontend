@@ -1,9 +1,6 @@
-// Pure promote derivation. promoteDefaults prefills the confirm modal from the
-// hackathon data; buildPromotedProject applies overrides and seeds gsisScore from
-// the real pinned briefScore. now passed in (caller owns Date.now()). No randomness.
+// Prefill the promotion form from persisted hackathon and founder records.
 
 import type { HackathonRegistration, FounderProfile } from "@/contexts/UserContext";
-import type { FounderProject } from "@/lib/api/projects";
 
 export interface PromoteOverrides {
   title?: string;
@@ -18,24 +15,5 @@ export function promoteDefaults(reg: HackathonRegistration, fp: FounderProfile):
     tagline: (reg.brief?.solutionSketch ?? "").trim().slice(0, 120),
     industry: fp.industries[0] ?? "",
     stage: "mvp",
-  };
-}
-
-export function buildPromotedProject(
-  reg: HackathonRegistration,
-  fp: FounderProfile,
-  overrides: PromoteOverrides,
-  now: number,
-): FounderProject {
-  const d = promoteDefaults(reg, fp);
-  return {
-    id: `proj_local_${now}`,
-    title: (overrides.title ?? d.title).trim(),
-    tagline: (overrides.tagline ?? d.tagline).trim(),
-    industry: overrides.industry ?? d.industry,
-    stage: overrides.stage ?? d.stage,
-    isPrimary: false,
-    gsisScore: reg.briefScore?.overall ?? 0,
-    hasWorkspace: true,
   };
 }

@@ -32,16 +32,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { mockMentees, mockTasks, mockRooms } from "./data";
+import { mentees, tasks, rooms } from "./liveData";
 import { ACCENT_SOLID, ACCENT_SOFT, NEUTRAL_BTN, HERO_GRADIENT, statusBadge } from "./theme";
 
 export function Room() {
   const { roomId } = useParams();
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 
-  const room = mockRooms.find((r) => r.id === roomId);
-  const roomMentees = mockMentees.slice(0, 3);
-  const roomTasks = mockTasks;
+  const room = rooms.find((r) => r.id === roomId);
+  const roomMentees = mentees.slice(0, 3);
+  const roomTasks = tasks;
 
   if (!room) {
     return <div className="text-muted-foreground">Room not found</div>;

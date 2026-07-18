@@ -19,12 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { mockApplications, type Application as ApplicationType } from "./data";
+import { applications as persistedApplications, type Application as ApplicationType } from "./liveData";
 import { ACCENT_TEXT, ACCENT_SOFT } from "./theme";
 import { toast } from "sonner";
 
 export function Applications() {
-  const [applications, setApplications] = useState(mockApplications);
+  const [applications, setApplications] = useState(persistedApplications);
   const [selectedApplication, setSelectedApplication] = useState<ApplicationType | null>(null);
 
   const handleAccept = (id: string) => {

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import type { HackathonRegistration, FinalSubmission } from "@/contexts/UserContext";
 import { useFounderProfile } from "@/contexts/UserContext";
-import { deriveJudgeFeedback } from "@/dashboard/_shared/hackathon/results";
 import { ResultsView } from "./ResultsView";
 import { submitHackathonFinal } from "@/lib/api/hackathon";
 
@@ -53,23 +52,19 @@ export function SubmitStage({ registration }: Props) {
       summary: values.summary.trim(),
       submittedAt: new Date().toISOString(),
     };
-    // Merge the submission in before deriving so demo credit + momentum bump count.
-    const merged: HackathonRegistration = { ...registration, finalSubmission: submission };
-    const feedback = deriveJudgeFeedback(merged, Date.now(), submission.submittedAt);
     setSubmitting(true);
     try {
       const result = await submitHackathonFinal(
         registration.hackathonId,
         registration.teamId,
         submission,
-        feedback,
       );
       if (!result.ok || !result.registration) {
         toast.error("The final submission was not persisted.");
         return;
       }
       registerForHackathon(result.registration);
-      toast.success("Pitch submitted — results are in");
+      toast.success("Pitch submitted for judging");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "The final submission failed.");
     } finally {
@@ -82,7 +77,7 @@ export function SubmitStage({ registration }: Props) {
       <div className="mb-5">
         <h2 className="text-base font-semibold text-slate-900">Submit &amp; pitch</h2>
         <p className="text-sm text-slate-600 mt-1">
-          Share your demo, deck, and video, plus a short summary. Submission locks and judging runs immediately.
+          Share your demo, deck, and video, plus a short summary. Submission locks after it is persisted.
         </p>
       </div>
 

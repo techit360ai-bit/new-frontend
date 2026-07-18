@@ -1,10 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import type { HackathonRegistration, IdeaBrief } from "@/contexts/UserContext";
 import { useFounderProfile } from "@/contexts/UserContext";
-import { scoreBrief } from "@/dashboard/_shared/hackathon/scoring";
 import { momentumColor } from "@/dashboard/_shared/hackathon/momentum";
 import { submitHackathonBrief } from "@/lib/api/hackathon";
 
@@ -54,13 +53,6 @@ export function BriefStage({ registration }: Props) {
   const [values, setValues] = useState<Record<string, string>>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
 
-  // Live score preview — debounced via useMemo on the 7 field values.
-  // Hoisted above the early return so hook order stays stable across locked/unlocked.
-  const previewScore = useMemo(
-    () => scoreBrief({ ...(values as unknown as IdeaBrief), submittedAt: "" }),
-    [values],
-  );
-
   const locked = !!registration.brief;
 
   const goToBuild = () => {
@@ -71,10 +63,10 @@ export function BriefStage({ registration }: Props) {
   };
 
   // ---- Post-submit locked view ----
-  if (locked && registration.brief && registration.briefScore) {
+  if (locked && registration.brief) {
     const brief = registration.brief;
     const score = registration.briefScore;
-    const color = momentumColor(score.overall);
+    const color = score ? momentumColor(score.overall) : null;
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="border border-slate-200 bg-white rounded-xl p-6">
@@ -93,25 +85,34 @@ export function BriefStage({ registration }: Props) {
           </dl>
         </div>
 
-        <div className="border border-slate-200 bg-white rounded-xl p-6 space-y-5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-900">Score breakdown</h3>
-            <span className={`text-2xl font-bold ${color.text}`}>{score.overall}</span>
-          </div>
-          {SUB_SCORES.map((s) => (
-            <div key={s.key} className="space-y-2">
-              <ScoreBar score={score[s.key]} label={s.label} />
-              <ul className="space-y-1 pl-1">
-                {score.critiques[s.key].map((c, i) => (
-                  <li key={i} className="text-xs text-slate-600 flex gap-1.5">
-                    <span className="text-slate-300">•</span>
-                    <span>{c}</span>
-                  </li>
-                ))}
-              </ul>
+        {score && color ? (
+          <div className="border border-slate-200 bg-white rounded-xl p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold text-slate-900">Persisted assessment</h3>
+              <span className={`text-2xl font-bold ${color.text}`}>{score.overall}</span>
             </div>
-          ))}
-        </div>
+            {SUB_SCORES.map((s) => (
+              <div key={s.key} className="space-y-2">
+                <ScoreBar score={score[s.key]} label={s.label} />
+                <ul className="space-y-1 pl-1">
+                  {score.critiques[s.key].map((c, i) => (
+                    <li key={i} className="text-xs text-slate-600 flex gap-1.5">
+                      <span className="text-slate-300">•</span>
+                      <span>{c}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="border border-amber-200 bg-amber-50 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-amber-900">Assessment pending</h3>
+            <p className="mt-1 text-sm text-amber-800">
+              Your brief is persisted. Scores will appear after the judging service records them.
+            </p>
+          </div>
+        )}
 
         <div className="flex justify-end">
           <button
@@ -128,7 +129,6 @@ export function BriefStage({ registration }: Props) {
 
   // ---- Pre-submit form ----
   const allValid = FIELDS.every((f) => values[f.key].trim().length >= MIN_CHARS);
-  const color = momentumColor(previewScore.overall);
 
   const handleSubmit = async () => {
     if (!allValid) return;
@@ -142,7 +142,6 @@ export function BriefStage({ registration }: Props) {
       successMetric: values.successMetric.trim(),
       submittedAt: new Date().toISOString(),
     };
-    const briefScore = scoreBrief(brief);
     setSubmitting(true);
     try {
       const result = await submitHackathonBrief(registration.hackathonId, {
@@ -150,8 +149,6 @@ export function BriefStage({ registration }: Props) {
         problem: brief.problem,
         solution: brief.solutionSketch,
         fields: brief,
-        briefScore,
-        composite: briefScore.overall,
       });
       if (!result.ok || !result.registration) {
         toast.error("The brief was not persisted.");
@@ -198,18 +195,6 @@ export function BriefStage({ registration }: Props) {
             </div>
           );
         })}
-      </div>
-
-      {/* Score preview */}
-      <div className="border border-slate-200 bg-slate-50 rounded-xl p-4 mt-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-slate-600 uppercase tracking-wider">Score preview</span>
-          <span className={`text-xl font-bold ${color.text}`}>{previewScore.overall}</span>
-        </div>
-        <div className="h-1.5 w-full rounded-full bg-slate-200">
-          <div className={`h-1.5 rounded-full ${color.bar}`} style={{ width: `${previewScore.overall}%` }} />
-        </div>
-        <p className="text-xs text-slate-500 mt-2">Critiques appear after you submit.</p>
       </div>
 
       <div className="flex justify-end mt-6">

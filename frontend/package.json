@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "env:check": "node scripts/validate-env.mjs",
     "workflow:check": "node scripts/validate-workflows.mjs",
+    "live-data:audit": "node scripts/live-data-audit.mjs",
     "release:journeys": "node scripts/validate-release-journeys.mjs",
     "scalability:check": "node scripts/scalability-check.mjs",
     "smoke:deploy": "node scripts/smoke.mjs",

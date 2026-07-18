@@ -49,11 +49,25 @@ export function ResultsView({ registration }: Props) {
   const { finalSubmission, judgeFeedback, briefScore } = registration;
   const [promoteOpen, setPromoteOpen] = useState(false);
 
-  if (!finalSubmission || !judgeFeedback) {
+  if (!finalSubmission) {
     return (
       <div className="border border-slate-200 bg-white rounded-xl p-12 text-center">
         <h2 className="text-base font-semibold text-slate-700 mb-2">Results unavailable</h2>
         <p className="text-sm text-slate-500">Submit your final pitch to see judging results.</p>
+      </div>
+    );
+  }
+
+  if (!judgeFeedback) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="border border-amber-200 bg-amber-50 rounded-xl p-6">
+          <h2 className="text-base font-semibold text-amber-900">Judging pending</h2>
+          <p className="mt-1 text-sm text-amber-800">
+            Your final pitch is persisted. Results will appear after judge feedback is recorded.
+          </p>
+        </div>
+        <SubmissionDetails registration={registration} />
       </div>
     );
   }
@@ -101,35 +115,7 @@ export function ResultsView({ registration }: Props) {
         </ul>
       </div>
 
-      {/* Locked submission */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Lock className="w-4 h-4 text-slate-400" />
-          <h3 className="text-base font-semibold text-slate-900">Final submission</h3>
-          <span className="ml-auto text-xs text-slate-500">Locked</span>
-        </div>
-        <dl className="space-y-3">
-          <div>
-            <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">Summary</dt>
-            <dd className="text-sm text-slate-800 mt-0.5 whitespace-pre-wrap">{finalSubmission.summary}</dd>
-          </div>
-          {LINKS.map((l) => (
-            <div key={l.key}>
-              <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">{l.label}</dt>
-              <dd className="mt-0.5">
-                <a
-                  href={finalSubmission[l.key]}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 hover:text-violet-800 break-all"
-                >
-                  {finalSubmission[l.key]} <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                </a>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+      <SubmissionDetails registration={registration} />
 
       {registration.promotedProjectId ? (
         <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5">
@@ -148,6 +134,42 @@ export function ResultsView({ registration }: Props) {
         </div>
       )}
       {promoteOpen && <PromoteToStartupModal registration={registration} onClose={() => setPromoteOpen(false)} />}
+    </div>
+  );
+}
+
+function SubmissionDetails({ registration }: Props) {
+  const submission = registration.finalSubmission;
+  if (!submission) return null;
+
+  return (
+    <div className="border border-slate-200 bg-white rounded-xl p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Lock className="w-4 h-4 text-slate-400" />
+        <h3 className="text-base font-semibold text-slate-900">Final submission</h3>
+        <span className="ml-auto text-xs text-slate-500">Locked</span>
+      </div>
+      <dl className="space-y-3">
+        <div>
+          <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">Summary</dt>
+          <dd className="text-sm text-slate-800 mt-0.5 whitespace-pre-wrap">{submission.summary}</dd>
+        </div>
+        {LINKS.map((link) => (
+          <div key={link.key}>
+            <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">{link.label}</dt>
+            <dd className="mt-0.5">
+              <a
+                href={submission[link.key]}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 hover:text-violet-800 break-all"
+              >
+                {submission[link.key]} <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+              </a>
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

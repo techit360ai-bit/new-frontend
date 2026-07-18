@@ -118,6 +118,8 @@ test("apiGet throws ApiError with parsed response body on non-2xx responses", as
 });
 
 test("withFallback returns fallback data and logs when fallback mode is enabled", async () => {
+  const previousFallback = env.VITE_API_FALLBACK;
+  env.VITE_API_FALLBACK = "1";
   const warn = captureWarn();
 
   try {
@@ -133,8 +135,45 @@ test("withFallback returns fallback data and logs when fallback mode is enabled"
     expect(warn.calls).toHaveLength(1);
     expect(String(warn.calls[0][0])).toContain("dashboard failed; using mock fallback");
   } finally {
+    if (previousFallback === undefined) delete env.VITE_API_FALLBACK;
+    else env.VITE_API_FALLBACK = previousFallback;
     warn.restore();
     resetAuth();
+  }
+});
+
+test("withFallback is strict by default in production mode", async () => {
+  const previousMode = env.MODE;
+  const previousDev = env.DEV;
+  const previousFallback = env.VITE_API_FALLBACK;
+  const previousStrict = env.VITE_API_STRICT;
+  env.MODE = "production";
+  env.DEV = false;
+  delete env.VITE_API_FALLBACK;
+  delete env.VITE_API_STRICT;
+
+  try {
+    let error: unknown;
+    try {
+      await withFallback(
+        async () => { throw new Error("production unavailable"); },
+        { fake: true },
+        "production",
+      );
+    } catch (caught) {
+      error = caught;
+    }
+    expect(error instanceof Error).toBe(true);
+    expect((error as Error).message).toContain("production unavailable");
+  } finally {
+    if (previousMode === undefined) delete env.MODE;
+    else env.MODE = previousMode;
+    if (previousDev === undefined) delete env.DEV;
+    else env.DEV = previousDev;
+    if (previousFallback === undefined) delete env.VITE_API_FALLBACK;
+    else env.VITE_API_FALLBACK = previousFallback;
+    if (previousStrict === undefined) delete env.VITE_API_STRICT;
+    else env.VITE_API_STRICT = previousStrict;
   }
 });
 

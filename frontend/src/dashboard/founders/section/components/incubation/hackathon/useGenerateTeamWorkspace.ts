@@ -27,8 +27,7 @@ export function useGenerateTeamWorkspace() {
 
       const workspaceId = result.workspace.id;
       const workspace = {
-        ...buildTeamWorkspace(registration, Date.now()),
-        id: workspaceId,
+        ...buildTeamWorkspace(registration, workspaceId),
         projectId: result.workspace.projectId,
       };
       addTeamWorkspace(workspace);

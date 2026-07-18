@@ -31,6 +31,7 @@ jobs:
           VITE_TECHIT_API: https://techit-backend.onrender.com/api/mcp
           VITE_MESSAGING_BASE_URL: https://techit-messaging.onrender.com
           VITE_MESSAGING_WS_URL: wss://techit-messaging.onrender.com/ws
+          VITE_API_STRICT: "1"
 
   deploy:
     name: Deploy to Render

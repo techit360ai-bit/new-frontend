@@ -1,941 +1,415 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Sparkles, Target, LayoutGrid, CheckCircle2, DollarSign,
-  FileText, Gauge, TrendingUp, Compass, BarChart3,
-  Zap, Users, Map, ClipboardList, Cpu, Star,
-  Brain, Send, Upload, RefreshCw, Download,
-  ChevronRight, AlertTriangle, CheckCircle, ArrowUpRight,
-  Rocket, Code2, Palette, Megaphone, Activity, ChevronLeft,
-  Briefcase, ArrowLeft, Lightbulb,
+  Activity,
+  AlertCircle,
+  ArrowLeft,
+  Brain,
+  Briefcase,
+  CheckCircle2,
+  ChevronRight,
+  Gauge,
+  Lightbulb,
+  RefreshCw,
+  Sparkles,
+  Target,
 } from "lucide-react";
 import { toast } from "sonner";
-import { runVenturePipeline, diagnoseIdea } from "@/lib/api/incubation";
+import {
+  diagnoseIdea,
+  runVenturePipeline,
+  type IdeaDiagnostic,
+  type PipelineBlueprint,
+} from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
 import { checkHealth } from "@/lib/api/health";
 import { roleDashboardPath } from "@/lib/roleRoutes";
 
 const PROBLEM_AREAS = [
-  { id: "ai", label: "AI", emoji: "🤖" },
-  { id: "healthcare", label: "Healthcare", emoji: "🏥" },
-  { id: "greentech", label: "Green Tech", emoji: "🌱" },
-  { id: "deeptech", label: "Deep Tech", emoji: "🧬" },
-  { id: "web3", label: "Web3", emoji: "⛓️" },
+  { id: "ai", label: "AI" },
+  { id: "healthcare", label: "Healthcare" },
+  { id: "greentech", label: "Green Tech" },
+  { id: "deeptech", label: "Deep Tech" },
+  { id: "web3", label: "Web3" },
 ];
 
-// ─── Sub-components ───────────────────────────────────────────
+const BLUEPRINT_SECTIONS = [
+  ["executive_summary", "Executive Summary"],
+  ["market_analysis", "Market Analysis"],
+  ["feasibility_report", "Feasibility Report"],
+  ["startup_strategy", "Startup Strategy"],
+  ["finance_strategy", "Finance Strategy"],
+  ["tech_architecture", "Technical Architecture"],
+  ["investor_signals", "Investor Signals"],
+  ["driver_breakdown", "Score Drivers"],
+] as const;
 
-function ProgressBar({
-  value,
-  colorFrom = "#38bdf8",
-  colorTo = "#0284c7",
-}: {
-  value: number;
-  colorFrom?: string;
-  colorTo?: string;
-}) {
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    const t = setTimeout(() => setWidth(value), 350);
-    return () => clearTimeout(t);
-  }, [value]);
-  return (
-    <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(14,165,233,0.1)" }}>
-      <div
-        className="h-full rounded-full transition-all duration-1000 ease-out"
-        style={{
-          width: `${width}%`,
-          background: `linear-gradient(90deg, ${colorFrom}, ${colorTo})`,
-        }}
-      />
-    </div>
-  );
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
 }
 
-function CircularProgress({
-  value,
-  size = 60,
-  stroke = "#0ea5e9",
-}: {
-  value: number;
-  size?: number;
-  stroke?: string;
-}) {
-  const r = (size - 10) / 2;
-  const circ = 2 * Math.PI * r;
-  const [p, setP] = useState(0);
-  useEffect(() => {
-    const t = setTimeout(() => setP(value), 450);
-    return () => clearTimeout(t);
-  }, [value]);
-  const offset = circ - (p / 100) * circ;
+function asText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function asScore(value: unknown): number | null {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : null;
+}
+
+function hasContent(value: unknown): boolean {
+  if (value == null || value === "") return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object") return Object.keys(asRecord(value)).length > 0;
+  return true;
+}
+
+function labelize(value: string): string {
+  return value
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/^\w|\s\w/g, (letter) => letter.toUpperCase());
+}
+
+function valueLabel(value: unknown): string {
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "number") return value.toLocaleString();
+  if (typeof value === "string") return value;
+  return JSON.stringify(value, null, 2);
+}
+
+function LiveValue({ value }: { value: unknown }) {
+  if (Array.isArray(value)) {
+    return (
+      <ul className="space-y-2">
+        {value.map((item, index) => (
+          <li key={`${index}-${valueLabel(item).slice(0, 24)}`} className="flex items-start gap-2 text-sm text-gray-700">
+            <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-600" />
+            <span className="whitespace-pre-wrap break-words">{valueLabel(item)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (value && typeof value === "object") {
+    return (
+      <dl className="grid gap-3 sm:grid-cols-2">
+        {Object.entries(asRecord(value)).filter(([, item]) => hasContent(item)).map(([key, item]) => (
+          <div key={key} className="border-l-2 border-cyan-100 pl-3">
+            <dt className="text-xs font-semibold text-gray-500">{labelize(key)}</dt>
+            <dd className="mt-1 whitespace-pre-wrap break-words text-sm text-gray-800">{valueLabel(item)}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+
+  return <p className="whitespace-pre-wrap break-words text-sm leading-6 text-gray-700">{valueLabel(value)}</p>;
+}
+
+function ScoreCard({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Gauge }) {
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(14,165,233,0.12)" strokeWidth="5" />
-        <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke={stroke} strokeWidth="5"
-          strokeDasharray={circ} strokeDashoffset={offset}
-          strokeLinecap="round"
-          style={{ transition: "stroke-dashoffset 1.1s ease-out" }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-[10px] font-bold" style={{ color: stroke }}>{value}%</span>
+    <div className="border border-gray-200 bg-white p-5">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-gray-600">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-gray-900">{Math.round(value)}</p>
+        </div>
+        <Icon className="h-7 w-7 text-cyan-600" />
+      </div>
+      <div className="mt-4 h-2 overflow-hidden bg-gray-100">
+        <div className="h-full bg-cyan-600" style={{ width: `${value}%` }} />
       </div>
     </div>
   );
 }
-
-// ─── Data ─────────────────────────────────────────────────────
-
-const navItems = [
-  { icon: <Sparkles size={14} />, title: "Unicorn Potential",        desc: "Score unicorn trajectory" },
-  { icon: <Target size={14} />,   title: "PMF Analysis",             desc: "Validate product-market fit" },
-  { icon: <LayoutGrid size={14} />, title: "SWOT Analysis",          desc: "Identify key strategic factors" },
-  { icon: <CheckCircle2 size={14} />, title: "Market Validation",    desc: "Confirm real market demand" },
-  { icon: <DollarSign size={14} />, title: "Monetization Logic",     desc: "Revenue model analysis" },
-  { icon: <FileText size={14} />, title: "Business Plan Generation", desc: "Full business plan output" },
-  { icon: <Gauge size={14} />,    title: "Feasibility",              desc: "Technical & market feasibility" },
-  { icon: <TrendingUp size={14} />, title: "Finance Strategy",       desc: "Financial projections & strategy" },
-  { icon: <Compass size={14} />,  title: "Startup Strategy",         desc: "Go-to-market planning" },
-  { icon: <BarChart3 size={14} />, title: "Market Intelligence",     desc: "Competitive intelligence" },
-  { icon: <Zap size={14} />,      title: "Impact Predictor",         desc: "Predict startup impact score" },
-  { icon: <Users size={14} />,    title: "Investor Intelligence",    desc: "Investor matching & profiling" },
-  { icon: <Map size={14} />,      title: "Execution Roadmap",        desc: "Milestone-based roadmap" },
-  { icon: <ClipboardList size={14} />, title: "Market Survey",       desc: "Survey design & analysis" },
-  { icon: <Cpu size={14} />,      title: "Tech Architecture",        desc: "System design blueprint" },
-  { icon: <Star size={14} />,     title: "Project Recommendation",   desc: "Personalized recommendations" },
-];
-
-const metrics = [
-  { label: "Problem Clarity",       value: 92, from: "#38bdf8", to: "#0284c7" },
-  { label: "Market Size",           value: 85, from: "#a78bfa", to: "#7c3aed" },
-  { label: "Technical Feasibility", value: 84, from: "#34d399", to: "#059669" },
-  { label: "Unicorn Potential",     value: 91, from: "#38bdf8", to: "#0369a1" },
-  { label: "Market Fit Score",      value: 88, from: "#6ee7b7", to: "#0d9488" },
-];
-
-const circleMetrics = [
-  { label: "Problem\nClarity",       value: 92, stroke: "#0ea5e9" },
-  { label: "Unicorn\nScore",         value: 91, stroke: "#8b5cf6" },
-  { label: "Market\nFit",           value: 88, stroke: "#10b981" },
-  { label: "Market\nSize",          value: 85, stroke: "#f59e0b" },
-  { label: "Tech\nFeasibility",     value: 84, stroke: "#6366f1" },
-];
-
-const risks = [
-  { label: "Risk Analysis",        value: 28, level: "Low",    from: "#6ee7b7", to: "#059669" },
-  { label: "Competition",          value: 45, level: "Medium", from: "#fcd34d", to: "#d97706" },
-  { label: "Technical Complexity", value: 35, level: "Medium", from: "#fcd34d", to: "#d97706" },
-  { label: "Time to Market",       value: 52, level: "Medium", from: "#fcd34d", to: "#d97706" },
-];
-
-const roadmap = [
-  { phase: "Validate with Users", period: "Month 1–2", detail: "User interviews, problem validation, survey rollout across 5 pilot universities" },
-  { phase: "Build MVP",           period: "Month 3–5", detail: "Core feature development, AI engine integration, matchmaking algorithm" },
-  { phase: "Beta Testing",        period: "Month 6–7", detail: "Closed beta with 200 student founders, feedback loops, iteration" },
-  { phase: "Launch & Iterate",    period: "Month 8+",  detail: "Public launch, growth loops, partnership expansion, investor outreach" },
-];
-
-const teamRoles = [
-  {
-    icon: <Code2 size={16} />,
-    role: "Technical Co-founder",
-    skills: ["React", "Node.js", "AI/ML", "System Design"],
-    bg: "bg-sky-50", border: "border-sky-100", iconBg: "bg-sky-100 text-sky-600",
-  },
-  {
-    icon: <Palette size={16} />,
-    role: "Product Designer",
-    skills: ["UI/UX", "Figma", "User Research", "Prototyping"],
-    bg: "bg-violet-50", border: "border-violet-100", iconBg: "bg-violet-100 text-violet-600",
-  },
-  {
-    icon: <Megaphone size={16} />,
-    role: "Marketing Lead",
-    skills: ["Growth", "Content", "Partnerships", "SEO"],
-    bg: "bg-emerald-50", border: "border-emerald-100", iconBg: "bg-emerald-100 text-emerald-600",
-  },
-];
-
-const insights = [
-  { type: "success", text: "Strong demand among student founders and technical talent in Africa" },
-  { type: "success", text: "High scalability through AI matchmaking engine" },
-  { type: "success", text: "Clear monetization via premium features and investor network fees" },
-  { type: "warning", text: "Competition from global platforms — need strong local focus" },
-];
-
-// ─── Main Component ───────────────────────────────────────────
 
 export function MainIncubationPanel() {
   const navigate = useNavigate();
-  const [activeNav, setActiveNav] = useState("Business Plan Generation");
-  const [copilotText, setCopilotText] = useState("");
-  const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(true);
-
-  // Structured idea form (replaces the freeform textarea)
   const [ideaTitle, setIdeaTitle] = useState("");
   const [ideaSolution, setIdeaSolution] = useState("");
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
-
-  // Incubation → Workspace pipeline state. Running the analysis persists a
-  // ProjectAnalysis in ai-router and returns a project_id; "Create Workspace"
-  // then provisions a workspace bound to that analyzed venture.
-  const [analyzedProjectId, setAnalyzedProjectId] = useState<string | null>(null);
+  const [blueprint, setBlueprint] = useState<PipelineBlueprint | null>(null);
+  const [diagnostic, setDiagnostic] = useState<IdeaDiagnostic | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [provisioning, setProvisioning] = useState(false);
-  // Live AI-engine reachability (drives the "AI Engine" status badge).
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
-  // Live next-steps from the idea diagnostic; falls back to mock insights when null.
-  const [nextSteps, setNextSteps] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let alive = true;
-    checkHealth().then((h) => { if (alive) setEngineOnline(h.ok); });
-    return () => { alive = false; };
+    let active = true;
+    void checkHealth().then((health) => {
+      if (active) setEngineOnline(health.ok);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
+  const projectId = asText(blueprint?.project_id);
+  const unicornScore = asScore(blueprint?.unicorn_potential_score);
+  const investmentScore = asScore(blueprint?.investment_score);
+  const structuredProfile = asRecord(diagnostic?.structured_profile);
+  const nextSteps = Array.isArray(diagnostic?.next_steps)
+    ? diagnostic.next_steps.filter((step): step is string => typeof step === "string" && step.trim().length > 0)
+    : [];
+  const sections = useMemo(
+    () => BLUEPRINT_SECTIONS
+      .map(([key, label]) => ({ key, label, value: blueprint?.[key] }))
+      .filter((section) => hasContent(section.value)),
+    [blueprint],
+  );
+  const canAnalyze = ideaTitle.trim().length > 0 && ideaSolution.trim().length > 0 && selectedAreas.length > 0;
+
+  const toggleArea = (id: string) => {
+    setSelectedAreas((current) => current.includes(id)
+      ? current.filter((area) => area !== id)
+      : [...current, id]);
+  };
+
   const handleRunAnalysis = async () => {
-    if (!ideaTitle || !ideaSolution || selectedAreas.length === 0 || analyzing) return;
+    if (!canAnalyze || analyzing) return;
     setAnalyzing(true);
-    const ideaPayload = {
-      startup_name: ideaTitle,
-      solution: ideaSolution,
+    setError(null);
+    setBlueprint(null);
+    setDiagnostic(null);
+
+    const payload = {
+      startup_name: ideaTitle.trim(),
+      solution: ideaSolution.trim(),
       focus_areas: selectedAreas,
     };
-    // Quick idea diagnostic (1 credit, Free+) for live evaluation + next steps,
-    // plus the full pipeline which persists the venture and returns a project_id.
-    const [diagnostic, result] = await Promise.all([
-      diagnoseIdea(ideaPayload),
-      runVenturePipeline(ideaPayload),
-    ]);
-    setAnalyzing(false);
-    setNextSteps(diagnostic?.next_steps ?? []);
-    const pid = result?.project_id ?? `proj_local_${Date.now()}`;
-    setAnalyzedProjectId(pid);
-    toast.success("Analysis complete — venture saved. Create a workspace to start building.");
+
+    try {
+      const [diagnosticResult, pipelineResult] = await Promise.all([
+        diagnoseIdea(payload),
+        runVenturePipeline(payload),
+      ]);
+      const persistedProjectId = asText(pipelineResult?.project_id);
+      const pipelineError = asText(pipelineResult?.error);
+      if (!pipelineResult || !persistedProjectId) {
+        throw new Error(pipelineError || "The analysis did not return a persisted project ID.");
+      }
+      setDiagnostic(diagnosticResult);
+      setBlueprint(pipelineResult);
+      toast.success("Analysis persisted");
+    } catch (analysisError) {
+      const message = analysisError instanceof Error ? analysisError.message : "Live analysis is unavailable.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const handleCreateWorkspace = async () => {
-    if (provisioning) return;
+    if (!projectId || provisioning) return;
     setProvisioning(true);
-    const projectId = analyzedProjectId ?? `proj_local_${Date.now()}`;
-    const res = await provisionWorkspace(projectId, ideaTitle || "Venture Workspace");
-    setProvisioning(false);
-    const wsId = res.workspace?.id ?? `ws_${projectId}`;
-    // Carry the binding so the workspace loads this venture's context.
-    navigate(`/workspaces?ws=${encodeURIComponent(wsId)}&project=${encodeURIComponent(projectId)}`);
+    try {
+      const result = await provisionWorkspace(projectId, `${ideaTitle.trim()} Workspace`);
+      const workspaceId = asText(result.workspace?.id);
+      if (!result.ok || !workspaceId) {
+        throw new Error(result.error || "The workspace was not persisted.");
+      }
+      navigate(`/workspaces?ws=${encodeURIComponent(workspaceId)}&project=${encodeURIComponent(projectId)}`);
+    } catch (workspaceError) {
+      toast.error(workspaceError instanceof Error ? workspaceError.message : "Workspace creation failed.");
+    } finally {
+      setProvisioning(false);
+    }
   };
 
-  const toggleArea = (id: string) =>
-    setSelectedAreas((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id],
-    );
-
   return (
-    <>
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes spin-slow { to { transform: rotate(360deg); } }
-        .spin-slow { animation: spin-slow 4s linear infinite; }
-        @keyframes ping-soft { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.15); } }
-        .ping-soft { animation: ping-soft 2s ease-in-out infinite; }
-      `}</style>
-
-      <div
-        className="h-screen flex overflow-hidden"
-        style={{ fontFamily: "'Inter', sans-serif", background: "#F0F9FF" }}
-      >
-        {/* ══════════════ LEFT SIDEBAR ══════════════ */}
-        <aside className="w-[264px] flex-shrink-0 flex flex-col border-r overflow-hidden" style={{ borderColor: "rgba(14,165,233,0.12)", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)" }}>
-
-          {/* Branding */}
-          <div className="px-4 pt-5 pb-4 flex-shrink-0 border-b" style={{ borderColor: "rgba(14,165,233,0.08)" }}>
+    <div className="min-h-screen bg-gray-50">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <Link
               to={roleDashboardPath.founder}
-              className="flex items-center gap-1.5 text-[10px] text-sky-500 hover:text-sky-700 font-semibold mb-3 transition-colors"
+              className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
             >
-              <ArrowLeft size={11} />
-              Back to TechIT
+              <ArrowLeft className="h-4 w-4" />
+              Founder dashboard
             </Link>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: "linear-gradient(135deg, #38bdf8, #0284c7, #1e40af)" }}>
-                <Brain size={17} className="text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-bold text-sky-900 leading-tight">TechIT Network</div>
-                <div className="text-[9px] text-sky-400 leading-tight font-medium mt-0.5">AI-Powered Startup Incubation</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border" style={{ background: "linear-gradient(135deg, #f0f9ff, #e0f2fe)", borderColor: "rgba(14,165,233,0.15)" }}>
-              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${engineOnline === false ? "bg-red-400" : "bg-emerald-400 ping-soft"}`} />
-              <span className="text-[10px] font-semibold text-sky-700">
-                {engineOnline === null ? "Checking AI Engine…" : engineOnline ? "AI Engine Active" : "AI Engine Offline"}
-              </span>
-              <Sparkles size={9} className="text-sky-400 ml-auto flex-shrink-0" />
-            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Startup Incubation</h1>
           </div>
-
-          {/* Nav items */}
-          <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5 scrollbar-hide">
-            {navItems.map((item) => {
-              const isActive = activeNav === item.title;
-              return (
-                <button
-                  key={item.title}
-                  onClick={() => setActiveNav(item.title)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl transition-all duration-150 flex items-start gap-2.5 group ${
-                    isActive ? "shadow-md" : "hover:bg-sky-50"
-                  }`}
-                  style={isActive ? { background: "linear-gradient(135deg, #38bdf8, #0284c7)", boxShadow: "0 4px 12px rgba(2,132,199,0.25)" } : {}}
-                >
-                  <div className={`mt-0.5 flex-shrink-0 ${isActive ? "text-white" : "text-sky-400 group-hover:text-sky-600"}`}>
-                    {item.icon}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className={`text-[11px] font-semibold leading-tight ${isActive ? "text-white" : "text-sky-900"}`}>
-                      {item.title}
-                    </div>
-                    <div className={`text-[9px] mt-0.5 leading-tight truncate ${isActive ? "text-sky-100" : "text-sky-400"}`}>
-                      {item.desc}
-                    </div>
-                  </div>
-                  {isActive && <ChevronRight size={11} className="text-white/70 mt-0.5 flex-shrink-0" />}
-                </button>
-              );
-            })}
+          <div className="flex items-center gap-2 text-sm">
+            <span className={`h-2.5 w-2.5 rounded-full ${engineOnline ? "bg-emerald-500" : engineOnline === false ? "bg-red-500" : "bg-gray-300"}`} />
+            <span className="font-medium text-gray-700">
+              {engineOnline === null ? "Checking AI service" : engineOnline ? "AI service available" : "AI service unavailable"}
+            </span>
           </div>
+        </div>
+      </header>
 
-          {/* AI Copilot */}
-          <div className="flex-shrink-0 border-t p-3" style={{ borderColor: "rgba(14,165,233,0.1)" }}>
-            <div className="rounded-2xl border p-3" style={{ background: "linear-gradient(135deg, #f0f9ff, #e0f2fe)", borderColor: "rgba(14,165,233,0.18)" }}>
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #38bdf8, #0284c7)" }}>
-                  <Brain size={12} className="text-white" />
-                </div>
-                <div>
-                  <div className="text-[11px] font-bold text-sky-900">AI Copilot</div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ping-soft" />
-                    <span className="text-[9px] text-emerald-600 font-semibold">Live</span>
-                  </div>
-                </div>
-              </div>
-              <textarea
-                value={copilotText}
-                onChange={(e) => setCopilotText(e.target.value)}
-                placeholder="Ask AI Copilot anything about your startup..."
-                className="w-full text-[10px] rounded-xl px-3 py-2 resize-none text-sky-900 placeholder-sky-300 focus:outline-none focus:ring-1 focus:ring-sky-300 border"
-                style={{ background: "rgba(255,255,255,0.8)", borderColor: "rgba(14,165,233,0.2)" }}
-                rows={2}
-              />
-              <button
-                className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-white text-[11px] font-bold transition-all hover:opacity-90 active:scale-95"
-                style={{ background: "linear-gradient(135deg, #0ea5e9, #0284c7)", boxShadow: "0 3px 10px rgba(2,132,199,0.3)" }}
-              >
-                <Send size={10} />
-                Send to Copilot
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        {/* ══════════════ CENTER PANEL ══════════════ */}
-        <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-
-          {/* Header */}
-          <header className="flex-shrink-0 px-6 py-3.5 border-b flex items-center justify-between" style={{ borderColor: "rgba(14,165,233,0.12)", background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)" }}>
+      <main className="mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[360px_1fr]">
+        <section className="self-start border border-gray-200 bg-white p-6 lg:sticky lg:top-6">
+          <div className="mb-6 flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center bg-cyan-50 text-cyan-700">
+              <Lightbulb className="h-5 w-5" />
+            </span>
             <div>
-              <h1 className="text-base font-bold text-sky-900 leading-tight">Real-Time AI Analysis</h1>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ping-soft" />
-                <span className="text-[10px] text-emerald-600 font-semibold">Live Processing</span>
-                <span className="text-[10px] text-sky-300 mx-1">·</span>
-                <span className="text-[10px] text-sky-400">Business Plan Generation</span>
-              </div>
+              <h2 className="font-semibold text-gray-900">Venture intake</h2>
+              <p className="text-sm text-gray-500">Persist a diagnostic and full analysis</p>
             </div>
-            <div className="flex items-center gap-3">
-              {/* Rotating AI indicator */}
-              <div className="relative w-8 h-8">
-                <div className="absolute inset-0 rounded-full border-2 border-dashed border-sky-300 spin-slow" />
-                <div className="absolute inset-1.5 rounded-full flex items-center justify-center" style={{ background: "rgba(14,165,233,0.1)" }}>
-                  <Activity size={9} className="text-sky-500" />
-                </div>
-              </div>
-              <button
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-[11px] font-bold transition-all hover:opacity-90 active:scale-95"
-                style={{ background: "linear-gradient(135deg, #0ea5e9, #0284c7)", boxShadow: "0 3px 10px rgba(2,132,199,0.25)" }}
-              >
-                <Download size={12} />
-                Export Report
-              </button>
-            </div>
-          </header>
+          </div>
 
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
+          <div className="space-y-5">
+            <label className="block">
+              <span className="text-sm font-medium text-gray-800">Startup name</span>
+              <input
+                type="text"
+                value={ideaTitle}
+                onChange={(event) => setIdeaTitle(event.target.value)}
+                className="mt-2 h-11 w-full border border-gray-300 px-3 text-sm outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+              />
+            </label>
 
-            {/* Analysis Complete Banner */}
-            <div className="flex items-center gap-3 px-5 py-3.5 rounded-2xl border" style={{ background: "linear-gradient(135deg, #ecfdf5, #d1fae5)", borderColor: "rgba(16,185,129,0.2)" }}>
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircle size={15} className="text-emerald-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-emerald-900">Idea Analysis & Evaluation Complete</div>
-                <div className="text-[10px] text-emerald-600 font-medium mt-0.5">Business Plan Generation · Just now</div>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-200/60 flex-shrink-0">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 ping-soft" />
-                <span className="text-[9px] font-bold text-emerald-800">Success</span>
-              </div>
-            </div>
+            <label className="block">
+              <span className="text-sm font-medium text-gray-800">Solution</span>
+              <textarea
+                rows={5}
+                value={ideaSolution}
+                onChange={(event) => setIdeaSolution(event.target.value)}
+                className="mt-2 w-full resize-y border border-gray-300 px-3 py-2 text-sm outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+              />
+            </label>
 
-            {/* Hero Score Card */}
-            <div
-              className="rounded-3xl p-5 relative overflow-hidden shadow-xl"
-              style={{ background: "linear-gradient(135deg, #0369a1 0%, #1e40af 50%, #1e3a8a 100%)", boxShadow: "0 20px 40px rgba(2,132,199,0.3)" }}
+            <fieldset>
+              <legend className="text-sm font-medium text-gray-800">Focus areas</legend>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {PROBLEM_AREAS.map((area) => {
+                  const selected = selectedAreas.includes(area.id);
+                  return (
+                    <label
+                      key={area.id}
+                      className={`flex cursor-pointer items-center gap-2 border px-3 py-2 text-sm ${selected ? "border-cyan-600 bg-cyan-50 text-cyan-800" : "border-gray-200 text-gray-700"}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => toggleArea(area.id)}
+                        className="accent-cyan-700"
+                      />
+                      {area.label}
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <button
+              type="button"
+              disabled={!canAnalyze || analyzing}
+              onClick={() => void handleRunAnalysis()}
+              className="flex h-11 w-full items-center justify-center gap-2 bg-cyan-700 px-4 text-sm font-semibold text-white hover:bg-cyan-800 disabled:cursor-not-allowed disabled:bg-gray-300"
             >
-              {/* Decorative blobs */}
-              <div className="absolute top-0 right-0 w-56 h-56 rounded-full -translate-y-20 translate-x-20" style={{ background: "rgba(255,255,255,0.05)" }} />
-              <div className="absolute bottom-0 left-8 w-36 h-36 rounded-full translate-y-16" style={{ background: "rgba(255,255,255,0.04)" }} />
-              <div className="absolute top-1/2 left-1/2 w-20 h-20 rounded-full -translate-x-8" style={{ background: "rgba(56,189,248,0.08)" }} />
+              {analyzing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
+              {analyzing ? "Running analysis" : "Run analysis"}
+            </button>
+          </div>
+        </section>
 
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <div className="text-[9px] text-sky-300 font-bold uppercase tracking-widest mb-1.5">Startup Analysis</div>
-                    <h2 className="text-lg font-black text-white leading-tight tracking-tight">HEALTH CARE APP</h2>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span
-                        className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wide"
-                        style={{ background: "rgba(52,211,153,0.2)", color: "#6ee7b7", border: "1px solid rgba(52,211,153,0.3)" }}
-                      >
-                        High Potential
-                      </span>
-                      <span className="text-[10px] text-sky-300 font-medium">Ready for MVP</span>
-                    </div>
-                  </div>
-                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)" }}>
-                    <Rocket size={22} className="text-sky-200" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  {/* Unicorn score */}
-                  <div className="p-4 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(8px)" }}>
-                    <div className="text-[9px] text-sky-300 font-semibold uppercase tracking-wider mb-2">Unicorn Potential</div>
-                    <div className="flex items-end gap-1 mb-3">
-                      <span className="text-4xl font-black text-white leading-none">91</span>
-                      <span className="text-base text-sky-300 font-bold mb-0.5">/100</span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
-                      <div className="h-full rounded-full transition-all duration-1000" style={{ width: "91%", background: "linear-gradient(90deg, #7dd3fc, #ffffff)" }} />
-                    </div>
-                  </div>
-                  {/* Market fit */}
-                  <div className="p-4 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(8px)" }}>
-                    <div className="text-[9px] text-sky-300 font-semibold uppercase tracking-wider mb-2">Market Fit Score</div>
-                    <div className="flex items-end gap-1 mb-3">
-                      <span className="text-4xl font-black text-white leading-none">88</span>
-                      <span className="text-base text-sky-300 font-bold mb-0.5">/100</span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
-                      <div className="h-full rounded-full transition-all duration-1000" style={{ width: "88%", background: "linear-gradient(90deg, #6ee7b7, #a7f3d0)" }} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <ArrowUpRight size={13} className="text-emerald-300 flex-shrink-0" />
-                  <span className="text-[10px] text-sky-200 font-medium">Top 9% of startups analyzed this month · AI confidence 94%</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Detailed Evaluation */}
-            <div className="bg-white rounded-3xl border p-5 shadow-sm" style={{ borderColor: "rgba(14,165,233,0.12)" }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-sky-900">Detailed Evaluation</h3>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: "rgba(14,165,233,0.08)" }}>
-                  <div className="w-1.5 h-1.5 rounded-full bg-sky-500 ping-soft" />
-                  <span className="text-[9px] font-bold text-sky-600">AI Confidence: 94%</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3.5">
-                {metrics.map((m) => (
-                  <div key={m.label}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] font-semibold text-sky-700">{m.label}</span>
-                      <span className="text-[11px] font-black text-sky-900">{m.value}%</span>
-                    </div>
-                    <ProgressBar value={m.value} colorFrom={m.from} colorTo={m.to} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Circular indicators */}
-              <div className="mt-5 pt-4 flex items-center justify-around" style={{ borderTop: "1px solid rgba(14,165,233,0.08)" }}>
-                {circleMetrics.map((c) => (
-                  <div key={c.label} className="flex flex-col items-center gap-1.5">
-                    <CircularProgress value={c.value} stroke={c.stroke} size={56} />
-                    <div className="text-center">
-                      {c.label.split("\n").map((line, i) => (
-                        <div key={i} className="text-[8px] text-sky-400 font-medium leading-tight">{line}</div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Risk Analysis */}
-            <div className="bg-white rounded-3xl border p-5 shadow-sm" style={{ borderColor: "rgba(14,165,233,0.12)" }}>
-              <h3 className="text-sm font-bold text-sky-900 mb-4">Risk Indicators</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {risks.map((r) => (
-                  <div key={r.label} className="p-3 rounded-2xl border" style={{ background: "rgba(240,249,255,0.5)", borderColor: "rgba(14,165,233,0.1)" }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-semibold text-sky-700">{r.label}</span>
-                      <span
-                        className="text-[8px] font-black px-1.5 py-0.5 rounded-md"
-                        style={
-                          r.level === "Low"
-                            ? { background: "#d1fae5", color: "#065f46" }
-                            : { background: "#fef3c7", color: "#92400e" }
-                        }
-                      >
-                        {r.level}
-                      </span>
-                    </div>
-                    <ProgressBar value={r.value} colorFrom={r.from} colorTo={r.to} />
-                    <div className="text-[9px] text-sky-400 font-medium mt-1.5">{r.value}% risk exposure</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Key AI Insights — glassmorphism */}
-            <div
-              className="rounded-3xl p-5 shadow-lg"
-              style={{
-                background: "linear-gradient(135deg, rgba(255,255,255,0.85), rgba(240,249,255,0.85))",
-                backdropFilter: "blur(16px)",
-                border: "1px solid rgba(56,189,248,0.25)",
-                boxShadow: "0 8px 32px rgba(2,132,199,0.1), inset 0 1px 0 rgba(255,255,255,0.6)",
-              }}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #38bdf8, #0284c7)" }}>
-                  <Brain size={12} className="text-white" />
-                </div>
-                <h3 className="text-sm font-bold text-sky-900">Key AI Insights</h3>
-                <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-lg" style={{ background: "rgba(14,165,233,0.1)" }}>
-                  <div className="w-1.5 h-1.5 rounded-full bg-sky-500 ping-soft" />
-                  <span className="text-[8px] font-bold text-sky-600 uppercase tracking-wide">AI Generated</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {insights.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-3 px-3 py-2.5 rounded-xl"
-                    style={
-                      item.type === "success"
-                        ? { background: "rgba(236,253,245,0.8)", border: "1px solid rgba(16,185,129,0.2)" }
-                        : { background: "rgba(255,251,235,0.8)", border: "1px solid rgba(245,158,11,0.2)" }
-                    }
-                  >
-                    {item.type === "success"
-                      ? <CheckCircle size={12} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                      : <AlertTriangle size={12} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                    }
-                    <span className={`text-[11px] leading-relaxed font-medium ${item.type === "success" ? "text-emerald-900" : "text-amber-900"}`}>
-                      {item.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Roadmap */}
-            <div className="bg-white rounded-3xl border p-5 shadow-sm" style={{ borderColor: "rgba(14,165,233,0.12)" }}>
-              <h3 className="text-sm font-bold text-sky-900 mb-4">AI-Generated Roadmap</h3>
+        <div className="space-y-6">
+          {error && (
+            <div className="flex items-start gap-3 border border-red-200 bg-red-50 p-5 text-red-800">
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
               <div>
-                {roadmap.map((step, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
-                        style={
-                          i === 0
-                            ? { background: "linear-gradient(135deg, #38bdf8, #0284c7)", color: "#fff", boxShadow: "0 4px 12px rgba(2,132,199,0.3)" }
-                            : { background: "rgba(14,165,233,0.1)", color: "#0369a1" }
-                        }
-                      >
-                        {i + 1}
-                      </div>
-                      {i < roadmap.length - 1 && (
-                        <div className="w-px h-10 mt-1" style={{ background: "linear-gradient(to bottom, rgba(14,165,233,0.25), rgba(14,165,233,0.05))" }} />
-                      )}
-                    </div>
-                    <div className={i < roadmap.length - 1 ? "pb-5" : ""}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-bold text-sky-900">{step.phase}</span>
-                        <span
-                          className="text-[8px] px-1.5 py-0.5 rounded-md font-semibold"
-                          style={{ background: "rgba(14,165,233,0.08)", color: "#0369a1", border: "1px solid rgba(14,165,233,0.12)" }}
-                        >
-                          {step.period}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-sky-500 leading-relaxed">{step.detail}</p>
-                    </div>
-                  </div>
-                ))}
+                <p className="font-semibold">Analysis unavailable</p>
+                <p className="mt-1 text-sm">{error}</p>
               </div>
             </div>
+          )}
 
-            {/* Team Composition */}
-            <div className="bg-white rounded-3xl border p-5 shadow-sm" style={{ borderColor: "rgba(14,165,233,0.12)" }}>
-              <h3 className="text-sm font-bold text-sky-900 mb-3">Recommended Team Composition</h3>
-              <div className="grid grid-cols-3 gap-3">
-                {teamRoles.map((member) => (
-                  <div key={member.role} className={`p-3 rounded-2xl border ${member.bg} ${member.border}`}>
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center mb-2.5 ${member.iconBg}`}>
-                      {member.icon}
-                    </div>
-                    <div className="text-[10px] font-bold text-sky-900 mb-2 leading-tight">{member.role}</div>
-                    <div className="flex flex-wrap gap-1">
-                      {member.skills.map((s) => (
-                        <span
-                          key={s}
-                          className="text-[8px] px-1.5 py-0.5 rounded-md font-semibold"
-                          style={{ background: "rgba(255,255,255,0.8)", color: "#0369a1", border: "1px solid rgba(14,165,233,0.15)" }}
-                        >
-                          {s}
-                        </span>
-                      ))}
+          {!blueprint && !error && (
+            <div className="flex min-h-72 flex-col items-center justify-center border border-dashed border-gray-300 bg-white px-8 text-center">
+              <Brain className="mb-4 h-9 w-9 text-gray-400" />
+              <h2 className="font-semibold text-gray-900">No persisted analysis selected</h2>
+              <p className="mt-2 max-w-md text-sm text-gray-500">
+                Live diagnostic and pipeline results will appear after the service persists a project.
+              </p>
+            </div>
+          )}
+
+          {blueprint && (
+            <>
+              <section className="border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" />
+                    <div>
+                      <h2 className="font-semibold text-emerald-950">
+                        {asText(blueprint.venture_name) || ideaTitle} persisted
+                      </h2>
+                      <p className="mt-1 break-all text-xs text-emerald-800">Project {projectId}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Next AI Actions */}
-            <div className="bg-white rounded-3xl border p-5 shadow-sm" style={{ borderColor: "rgba(14,165,233,0.12)" }}>
-              <h3 className="text-sm font-bold text-sky-900 mb-3">Next AI Actions</h3>
-              {nextSteps.length > 0 && (
-                <ul className="mb-3 space-y-1.5">
-                  {nextSteps.map((step, i) => (
-                    <li key={i} className="flex items-start gap-2 text-[11px] text-sky-700 leading-relaxed">
-                      <ChevronRight size={12} className="text-sky-400 flex-shrink-0 mt-0.5" />
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                {[
-                  { label: "Generate Pitch Deck", icon: <FileText size={15} />, primary: true },
-                  { label: "Build MVP Roadmap",   icon: <Map size={15} />,      primary: false },
-                  { label: "Explore Pivot Ideas", icon: <Compass size={15} />,  primary: false },
-                ].map((action) => (
                   <button
-                    key={action.label}
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl text-[11px] font-bold transition-all hover:scale-105 active:scale-95"
-                    style={
-                      action.primary
-                        ? { background: "linear-gradient(135deg, #0ea5e9, #0284c7)", color: "#fff", boxShadow: "0 4px 14px rgba(2,132,199,0.3)" }
-                        : { background: "rgba(240,249,255,0.8)", color: "#0369a1", border: "1px solid rgba(14,165,233,0.15)" }
-                    }
+                    type="button"
+                    disabled={!projectId || provisioning}
+                    onClick={() => void handleCreateWorkspace()}
+                    className="inline-flex h-10 items-center justify-center gap-2 bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 disabled:bg-gray-300"
                   >
-                    {action.icon}
-                    <span className="text-center leading-tight">{action.label}</span>
+                    <Briefcase className="h-4 w-4" />
+                    {provisioning ? "Creating workspace" : "Create workspace"}
                   </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-semibold text-sky-600 transition-all hover:bg-sky-100 active:scale-95"
-                  style={{ background: "rgba(240,249,255,0.6)", border: "1px solid rgba(14,165,233,0.12)" }}
-                >
-                  <RefreshCw size={12} />
-                  Revise Idea
-                </button>
-                <button
-                  onClick={() => navigate("/matches")}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-semibold text-sky-600 transition-all hover:bg-sky-100 active:scale-95"
-                  style={{ background: "rgba(240,249,255,0.6)", border: "1px solid rgba(14,165,233,0.12)" }}
-                >
-                  <Users size={12} />
-                  Find Collaborators
-                </button>
-              </div>
-            </div>
-
-            <div className="h-1" />
-          </div>
-
-          {/* Sticky structured idea form footer */}
-          <div
-            className="flex-shrink-0 border-t p-4"
-            style={{ borderColor: "rgba(14,165,233,0.12)", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)" }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <Lightbulb size={14} className="text-sky-500" />
-              <h4 className="text-[12px] font-bold text-sky-900">Enter your startup idea</h4>
-              <span className="text-[9px] text-sky-400 ml-1">AI will analyse and refine</span>
-            </div>
-
-            <div className="grid grid-cols-12 gap-3">
-              {/* Idea title */}
-              <div className="col-span-12 lg:col-span-5">
-                <label className="block text-[9px] font-bold text-sky-700 uppercase tracking-wider mb-1.5">
-                  Startup Idea
-                </label>
-                <input
-                  type="text"
-                  value={ideaTitle}
-                  onChange={(e) => setIdeaTitle(e.target.value)}
-                  placeholder="e.g., AI-powered diagnostics for rural clinics"
-                  className="w-full text-[12px] rounded-xl px-3 py-2.5 text-sky-900 placeholder-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-300 transition-all"
-                  style={{
-                    background: "rgba(240,249,255,0.7)",
-                    border: "1px solid rgba(14,165,233,0.18)",
-                  }}
-                />
-              </div>
-
-              {/* Solution */}
-              <div className="col-span-12 lg:col-span-7">
-                <label className="block text-[9px] font-bold text-sky-700 uppercase tracking-wider mb-1.5">
-                  Solution you are proposing
-                </label>
-                <textarea
-                  value={ideaSolution}
-                  onChange={(e) => setIdeaSolution(e.target.value)}
-                  placeholder="How does it work and who does it help?"
-                  rows={2}
-                  className="w-full text-[12px] rounded-xl px-3 py-2.5 resize-none text-sky-900 placeholder-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-300 transition-all"
-                  style={{
-                    background: "rgba(240,249,255,0.7)",
-                    border: "1px solid rgba(14,165,233,0.18)",
-                  }}
-                />
-              </div>
-
-              {/* Problem area chips */}
-              <div className="col-span-12">
-                <label className="block text-[9px] font-bold text-sky-700 uppercase tracking-wider mb-1.5">
-                  Problem area you are solving
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {PROBLEM_AREAS.map((area) => {
-                    const active = selectedAreas.includes(area.id);
-                    return (
-                      <button
-                        key={area.id}
-                        type="button"
-                        onClick={() => toggleArea(area.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all active:scale-95 ${
-                          active ? "text-white shadow-md" : "text-sky-700 hover:bg-sky-50"
-                        }`}
-                        style={
-                          active
-                            ? { background: "linear-gradient(135deg, #38bdf8, #0284c7)", border: "1px solid transparent" }
-                            : { background: "rgba(240,249,255,0.7)", border: "1px solid rgba(14,165,233,0.2)" }
-                        }
-                      >
-                        <span>{area.emoji}</span>
-                        {area.label}
-                      </button>
-                    );
-                  })}
                 </div>
-              </div>
-
-              {/* Actions row */}
-              <div className="col-span-12 flex flex-wrap items-center gap-2 pt-1">
-                <button
-                  disabled={!ideaTitle || !ideaSolution || selectedAreas.length === 0 || analyzing}
-                  onClick={handleRunAnalysis}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[11px] font-bold transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-                  style={{ background: "linear-gradient(135deg, #0ea5e9, #0284c7)", boxShadow: "0 3px 10px rgba(2,132,199,0.3)" }}
-                >
-                  <Activity size={12} />
-                  {analyzing ? "Analyzing…" : "Run Analysis"}
-                </button>
-                <button
-                  onClick={handleCreateWorkspace}
-                  disabled={provisioning}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[11px] font-bold transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 whitespace-nowrap"
-                  style={{ background: "linear-gradient(135deg, #10b981, #059669)", boxShadow: "0 3px 10px rgba(5,150,105,0.3)" }}
-                  title={analyzedProjectId ? "Create a workspace bound to this analyzed venture" : "Create a collaborative workspace for this project"}
-                >
-                  <Briefcase size={12} />
-                  {provisioning ? "Creating…" : "Create Workspace"}
-                </button>
-                <button
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sky-600 text-[11px] font-bold transition-all hover:bg-sky-100 active:scale-95 whitespace-nowrap"
-                  style={{ background: "rgba(240,249,255,0.8)", border: "1px solid rgba(14,165,233,0.18)" }}
-                >
-                  <Upload size={12} />
-                  Upload Docs
-                </button>
-                <span className="text-[9px] text-sky-400 ml-auto">
-                  {selectedAreas.length > 0
-                    ? `${selectedAreas.length} area${selectedAreas.length === 1 ? "" : "s"} selected`
-                    : "Select at least one area to enable analysis"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        {/* ══════════════ RIGHT PANEL ══════════════ */}
-        {isDocPreviewOpen && (
-          <aside
-            className="w-[420px] flex-shrink-0 flex flex-col border-l overflow-hidden"
-            style={{ borderColor: "rgba(14,165,233,0.12)", background: "rgba(255,255,255,0.82)", backdropFilter: "blur(12px)" }}
-          >
-            {/* Header */}
-            <div className="flex-shrink-0 px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: "rgba(14,165,233,0.1)" }}>
-              <div>
-                <h3 className="text-sm font-bold text-sky-900">Document Preview</h3>
-                <p className="text-[9px] text-sky-400 font-medium mt-0.5">AI-Generated Report</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  className="px-3 py-1.5 rounded-xl text-white text-[10px] font-bold transition-all hover:opacity-90 active:scale-95"
-                  style={{ background: "linear-gradient(135deg, #0ea5e9, #0284c7)", boxShadow: "0 3px 8px rgba(2,132,199,0.3)" }}
-                >
-                  Publish
-                </button>
-                <button
-                  onClick={() => setIsDocPreviewOpen(false)}
-                  className="w-7 h-7 rounded-xl flex items-center justify-center transition-all hover:bg-sky-100 active:scale-95"
-                  style={{ background: "rgba(240,249,255,0.8)", border: "1px solid rgba(14,165,233,0.15)" }}
-                  title="Collapse panel"
-                >
-                  <ChevronRight size={14} className="text-sky-600" />
-                </button>
-              </div>
-            </div>
-
-          {/* Scrollable doc content */}
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 scrollbar-hide">
-
-            {/* Doc header */}
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-base font-bold text-sky-900 leading-tight">TechIT Network</h2>
-                <p className="text-[10px] text-sky-500 font-medium mt-0.5">AI-Powered Startup Incubation Ecosystem</p>
-              </div>
-              <span
-                className="px-2.5 py-1 rounded-xl text-[9px] font-black flex-shrink-0"
-                style={{ background: "#d1fae5", color: "#065f46" }}
-              >
-                High Potential
-              </span>
-            </div>
-
-            {/* Section helper */}
-            {([
-              {
-                title: "Idea Summary",
-                content: (
-                  <p className="text-[11px] text-sky-700 leading-relaxed">
-                    TechIT Network is an intelligent platform that connects student founders, technical talent, mentors, collaborators, and investors in one unified AI-driven incubation ecosystem focused on emerging markets.
-                  </p>
-                ),
-              },
-              {
-                title: "AI Analysis Summary",
-                content: (
-                  <>
-                    <div className="grid grid-cols-2 gap-2.5 mb-3">
-                      <div className="p-3 rounded-2xl border" style={{ background: "rgba(240,249,255,0.5)", borderColor: "rgba(14,165,233,0.12)" }}>
-                        <p className="text-[8px] text-sky-400 font-semibold uppercase mb-1">Market Fit</p>
-                        <p className="text-2xl font-black text-emerald-600">82%</p>
-                      </div>
-                      <div className="p-3 rounded-2xl border" style={{ background: "rgba(240,249,255,0.5)", borderColor: "rgba(14,165,233,0.12)" }}>
-                        <p className="text-[8px] text-sky-400 font-semibold uppercase mb-1">Unicorn</p>
-                        <p className="text-2xl font-black text-sky-600">64%</p>
-                      </div>
-                    </div>
-                    <ul className="space-y-2">
-                      {[
-                        { type: "success", text: "Strong product-market alignment with student innovators" },
-                        { type: "success", text: "Scalable AI matchmaking engine" },
-                        { type: "warning", text: "Need differentiation from global competitors" },
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className={`text-[11px] font-black flex-shrink-0 mt-px ${item.type === "success" ? "text-emerald-500" : "text-amber-500"}`}>
-                            {item.type === "success" ? "✓" : "⚠"}
-                          </span>
-                          <span className="text-[10px] text-sky-700 leading-relaxed">{item.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ),
-              },
-              {
-                title: "Business Plan Excerpt",
-                content: (
-                  <div className="space-y-2.5">
-                    {[
-                      { label: "Executive Summary", body: "TechIT aims to become the leading startup incubation platform in Africa by leveraging AI to reduce execution friction and increase success rates." },
-                      { label: "Market Opportunity", body: "Over 500,000 student founders and technical talent across African universities seeking structured support." },
-                      { label: "Monetization", body: "Freemium model + premium incubation services + investor matchmaking fees." },
-                    ].map((item) => (
-                      <p key={item.label} className="text-[11px] text-sky-700 leading-relaxed">
-                        <strong className="text-sky-900 font-bold">{item.label}: </strong>{item.body}
-                      </p>
-                    ))}
-                  </div>
-                ),
-              },
-              {
-                title: "Recommendations & Risks",
-                content: (
-                  <p className="text-[11px] text-sky-700 leading-relaxed">
-                    Focus initial launch on 5 key universities. Primary risk is user acquisition — mitigated through university partnerships and AI-powered hackathons.
-                  </p>
-                ),
-              },
-            ] as { title: string; content: React.ReactNode }[]).map((section) => (
-              <section key={section.title}>
-                <h4
-                  className="text-[8px] font-black text-sky-700 uppercase tracking-widest pb-2 mb-3"
-                  style={{ borderBottom: "1px solid rgba(14,165,233,0.12)" }}
-                >
-                  {section.title}
-                </h4>
-                {section.content}
               </section>
-            ))}
 
-          </div>
-          </aside>
-        )}
+              {(unicornScore !== null || investmentScore !== null) && (
+                <section className="grid gap-4 sm:grid-cols-2">
+                  {unicornScore !== null && <ScoreCard label="Unicorn Potential" value={unicornScore} icon={Sparkles} />}
+                  {investmentScore !== null && <ScoreCard label="Investment Score" value={investmentScore} icon={Gauge} />}
+                </section>
+              )}
 
-        {/* Collapse toggle button when panel is closed */}
-        {!isDocPreviewOpen && (
-          <button
-            onClick={() => setIsDocPreviewOpen(true)}
-            className="fixed top-4 right-4 w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl transition-all hover:scale-105 active:scale-95 z-50"
-            style={{ background: "linear-gradient(135deg, #0ea5e9, #0284c7)", boxShadow: "0 4px 16px rgba(2,132,199,0.35)" }}
-            title="Show document preview"
-          >
-            <ChevronLeft size={18} className="text-white" />
-          </button>
-        )}
-      </div>
-    </>
+              {(hasContent(blueprint.unicorn_classification) || hasContent(blueprint.pivot_needed)) && (
+                <section className="grid gap-4 border border-gray-200 bg-white p-5 sm:grid-cols-2">
+                  {hasContent(blueprint.unicorn_classification) && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500">Classification</p>
+                      <p className="mt-1 font-medium text-gray-900">{valueLabel(blueprint.unicorn_classification)}</p>
+                    </div>
+                  )}
+                  {hasContent(blueprint.pivot_needed) && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500">Pivot Recommended</p>
+                      <p className="mt-1 font-medium text-gray-900">{valueLabel(blueprint.pivot_needed)}</p>
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {Object.keys(structuredProfile).length > 0 && (
+                <section className="border border-gray-200 bg-white p-6">
+                  <div className="mb-5 flex items-center gap-2">
+                    <Target className="h-5 w-5 text-cyan-700" />
+                    <h2 className="font-semibold text-gray-900">Persisted Venture Profile</h2>
+                  </div>
+                  <LiveValue value={structuredProfile} />
+                </section>
+              )}
+
+              {sections.map((section) => (
+                <section key={section.key} className="border border-gray-200 bg-white p-6">
+                  <h2 className="mb-5 font-semibold text-gray-900">{section.label}</h2>
+                  <LiveValue value={section.value} />
+                </section>
+              ))}
+
+              {nextSteps.length > 0 && (
+                <section className="border border-gray-200 bg-white p-6">
+                  <h2 className="mb-4 font-semibold text-gray-900">Persisted Next Steps</h2>
+                  <LiveValue value={nextSteps} />
+                </section>
+              )}
+            </>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }

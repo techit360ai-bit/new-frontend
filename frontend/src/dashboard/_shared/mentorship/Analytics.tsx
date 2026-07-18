@@ -17,7 +17,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { analyticsData, mockMentees } from "./data";
+import { analyticsData, mentees } from "./liveData";
 import { ACCENT_FILL, ACCENT_TEXT, CHART_PRIMARY, CHART_SECONDARY } from "./theme";
 
 export function Analytics() {
@@ -160,7 +160,7 @@ export function Analytics() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {mockMentees.map((mentee) => (
+            {mentees.map((mentee) => (
               <div key={mentee.id} className="flex items-center gap-4">
                 <img
                   src={mentee.avatar}

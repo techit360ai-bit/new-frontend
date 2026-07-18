@@ -20,6 +20,7 @@ const requiredBuildEnv = {
   VITE_TECHIT_API: "https://techit-backend.onrender.com/api/mcp",
   VITE_MESSAGING_BASE_URL: "https://techit-messaging.onrender.com",
   VITE_MESSAGING_WS_URL: "wss://techit-messaging.onrender.com/ws",
+  VITE_API_STRICT: "1",
 };
 
 function fail(message) {
@@ -58,7 +59,8 @@ function getBuildStepEnv(filePath, content, buildStep) {
   for (const line of stepLines.slice(envStart + 1)) {
     const match = line.match(/^\s{10}([A-Z0-9_]+):\s*(.+?)\s*$/);
     if (!match) continue;
-    env.set(match[1], match[2]);
+    const value = match[2].replace(/^("|')(.*)\1$/, "$2");
+    env.set(match[1], value);
   }
   return env;
 }

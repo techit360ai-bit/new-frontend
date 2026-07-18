@@ -376,11 +376,10 @@ export async function submitHackathonFinal(
   id: string,
   teamId: string,
   submission: FinalSubmission,
-  judgeFeedback: JudgeFeedback,
 ): Promise<{ ok: boolean; registration?: HackathonRegistration | null }> {
   const data = await domainPost<{ ok: boolean; registration?: unknown }>(
     `/hackathons/${encodeURIComponent(id)}/teams/${encodeURIComponent(teamId)}/final`,
-    { submission, judgeFeedback },
+    { submission },
   );
   return {
     ok: data.ok,

@@ -20,7 +20,7 @@ export function TeamWorkspaceView() {
   const localWorkspace = founderProfile.teamWorkspaces.find((w) => w.teamId === teamId);
   const ws = localWorkspace ?? (
     reg?.workspaceId
-      ? { ...buildTeamWorkspace(reg, new Date(reg.registeredAt).getTime()), id: reg.workspaceId }
+      ? buildTeamWorkspace(reg, reg.workspaceId, reg.registeredAt)
       : undefined
   );
 
