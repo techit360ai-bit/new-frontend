@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import type { HackathonRegistration } from "@/contexts/UserContext";
 import { useFounderProfile } from "@/contexts/UserContext";
-import { promoteDefaults, buildPromotedProject } from "@/dashboard/_shared/hackathon/promote";
+import { promoteDefaults } from "@/dashboard/_shared/hackathon/promote";
 import { createFounderProject } from "@/lib/api/projects";
 import { useGenerateTeamWorkspace } from "./useGenerateTeamWorkspace";
 
@@ -31,17 +31,11 @@ export function PromoteToStartupModal({ registration, onClose }: Props) {
     if (!canCreate) return;
     setCreating(true);
     try {
-      const draft = buildPromotedProject(
-        registration,
-        founderProfile,
-        { title, tagline, industry, stage },
-        Date.now(),
-      );
       const result = await createFounderProject({
-        title: draft.title,
-        tagline: draft.tagline,
-        industry: draft.industry,
-        stage: draft.stage,
+        title: title.trim(),
+        tagline: tagline.trim(),
+        industry: industry.trim(),
+        stage,
         hackathonId: registration.hackathonId,
         teamId: registration.teamId,
       });

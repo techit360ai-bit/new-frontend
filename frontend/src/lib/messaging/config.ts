@@ -1,5 +1,5 @@
 // Messaging service config - a SEPARATE origin from ai-router (lib/api/config.ts).
-export type ViteEnv = Record<string, string | undefined>;
+export type ViteEnv = Record<string, string | boolean | undefined>;
 
 export const env: ViteEnv =
   typeof import.meta !== "undefined"
@@ -7,15 +7,21 @@ export const env: ViteEnv =
     : {};
 
 export const MESSAGING_BASE_URL: string =
-  (env.VITE_MESSAGING_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+  (typeof env.VITE_MESSAGING_BASE_URL === "string"
+    ? env.VITE_MESSAGING_BASE_URL
+    : "http://localhost:8080").replace(/\/$/, "");
 
 export const MESSAGING_WS_URL: string =
-  env.VITE_MESSAGING_WS_URL ?? "ws://localhost:8080/ws";
+  typeof env.VITE_MESSAGING_WS_URL === "string"
+    ? env.VITE_MESSAGING_WS_URL
+    : "ws://localhost:8080/ws";
 
 export const MESSAGING_PREFIX = "/api/v1";
 
 export function messagingFallbackEnabled(): boolean {
-  return env.VITE_API_STRICT !== "1";
+  if (env.VITE_API_STRICT === "1") return false;
+  if (env.VITE_API_FALLBACK !== undefined) return env.VITE_API_FALLBACK === "1";
+  return env.MODE === undefined || env.MODE === "development" || env.MODE === "test" || env.DEV === true;
 }
 
 // Auth token getter; defaults to the AuthContext localStorage key.

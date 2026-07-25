@@ -1,16 +1,18 @@
-// buildTeamWorkspace — pure, deterministic. Seeds a TeamWorkspace record from a
-// registration: idea (the 7 brief fields), team roster, and submission artifacts.
-// now is passed in (caller owns Date.now()). No React, no side effects.
+// Build the client view from a persisted workspace ID and registration data.
 
 import type { HackathonRegistration, TeamWorkspace } from "@/contexts/UserContext";
 
-export function buildTeamWorkspace(reg: HackathonRegistration, now: number): TeamWorkspace {
+export function buildTeamWorkspace(
+  reg: HackathonRegistration,
+  workspaceId: string,
+  createdAt = new Date().toISOString(),
+): TeamWorkspace {
   return {
-    id: `ws_team_${now}`,
+    id: workspaceId,
     hackathonId: reg.hackathonId,
     teamId: reg.teamId,
     teamName: reg.teamName,
-    createdAt: new Date(now).toISOString(),
+    createdAt,
     idea: reg.brief
       ? {
           problem: reg.brief.problem, targetUser: reg.brief.targetUser,

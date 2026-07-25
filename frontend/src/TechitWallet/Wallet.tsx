@@ -1,12 +1,7 @@
 import {
   CreditCard,
   TrendingUp,
-  Zap,
-  Database,
-  Sparkles,
-  Rocket,
   Clock,
-  BarChart3,
   X,
   Play,
   ShoppingCart,
@@ -48,27 +43,6 @@ const bottomCards = [
     description: "Preview credit cost",
     icon: Clock,
     color: "border-teal-500/50",
-  },
-];
-
-const pricingFeatures = [
-  {
-    icon: Clock,
-    title: "Credits Never Expire",
-    description:
-      "Use your credits anytime. They roll over month to month, so you never lose what you paid for.",
-  },
-  {
-    icon: Zap,
-    title: "Flexible Usage",
-    description:
-      "Use credits across all features: AI code generation, automation, pipelines, and more.",
-  },
-  {
-    icon: Rocket,
-    title: "Scale As You Grow",
-    description:
-      "Start small and upgrade anytime. Buy extra credits when you need them.",
   },
 ];
 
@@ -135,6 +109,7 @@ export default function Wallet() {
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [packages, setPackages] = useState<DisplayPackage[]>([]);
   const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [walletLoading, setWalletLoading] = useState(true);
   const [walletError, setWalletError] = useState<string | null>(null);
 
   // PaymentModal state — holds the plan the user clicked "Get Started" on
@@ -166,6 +141,9 @@ export default function Wallet() {
         setPackages([]);
         setPlans([]);
         setWalletError(error instanceof Error ? error.message : "Live wallet data is unavailable.");
+      })
+      .finally(() => {
+        if (alive) setWalletLoading(false);
       });
     return () => { alive = false; };
   }, []);
@@ -193,15 +171,20 @@ export default function Wallet() {
   };
 
   const handleSelectPackage = async (pkg: DisplayPackage) => {
+    const amount = Number(pkg.amount ?? 0);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast("This package has no persisted numeric amount, so payment is unavailable.");
+      return;
+    }
     try {
-      await createWalletPaymentIntent({
-        amount: Number(pkg.amount || 0),
+      const result = await createWalletPaymentIntent({
+        amount,
         currency: pkg.currency || "USD",
         credits: pkg.credits,
         provider: "wallet",
         idemKey: `wallet-${pkg.id}-${Date.now()}`,
       });
-      toast("Payment intent created. Complete payment from your billing provider.");
+      toast(`Payment intent ${result.paymentIntent.id} created with status ${result.paymentIntent.status}.`);
     } catch (error) {
       toast(`Could not create payment intent: ${error instanceof Error ? error.message : "backend unavailable"}.`);
     }
@@ -225,10 +208,10 @@ export default function Wallet() {
                   <button className="text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-1">
                     Wallet
                   </button>
-                  <button className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <button onClick={openPlans} className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     Pricing
                   </button>
-                  <button className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <button onClick={openViewUsage} className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     Analytics
                   </button>
                 </nav>
@@ -243,6 +226,11 @@ export default function Wallet() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 lg:px-8 py-8 space-y-8">
+          {walletLoading && (
+            <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+              Loading persisted wallet records...
+            </div>
+          )}
           {walletError && (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               Live wallet records could not be loaded: {walletError}
@@ -289,7 +277,7 @@ export default function Wallet() {
               >
                 Plans
               </button>
-              <button className="w-full rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-white font-semibold py-2.5 transition-colors">
+              <button onClick={openViewUsage} className="w-full rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-white font-semibold py-2.5 transition-colors">
                 History
               </button>
             </div>
@@ -383,6 +371,16 @@ export default function Wallet() {
               return (
                 <div
                   key={idx}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    if (idx === 0) openPlans();
+                    else if (idx === 1) openViewUsage();
+                    else toast("Automation cost previews require a persisted automation estimate endpoint.");
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") event.currentTarget.click();
+                  }}
                   className={`rounded-2xl bg-slate-900/80 border ${card.color} px-6 py-6 space-y-3 hover:border-opacity-100 transition-all cursor-pointer group`}
                 >
                   <div className="flex items-start justify-between">
@@ -478,20 +476,6 @@ export default function Wallet() {
                   </div>
                 )}
               </div>
-              <div className="rounded-lg bg-slate-800/50 border border-slate-700 px-4 py-3 flex items-start gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 mt-0.5 shrink-0">
-                  <span className="text-xs text-cyan-400">✓</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">
-                    Credits never expire
-                  </p>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Use your credits anytime for AI automation, pipelines, and
-                    more
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -553,7 +537,13 @@ export default function Wallet() {
                 >
                   Cancel
                 </button>
-                <button className="w-full rounded-xl border border-cyan-500/50 bg-slate-800/30 hover:bg-slate-800/50 text-cyan-400 font-semibold py-3 transition-colors flex items-center justify-center gap-2">
+                <button
+                  onClick={() => {
+                    closeViewUsage();
+                    openModal();
+                  }}
+                  className="w-full rounded-xl border border-cyan-500/50 bg-slate-800/30 hover:bg-slate-800/50 text-cyan-400 font-semibold py-3 transition-colors flex items-center justify-center gap-2"
+                >
                   <ShoppingCart className="h-4 w-4" />
                   Buy More Credits
                 </button>
@@ -687,27 +677,6 @@ export default function Wallet() {
                   )}
                 </div>
 
-                {/* Features Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pb-6">
-                  {pricingFeatures.map((feature, idx) => {
-                    const IconComponent = feature.icon;
-                    return (
-                      <div
-                        key={idx}
-                        className="rounded-xl bg-linear-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-3 sm:p-4 space-y-2 hover:border-slate-600 transition-all"
-                      >
-                        <IconComponent className="h-5 w-5 text-cyan-400" />
-                        <h4 className="text-xs sm:text-sm font-semibold text-white">
-                          {feature.title}
-                        </h4>
-                        <p className="text-xs text-slate-400">
-                          {feature.description}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
                 {/* Custom Plan Section */}
                 <div className="rounded-2xl bg-linear-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/20 p-4 sm:p-6 text-center space-y-2 pb-8">
                   <h3 className="text-lg sm:text-xl font-bold text-white">
@@ -717,7 +686,7 @@ export default function Wallet() {
                     We offer custom pricing for large teams and enterprises with
                     specific needs.
                   </p>
-                  <button className="mx-auto rounded-lg bg-white hover:bg-slate-100 text-slate-900 font-semibold px-4 sm:px-6 py-2 transition-colors text-xs">
+                  <button onClick={() => toast("A persisted sales-contact endpoint is not available.")} className="mx-auto rounded-lg bg-white hover:bg-slate-100 text-slate-900 font-semibold px-4 sm:px-6 py-2 transition-colors text-xs">
                     Contact Sales
                   </button>
                 </div>

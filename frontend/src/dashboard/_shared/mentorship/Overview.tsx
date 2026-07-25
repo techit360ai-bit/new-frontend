@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { mockRooms, mockMentees, analyticsData } from "./data";
+import { rooms, mentees, analyticsData } from "./liveData";
 import { ACCENT_SOLID, ACCENT_TEXT, ACCENT_SOFT, HERO_GRADIENT } from "./theme";
 
 const BASE = "/investor/mentorship";
@@ -107,7 +107,7 @@ export function Overview() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {mockRooms.map((room) => (
+          {rooms.map((room) => (
             <Card key={room.id} className="transition-shadow hover:shadow-lg">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -147,7 +147,7 @@ export function Overview() {
         <Card>
           <CardContent className="p-0">
             <div className="divide-y divide-border">
-              {mockMentees.map((mentee) => (
+              {mentees.map((mentee) => (
                 <div key={mentee.id} className="p-4 transition-colors hover:bg-accent">
                   <div className="flex items-center gap-4">
                     <img
