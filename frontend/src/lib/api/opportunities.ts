@@ -2,7 +2,7 @@
 //
 // Collaborator opportunities - BACKEND /api/domain/opportunities.
 
-import { domainGet, domainPatch } from "@/lib/domainApi";
+import { domainGet, domainPatch, domainPost } from "@/lib/domainApi";
 import type { Event, Funding, Hackathon, Opportunity, Program } from "@/dashboard/_shared/opportunities/types";
 
 export type CollaboratorOpportunityType = "project" | "advisory" | "gig" | "testing";
@@ -107,6 +107,22 @@ export function fetchCollaboratorOpportunities(): Promise<CollaboratorOpportunit
     const rows = Array.isArray(data.opportunities) ? data.opportunities : [];
     return rows.map(normalizeCollaboratorOpportunity);
   });
+}
+
+export interface OpportunityApplication {
+  id: string;
+  opportunityId: string;
+  opportunityTitle: string;
+  message: string;
+  status: string;
+  createdAt: string;
+}
+
+export function applyToOpportunity(opportunityId: string, message: string): Promise<OpportunityApplication> {
+  return domainPost<{ ok: true; application: OpportunityApplication }>(
+    `/opportunities/${opportunityId}/apply`,
+    { message },
+  ).then((data) => data.application);
 }
 
 /** PATCH /api/domain/opportunities/{id} - persist collaborator opportunity status. */

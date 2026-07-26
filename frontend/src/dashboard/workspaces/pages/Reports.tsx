@@ -119,7 +119,29 @@ export function Reports() {
               Live workspace task and activity metrics
             </p>
           </div>
-          <button onClick={() => toast('Report export requires a persisted export endpoint.')} className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
+          <button
+            onClick={() => {
+              const report = {
+                exported_at: new Date().toISOString(),
+                summary: { completed: completedTasks, open: openTasks, events: totalEvents, total_tasks: tasks.length },
+                contributors: contributorData,
+                status_distribution: statusData,
+                recent_activity: activity.slice(0, 20),
+              };
+              const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `workspace-report-${Date.now()}.json`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              toast.success('Report exported successfully');
+            }}
+            disabled={loading || tasks.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm disabled:opacity-50"
+          >
             <Download className="w-4 h-4" />
             <span className="text-sm font-medium">Export Report</span>
           </button>

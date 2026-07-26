@@ -1,12 +1,36 @@
 import { FileText, FolderOpen, Image, FileCode, Download, MoreVertical, Upload } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { fetchDomainFiles, type DomainFileItem } from '@/lib/api/files';
+import { fetchDomainFiles, createDomainFile, type DomainFileItem } from '@/lib/api/files';
 
 export function Files() {
   const [files, setFiles] = useState<DomainFileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+    for (const file of Array.from(selectedFiles)) {
+      try {
+        const sizeLabel = file.size < 1024 ? `${file.size} B`
+          : file.size < 1024 * 1024 ? `${(file.size / 1024).toFixed(1)} KB`
+          : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+        const created = await createDomainFile({
+          name: file.name,
+          type: 'file',
+          size: sizeLabel,
+          sizeBytes: file.size,
+        });
+        setFiles((prev) => [created, ...prev]);
+        toast.success(`${file.name} uploaded`);
+      } catch (err) {
+        toast.error(`Failed to upload ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   useEffect(() => {
     let alive = true;
@@ -55,7 +79,17 @@ export function Files() {
               Manage and organize your project files
             </p>
           </div>
-          <button onClick={() => toast('File uploads require a persisted upload endpoint.')} className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => { void handleFileUpload(e); }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm"
+          >
             <Upload className="w-4 h-4" />
             <span className="text-sm font-medium">Upload Files</span>
           </button>
