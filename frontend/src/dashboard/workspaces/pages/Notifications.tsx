@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
+  deleteNotification as deleteNotificationApi,
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -152,8 +153,13 @@ export function Notifications() {
       .catch((err) => setError(err instanceof Error ? err.message : 'Notification update failed.'));
   };
 
-  const deleteNotification = () => {
-    toast('Notification deletion requires a persisted delete endpoint.');
+  const deleteNotification = (id: string) => {
+    deleteNotificationApi(id)
+      .then(() => {
+        setNotifications((prev) => prev.filter((row) => row.id !== id));
+        toast.success('Notification deleted');
+      })
+      .catch((err) => toast.error(err instanceof Error ? err.message : 'Delete failed'));
   };
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;

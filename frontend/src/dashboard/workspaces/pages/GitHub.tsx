@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { listActivity, listConnectors } from '../lib/api/connectors';
+import { workspacePost } from '../lib/api/client';
 import type { ActivityEvent, Connector } from '../lib/types';
 
 function formatTimestamp(value?: string): string {
@@ -126,7 +127,26 @@ export function GitHub() {
             </Button>
             <Button
               className="bg-[#2196F3] hover:bg-[#1976D2]"
-              onClick={() => toast('Repository creation requires a persisted GitHub tool action.')}
+              onClick={async () => {
+                const repoName = window.prompt('Enter the GitHub repository URL or name:');
+                if (!repoName?.trim()) return;
+                try {
+                  await workspacePost('/connectors', {
+                    id: 'github',
+                    name: 'GitHub',
+                    category: 'Source Control',
+                    status: 'connected',
+                    authType: 'oauth2',
+                    capabilities: ['read', 'write'],
+                    tools: [],
+                    resources: [...resources, repoName.trim()],
+                  });
+                  toast.success(`Repository "${repoName.trim()}" added successfully.`);
+                  load();
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'Failed to add repository connector.');
+                }
+              }}
             >
               <Github className="w-4 h-4 mr-2" />
               New Repository
@@ -202,7 +222,19 @@ export function GitHub() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toast('Repository deep links require persisted GitHub resource URLs.')}
+                    onClick={() => {
+                      // Try to open as URL; if not a valid URL, show toast with name
+                      const url = resource.startsWith('http')
+                        ? resource
+                        : resource.includes('/')
+                          ? `https://github.com/${resourceName(resource)}`
+                          : null;
+                      if (url) {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                      } else {
+                        toast.info(`Repository: ${resourceName(resource)}`);
+                      }
+                    }}
                   >
                     View Repository
                   </Button>

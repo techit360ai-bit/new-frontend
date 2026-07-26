@@ -80,3 +80,16 @@ export async function domainPatch<T>(
   });
   return parse<T>(res);
 }
+
+export async function domainDelete<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
+  const res = await fetch(domainUrl(path), {
+    method: "DELETE",
+    ...init,
+    headers: headers(init?.headers),
+    signal: timeoutSignal(init),
+  });
+  return parse<T>(res);
+}

@@ -167,3 +167,9 @@ export async function markAllNotificationsRead(): Promise<void> {
     method: 'POST',
   });
 }
+
+export async function deleteNotification(id: string): Promise<void> {
+  await request<{ ok: boolean }>(`/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+}

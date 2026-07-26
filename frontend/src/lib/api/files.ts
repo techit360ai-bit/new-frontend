@@ -2,7 +2,7 @@
 //
 // Workspace-visible file records backed by BACKEND /api/domain/files.
 
-import { domainGet } from "@/lib/domainApi";
+import { domainGet, domainPost, domainDelete } from "@/lib/domainApi";
 
 export type DomainFileType = "folder" | "file";
 export type DomainFileKind = "document" | "image" | "code";
@@ -72,4 +72,22 @@ export function fetchDomainFiles(): Promise<DomainFileItem[]> {
     const rows = Array.isArray(data.files) ? data.files : [];
     return rows.map(normalizeDomainFile);
   });
+}
+
+export interface CreateFilePayload {
+  name: string;
+  type?: "file" | "folder";
+  fileType?: DomainFileKind;
+  size?: string;
+  sizeBytes?: number;
+  workspaceId?: string;
+  url?: string;
+}
+
+export function createDomainFile(payload: CreateFilePayload): Promise<DomainFileItem> {
+  return domainPost<Record<string, unknown>>("/files", payload).then(normalizeDomainFile);
+}
+
+export function deleteDomainFile(id: string): Promise<{ ok: boolean }> {
+  return domainDelete<{ ok: boolean }>(`/files/${id}`);
 }

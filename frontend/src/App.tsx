@@ -122,6 +122,7 @@ import { NotificationsPage as FeedNotificationsPage } from "@/dashboard/feed/pag
 import { PostDetailPage } from "@/dashboard/feed/pages/PostDetailPage";
 import { MyLogPage } from "@/dashboard/feed/pages/MyLogPage";
 import { UserProfilePage } from "@/dashboard/feed/pages/UserProfilePage";
+import { DirectMessagePage } from "@/dashboard/feed/pages/DirectMessagePage";
 import { MessagingProvider } from "@/contexts/MessagingProvider";
 import { setMessagingToken } from "@/lib/messaging/config";
 import { DemoList } from "@/dashboard/demos/DemoList";
@@ -307,14 +308,7 @@ const App = () => {
           <Route path="post/:postId" element={<PostDetailPage />} />
           <Route path="problem/:problemId" element={<PostDetailPage />} />
           <Route path="profile/:userId" element={<UserProfilePage />} />
-          <Route
-            path="messages/:userId"
-            element={
-              <div className="p-8 text-center text-text-muted">
-                Messages feature coming soon...
-              </div>
-            }
-          />
+          <Route path="messages/:userId" element={<DirectMessagePage />} />
         </Route>
 
         <Route path="/demos"     element={<RequireAuth><DemoList /></RequireAuth>} />

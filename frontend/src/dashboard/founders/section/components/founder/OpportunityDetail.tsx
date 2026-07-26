@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
-import { fetchFounderOpportunity } from "@/lib/api/opportunities";
+import { applyToOpportunity, fetchFounderOpportunity } from "@/lib/api/opportunities";
 
 const TYPE_LABEL: Record<Opportunity["type"], string> = {
   hackathon: "HACKATHON",
@@ -17,6 +18,8 @@ export default function OpportunityDetail() {
   const [opp, setOpp] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [applying, setApplying] = useState(false);
+  const [applied, setApplied] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -148,17 +151,37 @@ export default function OpportunityDetail() {
               >
                 Register team →
               </button>
+            ) : applied ? (
+              <span className="text-sm font-medium px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Applied ✓
+              </span>
             ) : (
-              <div className="text-right">
-                <button
-                  type="button"
-                  disabled
-                  className="text-sm font-medium px-4 py-2 rounded-lg bg-slate-100 text-slate-400 cursor-not-allowed"
-                >
-                  {opp.type === "event" ? "RSVP" : "Apply"} →
-                </button>
-                <p className="text-[11px] text-slate-500 mt-1">Application flow coming soon.</p>
-              </div>
+              <button
+                type="button"
+                disabled={applying}
+                onClick={async () => {
+                  if (!opp.id) return;
+                  setApplying(true);
+                  try {
+                    await applyToOpportunity(opp.id, `Applying to ${opp.title}`);
+                    setApplied(true);
+                    toast.success("Application submitted!");
+                  } catch (err) {
+                    const msg = err instanceof Error ? err.message : "Application failed";
+                    if (msg.includes("already_applied")) {
+                      setApplied(true);
+                      toast.info("You have already applied");
+                    } else {
+                      toast.error(msg);
+                    }
+                  } finally {
+                    setApplying(false);
+                  }
+                }}
+                className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
+              >
+                {applying ? "Submitting..." : opp.type === "event" ? "RSVP →" : "Apply →"}
+              </button>
             )}
           </div>
         </div>
