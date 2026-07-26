@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { PenSquare } from 'lucide-react';
 import { LeftSidebar } from '../components/LeftSidebar';
 import { RightPanel } from '../components/RightPanel';
 import { ZoneSwitcher } from '../components/ZoneSwitcher';
@@ -64,6 +65,16 @@ export function FeedPage() {
           )}
         </div>
       </main>
+      {!composerExpanded && (
+        <button
+          type="button"
+          onClick={() => setComposerExpanded(true)}
+          className="fixed bottom-20 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-accent-primary text-white shadow-lg hover:opacity-90 transition-opacity lg:bottom-6"
+          aria-label="Create post"
+        >
+          <PenSquare className="h-6 w-6" />
+        </button>
+      )}
       <RightPanel />
     </div>
   );

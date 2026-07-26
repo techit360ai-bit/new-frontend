@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Activity,
@@ -154,6 +154,7 @@ export function MainIncubationPanel() {
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
   const [analysisResult, setAnalysisResult] = useState<Record<string, unknown> | null>(null);
   const [blueprintData, setBlueprintData] = useState<PipelineBlueprint | null>(null);
+  const ideaTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -502,19 +503,72 @@ export function MainIncubationPanel() {
             <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Next AI Actions</h3>
               <div className="grid grid-cols-2 gap-3">
-                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                <button
+                  onClick={async () => {
+                    if (!ideaInput.trim()) { toast.error("Please enter your startup idea first"); return; }
+                    setAnalyzing(true);
+                    const payload = { startup_name: ideaInput.trim(), solution: ideaInput.trim(), focus_areas: ["ai", "deeptech"] };
+                    try {
+                      const result = await generateBusinessPlan(payload);
+                      if (!result) throw new Error("No data returned");
+                      setAnalysisResult(result);
+                      toast.success("Pitch Deck generated successfully");
+                    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to generate pitch deck"); }
+                    finally { setAnalyzing(false); }
+                  }}
+                  disabled={analyzing}
+                  className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200 disabled:opacity-50"
+                >
                   <FileText className="h-4 w-4" />
                   Generate Pitch Deck
                 </button>
-                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                <button
+                  onClick={async () => {
+                    if (!ideaInput.trim()) { toast.error("Please enter your startup idea first"); return; }
+                    setAnalyzing(true);
+                    const payload = { startup_name: ideaInput.trim(), solution: ideaInput.trim(), focus_areas: ["ai", "deeptech"] };
+                    try {
+                      const result = await generateStrategy(payload);
+                      if (!result) throw new Error("No data returned");
+                      setAnalysisResult(result);
+                      toast.success("MVP Roadmap built successfully");
+                    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to build MVP roadmap"); }
+                    finally { setAnalyzing(false); }
+                  }}
+                  disabled={analyzing}
+                  className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200 disabled:opacity-50"
+                >
                   <Rocket className="h-4 w-4" />
                   Build MVP Roadmap
                 </button>
-                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                <button
+                  onClick={async () => {
+                    if (!ideaInput.trim()) { toast.error("Please enter your startup idea first"); return; }
+                    setAnalyzing(true);
+                    const payload = { startup_name: ideaInput.trim(), solution: ideaInput.trim(), focus_areas: ["ai", "deeptech"] };
+                    try {
+                      const result = await analyzePivot(payload);
+                      if (!result) throw new Error("No data returned");
+                      setAnalysisResult(result);
+                      toast.success("Pivot ideas explored successfully");
+                    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to explore pivot ideas"); }
+                    finally { setAnalyzing(false); }
+                  }}
+                  disabled={analyzing}
+                  className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200 disabled:opacity-50"
+                >
                   <Lightbulb className="h-4 w-4" />
                   Explore Pivot Ideas
                 </button>
-                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                <button
+                  onClick={() => {
+                    setBlueprintData(null);
+                    setAnalysisResult(null);
+                    ideaTextareaRef.current?.focus();
+                  }}
+                  disabled={analyzing}
+                  className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200 disabled:opacity-50"
+                >
                   <RefreshCw className="h-4 w-4" />
                   Revise Idea
                 </button>
@@ -554,6 +608,7 @@ export function MainIncubationPanel() {
         <div className="border-t border-gray-200 bg-white p-4">
           <div className="flex gap-3">
             <textarea
+              ref={ideaTextareaRef}
               value={ideaInput}
               onChange={(e) => setIdeaInput(e.target.value)}
               placeholder="Describe your startup idea..."

@@ -127,6 +127,10 @@ export function disconnectTrustSource(source: string): Promise<TrustVerification
   return apiPost<TrustVerificationResult>(`/trust/disconnect/${encodeURIComponent(source)}`, {});
 }
 
+export function connectTrustSource(source: string): Promise<TrustVerificationResult> {
+  return apiPost<TrustVerificationResult>(`/trust/verify/${encodeURIComponent(source)}`, {});
+}
+
 export function previewTrustNotifications(events: Array<Record<string, unknown>>): Promise<TrustNotificationPreview> {
   return apiPost<TrustNotificationPreview>("/trust/notifications/preview", { events });
 }

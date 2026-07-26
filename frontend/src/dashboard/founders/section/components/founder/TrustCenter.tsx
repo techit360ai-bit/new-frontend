@@ -7,7 +7,9 @@ import {
   CheckCircle2,
   Clock,
   History,
+  Link2,
   Lock,
+  Plus,
   RefreshCw,
   ShieldCheck,
   Unplug,
@@ -15,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  connectTrustSource,
   disconnectTrustSource,
   fetchTrustBadges,
   fetchTrustHistory,
@@ -375,6 +378,90 @@ export function TrustCenter() {
             );
           })}
         </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <Link2 className="w-4 h-4 text-violet-600" />
+          <div>
+            <h2 className="text-sm font-semibold text-slate-700">Connect a Source</h2>
+            <p className="mt-1 text-xs text-slate-500">Initiate verification for sources not yet connected.</p>
+          </div>
+        </div>
+        {(() => {
+          const allSources = [
+            "email",
+            "phone",
+            "github",
+            "linkedin",
+            "domain",
+            "website",
+            "organization",
+            "deployment",
+            "product_analytics",
+            "team",
+            "milestone",
+          ];
+          const connectedSources = new Set(integrations.map((i) => i.source));
+          const unconnectedSources = allSources.filter((s) => !connectedSources.has(s));
+
+          if (unconnectedSources.length === 0) {
+            return (
+              <div className="rounded-lg border border-dashed border-violet-200 bg-violet-50 p-4 text-sm text-violet-700">
+                All sources are connected.
+              </div>
+            );
+          }
+
+          return (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {unconnectedSources.map((source) => {
+                const disabled = busySource === source;
+                return (
+                  <div
+                    key={source}
+                    className="flex items-center justify-between rounded-lg border border-violet-200 bg-violet-50 p-4"
+                  >
+                    <p className="font-medium text-violet-700">
+                      {sourceLabels[source] ?? source}
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="border-violet-200 text-violet-700 hover:bg-violet-100"
+                      disabled={disabled}
+                      onClick={async () => {
+                        setBusySource(source);
+                        try {
+                          const result = await connectTrustSource(source);
+                          toast.success(
+                            `${sourceLabels[source] ?? source} verification initiated`,
+                            { description: result.next_action }
+                          );
+                          await load();
+                        } catch {
+                          toast.error(
+                            `Failed to connect ${sourceLabels[source] ?? source}`
+                          );
+                        } finally {
+                          setBusySource(null);
+                        }
+                      }}
+                    >
+                      {disabled ? (
+                        <RefreshCw className="animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
+                      Connect
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-5">
