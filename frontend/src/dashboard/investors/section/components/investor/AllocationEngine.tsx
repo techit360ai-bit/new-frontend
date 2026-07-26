@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   PieChart,
   Pie,
@@ -14,6 +14,7 @@ import {
   Bar,
 } from 'recharts';
 import { DollarSign, TrendingUp, AlertCircle, ChartBar } from 'lucide-react';
+import { toast } from 'sonner';
 import { fetchDealFlow, type InvestorStartup, type RiskLevel } from '@/lib/api/dealFlow';
 
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4'];
@@ -32,6 +33,7 @@ function riskColor(riskLevel: RiskLevel) {
 }
 
 export function AllocationEngine() {
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [totalCapital, setTotalCapital] = useState(1000000);
   const [minReadiness, setMinReadiness] = useState(80);
   const [maxRisk, setMaxRisk] = useState('moderate');
@@ -57,8 +59,9 @@ export function AllocationEngine() {
     return () => { alive = false; };
   }, []);
 
+  const BASE_REGIONS = ['North America', 'Europe', 'Asia', 'Africa', 'West Africa', 'East Africa', 'Southern Africa', 'North Africa', 'Latin America', 'Middle East', 'South Asia', 'South-East Asia'];
   const regions = useMemo(
-    () => ['all', ...Array.from(new Set(startups.map((startup) => startup.region).filter(Boolean)))],
+    () => ['all', ...Array.from(new Set([...BASE_REGIONS, ...startups.map((startup) => startup.region).filter(Boolean)]))],
     [startups],
   );
 
@@ -195,7 +198,13 @@ export function AllocationEngine() {
                 </div>
               </div>
 
-              <button className="w-full py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-colors">
+              <button
+                onClick={() => {
+                  toast.success(`Simulation complete: ${eligibleStartups.length} startups match your criteria`);
+                  resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="w-full py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-colors"
+              >
                 Run Simulation
               </button>
             </div>
@@ -309,7 +318,7 @@ export function AllocationEngine() {
                   </div>
                 </div>
 
-                <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+                <div ref={resultsRef} className="bg-[#111111] border border-gray-800 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-white mb-4">
                     Eligible Startups ({eligibleStartups.length})
                   </h3>

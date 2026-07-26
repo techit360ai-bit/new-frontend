@@ -4,8 +4,18 @@ import { EMPTY_HEATMAP, fetchHeatmap, type RegionSignal, type SectorSignal } fro
 
 const REGION_COLORS: Record<string, string> = {
   'North America': 'text-emerald-400',
+  'Latin America': 'text-lime-400',
   Europe: 'text-blue-400',
   Asia: 'text-purple-400',
+  'South Asia': 'text-indigo-400',
+  'South-East Asia': 'text-fuchsia-400',
+  'Middle East': 'text-amber-400',
+  Africa: 'text-orange-400',
+  'West Africa': 'text-orange-400',
+  'East Africa': 'text-yellow-400',
+  'Southern Africa': 'text-teal-400',
+  'North Africa': 'text-rose-400',
+  Oceania: 'text-cyan-400',
 };
 
 export function GlobalHeatmap() {

@@ -76,8 +76,9 @@ export function DealIntelligence() {
     return () => { alive = false; };
   }, []);
 
+  const BASE_REGIONS = ['North America', 'Europe', 'Asia', 'Africa', 'West Africa', 'East Africa', 'Southern Africa', 'North Africa', 'Latin America', 'Middle East', 'South Asia', 'South-East Asia'];
   const regions = useMemo(
-    () => ['all', ...Array.from(new Set(startups.map((startup) => startup.region).filter(Boolean)))],
+    () => ['all', ...Array.from(new Set([...BASE_REGIONS, ...startups.map((startup) => startup.region).filter(Boolean)]))],
     [startups],
   );
   const sectors = useMemo(
