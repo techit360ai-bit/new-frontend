@@ -1,10 +1,11 @@
 // frontend/src/dashboard/collaborators/section/components/collab/Dashboard.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { TrendingUp, ArrowRight, CheckCircle, GraduationCap, Headphones, Award } from "lucide-react";
+import { TrendingUp, ArrowRight, CheckCircle, GraduationCap, Headphones, Award, Target } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { EMPTY_EQUITY, fetchCollaboratorEquity, type CollaboratorEquity } from "@/lib/api/equity";
 import { EMPTY_EARNINGS, fetchCollaboratorEarnings, type CollaboratorEarnings } from "@/lib/api/earnings";
+import { fetchCollaboratorScores, type CollaboratorScores } from "@/lib/api/collaboratorScores";
 
 interface BuildSummary {
   id: string;
@@ -22,21 +23,24 @@ export function Dashboard() {
   const { collaboratorProfile } = useCollaboratorProfile();
   const [equity, setEquity] = useState<CollaboratorEquity>(EMPTY_EQUITY);
   const [earnings, setEarnings] = useState<CollaboratorEarnings>(EMPTY_EARNINGS);
+  const [scores, setScores] = useState<CollaboratorScores>({ cbs: 0, tss: {}, crs: 0 });
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
-    Promise.all([fetchCollaboratorEquity(), fetchCollaboratorEarnings()])
-      .then(([equityData, earningsData]) => {
+    Promise.all([fetchCollaboratorEquity(), fetchCollaboratorEarnings(), fetchCollaboratorScores()])
+      .then(([equityData, earningsData, scoresData]) => {
         if (!alive) return;
         setEquity(equityData);
         setEarnings(earningsData);
+        setScores(scoresData);
         setLoadError(null);
       })
       .catch((error) => {
         if (!alive) return;
         setEquity(EMPTY_EQUITY);
         setEarnings(EMPTY_EARNINGS);
+        setScores({ cbs: 0, tss: {}, crs: 0 });
         setLoadError(error instanceof Error ? error.message : "Live collaborator data is unavailable.");
       });
     return () => { alive = false; };
@@ -162,6 +166,86 @@ export function Dashboard() {
           </div>
           <p className="text-amber-600 text-sm mt-4 group-hover:translate-x-0.5 transition-transform">View earnings →</p>
         </Link>
+      </div>
+
+      {/* Collaborator Scores — CBS/TSS/CRS */}
+      <div className="border border-slate-200 bg-white rounded-xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Target className="w-5 h-5 text-indigo-600" />
+          <h2 className="text-sm font-semibold text-slate-700">Collaborator Scores</h2>
+        </div>
+
+        {scores.cbs === 0 && scores.crs === 0 && Object.keys(scores.tss).length === 0 ? (
+          <p className="text-sm text-slate-500">Complete projects to build your scores</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* CBS */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Build Score</p>
+              <div className="relative inline-flex">
+                <svg className="w-20 h-20">
+                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200" />
+                  <circle
+                    cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent"
+                    className="text-indigo-600 transition-all"
+                    strokeDasharray={`${2 * Math.PI * 36}`}
+                    strokeDashoffset={`${2 * Math.PI * 36 * (1 - scores.cbs / 100)}`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 40 40)"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-slate-900">{scores.cbs}</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">Collaborator Build Score</p>
+            </div>
+
+            {/* TSS */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Specialisation</p>
+              {Object.keys(scores.tss).length === 0 ? (
+                <p className="text-sm text-slate-500">No skills tracked yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {Object.entries(scores.tss)
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 3)
+                    .map(([skill, score]) => (
+                      <div key={skill}>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-slate-700 font-medium">{skill}</span>
+                          <span className="text-slate-900 font-semibold tabular-nums">{score}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-indigo-600" style={{ width: `${score}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+              <p className="text-xs text-slate-500 mt-2">Technical Specialisation</p>
+            </div>
+
+            {/* CRS */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Reliability</p>
+              <div className="relative inline-flex">
+                <svg className="w-20 h-20">
+                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200" />
+                  <circle
+                    cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent"
+                    className="text-cyan-600 transition-all"
+                    strokeDasharray={`${2 * Math.PI * 36}`}
+                    strokeDashoffset={`${2 * Math.PI * 36 * (1 - scores.crs / 100)}`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 40 40)"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-slate-900">{scores.crs}</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">Collaboration Reliability</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Active Builds */}
