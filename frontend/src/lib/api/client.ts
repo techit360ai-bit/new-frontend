@@ -88,6 +88,20 @@ export async function apiPost<T>(
   return parse<T>(res);
 }
 
+export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+  const url = apiUrl(path);
+  const h: Record<string, string> = {};
+  const token = getAuthToken();
+  if (token) h.Authorization = `Bearer ${token}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: h,
+    body: formData,
+    signal: AbortSignal.timeout(60000),
+  });
+  return parse<T>(res);
+}
+
 /**
  * Run an API call, falling back to bundled mock data on failure (unless strict
  * mode is on). Keeps dashboards rendering when the backend is unavailable.

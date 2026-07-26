@@ -3,7 +3,7 @@
 // Incubation Hub pipeline — ai-router /api/v1/incubation/pipeline/run.
 // Returns the persisted project_id so the analyzed venture can flow into a workspace.
 
-import { apiPost, withFallback } from "./client";
+import { apiPost, apiUpload, withFallback } from "./client";
 
 export interface PipelineBlueprint {
   project_id?: string;
@@ -118,5 +118,16 @@ export function designTechStack(ventureData: Record<string, unknown>): Promise<R
     () => apiPost<Record<string, unknown>>("/incubation/tech-stack/design", ventureData),
     () => null,
     "tech stack design",
+  );
+}
+
+/** POST /api/v1/incubation/document/upload — upload a document for AI diagnosis. */
+export function uploadIncubationDocument(file: File): Promise<Record<string, unknown> | null> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return withFallback(
+    () => apiUpload<Record<string, unknown>>("/incubation/document/upload", formData),
+    () => null,
+    "document upload",
   );
 }
