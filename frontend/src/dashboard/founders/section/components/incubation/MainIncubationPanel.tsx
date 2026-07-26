@@ -33,6 +33,7 @@ import {
   analyzeFinance,
   analyzeFeasibility,
   designTechStack,
+  uploadIncubationDocument,
   type PipelineBlueprint,
 } from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
@@ -155,6 +156,25 @@ export function MainIncubationPanel() {
   const [analysisResult, setAnalysisResult] = useState<Record<string, unknown> | null>(null);
   const [blueprintData, setBlueprintData] = useState<PipelineBlueprint | null>(null);
   const ideaTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDocUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || analyzing) return;
+    setAnalyzing(true);
+    setAnalysisResult(null);
+    try {
+      const result = await uploadIncubationDocument(file);
+      if (!result) throw new Error("Document analysis returned no data");
+      setAnalysisResult(result);
+      toast.success("Document analyzed successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Document upload failed");
+    } finally {
+      setAnalyzing(false);
+      if (docInputRef.current) docInputRef.current.value = "";
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -624,9 +644,17 @@ export function MainIncubationPanel() {
                 {analyzing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
                 Run Analysis
               </button>
+              <input
+                ref={docInputRef}
+                type="file"
+                accept=".pdf,.txt,.md,.csv,.doc,.docx"
+                className="hidden"
+                onChange={(e) => { void handleDocUpload(e); }}
+              />
               <button
-                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 text-sm font-medium rounded hover:bg-gray-200"
-                onClick={() => toast.info("Document upload coming soon")}
+                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 text-sm font-medium rounded hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
+                onClick={() => docInputRef.current?.click()}
+                disabled={analyzing}
               >
                 <FileText className="h-4 w-4" />
                 Upload Docs
