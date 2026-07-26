@@ -1,25 +1,41 @@
-import { Share2 } from 'lucide-react';
+import { Share2, CheckCircle, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { LivePostCard } from '../components/LivePostCard';
 import { BackButton } from '../components/BackButton';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
-import { useFeedPosts } from '../useFeedPosts';
-
-const BUILD_KINDS = new Set(['milestone', 'build-update', 'build', 'update']);
+import { useEffect, useState } from 'react';
+import { fetchContributions, type ContributionRecord } from '@/lib/api/contributions';
 
 function displayName(firstName?: string, lastName?: string, email?: string): string {
   return `${firstName ?? ''} ${lastName ?? ''}`.trim() || email || 'Your';
 }
 
 export function BuildLogPage() {
-  const { profile, user } = useAuth();
-  const { posts, loading, error } = useFeedPosts('global');
-  const ownerId = profile?.id || user?.id;
-  const buildPosts = posts.filter((post) => (
-    post.authorId === ownerId && BUILD_KINDS.has(post.kind)
-  ));
+  const { profile } = useAuth();
+  const [contributions, setContributions] = useState<ContributionRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const name = displayName(profile?.firstName, profile?.lastName, profile?.email);
+
+  useEffect(() => {
+    let alive = true;
+    fetchContributions()
+      .then((data) => {
+        if (!alive) return;
+        setContributions(data);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setContributions([]);
+        setError(err instanceof Error ? err.message : "Failed to load contributions");
+      })
+      .finally(() => {
+        if (!alive) return;
+        setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
 
   const shareLog = async () => {
     try {
@@ -37,12 +53,12 @@ export function BuildLogPage() {
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">{name} Build Log</h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Persisted milestones and build updates from your account.
+            Verified contribution records and project milestones.
           </p>
           <div className="mt-3 flex flex-wrap gap-3 text-xs text-text-muted">
             <span>{profile?.startupStage || 'Stage not set'}</span>
             <span>GSIS {profile?.credibilityScore ?? 0}</span>
-            <span>{buildPosts.length} updates</span>
+            <span>{contributions.length} contributions</span>
           </div>
         </div>
         <button
@@ -56,15 +72,68 @@ export function BuildLogPage() {
       </div>
 
       <div className="space-y-3">
-        {loading && <FeedLoadingState label="Loading your live build log..." />}
+        {loading && <FeedLoadingState label="Loading your build log..." />}
         {!loading && error && <FeedErrorState message={error} />}
-        {!loading && !error && buildPosts.map((post) => (
-          <LivePostCard key={post.id} post={post} authorName={name} />
-        ))}
-        {!loading && !error && buildPosts.length === 0 && (
+        {!loading && !error && contributions.map((contrib) => {
+          const gsisArrow = contrib.gsisChange > 0
+            ? <ArrowUp className="w-3 h-3 text-emerald-600" />
+            : contrib.gsisChange < 0
+            ? <ArrowDown className="w-3 h-3 text-red-600" />
+            : <Minus className="w-3 h-3 text-slate-400" />;
+          const gsisColor = contrib.gsisChange > 0
+            ? "text-emerald-600"
+            : contrib.gsisChange < 0
+            ? "text-red-600"
+            : "text-slate-500";
+          const endDateText = contrib.endDate
+            ? new Date(contrib.endDate).toLocaleDateString()
+            : "ongoing";
+
+          return (
+            <div key={contrib.id} className="border border-border-default rounded-xl p-4 bg-white">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-text-primary">{contrib.projectName}</h3>
+                    {contrib.verified && (
+                      <span className="flex items-center gap-1 text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
+                        <CheckCircle className="w-3 h-3" />
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-text-secondary">{contrib.role}</p>
+                </div>
+                <div className="flex items-center gap-1.5 text-sm">
+                  {gsisArrow}
+                  <span className={`font-semibold tabular-nums ${gsisColor}`}>
+                    {contrib.gsisChange > 0 ? '+' : ''}{contrib.gsisChange}
+                  </span>
+                  <span className="text-text-muted">GSIS</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs text-text-muted mb-3">
+                <span>{new Date(contrib.startDate).toLocaleDateString()} - {endDateText}</span>
+                <span>{contrib.milestonesShipped} milestones shipped</span>
+              </div>
+
+              {contrib.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {contrib.technologies.map((tech) => (
+                    <span key={tech} className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {!loading && !error && contributions.length === 0 && (
           <FeedEmptyState
-            title="No persisted build updates yet"
-            detail="Publish a milestone or build update from the feed composer to start your build log."
+            title="No contributions recorded yet"
+            detail="Complete verified projects to build your contribution log."
           />
         )}
       </div>

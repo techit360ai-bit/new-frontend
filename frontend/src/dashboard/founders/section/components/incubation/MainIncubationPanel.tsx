@@ -1,54 +1,79 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Activity,
   AlertCircle,
-  ArrowLeft,
+  BarChart3,
   Brain,
   Briefcase,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
-  Gauge,
+  Download,
+  FileText,
   Lightbulb,
   RefreshCw,
+  Rocket,
+  Send,
   Sparkles,
   Target,
+  TrendingUp,
+  Users,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  diagnoseIdea,
   runVenturePipeline,
-  type IdeaDiagnostic,
+  analyzeUnicorn,
+  analyzeMarket,
+  generateStrategy,
+  generateBusinessPlan,
+  analyzePivot,
+  generateInvestorReadiness,
+  analyzeFinance,
+  analyzeFeasibility,
+  designTechStack,
   type PipelineBlueprint,
 } from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
 import { checkHealth } from "@/lib/api/health";
-import { roleDashboardPath } from "@/lib/roleRoutes";
 
-const PROBLEM_AREAS = [
-  { id: "ai", label: "AI" },
-  { id: "healthcare", label: "Healthcare" },
-  { id: "greentech", label: "Green Tech" },
-  { id: "deeptech", label: "Deep Tech" },
-  { id: "web3", label: "Web3" },
+type AnalysisType =
+  | "unicorn"
+  | "pmf"
+  | "swot"
+  | "market"
+  | "monetization"
+  | "business-plan"
+  | "feasibility"
+  | "finance"
+  | "strategy"
+  | "intelligence"
+  | "impact"
+  | "investor"
+  | "roadmap"
+  | "survey"
+  | "tech"
+  | "recommendation";
+
+const ANALYSIS_TYPES: Array<{ id: AnalysisType; label: string; icon: typeof Sparkles }> = [
+  { id: "unicorn", label: "Unicorn Potential", icon: Sparkles },
+  { id: "pmf", label: "PMF Analysis", icon: Target },
+  { id: "swot", label: "SWOT Analysis", icon: BarChart3 },
+  { id: "market", label: "Market Validation", icon: TrendingUp },
+  { id: "monetization", label: "Monetization Logic", icon: Zap },
+  { id: "business-plan", label: "Business Plan Generation", icon: FileText },
+  { id: "feasibility", label: "Feasibility", icon: CheckCircle2 },
+  { id: "finance", label: "Finance Strategy", icon: BarChart3 },
+  { id: "strategy", label: "Startup Strategy", icon: Rocket },
+  { id: "intelligence", label: "Market Intelligence", icon: Brain },
+  { id: "impact", label: "Impact Predictor", icon: TrendingUp },
+  { id: "investor", label: "Investor Intelligence", icon: Briefcase },
+  { id: "roadmap", label: "Execution Roadmap", icon: Activity },
+  { id: "survey", label: "Market Survey", icon: Users },
+  { id: "tech", label: "Tech Architecture", icon: Zap },
+  { id: "recommendation", label: "Project Recommendation", icon: Lightbulb },
 ];
-
-const BLUEPRINT_SECTIONS = [
-  ["executive_summary", "Executive Summary"],
-  ["market_analysis", "Market Analysis"],
-  ["feasibility_report", "Feasibility Report"],
-  ["startup_strategy", "Startup Strategy"],
-  ["finance_strategy", "Finance Strategy"],
-  ["tech_architecture", "Technical Architecture"],
-  ["investor_signals", "Investor Signals"],
-  ["driver_breakdown", "Score Drivers"],
-] as const;
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
-    : {};
-}
 
 function asText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -59,69 +84,61 @@ function asScore(value: unknown): number | null {
   return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : null;
 }
 
-function hasContent(value: unknown): boolean {
-  if (value == null || value === "") return false;
-  if (Array.isArray(value)) return value.length > 0;
-  if (typeof value === "object") return Object.keys(asRecord(value)).length > 0;
-  return true;
-}
+function ScoreCircle({ score, label, size = "md" }: { score: number; label: string; size?: "sm" | "md" | "lg" }) {
+  const radius = size === "sm" ? 40 : size === "lg" ? 60 : 50;
+  const strokeWidth = size === "sm" ? 6 : size === "lg" ? 10 : 8;
+  const normalizedRadius = radius - strokeWidth * 0.5;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const offset = circumference - (score / 100) * circumference;
 
-function labelize(value: string): string {
-  return value
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/[_-]+/g, " ")
-    .replace(/^\w|\s\w/g, (letter) => letter.toUpperCase());
-}
+  const color = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
 
-function valueLabel(value: unknown): string {
-  if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (typeof value === "number") return value.toLocaleString();
-  if (typeof value === "string") return value;
-  return JSON.stringify(value, null, 2);
-}
-
-function LiveValue({ value }: { value: unknown }) {
-  if (Array.isArray(value)) {
-    return (
-      <ul className="space-y-2">
-        {value.map((item, index) => (
-          <li key={`${index}-${valueLabel(item).slice(0, 24)}`} className="flex items-start gap-2 text-sm text-gray-700">
-            <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-600" />
-            <span className="whitespace-pre-wrap break-words">{valueLabel(item)}</span>
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
-  if (value && typeof value === "object") {
-    return (
-      <dl className="grid gap-3 sm:grid-cols-2">
-        {Object.entries(asRecord(value)).filter(([, item]) => hasContent(item)).map(([key, item]) => (
-          <div key={key} className="border-l-2 border-cyan-100 pl-3">
-            <dt className="text-xs font-semibold text-gray-500">{labelize(key)}</dt>
-            <dd className="mt-1 whitespace-pre-wrap break-words text-sm text-gray-800">{valueLabel(item)}</dd>
-          </div>
-        ))}
-      </dl>
-    );
-  }
-
-  return <p className="whitespace-pre-wrap break-words text-sm leading-6 text-gray-700">{valueLabel(value)}</p>;
-}
-
-function ScoreCard({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Gauge }) {
   return (
-    <div className="border border-gray-200 bg-white p-5">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-gray-900">{Math.round(value)}</p>
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative">
+        <svg height={radius * 2} width={radius * 2}>
+          <circle
+            stroke="#e5e7eb"
+            fill="transparent"
+            strokeWidth={strokeWidth}
+            r={normalizedRadius}
+            cx={radius}
+            cy={radius}
+          />
+          <circle
+            stroke={color}
+            fill="transparent"
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${circumference} ${circumference}`}
+            style={{ strokeDashoffset: offset }}
+            strokeLinecap="round"
+            r={normalizedRadius}
+            cx={radius}
+            cy={radius}
+            transform={`rotate(-90 ${radius} ${radius})`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={`font-bold ${size === "sm" ? "text-lg" : size === "lg" ? "text-3xl" : "text-2xl"}`}>
+            {Math.round(score)}
+          </span>
         </div>
-        <Icon className="h-7 w-7 text-cyan-600" />
       </div>
-      <div className="mt-4 h-2 overflow-hidden bg-gray-100">
-        <div className="h-full bg-cyan-600" style={{ width: `${value}%` }} />
+      <p className={`text-center font-medium text-gray-700 ${size === "sm" ? "text-xs" : "text-sm"}`}>{label}</p>
+    </div>
+  );
+}
+
+function EvaluationBar({ label, score }: { label: string; score: number }) {
+  const color = score >= 70 ? "bg-emerald-500" : score >= 40 ? "bg-amber-500" : "bg-red-500";
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <span className="text-sm font-bold text-gray-900">{Math.round(score)}</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+        <div className={`h-full ${color}`} style={{ width: `${score}%` }} />
       </div>
     </div>
   );
@@ -129,15 +146,14 @@ function ScoreCard({ label, value, icon: Icon }: { label: string; value: number;
 
 export function MainIncubationPanel() {
   const navigate = useNavigate();
-  const [ideaTitle, setIdeaTitle] = useState("");
-  const [ideaSolution, setIdeaSolution] = useState("");
-  const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
-  const [blueprint, setBlueprint] = useState<PipelineBlueprint | null>(null);
-  const [diagnostic, setDiagnostic] = useState<IdeaDiagnostic | null>(null);
+  const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisType | null>(null);
+  const [ideaInput, setIdeaInput] = useState("");
+  const [copilotInput, setCopilotInput] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
-  const [provisioning, setProvisioning] = useState(false);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<Record<string, unknown> | null>(null);
+  const [blueprintData, setBlueprintData] = useState<PipelineBlueprint | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -149,56 +165,101 @@ export function MainIncubationPanel() {
     };
   }, []);
 
-  const projectId = asText(blueprint?.project_id);
-  const unicornScore = asScore(blueprint?.unicorn_potential_score);
-  const investmentScore = asScore(blueprint?.investment_score);
-  const structuredProfile = asRecord(diagnostic?.structured_profile);
-  const nextSteps = Array.isArray(diagnostic?.next_steps)
-    ? diagnostic.next_steps.filter((step): step is string => typeof step === "string" && step.trim().length > 0)
-    : [];
-  const sections = useMemo(
-    () => BLUEPRINT_SECTIONS
-      .map(([key, label]) => ({ key, label, value: blueprint?.[key] }))
-      .filter((section) => hasContent(section.value)),
-    [blueprint],
-  );
-  const canAnalyze = ideaTitle.trim().length > 0 && ideaSolution.trim().length > 0 && selectedAreas.length > 0;
+  const projectId = asText(blueprintData?.project_id);
+  const ventureName = asText(blueprintData?.venture_name) || "Your Startup";
+  const unicornScore = asScore(blueprintData?.unicorn_potential_score);
+  const investmentScore = asScore(blueprintData?.investment_score);
 
-  const toggleArea = (id: string) => {
-    setSelectedAreas((current) => current.includes(id)
-      ? current.filter((area) => area !== id)
-      : [...current, id]);
-  };
-
-  const handleRunAnalysis = async () => {
-    if (!canAnalyze || analyzing) return;
+  const handleRunFullAnalysis = async () => {
+    if (!ideaInput.trim() || analyzing) return;
     setAnalyzing(true);
-    setError(null);
-    setBlueprint(null);
-    setDiagnostic(null);
+    setAnalysisResult(null);
+    setBlueprintData(null);
 
     const payload = {
-      startup_name: ideaTitle.trim(),
-      solution: ideaSolution.trim(),
-      focus_areas: selectedAreas,
+      startup_name: ideaInput.trim(),
+      solution: ideaInput.trim(),
+      focus_areas: ["ai", "deeptech"],
     };
 
     try {
-      const [diagnosticResult, pipelineResult] = await Promise.all([
-        diagnoseIdea(payload),
-        runVenturePipeline(payload),
-      ]);
-      const persistedProjectId = asText(pipelineResult?.project_id);
-      const pipelineError = asText(pipelineResult?.error);
-      if (!pipelineResult || !persistedProjectId) {
-        throw new Error(pipelineError || "The analysis did not return a persisted project ID.");
+      const result = await runVenturePipeline(payload);
+      if (!result) {
+        throw new Error("Pipeline returned no data");
       }
-      setDiagnostic(diagnosticResult);
-      setBlueprint(pipelineResult);
-      toast.success("Analysis persisted");
-    } catch (analysisError) {
-      const message = analysisError instanceof Error ? analysisError.message : "Live analysis is unavailable.";
-      setError(message);
+      setBlueprintData(result);
+      setAnalysisResult(result);
+      toast.success("Full pipeline analysis complete");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Analysis failed";
+      toast.error(message);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleRunIndividualAnalysis = async (type: AnalysisType) => {
+    if (!ideaInput.trim() || analyzing) {
+      toast.error("Please enter your startup idea first");
+      return;
+    }
+    setAnalyzing(true);
+    setAnalysisResult(null);
+    setSelectedAnalysis(type);
+
+    const payload = {
+      startup_name: ideaInput.trim(),
+      solution: ideaInput.trim(),
+      focus_areas: ["ai", "deeptech"],
+    };
+
+    try {
+      let result: Record<string, unknown> | null = null;
+      switch (type) {
+        case "unicorn":
+          result = await analyzeUnicorn(payload);
+          break;
+        case "market":
+        case "pmf":
+        case "survey":
+          result = await analyzeMarket(payload);
+          break;
+        case "strategy":
+        case "roadmap":
+          result = await generateStrategy(payload);
+          break;
+        case "business-plan":
+          result = await generateBusinessPlan(payload);
+          break;
+        case "swot":
+        case "recommendation":
+          result = await analyzePivot(payload);
+          break;
+        case "investor":
+          result = await generateInvestorReadiness(payload);
+          break;
+        case "finance":
+        case "monetization":
+          result = await analyzeFinance(payload);
+          break;
+        case "feasibility":
+        case "impact":
+          result = await analyzeFeasibility(payload);
+          break;
+        case "tech":
+          result = await designTechStack(payload);
+          break;
+        default:
+          result = await analyzeUnicorn(payload);
+      }
+
+      if (!result) {
+        throw new Error("Analysis returned no data");
+      }
+      setAnalysisResult(result);
+      toast.success(`${ANALYSIS_TYPES.find((a) => a.id === type)?.label} complete`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Analysis failed";
       toast.error(message);
     } finally {
       setAnalyzing(false);
@@ -206,210 +267,426 @@ export function MainIncubationPanel() {
   };
 
   const handleCreateWorkspace = async () => {
-    if (!projectId || provisioning) return;
-    setProvisioning(true);
+    if (!projectId) {
+      toast.error("No project to create workspace for");
+      return;
+    }
     try {
-      const result = await provisionWorkspace(projectId, `${ideaTitle.trim()} Workspace`);
+      const result = await provisionWorkspace(projectId, `${ventureName} Workspace`);
       const workspaceId = asText(result.workspace?.id);
       if (!result.ok || !workspaceId) {
-        throw new Error(result.error || "The workspace was not persisted.");
+        throw new Error(result.error || "Workspace creation failed");
       }
       navigate(`/workspaces?ws=${encodeURIComponent(workspaceId)}&project=${encodeURIComponent(projectId)}`);
-    } catch (workspaceError) {
-      toast.error(workspaceError instanceof Error ? workspaceError.message : "Workspace creation failed.");
-    } finally {
-      setProvisioning(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Workspace creation failed");
     }
   };
 
+  const handleExportReport = () => {
+    if (!analysisResult) return;
+    const data = JSON.stringify(analysisResult, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analysis-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Report exported");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link
-              to={roleDashboardPath.founder}
-              className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Founder dashboard
-            </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Startup Incubation</h1>
+    <div className="flex h-screen bg-violet-50">
+      {/* LEFT SIDEBAR - 264px */}
+      <aside className="w-[264px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col">
+        <div className="border-b border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Brain className="h-5 w-5 text-violet-600" />
+            <h2 className="font-semibold text-gray-900">Analysis Types</h2>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <span className={`h-2.5 w-2.5 rounded-full ${engineOnline ? "bg-emerald-500" : engineOnline === false ? "bg-red-500" : "bg-gray-300"}`} />
-            <span className="font-medium text-gray-700">
-              {engineOnline === null ? "Checking AI service" : engineOnline ? "AI service available" : "AI service unavailable"}
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${engineOnline ? "bg-emerald-500" : "bg-gray-300"}`} />
+            <span className="text-xs text-gray-600">
+              {engineOnline === null ? "Checking..." : engineOnline ? "AI Engine Active" : "Engine Offline"}
             </span>
           </div>
         </div>
-      </header>
 
-      <main className="mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[360px_1fr]">
-        <section className="self-start border border-gray-200 bg-white p-6 lg:sticky lg:top-6">
-          <div className="mb-6 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center bg-cyan-50 text-cyan-700">
-              <Lightbulb className="h-5 w-5" />
-            </span>
+        <nav className="flex-1 overflow-y-auto p-2">
+          {ANALYSIS_TYPES.map((analysis) => {
+            const Icon = analysis.icon;
+            const isSelected = selectedAnalysis === analysis.id;
+            return (
+              <button
+                key={analysis.id}
+                onClick={() => void handleRunIndividualAnalysis(analysis.id)}
+                disabled={analyzing}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-medium text-left transition-colors rounded ${
+                  isSelected
+                    ? "bg-violet-100 text-violet-900"
+                    : "text-gray-700 hover:bg-violet-50 hover:text-violet-800"
+                } disabled:opacity-50`}
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{analysis.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="border-t border-gray-200 p-4">
+          <h3 className="text-xs font-semibold text-gray-500 mb-2">AI Copilot</h3>
+          <textarea
+            value={copilotInput}
+            onChange={(e) => setCopilotInput(e.target.value)}
+            placeholder="Ask AI anything..."
+            rows={3}
+            className="w-full text-sm border border-gray-300 rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
+          />
+          <button
+            onClick={() => {
+              if (copilotInput.trim()) {
+                toast.info("Copilot feature coming soon");
+                setCopilotInput("");
+              }
+            }}
+            disabled={!copilotInput.trim()}
+            className="mt-2 w-full flex items-center justify-center gap-2 bg-violet-600 text-white px-3 py-2 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
+          >
+            <Send className="h-4 w-4" />
+            Send
+          </button>
+        </div>
+      </aside>
+
+      {/* CENTER PANEL - flex-1 */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="border-b border-gray-200 bg-white px-6 py-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-semibold text-gray-900">Venture intake</h2>
-              <p className="text-sm text-gray-500">Persist a diagnostic and full analysis</p>
-            </div>
-          </div>
-
-          <div className="space-y-5">
-            <label className="block">
-              <span className="text-sm font-medium text-gray-800">Startup name</span>
-              <input
-                type="text"
-                value={ideaTitle}
-                onChange={(event) => setIdeaTitle(event.target.value)}
-                className="mt-2 h-11 w-full border border-gray-300 px-3 text-sm outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-medium text-gray-800">Solution</span>
-              <textarea
-                rows={5}
-                value={ideaSolution}
-                onChange={(event) => setIdeaSolution(event.target.value)}
-                className="mt-2 w-full resize-y border border-gray-300 px-3 py-2 text-sm outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
-              />
-            </label>
-
-            <fieldset>
-              <legend className="text-sm font-medium text-gray-800">Focus areas</legend>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                {PROBLEM_AREAS.map((area) => {
-                  const selected = selectedAreas.includes(area.id);
-                  return (
-                    <label
-                      key={area.id}
-                      className={`flex cursor-pointer items-center gap-2 border px-3 py-2 text-sm ${selected ? "border-cyan-600 bg-cyan-50 text-cyan-800" : "border-gray-200 text-gray-700"}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => toggleArea(area.id)}
-                        className="accent-cyan-700"
-                      />
-                      {area.label}
-                    </label>
-                  );
-                })}
+              <h1 className="text-xl font-bold text-gray-900">Real-Time AI Analysis</h1>
+              <div className="flex items-center gap-2 mt-1">
+                {analyzing && (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin text-violet-600" />
+                    <span className="text-sm text-violet-700">Processing...</span>
+                  </>
+                )}
               </div>
-            </fieldset>
-
+            </div>
             <button
-              type="button"
-              disabled={!canAnalyze || analyzing}
-              onClick={() => void handleRunAnalysis()}
-              className="flex h-11 w-full items-center justify-center gap-2 bg-cyan-700 px-4 text-sm font-semibold text-white hover:bg-cyan-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+              onClick={handleExportReport}
+              disabled={!analysisResult}
+              className="flex items-center gap-2 bg-violet-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
             >
-              {analyzing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
-              {analyzing ? "Running analysis" : "Run analysis"}
+              <Download className="h-4 w-4" />
+              Export Report
             </button>
           </div>
-        </section>
+        </header>
 
-        <div className="space-y-6">
-          {error && (
-            <div className="flex items-start gap-3 border border-red-200 bg-red-50 p-5 text-red-800">
-              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold">Analysis unavailable</p>
-                <p className="mt-1 text-sm">{error}</p>
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* Success Banner */}
+          {blueprintData && projectId && (
+            <div className="mb-6 border border-emerald-200 bg-emerald-50 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  <div>
+                    <p className="font-semibold text-emerald-900">{ventureName} analyzed successfully</p>
+                    <p className="text-xs text-emerald-700">Project ID: {projectId}</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {!blueprint && !error && (
-            <div className="flex min-h-72 flex-col items-center justify-center border border-dashed border-gray-300 bg-white px-8 text-center">
-              <Brain className="mb-4 h-9 w-9 text-gray-400" />
-              <h2 className="font-semibold text-gray-900">No persisted analysis selected</h2>
-              <p className="mt-2 max-w-md text-sm text-gray-500">
-                Live diagnostic and pipeline results will appear after the service persists a project.
+          {/* Hero Score Cards */}
+          {(unicornScore !== null || investmentScore !== null) && (
+            <div className="mb-6 grid grid-cols-2 gap-4">
+              {unicornScore !== null && (
+                <div className="bg-gradient-to-br from-violet-600 to-violet-900 rounded-lg p-6 text-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Unicorn Potential</h3>
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <p className="text-5xl font-bold">{Math.round(unicornScore)}</p>
+                  <div className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white" style={{ width: `${unicornScore}%` }} />
+                  </div>
+                </div>
+              )}
+              {investmentScore !== null && (
+                <div className="bg-gradient-to-br from-violet-700 to-violet-900 rounded-lg p-6 text-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Market Fit Score</h3>
+                    <Target className="h-6 w-6" />
+                  </div>
+                  <p className="text-5xl font-bold">{Math.round(investmentScore)}</p>
+                  <div className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white" style={{ width: `${investmentScore}%` }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Detailed Evaluation Bars */}
+          {analysisResult && (
+            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Detailed Evaluation</h3>
+              <div className="space-y-4">
+                {Object.entries(analysisResult)
+                  .filter(([key, val]) => typeof val === "number" && key.includes("score"))
+                  .map(([key, val]) => (
+                    <EvaluationBar
+                      key={key}
+                      label={key.replace(/_/g, " ").replace(/score/i, "").trim()}
+                      score={asScore(val) ?? 0}
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Circular Score Indicators */}
+          {analysisResult && Object.keys(analysisResult).some((k) => k.includes("score")) && (
+            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Key Metrics</h3>
+              <div className="flex flex-wrap gap-8 justify-center">
+                {Object.entries(analysisResult)
+                  .filter(([key, val]) => typeof val === "number" && key.includes("score"))
+                  .slice(0, 4)
+                  .map(([key, val]) => (
+                    <ScoreCircle
+                      key={key}
+                      score={asScore(val) ?? 0}
+                      label={key.replace(/_/g, " ").replace(/score/i, "").trim()}
+                      size="md"
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* AI Insights */}
+          {analysisResult && (
+            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Brain className="h-5 w-5 text-violet-600" />
+                AI Insights
+              </h3>
+              <div className="space-y-3">
+                {Object.entries(analysisResult)
+                  .filter(([key, val]) => typeof val === "string" && val.length > 50)
+                  .slice(0, 3)
+                  .map(([key, val]) => (
+                    <div key={key} className="border-l-4 border-violet-600 pl-4">
+                      <p className="text-sm font-semibold text-gray-700 mb-1">
+                        {key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </p>
+                      <p className="text-sm text-gray-600">{String(val)}</p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Next AI Actions */}
+          {analysisResult && (
+            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Next AI Actions</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                  <FileText className="h-4 w-4" />
+                  Generate Pitch Deck
+                </button>
+                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                  <Rocket className="h-4 w-4" />
+                  Build MVP Roadmap
+                </button>
+                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                  <Lightbulb className="h-4 w-4" />
+                  Explore Pivot Ideas
+                </button>
+                <button className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded font-medium hover:bg-violet-200">
+                  <RefreshCw className="h-4 w-4" />
+                  Revise Idea
+                </button>
+                <button
+                  onClick={() => navigate(`/matches?project=${projectId}`)}
+                  disabled={!projectId}
+                  className="flex items-center gap-2 bg-violet-600 text-white px-4 py-3 rounded font-medium hover:bg-violet-700 disabled:bg-gray-300"
+                >
+                  <Users className="h-4 w-4" />
+                  Find Collaborators
+                </button>
+                <button
+                  onClick={() => void handleCreateWorkspace()}
+                  disabled={!projectId}
+                  className="flex items-center gap-2 bg-violet-600 text-white px-4 py-3 rounded font-medium hover:bg-violet-700 disabled:bg-gray-300"
+                >
+                  <Briefcase className="h-4 w-4" />
+                  Create Workspace
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!analysisResult && !analyzing && (
+            <div className="flex flex-col items-center justify-center min-h-96 text-center">
+              <Brain className="h-16 w-16 text-violet-300 mb-4" />
+              <h2 className="text-xl font-bold text-gray-900 mb-2">No Analysis Yet</h2>
+              <p className="text-gray-600 mb-6 max-w-md">
+                Enter your startup idea below and run an analysis to see detailed insights, scores, and recommendations.
               </p>
             </div>
           )}
+        </div>
 
-          {blueprint && (
-            <>
-              <section className="border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" />
-                    <div>
-                      <h2 className="font-semibold text-emerald-950">
-                        {asText(blueprint.venture_name) || ideaTitle} persisted
-                      </h2>
-                      <p className="mt-1 break-all text-xs text-emerald-800">Project {projectId}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={!projectId || provisioning}
-                    onClick={() => void handleCreateWorkspace()}
-                    className="inline-flex h-10 items-center justify-center gap-2 bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 disabled:bg-gray-300"
-                  >
-                    <Briefcase className="h-4 w-4" />
-                    {provisioning ? "Creating workspace" : "Create workspace"}
-                  </button>
-                </div>
-              </section>
-
-              {(unicornScore !== null || investmentScore !== null) && (
-                <section className="grid gap-4 sm:grid-cols-2">
-                  {unicornScore !== null && <ScoreCard label="Unicorn Potential" value={unicornScore} icon={Sparkles} />}
-                  {investmentScore !== null && <ScoreCard label="Investment Score" value={investmentScore} icon={Gauge} />}
-                </section>
-              )}
-
-              {(hasContent(blueprint.unicorn_classification) || hasContent(blueprint.pivot_needed)) && (
-                <section className="grid gap-4 border border-gray-200 bg-white p-5 sm:grid-cols-2">
-                  {hasContent(blueprint.unicorn_classification) && (
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500">Classification</p>
-                      <p className="mt-1 font-medium text-gray-900">{valueLabel(blueprint.unicorn_classification)}</p>
-                    </div>
-                  )}
-                  {hasContent(blueprint.pivot_needed) && (
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500">Pivot Recommended</p>
-                      <p className="mt-1 font-medium text-gray-900">{valueLabel(blueprint.pivot_needed)}</p>
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {Object.keys(structuredProfile).length > 0 && (
-                <section className="border border-gray-200 bg-white p-6">
-                  <div className="mb-5 flex items-center gap-2">
-                    <Target className="h-5 w-5 text-cyan-700" />
-                    <h2 className="font-semibold text-gray-900">Persisted Venture Profile</h2>
-                  </div>
-                  <LiveValue value={structuredProfile} />
-                </section>
-              )}
-
-              {sections.map((section) => (
-                <section key={section.key} className="border border-gray-200 bg-white p-6">
-                  <h2 className="mb-5 font-semibold text-gray-900">{section.label}</h2>
-                  <LiveValue value={section.value} />
-                </section>
-              ))}
-
-              {nextSteps.length > 0 && (
-                <section className="border border-gray-200 bg-white p-6">
-                  <h2 className="mb-4 font-semibold text-gray-900">Persisted Next Steps</h2>
-                  <LiveValue value={nextSteps} />
-                </section>
-              )}
-            </>
-          )}
+        {/* Bottom Input Area */}
+        <div className="border-t border-gray-200 bg-white p-4">
+          <div className="flex gap-3">
+            <textarea
+              value={ideaInput}
+              onChange={(e) => setIdeaInput(e.target.value)}
+              placeholder="Describe your startup idea..."
+              rows={2}
+              className="flex-1 text-sm border border-gray-300 rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
+            />
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => void handleRunFullAnalysis()}
+                disabled={!ideaInput.trim() || analyzing}
+                className="flex items-center gap-2 bg-violet-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
+              >
+                {analyzing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                Run Analysis
+              </button>
+              <button
+                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 text-sm font-medium rounded hover:bg-gray-200"
+                onClick={() => toast.info("Document upload coming soon")}
+              >
+                <FileText className="h-4 w-4" />
+                Upload Docs
+              </button>
+            </div>
+          </div>
         </div>
       </main>
+
+      {/* RIGHT PANEL - 420px, collapsible */}
+      {rightPanelOpen && (
+        <aside className="w-[420px] flex-shrink-0 border-l border-gray-200 bg-white flex flex-col">
+          <div className="border-b border-gray-200 p-4 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-900">Document Preview</h2>
+            <button onClick={() => setRightPanelOpen(false)} className="text-gray-500 hover:text-gray-700">
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            {analysisResult ? (
+              <div className="space-y-4">
+                <section>
+                  <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <ChevronDown className="h-4 w-4 text-violet-600" />
+                    Idea Summary
+                  </h3>
+                  <p className="text-sm text-gray-700 leading-relaxed">{ideaInput || "Your startup idea"}</p>
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <ChevronDown className="h-4 w-4 text-violet-600" />
+                    AI Analysis Summary
+                  </h3>
+                  <div className="text-sm text-gray-700 space-y-2">
+                    {Object.entries(analysisResult)
+                      .filter(([, val]) => typeof val === "string")
+                      .slice(0, 2)
+                      .map(([key, val]) => (
+                        <p key={key} className="leading-relaxed">
+                          {String(val).slice(0, 200)}...
+                        </p>
+                      ))}
+                  </div>
+                </section>
+
+                {typeof blueprintData?.business_plan === "string" && blueprintData.business_plan && (
+                  <section>
+                    <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                      <ChevronDown className="h-4 w-4 text-violet-600" />
+                      Business Plan Excerpt
+                    </h3>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {String(blueprintData.business_plan).slice(0, 300)}...
+                    </p>
+                  </section>
+                )}
+
+                <section>
+                  <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <ChevronDown className="h-4 w-4 text-violet-600" />
+                    Recommendations & Risks
+                  </h3>
+                  <div className="space-y-2">
+                    {Object.entries(analysisResult)
+                      .filter(([key]) => key.includes("risk") || key.includes("recommendation"))
+                      .map(([key, val]) => (
+                        <div key={key} className="text-sm">
+                          <p className="font-medium text-gray-800">
+                            {key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                          </p>
+                          <p className="text-gray-600">{String(val)}</p>
+                        </div>
+                      ))}
+                  </div>
+                </section>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <FileText className="h-12 w-12 text-gray-300 mb-3" />
+                <p className="text-sm text-gray-500">No document to preview yet</p>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="border-t border-gray-200 p-4 space-y-2">
+            <button
+              disabled={!analysisResult}
+              className="w-full flex items-center justify-center gap-2 bg-violet-600 text-white px-4 py-2.5 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
+            >
+              Publish
+            </button>
+            <button
+              onClick={handleExportReport}
+              disabled={!analysisResult}
+              className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 text-sm font-medium rounded hover:bg-gray-50 disabled:bg-gray-100"
+            >
+              <Download className="h-4 w-4" />
+              Export Report
+            </button>
+          </div>
+        </aside>
+      )}
+
+      {/* Toggle button when panel is closed */}
+      {!rightPanelOpen && (
+        <button
+          onClick={() => setRightPanelOpen(true)}
+          className="fixed right-4 top-1/2 -translate-y-1/2 bg-violet-600 text-white p-2 rounded-l shadow-lg hover:bg-violet-700"
+        >
+          <ChevronRight className="h-5 w-5 rotate-180" />
+        </button>
+      )}
     </div>
   );
 }
