@@ -30,6 +30,7 @@ import {
   type OrganizationActivity,
   type OrganizationDashboardData,
 } from "@/lib/api/organization";
+import { WelcomeBack } from "@/components/WelcomeBack";
 
 interface MetricCard {
   key: keyof OrganizationDashboardData["metrics"];
@@ -141,6 +142,11 @@ export function Dashboard() {
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </button>
+      </div>
+
+      {/* Welcome Back — contextual intelligence surface */}
+      <div className="mb-6">
+        <WelcomeBack />
       </div>
 
       {error && (

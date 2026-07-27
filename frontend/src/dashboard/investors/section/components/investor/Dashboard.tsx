@@ -4,6 +4,7 @@ import { TrendingUp, Shield, DollarSign, Activity, Zap, ArrowRight, Sparkles, X 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
+import { WelcomeBack } from '@/components/WelcomeBack';
 
 export function Dashboard() {
   const { investorProfile } = useInvestorProfile();
@@ -70,6 +71,11 @@ export function Dashboard() {
       </div>
 
       <div className="p-8">
+        {/* Welcome Back — contextual intelligence surface */}
+        <div className="mb-6">
+          <WelcomeBack />
+        </div>
+
         {/* Onboarding banner — appears when profile is incomplete */}
         {onboardingIncomplete && !bannerDismissed && (
           <div className="mb-6 flex items-center gap-4 rounded-lg border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent px-5 py-4">
