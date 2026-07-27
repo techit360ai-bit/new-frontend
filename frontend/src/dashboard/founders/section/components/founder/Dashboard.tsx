@@ -10,6 +10,7 @@ import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
+import { WelcomeBack } from "@/components/WelcomeBack";
 
 interface Signal {
   id: string;
@@ -166,6 +167,9 @@ export function Dashboard() {
         <h1 className="text-2xl font-bold text-slate-900">Good morning, {firstName}.</h1>
         <p className="text-sm text-slate-500 mt-0.5">{today} · Week {weeksBuilding} of building</p>
       </div>
+
+      {/* Welcome Back — contextual intelligence surface */}
+      <WelcomeBack />
 
       {/* Your ventures — multi-project portfolio (S7) */}
       <div className="border border-slate-200 bg-white rounded-xl p-4">

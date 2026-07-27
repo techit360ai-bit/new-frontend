@@ -6,6 +6,7 @@ import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { EMPTY_EQUITY, fetchCollaboratorEquity, type CollaboratorEquity } from "@/lib/api/equity";
 import { EMPTY_EARNINGS, fetchCollaboratorEarnings, type CollaboratorEarnings } from "@/lib/api/earnings";
 import { fetchCollaboratorScores, type CollaboratorScores } from "@/lib/api/collaboratorScores";
+import { WelcomeBack } from "@/components/WelcomeBack";
 
 interface BuildSummary {
   id: string;
@@ -106,6 +107,10 @@ export function Dashboard() {
         <h1 className="text-2xl font-bold text-slate-900">Good morning, {firstName}.</h1>
         <p className="text-sm text-slate-500 mt-0.5">{today} · {builds.length} active builds</p>
       </div>
+
+      {/* Welcome Back — contextual intelligence surface */}
+      <WelcomeBack />
+
       {loadError && (
         <div className="border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">
           Live collaborator records could not be loaded: {loadError}
