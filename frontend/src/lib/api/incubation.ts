@@ -4,6 +4,7 @@
 // Returns the persisted project_id so the analyzed venture can flow into a workspace.
 
 import { apiPost, apiUpload, withFallback } from "./client";
+import { domainPost } from "@/lib/domainApi";
 
 export interface PipelineBlueprint {
   project_id?: string;
@@ -130,4 +131,32 @@ export function uploadIncubationDocument(file: File): Promise<Record<string, unk
     () => null,
     "document upload",
   );
+}
+
+// ---------------------------------------------------------------------------
+// Fast-Track Intake — for startups with existing codebases / business plans
+// ---------------------------------------------------------------------------
+
+export interface FastTrackPayload {
+  startup_name: string;
+  industry: string;
+  stage: string;
+  one_liner: string;
+  repo_url?: string;
+  document_id?: string;
+  focus_areas?: string[];
+}
+
+/** POST /api/v1/incubation/fast-track/run — enriched pipeline for existing startups. */
+export function runFastTrack(payload: FastTrackPayload): Promise<PipelineBlueprint | null> {
+  return withFallback(
+    () => apiPost<PipelineBlueprint>("/incubation/fast-track/run", payload),
+    () => null,
+    "fast-track pipeline",
+  );
+}
+
+/** POST /api/domain/incubation/publish — publish a scored project to investor deal flow. */
+export function publishToInvestors(projectId: string): Promise<{ ok: boolean; snapshotId?: string }> {
+  return domainPost<{ ok: boolean; snapshotId?: string }>("/incubation/publish", { projectId });
 }

@@ -1,17 +1,20 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Brain, Trophy, GraduationCap } from "lucide-react";
+import { Brain, Rocket, Trophy, GraduationCap } from "lucide-react";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { MainIncubationPanel } from "./MainIncubationPanel";
+import { FastTrackPanel } from "./FastTrackPanel";
 import { HackathonPanel } from "./HackathonPanel";
 import { Academy } from "@/dashboard/_shared/academy/Academy";
 
-type Panel = "main" | "hackathon" | "learn";
+type Panel = "main" | "fast-track" | "hackathon" | "learn";
 
 export default function IncubationLayout() {
   const [searchParams] = useSearchParams();
   const initialPanel: Panel =
-    searchParams.get("panel") === "hackathon"
+    searchParams.get("panel") === "fast-track"
+      ? "fast-track"
+      : searchParams.get("panel") === "hackathon"
       ? "hackathon"
       : searchParams.get("panel") === "learn"
       ? "learn"
@@ -34,6 +37,12 @@ export default function IncubationLayout() {
           onClick={() => setPanel("main")}
         />
         <SidebarPill
+          label="Track"
+          icon={<Rocket className="w-5 h-5" />}
+          active={panel === "fast-track"}
+          onClick={() => setPanel("fast-track")}
+        />
+        <SidebarPill
           label="Hack"
           icon={<Trophy className="w-5 h-5" />}
           active={panel === "hackathon"}
@@ -49,6 +58,7 @@ export default function IncubationLayout() {
       </aside>
       <div className="flex-1 min-w-0">
         {panel === "main" && <MainIncubationPanel />}
+        {panel === "fast-track" && <FastTrackPanel />}
         {panel === "hackathon" && <HackathonPanel />}
         {panel === "learn" && <Academy role="founder" userName={founderProfile.name.split(" ")[0]} />}
       </div>
