@@ -1,22 +1,30 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Briefcase,
+  FileText,
   Github,
+  Lightbulb,
   Upload,
   Loader2,
   CheckCircle2,
   Circle,
   ExternalLink,
+  RefreshCw,
   Rocket,
   Download,
   Eye,
   Plus,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   runFastTrack,
   uploadIncubationDocument,
   publishToInvestors,
+  generateBusinessPlan,
+  generateStrategy,
+  analyzePivot,
   type FastTrackPayload,
   type PipelineBlueprint,
 } from "@/lib/api/incubation";
@@ -477,6 +485,60 @@ export function FastTrackPanel() {
           </div>
         )}
 
+        {/* Next AI Actions */}
+        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
+          <h3 className="text-sm font-semibold text-slate-700 mb-4">Next AI Actions</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <NextActionButton
+              icon={<FileText className="w-4 h-4" />}
+              label="Generate Pitch Deck"
+              onClick={async () => {
+                const payload = { startup_name: startupName, solution: oneLiner, focus_areas: [industry.toLowerCase()] };
+                const result = await generateBusinessPlan(payload);
+                if (result) { setBlueprint({ ...blueprint, ...result } as PipelineBlueprint); toast.success("Pitch Deck generated"); }
+                else toast.error("Failed to generate pitch deck");
+              }}
+            />
+            <NextActionButton
+              icon={<Rocket className="w-4 h-4" />}
+              label="Build MVP Roadmap"
+              onClick={async () => {
+                const payload = { startup_name: startupName, solution: oneLiner, focus_areas: [industry.toLowerCase()] };
+                const result = await generateStrategy(payload);
+                if (result) { setBlueprint({ ...blueprint, ...result } as PipelineBlueprint); toast.success("MVP Roadmap built"); }
+                else toast.error("Failed to build MVP roadmap");
+              }}
+            />
+            <NextActionButton
+              icon={<Lightbulb className="w-4 h-4" />}
+              label="Explore Pivot Ideas"
+              onClick={async () => {
+                const payload = { startup_name: startupName, solution: oneLiner, focus_areas: [industry.toLowerCase()] };
+                const result = await analyzePivot(payload);
+                if (result) { setBlueprint({ ...blueprint, ...result } as PipelineBlueprint); toast.success("Pivot ideas explored"); }
+                else toast.error("Failed to explore pivot ideas");
+              }}
+            />
+            <NextActionButton
+              icon={<RefreshCw className="w-4 h-4" />}
+              label="Revise Idea"
+              onClick={handleReset}
+            />
+            <NextActionButton
+              icon={<Users className="w-4 h-4" />}
+              label="Find Collaborators"
+              onClick={() => navigate(`/matches?project=${projectId}`)}
+              disabled={!projectId}
+            />
+            <NextActionButton
+              icon={<Briefcase className="w-4 h-4" />}
+              label="Create Workspace"
+              onClick={handleCreateWorkspace}
+              disabled={workspaceCreated || !projectId}
+            />
+          </div>
+        </div>
+
         {/* Action Bar */}
         <div className="flex flex-wrap gap-3">
           <button
@@ -520,6 +582,29 @@ export function FastTrackPanel() {
 }
 
 // ─────────────────── SHARED DISPLAY COMPONENTS ───────────────────
+
+function NextActionButton({
+  icon,
+  label,
+  onClick,
+  disabled,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex items-center gap-2 bg-violet-100 text-violet-900 px-4 py-3 rounded-lg text-sm font-medium hover:bg-violet-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
 
 function ScoreHeroCard({
   label,

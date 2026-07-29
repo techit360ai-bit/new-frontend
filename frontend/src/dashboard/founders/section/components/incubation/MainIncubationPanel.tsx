@@ -750,12 +750,12 @@ export function MainIncubationPanel() {
               Publish
             </button>
             <button
-              onClick={handleExportReport}
-              disabled={!analysisResult}
+              onClick={() => void handleCreateWorkspace()}
+              disabled={!projectId}
               className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 text-sm font-medium rounded hover:bg-gray-50 disabled:bg-gray-100"
             >
-              <Download className="h-4 w-4" />
-              Export Report
+              <Briefcase className="h-4 w-4" />
+              Create Workspace
             </button>
           </div>
         </aside>
