@@ -97,14 +97,30 @@ export function StartupOverview() {
                     <MapPin className="w-3.5 h-3.5" /> {startup.region}
                   </span>
                 </div>
+                {/* Investors watching */}
+                {startup.investorsWatching > 0 && (
+                  <div className="flex items-center gap-2 mt-3">
+                    <div className="flex -space-x-2">
+                      {Array.from({ length: Math.min(startup.investorsWatching, 5) }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-7 h-7 rounded-full border-2 border-white bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center"
+                        >
+                          <Eye className="w-3 h-3 text-white" />
+                        </div>
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">
+                      {startup.investorsWatching > 5 && `+${startup.investorsWatching - 5} `}
+                      {startup.investorsWatching} investor{startup.investorsWatching !== 1 ? "s" : ""} watching
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${riskColor}`}>
                 {startup.riskLevel} risk
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700">
-                {startup.investorsWatching} investors watching
               </span>
             </div>
           </div>
