@@ -314,7 +314,7 @@ export function Dashboard() {
                   {highMomentumStartups.map((startup) => (
                   <Link
                     key={startup.id}
-                    to={`/investor/risk-radar/${startup.id}`}
+                    to={`/investor/startup/${startup.id}`}
                     className="block p-4 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg transition-all group"
                   >
                     <div className="flex items-start justify-between mb-2">

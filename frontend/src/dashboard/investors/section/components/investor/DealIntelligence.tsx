@@ -473,7 +473,7 @@ function StartupCard({ startup, onWatch }: StartupCardProps) {
 
       <div className="flex gap-2">
         <Link
-          to={`/investor/risk-radar/${startup.id}`}
+          to={`/investor/startup/${startup.id}`}
           className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded transition-all text-center"
         >
           Analyze
@@ -535,7 +535,7 @@ function StartupListItem({ startup, onWatch }: StartupCardProps) {
 
         <div className="flex gap-2">
           <Link
-            to={`/investor/risk-radar/${startup.id}`}
+            to={`/investor/startup/${startup.id}`}
             className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded transition-all"
           >
             Analyze
