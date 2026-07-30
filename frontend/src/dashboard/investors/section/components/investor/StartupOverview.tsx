@@ -103,9 +103,19 @@ export function StartupOverview() {
               <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${riskColor}`}>
                 {startup.riskLevel} risk
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700">
-                {startup.investorsWatching} investors watching
-              </span>
+              {startup.investorsWatching > 0 && (
+                <span className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700">
+                  <span className="flex -space-x-1.5">
+                    {Array.from({ length: Math.min(startup.investorsWatching, 4) }).map((_, i) => (
+                      <span
+                        key={i}
+                        className="inline-block w-5 h-5 rounded-full border-2 border-blue-50 bg-gradient-to-br from-blue-400 to-indigo-500"
+                      />
+                    ))}
+                  </span>
+                  {startup.investorsWatching > 4 && `+${startup.investorsWatching - 4}`} {startup.investorsWatching} watching
+                </span>
+              )}
             </div>
           </div>
 
