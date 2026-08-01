@@ -219,3 +219,146 @@ export async function updateOrganizationProject(
   if (!project) throw new Error("The organization project response was invalid.");
   return project;
 }
+
+// --- Organization Intelligence: Cohort Health -------------------------------
+
+export type HealthBand = "green" | "amber" | "red";
+
+export interface CohortHealthEntry {
+  id: string;
+  title: string;
+  industry: string;
+  stage: string;
+  gsisScore: number;
+  progress: number;
+  marketReadyScore: number;
+  mrr: number;
+  memberCount: number;
+  daysInactive: number;
+  decay: number;
+  band: HealthBand;
+  updatedAt: string;
+}
+
+export interface CohortAlert {
+  projectId: string;
+  severity: string;
+  type: string;
+  message: string;
+}
+
+export interface CohortHealthSummary {
+  total: number;
+  green: number;
+  amber: number;
+  red: number;
+  avgGsis: number;
+}
+
+export interface CohortHealthData {
+  cohort: CohortHealthEntry[];
+  alerts: CohortAlert[];
+  summary: CohortHealthSummary;
+  stages: string[];
+}
+
+export interface InterventionRec {
+  projectId: string;
+  title: string;
+  band: HealthBand;
+  recommendation: string;
+  source: "ai" | "rule";
+}
+
+export interface InterventionsData {
+  recommendations: InterventionRec[];
+  aiAvailable: boolean;
+}
+
+function asBand(value: unknown): HealthBand {
+  const v = asText(value);
+  return v === "green" || v === "red" ? v : "amber";
+}
+
+export interface CohortHealthParams {
+  stage?: string;
+  riskLevel?: HealthBand;
+}
+
+export function normalizeCohortHealth(payload: unknown): CohortHealthData {
+  const root = asRecord(payload);
+  const summary = asRecord(root.summary);
+  const cohort = asRows(root.cohort)
+    .map((row): CohortHealthEntry | null => {
+      const id = asText(row.id);
+      if (!id) return null;
+      return {
+        id,
+        title: asText(row.title) || "Untitled project",
+        industry: asText(row.industry),
+        stage: asText(row.stage) || "idea",
+        gsisScore: asPercent(row.gsisScore),
+        progress: asPercent(row.progress),
+        marketReadyScore: asPercent(row.marketReadyScore),
+        mrr: Math.max(0, asNumber(row.mrr)),
+        memberCount: Math.max(0, asNumber(row.memberCount)),
+        daysInactive: Math.max(0, asNumber(row.daysInactive)),
+        decay: Math.max(0, asNumber(row.decay)),
+        band: asBand(row.band),
+        updatedAt: asText(row.updatedAt),
+      };
+    })
+    .filter((row): row is CohortHealthEntry => row !== null);
+
+  const alerts = asRows(root.alerts)
+    .map((row) => ({
+      projectId: asText(row.projectId),
+      severity: asText(row.severity) || "medium",
+      type: asText(row.type) || "info",
+      message: asText(row.message),
+    }))
+    .filter((row) => row.message);
+
+  const stages = Array.isArray(root.stages)
+    ? root.stages.map((s) => asText(s)).filter(Boolean)
+    : [];
+
+  return {
+    cohort,
+    alerts,
+    summary: {
+      total: asNumber(summary.total),
+      green: asNumber(summary.green),
+      amber: asNumber(summary.amber),
+      red: asNumber(summary.red),
+      avgGsis: asNumber(summary.avgGsis),
+    },
+    stages,
+  };
+}
+
+export async function fetchCohortHealth(params: CohortHealthParams = {}): Promise<CohortHealthData> {
+  const query = new URLSearchParams();
+  if (params.stage) query.set("stage", params.stage);
+  if (params.riskLevel) query.set("riskLevel", params.riskLevel);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return normalizeCohortHealth(await domainGet<unknown>(`/organization/cohort-health${suffix}`));
+}
+
+export function normalizeInterventions(payload: unknown): InterventionsData {
+  const root = asRecord(payload);
+  const recommendations = asRows(root.recommendations)
+    .map((row) => ({
+      projectId: asText(row.projectId),
+      title: asText(row.title) || "Untitled project",
+      band: asBand(row.band),
+      recommendation: asText(row.recommendation),
+      source: asText(row.source) === "ai" ? ("ai" as const) : ("rule" as const),
+    }))
+    .filter((row) => row.recommendation);
+  return { recommendations, aiAvailable: asBoolean(root.aiAvailable) };
+}
+
+export async function fetchInterventions(): Promise<InterventionsData> {
+  return normalizeInterventions(await domainGet<unknown>("/organization/interventions"));
+}

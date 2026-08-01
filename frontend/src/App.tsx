@@ -83,6 +83,10 @@ import { Hackathons as OrgHackathons } from "@/dashboard/organization/section/co
 import { HackathonCreate as OrgHackathonCreate } from "@/dashboard/organization/section/components/org/HackathonCreate";
 import { HackathonDetail as OrgHackathonDetail } from "@/dashboard/organization/section/components/org/HackathonDetail";
 import { OrgProfile } from "@/dashboard/organization/section/components/org/OrgProfile";
+import { OrgIntelligenceLayout } from "@/dashboard/organization/section/components/org/intelligence/OrgIntelligenceLayout";
+import { CohortHealth as OrgCohortHealth } from "@/dashboard/organization/section/components/org/intelligence/CohortHealth";
+import { ImpactReporting as OrgImpactReporting } from "@/dashboard/organization/section/components/org/intelligence/ImpactReporting";
+import { DemoDayPipeline as OrgDemoDayPipeline } from "@/dashboard/organization/section/components/org/intelligence/DemoDayPipeline";
 import { OrgStep1 } from "@/dashboard/organization/onboarding/OrgStep1";
 import { OrgStep2 } from "@/dashboard/organization/onboarding/OrgStep2";
 import { OrgStep3 } from "@/dashboard/organization/onboarding/OrgStep3";
@@ -280,6 +284,12 @@ const App = () => {
         <Route path="/org" element={<RequireRole allowed={["organisation"]}><OrgLayout /></RequireRole>}>
           <Route index element={<OrgDashboard />} />
           <Route path="dashboard" element={<OrgDashboard />} />
+          <Route path="intelligence" element={<OrgIntelligenceLayout />}>
+            <Route index element={<OrgCohortHealth />} />
+            <Route path="cohort-health" element={<OrgCohortHealth />} />
+            <Route path="impact" element={<OrgImpactReporting />} />
+            <Route path="demo-day" element={<OrgDemoDayPipeline />} />
+          </Route>
           <Route path="teams" element={<OrgTeams />} />
           <Route path="projects" element={<OrgProjects />} />
           <Route path="incubator" element={<OrgIncubator />} />
