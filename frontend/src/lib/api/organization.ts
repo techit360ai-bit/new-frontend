@@ -362,3 +362,169 @@ export function normalizeInterventions(payload: unknown): InterventionsData {
 export async function fetchInterventions(): Promise<InterventionsData> {
   return normalizeInterventions(await domainGet<unknown>("/organization/interventions"));
 }
+
+// --- Organization Intelligence: Impact Reporting ----------------------------
+
+export interface ImpactMetrics {
+  startups: number;
+  productsLaunched: number;
+  totalMrr: number;
+  jobs: number;
+  avgProgress: number;
+  avgMarketReady: number;
+}
+
+export interface ImpactReport {
+  template: string;
+  metrics: ImpactMetrics;
+  stageProgression: { name: string; value: number }[];
+  industryBreakdown: { name: string; value: number }[];
+  revenueByStartup: { name: string; mrr: number }[];
+  generatedAt: string;
+}
+
+export interface KpiTarget {
+  id: string;
+  metric: string;
+  label: string;
+  target: number;
+}
+
+function nameValueRows(value: unknown): { name: string; value: number }[] {
+  return asRows(value)
+    .map((row) => ({ name: asText(row.name) || "Unspecified", value: asNumber(row.value) }))
+    .filter((row) => row.value > 0);
+}
+
+export function normalizeImpact(payload: unknown): ImpactReport {
+  const root = asRecord(payload);
+  const metrics = asRecord(root.metrics);
+  const charts = asRecord(root.charts);
+  return {
+    template: asText(root.template) || "quarterly",
+    metrics: {
+      startups: asNumber(metrics.startups),
+      productsLaunched: asNumber(metrics.productsLaunched),
+      totalMrr: asNumber(metrics.totalMrr),
+      jobs: asNumber(metrics.jobs),
+      avgProgress: asNumber(metrics.avgProgress),
+      avgMarketReady: asNumber(metrics.avgMarketReady),
+    },
+    stageProgression: nameValueRows(charts.stageProgression),
+    industryBreakdown: nameValueRows(charts.industryBreakdown),
+    revenueByStartup: asRows(charts.revenueByStartup)
+      .map((row) => ({ name: asText(row.name) || "Untitled", mrr: asNumber(row.mrr) }))
+      .filter((row) => row.mrr > 0),
+    generatedAt: asText(root.generatedAt),
+  };
+}
+
+export async function fetchImpact(template = "quarterly"): Promise<ImpactReport> {
+  return normalizeImpact(
+    await domainGet<unknown>(`/organization/impact?template=${encodeURIComponent(template)}`),
+  );
+}
+
+export async function fetchKpiTargets(): Promise<KpiTarget[]> {
+  const root = asRecord(await domainGet<unknown>("/organization/kpi-targets"));
+  return asRows(root.targets)
+    .map((row) => ({
+      id: asText(row.id),
+      metric: asText(row.metric),
+      label: asText(row.label) || asText(row.metric),
+      target: asNumber(row.target),
+    }))
+    .filter((row) => row.metric);
+}
+
+export async function saveKpiTarget(input: {
+  metric: string;
+  label?: string;
+  target: number;
+}): Promise<void> {
+  await domainPost<unknown>("/organization/kpi-targets", input);
+}
+
+// --- Organization Intelligence: Demo Day Pipeline ---------------------------
+
+export interface DemoDayChecklistItem {
+  key: string;
+  label: string;
+  met: boolean;
+}
+
+export interface DemoDayEntry {
+  id: string;
+  title: string;
+  industry: string;
+  stage: string;
+  gsisScore: number;
+  mrr: number;
+  investorReady: boolean;
+  published: boolean;
+  checklist: DemoDayChecklistItem[];
+  readyPct: number;
+}
+
+export interface DemoDayPipelineData {
+  threshold: number;
+  pipeline: DemoDayEntry[];
+}
+
+export interface InvestorMatch {
+  investorId: string;
+  name: string;
+  score: number;
+  reasons: string[];
+}
+
+export function normalizeDemoDayPipeline(payload: unknown): DemoDayPipelineData {
+  const root = asRecord(payload);
+  const pipeline = asRows(root.pipeline)
+    .map((row): DemoDayEntry | null => {
+      const id = asText(row.id);
+      if (!id) return null;
+      return {
+        id,
+        title: asText(row.title) || "Untitled",
+        industry: asText(row.industry),
+        stage: asText(row.stage) || "idea",
+        gsisScore: asPercent(row.gsisScore),
+        mrr: Math.max(0, asNumber(row.mrr)),
+        investorReady: asBoolean(row.investorReady),
+        published: asBoolean(row.published),
+        checklist: asRows(row.checklist).map((c) => ({
+          key: asText(c.key),
+          label: asText(c.label),
+          met: asBoolean(c.met),
+        })),
+        readyPct: asPercent(row.readyPct),
+      };
+    })
+    .filter((row): row is DemoDayEntry => row !== null);
+  return { threshold: asNumber(root.threshold) || 70, pipeline };
+}
+
+export async function fetchDemoDayPipeline(threshold = 70): Promise<DemoDayPipelineData> {
+  return normalizeDemoDayPipeline(
+    await domainGet<unknown>(`/organization/demo-day/pipeline?threshold=${threshold}`),
+  );
+}
+
+export async function pushToDealFlow(projectId: string): Promise<void> {
+  await domainPost<unknown>("/organization/demo-day/publish", { projectId });
+}
+
+export async function fetchInvestorMatches(projectId: string): Promise<InvestorMatch[]> {
+  const root = asRecord(
+    await domainGet<unknown>(`/organization/demo-day/matches/${encodeURIComponent(projectId)}`),
+  );
+  return asRows(root.matches)
+    .map((row) => ({
+      investorId: asText(row.investorId),
+      name: asText(row.name) || "Investor",
+      score: asNumber(row.score),
+      reasons: Array.isArray(row.reasons) ? row.reasons.map((r) => asText(r)).filter(Boolean) : [],
+    }))
+    .filter((row) => row.investorId);
+}
