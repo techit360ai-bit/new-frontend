@@ -14,6 +14,7 @@ import {
   CreditCard,
   Settings as SettingsIcon,
   Trophy,
+  Gauge,
   Rss,
   UserCircle,
   ArrowLeft,
@@ -35,6 +36,7 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: "Dashboard", path: "/org/dashboard", icon: LayoutDashboard },
+  { name: "Intelligence", path: "/org/intelligence", icon: Gauge },
   { name: "Teams", path: "/org/teams", icon: Users },
   { name: "Projects", path: "/org/projects", icon: FolderKanban },
   { name: "Incubator Programs", path: "/org/incubator", icon: GraduationCap },
@@ -63,7 +65,9 @@ export function OrgLayout() {
   const isActive = (path: string) =>
     path === "/org/hackathons"
       ? location.pathname.startsWith("/org/hackathons")
-      : location.pathname === path;
+      : path === "/org/intelligence"
+        ? location.pathname.startsWith("/org/intelligence")
+        : location.pathname === path;
 
   const planLabel =
     orgProfile.plan === "enterprise"
