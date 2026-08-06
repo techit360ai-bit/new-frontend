@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { BackButton } from '../components/BackButton';
 import { LivePostCard } from '../components/LivePostCard';
+import { gsisColorClass } from '@/lib/messaging/postKinds';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
 import { useFeedPosts } from '../useFeedPosts';
 
@@ -40,7 +41,7 @@ export function MyLogPage() {
             </p>
           </div>
           <div className="text-right">
-            <p className="font-mono text-4xl font-bold text-accent-primary">
+            <p className={`font-mono text-4xl font-bold ${gsisColorClass(profile?.credibilityScore ?? 0)}`}>
               {profile?.credibilityScore ?? 0}
             </p>
             <p className="text-xs text-text-muted">GSIS</p>

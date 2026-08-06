@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeedPosts } from '../useFeedPosts';
+import { gsisColorClass } from '@/lib/messaging/postKinds';
 
 export function RightPanel() {
   const { profile, user } = useAuth();
@@ -26,7 +27,7 @@ export function RightPanel() {
             <p className="text-xs capitalize text-text-secondary">{profile?.role || 'Role unavailable'}</p>
           </div>
           <div className="text-right">
-            <p className="font-mono text-3xl font-bold text-accent-primary">{profile?.credibilityScore ?? 0}</p>
+            <p className={`font-mono text-3xl font-bold ${gsisColorClass(profile?.credibilityScore ?? 0)}`}>{profile?.credibilityScore ?? 0}</p>
             <p className="text-[10px] uppercase text-text-muted">GSIS</p>
           </div>
         </div>

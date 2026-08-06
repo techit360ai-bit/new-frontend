@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Flame, MessageCircle, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { likePost, unlikePost } from '@/lib/messaging/feed';
-import { KIND_META } from '@/lib/messaging/postKinds';
+import { KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import type { WirePost } from '@/lib/messaging/types';
 import { ShareModal } from './ShareModal';
 
@@ -60,7 +60,7 @@ export function LivePostCard({
 
   return (
     <>
-      <article className="border-y border-border-default bg-bg-surface px-4 py-4 sm:rounded-lg sm:border">
+      <article className={`border-y border-border-default border-l-4 bg-bg-surface px-4 py-4 sm:rounded-lg sm:border ${kindColorClass(post.kind).split(' ')[0]}`}>
         <div className="mb-3 flex items-start justify-between gap-3">
           <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-semibold text-white">
@@ -77,7 +77,7 @@ export function LivePostCard({
         </div>
 
         <Link to={`/feed/post/${encodeURIComponent(post.id)}`} className="block">
-          <p className="mb-2 text-[11px] font-medium uppercase text-accent-primary">
+          <p className={`mb-2 text-[11px] font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
             {meta.emoji ? `${meta.emoji} ` : ''}{meta.label}
           </p>
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">{post.body}</p>
