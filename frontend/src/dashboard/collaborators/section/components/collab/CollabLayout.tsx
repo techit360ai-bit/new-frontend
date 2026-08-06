@@ -6,6 +6,7 @@ import {
   Settings as SettingsIcon, ArrowLeft,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
@@ -127,6 +128,7 @@ export function CollabLayout() {
         </header>
 
         <div className="flex-1 overflow-y-auto">
+          <ProfileCompletionBanner role="collaborator" profilePath="/collaborator/profile" />
           <Outlet />
         </div>
       </main>

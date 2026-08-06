@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFounderProfile, type FounderExperience } from "@/contexts/UserContext";
-import { FounderProgressBar } from "./FounderProgressBar";
+import { useAuth } from "@/contexts/AuthContext";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { User, MapPin, Briefcase, Calendar, MessageSquare } from "lucide-react";
 
 const FOUNDER_TYPES: { v: FounderExperience; label: string }[] = [
@@ -12,6 +13,7 @@ const FOUNDER_TYPES: { v: FounderExperience; label: string }[] = [
 
 export function FounderStep1() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
   const { founderProfile, updateFounderProfile } = useFounderProfile();
   const [name, setName]         = useState(founderProfile.name);
   const [title, setTitle]       = useState(founderProfile.title);
@@ -19,23 +21,27 @@ export function FounderStep1() {
   const [years, setYears]       = useState(founderProfile.yearsBuilding);
   const [type, setType]         = useState<FounderExperience>(founderProfile.founderType);
   const [headline, setHeadline] = useState(founderProfile.headline);
+  const [finishing, setFinishing] = useState(false);
 
   const canContinue = name.trim() && title.trim() && location.trim() && years >= 0 && headline.trim();
 
   const persist = () => updateFounderProfile({ name, title, location, yearsBuilding: years, founderType: type, headline });
-  const handleNext     = () => { persist(); navigate("/founder/onboarding/step-2"); };
-  const handleSaveExit = () => { persist(); navigate("/"); };
+  const handleFinish = async () => {
+    persist();
+    setFinishing(true);
+    // Onboarded now; the rest of the profile is completed later (banner prompts them).
+    const { error } = await updateProfile({ isOnboarded: true });
+    if (error) { setFinishing(false); return; }
+    localStorage.setItem("techit_profile_completion_pending", "founder");
+    navigate(roleDashboardPath.founder, { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-2xl">
-        <div className="flex justify-end mb-4">
-          <button onClick={handleSaveExit} className="text-sm text-slate-500 hover:text-slate-900">Save &amp; exit</button>
-        </div>
-        <FounderProgressBar currentStep={1} totalSteps={6} />
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Tell us who you are</h1>
-          <p className="text-base text-slate-600">The basics. We'll use this on your public profile and to match you with the right builds.</p>
+          <p className="text-base text-slate-600">Just the basics to get you in. You can complete the rest of your profile any time from your dashboard.</p>
         </div>
 
         <div className="space-y-5">
@@ -80,9 +86,9 @@ export function FounderStep1() {
         </div>
 
         <div className="flex justify-end mt-10">
-          <button onClick={handleNext} disabled={!canContinue}
+          <button onClick={handleFinish} disabled={!canContinue || finishing}
             className="px-6 py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors">
-            Continue →
+            {finishing ? "Setting up…" : "Finish & go to dashboard"}
           </button>
         </div>
       </div>

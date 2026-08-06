@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrgProfile } from "@/contexts/UserContext";
-import { OrgProgressBar } from "./OrgProgressBar";
+import { useAuth } from "@/contexts/AuthContext";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { Building2, MapPin, Globe, Hash, Calendar } from "lucide-react";
 
 const orgTypes = [
@@ -17,6 +18,7 @@ const orgTypes = [
 
 export function OrgStep1() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
   const [orgName, setOrgName] = useState(orgProfile.orgName);
   const [orgType, setOrgType] = useState(orgProfile.orgType);
@@ -26,8 +28,9 @@ export function OrgStep1() {
   );
   const [foundingYear, setFoundingYear] = useState(orgProfile.foundingYear);
   const [website, setWebsite] = useState(orgProfile.website);
+  const [finishing, setFinishing] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     updateOrgProfile({
       orgName,
       orgType,
@@ -36,21 +39,23 @@ export function OrgStep1() {
       foundingYear,
       website,
     });
-    navigate("/org/onboarding/step-2");
+    setFinishing(true);
+    const { error } = await updateProfile({ isOnboarded: true });
+    if (error) { setFinishing(false); return; }
+    localStorage.setItem("techit_profile_completion_pending", "organisation");
+    navigate(roleDashboardPath.org, { replace: true });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-3xl">
-        <OrgProgressBar currentStep={1} totalSteps={5} />
 
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
             Organisation Identity
           </h1>
           <p className="text-base text-slate-600 dark:text-slate-400">
-            Tell us about your organisation so TechIT can serve the right
-            builders and partners.
+            Just the essentials to get started. Complete the rest from your profile later.
           </p>
         </div>
 
@@ -136,10 +141,10 @@ export function OrgStep1() {
         <div className="mt-12 flex justify-end">
           <button
             onClick={handleNext}
-            disabled={!orgName.trim() || !orgType || !location.trim()}
+            disabled={!orgName.trim() || !orgType || !location.trim() || finishing}
             className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
-            Continue
+            {finishing ? "Setting up…" : "Finish & go to dashboard"}
           </button>
         </div>
       </div>
