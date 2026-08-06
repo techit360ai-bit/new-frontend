@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -17,9 +17,12 @@ import {
   ArrowLeft,
   UserCircle,
   ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
+import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 
 interface NavItem {
   path: string;
@@ -32,6 +35,7 @@ interface NavItem {
 export function InvestorLayout() {
   const location = useLocation();
   const { investorProfile } = useInvestorProfile();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     writeStoredActiveRole('investor');
@@ -66,12 +70,17 @@ export function InvestorLayout() {
   return (
     <div className="flex h-screen bg-[#0a0a0a] text-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#111111] border-r border-gray-800 flex flex-col">
+      <aside className={`bg-[#111111] border-r border-gray-800 flex flex-col transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-6 border-b border-gray-800">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-emerald-400">
+            {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          </button>
+          {!sidebarCollapsed && <>
           <h1 className="text-2xl font-bold text-white">
             TECH<span className="text-emerald-400">IT</span>
           </h1>
           <p className="text-xs text-gray-400 mt-1 font-mono">INVESTOR INTELLIGENCE</p>
+          </>}
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -116,7 +125,7 @@ export function InvestorLayout() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-800 space-y-3">
+        {!sidebarCollapsed && <div className="p-4 border-t border-gray-800 space-y-3">
           <Link
             to={roleDashboardPath.investor}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-colors"
@@ -141,11 +150,12 @@ export function InvestorLayout() {
               <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-emerald-400 transition-colors flex-shrink-0 ml-2" />
             </div>
           </Link>
-        </div>
+        </div>}
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
+        <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
         <Outlet />
       </main>
     </div>

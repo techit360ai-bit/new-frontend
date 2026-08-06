@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, CheckSquare, TrendingUp, DollarSign, PieChart,
   Sparkles, Award, MessageSquare, Wrench, Rss, UserCircle,
-  Settings as SettingsIcon, ArrowLeft,
+  Settings as SettingsIcon, ArrowLeft, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
@@ -43,6 +43,7 @@ export function CollabLayout() {
   const navigate = useNavigate();
   const { collaboratorProfile } = useCollaboratorProfile();
   const { profile } = useAuth();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     writeStoredActiveRole("collaborator");
@@ -96,14 +97,19 @@ export function CollabLayout() {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <aside className="hidden lg:flex lg:flex-col w-64 bg-slate-900 border-r border-slate-800">
+      <aside className={`hidden lg:flex lg:flex-col bg-slate-900 border-r border-slate-800 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-5 border-b border-slate-800">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-amber-400">
+            {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          </button>
+          {!sidebarCollapsed && <>
           <Link to={roleDashboardPath.collaborator} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-400 transition-colors mb-3">
             <ArrowLeft className="w-3 h-3" />
             Back to TechIT
           </Link>
           <h1 className="text-xl font-bold text-amber-400 tracking-wide">TECHIT</h1>
           <p className="text-xs text-slate-400 mt-0.5">Collaborator Portal</p>
+          </>}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
@@ -112,11 +118,11 @@ export function CollabLayout() {
           {accountNav.map(renderNavItem)}
         </nav>
 
-        <Link to="/collaborator/equity" className="m-3 p-3 rounded-lg bg-slate-800 hover:bg-slate-800/70 transition-colors border border-slate-700">
+        {!sidebarCollapsed && <Link to="/collaborator/equity" className="m-3 p-3 rounded-lg bg-slate-800 hover:bg-slate-800/70 transition-colors border border-slate-700">
           <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Building for Equity</p>
           <p className="text-sm text-white mt-1">View your persisted ownership ledger</p>
           <p className="text-xs text-amber-400 mt-1">View equity →</p>
-        </Link>
+        </Link>}
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden">
