@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { gsisColorClass } from '@/lib/messaging/postKinds';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   connectWithUser,
@@ -130,7 +131,7 @@ function TribeMemberCard({ profile }: { profile: PublicUserProfile }) {
           <p className="text-xs text-text-muted">{profile.location}</p>
         </div>
         <div className="text-right">
-          <p className="font-mono text-sm font-semibold text-accent-primary">{profile.gsis}</p>
+          <p className={`font-mono text-sm font-semibold ${gsisColorClass(profile.gsis)}`}>{profile.gsis}</p>
           <p className="text-[10px] uppercase text-text-muted">GSIS</p>
         </div>
       </div>

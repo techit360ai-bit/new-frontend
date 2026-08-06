@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeedPosts } from '../useFeedPosts';
+import { gsisColorClass } from '@/lib/messaging/postKinds';
 
 export function LeftSidebar() {
   const { profile, user } = useAuth();
@@ -23,7 +24,7 @@ export function LeftSidebar() {
           {profile?.role || 'Role unavailable'} · {profile?.startupStage || 'Stage not set'}
         </p>
         <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border-default pt-4">
-          <Metric label="GSIS" value={profile?.credibilityScore ?? 0} />
+          <div><p className="text-[11px] text-text-muted">GSIS</p><p className={`mt-1 font-mono text-base font-semibold ${gsisColorClass(profile?.credibilityScore ?? 0)}`}>{profile?.credibilityScore ?? 0}</p></div>
           <Metric label="Posts" value={loading ? '...' : ownPosts.length} />
         </div>
       </section>

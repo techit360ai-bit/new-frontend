@@ -10,7 +10,7 @@ import {
   likePost,
   unlikePost,
 } from '@/lib/messaging/feed';
-import { KIND_META } from '@/lib/messaging/postKinds';
+import { KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import type { WireComment, WirePost } from '@/lib/messaging/types';
 import { fetchPublicUserProfile, type PublicUserProfile } from '@/lib/api/users';
 import { ShareModal } from '../components/ShareModal';
@@ -154,7 +154,7 @@ export function PostDetailPage() {
     <div className="mx-auto max-w-3xl px-4 py-6 pb-20 lg:pb-6">
       <BackButton label="Back to Feed" className="mb-6" />
 
-      <article className="mb-6 border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+      <article className={`mb-6 border-y border-border-default border-l-4 bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6 ${kindColorClass(post.kind).split(' ')[0]}`}>
         <div className="mb-4 flex items-start justify-between gap-3">
           <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-primary text-sm font-semibold text-white">
@@ -170,7 +170,7 @@ export function PostDetailPage() {
           <time className="text-xs text-text-muted" dateTime={post.ts}>{formatTimestamp(post.ts)}</time>
         </div>
 
-        <p className="mb-3 text-xs font-medium uppercase text-accent-primary">
+        <p className={`mb-3 text-xs font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
           {meta.emoji ? `${meta.emoji} ` : ''}{meta.label}
         </p>
         <p className="whitespace-pre-wrap text-base leading-relaxed text-text-primary">{post.body}</p>

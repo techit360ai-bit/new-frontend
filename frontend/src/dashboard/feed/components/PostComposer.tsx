@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { createPost } from '@/lib/messaging/feed';
 import { VIEWER_ROLES, normalizeRole } from '@/lib/messaging/roles';
-import { kindsForRole, KIND_META } from '@/lib/messaging/postKinds';
+import { kindsForRole, KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import { useAuth } from '@/contexts/AuthContext';
 
 function initials(value: string): string {
@@ -84,7 +84,7 @@ export function PostComposer({
               onClick={() => setSelectedType(type.id)}
               className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 selectedType === type.id
-                  ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
+                  ? `bg-accent-primary/10 ${kindColorClass(type.id)}`
                   : 'border-border-default text-text-secondary hover:border-border-active'
               }`}
             >
