@@ -25,6 +25,7 @@ import {
 import { useEffect, useState } from "react";
 import { useOrgProfile } from "@/contexts/UserContext";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 
 interface NavItem {
   name: string;
@@ -199,6 +200,7 @@ export function OrgLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pt-16 lg:pt-0">
+        <ProfileCompletionBanner role="organisation" profilePath="/org/profile" />
         <Outlet />
       </main>
     </div>

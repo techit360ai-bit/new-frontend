@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 
 type NavKind = "link" | "external" | "placeholder";
 interface NavItem { name: string; path: string; icon: typeof LayoutDashboard; kind: NavKind; }
@@ -154,7 +155,10 @@ export function FounderLayout() {
           </div>
           <TopBarRoleMenu />
         </header>
-        <div className="flex-1 overflow-y-auto"><Outlet /></div>
+        <div className="flex-1 overflow-y-auto">
+          <ProfileCompletionBanner role="founder" profilePath="/founder/profile" />
+          <Outlet />
+        </div>
       </main>
 
       <Toaster richColors position="bottom-right" />
