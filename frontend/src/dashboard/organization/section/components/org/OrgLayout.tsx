@@ -21,6 +21,8 @@ import {
   Menu,
   X,
   ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOrgProfile } from "@/contexts/UserContext";
@@ -58,6 +60,7 @@ export function OrgLayout() {
   const location = useLocation();
   const { orgProfile } = useOrgProfile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     writeStoredActiveRole("org");
@@ -105,8 +108,12 @@ export function OrgLayout() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-200">
+      <aside className={`hidden lg:flex lg:flex-col bg-white border-r border-gray-200 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-6 border-b border-gray-200">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-indigo-600">
+            {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          </button>
+          {!sidebarCollapsed && <>
           <Link
             to={roleDashboardPath.org}
             className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors mb-3"
@@ -116,6 +123,7 @@ export function OrgLayout() {
           </Link>
           <h1 className="text-2xl font-bold text-indigo-600">TECHIT</h1>
           <p className="text-sm text-gray-600 mt-1">Organization Portal</p>
+          </>}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -134,7 +142,7 @@ export function OrgLayout() {
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
+        {!sidebarCollapsed && <div className="p-4 border-t border-gray-200">
           <Link
             to="/org/billing"
             className="block bg-indigo-50 hover:bg-indigo-100 rounded-lg p-4 group transition-colors"
@@ -149,7 +157,7 @@ export function OrgLayout() {
               <ChevronRight className="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 transition-colors flex-shrink-0 ml-2" />
             </div>
           </Link>
-        </div>
+        </div>}
       </aside>
 
       {/* Mobile Menu Button */}

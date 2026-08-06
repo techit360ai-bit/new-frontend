@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useInvestorProfile } from "@/contexts/UserContext";
-import { InvestorProgressBar } from "./InvestorProgressBar";
+import { useAuth } from "@/contexts/AuthContext";
+import { roleDashboardPath } from "@/lib/roleRoutes";
 import { Button } from "@/components/ui/button";
 import { MapPin, Minus, Plus } from "lucide-react";
 
@@ -24,6 +25,7 @@ const fundSizes = ["<$1M", "$1M–$10M", "$10M–$100M", "$100M+"];
 
 export function InvestorStep1() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
   const { investorProfile, updateInvestorProfile } = useInvestorProfile();
   const [investorType, setInvestorType] = useState(
     investorProfile.investorType,
@@ -34,23 +36,26 @@ export function InvestorStep1() {
     investorProfile.yearsInvesting || 0,
   );
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [finishing, setFinishing] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     updateInvestorProfile({ investorType, location, fundSize, yearsInvesting });
-    navigate("/investor/onboarding/step-2");
+    setFinishing(true);
+    const { error } = await updateProfile({ isOnboarded: true });
+    if (error) { setFinishing(false); return; }
+    localStorage.setItem("techit_profile_completion_pending", "investor");
+    navigate(roleDashboardPath.investor, { replace: true });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-3xl">
-        <InvestorProgressBar currentStep={1} totalSteps={5} />
-
         <div className="mb-12">
           <h1 className="text-5xl sm:text-4xl mb-3 text-slate-900 dark:text-white font-bold tracking-tight">
             Investor Identity
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
-            Help us understand your investment profile
+            Just the essentials to get started. Complete the rest from your profile later.
           </p>
         </div>
 
@@ -176,10 +181,10 @@ export function InvestorStep1() {
         <div className="mt-16 flex justify-end">
           <Button
             onClick={handleNext}
-            disabled={!investorType || !location || !fundSize}
+            disabled={!investorType || !location || !fundSize || finishing}
             className="px-10 py-6 text-lg bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 dark:from-teal-500 dark:to-cyan-500 dark:hover:from-teal-600 dark:hover:to-cyan-600 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            Continue
+            {finishing ? "Setting up…" : "Finish & go to dashboard"}
           </Button>
         </div>
       </div>

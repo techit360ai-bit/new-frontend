@@ -1,10 +1,10 @@
 // frontend/src/dashboard/founders/section/components/founder/FounderLayout.tsx
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FlaskConical, PanelsTopLeft, Rss, Compass, Lightbulb,
   Route as RouteIcon, MessageSquare, LineChart, Wallet, UserCircle,
-  Settings as SettingsIcon, ArrowLeft, ShieldCheck,
+  Settings as SettingsIcon, ArrowLeft, ShieldCheck, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
@@ -47,6 +47,7 @@ export function FounderLayout() {
   const navigate = useNavigate();
   const { founderProfile } = useFounderProfile();
   const { profile } = useAuth();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     writeStoredActiveRole("founder");
@@ -120,13 +121,18 @@ export function FounderLayout() {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-slate-200">
+      <aside className={`hidden lg:flex lg:flex-col bg-white border-r border-slate-200 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-5 border-b border-slate-200">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-violet-600">
+            {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          </button>
+          {!sidebarCollapsed && <>
           <Link to="/" className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-violet-600 transition-colors mb-3">
             <ArrowLeft className="w-3 h-3" /> Back to TechIT
           </Link>
           <h1 className="text-xl font-bold text-violet-600 tracking-wide">TECHIT</h1>
           <p className="text-xs text-slate-500 mt-0.5">Founder Portal</p>
+          </>}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
@@ -139,12 +145,12 @@ export function FounderLayout() {
           {accountNav.map(renderItem)}
         </nav>
 
-        <Link to="/founder/profile" className="m-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200 flex items-center gap-3">
+        <Link to="/founder/profile" className={`m-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200 flex items-center gap-3 ${sidebarCollapsed ? "justify-center" : ""}`}>
           <div className="w-9 h-9 rounded-full bg-violet-600 text-white text-sm font-semibold flex items-center justify-center">{initials}</div>
-          <div className="min-w-0">
+          {!sidebarCollapsed && <div className="min-w-0">
             <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
             <p className="text-xs text-slate-500 truncate">Founder · {startupLabel} · {founderProfile.stage}</p>
-          </div>
+          </div>}
         </Link>
       </aside>
 

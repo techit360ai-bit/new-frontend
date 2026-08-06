@@ -31,10 +31,6 @@ import Wallet from "@/TechitWallet/Wallet";
 import NotFound from "@/dashboard/NotFound";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InvestorStep1 } from "@/dashboard/investors/onboarding/InvestorStep1";
-import { InvestorStep2 } from "@/dashboard/investors/onboarding/InvestorStep2";
-import { InvestorStep3 } from "@/dashboard/investors/onboarding/InvestorStep3";
-import { InvestorStep4 } from "@/dashboard/investors/onboarding/InvestorStep4";
-import { InvestorStep5 } from "@/dashboard/investors/onboarding/InvestorStep5";
 import { InvestorLayout } from "@/dashboard/investors/section/components/investor/InvestorLayout";
 import { Dashboard as InvestorDashboard } from "@/dashboard/investors/section/components/investor/Dashboard";
 import { DealIntelligence as InvestorDealIntelligence } from "@/dashboard/investors/section/components/investor/DealIntelligence";
@@ -171,10 +167,7 @@ const App = () => {
         <Route path="/collaborator/summary" element={<Navigate to="/collaborator/dashboard" replace />} />
 
         <Route path="/investor/onboarding/step-1" element={<RequireRole allowed={["investor"]}><InvestorStep1 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-2" element={<RequireRole allowed={["investor"]}><InvestorStep2 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-3" element={<RequireRole allowed={["investor"]}><InvestorStep3 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-4" element={<RequireRole allowed={["investor"]}><InvestorStep4 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-5" element={<RequireRole allowed={["investor"]}><InvestorStep5 /></RequireRole>} />
+        {[2,3,4,5].map(step => <Route key={step} path={`/investor/onboarding/step-${step}`} element={<Navigate to="/investor/dashboard" replace />} />)}
         <Route path="/investor/setup" element={<Navigate to="/investor/onboarding/step-1" replace />} />
 
         {/* Investor section */}
