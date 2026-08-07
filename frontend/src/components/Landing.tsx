@@ -699,9 +699,14 @@ const Landing = () => {
 
               <div>
                 <div className="footer-col-label">COMPANY</div>
-                {["About", "Blog", "Privacy", "Terms"].map((item) => (
-                  <a key={item} href="#" className="footer-link">
-                    {item}
+                {[
+                  { label: "About", href: "#" },
+                  { label: "Blog", href: "#" },
+                  { label: "Privacy", href: "/privacy-policy.html" },
+                  { label: "Terms", href: "/terms-of-service.html" },
+                ].map((item) => (
+                  <a key={item.label} href={item.href} className="footer-link">
+                    {item.label}
                   </a>
                 ))}
               </div>
