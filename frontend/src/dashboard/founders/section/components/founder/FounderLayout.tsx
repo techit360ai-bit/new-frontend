@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FlaskConical, PanelsTopLeft, Rss, Compass, Lightbulb,
-  Route as RouteIcon, MessageSquare, LineChart, Wallet, UserCircle,
+  Route as RouteIcon, MessageSquare, Wallet, UserCircle,
   Settings as SettingsIcon, ArrowLeft, ShieldCheck, PanelLeftClose, PanelLeftOpen, Plug, Scale,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
@@ -33,7 +33,6 @@ const comingSoonNav: NavItem[] = [
 
 const utilityNav: NavItem[] = [
   { name: "Messages",  path: "/founder/messages",         icon: MessageSquare, kind: "link" },
-  { name: "Investors", path: "/matchresults", icon: LineChart,     kind: "link" },
   { name: "Wallet",    path: "/wallet",       icon: Wallet,        kind: "external" },
 ];
 
@@ -114,9 +113,6 @@ export function FounderLayout() {
         }`}>
         <Icon className="w-4 h-4" />
         <span className="flex-1 font-medium">{item.name}</span>
-        {item.kind === "external" && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono uppercase tracking-wider">Hub</span>
-        )}
       </Link>
     );
   };

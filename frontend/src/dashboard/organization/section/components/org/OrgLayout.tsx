@@ -99,11 +99,6 @@ export function OrgLayout() {
       >
         <Icon className="w-5 h-5" />
         <span className="text-sm font-medium flex-1">{item.name}</span>
-        {item.external && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-mono uppercase tracking-wider">
-            Hub
-          </span>
-        )}
       </Link>
     );
   };

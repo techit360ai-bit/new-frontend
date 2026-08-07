@@ -87,11 +87,6 @@ export function CollabLayout() {
         }`}>
         <Icon className="w-4 h-4" />
         <span className="flex-1 font-medium">{item.name}</span>
-        {item.external && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 font-mono uppercase tracking-wider">
-            Hub
-          </span>
-        )}
       </Link>
     );
   };
