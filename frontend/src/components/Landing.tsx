@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowRight, Zap, ChevronDown, Boxes } from "lucide-react";
+import { ArrowRight, Zap, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useAuth } from "@/contexts/AuthContext";
 import "@/Landing.css";
 
 interface RoleCard {
@@ -14,17 +13,6 @@ interface RoleCard {
   tagline: string;
   features: string[];
   linkLabel: string;
-}
-
-interface FeedPost {
-  initials: string;
-  name: string;
-  location: string;
-  badge: string;
-  badgeColor: string;
-  text: string;
-  likes: number;
-  comments: number;
 }
 
 const ROLE_CARDS: RoleCard[] = [
@@ -121,39 +109,6 @@ const FEATURE_CARDS = [
   },
 ];
 
-const FEED_POSTS: FeedPost[] = [
-  {
-    initials: "AK",
-    name: "Amara Kone",
-    location: "Lagos, NG",
-    badge: "HIRING",
-    badgeColor: "#7c3aed",
-    text: "Just hit 500 beta signups for NeuralDocs 🎉 Looking for a senior React dev — equity + credits available.",
-    likes: 48,
-    comments: 12,
-  },
-  {
-    initials: "MR",
-    name: "Marcus Reid",
-    location: "London, UK",
-    badge: "OPEN",
-    badgeColor: "#10b981",
-    text: "Credibility score hit 94 🔥 Open to new paid collaborations. Node.js, React, ML integrations. DM or request.",
-    likes: 31,
-    comments: 7,
-  },
-  {
-    initials: "VT",
-    name: "Vikram Thakur",
-    location: "Mumbai, IN",
-    badge: "INVESTING",
-    badgeColor: "#06b6d4",
-    text: "Looking at early-stage FinTech & HealthTech in Africa & SE Asia. AI score above 80 gets my attention. Drop your pitch.",
-    likes: 87,
-    comments: 24,
-  },
-];
-
 // Doubled so the CSS marquee loop is seamless (first half scrolls out, second half takes over)
 const MARQUEE_ITEMS = [
   "AI-Powered Matching",
@@ -225,8 +180,6 @@ function Reveal({
 
 function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
   const [scrolled, setScrolled] = useState(false);
-  const { profile } = useAuth();
-  const canAccessPlugins = profile?.role === "founder" || profile?.role === "organisation";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
@@ -292,29 +245,6 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
 
       {/* Sign In + Get Started */}
       <div className="nav-actions">
-        {canAccessPlugins && (
-          <Link
-            to="/plugins"
-            className="nav-plugins"
-            aria-label="Open the Plugins & MCP control panel"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "7px 14px",
-              borderRadius: 9999,
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-              border: `1px solid ${scrolled ? "rgba(255,255,255,0.35)" : "rgba(99,102,241,0.35)"}`,
-              background: scrolled ? "rgba(255,255,255,0.10)" : "rgba(99,102,241,0.08)",
-              color: scrolled ? "#ffffff" : "#4f46e5",
-              transition: "all 150ms ease",
-            }}
-          >
-            <Boxes size={14} /> Plugins
-          </Link>
-        )}
         <Link
           to="/signin"
           className="nav-signin"
@@ -666,126 +596,6 @@ const Landing = () => {
                 </div>
               </Reveal>
 
-              {/* Right — mock posts */}
-              <div className="feed-posts">
-                {FEED_POSTS.map((post, i) => (
-                  <Reveal key={post.name} delay={i * 90}>
-                    <div className="feed-post">
-                      <div className="feed-post-header">
-                        <div className="feed-post-meta">
-                          <div className="feed-avatar">{post.initials}</div>
-                          <div>
-                            <div className="feed-post-name">{post.name}</div>
-                            <div className="feed-post-location">
-                              {post.location}
-                            </div>
-                          </div>
-                        </div>
-                        <span
-                          className="feed-badge"
-                          style={{
-                            background: `${post.badgeColor}20`,
-                            border: `1px solid ${post.badgeColor}`,
-                            color: post.badgeColor,
-                          }}
-                        >
-                          {post.badge}
-                        </span>
-                      </div>
-                      <p className="feed-post-text">{post.text}</p>
-                      <div className="feed-actions">
-                        <span>❤️ {post.likes}</span>
-                        <span>💬 {post.comments}</span>
-                        <span className="feed-collab-btn">
-                          <Zap size={12} /> Collaborate
-                        </span>
-                      </div>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/*CREDITS — "Power Your Growth With Credits" 2-col split → stacks on tablet/mobile*/}
-        <section className="section section-alt">
-          <div className="max-w">
-            <div className="credits-layout">
-              {/* Left — copy + pricing tiers */}
-              <Reveal>
-                <div>
-                  <p className="section-label">// CREDIT ECONOMY</p>
-                  <h2
-                    className="section-title"
-                    style={{ fontSize: "clamp(28px, 4vw, 50px)" }}
-                  >
-                    Power Your Growth With Credits
-                  </h2>
-                  <p className="section-sub">
-                    A fair economy built for builders. Core features are always
-                    free. Credits unlock the AI-powered premium features that
-                    help you move faster.
-                  </p>
-                  <div className="pricing-tiers">
-                    {[
-                      {
-                        emoji: "🆓",
-                        name: "Starter — Free",
-                        sub: "250 credits/month · Core features",
-                        price: "$0",
-                      },
-                      {
-                        emoji: "⚡",
-                        name: "Pro Builder",
-                        sub: "2,500 credits/month · Full AI suite",
-                        price: "$19/mo",
-                      },
-                      {
-                        emoji: "💎",
-                        name: "Elite Network",
-                        sub: "Unlimited credits · Investor access",
-                        price: "$49/mo",
-                      },
-                    ].map((tier) => (
-                      <div key={tier.name} className="pricing-tier">
-                        <div className="pricing-tier-left">
-                          <div className="pricing-tier-icon">{tier.emoji}</div>
-                          <div>
-                            <div className="pricing-tier-name">{tier.name}</div>
-                            <div className="pricing-tier-sub">{tier.sub}</div>
-                          </div>
-                        </div>
-                        <div className="pricing-tier-price gradient-purple-cyan">
-                          {tier.price}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Reveal>
-
-              {/* Right — live balance card */}
-              <Reveal delay={110}>
-                <div className="balance-card">
-                  <div className="balance-label">YOUR BALANCE</div>
-                  <div className="balance-amount gradient-purple-cyan">
-                    1,250
-                  </div>
-                  {[
-                    ["AI Matching (per search)", "50 credits"],
-                    ["Idea AI Evaluation", "75 credits"],
-                    ["Incubation Hub / month", "200 credits"],
-                    ["Paid Collab Request", "25 credits"],
-                    ["Priority Profile Boost", "100 credits"],
-                  ].map(([label, cost]) => (
-                    <div key={label} className="balance-row">
-                      <span className="balance-row-label">{label}</span>
-                      <span className="balance-row-cost">{cost}</span>
-                    </div>
-                  ))}
-                </div>
-              </Reveal>
             </div>
           </div>
         </section>
@@ -797,8 +607,7 @@ const Landing = () => {
               <div className="cta-star">✦</div>
               <h2 className="cta-title">Ready to Build Something Real?</h2>
               <p className="cta-sub">
-                Join thousands of founders, collaborators, investors, and
-                organisations already on TechIT Network.
+                Join founders, collaborators, investors, and organisations building on TechIT Network.
               </p>
 
               {/* Role picker — each fires the right navigation handler */}

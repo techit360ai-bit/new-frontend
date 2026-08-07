@@ -3,7 +3,8 @@
 // Incubation Hub pipeline — ai-router /api/v1/incubation/pipeline/run.
 // Returns the persisted project_id so the analyzed venture can flow into a workspace.
 
-import { apiPost, apiUpload, withFallback } from "./client";
+import { apiPost, apiUpload, getAuthToken, withFallback } from "./client";
+import { apiUrl } from "./config";
 import { domainPost } from "@/lib/domainApi";
 
 export interface PipelineBlueprint {
@@ -133,6 +134,18 @@ export function uploadIncubationDocument(file: File): Promise<Record<string, unk
   );
 }
 
+export function persistIndividualAnalysis(
+  ventureData: Record<string, unknown>,
+  analysis: Record<string, unknown>,
+  module: string,
+): Promise<{ project_id: string }> {
+  return apiPost<{ project_id: string }>("/incubation/analysis/persist", {
+    venture_data: ventureData,
+    analysis,
+    module,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Fast-Track Intake — for startups with existing codebases / business plans
 // ---------------------------------------------------------------------------
@@ -159,4 +172,14 @@ export function runFastTrack(payload: FastTrackPayload): Promise<PipelineBluepri
 /** POST /api/domain/incubation/publish — publish a scored project to investor deal flow. */
 export function publishToInvestors(projectId: string): Promise<{ ok: boolean; snapshotId?: string }> {
   return domainPost<{ ok: boolean; snapshotId?: string }>("/incubation/publish", { projectId });
+}
+
+/** Download the authenticated user's latest persisted analysis for a project. */
+export async function downloadProjectAnalysis(projectId: string): Promise<Blob> {
+  const token = getAuthToken();
+  const response = await fetch(apiUrl(`/incubation/projects/${encodeURIComponent(projectId)}/export`), {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  if (!response.ok) throw new Error(`Analysis download failed (${response.status})`);
+  return response.blob();
 }
