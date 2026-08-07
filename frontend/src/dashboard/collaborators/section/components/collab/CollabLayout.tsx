@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, CheckSquare, TrendingUp, DollarSign, PieChart,
   Sparkles, Award, MessageSquare, Wrench, Rss, UserCircle,
-  Settings as SettingsIcon, ArrowLeft, PanelLeftClose, PanelLeftOpen,
+  Settings as SettingsIcon, ArrowLeft, PanelLeftClose, PanelLeftOpen, Scale,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
@@ -36,6 +36,7 @@ const primaryNav: NavItem[] = [
 const accountNav: NavItem[] = [
   { name: "Profile",  path: "/collaborator/profile",  icon: UserCircle },
   { name: "Settings", path: "/collaborator/settings", icon: SettingsIcon },
+  { name: "Privacy", path: "/compliance", icon: Scale },
 ];
 
 export function CollabLayout() {

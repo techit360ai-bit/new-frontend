@@ -30,6 +30,8 @@ import ContractSigningPage from "@/dashboard/founders/section/components/founder
 import Wallet from "@/TechitWallet/Wallet";
 import NotFound from "@/dashboard/NotFound";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CookieConsent } from "@/components/CookieConsent";
+import ComplianceCenter from "@/dashboard/ComplianceCenter";
 import { InvestorStep1 } from "@/dashboard/investors/onboarding/InvestorStep1";
 import { InvestorLayout } from "@/dashboard/investors/section/components/investor/InvestorLayout";
 import { Dashboard as InvestorDashboard } from "@/dashboard/investors/section/components/investor/Dashboard";
@@ -221,6 +223,7 @@ const App = () => {
           <Route path="/contracts/sign"  element={<ContractSigningPage />} />
         </Route>
         <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+        <Route path="/compliance" element={<RequireAuth><ComplianceCenter /></RequireAuth>} />
         <Route path="/signup" element={<RedirectAuthenticated><Signup /></RedirectAuthenticated>} />
         <Route path="/signin" element={<RedirectAuthenticated><Login /></RedirectAuthenticated>} />
         <Route path="/forgot-password" element={<RedirectAuthenticated><ForgotPassword /></RedirectAuthenticated>} />
@@ -298,6 +301,7 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ThemeToggle />
+      <CookieConsent />
       </MessagingProvider>
     </UserProvider>
     </AuthProvider>

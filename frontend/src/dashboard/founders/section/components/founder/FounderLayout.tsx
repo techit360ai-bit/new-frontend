@@ -4,7 +4,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FlaskConical, PanelsTopLeft, Rss, Compass, Lightbulb,
   Route as RouteIcon, MessageSquare, LineChart, Wallet, UserCircle,
-  Settings as SettingsIcon, ArrowLeft, ShieldCheck, PanelLeftClose, PanelLeftOpen,
+  Settings as SettingsIcon, ArrowLeft, ShieldCheck, PanelLeftClose, PanelLeftOpen, Plug, Scale,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
@@ -39,6 +39,8 @@ const utilityNav: NavItem[] = [
 
 const accountNav: NavItem[] = [
   { name: "Profile",  path: "/founder/profile",  icon: UserCircle,   kind: "link" },
+  { name: "Plugins", path: "/plugins", icon: Plug, kind: "link" },
+  { name: "Privacy", path: "/compliance", icon: Scale, kind: "link" },
   { name: "Settings", path: "/founder/settings", icon: SettingsIcon, kind: "link" },
 ];
 

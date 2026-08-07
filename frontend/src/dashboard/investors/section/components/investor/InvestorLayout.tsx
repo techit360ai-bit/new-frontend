@@ -19,6 +19,7 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
+  Scale,
 } from 'lucide-react';
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
@@ -55,6 +56,7 @@ export function InvestorLayout() {
     { path: '/investor/profile', label: 'Profile', icon: UserCircle },
     { path: '/investor/trust', label: 'Trust Dashboard', icon: ShieldCheck },
     { path: '/investor/mentorship', label: 'Mentorship Hub', icon: GraduationCap },
+    { path: '/compliance', label: 'Privacy & Compliance', icon: Scale },
     // Cross-section
     { path: '/feed', label: 'Feed', icon: Rss, external: true },
   ];

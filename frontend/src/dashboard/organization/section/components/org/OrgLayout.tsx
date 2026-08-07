@@ -23,6 +23,7 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
+  Scale,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOrgProfile } from "@/contexts/UserContext";
@@ -52,8 +53,10 @@ const navigation: NavItem[] = [
   { name: "Hangout", path: "/org/hangout", icon: MessageSquare },
   { name: "Feed", path: "/feed", icon: Rss, external: true },
   { name: "Integrations", path: "/org/integrations", icon: Plug },
+  { name: "Plugins", path: "/plugins", icon: Plug },
   { name: "Billing & Usage", path: "/org/billing", icon: CreditCard },
   { name: "Settings", path: "/org/settings", icon: SettingsIcon },
+  { name: "Privacy & Compliance", path: "/compliance", icon: Scale },
 ];
 
 export function OrgLayout() {

@@ -34,6 +34,8 @@ import {
   analyzeFeasibility,
   designTechStack,
   uploadIncubationDocument,
+  downloadProjectAnalysis,
+  persistIndividualAnalysis,
   type PipelineBlueprint,
 } from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
@@ -277,7 +279,10 @@ export function MainIncubationPanel() {
       if (!result) {
         throw new Error("Analysis returned no data");
       }
-      setAnalysisResult(result);
+      const persisted = await persistIndividualAnalysis(payload, result, type);
+      const persistedResult = { ...result, project_id: persisted.project_id };
+      setBlueprintData(persistedResult);
+      setAnalysisResult(persistedResult);
       toast.success(`${ANALYSIS_TYPES.find((a) => a.id === type)?.label} complete`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Analysis failed";
@@ -304,19 +309,18 @@ export function MainIncubationPanel() {
     }
   };
 
-  const handleExportReport = () => {
-    if (!analysisResult) return;
-    const data = JSON.stringify(analysisResult, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
+  const handleExportReport = async () => {
+    if (!projectId) { toast.error("Run the full analysis before downloading"); return; }
+    const blob = await downloadProjectAnalysis(projectId);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `analysis-${Date.now()}.json`;
+    a.download = `idea-analysis-${projectId}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("Report exported");
+    toast.success("Persisted analysis downloaded");
   };
 
   return (
@@ -400,12 +404,12 @@ export function MainIncubationPanel() {
               </div>
             </div>
             <button
-              onClick={handleExportReport}
-              disabled={!analysisResult}
+              onClick={() => void handleExportReport().catch((err) => toast.error(err instanceof Error ? err.message : "Download failed"))}
+              disabled={!projectId}
               className="flex items-center gap-2 bg-violet-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
             >
               <Download className="h-4 w-4" />
-              Export Report
+              Download Analysis
             </button>
           </div>
         </header>
@@ -744,10 +748,12 @@ export function MainIncubationPanel() {
           {/* Action Buttons */}
           <div className="border-t border-gray-200 p-4 space-y-2">
             <button
-              disabled={!analysisResult}
+              onClick={() => void handleExportReport().catch((err) => toast.error(err instanceof Error ? err.message : "Export failed"))}
+              disabled={!projectId}
               className="w-full flex items-center justify-center gap-2 bg-violet-600 text-white px-4 py-2.5 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
             >
-              Publish
+              <Download className="h-4 w-4" />
+              Export Analysis
             </button>
             <button
               onClick={() => void handleCreateWorkspace()}
