@@ -808,14 +808,18 @@ export default function Signup() {
                 <span className="text-sm text-[color:var(--muted-foreground)] leading-relaxed">
                   I agree to the{" "}
                   <a
-                    href="/terms"
+                    href="/terms-of-service.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-[color:var(--primary)] hover:underline"
                   >
                     Terms of Service
                   </a>{" "}
                   and{" "}
                   <a
-                    href="/privacy"
+                    href="/privacy-policy.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-[color:var(--primary)] hover:underline"
                   >
                     Privacy Policy

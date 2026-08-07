@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — TechIT Network</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #0B1D3A;
+      --blue:    #1A3C6B;
+      --accent:  #2E75B6;
+      --teal:    #0EA5A0;
+      --amber:   #D97706;
+      --light:   #F4F7FB;
+      --white:   #FFFFFF;
+      --text:    #1C2B3A;
+      --muted:   #5A6A7A;
+      --border:  #DDE6F0;
+      --banner:  #EBF3FB;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--light);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .topbar {
+      background: var(--navy);
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 2px solid var(--teal);
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .topbar-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      color: white; font-size: 16px; font-weight: 700;
+    }
+    .topbar-name {
+      font-family: 'DM Serif Display', serif;
+      color: white; font-size: 18px; letter-spacing: 0.01em;
+    }
+    .topbar-badge {
+      font-size: 11px; font-weight: 600; color: var(--amber);
+      background: rgba(217, 119, 6, 0.12);
+      padding: 4px 12px; border-radius: 20px;
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    .hero {
+      background: linear-gradient(150deg, #0A1628 0%, #0D2240 50%, #112B52 100%);
+      padding: 80px 40px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40px; left: -40px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14,165,160,0.2) 0%, transparent 70%);
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; right: 15%;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(46,117,182,0.2) 0%, transparent 70%);
+    }
+    .hero-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+    .hero-tag {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: rgba(217,119,6,0.12);
+      border: 1px solid rgba(217,119,6,0.3);
+      padding: 5px 14px; border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 5vw, 52px);
+      color: white;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero h1 em {
+      color: var(--teal);
+      font-style: italic;
+    }
+    .hero-sub {
+      font-size: 16px; color: rgba(255,255,255,0.6);
+      max-width: 560px; margin-bottom: 32px;
+    }
+    .hero-meta {
+      display: flex; gap: 32px; flex-wrap: wrap;
+    }
+    .hero-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .hero-meta-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: rgba(255,255,255,0.35);
+    }
+    .hero-meta-value {
+      font-size: 14px; color: rgba(255,255,255,0.85); font-weight: 500;
+    }
+
+    .layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .sidebar { position: sticky; top: 80px; }
+    .sidebar-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-nav { list-style: none; }
+    .sidebar-nav li { margin-bottom: 2px; }
+    .sidebar-nav a {
+      display: block;
+      font-size: 13px; font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 7px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      border-left: 2px solid transparent;
+    }
+    .sidebar-nav a:hover {
+      color: var(--accent);
+      background: var(--banner);
+      border-left-color: var(--accent);
+    }
+    .sidebar-highlight {
+      margin-top: 28px;
+      background: linear-gradient(135deg, var(--banner), #E0F0FF);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .sidebar-highlight-title {
+      font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 8px;
+    }
+    .sidebar-highlight p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .sidebar-highlight a { color: var(--accent); font-weight: 600; text-decoration: none; }
+
+    .section {
+      margin-bottom: 52px;
+      scroll-margin-top: 100px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .section-num {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: linear-gradient(135deg, #0D2240, var(--blue));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: white;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; color: var(--navy);
+    }
+
+    .content p {
+      font-size: 15px; color: var(--text);
+      margin-bottom: 14px; line-height: 1.75;
+    }
+    .content ul {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+    .content ul li {
+      font-size: 15px; color: var(--text);
+      padding: 8px 0 8px 24px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .content ul li:last-child { border-bottom: none; }
+    .content ul li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .info-box {
+      background: var(--banner);
+      border: 1px solid #BDD8F5;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin-bottom: 20px;
+    }
+    .info-box p { font-size: 14px; color: var(--blue); margin: 0; line-height: 1.6; }
+    .info-box strong { font-weight: 600; }
+
+    .warn-box {
+      background: #FEF9EC;
+      border: 1px solid #FCD34D;
+      border-left: 4px solid var(--amber);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin-bottom: 20px;
+    }
+    .warn-box p { font-size: 14px; color: #78350F; margin: 0; line-height: 1.6; }
+    .warn-box strong { font-weight: 600; }
+
+    .prohibited-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .prohibited-item {
+      background: white;
+      border: 1px solid #FECACA;
+      border-left: 3px solid #EF4444;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      font-size: 14px; color: var(--text);
+    }
+    .prohibited-item strong { display: block; color: #B91C1C; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+      margin: 40px 0;
+    }
+
+    .contact-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .contact-item label {
+      display: block;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+    .contact-item span {
+      font-size: 15px; font-weight: 500; color: var(--navy);
+    }
+    .contact-item a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+    /* CONSENT MODAL */
+    .consent-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 29, 58, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .consent-modal {
+      background: white;
+      border-radius: 20px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(11,29,58,0.3);
+      overflow: hidden;
+      animation: modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.92) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .consent-header {
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      padding: 28px 32px 24px;
+    }
+    .consent-logo {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .consent-logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      color: white; font-size: 15px;
+    }
+    .consent-logo-name {
+      font-family: 'DM Serif Display', serif;
+      color: white; font-size: 16px;
+    }
+    .consent-header h2 {
+      font-family: 'DM Serif Display', serif;
+      color: white; font-size: 22px; margin-bottom: 8px;
+    }
+    .consent-header p {
+      color: rgba(255,255,255,0.65); font-size: 14px; line-height: 1.5;
+    }
+    .consent-body {
+      padding: 28px 32px;
+    }
+    .consent-body p {
+      font-size: 14px; color: var(--text); line-height: 1.65; margin-bottom: 20px;
+    }
+    .consent-checkboxes {
+      display: flex; flex-direction: column; gap: 14px;
+      margin-bottom: 24px;
+    }
+    .consent-check {
+      display: flex; align-items: flex-start; gap: 12px;
+      cursor: pointer;
+    }
+    .consent-check input[type="checkbox"] {
+      width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px;
+      accent-color: var(--accent); cursor: pointer;
+    }
+    .consent-check-text {
+      font-size: 13px; color: var(--text); line-height: 1.5;
+    }
+    .consent-check-text a {
+      color: var(--accent); font-weight: 600; text-decoration: none;
+    }
+    .consent-check-text strong {
+      display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 2px;
+    }
+    .consent-check.required .consent-check-text strong::after {
+      content: ' *';
+      color: #EF4444;
+    }
+    .consent-actions {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .btn-accept {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .btn-accept:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-accept:disabled {
+      background: #CBD5E1;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-reject {
+      width: 100%;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reject:hover {
+      background: var(--light);
+      color: var(--text);
+      border-color: var(--muted);
+    }
+    .consent-required-note {
+      font-size: 11px; color: var(--muted);
+      text-align: center; margin-top: 12px;
+    }
+
+    /* COOKIE BANNER */
+    .cookie-banner {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--navy);
+      border-top: 2px solid var(--accent);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      z-index: 900;
+      flex-wrap: wrap;
+      transform: translateY(100%);
+      transition: transform 0.4s ease;
+    }
+    .cookie-banner.visible { transform: translateY(0); }
+    .cookie-text {
+      font-size: 13px; color: rgba(255,255,255,0.7);
+      flex: 1; min-width: 200px;
+    }
+    .cookie-text a { color: var(--teal); }
+    .cookie-actions { display: flex; gap: 10px; flex-shrink: 0; }
+    .btn-cookie-accept {
+      background: var(--teal);
+      color: white; border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-cookie-accept:hover { opacity: 0.85; }
+    .btn-cookie-reject {
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cookie-reject:hover {
+      color: rgba(255,255,255,0.8);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    /* SUCCESS STATE */
+    .consent-success {
+      padding: 40px 32px;
+      text-align: center;
+      display: none;
+    }
+    .consent-success-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #10B981, #059669);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin: 0 auto 20px;
+    }
+    .consent-success h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px; color: var(--navy); margin-bottom: 10px;
+    }
+    .consent-success p { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
+    .btn-continue {
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      color: white; border: none;
+      border-radius: 10px;
+      padding: 13px 32px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer;
+    }
+
+    .legal-footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px 40px;
+      font-size: 13px;
+      border-top: 2px solid var(--teal);
+    }
+    .legal-footer strong { color: rgba(255,255,255,0.85); }
+    .legal-footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; padding: 40px 20px; }
+      .sidebar { position: static; }
+      .hero { padding: 60px 20px 40px; }
+      .topbar { padding: 14px 20px; }
+      .contact-card { grid-template-columns: 1fr; }
+      .cookie-banner { padding: 16px 20px; }
+      .consent-header { padding: 22px 24px 20px; }
+      .consent-body { padding: 24px; }
+      .consent-success { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── USER CONSENT MODAL ── -->
+  <div class="consent-overlay" id="consentOverlay">
+    <div class="consent-modal" id="consentModal">
+
+      <!-- Modal Header -->
+      <div class="consent-header">
+        <div class="consent-logo">
+          <div class="consent-logo-icon">T</div>
+          <span class="consent-logo-name">TechIT Network</span>
+        </div>
+        <h2>Before you continue</h2>
+        <p>We need your agreement to our Terms of Service and Privacy Policy before you can access the platform. Please review and confirm below.</p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="consent-body" id="consentBody">
+        <p>By using TechIT Network, you agree to be bound by the following. You must accept the required items to continue.</p>
+
+        <div class="consent-checkboxes">
+
+          <label class="consent-check required">
+            <input type="checkbox" id="chk-tos" onchange="validateConsent()" />
+            <div class="consent-check-text">
+              <strong>Terms of Service</strong>
+              I have read and agree to the <a href="#" onclick="event.preventDefault()">Terms of Service</a>. This includes platform usage rules, content ownership, acceptable use, and governing law.
+            </div>
+          </label>
+
+          <label class="consent-check required">
+            <input type="checkbox" id="chk-privacy" onchange="validateConsent()" />
+            <div class="consent-check-text">
+              <strong>Privacy Policy</strong>
+              I understand and agree to the <a href="privacy-policy.html" target="_blank">Privacy Policy</a>, including how my personal data is collected, used, stored, and protected.
+            </div>
+          </label>
+
+          <label class="consent-check">
+            <input type="checkbox" id="chk-marketing" onchange="validateConsent()" />
+            <div class="consent-check-text">
+              <strong>Marketing Communications (Optional)</strong>
+              I consent to receiving product updates, tips, and relevant communications from TechIT Network. I can unsubscribe at any time.
+            </div>
+          </label>
+
+          <label class="consent-check">
+            <input type="checkbox" id="chk-analytics" onchange="validateConsent()" />
+            <div class="consent-check-text">
+              <strong>Platform Analytics (Optional)</strong>
+              I consent to the use of anonymized analytics data to help improve the TechIT platform experience.
+            </div>
+          </label>
+
+        </div>
+
+        <div class="consent-actions">
+          <button class="btn-accept" id="btnAccept" onclick="handleAccept()" disabled>
+            I Agree — Continue to TechIT
+          </button>
+          <button class="btn-reject" onclick="handleReject()">
+            Decline &amp; Exit
+          </button>
+        </div>
+        <p class="consent-required-note">* Required to access the platform. You may review these documents at any time from your account settings.</p>
+      </div>
+
+      <!-- Success State -->
+      <div class="consent-success" id="consentSuccess">
+        <div class="consent-success-icon">✓</div>
+        <h3>You're all set!</h3>
+        <p>Your consent has been recorded. Welcome to TechIT Network — let's build something great.</p>
+        <button class="btn-continue" onclick="dismissModal()">Enter Platform →</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── COOKIE BANNER ── -->
+  <div class="cookie-banner" id="cookieBanner">
+    <p class="cookie-text">
+      We use essential cookies to operate the platform. With your permission, we also use analytics cookies to improve your experience.
+      Read our <a href="privacy-policy.html">Privacy Policy</a> and <a href="#">Cookie Policy</a> to learn more.
+    </p>
+    <div class="cookie-actions">
+      <button class="btn-cookie-reject" onclick="rejectCookies()">Essential Only</button>
+      <button class="btn-cookie-accept" onclick="acceptCookies()">Accept All Cookies</button>
+    </div>
+  </div>
+
+  <!-- ── TOPBAR ── -->
+  <header class="topbar">
+    <a class="topbar-brand" href="#">
+      <div class="topbar-logo">T</div>
+      <span class="topbar-name">TechIT Network</span>
+    </a>
+    <span class="topbar-badge">Terms of Service</span>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-tag">Legal Document</div>
+      <h1>Terms of <em>Service</em></h1>
+      <p class="hero-sub">The rules and rights that govern your use of TechIT Network — written to be fair, clear, and enforceable across every jurisdiction we operate in.</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Effective Date</span>
+          <span class="hero-meta-value">[Insert Date]</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Version</span>
+          <span class="hero-meta-value">1.0</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Governing Law</span>
+          <span class="hero-meta-value">Federal Republic of Nigeria</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Jurisdiction</span>
+          <span class="hero-meta-value">Global (EU · USA · Africa)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <p class="sidebar-title">Contents</p>
+      <ul class="sidebar-nav">
+        <li><a href="#t1">1. Eligibility</a></li>
+        <li><a href="#t2">2. Account Registration</a></li>
+        <li><a href="#t3">3. Permitted Use</a></li>
+        <li><a href="#t4">4. Prohibited Activities</a></li>
+        <li><a href="#t5">5. User Content & IP</a></li>
+        <li><a href="#t6">6. Platform IP</a></li>
+        <li><a href="#t7">7. Service Availability</a></li>
+        <li><a href="#t8">8. Payments</a></li>
+        <li><a href="#t9">9. Disclaimer of Warranties</a></li>
+        <li><a href="#t10">10. Limitation of Liability</a></li>
+        <li><a href="#t11">11. Termination</a></li>
+        <li><a href="#t12">12. Governing Law</a></li>
+        <li><a href="#t13">13. Amendments</a></li>
+        <li><a href="#t14">14. Contact</a></li>
+      </ul>
+      <div class="sidebar-highlight">
+        <p class="sidebar-highlight-title">🔗 Related Document</p>
+        <p>See our <a href="privacy-policy.html">Privacy Policy</a> for full details on how we collect, store, and protect your personal data.</p>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+      <div class="info-box">
+        <p><strong>Agreement Summary:</strong> By creating an account or using TechIT Network, you enter into a binding agreement with HaviTec LTD. These Terms protect both you and us. Your startup ideas and content remain your intellectual property. We never claim ownership of what you build on TechIT.</p>
+      </div>
+
+      <!-- 1 -->
+      <div class="section" id="t1">
+        <div class="section-header">
+          <div class="section-num">1</div>
+          <h2 class="section-title">Eligibility</h2>
+        </div>
+        <p>To access and use TechIT Network, you must meet all of the following requirements:</p>
+        <ul>
+          <li>Be at least 18 years of age, or the legal age of majority in your jurisdiction — whichever is higher</li>
+          <li>Have the legal capacity and authority to enter into binding agreements</li>
+          <li>Not be located in a jurisdiction where access to the platform is restricted or prohibited by applicable law</li>
+          <li>Not be a person or entity subject to applicable sanctions lists (UN, EU, US OFAC, or equivalent)</li>
+        </ul>
+        <p>By accepting these Terms, you represent and warrant that you meet all of the above requirements.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 2 -->
+      <div class="section" id="t2">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <h2 class="section-title">Account Registration</h2>
+        </div>
+        <p>When you create a TechIT account, you take on the following responsibilities:</p>
+        <ul>
+          <li>Providing accurate, current, and complete registration information and keeping it updated</li>
+          <li>Maintaining the confidentiality of your account credentials — your password is your responsibility</li>
+          <li>Taking full responsibility for all activity that occurs under your account, whether or not authorized by you</li>
+          <li>Notifying us immediately at <a href="mailto:havitecltd@gmail.com" style="color:var(--accent); font-weight:600;">havitecltd@gmail.com</a> if you suspect unauthorized access to your account</li>
+        </ul>
+        <p>You may not share your account credentials, create accounts on behalf of others without authorization, or maintain more than one account per individual unless expressly permitted.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 3 -->
+      <div class="section" id="t3">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <h2 class="section-title">Permitted Use</h2>
+        </div>
+        <p>TechIT Network is designed for founders, entrepreneurs, and early-stage teams to validate ideas, develop strategy, track execution, and prepare for investment. Permitted uses include:</p>
+        <ul>
+          <li>Using AI-assisted tools to explore, validate, and refine startup ideas</li>
+          <li>Creating and managing startup strategy documents, roadmaps, and execution plans</li>
+          <li>Using the platform's scoring frameworks and readiness indicators for internal decision-making</li>
+          <li>Connecting with platform features designed to support fundraising preparation and investor readiness</li>
+          <li>Collaborating with team members you have explicitly invited to your workspace</li>
+        </ul>
+        <div class="warn-box">
+          <p><strong>Important:</strong> AI-generated outputs from TechIT Network are tools, not guarantees. Do not present AI-generated analysis to investors or third parties without independent verification. We are not responsible for decisions made based solely on platform outputs.</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 4 -->
+      <div class="section" id="t4">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <h2 class="section-title">Prohibited Activities</h2>
+        </div>
+        <p>The following activities are strictly prohibited on TechIT Network. Violation may result in immediate account suspension without refund:</p>
+
+        <div class="prohibited-grid">
+          <div class="prohibited-item">
+            <strong>Fraud & Deception</strong>
+            Engaging in fraudulent, misleading, or deceptive conduct — including misrepresenting your identity, startup, or funding status
+          </div>
+          <div class="prohibited-item">
+            <strong>Unauthorized Access</strong>
+            Attempting to access systems, accounts, or data you are not authorized to access
+          </div>
+          <div class="prohibited-item">
+            <strong>Malicious Code</strong>
+            Uploading, transmitting, or introducing viruses, malware, or disruptive software
+          </div>
+          <div class="prohibited-item">
+            <strong>Platform Scraping</strong>
+            Systematically extracting data, content, or outputs from the platform without written permission
+          </div>
+          <div class="prohibited-item">
+            <strong>IP Misuse</strong>
+            Reproducing, distributing, or creating derivative works from TechIT's proprietary frameworks without authorization
+          </div>
+          <div class="prohibited-item">
+            <strong>Illegal Activity</strong>
+            Using the platform to facilitate money laundering, fraud, sanctions evasion, or any other illegal activity
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 5 -->
+      <div class="section" id="t5">
+        <div class="section-header">
+          <div class="section-num">5</div>
+          <h2 class="section-title">User Content & Intellectual Property</h2>
+        </div>
+        <div class="info-box">
+          <p><strong>Your ideas are yours.</strong> TechIT Network does not claim ownership over any startup concept, business strategy, document, or content that you create or upload to the platform.</p>
+        </div>
+        <p>When you submit content to TechIT Network:</p>
+        <ul>
+          <li>You retain full intellectual property rights over all original content you create or upload</li>
+          <li>You grant HaviTec LTD a limited, non-exclusive, royalty-free license to process, store, and display your content solely to provide the services you have subscribed to</li>
+          <li>This license does not allow us to sell your content, share it with competitors, or use it for any purpose outside of delivering platform services to you</li>
+          <li>You represent and warrant that your content does not infringe the intellectual property rights, privacy rights, or any other rights of any third party</li>
+        </ul>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 6 -->
+      <div class="section" id="t6">
+        <div class="section-header">
+          <div class="section-num">6</div>
+          <h2 class="section-title">TechIT Platform Intellectual Property</h2>
+        </div>
+        <p>All platform content created by HaviTec LTD — including but not limited to the TechIT brand identity, platform interface design, source code, AI models, proprietary scoring frameworks, and the following proprietary concepts — is protected by applicable intellectual property law:</p>
+        <ul>
+          <li>Execution Velocity Index (EVI)</li>
+          <li>Market Readiness Score (MRS)</li>
+          <li>Technology Readiness Level radar charts and associated methodologies</li>
+          <li>Idea Validation Engine, Incubation Hub, and Solution Hub architectures</li>
+          <li>All written documentation, prompts, scoring rubrics, and structured frameworks</li>
+        </ul>
+        <p>You may not reproduce, distribute, reverse-engineer, or create derivative works from any TechIT-owned content without prior written authorization from HaviTec LTD.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 7 -->
+      <div class="section" id="t7">
+        <div class="section-header">
+          <div class="section-num">7</div>
+          <h2 class="section-title">Service Availability & Changes</h2>
+        </div>
+        <p>TechIT Network is provided on an "as is" and "as available" basis. We reserve the right to:</p>
+        <ul>
+          <li>Modify, update, or discontinue features or services at any time, with reasonable advance notice where possible</li>
+          <li>Perform scheduled maintenance that may result in temporary platform unavailability</li>
+          <li>Suspend access immediately in the event of a security incident, legal requirement, or platform abuse</li>
+        </ul>
+        <p>We will communicate planned downtime with at least 24 hours notice through platform notifications or email. We do not guarantee 100% uptime and are not liable for damages arising from temporary unavailability.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 8 -->
+      <div class="section" id="t8">
+        <div class="section-header">
+          <div class="section-num">8</div>
+          <h2 class="section-title">Payments & Subscriptions</h2>
+        </div>
+        <p>Where TechIT Network offers paid services or subscription tiers:</p>
+        <ul>
+          <li>All fees are displayed in USD unless otherwise stated and are exclusive of applicable taxes, VAT, or levies</li>
+          <li>Subscription fees are billed in advance on the applicable billing cycle (monthly or annually)</li>
+          <li>Payments are processed through secure third-party providers — we do not store raw card data</li>
+          <li>Refunds are handled in accordance with our Refund Policy [Insert Link]</li>
+          <li>We reserve the right to modify pricing with a minimum of 30 days advance notice to active subscribers</li>
+          <li>Failure to pay may result in service suspension or account downgrade to a free tier if available</li>
+        </ul>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 9 -->
+      <div class="section" id="t9">
+        <div class="section-header">
+          <div class="section-num">9</div>
+          <h2 class="section-title">Disclaimer of Warranties</h2>
+        </div>
+        <p>To the fullest extent permitted by applicable law, TechIT Network and all associated services are provided without warranties of any kind — express, implied, or statutory — including without limitation warranties of merchantability, fitness for a particular purpose, accuracy, or non-infringement.</p>
+        <ul>
+          <li>We do not warrant that platform features will be error-free, uninterrupted, or free from security vulnerabilities</li>
+          <li>AI-generated content, analyses, scores, and recommendations are provided for informational purposes only and do not constitute professional business, legal, or financial advice</li>
+          <li>You use all outputs at your own discretion and assume all risk associated with business decisions made on the basis of platform information</li>
+        </ul>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 10 -->
+      <div class="section" id="t10">
+        <div class="section-header">
+          <div class="section-num">10</div>
+          <h2 class="section-title">Limitation of Liability</h2>
+        </div>
+        <p>To the maximum extent permitted by applicable law, HaviTec LTD, its officers, directors, employees, and agents shall not be liable for:</p>
+        <ul>
+          <li>Indirect, incidental, special, punitive, or consequential damages of any nature</li>
+          <li>Loss of profits, revenue, business opportunities, data, or goodwill</li>
+          <li>Damages arising from reliance on AI-generated recommendations or platform outputs</li>
+          <li>Unauthorized access to your data by third parties despite our reasonable security measures</li>
+        </ul>
+        <p>Where liability cannot be excluded by law, our total cumulative liability to you for any claims arising out of or related to these Terms shall not exceed the total amount paid by you to HaviTec LTD in the 12 months immediately preceding the claim.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 11 -->
+      <div class="section" id="t11">
+        <div class="section-header">
+          <div class="section-num">11</div>
+          <h2 class="section-title">Termination</h2>
+        </div>
+        <p>Either party may end the service relationship at any time:</p>
+        <ul>
+          <li><strong>By You:</strong> You may delete your account at any time through your account settings. Deletion requests are processed within 30 days in accordance with our Privacy Policy</li>
+          <li><strong>By Us (for cause):</strong> We may suspend or permanently terminate accounts that violate these Terms, with or without prior notice depending on the severity of the violation</li>
+          <li><strong>By Us (for other reasons):</strong> We may discontinue the platform or terminate accounts with 30 days written notice, accompanied by a data export option</li>
+        </ul>
+        <p>Upon termination, your right to access the platform ceases immediately. All provisions of these Terms that by their nature should survive termination — including IP rights, limitation of liability, and dispute resolution — will continue to apply.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 12 -->
+      <div class="section" id="t12">
+        <div class="section-header">
+          <div class="section-num">12</div>
+          <h2 class="section-title">Governing Law & Dispute Resolution</h2>
+        </div>
+        <p>These Terms are governed by the laws of the Federal Republic of Nigeria. The following jurisdiction-specific provisions also apply:</p>
+        <ul>
+          <li><strong>EU Users:</strong> Consumer protection provisions under applicable EU law are not displaced by these Terms. You retain all rights provided under EU consumer protection legislation</li>
+          <li><strong>US Users (California):</strong> California consumers retain all rights under CCPA. Any disputes will be resolved through binding arbitration under applicable arbitration rules, waiving the right to participate in class action proceedings</li>
+          <li><strong>African Users (outside Nigeria):</strong> Disputes shall first be referred to good-faith mediation. If unresolved within 30 days, either party may proceed to binding arbitration</li>
+        </ul>
+        <p>Before initiating any formal proceedings, disputes should be submitted to <a href="mailto:anthony@techitnetwork.com" style="color:var(--accent); font-weight:600;">anthony@techitnetwork.com</a> for good-faith resolution.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 13 -->
+      <div class="section" id="t13">
+        <div class="section-header">
+          <div class="section-num">13</div>
+          <h2 class="section-title">Amendments</h2>
+        </div>
+        <p>We reserve the right to update these Terms at any time as our platform evolves or as regulatory requirements change:</p>
+        <ul>
+          <li>Non-material changes (corrections, clarifications) — effective immediately upon posting with updated date</li>
+          <li>Material changes — users will receive at least 14 days advance notice via email and platform notification</li>
+          <li>Changes requiring fresh consent — an explicit consent prompt will be presented on next login</li>
+        </ul>
+        <p>Continued use of the platform after the effective date of any update constitutes your acceptance of the revised Terms. If you disagree with any changes, you may delete your account before the effective date.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 14 -->
+      <div class="section" id="t14">
+        <div class="section-header">
+          <div class="section-num">14</div>
+          <h2 class="section-title">Contact Us</h2>
+        </div>
+        <p>For questions about these Terms, your account, or anything else related to TechIT Network:</p>
+        <div class="contact-card">
+          <div class="contact-item">
+            <label>Company</label>
+            <span>HaviTec LTD (TechIT Network)</span>
+          </div>
+          <div class="contact-item">
+            <label>General Inquiries</label>
+            <span><a href="mailto:anna@techitnetwork.com">anna@techitnetwork.com</a></span>
+          </div>
+          <div class="contact-item">
+            <label>Legal Department</label>
+            <span><a href="mailto:anthony@techitnetwork.com">anthony@techitnetwork.com</a></span>
+          </div>
+          <div class="contact-item">
+            <label>Security Issues</label>
+            <span><a href="mailto:havitecltd@gmail.com">havitecltd@gmail.com</a></span>
+          </div>
+          <div class="contact-item">
+            <label>Registered Address</label>
+            <span>[Insert Company Address, Nigeria]</span>
+          </div>
+          <div class="contact-item">
+            <label>Response Time</label>
+            <span>Within 5 business days</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="legal-footer">
+    <p><strong>HaviTec LTD — TechIT Network</strong> &nbsp;·&nbsp; Terms of Service v1.0 &nbsp;·&nbsp; Effective [Insert Date]</p>
+    <p style="margin-top: 8px;">Governed by Nigerian Law &nbsp;·&nbsp; Valid globally with jurisdiction-specific provisions &nbsp;·&nbsp; <a href="privacy-policy.html">Privacy Policy</a></p>
+  </footer>
+
+  <!-- ── JAVASCRIPT ── -->
+  <script>
+    // Consent modal logic
+    function validateConsent() {
+      const tos = document.getElementById('chk-tos').checked;
+      const privacy = document.getElementById('chk-privacy').checked;
+      document.getElementById('btnAccept').disabled = !(tos && privacy);
+    }
+
+    function handleAccept() {
+      const marketing = document.getElementById('chk-marketing').checked;
+      const analytics = document.getElementById('chk-analytics').checked;
+
+      // Record consent (replace with real API call)
+      const consentRecord = {
+        timestamp: new Date().toISOString(),
+        tos: true,
+        privacy: true,
+        marketing,
+        analytics,
+        version: '1.0'
+      };
+      console.log('Consent recorded:', consentRecord);
+      // e.g. await fetch('/api/consent', { method: 'POST', body: JSON.stringify(consentRecord) });
+
+      // Show success state
+      document.getElementById('consentBody').style.display = 'none';
+      document.getElementById('consentSuccess').style.display = 'block';
+
+      // Show cookie banner (EU users would see this)
+      setTimeout(() => {
+        document.getElementById('cookieBanner').classList.add('visible');
+      }, 1200);
+    }
+
+    function handleReject() {
+      // Redirect or show restricted message
+      document.getElementById('consentModal').innerHTML = `
+        <div style="padding: 48px 32px; text-align: center;">
+          <div style="font-size: 40px; margin-bottom: 16px;">🚫</div>
+          <h3 style="font-family: 'DM Serif Display', serif; font-size: 22px; color: #0B1D3A; margin-bottom: 10px;">Access Restricted</h3>
+          <p style="font-size: 15px; color: #5A6A7A; line-height: 1.6; margin-bottom: 24px;">You must accept the Terms of Service and Privacy Policy to use TechIT Network. You can review our documents and return at any time.</p>
+          <a href="privacy-policy.html" style="color: #2E75B6; font-weight: 600; font-size: 14px;">Read Privacy Policy →</a>
+        </div>
+      `;
+    }
+
+    function dismissModal() {
+      document.getElementById('consentOverlay').style.opacity = '0';
+      document.getElementById('consentOverlay').style.transition = 'opacity 0.3s ease';
+      setTimeout(() => {
+        document.getElementById('consentOverlay').style.display = 'none';
+      }, 300);
+    }
+
+    function acceptCookies() {
+      document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
+      console.log('Cookies: all accepted');
+    }
+
+    function rejectCookies() {
+      document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
+      console.log('Cookies: essential only');
+    }
+  </script>
+
+</body>
+</html>
