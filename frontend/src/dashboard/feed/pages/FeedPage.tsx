@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PenSquare } from 'lucide-react';
 import { LeftSidebar } from '../components/LeftSidebar';
 import { RightPanel } from '../components/RightPanel';
@@ -7,6 +7,8 @@ import { PostComposer } from '../components/PostComposer';
 import { LivePostCard } from '../components/LivePostCard';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
 import { useFeedPosts } from '../useFeedPosts';
+import { useAuth } from '@/contexts/AuthContext';
+import { syncDiscoveryProfile } from '@/lib/messaging/discovery';
 
 const CATEGORY_IDS: Record<string, string> = {
   'For You': 'for-you', Following: 'following', Startups: 'startups', Funding: 'funding',
@@ -14,11 +16,17 @@ const CATEGORY_IDS: Record<string, string> = {
 };
 
 export function FeedPage() {
+  const { profile } = useAuth();
   const [activeZone, setActiveZone] = useState('For You');
   const [composerExpanded, setComposerExpanded] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState('milestone');
   const backendZone = activeZone === 'Following' ? 'tribe' : 'global';
   const { posts, loading, error, reload } = useFeedPosts(backendZone, CATEGORY_IDS[activeZone]);
+
+  useEffect(() => {
+    if (!profile) return;
+    void syncDiscoveryProfile({ location: profile.country, skills: profile.skills, industries: profile.industries, interests: profile.investmentFocus, credibility: profile.credibilityScore, startupQuality: 0, contributionScore: 0 });
+  }, [profile]);
 
   const visiblePosts = useMemo(() => {
     return posts;

@@ -50,6 +50,11 @@ export async function msgPost<T>(path: string, body?: unknown, init?: RequestIni
   return parse<T>(res);
 }
 
+export async function msgPut<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
+  const res = await fetch(messagingUrl(path), { method: "PUT", ...init, headers: headers(init?.headers), body: body === undefined ? undefined : JSON.stringify(body), signal: timeoutSignal(init) });
+  return parse<T>(res);
+}
+
 export async function msgPatch<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
   const res = await fetch(messagingUrl(path), {
     method: "PATCH",
