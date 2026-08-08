@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, MessageCircle, Share2 } from 'lucide-react';
+import { Bookmark, EyeOff, Flame, MessageCircle, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { likePost, unlikePost } from '@/lib/messaging/feed';
 import { KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import type { WirePost } from '@/lib/messaging/types';
 import { ShareModal } from './ShareModal';
+import { postFeedback, savePost, unsavePost } from '@/lib/messaging/discovery';
 
 function formatTimestamp(value: string): string {
   const date = new Date(value);
@@ -40,6 +41,8 @@ export function LivePostCard({
   const [likeCount, setLikeCount] = useState<number | null>(null);
   const [liking, setLiking] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const meta = kindMeta(post.kind);
   const author = authorName || post.authorId;
 
@@ -57,6 +60,20 @@ export function LivePostCard({
       setLiking(false);
     }
   };
+
+  const toggleSave = async () => {
+    const result = saved ? await unsavePost(post.id) : await savePost(post.id);
+    if (!result) { toast.error('Save could not be persisted.'); return; }
+    setSaved(result.saved);
+  };
+
+  const hidePost = async () => {
+    const result = await postFeedback(post.id, 'not_interested');
+    if (!result) { toast.error('Feedback could not be persisted.'); return; }
+    setHidden(true);
+  };
+
+  if (hidden) return null;
 
   return (
     <>
@@ -100,6 +117,8 @@ export function LivePostCard({
             <Flame className={`h-4 w-4 ${liked ? 'fill-current text-score-red' : ''}`} />
             {likeCount === null ? 'React' : likeCount}
           </button>
+          <button type="button" onClick={() => { void toggleSave(); }} aria-label={saved ? 'Remove saved post' : 'Save post'} className={`flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-accent-primary ${saved ? 'text-accent-primary' : ''}`}><Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />Save</button>
+          <button type="button" onClick={() => { void hidePost(); }} aria-label="Not interested in this post" className="flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-score-red"><EyeOff className="h-4 w-4" />Not interested</button>
           <Link
             to={`/feed/post/${encodeURIComponent(post.id)}`}
             className="flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-accent-primary"
