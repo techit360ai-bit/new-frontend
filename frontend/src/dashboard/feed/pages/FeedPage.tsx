@@ -25,7 +25,7 @@ export function FeedPage() {
 
   useEffect(() => {
     if (!profile) return;
-    void syncDiscoveryProfile({ location: profile.country, skills: profile.skills, industries: profile.industries, interests: profile.investmentFocus, credibility: profile.credibilityScore, startupQuality: 0, contributionScore: 0 });
+    void syncDiscoveryProfile({ location: profile.country, skills: profile.skills, industries: profile.industries, interests: profile.investmentFocus });
   }, [profile]);
 
   const visiblePosts = useMemo(() => {
