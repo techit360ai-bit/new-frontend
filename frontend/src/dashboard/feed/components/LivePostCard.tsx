@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, EyeOff, Flame, MessageCircle, Share2 } from 'lucide-react';
+import { Ban, Bookmark, EyeOff, Flag, Flame, MessageCircle, Share2, VolumeX } from 'lucide-react';
 import { toast } from 'sonner';
 import { likePost, unlikePost } from '@/lib/messaging/feed';
 import { KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import type { WirePost } from '@/lib/messaging/types';
 import { ShareModal } from './ShareModal';
-import { postFeedback, savePost, unsavePost } from '@/lib/messaging/discovery';
+import { blockUser, muteUser, postFeedback, savePost, unsavePost } from '@/lib/messaging/discovery';
 
 function formatTimestamp(value: string): string {
   const date = new Date(value);
@@ -73,6 +73,20 @@ export function LivePostCard({
     setHidden(true);
   };
 
+  const controlCreator = async (control: 'mute' | 'block') => {
+    const result = control === 'mute' ? await muteUser(post.authorId) : await blockUser(post.authorId);
+    if (!result) { toast.error(`${control} could not be persisted.`); return; }
+    setHidden(true);
+    toast.success(control === 'mute' ? 'Creator muted.' : 'Creator blocked.');
+  };
+
+  const reportPost = async () => {
+    const result = await postFeedback(post.id, 'report');
+    if (!result) { toast.error('Report could not be persisted.'); return; }
+    setHidden(true);
+    toast.success('Report submitted for review.');
+  };
+
   if (hidden) return null;
 
   return (
@@ -119,6 +133,9 @@ export function LivePostCard({
           </button>
           <button type="button" onClick={() => { void toggleSave(); }} aria-label={saved ? 'Remove saved post' : 'Save post'} className={`flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-accent-primary ${saved ? 'text-accent-primary' : ''}`}><Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />Save</button>
           <button type="button" onClick={() => { void hidePost(); }} aria-label="Not interested in this post" className="flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-score-red"><EyeOff className="h-4 w-4" />Not interested</button>
+          <button type="button" onClick={() => { void controlCreator('mute'); }} aria-label="Mute creator" className="flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-score-red"><VolumeX className="h-4 w-4" />Mute</button>
+          <button type="button" onClick={() => { void controlCreator('block'); }} aria-label="Block creator" className="flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-score-red"><Ban className="h-4 w-4" />Block</button>
+          <button type="button" onClick={() => { void reportPost(); }} aria-label="Report post" className="flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-score-red"><Flag className="h-4 w-4" />Report</button>
           <Link
             to={`/feed/post/${encodeURIComponent(post.id)}`}
             className="flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-accent-primary"
