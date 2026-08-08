@@ -7,6 +7,7 @@ export interface WireMessage {
   type: string;
   body: string;
   ts: string;
+  category?: string;
 }
 export interface WireConvSummary {
   id: string;

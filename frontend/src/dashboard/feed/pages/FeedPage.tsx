@@ -8,31 +8,27 @@ import { LivePostCard } from '../components/LivePostCard';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
 import { useFeedPosts } from '../useFeedPosts';
 
-const FILTER_KINDS: Record<string, string[] | null> = {
-  'Global Pulse': null,
-  'Your Tribe': null,
-  'Build Logs': ['milestone', 'build-update', 'build', 'update'],
-  Questions: ['question'],
-  Problems: ['problem'],
+const CATEGORY_IDS: Record<string, string> = {
+  'For You': 'for-you', Following: 'following', Startups: 'startups', Funding: 'funding',
+  Hackathons: 'hackathons', Organizations: 'organizations', Learning: 'learning', 'AI Recommendations': 'ai-recommendations',
 };
 
 export function FeedPage() {
-  const [activeZone, setActiveZone] = useState('Global Pulse');
+  const [activeZone, setActiveZone] = useState('For You');
   const [composerExpanded, setComposerExpanded] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState('milestone');
-  const backendZone = activeZone === 'Your Tribe' ? 'tribe' : 'global';
-  const { posts, loading, error, reload } = useFeedPosts(backendZone);
+  const backendZone = activeZone === 'Following' ? 'tribe' : 'global';
+  const { posts, loading, error, reload } = useFeedPosts(backendZone, CATEGORY_IDS[activeZone]);
 
   const visiblePosts = useMemo(() => {
-    const kinds = FILTER_KINDS[activeZone];
-    return kinds ? posts.filter((post) => kinds.includes(post.kind)) : posts;
-  }, [activeZone, posts]);
+    return posts;
+  }, [posts]);
 
   const changeZone = (zone: string) => {
     setActiveZone(zone);
-    if (zone === 'Questions') setSelectedPostType('question');
-    if (zone === 'Problems') setSelectedPostType('problem');
-    if (zone === 'Build Logs') setSelectedPostType('build-update');
+    if (zone === 'Learning') setSelectedPostType('insight');
+    if (zone === 'Startups') setSelectedPostType('build-update');
+    if (zone === 'Funding') setSelectedPostType('investment-signal');
   };
 
   return (

@@ -8,6 +8,21 @@ export function fetchPosts(zone: "global" | "tribe" = "global"): Promise<WirePos
     "posts",
   );
 }
+
+export interface FeedPageResponse { posts: WirePost[]; category?: string; nextCursor?: string; hasMore?: boolean }
+
+export function fetchPostsPage(options: { zone?: 'global' | 'tribe'; category?: string; before?: string; limit?: number } = {}): Promise<FeedPageResponse> {
+  const params = new URLSearchParams();
+  if (options.zone) params.set('zone', options.zone);
+  if (options.category) params.set('category', options.category);
+  if (options.before) params.set('before', options.before);
+  if (options.limit) params.set('limit', String(options.limit));
+  return withFallback(
+    () => msgGet<FeedPageResponse>(`/posts?${params.toString()}`).then(page => ({ ...page, posts: page.posts ?? [] })),
+    { posts: [], category: options.category, nextCursor: '', hasMore: false },
+    'posts page',
+  );
+}
 export function createPost(kind: string, body: string, audience?: string[]): Promise<WirePost | null> {
   return withFallback(
     () => msgPost<WirePost>("/posts", { kind, body, ...(audience && audience.length ? { audience } : {}) }),

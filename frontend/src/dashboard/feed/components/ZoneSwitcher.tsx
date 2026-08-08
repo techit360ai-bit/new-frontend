@@ -1,5 +1,5 @@
 export function ZoneSwitcher({ active, onChange }: { active: string; onChange: (zone: string) => void }) {
-  const zones = ['Global Pulse', 'Your Tribe', 'Build Logs', 'Questions', 'Problems'];
+  const zones = ['For You', 'Following', 'Startups', 'Funding', 'Hackathons', 'Organizations', 'Learning', 'AI Recommendations'];
   return (
     <div className="sticky top-14 bg-bg-surface border-b border-border-default h-12 flex items-center gap-6 px-6 overflow-x-auto z-40">
       {zones.map((zone) => (
