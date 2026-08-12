@@ -42,6 +42,7 @@ export function IncubationHumanLoopPanel({ validation, workspaceId }: { validati
   const state = objectValue(session?.state);
   const evidence = objectValue(state.evidence ?? validation?.evidence);
   const geography = objectValue(state.geography ?? validation?.geography);
+  const company = objectValue(state.company_building ?? validation?.company_building);
   const sources = arrayValue(evidence.sources);
   const contradictions = arrayValue(evidence.contradictory_evidence);
   const decisions = arrayValue(state.decisions);
@@ -143,6 +144,12 @@ export function IncubationHumanLoopPanel({ validation, workspaceId }: { validati
         <button onClick={() => decide("validate_idea", "Founder reviewed the questions, evidence, contradictions and falsification tests.")} disabled={busy !== null || approval("validate_idea")} className="mt-3 flex items-center gap-2 rounded-md border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-800 disabled:opacity-40"><ShieldCheck className="h-4 w-4" /> {approval("validate_idea") ? "Human validation recorded" : "I approve the validation decision"}</button>
       </div>
 
+      <div className="rounded-lg border border-indigo-200 bg-indigo-50/40 p-4">
+        <h4 className="text-sm font-semibold text-indigo-950">Build a company, not only a product</h4>
+        <p className="mt-1 text-xs text-indigo-800">The first product is the wedge. Company validation tests recurring customer value, repeatable distribution, an operating model, business model, expansion and a compounding advantage.</p>
+        {Object.keys(company).length > 0 ? <div className="mt-3 grid gap-3 md:grid-cols-2"><CompanyDimension label="Company thesis" value={company.company_thesis} /><CompanyDimension label="Product wedge" value={company.wedge} /><CompanyDimension label="Repeatability" value={company.repeatability} /><CompanyDimension label="Distribution" value={company.distribution} /><CompanyDimension label="Operating model" value={company.operating_model} /><CompanyDimension label="Defensibility" value={company.defensibility} /></div> : <p className="mt-3 text-xs text-slate-500">Company-building analysis will appear after the validation session starts.</p>}
+      </div>
+
       <div className="rounded-lg border border-slate-200 p-4">
         <h4 className="flex items-center gap-2 text-sm font-semibold"><Code2 className="h-4 w-4 text-violet-600" /> MVP scope, code plan and private preview</h4>
         <div className="mt-3 flex flex-wrap gap-2">{[["one_day_prototype", "1 day"], ["three_day_demo", "3 days"], ["one_week_mvp", "1 week"], ["production_mvp_2_to_6_weeks", "2–6 weeks"]].map(([id, label]) => <button key={id} onClick={() => setScope(id)} className={`rounded-full px-3 py-1.5 text-xs font-medium ${scope === id ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-700"}`}>{label}</button>)}</div>
@@ -152,4 +159,8 @@ export function IncubationHumanLoopPanel({ validation, workspaceId }: { validati
       </div>
     </section>
   );
+}
+
+function CompanyDimension({ label, value }: { label: string; value: unknown }) {
+  return <div className="rounded-md border border-indigo-100 bg-white p-3"><p className="text-xs font-semibold text-indigo-900">{label}</p><p className="mt-1 whitespace-pre-wrap text-xs text-slate-600">{typeof value === "string" ? value : JSON.stringify(value ?? {}, null, 2)}</p></div>;
 }
