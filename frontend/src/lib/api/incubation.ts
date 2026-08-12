@@ -42,6 +42,7 @@ export interface ValidationStartResult {
   founder_questions: FounderQuestion[];
   evidence?: Record<string, unknown>;
   geography?: Record<string, unknown>;
+  company_building?: Record<string, unknown>;
   workspace_id?: string;
 }
 
@@ -142,6 +143,8 @@ export const analyzeSWOT = (data: Record<string, unknown>) =>
   runAnalysis("/incubation/swot/analyze", data, "SWOT analysis");
 export const analyzeMonetization = (data: Record<string, unknown>) =>
   runAnalysis("/incubation/monetization/analyze", data, "monetization analysis");
+export const analyzeCompanyBuilding = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/company/analyze", data, "company-building analysis");
 export const analyzeMarketIntelligence = (data: Record<string, unknown>) =>
   runAnalysis("/incubation/intelligence/analyze", data, "market intelligence");
 export const analyzeImpact = (data: Record<string, unknown>) =>
