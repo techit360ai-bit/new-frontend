@@ -25,10 +25,14 @@ import {
   generateBusinessPlan,
   generateStrategy,
   analyzePivot,
+  recordHumanDecision,
   type FastTrackPayload,
   type PipelineBlueprint,
+  type ValidationStartResult,
 } from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
+import { IncubationHumanLoopPanel } from "./IncubationHumanLoopPanel";
+import { ModelSelector } from "./ModelSelector";
 
 const STAGES = ["pre-seed", "seed", "series-a", "series-b", "growth"] as const;
 type Stage = (typeof STAGES)[number];
@@ -65,6 +69,9 @@ export function FastTrackPanel() {
   const [stage, setStage] = useState<Stage>("seed");
   const [oneLiner, setOneLiner] = useState("");
   const [repoUrl, setRepoUrl] = useState("");
+  const [targetGeography, setTargetGeography] = useState("");
+  const [timeConstraint, setTimeConstraint] = useState("1 week");
+  const [selectedModel, setSelectedModel] = useState("");
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docId, setDocId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -123,6 +130,9 @@ export function FastTrackPanel() {
       repo_url: repoUrl.trim() || undefined,
       document_id: docId || undefined,
       focus_areas: [industry.toLowerCase().replace(/\s+/g, "_")],
+      target_geography: targetGeography.trim() || undefined,
+      founder_constraints: { preferred_mvp_timeline: timeConstraint },
+      model_id: selectedModel || undefined,
     };
 
     const result = await runFastTrack(payload);
@@ -132,6 +142,7 @@ export function FastTrackPanel() {
       setProgressIndex(PIPELINE_STEPS.length);
       setBlueprint(result);
       setProjectId(result.project_id || null);
+      setWorkspaceCreated(Boolean(result.workspace_id));
       setPipelineRunning(false);
       setTimeout(() => setStep(3), 800);
     } else {
@@ -143,6 +154,12 @@ export function FastTrackPanel() {
   const handlePublish = async () => {
     if (!projectId) return;
     setPublishing(true);
+    if (!blueprint?.incubation_session_id) {
+      setPublishing(false);
+      toast.error("Complete founder validation before publishing");
+      return;
+    }
+    await recordHumanDecision(blueprint.incubation_session_id, "publish_investor", "approved", "Founder explicitly approved publishing this analysis to investor deal flow.");
     const result = await publishToInvestors(projectId);
     setPublishing(false);
     if (result.ok) {
@@ -155,12 +172,16 @@ export function FastTrackPanel() {
 
   const handleCreateWorkspace = async () => {
     if (!projectId) return;
+    if (blueprint?.workspace_id) {
+      navigate(`/workspaces/copilot?ws=${encodeURIComponent(blueprint.workspace_id)}&project=${encodeURIComponent(projectId)}`);
+      return;
+    }
     const result = await provisionWorkspace(projectId, `${startupName} Workspace`);
     if (result.ok && result.workspace?.id) {
       setWorkspaceCreated(true);
       toast.success("Workspace created!");
       navigate(
-        `/workspaces?ws=${encodeURIComponent(result.workspace.id)}&project=${encodeURIComponent(projectId)}`
+        `/workspaces/copilot?ws=${encodeURIComponent(result.workspace.id)}&project=${encodeURIComponent(projectId)}`
       );
     } else {
       toast.error("Workspace creation failed");
@@ -185,6 +206,8 @@ export function FastTrackPanel() {
     setStage("seed");
     setOneLiner("");
     setRepoUrl("");
+    setTargetGeography("");
+    setSelectedModel("");
     setDocFile(null);
     setDocId(null);
     setBlueprint(null);
@@ -295,6 +318,13 @@ export function FastTrackPanel() {
                 </button>
               </p>
             </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block"><span className="mb-2 block text-sm font-semibold text-slate-700">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="e.g. Budapest, Hungary or West Africa" className="h-12 w-full rounded-lg border-2 border-slate-300 bg-white px-4 text-sm outline-none focus:border-violet-500" /></label>
+              <label className="block"><span className="mb-2 block text-sm font-semibold text-slate-700">Preferred MVP timeline</span><select value={timeConstraint} onChange={(event) => setTimeConstraint(event.target.value)} className="h-12 w-full rounded-lg border-2 border-slate-300 bg-white px-4 text-sm"><option>1 day</option><option>3 days</option><option>1 week</option><option>2–6 weeks</option></select></label>
+            </div>
+
+            <ModelSelector value={selectedModel} onChange={setSelectedModel} />
 
             {/* Document Upload */}
             <div>
@@ -486,6 +516,9 @@ export function FastTrackPanel() {
         )}
 
         {/* Next AI Actions */}
+        {blueprint?.incubation_session_id && <IncubationHumanLoopPanel validation={blueprint.validation as ValidationStartResult | undefined} workspaceId={blueprint.workspace_id} />}
+
+        {/* Next AI Actions */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Next AI Actions</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -532,9 +565,9 @@ export function FastTrackPanel() {
             />
             <NextActionButton
               icon={<Briefcase className="w-4 h-4" />}
-              label="Create Workspace"
+              label={workspaceCreated ? "Open Workspace Copilot" : "Create Workspace"}
               onClick={handleCreateWorkspace}
-              disabled={workspaceCreated || !projectId}
+              disabled={!projectId}
             />
           </div>
         </div>
@@ -543,11 +576,11 @@ export function FastTrackPanel() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleCreateWorkspace}
-            disabled={workspaceCreated || !projectId}
+            disabled={!projectId}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
           >
             <ExternalLink className="w-4 h-4" />
-            {workspaceCreated ? "Workspace Created" : "Create Workspace"}
+            {workspaceCreated ? "Open Workspace Copilot" : "Create Workspace"}
           </button>
           <button
             onClick={handlePublish}

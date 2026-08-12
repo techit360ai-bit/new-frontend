@@ -26,6 +26,14 @@ import {
   runVenturePipeline,
   analyzeUnicorn,
   analyzeMarket,
+  analyzePMF,
+  analyzeSWOT,
+  analyzeMonetization,
+  analyzeMarketIntelligence,
+  analyzeImpact,
+  generateRoadmap,
+  simulateMarketSurvey,
+  generateRecommendations,
   generateStrategy,
   generateBusinessPlan,
   analyzePivot,
@@ -37,7 +45,10 @@ import {
   downloadProjectAnalysis,
   persistIndividualAnalysis,
   type PipelineBlueprint,
+  type ValidationStartResult,
 } from "@/lib/api/incubation";
+import { IncubationHumanLoopPanel } from "./IncubationHumanLoopPanel";
+import { ModelSelector } from "./ModelSelector";
 import { provisionWorkspace } from "@/lib/api/workspaces";
 import { checkHealth } from "@/lib/api/health";
 
@@ -157,6 +168,8 @@ export function MainIncubationPanel() {
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
   const [analysisResult, setAnalysisResult] = useState<Record<string, unknown> | null>(null);
   const [blueprintData, setBlueprintData] = useState<PipelineBlueprint | null>(null);
+  const [targetGeography, setTargetGeography] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
   const ideaTextareaRef = useRef<HTMLTextAreaElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
@@ -203,6 +216,8 @@ export function MainIncubationPanel() {
       startup_name: ideaInput.trim(),
       solution: ideaInput.trim(),
       focus_areas: ["ai", "deeptech"],
+      target_geography: targetGeography.trim() || undefined,
+      model_id: selectedModel || undefined,
     };
 
     try {
@@ -234,6 +249,8 @@ export function MainIncubationPanel() {
       startup_name: ideaInput.trim(),
       solution: ideaInput.trim(),
       focus_areas: ["ai", "deeptech"],
+      target_geography: targetGeography.trim() || undefined,
+      model_id: selectedModel || undefined,
     };
 
     try {
@@ -243,31 +260,46 @@ export function MainIncubationPanel() {
           result = await analyzeUnicorn(payload);
           break;
         case "market":
-        case "pmf":
-        case "survey":
           result = await analyzeMarket(payload);
           break;
+        case "pmf":
+          result = await analyzePMF(payload);
+          break;
+        case "survey":
+          result = await simulateMarketSurvey(payload);
+          break;
         case "strategy":
-        case "roadmap":
           result = await generateStrategy(payload);
+          break;
+        case "roadmap":
+          result = await generateRoadmap(payload);
           break;
         case "business-plan":
           result = await generateBusinessPlan(payload);
           break;
         case "swot":
+          result = await analyzeSWOT(payload);
+          break;
         case "recommendation":
-          result = await analyzePivot(payload);
+          result = await generateRecommendations(payload);
           break;
         case "investor":
           result = await generateInvestorReadiness(payload);
           break;
         case "finance":
-        case "monetization":
           result = await analyzeFinance(payload);
           break;
+        case "monetization":
+          result = await analyzeMonetization(payload);
+          break;
         case "feasibility":
-        case "impact":
           result = await analyzeFeasibility(payload);
+          break;
+        case "impact":
+          result = await analyzeImpact(payload);
+          break;
+        case "intelligence":
+          result = await analyzeMarketIntelligence(payload);
           break;
         case "tech":
           result = await designTechStack(payload);
@@ -298,12 +330,17 @@ export function MainIncubationPanel() {
       return;
     }
     try {
+      const seededWorkspaceId = asText(blueprintData?.workspace_id);
+      if (seededWorkspaceId) {
+        navigate(`/workspaces/copilot?ws=${encodeURIComponent(seededWorkspaceId)}&project=${encodeURIComponent(projectId)}`);
+        return;
+      }
       const result = await provisionWorkspace(projectId, `${ventureName} Workspace`);
       const workspaceId = asText(result.workspace?.id);
       if (!result.ok || !workspaceId) {
         throw new Error(result.error || "Workspace creation failed");
       }
-      navigate(`/workspaces?ws=${encodeURIComponent(workspaceId)}&project=${encodeURIComponent(projectId)}`);
+      navigate(`/workspaces/copilot?ws=${encodeURIComponent(workspaceId)}&project=${encodeURIComponent(projectId)}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Workspace creation failed");
     }
@@ -523,6 +560,14 @@ export function MainIncubationPanel() {
           )}
 
           {/* Next AI Actions */}
+          {blueprintData?.incubation_session_id && (
+            <IncubationHumanLoopPanel
+              validation={blueprintData.validation as ValidationStartResult | undefined}
+              workspaceId={asText(blueprintData.workspace_id)}
+            />
+          )}
+
+          {/* Next AI Actions */}
           {analysisResult && (
             <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Next AI Actions</h3>
@@ -610,7 +655,7 @@ export function MainIncubationPanel() {
                   className="flex items-center gap-2 bg-violet-600 text-white px-4 py-3 rounded font-medium hover:bg-violet-700 disabled:bg-gray-300"
                 >
                   <Briefcase className="h-4 w-4" />
-                  Create Workspace
+                  {asText(blueprintData?.workspace_id) ? "Open Workspace Copilot" : "Create Workspace"}
                 </button>
               </div>
             </div>
@@ -630,6 +675,10 @@ export function MainIncubationPanel() {
 
         {/* Bottom Input Area */}
         <div className="border-t border-gray-200 bg-white p-4">
+          <div className="mb-3 grid gap-3 md:grid-cols-2">
+            <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="Country, city or region" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+            <ModelSelector value={selectedModel} onChange={setSelectedModel} />
+          </div>
           <div className="flex gap-3">
             <textarea
               ref={ideaTextareaRef}
@@ -761,7 +810,7 @@ export function MainIncubationPanel() {
               className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 text-sm font-medium rounded hover:bg-gray-50 disabled:bg-gray-100"
             >
               <Briefcase className="h-4 w-4" />
-              Create Workspace
+              {asText(blueprintData?.workspace_id) ? "Open Workspace Copilot" : "Create Workspace"}
             </button>
           </div>
         </aside>
