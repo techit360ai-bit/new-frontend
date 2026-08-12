@@ -13,7 +13,45 @@ export interface PipelineBlueprint {
   unicorn_potential_score?: number;
   investment_score?: number;
   pivot_needed?: boolean;
+  workspace_id?: string;
+  incubation_session_id?: string;
+  validation?: ValidationStartResult;
   [k: string]: unknown;
+}
+
+export interface FounderQuestion {
+  id: string;
+  priority?: string;
+  category?: string;
+  question: string;
+  why_it_matters?: string;
+  answer_type?: string;
+}
+
+export interface IncubationSession {
+  id: string;
+  projectId?: string | null;
+  status: string;
+  currentPhase: number;
+  version: number;
+  state: Record<string, unknown>;
+}
+
+export interface ValidationStartResult {
+  session: IncubationSession;
+  founder_questions: FounderQuestion[];
+  evidence?: Record<string, unknown>;
+  geography?: Record<string, unknown>;
+  workspace_id?: string;
+}
+
+export interface SandboxBuild {
+  id: string;
+  status: string;
+  scope: string;
+  checks?: Record<string, { passed?: boolean; detail?: string }>;
+  previewUrl?: string;
+  artifactPath?: string;
 }
 
 /** POST /api/v1/incubation/pipeline/run — runs the venture pipeline, persists an analysis. */
@@ -33,7 +71,7 @@ export interface IdeaDiagnostic {
   [k: string]: unknown;
 }
 
-/** POST /api/v1/incubation/idea/diagnose — quick idea diagnostic (1 credit, Free+). */
+/** POST /api/v1/incubation/idea/diagnose — quick idea diagnostic. */
 export function diagnoseIdea(ideaData: Record<string, unknown>): Promise<IdeaDiagnostic | null> {
   return withFallback(
     () => apiPost<IdeaDiagnostic>("/incubation/idea/diagnose", ideaData),
@@ -81,11 +119,39 @@ export function generateBusinessPlan(ventureData: Record<string, unknown>): Prom
 /** POST /api/v1/incubation/pivot/analyze — pivot analysis. */
 export function analyzePivot(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
   return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/pivot/analyze", ventureData),
+    () => apiPost<Record<string, unknown>>("/incubation/pivot/analyze", {
+      venture_data: ventureData,
+      unicorn_score: ventureData.unicorn_potential_score ?? 0,
+    }),
     () => null,
     "pivot analysis",
   );
 }
+
+function runAnalysis(path: string, ventureData: Record<string, unknown>, label: string) {
+  return withFallback(
+    () => apiPost<Record<string, unknown>>(path, ventureData),
+    () => null,
+    label,
+  );
+}
+
+export const analyzePMF = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/pmf/validate", data, "PMF validation");
+export const analyzeSWOT = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/swot/analyze", data, "SWOT analysis");
+export const analyzeMonetization = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/monetization/analyze", data, "monetization analysis");
+export const analyzeMarketIntelligence = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/intelligence/analyze", data, "market intelligence");
+export const analyzeImpact = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/impact/analyze", data, "impact analysis");
+export const generateRoadmap = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/roadmap/generate", data, "MVP roadmap");
+export const simulateMarketSurvey = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/survey/simulate", data, "market survey simulation");
+export const generateRecommendations = (data: Record<string, unknown>) =>
+  runAnalysis("/incubation/recommendations/generate", data, "recommendations");
 
 /** POST /api/v1/incubation/investor-readiness/generate — investor readiness report. */
 export function generateInvestorReadiness(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
@@ -146,6 +212,39 @@ export function persistIndividualAnalysis(
   });
 }
 
+export const startValidation = (ventureData: Record<string, unknown>) =>
+  apiPost<ValidationStartResult>("/incubation/validation/start", ventureData);
+
+export const submitFounderAnswers = (sessionId: string, answers: Record<string, string>) =>
+  apiPost<{ session: IncubationSession; founder_questions: FounderQuestion[]; validation_blocked: boolean }>(`/incubation/validation/${encodeURIComponent(sessionId)}/answers`, { answers });
+
+export const runSessionPMFValidation = (sessionId: string) =>
+  apiPost<{ session: IncubationSession; pmf_validation: Record<string, unknown> }>(`/incubation/validation/${encodeURIComponent(sessionId)}/pmf`);
+
+export const generateSessionMVPPlan = (sessionId: string, founderConstraints: Record<string, unknown>) =>
+  apiPost<{ session: IncubationSession; mvp_plan: Record<string, unknown> }>(`/incubation/validation/${encodeURIComponent(sessionId)}/mvp-plan`, { founder_constraints: founderConstraints });
+
+export const recordHumanDecision = (sessionId: string, action: string, decision: string, rationale = "") =>
+  apiPost<{ session: IncubationSession; recorded: boolean }>(`/incubation/validation/${encodeURIComponent(sessionId)}/decisions`, { action, decision, rationale });
+
+export const createSandboxBuild = (sessionId: string, scope: string, workspaceId?: string) =>
+  apiPost<SandboxBuild>(`/incubation/validation/${encodeURIComponent(sessionId)}/builds`, { scope, workspace_id: workspaceId });
+
+export const deploySandboxPreview = (sessionId: string, buildId: string) =>
+  apiPost<SandboxBuild>(`/incubation/validation/${encodeURIComponent(sessionId)}/builds/${encodeURIComponent(buildId)}/deploy-preview`);
+
+async function authenticatedBuildBlob(buildId: string, kind: "artifact" | "preview"): Promise<Blob> {
+  const token = getAuthToken();
+  const response = await fetch(apiUrl(`/incubation/builds/${encodeURIComponent(buildId)}/${kind}`), {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  if (!response.ok) throw new Error(`Build ${kind} failed (${response.status})`);
+  return response.blob();
+}
+
+export const downloadSandboxArtifact = (buildId: string) => authenticatedBuildBlob(buildId, "artifact");
+export const fetchSandboxPreview = (buildId: string) => authenticatedBuildBlob(buildId, "preview");
+
 // ---------------------------------------------------------------------------
 // Fast-Track Intake — for startups with existing codebases / business plans
 // ---------------------------------------------------------------------------
@@ -158,6 +257,9 @@ export interface FastTrackPayload {
   repo_url?: string;
   document_id?: string;
   focus_areas?: string[];
+  target_geography?: string;
+  founder_constraints?: Record<string, unknown>;
+  model_id?: string;
 }
 
 /** POST /api/v1/incubation/fast-track/run — enriched pipeline for existing startups. */

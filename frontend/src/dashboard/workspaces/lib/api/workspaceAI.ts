@@ -5,22 +5,10 @@
 // Separate from the mock console seam (client.ts); these hit the real engine and
 // return null on failure so the console degrades gracefully.
 
-const API_BASE: string =
-  (import.meta as unknown as { env?: Record<string, string> }).env
-    ?.VITE_API_BASE_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
+import { apiPost } from "@/lib/api/client";
 
 async function post<T>(path: string, body: unknown): Promise<T | null> {
-  try {
-    const res = await fetch(`${API_BASE}/api/v1${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
-  }
+  try { return await apiPost<T>(path, body); } catch { return null; }
 }
 
 export interface TaskSuggestions {
@@ -35,7 +23,29 @@ export function suggestTasks(workspaceData: Record<string, unknown>): Promise<Ta
 
 export interface CodeReview {
   review?: unknown;
-  cost?: number;
+  provider_cost_usd?: number;
+}
+
+export interface WorkspaceConversationMessage { role: "user" | "assistant"; content: string; }
+export interface WorkspaceConversationResponse {
+  message: string;
+  model_used?: string;
+  provider?: string;
+  context_injected: boolean;
+  context_version?: string;
+  approval_required: boolean;
+  approval_action?: string | null;
+  executed: false;
+}
+
+export function converseWithWorkspace(payload: {
+  workspace_id: string;
+  message: string;
+  messages?: WorkspaceConversationMessage[];
+  requested_action?: string;
+  model_id?: string;
+}): Promise<WorkspaceConversationResponse | null> {
+  return post<WorkspaceConversationResponse>("/workspace/conversation", payload);
 }
 /** POST /api/v1/workspace/code/review — Body: { code, language, context } */
 export function reviewCode(payload: Record<string, unknown>): Promise<CodeReview | null> {

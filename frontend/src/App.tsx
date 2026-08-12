@@ -96,6 +96,7 @@ import { Reports as WsReports } from "@/dashboard/workspaces/pages/Reports";
 import { Connectors as WsConnectors } from "@/dashboard/workspaces/pages/Connectors";
 import { Agents as WsAgents } from "@/dashboard/workspaces/pages/Agents";
 import { Chat as WsChat } from "@/dashboard/workspaces/pages/Chat";
+import { Copilot as WsCopilot } from "@/dashboard/workspaces/pages/Copilot";
 import { Files as WsFiles } from "@/dashboard/workspaces/pages/Files";
 import { Notifications as WsNotifications } from "@/dashboard/workspaces/pages/Notifications";
 import { Settings as WsSettings } from "@/dashboard/workspaces/pages/Settings";
@@ -237,6 +238,7 @@ const App = () => {
           <Route path="agents" element={<WsAgents />} />
           <Route path="ai-agents" element={<Navigate to="/workspaces/agents" replace />} />
           <Route path="chat" element={<WsChat />} />
+          <Route path="copilot" element={<WsCopilot />} />
           <Route path="files" element={<WsFiles />} />
           <Route path="github" element={<WsGitHub />} />
           <Route path="reports" element={<WsReports />} />
