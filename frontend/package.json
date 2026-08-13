@@ -18,7 +18,7 @@
     "test:local": "node --no-warnings --experimental-strip-types scripts/run-tests.mjs src"
   },
   "dependencies": {
-    "@livekit/components-react": "^2.9.21",
+    "@livekit/components-react": "^2.9.23",
     "@livekit/components-styles": "^1.2.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
