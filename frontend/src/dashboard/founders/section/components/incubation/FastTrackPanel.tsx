@@ -516,7 +516,13 @@ export function FastTrackPanel() {
         )}
 
         {/* Next AI Actions */}
-        {blueprint?.incubation_session_id && <IncubationHumanLoopPanel validation={blueprint.validation as ValidationStartResult | undefined} workspaceId={blueprint.workspace_id} />}
+        {blueprint?.incubation_session_id && (
+          <IncubationHumanLoopPanel
+            validation={blueprint.validation as ValidationStartResult | undefined}
+            workspaceId={blueprint.workspace_id}
+            project={{ id: projectId, name: startupName, summary: oneLiner, industry, stage }}
+          />
+        )}
 
         {/* Next AI Actions */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">

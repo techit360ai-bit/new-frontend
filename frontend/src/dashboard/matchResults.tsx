@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { HackathonMatchBanner } from "@/dashboard/founders/section/components/founder/HackathonMatchBanner";
 import { inviteHackathonCollaborator } from "@/lib/api/hackathon";
@@ -24,6 +25,16 @@ import {
   fetchCollaboratorDirectory,
   type CollaboratorDirectoryEntry,
 } from "@/lib/api/users";
+import {
+  loadCollaborationInvite,
+  rankCollaborators,
+  type CollaborationInviteDraft,
+} from "@/lib/collaborationMatching";
+import {
+  markValidationStoryShown,
+  ValidationStoryDialog,
+  validationStoryDue,
+} from "@/dashboard/founders/section/components/incubation/IncubationCollaborationPrompts";
 
 interface Match {
   id: string;
@@ -36,6 +47,8 @@ interface Match {
   location: string;
   credibilityScore: number;
   isVerified: boolean;
+  matchScore: number | null;
+  matchReasons: string[];
 }
 
 function initials(value: string): string {
@@ -49,7 +62,7 @@ function roleTokens(value: string): string[] {
   return value.toLowerCase().split(/[^a-z0-9+#.]+/).filter((word) => word.length > 1);
 }
 
-function directoryMatch(profile: CollaboratorDirectoryEntry): Match {
+function directoryMatch(profile: CollaboratorDirectoryEntry, matchScore: number | null = null, matchReasons: string[] = []): Match {
   return {
     id: profile.id,
     name: profile.name,
@@ -61,6 +74,8 @@ function directoryMatch(profile: CollaboratorDirectoryEntry): Match {
     location: profile.location,
     credibilityScore: profile.credibilityScore,
     isVerified: profile.isVerified,
+    matchScore,
+    matchReasons,
   };
 }
 
@@ -75,7 +90,9 @@ export default function MatchResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const hackathonId = searchParams.get("hackathon");
+  const projectId = searchParams.get("project");
   const { founderProfile } = useFounderProfile();
+  const { profile: authProfile } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [hackathon, setHackathon] = useState<Hackathon | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,6 +107,18 @@ export default function MatchResults() {
   const [equity, setEquity] = useState<Record<string, number>>({});
   const [contractFor, setContractFor] = useState<Match | null>(null);
   const [projectName, setProjectName] = useState("");
+  const [storyOpen, setStoryOpen] = useState(false);
+  const invitationDraft = useMemo<CollaborationInviteDraft | null>(
+    () => projectId ? loadCollaborationInvite(projectId) : null,
+    [projectId],
+  );
+
+  useEffect(() => {
+    if (invitationDraft && validationStoryDue()) {
+      markValidationStoryShown();
+      setStoryOpen(true);
+    }
+  }, [invitationDraft]);
 
   useEffect(() => {
     let alive = true;
@@ -101,7 +130,13 @@ export default function MatchResults() {
     ])
       .then(([profiles, opportunity]) => {
         if (!alive) return;
-        setMatches(profiles.map(directoryMatch));
+        const ranked = invitationDraft
+          ? rankCollaborators(profiles, invitationDraft, {
+              timezone: authProfile?.timezone,
+              location: authProfile?.country,
+            }).map((row) => directoryMatch(row.profile, row.score, row.reasons))
+          : profiles.map((profile) => directoryMatch(profile));
+        setMatches(ranked);
         setHackathon(opportunity?.type === "hackathon" ? opportunity : null);
       })
       .catch((loadError) => {
@@ -114,13 +149,13 @@ export default function MatchResults() {
         if (alive) setLoading(false);
       });
     return () => { alive = false; };
-  }, [hackathonId]);
+  }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft]);
 
   useEffect(() => {
     if (!projectName) {
-      setProjectName(registration?.teamName || founderProfile.startupName || "");
+      setProjectName(invitationDraft?.projectName || registration?.teamName || founderProfile.startupName || "");
     }
-  }, [founderProfile.startupName, projectName, registration?.teamName]);
+  }, [founderProfile.startupName, invitationDraft?.projectName, projectName, registration?.teamName]);
 
   const visibleMatches = useMemo(() => {
     if (!hackathonId || !registration) return matches;
@@ -171,7 +206,17 @@ export default function MatchResults() {
   const handleConnect = async (match: Match) => {
     setInvitingIds((current) => new Set(current).add(match.id));
     try {
-      await connectWithUser(match.id);
+      await connectWithUser(match.id, invitationDraft ? {
+        projectId: invitationDraft.projectId,
+        projectName: invitationDraft.projectName,
+        summary: invitationDraft.summary,
+        scope: invitationDraft.scope,
+        requestedRole: invitationDraft.requestedRole,
+        requiredSkills: invitationDraft.requiredSkills,
+        compensationMode: invitationDraft.compensationMode,
+        equityProposal: invitationDraft.equityProposal,
+        cashReward: invitationDraft.cashReward,
+      } : undefined);
       setInvitedIds((current) => new Set(current).add(match.id));
       toast.success(`Connection request sent to ${match.name}.`);
     } catch (connectError) {
@@ -198,6 +243,15 @@ export default function MatchResults() {
               Live collaborator profiles from the authenticated TechIT directory
             </p>
           </div>
+
+          {invitationDraft && (
+            <div className="mb-6 rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm text-violet-950">
+              <p className="font-semibold">Profile-based matches for {invitationDraft.projectName}</p>
+              <p className="mt-1 text-xs text-violet-800">{invitationDraft.summary}</p>
+              <p className="mt-2 text-xs"><span className="font-semibold">Scope:</span> {invitationDraft.scope}</p>
+              <p className="mt-2 text-[11px] text-violet-700">Ranked from disclosed skills, availability, start timing, compensation preferences, credibility, verification, timezone/location and industry. Scores are transparent fit indicators, not predictions.</p>
+            </div>
+          )}
 
           {/* Project + Equity Allocation Summary */}
           <div className="bg-card rounded-xl border border-border p-4 lg:p-5 mb-6 lg:mb-8">
@@ -309,7 +363,7 @@ export default function MatchResults() {
                       </div>
                       {/* Match Badge */}
                       <div className="px-3 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 rounded-full text-xs sm:text-sm font-medium text-center">
-                        {match.isVerified ? "Verified profile" : "Live profile"}
+                        {match.matchScore !== null ? `${match.matchScore}% profile fit` : match.isVerified ? "Verified profile" : "Live profile"}
                       </div>
                     </div>
 
@@ -352,6 +406,14 @@ export default function MatchResults() {
                           </span>
                         ))}
                       </div>
+
+                      {match.matchReasons.length > 0 && (
+                        <div className="mb-3 flex flex-wrap gap-2">
+                          {match.matchReasons.map((reason) => (
+                            <span key={reason} className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-800">{reason}</span>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Equity proposal slider */}
                       <div className="bg-slate-50 dark:bg-slate-900/40 border border-border rounded-lg p-3 mb-3 lg:mb-4">
@@ -460,6 +522,20 @@ export default function MatchResults() {
           projectName={projectName}
           equity={equity[contractFor.id] ?? 0}
           onClose={() => setContractFor(null)}
+        />
+      )}
+      {invitationDraft && (
+        <ValidationStoryDialog
+          open={storyOpen}
+          onOpenChange={setStoryOpen}
+          project={{
+            id: invitationDraft.projectId,
+            name: invitationDraft.projectName,
+            summary: invitationDraft.summary,
+            industry: invitationDraft.industry,
+            stage: invitationDraft.stage,
+          }}
+          sessionId={invitationDraft.projectId}
         />
       )}
     </div>

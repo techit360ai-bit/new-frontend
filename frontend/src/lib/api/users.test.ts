@@ -69,6 +69,34 @@ test('connect action writes through the persisted BACKEND endpoint', async () =>
   }
 });
 
+test('connect action sends structured project context when supplied', async () => {
+  const fetchMock = stubFetch(async () => response({ ok: true }));
+  try {
+    await connectWithUser('user_2', {
+      projectId: 'project_1',
+      projectName: 'LedgerCare',
+      summary: 'LedgerCare helps clinics reconcile patient payments.',
+      scope: 'Build and test the reconciliation API.',
+      requestedRole: 'Backend Engineer',
+      requiredSkills: ['Node.js', 'Postgres'],
+      compensationMode: 'equity-heavy',
+      equityProposal: 4,
+      cashReward: 0,
+    });
+    const [, init] = fetchMock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual({
+      invitation: expect.objectContaining({
+        projectId: 'project_1',
+        requestedRole: 'Backend Engineer',
+        requiredSkills: ['Node.js', 'Postgres'],
+        compensationMode: 'equity-heavy',
+      }),
+    });
+  } finally {
+    fetchMock.restore();
+  }
+});
+
 test('collaborator directory reads safe authenticated user records without fallback rows', async () => {
   setAuthTokenGetter(() => 'jwt-directory');
   const fetchMock = stubFetch(async () => response({
@@ -79,9 +107,17 @@ test('collaborator directory reads safe authenticated user records without fallb
       title: 'Backend Engineer',
       headline: '',
       skills: ['Node.js'],
+      discipline: 'Engineering',
+      subSkills: ['API design'],
+      techStack: ['Node.js'],
       weeklyHours: 20,
       timezone: 'UTC+1',
       location: 'Nigeria',
+      earliestStart: 'this-week',
+      commitmentStyle: 'deep',
+      equityPreference: 70,
+      minCashFloor: 1000,
+      industries: ['HealthTech'],
       avatarUrl: '',
       credibilityScore: 80,
       isVerified: true,

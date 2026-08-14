@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, CircleHelp, Code2, ExternalLink, Globe2, Loader2, Search, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   createSandboxBuild,
@@ -15,6 +16,13 @@ import {
   type SandboxBuild,
   type ValidationStartResult,
 } from "@/lib/api/incubation";
+import {
+  CollaboratorInviteDialog,
+  markValidationStoryShown,
+  ValidationStoryDialog,
+  validationStoryDue,
+  type IncubationProjectContext,
+} from "./IncubationCollaborationPrompts";
 
 function objectValue(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -24,7 +32,16 @@ function arrayValue(value: unknown): Array<Record<string, unknown>> {
   return Array.isArray(value) ? value.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object") : [];
 }
 
-export function IncubationHumanLoopPanel({ validation, workspaceId }: { validation?: ValidationStartResult | null; workspaceId?: string }) {
+export function IncubationHumanLoopPanel({
+  validation,
+  workspaceId,
+  project = {},
+}: {
+  validation?: ValidationStartResult | null;
+  workspaceId?: string;
+  project?: IncubationProjectContext;
+}) {
+  const navigate = useNavigate();
   const [session, setSession] = useState<IncubationSession | null>(validation?.session ?? null);
   const [questions, setQuestions] = useState<FounderQuestion[]>(validation?.founder_questions ?? []);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -33,6 +50,8 @@ export function IncubationHumanLoopPanel({ validation, workspaceId }: { validati
   const [mvp, setMvp] = useState<Record<string, unknown>>({});
   const [scope, setScope] = useState("one_week_mvp");
   const [build, setBuild] = useState<SandboxBuild | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);
 
   useEffect(() => {
     setSession(validation?.session ?? null);
@@ -70,9 +89,22 @@ export function IncubationHumanLoopPanel({ validation, workspaceId }: { validati
 
   const decide = async (action: string, rationale: string) => {
     setBusy(action);
-    try { const result = await recordHumanDecision(session.id, action, "approved", rationale); setSession(result.session); toast.success("Human decision recorded"); }
+    try {
+      const result = await recordHumanDecision(session.id, action, "approved", rationale);
+      setSession(result.session);
+      toast.success("Human decision recorded");
+      if (action === "validate_idea") setInviteOpen(true);
+    }
     catch (error) { toast.error(error instanceof Error ? error.message : "Decision could not be recorded"); }
     finally { setBusy(null); }
+  };
+
+  const updateInviteOpen = (open: boolean) => {
+    setInviteOpen(open);
+    if (!open && validationStoryDue()) {
+      markValidationStoryShown();
+      setStoryOpen(true);
+    }
   };
 
   const planMvp = async () => {
@@ -117,6 +149,7 @@ export function IncubationHumanLoopPanel({ validation, workspaceId }: { validati
   };
 
   return (
+    <>
     <section className="mb-6 space-y-4 rounded-xl border border-violet-200 bg-white p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h3 className="font-bold text-slate-900">Founder Validation & Human Decisions</h3><p className="text-xs text-slate-500">AI autonomy is capped at 60%. Scores and plans remain provisional until you approve them.</p></div>
@@ -158,6 +191,20 @@ export function IncubationHumanLoopPanel({ validation, workspaceId }: { validati
         {build && <div className="mt-3 rounded-md bg-slate-50 p-3 text-xs"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 className="h-4 w-4 text-emerald-600" /> Build {build.status.replaceAll("_", " ")}</p><div className="mt-2 flex flex-wrap gap-2"><button onClick={() => openProtectedBlob("artifact")} className="rounded border px-2 py-1">Download ZIP</button><button onClick={() => openProtectedBlob("preview")} className="flex items-center gap-1 rounded border px-2 py-1">Open preview <ExternalLink className="h-3 w-3" /></button><button onClick={() => decide("create_repository", "Founder authorizes a restricted GitHub App to create a repository for this approved artifact.")} className="rounded border px-2 py-1">Approve repository</button><button onClick={() => decide("deploy_preview", "Founder authorizes a private preview deployment only.")} className="rounded border px-2 py-1">Approve preview deploy</button><button onClick={deployPreview} disabled={busy !== null || !approval("create_repository") || !approval("deploy_preview")} className="rounded bg-violet-600 px-2 py-1 text-white disabled:opacity-40">{busy === "deploy" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Deploy preview"}</button></div></div>}
       </div>
     </section>
+    <CollaboratorInviteDialog
+      open={inviteOpen}
+      onOpenChange={updateInviteOpen}
+      project={{ ...project, id: project.id || session.projectId }}
+      sessionId={session.id}
+      onContinue={(draft) => navigate(`/matches?project=${encodeURIComponent(draft.projectId)}`)}
+    />
+    <ValidationStoryDialog
+      open={storyOpen}
+      onOpenChange={setStoryOpen}
+      project={{ ...project, id: project.id || session.projectId }}
+      sessionId={session.id}
+    />
+    </>
   );
 }
 

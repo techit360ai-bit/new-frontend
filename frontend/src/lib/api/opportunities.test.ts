@@ -2,7 +2,9 @@ import { expect, test } from "vitest";
 import { setAuthTokenGetter } from "./client";
 import {
   fetchCollaboratorOpportunities,
+  broadcastCollaborationCall,
   normalizeCollaboratorOpportunity,
+  normalizePublishedOpportunity,
   patchCollaboratorOpportunityStatus,
 } from "./opportunities";
 
@@ -83,6 +85,22 @@ test("collaborator opportunities return empty live state without fixture records
   }
 });
 
+test("collaborator opportunities honor broadcast audience roles", async () => {
+  const fetchMock = stubFetch(async () => response({
+    opportunities: [
+      { id: "visible", type: "collaboration", title: "Visible", audienceRoles: ["collaborator"] },
+      { id: "founders", type: "collaboration", title: "Founders", audienceRoles: ["founder"] },
+    ],
+  }));
+  try {
+    await expect(fetchCollaboratorOpportunities()).resolves.toEqual([
+      expect.objectContaining({ id: "visible" }),
+    ]);
+  } finally {
+    fetchMock.restore();
+  }
+});
+
 test("collaborator opportunity status persists through BACKEND domain endpoint", async () => {
   const fetchMock = stubFetch(async () => response({
     opportunity: { id: "opp_1", title: "Live Opportunity", company: "LiveCo", status: "applied" },
@@ -111,5 +129,58 @@ test("opportunity normalizer tolerates partial live records", () => {
     riskLevel: "medium",
     skills: ["Design"],
     timeline: "Timeline TBD",
+  });
+});
+
+test("broadcasts an ownership-focused collaboration call with future audience metadata", async () => {
+  const fetchMock = stubFetch(async (_url, init) => response({ opportunity: { id: "opp_call", type: "collaboration", visibility: "public", status: "open", ...JSON.parse(String(init?.body)) } }));
+  try {
+    const created = await broadcastCollaborationCall({
+      projectId: "project_1",
+      projectName: "LedgerCare",
+      summary: "LedgerCare helps clinics reconcile patient payments.",
+      scope: "Own the reconciliation API.",
+      requestedRole: "Backend Engineer",
+      requiredSkills: ["Node.js", "Postgres"],
+      desiredWeeklyHours: 20,
+      earliestStart: "2-weeks",
+      commitmentStyle: "deep",
+      compensationMode: "equity-heavy",
+      equityProposal: 4,
+      cashReward: 0,
+      industry: "HealthTech",
+    }, ["collaborator", "founder", "explorer"]);
+    const [url, init] = fetchMock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(String(init.body));
+    expect(url).toBe("http://localhost:3000/api/domain/opportunities/collaboration-calls");
+    expect(body).toMatchObject({
+      compensationMode: "equity-heavy",
+      equityPercent: 4,
+      cashCompMonthly: 0,
+      audienceRoles: ["collaborator", "founder", "explorer"],
+    });
+    expect(created.type).toBe("collaboration");
+  } finally {
+    fetchMock.restore();
+  }
+});
+
+test("normalizes collaboration calls for the founder opportunity hub", () => {
+  expect(normalizePublishedOpportunity({
+    id: "opp_call",
+    type: "collaboration",
+    title: "Backend Engineer for LedgerCare",
+    company: "LedgerCare",
+    summary: "Build the API",
+    status: "open",
+    equityPercent: 4,
+    cashCompMonthly: 0,
+    audienceRoles: ["founder", "collaborator"],
+  })).toMatchObject({
+    id: "opp_call",
+    type: "collaboration",
+    role: "",
+    equityPercent: 4,
+    audienceRoles: ["founder", "collaborator"],
   });
 });

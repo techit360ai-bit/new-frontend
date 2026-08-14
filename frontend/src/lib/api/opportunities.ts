@@ -4,8 +4,9 @@
 
 import { domainGet, domainPatch, domainPost } from "@/lib/domainApi";
 import type { Event, Funding, Hackathon, Opportunity, Program } from "@/dashboard/_shared/opportunities/types";
+import type { CollaborationAudienceRole, CollaborationInviteDraft } from "@/lib/collaborationMatching";
 
-export type CollaboratorOpportunityType = "project" | "advisory" | "gig" | "testing";
+export type CollaboratorOpportunityType = "project" | "advisory" | "gig" | "testing" | "collaboration";
 export type CollaboratorOpportunityRisk = "low" | "medium" | "high";
 export type CollaboratorOpportunityStatus = "open" | "applied" | "passed";
 
@@ -85,7 +86,7 @@ export function normalizeCollaboratorOpportunity(value: unknown): CollaboratorOp
     id: firstString(record, ["id", "opportunityId"], `opportunity-${company.toLowerCase().replace(/\s+/g, "-")}`),
     title: firstString(record, ["title", "role", "name"], "Untitled opportunity"),
     company,
-    type: oneOf(record.type, ["project", "advisory", "gig", "testing"] as const, "project"),
+    type: oneOf(record.type, ["project", "advisory", "gig", "testing", "collaboration"] as const, "project"),
     cashCompMonthly: firstNumber(record, ["cashCompMonthly", "monthlyCompensation", "monthlyCash"]),
     cashCompOneTime: firstNumber(record, ["cashCompOneTime", "oneTimeCompensation", "fixedFee"]),
     equityPercent: firstNumber(record, ["equityPercent", "equity", "equityComp"]),
@@ -105,8 +106,44 @@ export function normalizeCollaboratorOpportunity(value: unknown): CollaboratorOp
 export function fetchCollaboratorOpportunities(): Promise<CollaboratorOpportunity[]> {
   return domainGet<{ opportunities?: unknown[] }>("/opportunities").then((data) => {
     const rows = Array.isArray(data.opportunities) ? data.opportunities : [];
-    return rows.map(normalizeCollaboratorOpportunity);
+    return rows.filter((row) => visibleToAudience(row, "collaborator")).map(normalizeCollaboratorOpportunity);
   });
+}
+
+function visibleToAudience(value: unknown, role: "collaborator" | "founder"): boolean {
+  const audience = asRecord(value).audienceRoles;
+  return !Array.isArray(audience) || audience.length === 0 || audience.includes(role);
+}
+
+export async function broadcastCollaborationCall(
+  draft: CollaborationInviteDraft,
+  audienceRoles: CollaborationAudienceRole[],
+): Promise<CollaboratorOpportunity> {
+  const applyDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const data = await domainPost<{ opportunity?: unknown }>("/opportunities/collaboration-calls", {
+    projectId: draft.projectId,
+    title: `${draft.requestedRole} for ${draft.projectName}`.slice(0, 160),
+    company: draft.projectName,
+    summary: draft.summary,
+    description: draft.summary,
+    scope: draft.scope,
+    role: draft.requestedRole,
+    skills: draft.requiredSkills,
+    compensationMode: draft.compensationMode,
+    cashCompMonthly: draft.cashReward ?? 0,
+    equityPercent: draft.equityProposal ?? 0,
+    timeCommitment: `${draft.desiredWeeklyHours} hrs/week`,
+    timeline: draft.earliestStart,
+    commitmentStyle: draft.commitmentStyle,
+    industry: draft.industry,
+    stage: draft.stage,
+    tags: [draft.industry, ...draft.requiredSkills].filter(Boolean).slice(0, 12),
+    audienceRoles,
+    applyDeadline,
+    publishedAt: new Date().toISOString(),
+    poster: "",
+  });
+  return normalizeCollaboratorOpportunity(data.opportunity);
 }
 
 export interface OpportunityApplication {
@@ -210,7 +247,7 @@ function baseOpportunity(record: PublishedRecord, type: Opportunity["type"]) {
 export function normalizePublishedOpportunity(value: unknown): Opportunity | null {
   const record = publishedRecord(value);
   const type = valueString(record, ["type"]);
-  if (!["hackathon", "program", "funding", "event"].includes(type)) return null;
+  if (!["hackathon", "program", "funding", "event", "collaboration"].includes(type)) return null;
   const base = baseOpportunity(record, type as Opportunity["type"]);
   if (!base.id) return null;
 
@@ -257,6 +294,21 @@ export function normalizePublishedOpportunity(value: unknown): Opportunity | nul
       audienceStage: valueList(record, ["audienceStage"]) as Funding["audienceStage"],
     } satisfies Funding;
   }
+  if (type === "collaboration") {
+    return {
+      ...base,
+      type: "collaboration",
+      role: valueString(record, ["role", "requestedRole"]),
+      skills: valueList(record, ["skills", "requiredSkills"]),
+      scope: valueString(record, ["scope"]),
+      timeCommitment: valueString(record, ["timeCommitment", "commitment"]),
+      cashCompMonthly: valueNumber(record, ["cashCompMonthly", "monthlyCash"]),
+      equityPercent: valueNumber(record, ["equityPercent", "equity"]),
+      audienceRoles: valueList(record, ["audienceRoles"]).filter(
+        (role): role is "collaborator" | "founder" | "explorer" => role === "collaborator" || role === "founder" || role === "explorer",
+      ),
+    };
+  }
   const format = valueString(record, ["format"]);
   return {
     ...base,
@@ -281,7 +333,9 @@ export async function fetchFounderOpportunityCatalog(): Promise<Opportunity[]> {
   ]);
   const normalized = [
     ...(hackathonData.hackathons ?? []).map(normalizePublishedHackathon),
-    ...(opportunityData.opportunities ?? []).map(normalizePublishedOpportunity),
+    ...(opportunityData.opportunities ?? [])
+      .filter((row) => visibleToAudience(row, "founder"))
+      .map(normalizePublishedOpportunity),
   ].filter((item): item is Opportunity => Boolean(item));
   return [...new Map(normalized.map((item) => [item.id, item])).values()];
 }
