@@ -35,6 +35,12 @@ import {
   ValidationStoryDialog,
   validationStoryDue,
 } from "@/dashboard/founders/section/components/incubation/IncubationCollaborationPrompts";
+import {
+  fetchWorkspaces,
+  inviteWorkspaceCollaborator,
+  provisionWorkspace,
+  type WorkspaceRef,
+} from "@/lib/api/workspaces";
 
 interface Match {
   id: string;
@@ -108,6 +114,9 @@ export default function MatchResults() {
   const [contractFor, setContractFor] = useState<Match | null>(null);
   const [projectName, setProjectName] = useState("");
   const [storyOpen, setStoryOpen] = useState(false);
+  const [workspaces, setWorkspaces] = useState<WorkspaceRef[]>([]);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
+  const [workspaceAccess, setWorkspaceAccess] = useState<"contributor" | "viewer">("contributor");
   const invitationDraft = useMemo<CollaborationInviteDraft | null>(
     () => projectId ? loadCollaborationInvite(projectId) : null,
     [projectId],
@@ -127,8 +136,9 @@ export default function MatchResults() {
     Promise.all([
       fetchCollaboratorDirectory(),
       hackathonId ? fetchFounderOpportunity(hackathonId) : Promise.resolve(null),
+      invitationDraft ? fetchWorkspaces() : Promise.resolve([]),
     ])
-      .then(([profiles, opportunity]) => {
+      .then(([profiles, opportunity, workspaceRows]) => {
         if (!alive) return;
         const ranked = invitationDraft
           ? rankCollaborators(profiles, invitationDraft, {
@@ -138,6 +148,12 @@ export default function MatchResults() {
           : profiles.map((profile) => directoryMatch(profile));
         setMatches(ranked);
         setHackathon(opportunity?.type === "hackathon" ? opportunity : null);
+        const owned = workspaceRows.filter((workspace) => workspace.isOwner !== false);
+        setWorkspaces(owned);
+        const preferred = owned.find((workspace) => workspace.id === invitationDraft?.workspaceId)
+          ?? owned.find((workspace) => workspace.projectId === invitationDraft?.projectId)
+          ?? owned[0];
+        if (preferred) setSelectedWorkspaceId(preferred.id);
       })
       .catch((loadError) => {
         if (!alive) return;
@@ -206,19 +222,35 @@ export default function MatchResults() {
   const handleConnect = async (match: Match) => {
     setInvitingIds((current) => new Set(current).add(match.id));
     try {
-      await connectWithUser(match.id, invitationDraft ? {
-        projectId: invitationDraft.projectId,
-        projectName: invitationDraft.projectName,
-        summary: invitationDraft.summary,
-        scope: invitationDraft.scope,
-        requestedRole: invitationDraft.requestedRole,
-        requiredSkills: invitationDraft.requiredSkills,
-        compensationMode: invitationDraft.compensationMode,
-        equityProposal: invitationDraft.equityProposal,
-        cashReward: invitationDraft.cashReward,
-      } : undefined);
+      if (invitationDraft) {
+        let workspaceId = selectedWorkspaceId || invitationDraft.workspaceId || "";
+        if (!workspaceId) {
+          const provisioned = await provisionWorkspace(
+            invitationDraft.projectId,
+            `${invitationDraft.projectName} Workspace`,
+          );
+          if (!provisioned.ok || !provisioned.workspace?.id) throw new Error("A project workspace could not be created.");
+          workspaceId = provisioned.workspace.id;
+          setWorkspaces((current) => [...current, provisioned.workspace as WorkspaceRef]);
+          setSelectedWorkspaceId(workspaceId);
+        }
+        await inviteWorkspaceCollaborator(workspaceId, {
+          collaboratorId: match.id,
+          requestedRole: invitationDraft.requestedRole,
+          scope: invitationDraft.scope,
+          requiredSkills: invitationDraft.requiredSkills,
+          compensationMode: invitationDraft.compensationMode,
+          equityProposal: (equity[match.id] ?? 0) > 0 ? equity[match.id] : invitationDraft.equityProposal,
+          cashReward: invitationDraft.cashReward,
+          accessLevel: workspaceAccess,
+        });
+      } else {
+        await connectWithUser(match.id);
+      }
       setInvitedIds((current) => new Set(current).add(match.id));
-      toast.success(`Connection request sent to ${match.name}.`);
+      toast.success(invitationDraft
+        ? `Workspace invitation sent to ${match.name}.`
+        : `Connection request sent to ${match.name}.`);
     } catch (connectError) {
       toast.error(connectError instanceof Error ? connectError.message : "The connection request could not be sent.");
     } finally {
@@ -249,6 +281,22 @@ export default function MatchResults() {
               <p className="font-semibold">Profile-based matches for {invitationDraft.projectName}</p>
               <p className="mt-1 text-xs text-violet-800">{invitationDraft.summary}</p>
               <p className="mt-2 text-xs"><span className="font-semibold">Scope:</span> {invitationDraft.scope}</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-xs font-semibold text-violet-900">
+                  Workspace
+                  <select value={selectedWorkspaceId} onChange={(event) => setSelectedWorkspaceId(event.target.value)} className="mt-1 w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-sm">
+                    {workspaces.length === 0 && <option value="">Create {invitationDraft.projectName} Workspace when inviting</option>}
+                    {workspaces.map((workspace) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
+                  </select>
+                </label>
+                <label className="text-xs font-semibold text-violet-900">
+                  Access after acceptance
+                  <select value={workspaceAccess} onChange={(event) => setWorkspaceAccess(event.target.value as "contributor" | "viewer")} className="mt-1 w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-sm">
+                    <option value="contributor">Contributor - tasks and reports</option>
+                    <option value="viewer">Viewer - read only</option>
+                  </select>
+                </label>
+              </div>
               <p className="mt-2 text-[11px] text-violet-700">Ranked from disclosed skills, availability, start timing, compensation preferences, credibility, verification, timezone/location and industry. Scores are transparent fit indicators, not predictions.</p>
             </div>
           )}

@@ -520,7 +520,7 @@ export function FastTrackPanel() {
           <IncubationHumanLoopPanel
             validation={blueprint.validation as ValidationStartResult | undefined}
             workspaceId={blueprint.workspace_id}
-            project={{ id: projectId, name: startupName, summary: oneLiner, industry, stage }}
+            project={{ id: projectId, workspaceId: blueprint.workspace_id, name: startupName, summary: oneLiner, industry, stage }}
           />
         )}
 

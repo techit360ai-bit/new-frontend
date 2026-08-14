@@ -566,6 +566,7 @@ export function MainIncubationPanel() {
               workspaceId={asText(blueprintData.workspace_id)}
               project={{
                 id: projectId,
+                workspaceId: asText(blueprintData.workspace_id),
                 name: ventureName,
                 summary: ideaInput,
                 industry: asText(blueprintData.industry),

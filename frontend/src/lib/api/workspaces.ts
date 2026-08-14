@@ -11,6 +11,8 @@ export interface WorkspaceRef {
   name: string;
   status: string;
   seededFromAnalysis: boolean;
+  isOwner?: boolean;
+  accessLevel?: "owner" | "contributor" | "viewer";
 }
 
 export interface WorkspaceContext {
@@ -18,6 +20,28 @@ export interface WorkspaceContext {
   projectId: string | null;
   venture: Record<string, unknown> | null;
   blueprintAvailable: boolean;
+  isOwner?: boolean;
+  accessLevel?: "owner" | "contributor" | "viewer";
+}
+
+export interface WorkspaceInvitation {
+  id: string;
+  workspaceId: string;
+  workspaceName: string;
+  projectId: string | null;
+  collaboratorId: string;
+  inviterName: string;
+  requestedRole: string;
+  scope: string;
+  requiredSkills: string[];
+  compensationMode: "equity-heavy" | "equity-cash" | "cash-only";
+  equityProposal: number;
+  cashReward: number;
+  accessLevel: "contributor" | "viewer";
+  status: "pending" | "accepted" | "declined" | "expired";
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /** GET /api/domain/workspaces — the founder's workspaces (each bound to a project). */
@@ -43,4 +67,41 @@ export function fetchWorkspaceContext(
 ): Promise<WorkspaceContext | null> {
   const qs = projectId ? `?project_id=${encodeURIComponent(projectId)}` : "";
   return domainGet<WorkspaceContext>(`/workspaces/${workspaceId}/context${qs}`);
+}
+
+export function inviteWorkspaceCollaborator(
+  workspaceId: string,
+  invitation: {
+    collaboratorId: string;
+    requestedRole: string;
+    scope: string;
+    requiredSkills: string[];
+    compensationMode: "equity-heavy" | "equity-cash" | "cash-only";
+    equityProposal?: number;
+    cashReward?: number;
+    accessLevel: "contributor" | "viewer";
+  },
+): Promise<WorkspaceInvitation> {
+  return domainPost<{ invitation: WorkspaceInvitation }>(
+    `/workspaces/${encodeURIComponent(workspaceId)}/invitations`,
+    invitation,
+  ).then((data) => data.invitation);
+}
+
+export function fetchWorkspaceInvitation(invitationId: string): Promise<WorkspaceInvitation> {
+  return domainGet<{ invitation: WorkspaceInvitation }>(
+    `/workspace-invitations/${encodeURIComponent(invitationId)}`,
+  ).then((data) => data.invitation);
+}
+
+export function acceptWorkspaceInvitation(invitationId: string): Promise<WorkspaceInvitation> {
+  return domainPost<{ invitation: WorkspaceInvitation }>(
+    `/workspace-invitations/${encodeURIComponent(invitationId)}/accept`,
+  ).then((data) => data.invitation);
+}
+
+export function declineWorkspaceInvitation(invitationId: string): Promise<WorkspaceInvitation> {
+  return domainPost<{ invitation: WorkspaceInvitation }>(
+    `/workspace-invitations/${encodeURIComponent(invitationId)}/decline`,
+  ).then((data) => data.invitation);
 }

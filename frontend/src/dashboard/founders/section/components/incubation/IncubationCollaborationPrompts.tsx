@@ -18,6 +18,7 @@ import { broadcastCollaborationCall } from "@/lib/api/opportunities";
 
 export interface IncubationProjectContext {
   id?: string | null;
+  workspaceId?: string | null;
   name?: string;
   summary?: string;
   industry?: string;
@@ -134,6 +135,7 @@ export function CollaboratorInviteDialog({
     }
     const draft: CollaborationInviteDraft = {
       projectId,
+      workspaceId: clean(project.workspaceId) || undefined,
       projectName,
       summary: summary.trim().slice(0, 500),
       scope: scope.trim().slice(0, 1000),

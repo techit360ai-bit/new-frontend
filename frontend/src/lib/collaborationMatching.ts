@@ -2,6 +2,7 @@ import type { CollaboratorDirectoryEntry } from "@/lib/api/users";
 
 export interface CollaborationInviteDraft {
   projectId: string;
+  workspaceId?: string;
   projectName: string;
   summary: string;
   scope: string;
@@ -80,6 +81,7 @@ export function loadCollaborationInvite(projectId: string): CollaborationInviteD
     if (!value.projectId || !value.projectName || !value.summary || !value.scope || !value.requestedRole) return null;
     return {
       projectId: String(value.projectId),
+      workspaceId: value.workspaceId ? String(value.workspaceId) : undefined,
       projectName: String(value.projectName),
       summary: String(value.summary),
       scope: String(value.scope),
