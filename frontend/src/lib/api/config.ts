@@ -39,5 +39,5 @@ export function apiFallbackEnabled(): boolean {
 /** Build a full URL for an ai-router path (with or without leading slash). */
 export function apiUrl(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${clean.startsWith(API_PREFIX) ? "" : API_PREFIX}${clean}`;
+  return `${API_BASE_URL}${clean.startsWith("/api/") ? "" : API_PREFIX}${clean}`;
 }

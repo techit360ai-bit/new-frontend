@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import {
   addToWatchlist,
   fetchDealFlow,
+  toGsisV2Input,
   type InvestorStartup,
   type RiskLevel,
 } from '@/lib/api/dealFlow';
+import { computeGsisV2Batch, type GsisV2Scorecard } from '@/lib/api/gsis';
 import {
   Filter,
   Grid3x3,
@@ -31,6 +33,10 @@ const DEFAULT_FILTERS = {
   maxBurnEfficiency: 10,
   hasTrackRecord: false,
   minBestPlacement: 0,
+  minGsis: 0,
+  stage: 'all',
+  minPmf: 0,
+  minConfidence: 0,
 };
 
 function riskColor(riskLevel: RiskLevel) {
@@ -58,6 +64,7 @@ export function DealIntelligence() {
   const [startups, setStartups] = useState<InvestorStartup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [scorecards, setScorecards] = useState<Record<string, GsisV2Scorecard>>({});
 
   useEffect(() => {
     let alive = true;
@@ -66,6 +73,13 @@ export function DealIntelligence() {
         if (!alive) return;
         setStartups(data.ranking);
         setError(null);
+        const inputs = data.ranking.map(toGsisV2Input);
+        computeGsisV2Batch(inputs).then((rows) => {
+          if (!alive) return;
+          setScorecards(Object.fromEntries(
+            rows.filter((row) => row.startup_id).map((row) => [row.startup_id as string, row]),
+          ));
+        });
       })
       .catch(() => {
         if (alive) setError('Unable to load live deal intelligence.');
@@ -87,6 +101,11 @@ export function DealIntelligence() {
   );
 
   const filteredStartups = startups.filter((startup) => {
+    const scorecard = scorecards[startup.id];
+    if (filters.minGsis > 0 && (scorecard?.gsis == null || scorecard.gsis < filters.minGsis)) return false;
+    if (filters.stage !== 'all' && scorecard?.stage.detected_stage !== filters.stage) return false;
+    if (filters.minPmf > 0 && (scorecard?.pmf.score == null || scorecard.pmf.score < filters.minPmf)) return false;
+    if (filters.minConfidence > 0 && (!scorecard || scorecard.confidence * 100 < filters.minConfidence)) return false;
     if (startup.readinessScore < filters.minReadiness) return false;
     if (startup.executionVelocity < filters.minExecutionVelocity) return false;
     if (startup.betaRetention < filters.minBetaRetention) return false;
@@ -178,6 +197,40 @@ export function DealIntelligence() {
                 min={0}
                 max={100}
               />
+              <SliderFilter
+                label="Minimum GSIS v2"
+                value={filters.minGsis}
+                onChange={(value) => setFilters({ ...filters, minGsis: value })}
+                min={0}
+                max={100}
+              />
+              <SliderFilter
+                label="Minimum PMF"
+                value={filters.minPmf}
+                onChange={(value) => setFilters({ ...filters, minPmf: value })}
+                min={0}
+                max={100}
+              />
+              <SliderFilter
+                label="Minimum confidence %"
+                value={filters.minConfidence}
+                onChange={(value) => setFilters({ ...filters, minConfidence: value })}
+                min={0}
+                max={100}
+              />
+              <div>
+                <label className="text-sm text-gray-400 mb-2 block">Detected stage</label>
+                <select
+                  value={filters.stage}
+                  onChange={(e) => setFilters({ ...filters, stage: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
+                >
+                  <option value="all">All stages</option>
+                  <option value="BUILD">Build</option>
+                  <option value="LAUNCH">Launch</option>
+                  <option value="GROWTH">Growth</option>
+                </select>
+              </div>
             </FilterSection>
 
             <FilterSection
@@ -339,13 +392,13 @@ export function DealIntelligence() {
             viewMode === 'grid' ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {sortedStartups.map((startup) => (
-                  <StartupCard key={startup.id} startup={startup} onWatch={handleWatch} />
+                  <StartupCard key={startup.id} startup={startup} scorecard={scorecards[startup.id]} onWatch={handleWatch} />
                 ))}
               </div>
             ) : (
               <div className="space-y-3">
                 {sortedStartups.map((startup) => (
-                  <StartupListItem key={startup.id} startup={startup} onWatch={handleWatch} />
+                  <StartupListItem key={startup.id} startup={startup} scorecard={scorecards[startup.id]} onWatch={handleWatch} />
                 ))}
               </div>
             )
@@ -421,10 +474,11 @@ function SliderFilter({ label, value, onChange, min, max }: SliderFilterProps) {
 
 interface StartupCardProps {
   startup: InvestorStartup;
+  scorecard?: GsisV2Scorecard;
   onWatch: (projectId: string) => void;
 }
 
-function StartupCard({ startup, onWatch }: StartupCardProps) {
+function StartupCard({ startup, scorecard, onWatch }: StartupCardProps) {
   return (
     <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-all">
       <div className="flex items-start justify-between mb-3">
@@ -443,6 +497,7 @@ function StartupCard({ startup, onWatch }: StartupCardProps) {
       </div>
 
       <div className="space-y-2 mb-4">
+        {scorecard && <V2SignalStrip scorecard={scorecard} />}
         <MetricRow label="Readiness" value={startup.readinessScore} isScore />
         <MetricRow label="EVI" value={startup.executionVelocity} isScore />
         <MetricRow
@@ -497,7 +552,7 @@ function StartupCard({ startup, onWatch }: StartupCardProps) {
   );
 }
 
-function StartupListItem({ startup, onWatch }: StartupCardProps) {
+function StartupListItem({ startup, scorecard, onWatch }: StartupCardProps) {
   return (
     <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-all">
       <div className="flex items-center justify-between">
@@ -513,6 +568,7 @@ function StartupListItem({ startup, onWatch }: StartupCardProps) {
           </div>
 
           <div className="flex gap-8 flex-1">
+            {scorecard && <V2SignalStrip scorecard={scorecard} compact />}
             <SignalValue label="Readiness" value={startup.readinessScore} color="text-emerald-400" />
             <SignalValue label="EVI" value={startup.executionVelocity} color="text-purple-400" />
             <SignalValue label="Revenue" value={formatMoney(startup.mrr)} color="text-emerald-400" />
@@ -558,6 +614,21 @@ interface SignalValueProps {
   label: string;
   value: string | number;
   color: string;
+}
+
+function V2SignalStrip({ scorecard, compact = false }: { scorecard: GsisV2Scorecard; compact?: boolean }) {
+  const momentum = (scorecard.momentum.score > 0 ? '+' : '') + scorecard.momentum.score;
+  return (
+    <div className={compact
+      ? 'grid min-w-[24rem] grid-cols-4 gap-2 border-y border-emerald-500/20 py-2'
+      : 'grid grid-cols-3 gap-2 border-y border-emerald-500/20 py-2'}
+    >
+      <SignalValue label="GSIS v2" value={scorecard.gsis == null ? '—' : Math.round(scorecard.gsis)} color="text-emerald-400" />
+      <SignalValue label="Stage" value={scorecard.stage.detected_stage} color="text-white" />
+      <SignalValue label="PMF" value={scorecard.pmf.score == null ? 'N/A' : Math.round(scorecard.pmf.score)} color="text-purple-300" />
+      {compact && <SignalValue label="Momentum" value={momentum} color="text-amber-300" />}
+    </div>
+  );
 }
 
 function SignalValue({ label, value, color }: SignalValueProps) {
