@@ -3,6 +3,7 @@
 // Investor deal-flow ranking — BACKEND /api/domain/investor/deal-flow.
 
 import { domainGet, domainPost } from "@/lib/domainApi";
+import type { GsisV2Input } from "@/lib/api/gsis";
 
 export type RiskLevel = "low" | "moderate" | "high" | "unknown";
 
@@ -68,6 +69,15 @@ export interface InvestorStartup {
   rankScore: number;
   watchlisted: boolean;
   raw: DealFlowEntry;
+  gsisV2?: {
+    gsis: number | null;
+    stage: string;
+    momentum: number;
+    pmf: number | null;
+    riskLevel: string;
+    readiness: number | null;
+    confidence: number;
+  };
 }
 
 export interface DealFlowEntry {
@@ -252,6 +262,23 @@ export function normalizeDealFlowEntry(row: DealFlowEntry, watchlistProjectIds: 
     rankScore: firstNumber(row.rankScore, row.wcrs, row.eviI, row.gsisScore, project.gsisScore),
     watchlisted: bool(row.watchlisted) || watchlistProjectIds.includes(id),
     raw: row,
+  };
+}
+
+export function toGsisV2Input(startup: InvestorStartup): GsisV2Input {
+  const metrics: GsisV2Input["metrics"] = {};
+  if (startup.readinessScore > 0) metrics.product = { score: startup.readinessScore, status: "derived", evidence_level: 2, source: "deal_flow" };
+  if (startup.executionVelocity > 0) metrics.execution = { score: startup.executionVelocity, status: "derived", evidence_level: 2, source: "deal_flow" };
+  if (startup.betaRetention > 0) metrics.retention = { value: startup.betaRetention, status: "observed", evidence_level: 3, source: "deal_flow" };
+  if (startup.revenueGrowth > 0) metrics.revenue_growth = { value: startup.revenueGrowth, status: "observed", evidence_level: 4, source: "deal_flow" };
+  if (startup.mrr > 0) metrics.revenue = { value: startup.mrr, status: "observed", evidence_level: 4, source: "deal_flow" };
+  if (startup.founderReliability > 0) metrics.team = { score: startup.founderReliability, status: "derived", evidence_level: 2, source: "deal_flow" };
+  return {
+    startup_id: startup.id,
+    declared_stage: typeof startup.raw.stage === "string" ? startup.raw.stage : undefined,
+    geography: startup.region,
+    legacy_gsis: Number(startup.raw.gsisScore ?? 0) || undefined,
+    metrics,
   };
 }
 
