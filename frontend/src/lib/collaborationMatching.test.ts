@@ -66,7 +66,7 @@ describe("rankCollaborators", () => {
 
     const ranked = rankCollaborators([sparse, strong], draft, { timezone: "UTC+1", location: "Nigeria" });
     expect(ranked.map((row) => row.profile.id)).toEqual(["strong", "sparse"]);
-    expect(ranked[0].score).toBeGreaterThan(80);
+    expect(ranked[0].score > 80).toBe(true);
     expect(ranked[0].reasons).toContain("Role fit: Backend Engineer");
   });
 
