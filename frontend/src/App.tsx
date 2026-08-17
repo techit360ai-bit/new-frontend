@@ -26,6 +26,7 @@ import MatchResults from "@/dashboard/matchResults";
 import OpportunityHub from "@/dashboard/founders/section/components/founder/OpportunityHub";
 import OpportunityDetail from "@/dashboard/founders/section/components/founder/OpportunityDetail";
 import InviteAcceptPage from "@/dashboard/founders/section/components/founder/InviteAcceptPage";
+import { WorkspaceInvitationPage } from "@/dashboard/workspaces/pages/WorkspaceInvitationPage";
 import ContractSigningPage from "@/dashboard/founders/section/components/founder/ContractSigningPage";
 import Wallet from "@/TechitWallet/Wallet";
 import NotFound from "@/dashboard/NotFound";
@@ -96,6 +97,7 @@ import { Reports as WsReports } from "@/dashboard/workspaces/pages/Reports";
 import { Connectors as WsConnectors } from "@/dashboard/workspaces/pages/Connectors";
 import { Agents as WsAgents } from "@/dashboard/workspaces/pages/Agents";
 import { Chat as WsChat } from "@/dashboard/workspaces/pages/Chat";
+import { Copilot as WsCopilot } from "@/dashboard/workspaces/pages/Copilot";
 import { Files as WsFiles } from "@/dashboard/workspaces/pages/Files";
 import { Notifications as WsNotifications } from "@/dashboard/workspaces/pages/Notifications";
 import { Settings as WsSettings } from "@/dashboard/workspaces/pages/Settings";
@@ -103,6 +105,7 @@ import { GitHub as WsGitHub } from "@/dashboard/workspaces/pages/GitHub";
 import { ComponentLibrary as WsComponentLibrary } from "@/dashboard/workspaces/components/ComponentLibrary";
 import { FeedLayout } from "@/dashboard/feed/components/FeedLayout";
 import { FeedPage } from "@/dashboard/feed/pages/FeedPage";
+import { DiscoveryPage } from "@/dashboard/feed/pages/DiscoveryPage";
 import { TribePage } from "@/dashboard/feed/pages/TribePage";
 import { BuildLogPage } from "@/dashboard/feed/pages/BuildLogPage";
 import { QuestionsPage } from "@/dashboard/feed/pages/QuestionsPage";
@@ -206,6 +209,7 @@ const App = () => {
         </Route>
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
+        <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
 
         <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
           <Route path="/founder/dashboard" element={<Dashboard />} />
@@ -237,6 +241,7 @@ const App = () => {
           <Route path="agents" element={<WsAgents />} />
           <Route path="ai-agents" element={<Navigate to="/workspaces/agents" replace />} />
           <Route path="chat" element={<WsChat />} />
+          <Route path="copilot" element={<WsCopilot />} />
           <Route path="files" element={<WsFiles />} />
           <Route path="github" element={<WsGitHub />} />
           <Route path="reports" element={<WsReports />} />
@@ -282,6 +287,7 @@ const App = () => {
         {/* Feed / Hangout */}
         <Route path="/feed" element={<RequireAuth><FeedLayout /></RequireAuth>}>
           <Route index element={<FeedPage />} />
+          <Route path="discover" element={<DiscoveryPage />} />
           <Route path="tribe" element={<TribePage />} />
           <Route path="build-log" element={<BuildLogPage />} />
           <Route path="questions" element={<QuestionsPage />} />

@@ -17,11 +17,13 @@ import {
   Target,
   Briefcase,
 } from "lucide-react";
-import { fetchDealFlow, type InvestorStartup } from "@/lib/api/dealFlow";
+import { fetchDealFlow, toGsisV2Input, type InvestorStartup } from "@/lib/api/dealFlow";
+import { computeGsisV2, type GsisV2Scorecard } from "@/lib/api/gsis";
 
 export function StartupOverview() {
   const { startupId } = useParams();
   const [startup, setStartup] = useState<InvestorStartup | null>(null);
+  const [scorecard, setScorecard] = useState<GsisV2Scorecard | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,12 +31,21 @@ export function StartupOverview() {
       setLoading(false);
       return;
     }
+    let alive = true;
     fetchDealFlow()
       .then((data) => {
-        setStartup(data.ranking.find((s) => s.id === startupId) ?? null);
+        const selected = data.ranking.find((s) => s.id === startupId) ?? null;
+        if (!alive) return;
+        setStartup(selected);
+        if (selected) {
+          computeGsisV2(toGsisV2Input(selected)).then((result) => {
+            if (alive) setScorecard(result);
+          });
+        }
       })
-      .catch(() => setStartup(null))
-      .finally(() => setLoading(false));
+      .catch(() => { if (alive) setStartup(null); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
   }, [startupId]);
 
   if (loading) {
@@ -168,6 +179,74 @@ export function StartupOverview() {
           <MetricCard label="Founder Reliability" value={startup.founderReliability} icon={Users} />
         </div>
 
+        {scorecard && (
+          <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-100 pb-5">
+              <div>
+                <p className="text-xs font-semibold text-emerald-700">GSIS v2 INVESTMENT INTELLIGENCE</p>
+                <h2 className="mt-1 text-xl font-bold text-gray-900">Evidence-backed stage analysis</h2>
+                <p className="mt-1 max-w-2xl text-sm text-gray-500">{scorecard.stage.reason}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-4xl font-bold text-emerald-600">{scorecard.gsis == null ? "—" : Math.round(scorecard.gsis)}</p>
+                <p className="text-xs text-gray-500">GSIS / 100</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-5 sm:grid-cols-3 lg:grid-cols-6">
+              <IntelligenceValue label="Detected stage" value={scorecard.stage.detected_stage} />
+              <IntelligenceValue label="Stage health" value={scorecard.stage_health == null ? "—" : String(Math.round(scorecard.stage_health))} />
+              <IntelligenceValue label="Momentum" value={(scorecard.momentum.score > 0 ? "+" : "") + scorecard.momentum.score} />
+              <IntelligenceValue label="PMF" value={scorecard.pmf.score == null ? "N/A" : String(Math.round(scorecard.pmf.score))} />
+              <IntelligenceValue label="Risk" value={scorecard.risk.level} />
+              <IntelligenceValue label={scorecard.readiness.next_stage + " readiness"} value={scorecard.readiness.score == null ? "—" : String(Math.round(scorecard.readiness.score))} />
+            </div>
+
+            <div className="grid gap-6 border-t border-gray-100 pt-5 lg:grid-cols-2">
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-800">Score decomposition</h3>
+                  <span className="text-xs text-gray-500">{Math.round(scorecard.confidence * 100)}% confidence</span>
+                </div>
+                <div className="mt-3 space-y-3">
+                  {Object.values(scorecard.components ?? {}).sort((a, b) => b.score - a.score).slice(0, 8).map((component) => (
+                    <div key={component.key}>
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <span className="capitalize text-gray-600">{component.key.replaceAll("_", " ")}</span>
+                        <span className="font-medium text-gray-900">{Math.round(component.score)}</span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded bg-gray-100">
+                        <div className="h-full bg-emerald-500" style={{ width: component.score + "%" }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800">Stage transition</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  {scorecard.readiness.status.replaceAll("_", " ")} · {scorecard.readiness.satisfied_gates.length} gates satisfied
+                </p>
+                <div className="mt-3 space-y-2">
+                  {scorecard.readiness.satisfied_gates.map((gate) => (
+                    <GateRow key={gate.metric} label={gate.metric} met />
+                  ))}
+                  {scorecard.readiness.blocking_requirements.map((gate) => (
+                    <GateRow key={gate.metric} label={gate.metric} met={false} />
+                  ))}
+                </div>
+                <div className="mt-5 border-t border-gray-100 pt-4">
+                  <p className="text-xs font-semibold text-gray-500">PRIMARY CONSTRAINT</p>
+                  <p className="mt-1 text-sm font-semibold capitalize text-gray-900">{scorecard.bottleneck.category.replaceAll("_", " ").toLowerCase()}</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Data coverage {Math.round(scorecard.data_coverage * 100)}%. Unknown metrics are excluded from the score rather than treated as zero.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Verification Badges */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <h3 className="text-sm font-semibold text-gray-700 mb-4">Verification Status</h3>
@@ -279,6 +358,24 @@ export function StartupOverview() {
           </Link>
         </div>
       </div>
+    </div>
+  );
+}
+
+function IntelligenceValue({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="truncate text-lg font-semibold text-gray-900">{value}</p>
+      <p className="mt-0.5 text-xs text-gray-500">{label}</p>
+    </div>
+  );
+}
+
+function GateRow({ label, met }: { label: string; met: boolean }) {
+  return (
+    <div className="flex items-center justify-between border-b border-gray-100 pb-2 text-sm">
+      <span className="capitalize text-gray-600">{label.replaceAll("_", " ").toLowerCase()}</span>
+      <span className={met ? "text-emerald-600" : "text-amber-600"}>{met ? "Satisfied" : "Missing"}</span>
     </div>
   );
 }

@@ -13,6 +13,7 @@ const TYPE_LABELS: Record<TypeFilter, string> = {
   program: "Programs",
   funding: "Funding",
   event: "Events",
+  collaboration: "Collaboration calls",
 };
 
 const STATUS_RANK: Record<OpportunityStatus, number> = { open: 0, "closing-soon": 1, closed: 2 };
@@ -69,7 +70,7 @@ export default function OpportunityHub() {
   const gridItems = useMemo(() => filtered.filter((o) => o.id !== featured?.id), [filtered, featured]);
 
   const counts = useMemo(() => {
-    const c: Record<TypeFilter, number> = { all: 0, hackathon: 0, program: 0, funding: 0, event: 0 };
+    const c: Record<TypeFilter, number> = { all: 0, hackathon: 0, program: 0, funding: 0, event: 0, collaboration: 0 };
     for (const o of opportunities) {
       if (statusFilter !== "all" && o.status !== statusFilter) continue;
       c.all++;
@@ -82,7 +83,7 @@ export default function OpportunityHub() {
     <div className="p-6 max-w-7xl mx-auto">
       <header className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-900">Opportunity Hub</h1>
-        <p className="text-sm text-slate-600 mt-1">Programs, hackathons, funding, and events from organizations.</p>
+        <p className="text-sm text-slate-600 mt-1">Programs, hackathons, funding, events and ownership-focused collaboration calls.</p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">

@@ -11,6 +11,7 @@ const TYPE_LABEL: Record<Opportunity["type"], string> = {
   program: "PROGRAM",
   funding: "FUNDING",
   event: "EVENT",
+  collaboration: "COLLABORATION CALL",
 };
 
 const STATUS_STYLES = {
@@ -42,6 +43,10 @@ function metricLine(opp: Opportunity): string {
       return `${opp.amountRange} · ${opp.equityRequired ? "Equity" : "Non-dilutive"}`;
     case "event":
       return `${opp.format} · ${opp.durationMinutes}min · ${opp.isVirtual ? "Virtual" : opp.hostedBy}`;
+    case "collaboration": {
+      const ownership = opp.equityPercent > 0 ? `${opp.equityPercent}% ownership proposed` : "Cash-only offer";
+      return `${opp.role} · ${opp.timeCommitment} · ${ownership}`;
+    }
   }
 }
 
@@ -51,6 +56,7 @@ function ctaLabel(opp: Opportunity): string {
     case "program":
     case "funding":   return "Apply →";
     case "event":     return "RSVP →";
+    case "collaboration": return "Express interest →";
   }
 }
 

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { HackathonMatchBanner } from "@/dashboard/founders/section/components/founder/HackathonMatchBanner";
 import { inviteHackathonCollaborator } from "@/lib/api/hackathon";
@@ -24,6 +25,22 @@ import {
   fetchCollaboratorDirectory,
   type CollaboratorDirectoryEntry,
 } from "@/lib/api/users";
+import {
+  loadCollaborationInvite,
+  rankCollaborators,
+  type CollaborationInviteDraft,
+} from "@/lib/collaborationMatching";
+import {
+  markValidationStoryShown,
+  ValidationStoryDialog,
+  validationStoryDue,
+} from "@/dashboard/founders/section/components/incubation/IncubationCollaborationPrompts";
+import {
+  fetchWorkspaces,
+  inviteWorkspaceCollaborator,
+  provisionWorkspace,
+  type WorkspaceRef,
+} from "@/lib/api/workspaces";
 
 interface Match {
   id: string;
@@ -36,6 +53,8 @@ interface Match {
   location: string;
   credibilityScore: number;
   isVerified: boolean;
+  matchScore: number | null;
+  matchReasons: string[];
 }
 
 function initials(value: string): string {
@@ -49,7 +68,7 @@ function roleTokens(value: string): string[] {
   return value.toLowerCase().split(/[^a-z0-9+#.]+/).filter((word) => word.length > 1);
 }
 
-function directoryMatch(profile: CollaboratorDirectoryEntry): Match {
+function directoryMatch(profile: CollaboratorDirectoryEntry, matchScore: number | null = null, matchReasons: string[] = []): Match {
   return {
     id: profile.id,
     name: profile.name,
@@ -61,6 +80,8 @@ function directoryMatch(profile: CollaboratorDirectoryEntry): Match {
     location: profile.location,
     credibilityScore: profile.credibilityScore,
     isVerified: profile.isVerified,
+    matchScore,
+    matchReasons,
   };
 }
 
@@ -75,7 +96,9 @@ export default function MatchResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const hackathonId = searchParams.get("hackathon");
+  const projectId = searchParams.get("project");
   const { founderProfile } = useFounderProfile();
+  const { profile: authProfile } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [hackathon, setHackathon] = useState<Hackathon | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,6 +113,21 @@ export default function MatchResults() {
   const [equity, setEquity] = useState<Record<string, number>>({});
   const [contractFor, setContractFor] = useState<Match | null>(null);
   const [projectName, setProjectName] = useState("");
+  const [storyOpen, setStoryOpen] = useState(false);
+  const [workspaces, setWorkspaces] = useState<WorkspaceRef[]>([]);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
+  const [workspaceAccess, setWorkspaceAccess] = useState<"contributor" | "viewer">("contributor");
+  const invitationDraft = useMemo<CollaborationInviteDraft | null>(
+    () => projectId ? loadCollaborationInvite(projectId) : null,
+    [projectId],
+  );
+
+  useEffect(() => {
+    if (invitationDraft && validationStoryDue()) {
+      markValidationStoryShown();
+      setStoryOpen(true);
+    }
+  }, [invitationDraft]);
 
   useEffect(() => {
     let alive = true;
@@ -98,11 +136,24 @@ export default function MatchResults() {
     Promise.all([
       fetchCollaboratorDirectory(),
       hackathonId ? fetchFounderOpportunity(hackathonId) : Promise.resolve(null),
+      invitationDraft ? fetchWorkspaces() : Promise.resolve([]),
     ])
-      .then(([profiles, opportunity]) => {
+      .then(([profiles, opportunity, workspaceRows]) => {
         if (!alive) return;
-        setMatches(profiles.map(directoryMatch));
+        const ranked = invitationDraft
+          ? rankCollaborators(profiles, invitationDraft, {
+              timezone: authProfile?.timezone,
+              location: authProfile?.country,
+            }).map((row) => directoryMatch(row.profile, row.score, row.reasons))
+          : profiles.map((profile) => directoryMatch(profile));
+        setMatches(ranked);
         setHackathon(opportunity?.type === "hackathon" ? opportunity : null);
+        const owned = workspaceRows.filter((workspace) => workspace.isOwner !== false);
+        setWorkspaces(owned);
+        const preferred = owned.find((workspace) => workspace.id === invitationDraft?.workspaceId)
+          ?? owned.find((workspace) => workspace.projectId === invitationDraft?.projectId)
+          ?? owned[0];
+        if (preferred) setSelectedWorkspaceId(preferred.id);
       })
       .catch((loadError) => {
         if (!alive) return;
@@ -114,13 +165,13 @@ export default function MatchResults() {
         if (alive) setLoading(false);
       });
     return () => { alive = false; };
-  }, [hackathonId]);
+  }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft]);
 
   useEffect(() => {
     if (!projectName) {
-      setProjectName(registration?.teamName || founderProfile.startupName || "");
+      setProjectName(invitationDraft?.projectName || registration?.teamName || founderProfile.startupName || "");
     }
-  }, [founderProfile.startupName, projectName, registration?.teamName]);
+  }, [founderProfile.startupName, invitationDraft?.projectName, projectName, registration?.teamName]);
 
   const visibleMatches = useMemo(() => {
     if (!hackathonId || !registration) return matches;
@@ -171,9 +222,35 @@ export default function MatchResults() {
   const handleConnect = async (match: Match) => {
     setInvitingIds((current) => new Set(current).add(match.id));
     try {
-      await connectWithUser(match.id);
+      if (invitationDraft) {
+        let workspaceId = selectedWorkspaceId || invitationDraft.workspaceId || "";
+        if (!workspaceId) {
+          const provisioned = await provisionWorkspace(
+            invitationDraft.projectId,
+            `${invitationDraft.projectName} Workspace`,
+          );
+          if (!provisioned.ok || !provisioned.workspace?.id) throw new Error("A project workspace could not be created.");
+          workspaceId = provisioned.workspace.id;
+          setWorkspaces((current) => [...current, provisioned.workspace as WorkspaceRef]);
+          setSelectedWorkspaceId(workspaceId);
+        }
+        await inviteWorkspaceCollaborator(workspaceId, {
+          collaboratorId: match.id,
+          requestedRole: invitationDraft.requestedRole,
+          scope: invitationDraft.scope,
+          requiredSkills: invitationDraft.requiredSkills,
+          compensationMode: invitationDraft.compensationMode,
+          equityProposal: (equity[match.id] ?? 0) > 0 ? equity[match.id] : invitationDraft.equityProposal,
+          cashReward: invitationDraft.cashReward,
+          accessLevel: workspaceAccess,
+        });
+      } else {
+        await connectWithUser(match.id);
+      }
       setInvitedIds((current) => new Set(current).add(match.id));
-      toast.success(`Connection request sent to ${match.name}.`);
+      toast.success(invitationDraft
+        ? `Workspace invitation sent to ${match.name}.`
+        : `Connection request sent to ${match.name}.`);
     } catch (connectError) {
       toast.error(connectError instanceof Error ? connectError.message : "The connection request could not be sent.");
     } finally {
@@ -198,6 +275,31 @@ export default function MatchResults() {
               Live collaborator profiles from the authenticated TechIT directory
             </p>
           </div>
+
+          {invitationDraft && (
+            <div className="mb-6 rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm text-violet-950">
+              <p className="font-semibold">Profile-based matches for {invitationDraft.projectName}</p>
+              <p className="mt-1 text-xs text-violet-800">{invitationDraft.summary}</p>
+              <p className="mt-2 text-xs"><span className="font-semibold">Scope:</span> {invitationDraft.scope}</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-xs font-semibold text-violet-900">
+                  Workspace
+                  <select value={selectedWorkspaceId} onChange={(event) => setSelectedWorkspaceId(event.target.value)} className="mt-1 w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-sm">
+                    {workspaces.length === 0 && <option value="">Create {invitationDraft.projectName} Workspace when inviting</option>}
+                    {workspaces.map((workspace) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
+                  </select>
+                </label>
+                <label className="text-xs font-semibold text-violet-900">
+                  Access after acceptance
+                  <select value={workspaceAccess} onChange={(event) => setWorkspaceAccess(event.target.value as "contributor" | "viewer")} className="mt-1 w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-sm">
+                    <option value="contributor">Contributor - tasks and reports</option>
+                    <option value="viewer">Viewer - read only</option>
+                  </select>
+                </label>
+              </div>
+              <p className="mt-2 text-[11px] text-violet-700">Ranked from disclosed skills, availability, start timing, compensation preferences, credibility, verification, timezone/location and industry. Scores are transparent fit indicators, not predictions.</p>
+            </div>
+          )}
 
           {/* Project + Equity Allocation Summary */}
           <div className="bg-card rounded-xl border border-border p-4 lg:p-5 mb-6 lg:mb-8">
@@ -309,7 +411,7 @@ export default function MatchResults() {
                       </div>
                       {/* Match Badge */}
                       <div className="px-3 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 rounded-full text-xs sm:text-sm font-medium text-center">
-                        {match.isVerified ? "Verified profile" : "Live profile"}
+                        {match.matchScore !== null ? `${match.matchScore}% profile fit` : match.isVerified ? "Verified profile" : "Live profile"}
                       </div>
                     </div>
 
@@ -352,6 +454,14 @@ export default function MatchResults() {
                           </span>
                         ))}
                       </div>
+
+                      {match.matchReasons.length > 0 && (
+                        <div className="mb-3 flex flex-wrap gap-2">
+                          {match.matchReasons.map((reason) => (
+                            <span key={reason} className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-800">{reason}</span>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Equity proposal slider */}
                       <div className="bg-slate-50 dark:bg-slate-900/40 border border-border rounded-lg p-3 mb-3 lg:mb-4">
@@ -460,6 +570,20 @@ export default function MatchResults() {
           projectName={projectName}
           equity={equity[contractFor.id] ?? 0}
           onClose={() => setContractFor(null)}
+        />
+      )}
+      {invitationDraft && (
+        <ValidationStoryDialog
+          open={storyOpen}
+          onOpenChange={setStoryOpen}
+          project={{
+            id: invitationDraft.projectId,
+            name: invitationDraft.projectName,
+            summary: invitationDraft.summary,
+            industry: invitationDraft.industry,
+            stage: invitationDraft.stage,
+          }}
+          sessionId={invitationDraft.projectId}
         />
       )}
     </div>

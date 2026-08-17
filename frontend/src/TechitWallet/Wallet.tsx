@@ -28,7 +28,8 @@ export default function Wallet() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (initial = false) => {
-    initial ? setLoading(true) : setRefreshing(true);
+    if (initial) setLoading(true);
+    else setRefreshing(true);
     try {
       const [wallet, history, packs, planRows] = await Promise.all([
         fetchWalletSummary(), fetchWalletTransactions(), fetchCreditPackages(), fetchBillingPlans(),

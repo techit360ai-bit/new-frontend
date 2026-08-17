@@ -4,7 +4,13 @@ import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { ArrowRight, CheckCircle, TrendingUp, Plus } from "lucide-react";
 import { useFounderProfile, type FounderStage } from "@/contexts/UserContext";
-import { fetchDashboardIntelligence, type DashboardIntelligence } from "@/lib/api/gsis";
+import {
+  computeGsisV2,
+  fetchDashboardIntelligence,
+  type DashboardIntelligence,
+  type GsisMetricInput,
+  type GsisV2Scorecard,
+} from "@/lib/api/gsis";
 import { fetchAudioBriefing } from "@/lib/api/audio";
 import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
@@ -74,6 +80,23 @@ function normalizedStage(stage: string | undefined): FounderStage {
 const EMPTY_SIGNALS: Signal[] = [];
 const EMPTY_TASKS: FounderTask[] = [];
 const EMPTY_JOURNEY: JourneyStage[] = [];
+
+function displayScore(value: number | null | undefined) {
+  return value == null ? "Unknown" : Math.round(value).toString();
+}
+
+function metricLabel(value: string) {
+  return value.toLowerCase().replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function IntelligenceMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="truncate text-lg font-semibold text-slate-900 tabular-nums">{value}</p>
+      <p className="mt-0.5 text-[11px] text-slate-500">{label}</p>
+    </div>
+  );
+}
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -147,6 +170,42 @@ export function Dashboard() {
     setActiveVentureId((cur) => cur ?? (ventures.find((v) => v.isPrimary) ?? ventures[0])?.id ?? null);
   }, [ventures]);
   const activeVenture = ventures.find((v) => v.id === activeVentureId) ?? ventures[0] ?? null;
+
+  const [scorecard, setScorecard] = useState<GsisV2Scorecard | null>(null);
+  useEffect(() => {
+    if (!activeVenture && !p.startupName) {
+      setScorecard(null);
+      return;
+    }
+    let alive = true;
+    const observedAt = activeVenture?.updatedAt ?? new Date().toISOString();
+    const users = activeVenture?.users ?? p.users;
+    const revenue = activeVenture?.revenueMonthly ?? p.revenueMonthly;
+    const metrics: Record<string, GsisMetricInput> = {
+      team_size: { value: p.currentTeamSize, status: "observed", evidence_level: 2, source: "founder_profile", observed_at: observedAt },
+      product_available: {
+        value: p.launchStatus !== "pre-launch" || ["launch", "growth"].includes(String(activeVenture?.stage ?? p.stage).toLowerCase()),
+        status: "derived",
+        evidence_level: 2,
+        source: "founder_profile",
+        observed_at: observedAt,
+      },
+    };
+    if (users > 0) metrics.active_users = { value: users, status: "observed", evidence_level: 3, source: "founder_profile", observed_at: observedAt };
+    if (revenue > 0) metrics.revenue = { value: revenue, status: "observed", evidence_level: 4, source: "founder_profile", observed_at: observedAt };
+    if ((activeVenture?.progress ?? 0) > 0) {
+      metrics.product = { score: activeVenture?.progress, status: "derived", evidence_level: 2, source: "project_progress", observed_at: observedAt };
+    }
+    computeGsisV2({
+      startup_id: activeVenture?.id,
+      declared_stage: activeVenture?.stage ?? p.stage,
+      geography: p.location,
+      last_activity_at: activeVenture?.updatedAt,
+      legacy_gsis: activeVenture?.gsisScore,
+      metrics,
+    }).then((result) => { if (alive) setScorecard(result); });
+    return () => { alive = false; };
+  }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users]);
 
   const firstName = (p.name || "Founder").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -267,48 +326,73 @@ export function Dashboard() {
       </Link>
       ) : null}
 
-      {/* GSIS — Global Startup Intelligence Score (from ai-router) */}
-      {intel?.gsis && (
+      {/* GSIS v2 — focused operating intelligence in the existing dashboard card language. */}
+      {scorecard ? (
         <div className="border border-slate-200 bg-white rounded-xl p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold text-slate-700">Global Startup Intelligence Score</h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {intel.gsis.classification ?? "Master composite"} · live from the AI engine
-              </p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-slate-700">Startup intelligence</h2>
+                <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{scorecard.model.version}</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">{scorecard.stage.reason}</p>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-violet-700 tabular-nums leading-none">
-                {Math.round(intel.gsis.gsis)}
+                {displayScore(scorecard.gsis)}
               </p>
-              <p className="text-xs text-slate-400 mt-1">/ 100</p>
+              <p className="text-xs text-slate-400 mt-1">GSIS / 100</p>
             </div>
           </div>
-          <div className="h-2 bg-slate-100 rounded-full overflow-hidden mt-4">
-            <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-500"
-              style={{ width: `${Math.min(100, Math.round(intel.gsis.gsis))}%` }} />
+          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-slate-100 pt-4 sm:grid-cols-3 lg:grid-cols-6">
+            <IntelligenceMetric label="Stage" value={scorecard.stage.detected_stage} />
+            <IntelligenceMetric label="Stage health" value={displayScore(scorecard.stage_health)} />
+            <IntelligenceMetric label="Momentum" value={`${scorecard.momentum.score > 0 ? "+" : ""}${scorecard.momentum.score}`} />
+            <IntelligenceMetric label="PMF" value={scorecard.pmf.score == null ? "N/A" : displayScore(scorecard.pmf.score)} />
+            <IntelligenceMetric label="Risk" value={scorecard.risk.level} />
+            <IntelligenceMetric label={`${metricLabel(scorecard.readiness.next_stage)} readiness`} value={displayScore(scorecard.readiness.score)} />
           </div>
-          {intel.gsis.components && (
-            <div className="grid grid-cols-3 gap-3 mt-4">
-              {Object.entries(intel.gsis.components).slice(0, 3).map(([k, v]) => (
-                <div key={k}>
-                  <p className="text-lg font-bold text-slate-900 tabular-nums">{Math.round(Number(v))}</p>
-                  <p className="text-xs text-slate-500 capitalize">{k.replace(/([A-Z])/g, " $1")}</p>
-                </div>
-              ))}
+          <div className="mt-5 grid gap-5 border-t border-slate-100 pt-5 lg:grid-cols-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase text-slate-500">Primary bottleneck</p>
+              <p className="mt-1 text-base font-semibold text-slate-900">{metricLabel(scorecard.bottleneck.category)}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                {scorecard.bottleneck.score == null ? "More evidence is required to quantify this constraint." : `Current component score: ${Math.round(scorecard.bottleneck.score)}/100.`}
+              </p>
             </div>
-          )}
-          {intel.alerts?.length > 0 && (
-            <ul className="mt-4 space-y-1.5">
-              {intel.alerts.slice(0, 3).map((a, i) => (
-                <li key={a.id ?? i} className="text-xs text-amber-700 flex items-start gap-1.5">
-                  <span className="mt-0.5">•</span><span>{a.message}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+            {scorecard.recommendation && (
+              <div className="border-l-2 border-violet-500 pl-4">
+                <p className="text-[11px] font-semibold uppercase text-violet-700">Next best action</p>
+                <p className="mt-1 text-sm font-medium text-slate-900">{scorecard.recommendation.action}</p>
+                <p className="mt-1 text-xs text-slate-500">{scorecard.recommendation.next_milestone}</p>
+              </div>
+            )}
+          </div>
+          <div className="mt-5 border-t border-slate-100 pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-medium text-slate-700">
+                {metricLabel(scorecard.readiness.next_stage)} gate: {metricLabel(scorecard.readiness.status)}
+              </p>
+              <p className="text-xs text-slate-500">
+                {Math.round(scorecard.data_coverage * 100)}% coverage · {Math.round(scorecard.confidence * 100)}% confidence
+              </p>
+            </div>
+            {scorecard.readiness.blocking_requirements.length > 0 && (
+              <p className="mt-2 text-xs text-amber-700">
+                Missing: {scorecard.readiness.blocking_requirements.map((gate) => metricLabel(gate.metric)).join(" · ")}
+              </p>
+            )}
+          </div>
         </div>
-      )}
+      ) : intel?.gsis ? (
+        <div className="border border-slate-200 bg-white rounded-xl p-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-700">Global Startup Intelligence Score</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Legacy scorecard · v2 evidence is not available</p>
+          </div>
+          <p className="text-3xl font-bold text-violet-700 tabular-nums">{Math.round(intel.gsis.gsis)}</p>
+        </div>
+      ) : null}
 
       {/* Momentum briefing (B5) + risk alerts (B4) from the AI engine */}
       <div className="border border-slate-200 bg-white rounded-xl p-4 flex flex-wrap items-center gap-4">
