@@ -1,6 +1,9 @@
 import { getAuthToken } from './client'
 
-const CORE_API = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/$/, '')
+const env = typeof import.meta !== 'undefined'
+  ? ((import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {})
+  : {}
+const CORE_API = (env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/$/, '')
 
 export type RecommendationEntityType = 'person' | 'startup' | 'project' | 'opportunity' | 'idea' | 'organization' | 'content' | 'notification'
 
