@@ -14,6 +14,10 @@ export interface FounderProject {
   gsisScore: number;
   hasWorkspace: boolean;
   origin?: ProjectOrigin;
+  progress?: number;
+  users?: number;
+  revenueMonthly?: number;
+  updatedAt?: string;
 }
 
 export interface ProjectOrigin {
