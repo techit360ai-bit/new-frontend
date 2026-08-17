@@ -16,7 +16,10 @@ export default defineConfig([
       'react-hooks': reactHooks,
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // Keep the stable hook correctness rules while the codebase remains
+      // compatible with React Hooks 7. Compiler diagnostics are opt-in here.
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'no-empty': ['error', { allowEmptyCatch: true }],
