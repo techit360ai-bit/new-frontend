@@ -104,6 +104,7 @@ import { GitHub as WsGitHub } from "@/dashboard/workspaces/pages/GitHub";
 import { ComponentLibrary as WsComponentLibrary } from "@/dashboard/workspaces/components/ComponentLibrary";
 import { FeedLayout } from "@/dashboard/feed/components/FeedLayout";
 import { FeedPage } from "@/dashboard/feed/pages/FeedPage";
+import { DiscoveryPage } from "@/dashboard/feed/pages/DiscoveryPage";
 import { TribePage } from "@/dashboard/feed/pages/TribePage";
 import { BuildLogPage } from "@/dashboard/feed/pages/BuildLogPage";
 import { QuestionsPage } from "@/dashboard/feed/pages/QuestionsPage";
@@ -284,6 +285,7 @@ const App = () => {
         {/* Feed / Hangout */}
         <Route path="/feed" element={<RequireAuth><FeedLayout /></RequireAuth>}>
           <Route index element={<FeedPage />} />
+          <Route path="discover" element={<DiscoveryPage />} />
           <Route path="tribe" element={<TribePage />} />
           <Route path="build-log" element={<BuildLogPage />} />
           <Route path="questions" element={<QuestionsPage />} />

@@ -89,7 +89,8 @@ function GlobalNav({ unreadCount, onNotifClick }: { unreadCount: number; onNotif
         </Link>
         <div className="hidden items-center gap-6 text-[14px] font-medium lg:flex">
           <NavLink to={dashboardPath} label="Dashboard" />
-          <NavLink to="/feed" label="Hangout" active={location.pathname.startsWith('/feed')} />
+          <NavLink to="/feed" label="Hangout" active={location.pathname === '/feed'} />
+          <NavLink to="/feed/discover" label="Discover" />
           <NavLink to="/workspaces" label="Workspace" />
           <NavLink to="/wallet" label="Wallet" />
         </div>
@@ -130,7 +131,7 @@ function MobileTabBar() {
     { id: 'tribe', path: '/feed/tribe', icon: Users, label: 'Tribe' },
     { id: 'builds', path: '/feed/build-log', icon: FileText, label: 'Builds' },
     { id: 'qa', path: '/feed/questions', icon: HelpCircle, label: 'Q&A' },
-    { id: 'log', path: '/feed/my-log', icon: Compass, label: 'My Log' },
+    { id: 'discover', path: '/feed/discover', icon: Compass, label: 'Discover' },
   ];
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-border-default bg-bg-surface lg:hidden">
