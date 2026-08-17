@@ -11,10 +11,10 @@ jobs:
     name: Frontend Quality Gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "22"
           cache: npm
@@ -74,6 +74,13 @@ jobs:
     needs: quality
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.RENDER_FRONTEND_DEPLOY_ENABLED == 'true'
     steps:
+      - name: Verify merged PR provenance
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          count="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --jq '[.[] | select(.merged_at != null)] | length')"
+          test "$count" -gt 0
+
       - name: Trigger Render deploy
         run: |
           curl -s -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" \
