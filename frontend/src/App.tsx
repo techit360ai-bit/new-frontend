@@ -26,6 +26,7 @@ import MatchResults from "@/dashboard/matchResults";
 import OpportunityHub from "@/dashboard/founders/section/components/founder/OpportunityHub";
 import OpportunityDetail from "@/dashboard/founders/section/components/founder/OpportunityDetail";
 import InviteAcceptPage from "@/dashboard/founders/section/components/founder/InviteAcceptPage";
+import { WorkspaceInvitationPage } from "@/dashboard/workspaces/pages/WorkspaceInvitationPage";
 import ContractSigningPage from "@/dashboard/founders/section/components/founder/ContractSigningPage";
 import Wallet from "@/TechitWallet/Wallet";
 import NotFound from "@/dashboard/NotFound";
@@ -208,6 +209,7 @@ const App = () => {
         </Route>
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
+        <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
 
         <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
           <Route path="/founder/dashboard" element={<Dashboard />} />

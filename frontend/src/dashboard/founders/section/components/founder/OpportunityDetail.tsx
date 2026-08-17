@@ -10,6 +10,7 @@ const TYPE_LABEL: Record<Opportunity["type"], string> = {
   program: "PROGRAM",
   funding: "FUNDING",
   event: "EVENT",
+  collaboration: "COLLABORATION CALL",
 };
 
 export default function OpportunityDetail() {
@@ -130,6 +131,17 @@ export default function OpportunityDetail() {
               <Detail label="Duration" value={`${opp.durationMinutes} min`} />
               <Detail label="Hosted by" value={opp.hostedBy} />
               <Detail label="Mode" value={opp.isVirtual ? "Virtual" : "In person"} />
+            </dl>
+          )}
+          {opp.type === "collaboration" && (
+            <dl className="grid grid-cols-2 gap-4 mt-6">
+              <Detail label="Role" value={opp.role} />
+              <Detail label="Ownership proposed" value={opp.equityPercent > 0 ? `${opp.equityPercent}%` : "None (cash-only exception)"} />
+              <Detail label="Commitment" value={opp.timeCommitment} />
+              <Detail label="Cash support" value={opp.cashCompMonthly > 0 ? `$${opp.cashCompMonthly.toLocaleString()}/month` : "Not included"} />
+              <Detail label="Skills" value={opp.skills.join(", ")} />
+              <Detail label="Audience" value={opp.audienceRoles.join(", ")} />
+              <div className="col-span-2"><Detail label="Scope" value={opp.scope} /></div>
             </dl>
           )}
 

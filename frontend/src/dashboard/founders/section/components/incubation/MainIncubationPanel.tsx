@@ -564,6 +564,14 @@ export function MainIncubationPanel() {
             <IncubationHumanLoopPanel
               validation={blueprintData.validation as ValidationStartResult | undefined}
               workspaceId={asText(blueprintData.workspace_id)}
+              project={{
+                id: projectId,
+                workspaceId: asText(blueprintData.workspace_id),
+                name: ventureName,
+                summary: ideaInput,
+                industry: asText(blueprintData.industry),
+                stage: asText(blueprintData.stage),
+              }}
             />
           )}
 

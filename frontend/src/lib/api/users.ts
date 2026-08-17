@@ -48,12 +48,32 @@ export interface CollaboratorDirectoryEntry {
   title: string;
   headline: string;
   skills: string[];
+  discipline: string;
+  subSkills: string[];
+  techStack: string[];
   weeklyHours: number;
   timezone: string;
   location: string;
+  earliestStart: string;
+  commitmentStyle: string;
+  equityPreference: number;
+  minCashFloor: number;
+  industries: string[];
   avatarUrl: string;
   credibilityScore: number;
   isVerified: boolean;
+}
+
+export interface CollaborationInvitation {
+  projectId: string;
+  projectName: string;
+  summary: string;
+  scope: string;
+  requestedRole: string;
+  requiredSkills: string[];
+  compensationMode?: "equity-heavy" | "equity-cash" | "cash-only";
+  equityProposal?: number;
+  cashReward?: number;
 }
 
 function timeoutSignal(init?: RequestInit): AbortSignal {
@@ -96,8 +116,9 @@ export function fetchCollaboratorDirectory(): Promise<CollaboratorDirectoryEntry
     .then((data) => Array.isArray(data.users) ? data.users : []);
 }
 
-export async function connectWithUser(userId: string): Promise<void> {
+export async function connectWithUser(userId: string, invitation?: CollaborationInvitation): Promise<void> {
   await request<{ ok: boolean }>(`/${encodeURIComponent(userId)}/connect`, {
     method: 'POST',
+    body: invitation ? JSON.stringify({ invitation }) : undefined,
   });
 }

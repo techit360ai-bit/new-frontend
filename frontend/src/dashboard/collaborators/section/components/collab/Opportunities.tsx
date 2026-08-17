@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import {
+  applyToOpportunity,
   fetchCollaboratorOpportunities,
   patchCollaboratorOpportunityStatus,
   type CollaboratorOpportunity,
@@ -17,6 +18,7 @@ const filters: { value: Filter; label: string }[] = [
   { value: "advisory", label: "Advisory" },
   { value: "gig", label: "Gig" },
   { value: "testing", label: "Testing" },
+  { value: "collaboration", label: "Collaboration calls" },
 ];
 
 export function Opportunities() {
@@ -56,17 +58,33 @@ export function Opportunities() {
     const o = opps.find((x) => x.id === id);
     if (!o) return;
     try {
-      const updated = await patchCollaboratorOpportunityStatus(id, "applied");
-      setOpps((cur) => cur.map((row) => row.id === id ? updated : row));
+      if (o.type === "collaboration") {
+        await applyToOpportunity(id, `Interested in contributing as ${o.title}.`);
+        setOpps((cur) => cur.map((row) => row.id === id ? { ...row, status: "applied" } : row));
+      } else {
+        const updated = await patchCollaboratorOpportunityStatus(id, "applied");
+        setOpps((cur) => cur.map((row) => row.id === id ? updated : row));
+      }
       toast.success(`Application sent to ${o.company}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not update opportunity status.");
+      const message = err instanceof Error ? err.message : "Could not update opportunity status.";
+      if (message.includes("already_applied")) {
+        setOpps((cur) => cur.map((row) => row.id === id ? { ...row, status: "applied" } : row));
+        toast.info("You already expressed interest in this call.");
+      } else {
+        toast.error(message);
+      }
     }
   };
 
   const handlePass = async (id: string) => {
     const removed = opps.find((o) => o.id === id);
     if (!removed) return;
+    if (removed.type === "collaboration") {
+      setOpps((cur) => cur.filter((o) => o.id !== id));
+      toast("Removed from this view");
+      return;
+    }
     try {
       await patchCollaboratorOpportunityStatus(id, "passed");
       setOpps((cur) => cur.filter((o) => o.id !== id));
@@ -93,10 +111,10 @@ export function Opportunities() {
 
   const compLabel = (o: CollaboratorOpportunity): string => {
     const parts: string[] = [];
-    if (o.cashCompMonthly > 0)  parts.push(`$${(o.cashCompMonthly / 1000).toFixed(0)}K/mo`);
-    if (o.cashCompOneTime > 0)  parts.push(`$${o.cashCompOneTime.toLocaleString()} one-time`);
-    if (o.equityPercent > 0)    parts.push(`${o.equityPercent}% equity`);
-    return parts.join(" + ") || "Compensation TBD";
+    if (o.equityPercent > 0)    parts.push(`${o.equityPercent}% ownership proposed`);
+    if (o.cashCompMonthly > 0)  parts.push(`$${o.cashCompMonthly.toLocaleString()}/mo support`);
+    if (o.cashCompOneTime > 0)  parts.push(`$${o.cashCompOneTime.toLocaleString()} one-time support`);
+    return parts.join(" + ") || "Ownership proposal to be agreed";
   };
 
   return (
@@ -149,7 +167,7 @@ export function Opportunities() {
                   <h3 className="font-semibold text-slate-900 mt-1">{o.title}</h3>
                   <p className="text-sm text-slate-600">{o.company}</p>
                 </div>
-                <span className="text-sm font-semibold text-amber-700 tabular-nums">{o.matchScore}%</span>
+                {o.matchScore > 0 && <span className="text-sm font-semibold text-amber-700 tabular-nums">{o.matchScore}% profile fit</span>}
               </div>
               <p className="text-sm text-slate-700 mb-3">{compLabel(o)}</p>
               <div className="flex flex-wrap gap-1 mb-3">

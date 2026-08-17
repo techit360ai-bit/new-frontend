@@ -1,4 +1,4 @@
-export type OpportunityType = "hackathon" | "program" | "funding" | "event";
+export type OpportunityType = "hackathon" | "program" | "funding" | "event" | "collaboration";
 export type OpportunityStatus = "open" | "closing-soon" | "closed";
 
 interface OpportunityBase {
@@ -54,4 +54,15 @@ export interface Event extends OpportunityBase {
   isVirtual: boolean;
 }
 
-export type Opportunity = Hackathon | Program | Funding | Event;
+export interface CollaborationCall extends OpportunityBase {
+  type: "collaboration";
+  role: string;
+  skills: string[];
+  scope: string;
+  timeCommitment: string;
+  cashCompMonthly: number;
+  equityPercent: number;
+  audienceRoles: ("collaborator" | "founder" | "explorer")[];
+}
+
+export type Opportunity = Hackathon | Program | Funding | Event | CollaborationCall;
