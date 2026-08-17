@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Compass, RefreshCw } from 'lucide-react'
+import { Compass, RefreshCw, Search } from 'lucide-react'
 import { RecommendationCard } from '../components/RecommendationCard'
 import {
   listRecommendations,
   recordRecommendationExposure,
+  searchDiscovery,
   sendRecommendationFeedback,
   type DiscoveryRecommendation,
 } from '@/lib/api/discovery'
@@ -23,6 +24,8 @@ export function DiscoveryPage() {
   const [recommendations, setRecommendations] = useState<DiscoveryRecommendation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const [personalized, setPersonalized] = useState(true)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -37,6 +40,28 @@ export function DiscoveryPage() {
   }, [activeType])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    const value = query.trim()
+    if (!value) { load(); return }
+    const timer = window.setTimeout(() => {
+      setLoading(true)
+      searchDiscovery(value, { type: activeType || undefined, limit: 50, personalized })
+        .then(result => setRecommendations(result.results.map((entity, index) => ({
+          id: `search:${entity.type}:${entity.entityId}`,
+          entityType: entity.type,
+          entityId: entity.entityId,
+          score: entity.score,
+          rank: index + 1,
+          reasonType: personalized ? 'PERSONALIZED_SEARCH' : 'SEARCH_MATCH',
+          reasonText: personalized ? 'Ranked using your role and interests. Complete results remain available.' : 'Matches your search terms without personalization.',
+          entity,
+        }))))
+        .catch(err => { setRecommendations([]); setError(err instanceof Error ? err.message : 'Search is unavailable.') })
+        .finally(() => setLoading(false))
+    }, 250)
+    return () => window.clearTimeout(timer)
+  }, [activeType, load, personalized, query])
 
   const dismiss = (recommendation: DiscoveryRecommendation) => {
     setRecommendations(current => current.filter(item => item.id !== recommendation.id))
@@ -63,11 +88,22 @@ export function DiscoveryPage() {
         ))}
       </div>
 
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <label className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+          <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search people, startups, projects, ideas, and opportunities" className="h-10 w-full rounded-md border border-border-default bg-bg-surface pl-9 pr-3 text-sm text-text-primary outline-none focus:border-accent-primary" />
+        </label>
+        <label className="flex h-10 items-center gap-2 text-xs text-text-secondary">
+          <input type="checkbox" checked={personalized} onChange={event => setPersonalized(event.target.checked)} className="h-4 w-4 accent-accent-primary" />
+          Personalized ranking
+        </label>
+      </div>
+
       {loading && <div className="py-16 text-center text-sm text-text-secondary">Loading recommendations...</div>}
       {!loading && error && <div className="py-16 text-center text-sm text-score-red">{error}</div>}
       {!loading && !error && recommendations.length > 0 && (
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {recommendations.map(item => <RecommendationCard key={item.id} recommendation={item} onDismiss={dismiss} onAction={(rec, action) => void recordRecommendationExposure(rec.id, action, 'discovery').catch(() => undefined)} />)}
+          {recommendations.map(item => <RecommendationCard key={item.id} recommendation={item} onDismiss={query ? undefined : dismiss} onAction={(rec, action) => { if (!rec.id.startsWith('search:')) void recordRecommendationExposure(rec.id, action, 'discovery').catch(() => undefined) }} />)}
         </div>
       )}
       {!loading && !error && recommendations.length === 0 && (

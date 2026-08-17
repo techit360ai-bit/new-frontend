@@ -64,6 +64,13 @@ export interface ReturnSummary {
   completed?: boolean
 }
 
+export interface DiscoverySearchResult extends RecommendationEntity {
+  lexicalScore: number
+  personalizedScore: number
+  semanticScore?: number
+  score: number
+}
+
 function token() {
   return getAuthToken()
 }
@@ -93,6 +100,14 @@ export function listRecommendations(options: { surface?: string; type?: string; 
 
 export function getReturnSummary() {
   return coreRequest<ReturnSummary>('/discovery/return-summary')
+}
+
+export function searchDiscovery(query: string, options: { type?: string; limit?: number; personalized?: boolean } = {}) {
+  const params = new URLSearchParams({ q: query })
+  if (options.type) params.set('type', options.type)
+  if (options.limit) params.set('limit', String(options.limit))
+  if (options.personalized !== undefined) params.set('personalized', String(options.personalized))
+  return coreRequest<{ results: DiscoverySearchResult[]; meta: { query: string; total: number; personalized: boolean; completeDatasetAvailable: boolean } }>(`/discovery/search?${params.toString()}`)
 }
 
 export function syncRecommendationProfile(profile: Record<string, unknown>) {

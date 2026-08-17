@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PenSquare } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { LeftSidebar } from '../components/LeftSidebar';
 import { RightPanel } from '../components/RightPanel';
 import { ZoneSwitcher } from '../components/ZoneSwitcher';
@@ -32,6 +32,7 @@ const CATEGORY_IDS: Record<string, string> = {
 
 export function FeedPage() {
   const { profile } = useAuth();
+  const [searchParams] = useSearchParams();
   const [activeZone, setActiveZone] = useState('For You');
   const [composerExpanded, setComposerExpanded] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState('milestone');
@@ -56,7 +57,7 @@ export function FeedPage() {
   useEffect(() => {
     let alive = true;
     getReturnSummary()
-      .then(summary => { if (alive) setReturnSummary(summary); })
+      .then(summary => { if (alive) { setReturnSummary(summary); if (summary.available && searchParams.get('catchup') === '1') setCatchUpMode(true); } })
       .catch(() => { if (alive) setReturnSummary(null); })
       .finally(() => { void recordDiscoveryActivity('feed_visit', 'feed').catch(() => undefined); });
     listRecommendations({ surface: 'feed', limit: 6 })
@@ -67,7 +68,7 @@ export function FeedPage() {
       })
       .catch(() => { if (alive) setRecommendations([]); });
     return () => { alive = false; };
-  }, []);
+  }, [searchParams]);
 
   const visiblePosts = useMemo(() => {
     return posts;

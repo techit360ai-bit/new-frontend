@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchSessionContext, type SessionContext } from "@/lib/api/context";
+import { getReturnSummary, type ReturnSummary } from "@/lib/api/discovery";
 
 // Role-specific theme tokens
 const roleThemes = {
@@ -69,14 +70,17 @@ export function WelcomeBack() {
   const { profile } = useAuth();
   const [context, setContext] = useState<SessionContext | null>(null);
   const [loading, setLoading] = useState(true);
+  const [returnSummary, setReturnSummary] = useState<ReturnSummary | null>(null);
   const role: RoleKey = (profile?.role as RoleKey) || "founder";
   const theme = roleThemes[role];
 
   useEffect(() => {
     let alive = true;
-    fetchSessionContext()
-      .then((data) => {
-        if (alive) setContext(data);
+    Promise.allSettled([fetchSessionContext(), getReturnSummary()])
+      .then(([contextResult, returnResult]) => {
+        if (!alive) return;
+        if (contextResult.status === 'fulfilled') setContext(contextResult.value);
+        if (returnResult.status === 'fulfilled') setReturnSummary(returnResult.value);
       })
       .catch(() => {})
       .finally(() => {
@@ -97,7 +101,9 @@ export function WelcomeBack() {
     context.weeklyPriority !== null ||
     context.awayMessage !== null;
 
-  if (!hasContent) return null;
+  const hasReturnSummary = Boolean(returnSummary?.available && returnSummary.items.length > 0);
+
+  if (!hasContent && !hasReturnSummary) return null;
 
   return (
     <div className={`rounded-xl border ${theme.border} ${theme.bg} p-5 space-y-4`}>
@@ -121,6 +127,24 @@ export function WelcomeBack() {
           </div>
         )}
       </div>
+
+      {hasReturnSummary && returnSummary && (
+        <div className="rounded-lg border border-white/60 bg-white/70 p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <Bell className={`h-3.5 w-3.5 ${theme.accent}`} />
+                <h3 className="text-xs font-semibold uppercase text-slate-500">Return intelligence</h3>
+              </div>
+              <p className="mt-1 text-sm font-medium text-slate-900">{returnSummary.headline}</p>
+              <p className="mt-1 text-xs text-slate-500">{returnSummary.categories.map(item => `${item.count} ${item.name.toLowerCase()}`).join(' · ')}</p>
+            </div>
+            <Link to="/feed?catchup=1" className={`inline-flex shrink-0 items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium ${theme.button}`}>
+              Catch up <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Decay Status (founders primarily, but shown for any role) */}
       {context.decayStatus && (
