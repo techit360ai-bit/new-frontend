@@ -82,6 +82,9 @@ import { CohortHealth as OrgCohortHealth } from "@/dashboard/organization/sectio
 import { ImpactReporting as OrgImpactReporting } from "@/dashboard/organization/section/components/org/intelligence/ImpactReporting";
 import { DemoDayPipeline as OrgDemoDayPipeline } from "@/dashboard/organization/section/components/org/intelligence/DemoDayPipeline";
 import { OrgStep1 } from "@/dashboard/organization/onboarding/OrgStep1";
+import { VerificationCenter } from "@/components/authorization/VerificationCenter";
+import { MfaSetup } from "@/components/authorization/MfaSetup";
+import { CapabilityGate } from "@/components/authorization/CapabilityGate";
 import { CollabStep1 } from "@/dashboard/collaborators/onboarding/CollabStep1";
 import { UserProvider } from "@/contexts/UserContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -188,10 +191,10 @@ const App = () => {
           <Route path="trust" element={<InvestorTrustDashboard />} />
           <Route path="trust/:startupId" element={<InvestorTrustDashboard />} />
           <Route path="capital-pools" element={<InvestorCapitalPools />} />
-          <Route path="heatmap" element={<InvestorHeatmap />} />
-          <Route path="data-rooms" element={<InvestorDataRooms />} />
+          <Route path="heatmap" element={<CapabilityGate capability="investor.intelligence.view" role="investor"><InvestorHeatmap /></CapabilityGate>} />
+          <Route path="data-rooms" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDataRooms /></CapabilityGate>} />
           <Route path="data-room/:startupId" element={<InvestorDataRoom />} />
-          <Route path="deal-rooms" element={<InvestorDealRooms />} />
+          <Route path="deal-rooms" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDealRooms /></CapabilityGate>} />
           <Route path="deal-room/:startupId" element={<InvestorDealRoom />} />
           <Route path="reputation" element={<InvestorReputation />} />
           <Route path="profile" element={<InvestorProfile />} />
@@ -227,6 +230,8 @@ const App = () => {
           <Route path="/contracts/sign"  element={<ContractSigningPage />} />
         </Route>
         <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+        <Route path="/verification/:role" element={<RequireAuth><VerificationCenter /></RequireAuth>} />
+        <Route path="/security/mfa" element={<RequireAuth><MfaSetup /></RequireAuth>} />
         <Route path="/compliance" element={<RequireAuth><ComplianceCenter /></RequireAuth>} />
         <Route path="/signup" element={<RedirectAuthenticated><Signup /></RedirectAuthenticated>} />
         <Route path="/signin" element={<RedirectAuthenticated><Login /></RedirectAuthenticated>} />
@@ -272,10 +277,10 @@ const App = () => {
           <Route path="hackathons" element={<OrgHackathons />} />
           <Route path="hackathons/new" element={<OrgHackathonCreate />} />
           <Route path="hackathons/:id" element={<OrgHackathonDetail />} />
-          <Route path="talent" element={<OrgTalentPool />} />
+          <Route path="talent" element={<CapabilityGate capability="organization.recruit" role="organization"><OrgTalentPool /></CapabilityGate>} />
           <Route path="ai-ops" element={<OrgAIOps />} />
-          <Route path="analytics" element={<OrgAnalytics />} />
-          <Route path="marketplace" element={<OrgMarketplace />} />
+          <Route path="analytics" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgAnalytics /></CapabilityGate>} />
+          <Route path="marketplace" element={<CapabilityGate capability="organization.opportunity.create" role="organization"><OrgMarketplace /></CapabilityGate>} />
           <Route path="market-ready" element={<OrgMarketReady />} />
           <Route path="hangout" element={<OrgHangout />} />
           <Route path="integrations" element={<OrgIntegrations />} />
