@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Settings as SettingsIcon, User, Bell, Shield, Palette, Globe, Zap, Github } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,12 +7,15 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { getActiveSessions, revokeOtherSessions, revokeSession } from '@/lib/api/session';
 
 export function Settings() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
+  const [sessions, setSessions] = useState<Awaited<ReturnType<typeof getActiveSessions>>['sessions']>([]);
+  useEffect(() => { void getActiveSessions().then(data => setSessions(data.sessions)).catch(() => setSessions([])); }, []);
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -234,20 +237,9 @@ export function Settings() {
                   <Label>Active Sessions</Label>
                   <p className="text-sm text-gray-500 mb-3">Manage your active sessions</p>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">Chrome on MacOS</p>
-                        <p className="text-xs text-gray-500">Current session • San Francisco, CA</p>
-                      </div>
-                      <span className="text-xs text-green-600 font-medium">Active Now</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">Safari on iPhone</p>
-                        <p className="text-xs text-gray-500">2 hours ago • San Francisco, CA</p>
-                      </div>
-                      <Button variant="ghost" size="sm" className="text-red-500">Revoke</Button>
-                    </div>
+                    {sessions.map(session => <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div><p className="font-medium text-sm">{session.browser} on {session.platform}</p><p className="text-xs text-gray-500">{session.current ? 'Current session' : `Last active ${new Date(session.lastActiveAt).toLocaleString()}`}</p></div>{session.current ? <span className="text-xs text-green-600 font-medium">Active now</span> : <Button variant="ghost" size="sm" className="text-red-500" onClick={() => void revokeSession(session.sessionIdentifier).then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Revoke</Button>}</div>)}
+                    {sessions.length > 1 && <Button variant="outline" size="sm" onClick={() => void revokeOtherSessions().then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Sign out other devices</Button>}
+                    {!sessions.length && <p className="text-sm text-gray-500">No active sessions available.</p>}
                   </div>
                 </div>
               </div>

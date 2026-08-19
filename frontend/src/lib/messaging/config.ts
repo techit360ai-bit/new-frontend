@@ -27,7 +27,7 @@ export function messagingFallbackEnabled(): boolean {
 // Auth token getter; defaults to the AuthContext localStorage key.
 let tokenGetter: () => string | null = () => {
   try {
-    return localStorage.getItem("techit_token");
+    return (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem("techit_access_token") : null) || (import.meta.env.MODE === 'test' ? localStorage.getItem("techit_token") : null);
   } catch {
     return null;
   }

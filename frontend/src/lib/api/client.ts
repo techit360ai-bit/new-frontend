@@ -39,12 +39,18 @@ export class ApiError extends Error {
 
 /** Optional auth token getter — wire to real auth later. */
 let authTokenGetter: (() => string | null) | null = null;
+let accessToken: string | null = null;
+let refreshPromise: Promise<string | null> | null = null;
+function sessionValue(key: string) { try { return typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null } catch { return null } }
+function setSessionValue(key: string, value: string | null) { try { if (typeof sessionStorage !== 'undefined') { if (value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key) } } catch {} }
 export function setAuthTokenGetter(fn: () => string | null) {
   authTokenGetter = fn;
 }
 
+export function setAccessToken(token: string | null) { accessToken = token; setSessionValue('techit_access_token', token); }
+
 export function getAuthToken(): string | null {
-  return authTokenGetter?.() ?? null;
+  return accessToken ?? authTokenGetter?.() ?? sessionValue('techit_access_token') ?? (import.meta.env.MODE === 'test' ? (() => { try { return localStorage.getItem('techit_token') } catch { return null } })() : null);
 }
 
 function headers(extra?: HeadersInit): HeadersInit {
@@ -63,14 +69,18 @@ async function parse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
+async function requestWithRefresh<T>(path: string, init: RequestInit, method: string, body?: unknown): Promise<T> {
+  const run = () => fetch(apiUrl(path), { method, ...init, headers: headers(init.headers), body: body === undefined ? init.body : JSON.stringify(body), credentials: 'include', signal: timeoutSignal(init) })
+  let response = await run()
+  if (response.status === 401 && getAuthToken() && path !== '/auth/refresh' && path !== 'auth/refresh') {
+    const token = await refreshAccessToken()
+    if (token) response = await run()
+  }
+  return parse<T>(response)
+}
+
 export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(apiUrl(path), {
-    method: "GET",
-    ...init,
-    headers: headers(init?.headers),
-    signal: timeoutSignal(init),
-  });
-  return parse<T>(res);
+  return requestWithRefresh<T>(path, init || {}, 'GET')
 }
 
 export async function apiPost<T>(
@@ -78,14 +88,16 @@ export async function apiPost<T>(
   body?: unknown,
   init?: RequestInit,
 ): Promise<T> {
-  const res = await fetch(apiUrl(path), {
-    method: "POST",
-    ...init,
-    headers: headers(init?.headers),
-    body: body === undefined ? undefined : JSON.stringify(body),
-    signal: timeoutSignal(init),
-  });
-  return parse<T>(res);
+  return requestWithRefresh<T>(path, init || {}, 'POST', body)
+}
+
+export async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' } })
+    .then(async response => { if (!response.ok) return null; const data = await response.json() as { token?: string }; setAccessToken(data.token || null); return data.token || null })
+    .catch(() => null)
+    .finally(() => { refreshPromise = null });
+  return refreshPromise;
 }
 
 export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {

@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate, useLocation } from "react-router";
+import { useEffect } from "react";
 import Landing from "@/components/Landing";
 import { FounderStep1 } from "@/dashboard/founders/onboarding/FounderStep1";
 import { FounderLayout } from "@/dashboard/founders/section/components/founder/FounderLayout";
@@ -125,18 +126,22 @@ import { DemoCreate } from "@/dashboard/demos/DemoCreate";
 import { DemoRoom } from "@/dashboard/demos/DemoRoom";
 import PluginsDashboard from "@/dashboard/plugins/PluginsDashboard";
 import { RequirePluginsAccess } from "@/components/RequirePluginsAccess";
+import { getAuthToken } from "@/lib/api/client";
 
 setMessagingToken(() => {
-  try { return localStorage.getItem("techit_token"); } catch { return null; }
+  try { return getAuthToken(); } catch { return null; }
 });
+
+function RouteMemory() { const location = useLocation(); useEffect(() => { if (!location.pathname.startsWith('/signin') && !location.pathname.startsWith('/signup')) sessionStorage.setItem('techit_last_route', `${location.pathname}${location.search}`) }, [location.pathname, location.search]); return null }
 
 const App = () => {
   return (
     <AuthProvider>
     <UserProvider>
       <MessagingProvider>
+      <RouteMemory />
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<RedirectAuthenticated><Landing /></RedirectAuthenticated>} />
         <Route
           path="/plugins"
           element={
