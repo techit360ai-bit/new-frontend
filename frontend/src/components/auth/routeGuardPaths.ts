@@ -54,12 +54,22 @@ export function authenticatedRedirectPath({
   hasUser,
   profileRole,
   isOnboarded,
+  lastRoute,
 }: {
   loading: boolean;
   hasUser: boolean;
   profileRole: RouteGuardRole | null;
   isOnboarded: boolean;
+  lastRoute?: string | null;
 }) {
   if (loading || !hasUser || !profileRole) return null;
+  if (isSafeRoleRoute(lastRoute, profileRole)) return lastRoute;
   return isOnboarded ? homePathFor(profileRole) : setupPathFor(profileRole);
+}
+
+function isSafeRoleRoute(route: string | null | undefined, role: RouteGuardRole) {
+  if (!route || !route.startsWith('/') || route.startsWith('//')) return false;
+  if (route.startsWith('/admin') || route.startsWith('/login') || route.startsWith('/signin')) return false;
+  const roleRoot = role === 'organisation' ? '/organization' : `/${role}`;
+  return route.startsWith(roleRoot) || route.startsWith('/feed') || route.startsWith('/workspace');
 }

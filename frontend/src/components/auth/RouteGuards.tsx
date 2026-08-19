@@ -67,6 +67,7 @@ export function RedirectAuthenticated({ children }: { children: ReactNode }) {
     hasUser: Boolean(user),
     profileRole: profile?.role ?? null,
     isOnboarded: Boolean(profile?.isOnboarded),
+    lastRoute: sessionStorage.getItem('techit_last_route'),
   });
 
   if (loading) return <AuthLoading />;

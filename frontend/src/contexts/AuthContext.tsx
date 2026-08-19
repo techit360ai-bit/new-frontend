@@ -2,7 +2,7 @@ import {
   createContext, useContext, useEffect, useRef,
   useState, useCallback, type ReactNode,
 } from 'react'
-import { setAuthTokenGetter } from '../lib/api/client'
+import { getAuthToken, refreshAccessToken, setAccessToken, setAuthTokenGetter } from '../lib/api/client'
 
 // ── Types ─────────────────────────────────────────────────────
 export type Role = 'founder' | 'collaborator' | 'investor' | 'organisation'
@@ -108,20 +108,23 @@ interface AuthContextType {
 }
 
 // ── Storage helpers ───────────────────────────────────────────
-const TOKEN_KEY = 'techit_token'
+const TOKEN_KEY = 'techit_access_token'
 const USER_KEY  = 'techit_user'
 
 const getStored = () => ({
-  token: localStorage.getItem(TOKEN_KEY),
+  token: getAuthToken(),
   user: (() => { try { const u = localStorage.getItem(USER_KEY); return u ? JSON.parse(u) : null } catch { return null } })(),
 })
-const saveToken = (t: string | null) => t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY)
+try { localStorage.removeItem('techit_token') } catch {}
+const saveToken = (t: string | null) => { setAccessToken(t); if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY) }
 const saveUser  = (u: User | null)   => u ? localStorage.setItem(USER_KEY, JSON.stringify(u)) : localStorage.removeItem(USER_KEY)
 
 // Forward the stored JWT to the ai-router API client so every dashboard request
 // carries `Authorization: Bearer <token>`. Registered at module load (reads the
 // current token on each call) so it's live before <AuthProvider> even mounts.
-setAuthTokenGetter(() => getStored().token)
+setAuthTokenGetter(() => accessTokenForApi())
+
+function accessTokenForApi() { return sessionStorage.getItem('techit_access_token') }
 
 // ── API base URL ──────────────────────────────────────────────
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
@@ -130,7 +133,9 @@ async function apiFetch(path: string, opts: RequestInit = {}) {
   const { token } = getStored() 
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
-  const res = await fetch(`${API}${path}`, { ...opts, headers: { ...headers, ...(opts.headers as Record<string, string> || {}) } })
+  const request = async (token: string | null) => fetch(`${API}${path}`, { ...opts, credentials: 'include', headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(opts.headers as Record<string, string> || {}) } })
+  let res = await request(getAuthToken())
+  if (res.status === 401 && path !== '/auth/refresh') { const token = await refreshAccessToken(); if (token) res = await request(token) }
   return res
 }
 
@@ -167,11 +172,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const bootstrap = async () => {
       const { token, user: storedUser } = getStored()
       if (!mounted) return
-      if (!token || !storedUser) { setLoading(false); return }
-
-      setUser(storedUser)
       try {
-        const res = await apiFetch('/auth/session')
+        if (storedUser) setUser(storedUser)
+        let res = await apiFetch('/auth/session')
+        if (res.status === 401) { const refreshed = await refreshAccessToken(); if (refreshed) res = await apiFetch('/auth/session') }
         if (!res.ok) throw new Error('Session invalid')
         const { user: freshUser } = await res.json()
         setUser(freshUser)
@@ -185,9 +189,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     bootstrap()
 
     const onStorage = (e: StorageEvent) => {
-      if (e.key === TOKEN_KEY || e.key === USER_KEY) {
+      if (e.key === TOKEN_KEY || e.key === USER_KEY || e.key === 'techit_auth_event') {
         const { token, user: u } = getStored()
         setUser(u)
+        if (e.key === 'techit_auth_event' && !token) { setProfile(null); setLoading(false); return }
         if (token && u) fetchProfile(u.id)
         else { setProfile(null); setLoading(false) }
       }
@@ -201,7 +206,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch(`${API}/auth/signup`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'X-TechIT-Client': 'web' },
         body: JSON.stringify(data),
       })
       const json = await res.json()
@@ -217,7 +223,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch(`${API}/auth/signin`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'X-TechIT-Client': 'web' },
         body: JSON.stringify({ email, password }),
       })
       const json = await res.json()
@@ -237,7 +244,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ── signOut ───────────────────────────────────────────────────
   const signOut = async () => {
     try { await apiFetch('/auth/signout', { method: 'POST' }) } catch {}
-    saveToken(null); saveUser(null)
+    saveToken(null); saveUser(null); localStorage.setItem('techit_auth_event', JSON.stringify({ type: 'logout', at: Date.now() }))
     setUser(null); setProfile(null)
   }
 
