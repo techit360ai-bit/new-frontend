@@ -33,11 +33,13 @@ export function normalizeRole(role: AuthRole | string | null | undefined): Role 
 }
 
 export function authRoleDashboardPath(role: AuthRole | string | null | undefined) {
+  if (role === "explorer") return "/explore";
   const normalized = normalizeRole(role);
   return normalized ? roleDashboardPath[normalized] : roleDashboardPath.founder;
 }
 
 export function authRoleOnboardingPath(role: AuthRole | string | null | undefined) {
+  if (role === "explorer") return "/explore";
   const normalized = normalizeRole(role);
   return normalized ? roleOnboardingPath[normalized] : roleOnboardingPath.founder;
 }

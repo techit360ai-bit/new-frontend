@@ -5,7 +5,30 @@ import {
 import { getAuthToken, refreshAccessToken, setAccessToken, setAuthTokenGetter } from '../lib/api/client'
 
 // ── Types ─────────────────────────────────────────────────────
-export type Role = 'founder' | 'collaborator' | 'investor' | 'organisation'
+export type Role = 'explorer' | 'founder' | 'collaborator' | 'investor' | 'organisation'
+
+export interface RoleAssignment {
+  role: Role
+  roleAssignmentId: string
+  status: string
+  assurance?: string
+  isPrimary?: boolean
+}
+
+export interface ActiveContext {
+  id: string | null
+  userId: string
+  role: Role
+  roleAssignmentId?: string | null
+  organizationId?: string | null
+  workspaceId?: string | null
+  resourceType?: string | null
+  resourceId?: string | null
+  status?: string
+  startedAt?: string | null
+  lastActiveAt?: string | null
+  updatedAt?: string | null
+}
 
 export interface Profile {
   id: string
@@ -105,6 +128,12 @@ interface AuthContextType {
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: Error | null }>
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>
   refreshProfile: () => Promise<void>
+  roleAssignments: RoleAssignment[]
+  activeContext: ActiveContext | null
+  contextLoading: boolean
+  refreshContext: () => Promise<void>
+  switchContext: (input: { role: Role; organizationId?: string; workspaceId?: string; resourceType?: string; resourceId?: string }) => Promise<{ error: Error | null }>
+  activateRole: (role: Role, profile?: Record<string, unknown>) => Promise<{ error: Error | null }>
 }
 
 // ── Storage helpers ───────────────────────────────────────────
@@ -128,6 +157,7 @@ function accessTokenForApi() { return sessionStorage.getItem('techit_access_toke
 
 // ── API base URL ──────────────────────────────────────────────
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+const normalizeContextRole = (value: unknown): Role => String(value || '').toLowerCase() === 'organization' ? 'organisation' : (String(value || 'explorer') as Role)
 
 async function apiFetch(path: string, opts: RequestInit = {}) {
   const { token } = getStored() 
@@ -146,6 +176,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user,    setUser]    = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [roleAssignments, setRoleAssignments] = useState<RoleAssignment[]>([])
+  const [activeContext, setActiveContext] = useState<ActiveContext | null>(null)
+  const [contextLoading, setContextLoading] = useState(false)
   const fetchingRef = useRef<string | null>(null)
 
   // ── fetchProfile ─────────────────────────────────────────────
@@ -166,6 +199,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
+  const fetchContext = useCallback(async () => {
+    setContextLoading(true)
+    try {
+      const res = await apiFetch('/context/available')
+      if (!res.ok) throw new Error('Failed to fetch contexts')
+      const data = await res.json()
+      setRoleAssignments(Array.isArray(data.contexts) ? data.contexts.map((item: RoleAssignment) => ({ ...item, role: normalizeContextRole(item.role) })) : [])
+      setActiveContext(data.activeContext ? { ...data.activeContext, role: normalizeContextRole(data.activeContext.role) } : null)
+    } catch {
+      setRoleAssignments([])
+      setActiveContext(null)
+    } finally {
+      setContextLoading(false)
+    }
+  }, [])
+
   // ── Bootstrap on mount ────────────────────────────────────────
   useEffect(() => {
     let mounted = true
@@ -180,9 +229,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { user: freshUser } = await res.json()
         setUser(freshUser)
         await fetchProfile(freshUser.id)
+        await fetchContext()
       } catch {
         saveToken(null); saveUser(null)
-        setUser(null); setProfile(null)
+        setUser(null); setProfile(null); setRoleAssignments([]); setActiveContext(null)
         setLoading(false)
       }
     }
@@ -192,14 +242,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (e.key === TOKEN_KEY || e.key === USER_KEY || e.key === 'techit_auth_event') {
         const { token, user: u } = getStored()
         setUser(u)
-        if (e.key === 'techit_auth_event' && !token) { setProfile(null); setLoading(false); return }
+        if (e.key === 'techit_auth_event' && !token) { setProfile(null); setRoleAssignments([]); setActiveContext(null); setLoading(false); return }
         if (token && u) fetchProfile(u.id)
         else { setProfile(null); setLoading(false) }
       }
     }
     window.addEventListener('storage', onStorage)
     return () => { mounted = false; window.removeEventListener('storage', onStorage) }
-  }, [fetchProfile])
+  }, [fetchContext, fetchProfile])
 
   // ── signUp ────────────────────────────────────────────────────
   const signUp = async (data: SignUpData): Promise<{ error: Error | null }> => {
@@ -235,6 +285,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       saveUser(u)
       setUser(u)
       setProfile(p)
+      await fetchContext()
       return { error: null }
     } catch (e) {
       return { error: e instanceof Error ? e : new Error('Sign in failed') }
@@ -245,7 +296,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     try { await apiFetch('/auth/signout', { method: 'POST' }) } catch {}
     saveToken(null); saveUser(null); localStorage.setItem('techit_auth_event', JSON.stringify({ type: 'logout', at: Date.now() }))
-    setUser(null); setProfile(null)
+    setUser(null); setProfile(null); setRoleAssignments([]); setActiveContext(null)
   }
 
   const changePassword = async (
@@ -289,8 +340,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await fetchProfile(user.id)
   }, [user, fetchProfile])
 
+  const refreshContext = useCallback(async () => {
+    if (user) await fetchContext()
+  }, [user, fetchContext])
+
+  const switchContext = useCallback(async (input: { role: Role; organizationId?: string; workspaceId?: string; resourceType?: string; resourceId?: string }) => {
+    try {
+      const res = await apiFetch('/context/switch', { method: 'POST', body: JSON.stringify(input) })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Context switch failed')
+      setActiveContext(data.activeContext ? { ...data.activeContext, role: normalizeContextRole(data.activeContext.role) } : null)
+      if (Array.isArray(data.availableContexts)) setRoleAssignments(data.availableContexts.map((item: RoleAssignment) => ({ ...item, role: normalizeContextRole(item.role) })))
+      setProfile(prev => prev ? { ...prev, activeRole: input.role } : prev)
+      const refreshed = await refreshAccessToken()
+      if (refreshed) saveToken(refreshed)
+      return { error: null }
+    } catch (e) {
+      return { error: e instanceof Error ? e : new Error('Context switch failed') }
+    }
+  }, [])
+
+  const activateRole = useCallback(async (role: Role, roleProfile: Record<string, unknown> = {}) => {
+    try {
+      const res = await apiFetch('/authorization/roles/activate', { method: 'POST', body: JSON.stringify({ role, profile: roleProfile }) })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Role activation failed')
+      await fetchContext()
+      return { error: null }
+    } catch (e) {
+      return { error: e instanceof Error ? e : new Error('Role activation failed') }
+    }
+  }, [fetchContext])
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, changePassword, updateProfile, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, changePassword, updateProfile, refreshProfile, roleAssignments, activeContext, contextLoading, refreshContext, switchContext, activateRole }}>
       {children}
     </AuthContext.Provider>
   )
