@@ -1,12 +1,14 @@
 import { authRoleDashboardPath, authRoleOnboardingPath } from "@/lib/roleRoutes";
 
-export type RouteGuardRole = "founder" | "collaborator" | "investor" | "organisation";
+export type RouteGuardRole = "explorer" | "founder" | "collaborator" | "investor" | "organisation";
 
 export function setupPathFor(role: RouteGuardRole) {
+  if (role === "explorer") return "/explore";
   return authRoleOnboardingPath(role);
 }
 
 export function homePathFor(role: RouteGuardRole) {
+  if (role === "explorer") return "/explore";
   return authRoleDashboardPath(role);
 }
 

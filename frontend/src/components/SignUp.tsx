@@ -25,7 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-type Role = "founder" | "collaborator" | "investor" | "organisation";
+type Role = "explorer" | "founder" | "collaborator" | "investor" | "organisation";
 
 // Enhanced Toast Component
 const Toast = ({
@@ -67,6 +67,7 @@ const Toast = ({
 };
 
 const ROLES: { id: Role; label: string; desc: string }[] = [
+  { id: "explorer", label: "Explorer", desc: "Discover TechIT and find where you can create value" },
   { id: "founder", label: "Founder", desc: "Launch startups & find your team" },
   {
     id: "collaborator",
@@ -103,6 +104,7 @@ const validatePassword = (
 };
 
 const getSetupPath = (role: Role) => {
+  if (role === "explorer") return "/explore";
   if (role === "organisation") return "/org/setup";
   return `/${role}/setup`;
 };
@@ -206,7 +208,7 @@ export default function Signup() {
     firstName: "",
     lastName: "",
     email: "",
-    role: "founder" as Role,
+    role: "explorer" as Role,
     password: "",
     confirmPassword: "",
     agreeTerms: false,

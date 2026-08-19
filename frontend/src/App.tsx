@@ -33,6 +33,8 @@ import Wallet from "@/TechitWallet/Wallet";
 import NotFound from "@/dashboard/NotFound";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CookieConsent } from "@/components/CookieConsent";
+import ExplorerHome from "@/dashboard/explorer/ExplorerHome";
+import { ContextSwitcher } from "@/components/context/ContextSwitcher";
 import ComplianceCenter from "@/dashboard/ComplianceCenter";
 import { InvestorStep1 } from "@/dashboard/investors/onboarding/InvestorStep1";
 import { InvestorLayout } from "@/dashboard/investors/section/components/investor/InvestorLayout";
@@ -235,6 +237,8 @@ const App = () => {
           <Route path="/contracts/sign"  element={<ContractSigningPage />} />
         </Route>
         <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+        <Route path="/explore" element={<RequireAuth><ExplorerHome /></RequireAuth>} />
+        <Route path="/explorer" element={<Navigate to="/explore" replace />} />
         <Route path="/verification/:role" element={<RequireAuth><VerificationCenter /></RequireAuth>} />
         <Route path="/security/mfa" element={<RequireAuth><MfaSetup /></RequireAuth>} />
         <Route path="/compliance" element={<RequireAuth><ComplianceCenter /></RequireAuth>} />
@@ -317,6 +321,7 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ThemeToggle />
+      <div className="fixed bottom-5 left-5 z-30"><ContextSwitcher /></div>
       <CookieConsent />
       </MessagingProvider>
     </UserProvider>
