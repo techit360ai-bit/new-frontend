@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, CheckCircle2, Clock, Plus } from "lucide-react";
 import {
   Card,
@@ -32,16 +32,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { mentees, tasks, rooms } from "./liveData";
+import { createMentorshipTask, getMentorshipRoom, type MentorshipRoom, type MentorshipTask } from "@/lib/api/mentorship";
+import { toast } from "sonner";
 import { ACCENT_SOLID, ACCENT_SOFT, NEUTRAL_BTN, HERO_GRADIENT, statusBadge } from "./theme";
 
 export function Room() {
   const { roomId } = useParams();
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
-
-  const room = rooms.find((r) => r.id === roomId);
-  const roomMentees = mentees.slice(0, 3);
-  const roomTasks = tasks;
+  const [room, setRoom] = useState<MentorshipRoom | null>(null);
+  const [roomMentees, setRoomMentees] = useState<Array<Record<string, any>>>([]);
+  const [roomTasks, setRoomTasks] = useState<MentorshipTask[]>([]);
+  useEffect(() => { if (roomId) getMentorshipRoom(roomId).then((data) => { setRoom(data.room); setRoomMentees(data.mentees); setRoomTasks(data.tasks); }).catch(() => toast.error("Unable to load mentorship room.")); }, [roomId]);
 
   if (!room) {
     return <div className="text-muted-foreground">Room not found</div>;
@@ -102,12 +103,12 @@ export function Room() {
                   <div className="flex items-start gap-3">
                     <img
                       src={mentee.avatar}
-                      alt={mentee.name}
+                      alt={String(mentee.name || mentee.userId || "Mentee")}
                       className="h-12 w-12 rounded-full object-cover"
                     />
                     <div className="flex-1">
-                      <CardTitle className="text-base">{mentee.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{mentee.email}</p>
+                      <CardTitle className="text-base">{String(mentee.name || mentee.userId || "Mentee")}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{String(mentee.email || mentee.userId || "")}</p>
                     </div>
                   </div>
                 </CardHeader>
@@ -115,14 +116,14 @@ export function Room() {
                   <div>
                     <div className="mb-1 flex justify-between text-sm">
                       <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">{mentee.progress}%</span>
+                      <span className="font-medium">{Number(mentee.progress || 0)}%</span>
                     </div>
-                    <Progress value={mentee.progress} />
+                    <Progress value={Number(mentee.progress || 0)} />
                   </div>
                   <div>
                     <div className="mb-2 text-sm text-muted-foreground">Skills</div>
                     <div className="flex flex-wrap gap-1">
-                      {mentee.skills.map((skill) => (
+                        {(Array.isArray(mentee.skills) ? mentee.skills : []).map((skill) => (
                         <span key={skill} className={`rounded px-2 py-1 text-xs ${ACCENT_SOFT}`}>
                           {skill}
                         </span>
@@ -131,7 +132,7 @@ export function Room() {
                   </div>
                   <div>
                     <div className="mb-1 text-sm text-muted-foreground">Goals</div>
-                    <p className="text-sm">{mentee.goals}</p>
+                    <p className="text-sm">{String(mentee.goals || "Active mentorship participant")}</p>
                   </div>
                   <button className={`w-full rounded-lg px-4 py-2 text-sm ${NEUTRAL_BTN}`}>
                     View Details
@@ -174,8 +175,8 @@ export function Room() {
                       </SelectTrigger>
                       <SelectContent>
                         {roomMentees.map((mentee) => (
-                          <SelectItem key={mentee.id} value={mentee.id}>
-                            {mentee.name}
+                          <SelectItem key={String(mentee.id)} value={String(mentee.userId || mentee.id)}>
+                            {String(mentee.name || mentee.userId || "Mentee")}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -205,7 +206,7 @@ export function Room() {
                     <Input id="reward" placeholder="e.g., $500 or 2% equity" />
                   </div>
                   <button
-                    onClick={() => setIsCreateTaskOpen(false)}
+                    onClick={async () => { const title = (document.getElementById("task-title") as HTMLInputElement)?.value; if (!roomId || !title) return; try { const result = await createMentorshipTask(roomId, { title, description: (document.getElementById("task-description") as HTMLTextAreaElement)?.value, assignedTo: (document.querySelector("[id='assign-to']") as HTMLInputElement)?.value }); setRoomTasks((current) => [...current, result.task]); setIsCreateTaskOpen(false); toast.success("Task created"); } catch { toast.error("Unable to create task"); } }}
                     className={`w-full rounded-lg px-4 py-2 transition-colors ${ACCENT_SOLID}`}
                   >
                     Create Task

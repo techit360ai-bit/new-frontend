@@ -91,6 +91,14 @@ export async function apiPost<T>(
   return requestWithRefresh<T>(path, init || {}, 'POST', body)
 }
 
+export async function apiPatch<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
+  return requestWithRefresh<T>(path, init || {}, 'PATCH', body)
+}
+
+export async function apiDelete<T>(path: string, init?: RequestInit): Promise<T> {
+  return requestWithRefresh<T>(path, init || {}, 'DELETE')
+}
+
 export async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' } })

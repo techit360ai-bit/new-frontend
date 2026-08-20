@@ -20,6 +20,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { ACCENT_SOLID, ACCENT_SOFT, NEUTRAL_BTN } from "./theme";
 import { toast } from "sonner";
+import { createMentorshipRoom } from "@/lib/api/mentorship";
 
 const BASE = "/investor/mentorship";
 
@@ -27,12 +28,17 @@ export function CreateRoom() {
   const navigate = useNavigate();
   const [paymentModel, setPaymentModel] = useState<string>("");
   const [isAdvancedHub, setIsAdvancedHub] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Demo: in a real app this would persist the room.
-    toast.success("Mentorship room created successfully!");
-    setTimeout(() => navigate(BASE), 1000);
+    const form = new FormData(e.currentTarget as HTMLFormElement);
+    setSaving(true);
+    createMentorshipRoom({
+      name: String(form.get("name") || ""), description: String(form.get("description") || ""), expertise: String(form.get("expertise") || ""),
+      capacity: Number(form.get("capacity") || 0), paymentModel: paymentModel || "free", advancedHub: isAdvancedHub,
+      requiredSkills: String(form.get("requiredSkills") || ""), applicationQuestions: String(form.get("applicationQuestions") || ""),
+    }).then(() => { toast.success("Mentorship room created successfully!"); navigate(BASE); }).catch(() => toast.error("Unable to create the room. Please try again.")).finally(() => setSaving(false));
   };
 
   return (
@@ -61,12 +67,12 @@ export function CreateRoom() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="room-name">Room Name *</Label>
-              <Input id="room-name" placeholder="e.g., SaaS Development Mastery" required />
+              <Input id="room-name" name="name" placeholder="e.g., SaaS Development Mastery" required />
             </div>
             <div>
               <Label htmlFor="description">Description *</Label>
               <Textarea
-                id="description"
+                id="description" name="description"
                 placeholder="Describe what mentees will learn and achieve in this room..."
                 rows={4}
                 required
@@ -74,7 +80,7 @@ export function CreateRoom() {
             </div>
             <div>
               <Label htmlFor="expertise">Your Expertise (comma separated)</Label>
-              <Input id="expertise" placeholder="e.g., SaaS, Product Management, Go-to-Market" />
+              <Input id="expertise" name="expertise" placeholder="e.g., SaaS, Product Management, Go-to-Market" />
             </div>
           </CardContent>
         </Card>
@@ -87,7 +93,7 @@ export function CreateRoom() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="capacity">Maximum Mentees *</Label>
-              <Input id="capacity" type="number" min="1" max="50" placeholder="e.g., 5" required />
+              <Input id="capacity" name="capacity" type="number" min="1" max="500" placeholder="e.g., 5" required />
               <p className="mt-1 text-sm text-muted-foreground">
                 How many mentees can you effectively mentor at once?
               </p>
@@ -200,14 +206,14 @@ export function CreateRoom() {
             <div>
               <Label htmlFor="required-skills">Required Skills</Label>
               <Input
-                id="required-skills"
+                id="required-skills" name="requiredSkills"
                 placeholder="e.g., Basic coding knowledge, Business fundamentals"
               />
             </div>
             <div>
               <Label htmlFor="application-questions">Custom Application Questions</Label>
               <Textarea
-                id="application-questions"
+                id="application-questions" name="applicationQuestions"
                 placeholder="Enter custom questions for applicants (one per line)"
                 rows={4}
               />
@@ -228,7 +234,7 @@ export function CreateRoom() {
             type="submit"
             className={`flex-1 rounded-lg px-6 py-3 transition-colors ${ACCENT_SOLID}`}
           >
-            Create Mentorship Room
+            {saving ? "Creating…" : "Create Mentorship Room"}
           </button>
         </div>
       </form>

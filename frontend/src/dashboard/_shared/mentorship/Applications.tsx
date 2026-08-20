@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, X, Mail, Calendar, Briefcase } from "lucide-react";
 import {
   Card,
@@ -19,33 +19,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { applications as persistedApplications, type Application as ApplicationType } from "./liveData";
+import { listMentorshipApplications, reviewMentorshipApplication, type MentorshipApplication } from "@/lib/api/mentorship";
 import { ACCENT_TEXT, ACCENT_SOFT } from "./theme";
 import { toast } from "sonner";
 
 export function Applications() {
-  const [applications, setApplications] = useState(persistedApplications);
-  const [selectedApplication, setSelectedApplication] = useState<ApplicationType | null>(null);
+  const [applications, setApplications] = useState<MentorshipApplication[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<MentorshipApplication | null>(null);
+  useEffect(() => { listMentorshipApplications().then((result) => setApplications(result.applications)).catch(() => toast.error("Unable to load applications.")); }, []);
 
   const handleAccept = (id: string) => {
-    setApplications((apps) =>
-      apps.map((app) => (app.id === id ? { ...app, status: "accepted" as const } : app)),
-    );
-    toast.success("Application accepted! Mentee has been notified.");
+    reviewMentorshipApplication(id, "accepted").then(() => { setApplications((apps) => apps.map((app) => app.id === id ? { ...app, status: "accepted" } : app)); toast.success("Application accepted! Mentee has been notified."); }).catch(() => toast.error("Unable to accept application."));
   };
 
   const handleReject = (id: string) => {
-    setApplications((apps) =>
-      apps.map((app) => (app.id === id ? { ...app, status: "rejected" as const } : app)),
-    );
-    toast.error("Application rejected. Applicant has been notified.");
+    reviewMentorshipApplication(id, "rejected").then(() => { setApplications((apps) => apps.map((app) => app.id === id ? { ...app, status: "rejected" } : app)); toast.success("Application rejected. Applicant has been notified."); }).catch(() => toast.error("Unable to reject application."));
   };
 
   const pendingApplications = applications.filter((app) => app.status === "pending");
   const acceptedApplications = applications.filter((app) => app.status === "accepted");
   const rejectedApplications = applications.filter((app) => app.status === "rejected");
 
-  const ApplicationCard = ({ application }: { application: ApplicationType }) => (
+  const ApplicationCard = ({ application }: { application: MentorshipApplication }) => (
     <Card
       className="cursor-pointer transition-shadow hover:shadow-md"
       onClick={() => setSelectedApplication(application)}
@@ -54,16 +49,16 @@ export function Applications() {
         <div className="flex items-start gap-4">
           <img
             src={application.avatar}
-            alt={application.applicantName}
+            alt={application.applicantName || "Applicant"}
             className="h-16 w-16 rounded-full object-cover"
           />
           <div className="flex-1">
             <div className="mb-2 flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold">{application.applicantName}</h3>
+                <h3 className="text-lg font-semibold">{application.applicantName || "Applicant"}</h3>
                 <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4" />
-                  <span>{application.email}</span>
+                  <span>{application.applicantId}</span>
                 </div>
               </div>
               <Badge variant={application.status === "pending" ? "secondary" : "default"}>
@@ -84,7 +79,7 @@ export function Applications() {
 
             <div className="mb-3">
               <p className="mb-1 text-sm font-medium">Applying to:</p>
-              <p className={`text-sm ${ACCENT_TEXT}`}>{application.roomName}</p>
+              <p className={`text-sm ${ACCENT_TEXT}`}>{application.roomName || application.roomId}</p>
             </div>
 
             <div className="mb-3">
@@ -225,11 +220,11 @@ export function Applications() {
                 <div className="flex items-start gap-4">
                   <img
                     src={selectedApplication.avatar}
-                    alt={selectedApplication.applicantName}
+                    alt={selectedApplication.applicantName || "Applicant"}
                     className="h-20 w-20 rounded-full object-cover"
                   />
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold">{selectedApplication.applicantName}</h3>
+                    <h3 className="text-xl font-semibold">{selectedApplication.applicantName || "Applicant"}</h3>
                     <p className="text-muted-foreground">{selectedApplication.email}</p>
                     <Badge
                       className="mt-2"
@@ -242,7 +237,7 @@ export function Applications() {
 
                 <div>
                   <h4 className="mb-2 font-medium">Applying to:</h4>
-                  <p className={ACCENT_TEXT}>{selectedApplication.roomName}</p>
+                  <p className={ACCENT_TEXT}>{selectedApplication.roomName || selectedApplication.roomId}</p>
                 </div>
 
                 <div>
