@@ -1,5 +1,12 @@
 import { domainGet, domainPatch, domainPost } from "@/lib/domainApi";
 
+export type OrganizationLiveSection = "marketplace" | "talent" | "settings" | "integrations" | "programs" | "ai-operations" | "market-readiness" | "community";
+export type OrganizationLiveRecord = { id: string; title?: string; name?: string; description?: string; status?: string; category?: string; ownerId?: string; createdAt?: string; updatedAt?: string; [key: string]: unknown };
+const responseKeys: Record<OrganizationLiveSection, string> = { marketplace: "items", talent: "talent", settings: "settings", integrations: "integrations", programs: "programs", "ai-operations": "operations", "market-readiness": "records", community: "posts" };
+export async function fetchOrganizationSection(section: OrganizationLiveSection): Promise<OrganizationLiveRecord[]> { const payload = await domainGet<Record<string, unknown>>(`/organization/${section}`); const value = payload[responseKeys[section]]; return Array.isArray(value) ? value as OrganizationLiveRecord[] : []; }
+export async function createOrganizationSectionRecord(section: OrganizationLiveSection, input: Record<string, unknown>): Promise<OrganizationLiveRecord> { const payload = await domainPost<Record<string, OrganizationLiveRecord>>(`/organization/${section}`, input); return payload[responseKeys[section].replace(/s$/, "")] || Object.values(payload)[0]; }
+export async function updateOrganizationSectionRecord(section: OrganizationLiveSection, id: string, input: Record<string, unknown>): Promise<OrganizationLiveRecord> { const payload = await domainPatch<Record<string, OrganizationLiveRecord>>(`/organization/${section}/${encodeURIComponent(id)}`, input); return Object.values(payload)[0]; }
+
 export interface OrganizationMetrics {
   activePrograms: number;
   hackathons: number;
