@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
 import { WelcomeBack } from '@/components/WelcomeBack';
+import { InvestorIntelligencePanel } from './InvestorIntelligencePanel';
 
 export function Dashboard() {
   const { investorProfile } = useInvestorProfile();
@@ -75,6 +76,8 @@ export function Dashboard() {
         <div className="mb-6">
           <WelcomeBack />
         </div>
+
+        <InvestorIntelligencePanel />
 
         {/* Onboarding banner — appears when profile is incomplete */}
         {onboardingIncomplete && !bannerDismissed && (
