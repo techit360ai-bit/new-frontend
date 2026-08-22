@@ -5,6 +5,9 @@ const tabs = [
   { name: "Cohort Health", path: "/org/intelligence/cohort-health" },
   { name: "Impact", path: "/org/intelligence/impact" },
   { name: "Demo Day", path: "/org/intelligence/demo-day" },
+  { name: "Allocation", path: "/org/intelligence/allocation" },
+  { name: "Alumni", path: "/org/intelligence/alumni" },
+  { name: "Benchmarks", path: "/org/intelligence/benchmarks" },
 ];
 
 export function OrgIntelligenceLayout() {

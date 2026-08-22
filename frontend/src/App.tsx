@@ -56,6 +56,7 @@ import { InvestorTrustDashboard } from "@/dashboard/investors/section/components
 import { DealPipeline as InvestorDealPipeline } from "@/dashboard/investors/section/components/investor/DealPipeline";
 import { DealRoomPage as InvestorDealRoomPage } from "@/dashboard/investors/section/components/investor/DealRoomPage";
 import { StartupOverview as InvestorStartupOverview } from "@/dashboard/investors/section/components/investor/StartupOverview";
+import { InvestorIntelligenceDetail } from "@/dashboard/investors/section/components/investor/InvestorIntelligenceDetail";
 import { MentorshipGate } from "@/dashboard/_shared/mentorship/MentorshipGate";
 import { Overview as MentorshipOverview } from "@/dashboard/_shared/mentorship/Overview";
 import { Room as MentorshipRoom } from "@/dashboard/_shared/mentorship/Room";
@@ -86,6 +87,7 @@ import { OrgIntelligenceLayout } from "@/dashboard/organization/section/componen
 import { CohortHealth as OrgCohortHealth } from "@/dashboard/organization/section/components/org/intelligence/CohortHealth";
 import { ImpactReporting as OrgImpactReporting } from "@/dashboard/organization/section/components/org/intelligence/ImpactReporting";
 import { DemoDayPipeline as OrgDemoDayPipeline } from "@/dashboard/organization/section/components/org/intelligence/DemoDayPipeline";
+import { AlumniOutcomes as OrgAlumniOutcomes, CohortBenchmarks as OrgCohortBenchmarks, ResourceAllocation as OrgResourceAllocation } from "@/dashboard/organization/section/components/org/intelligence/AdvancedIntelligence";
 import { OrgStep1 } from "@/dashboard/organization/onboarding/OrgStep1";
 import { VerificationCenter } from "@/components/authorization/VerificationCenter";
 import { MfaSetup } from "@/components/authorization/MfaSetup";
@@ -209,6 +211,7 @@ const App = () => {
           <Route path="profile" element={<InvestorProfile />} />
           <Route path="deals" element={<InvestorDealPipeline />} />
           <Route path="deals/:dealId" element={<InvestorDealRoomPage />} />
+          <Route path="intelligence/startups/:startupId" element={<InvestorIntelligenceDetail />} />
         </Route>
 
         {/* Mentorship Hub (own focused layout, gated by role) */}
@@ -283,6 +286,9 @@ const App = () => {
             <Route path="cohort-health" element={<OrgCohortHealth />} />
             <Route path="impact" element={<OrgImpactReporting />} />
             <Route path="demo-day" element={<OrgDemoDayPipeline />} />
+            <Route path="allocation" element={<OrgResourceAllocation />} />
+            <Route path="alumni" element={<OrgAlumniOutcomes />} />
+            <Route path="benchmarks" element={<OrgCohortBenchmarks />} />
           </Route>
           <Route path="teams" element={<OrgTeams />} />
           <Route path="projects" element={<OrgProjects />} />
