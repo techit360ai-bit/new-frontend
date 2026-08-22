@@ -356,6 +356,12 @@ export function StartupOverview() {
           >
             <Briefcase className="w-4 h-4" /> Open Data Room
           </Link>
+          <Link
+            to={`/investor/deals?projectId=${encodeURIComponent(startupId || "")}`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-purple-300 text-purple-700 text-sm font-medium hover:bg-purple-50 transition-colors"
+          >
+            <Handshake className="w-4 h-4" /> Open Deal Room
+          </Link>
         </div>
       </div>
     </div>
