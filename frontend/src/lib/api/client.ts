@@ -95,6 +95,10 @@ export async function apiPatch<T>(path: string, body?: unknown, init?: RequestIn
   return requestWithRefresh<T>(path, init || {}, 'PATCH', body)
 }
 
+export async function apiPut<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
+  return requestWithRefresh<T>(path, init || {}, 'PUT', body)
+}
+
 export async function apiDelete<T>(path: string, init?: RequestInit): Promise<T> {
   return requestWithRefresh<T>(path, init || {}, 'DELETE')
 }
