@@ -38,7 +38,7 @@ export function Dashboard() {
     watchlistedStartups: startups.filter((s) => s.watchlisted).length,
     highReadiness: startups.filter((s) => s.readinessScore >= 80).length,
     highExecution: startups.filter((s) => s.executionVelocity >= 75).length,
-    revenueValidated: startups.filter((s) => s.mrr > 0 || s.revenueGrowth > 0).length,
+    revenueSignals: startups.filter((s) => s.mrr > 0 || s.revenueGrowth > 0).length,
     aiGovernanceVerified: startups.filter((s) => s.aiGovernanceVerified).length,
   }), [startups]);
 
@@ -144,8 +144,8 @@ export function Dashboard() {
             borderColor="border-purple-500/20"
           />
           <MetricCard
-            label="Revenue Validated"
-            value={metrics.revenueValidated}
+            label="Revenue Signals"
+            value={metrics.revenueSignals}
             icon={DollarSign}
             color="text-amber-400"
             bgColor="bg-amber-500/10"

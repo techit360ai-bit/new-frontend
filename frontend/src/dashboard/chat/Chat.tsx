@@ -213,7 +213,7 @@ const SAMPLE_POSTS: Post[] = [
 
 const Chat = () => {
   const [activeTab, setActiveTab] = useState("Global Pulse");
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>(SAMPLE_POSTS);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [momentumOpen, setMomentumOpen] = useState(false);
 
@@ -221,7 +221,11 @@ const Chat = () => {
   useEffect(() => {
     let alive = true;
     fetchPosts().then((ps) => {
-      if (!alive || ps.length === 0) return;
+      if (!alive) return;
+      if (ps.length === 0) {
+        setFilteredPosts([]);
+        return;
+      }
       setFilteredPosts(ps.map((p) => ({
         id: p.id,
         author: { name: p.authorId, role: "", avatar: p.authorId.slice(0, 2).toUpperCase(), initials: p.authorId.slice(0, 2).toUpperCase(), avatarColor: "from-slate-400 to-slate-500" },
