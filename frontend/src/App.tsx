@@ -53,6 +53,8 @@ import { DealRooms as InvestorDealRooms } from "@/dashboard/investors/section/co
 import { Reputation as InvestorReputation } from "@/dashboard/investors/section/components/investor/Reputation";
 import { InvestorProfile } from "@/dashboard/investors/section/components/investor/InvestorProfile";
 import { InvestorTrustDashboard } from "@/dashboard/investors/section/components/investor/InvestorTrustDashboard";
+import { DealPipeline as InvestorDealPipeline } from "@/dashboard/investors/section/components/investor/DealPipeline";
+import { DealRoomPage as InvestorDealRoomPage } from "@/dashboard/investors/section/components/investor/DealRoomPage";
 import { StartupOverview as InvestorStartupOverview } from "@/dashboard/investors/section/components/investor/StartupOverview";
 import { MentorshipGate } from "@/dashboard/_shared/mentorship/MentorshipGate";
 import { Overview as MentorshipOverview } from "@/dashboard/_shared/mentorship/Overview";
@@ -205,6 +207,8 @@ const App = () => {
           <Route path="deal-room/:startupId" element={<InvestorDealRoom />} />
           <Route path="reputation" element={<InvestorReputation />} />
           <Route path="profile" element={<InvestorProfile />} />
+          <Route path="deals" element={<InvestorDealPipeline />} />
+          <Route path="deals/:dealId" element={<InvestorDealRoomPage />} />
         </Route>
 
         {/* Mentorship Hub (own focused layout, gated by role) */}
