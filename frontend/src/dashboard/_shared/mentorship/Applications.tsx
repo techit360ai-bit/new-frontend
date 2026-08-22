@@ -48,7 +48,7 @@ export function Applications() {
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <img
-            src={application.avatar}
+            src={application.avatar || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(application.applicantName || application.applicantId)}`}
             alt={application.applicantName || "Applicant"}
             className="h-16 w-16 rounded-full object-cover"
           />
@@ -69,7 +69,7 @@ export function Applications() {
             <div className="mb-3 space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>Applied {new Date(application.appliedDate).toLocaleDateString()}</span>
+                  <span>Applied {application.createdAt ? new Date(application.createdAt).toLocaleDateString() : "Date unavailable"}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Briefcase className="h-4 w-4" />
@@ -219,13 +219,13 @@ export function Applications() {
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <img
-                    src={selectedApplication.avatar}
+                    src={selectedApplication.avatar || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(selectedApplication.applicantName || selectedApplication.applicantId)}`}
                     alt={selectedApplication.applicantName || "Applicant"}
                     className="h-20 w-20 rounded-full object-cover"
                   />
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold">{selectedApplication.applicantName || "Applicant"}</h3>
-                    <p className="text-muted-foreground">{selectedApplication.email}</p>
+                    <p className="text-muted-foreground">{selectedApplication.email || selectedApplication.applicantId}</p>
                     <Badge
                       className="mt-2"
                       variant={selectedApplication.status === "pending" ? "secondary" : "default"}
@@ -266,11 +266,11 @@ export function Applications() {
                 <div>
                   <h4 className="mb-2 font-medium">Applied Date:</h4>
                   <p className="text-muted-foreground">
-                    {new Date(selectedApplication.appliedDate).toLocaleDateString("en-US", {
+                    {selectedApplication.createdAt ? new Date(selectedApplication.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
-                    })}
+                    }) : "Date unavailable"}
                   </p>
                 </div>
 
