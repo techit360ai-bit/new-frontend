@@ -155,3 +155,20 @@ export async function fetchOrganizationKpis(): Promise<OrganizationKpi[]> {
     })),
   }));
 }
+
+export interface OrganizationAllocation { projectId: string; title: string; resources: number; tasks: number; completedTasks: number; execution: number | null; utilization: number | null }
+export interface OrganizationAlumni { id: string; title: string; status: string; funding: number | null; jobs: number | null; revenue: number | null; completedAt: string | null }
+export interface OrganizationBenchmark { cohortId: string; name: string; startups: number; avgHealth: number | null; avgProgress: number | null; avgMilestoneProgress: number | null; engagement: number | null }
+
+export async function fetchOrganizationResourceAllocation() {
+  const root = record(await apiGet<unknown>("/organization-intelligence/resource-allocation"));
+  return { totals: record(root.totals), byKind: rows(root.byKind), allocation: rows(root.allocation) as unknown as OrganizationAllocation[] };
+}
+export async function fetchOrganizationAlumni() {
+  const root = record(await apiGet<unknown>("/organization-intelligence/alumni"));
+  return { summary: record(root.summary), outcomes: rows(root.outcomes) as unknown as OrganizationAlumni[] };
+}
+export async function fetchOrganizationCohortBenchmarks() {
+  const root = record(await apiGet<unknown>("/organization-intelligence/cohort-benchmarks"));
+  return rows(root.benchmark) as unknown as OrganizationBenchmark[];
+}
