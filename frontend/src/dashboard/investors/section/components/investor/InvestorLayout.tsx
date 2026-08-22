@@ -20,6 +20,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Scale,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
@@ -37,6 +39,7 @@ export function InvestorLayout() {
   const location = useLocation();
   const { investorProfile } = useInvestorProfile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     writeStoredActiveRole('investor');
@@ -70,9 +73,9 @@ export function InvestorLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a] text-gray-100">
+    <div className="app-shell flex h-screen overflow-hidden bg-[#0a0a0a] text-gray-100">
       {/* Sidebar */}
-      <aside className={`bg-[#111111] border-r border-gray-800 flex flex-col transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
+      <aside className={`hidden lg:flex bg-[#111111] border-r border-gray-800 flex-col transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-6 border-b border-gray-800">
           <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-emerald-400">
             {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
@@ -150,8 +153,26 @@ export function InvestorLayout() {
         </div>}
       </aside>
 
+      <div className="lg:hidden">
+        <header className="app-safe-area-top fixed inset-x-0 top-0 z-50 border-b border-gray-800 bg-[#111111]/95 backdrop-blur">
+          <div className="flex min-h-16 items-center justify-between gap-3 px-4">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">TECH<span className="text-emerald-400">IT</span></p>
+              <p className="truncate text-xs text-gray-400">Investor Intelligence</p>
+            </div>
+            <button type="button" onClick={() => setMobileMenuOpen((value) => !value)} className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-300 hover:bg-gray-800" aria-label={mobileMenuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileMenuOpen}>
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </header>
+        {mobileMenuOpen && <div className="fixed inset-0 z-40 bg-[#111111] pt-16"><nav className="app-safe-area-bottom h-full overflow-y-auto space-y-1 p-4">
+          {navItems.map((item) => { const Icon = item.icon; const active = isActive(item.path); return <Link key={item.label} to={item.path} onClick={() => setMobileMenuOpen(false)} className={`app-nav-link flex items-center gap-3 px-3 text-sm ${active ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-300 hover:bg-gray-800'}`}><Icon className="h-5 w-5" /><span className="min-w-0 flex-1 truncate">{item.label}</span></Link>; })}
+          <Link to={roleDashboardPath.investor} onClick={() => setMobileMenuOpen(false)} className="app-nav-link mt-4 flex items-center gap-3 border-t border-gray-800 px-3 pt-5 text-sm text-gray-400"><ArrowLeft className="h-5 w-5" />Back to TechIT</Link>
+        </nav></div>}
+      </div>
+
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pt-16 lg:pt-0">
         <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
         <Outlet />
       </main>

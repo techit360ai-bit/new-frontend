@@ -14,7 +14,7 @@ const MobileNavBar = ({
   onCloseSidebar,
 }: MobileNavBarProps) => {
   return (
-    <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+    <div className="app-safe-area-top md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-b border-border px-4 flex min-h-16 items-center justify-between">
       <h1 className="font-semibold text-foreground text-sm truncate flex-1">
         {title}
       </h1>
@@ -22,7 +22,7 @@ const MobileNavBar = ({
         {isSidebarOpen && (
           <button
             onClick={onCloseSidebar}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            className="app-touch-target inline-flex items-center justify-center hover:bg-accent rounded-lg transition-colors"
             aria-label="Close sidebar"
           >
             <X className="h-5 w-5 text-foreground" />
@@ -30,7 +30,7 @@ const MobileNavBar = ({
         )}
         <button
           onClick={onToggleSidebar}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          className="app-touch-target inline-flex items-center justify-center hover:bg-accent rounded-lg transition-colors"
           aria-label="Toggle sidebar"
         >
           <Menu className="h-5 w-5 text-foreground" />

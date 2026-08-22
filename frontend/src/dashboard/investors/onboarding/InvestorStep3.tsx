@@ -6,7 +6,7 @@ import {
 } from "@/contexts/UserContext";
 import { InvestorProgressBar } from "./InvestorProgressBar";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { BarChart3, Plus, X } from "lucide-react";
 
 const investmentStages = [
   "Idea",
@@ -210,7 +210,7 @@ export function InvestorStep3() {
 
           {portfolio.length === 0 && (
             <div className="text-center py-16 text-slate-500 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/20 rounded-xl">
-              <div className="text-6xl mb-3">📊</div>
+              <BarChart3 className="mx-auto mb-3 h-10 w-10 text-slate-400" aria-hidden="true" />
               <p className="font-medium text-base">No investments added yet.</p>
               <p className="text-sm mt-1">
                 Add your first investment above to get started.

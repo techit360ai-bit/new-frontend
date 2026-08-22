@@ -1,5 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowRight, Zap, ChevronDown } from "lucide-react";
+import {
+  ArrowRight,
+  Zap,
+  ChevronDown,
+  Rocket,
+  Gem,
+  Building2,
+  Brain,
+  Code2,
+  Radio,
+  Star,
+  Handshake,
+  KeyRound,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -7,7 +20,7 @@ import "@/Landing.css";
 
 interface RoleCard {
   key: string;
-  emoji: string;
+  icon: typeof Rocket;
   iconBg: string;
   accentColor: string;
   tagline: string;
@@ -18,7 +31,7 @@ interface RoleCard {
 const ROLE_CARDS: RoleCard[] = [
   {
     key: "Founder",
-    emoji: "🚀",
+    icon: Rocket,
     iconBg: "linear-gradient(135deg, #7c3aed, #a855f7)",
     accentColor: "#a855f7",
     tagline:
@@ -33,7 +46,7 @@ const ROLE_CARDS: RoleCard[] = [
   },
   {
     key: "Collaborator",
-    emoji: "⚡",
+    icon: Zap,
     iconBg: "linear-gradient(135deg, #0ea5e9, #06b6d4)",
     accentColor: "#06b6d4",
     tagline: "Join exciting startups, earn credits & equity, build your legacy",
@@ -47,7 +60,7 @@ const ROLE_CARDS: RoleCard[] = [
   },
   {
     key: "Investor",
-    emoji: "💎",
+    icon: Gem,
     iconBg: "linear-gradient(135deg, #10b981, #06b6d4)",
     accentColor: "#10b981",
     tagline: "Discover pre-vetted startups, access AI-scored deal flow",
@@ -61,7 +74,7 @@ const ROLE_CARDS: RoleCard[] = [
   },
   {
     key: "Organisation",
-    emoji: "🏢",
+    icon: Building2,
     iconBg: "linear-gradient(135deg, #f43f5e, #ec4899)",
     accentColor: "#f43f5e",
     tagline:
@@ -78,32 +91,32 @@ const ROLE_CARDS: RoleCard[] = [
 
 const FEATURE_CARDS = [
   {
-    emoji: "🧠",
+    icon: Brain,
     title: "AI Matching Engine",
     desc: "Our model analyzes skills, certifications, availability, risk appetite, and timezone to surface your most compatible collaborators.",
   },
   {
-    emoji: "💻",
+    icon: Code2,
     title: "Web Code Editor",
     desc: "Full in-platform coding environment with Monaco Editor. Write, run, and collaborate on code without leaving TechIT Network.",
   },
   {
-    emoji: "📡",
+    icon: Radio,
     title: "Social Feed",
     desc: "Post updates, share milestones, discover projects, and engage with the builder community. Built for builders, not vanity.",
   },
   {
-    emoji: "⭐",
+    icon: Star,
     title: "Credibility Score",
     desc: "Every shipped feature, delivered milestone, and positive review contributes to your transparent public trust score.",
   },
   {
-    emoji: "🤝",
+    icon: Handshake,
     title: "Paid Collaborations",
     desc: "Send paid or equity collaboration requests secured by the credit system. Founders set terms, collaborators negotiate.",
   },
   {
-    emoji: "🔑",
+    icon: KeyRound,
     title: "Credit Economy",
     desc: "A fair economy built for builders. Earn credits by contributing, purchase bundles, or subscribe for unlimited access.",
   },
@@ -474,7 +487,7 @@ const Landing = () => {
                       className="role-icon"
                       style={{ background: card.iconBg }}
                     >
-                      {card.emoji}
+                      <card.icon size={24} strokeWidth={1.8} aria-hidden="true" />
                     </div>
                     <h3 className="role-name">{card.key}</h3>
                     <p className="role-tagline">{card.tagline}</p>
@@ -521,7 +534,7 @@ const Landing = () => {
               {FEATURE_CARDS.map((card, i) => (
                 <Reveal key={card.title} delay={i * 55}>
                   <div className="feature-card">
-                    <div className="feature-emoji">{card.emoji}</div>
+                    <div className="feature-emoji"><card.icon size={22} strokeWidth={1.8} aria-hidden="true" /></div>
                     <h3 className="feature-title">{card.title}</h3>
                     <p className="feature-desc">{card.desc}</p>
                   </div>
@@ -601,22 +614,22 @@ const Landing = () => {
               <div className="cta-role-row">
                 {[
                   {
-                    emoji: "🚀",
+                    icon: Rocket,
                     label: "Founder",
                     handler: handleFounderStart,
                   },
                   {
-                    emoji: "⚡",
+                    icon: Zap,
                     label: "Collaborator",
                     handler: handleCollaboratorStart,
                   },
                   {
-                    emoji: "💎",
+                    icon: Gem,
                     label: "Investor",
                     handler: handleInvestorStart,
                   },
                   {
-                    emoji: "🏢",
+                    icon: Building2,
                     label: "Organisation",
                     handler: handleOrganizationStart,
                   },
@@ -626,7 +639,7 @@ const Landing = () => {
                     className="cta-role-btn"
                     onClick={role.handler}
                   >
-                    {role.emoji} {role.label}
+                    <role.icon size={16} strokeWidth={1.8} aria-hidden="true" /> {role.label}
                   </button>
                 ))}
               </div>
