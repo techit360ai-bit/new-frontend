@@ -393,7 +393,7 @@ const Landing = () => {
             {/* Animated live badge */}
             <div className="hero-badge">
               <span className="hero-badge-dot" />
-              Now live globally · 60+ countries · Growing fast
+              Explore the platform and join the TechIT network
             </div>
 
             {/* Headline — each span is a block so it stacks vertically,
@@ -428,30 +428,17 @@ const Landing = () => {
               <button className="btn-primary" onClick={handleGetStarted}>
                 Join the Network <ArrowRight size={16} />
               </button>
-              <button className="btn-ghost">
+              <button className="btn-ghost" onClick={handleGetStarted}>
                 Explore Roles <ChevronDown size={16} />
               </button>
             </div>
           </div>
         </section>
 
-        {/* STATS BAR:padding-top: 20px gives a small gap from the hero's bottom edge.*/}
         <Reveal>
-          <div className="stats-wrapper">
+          <div className="stats-wrapper" aria-label="Platform activity">
             <div className="stats-grid">
-              {[
-                { value: "12K+", label: "Builders" },
-                { value: "3.4K", label: "Projects Launched" },
-                { value: "$2.1M", label: "Funded via Platform" },
-                { value: "60+", label: "Countries" },
-              ].map((stat) => (
-                <div key={stat.label} className="stat-cell">
-                  <div className="stat-value gradient-purple-cyan">
-                    {stat.value}
-                  </div>
-                  <div className="stat-label">{stat.label}</div>
-                </div>
-              ))}
+              <div className="stat-cell"><div className="stat-label">Live platform metrics are available after sign-in.</div></div>
             </div>
           </div>
         </Reveal>

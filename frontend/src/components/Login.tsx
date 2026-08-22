@@ -79,21 +79,9 @@ export default function Login() {
           </p>
         </div>
         <div className="relative z-10 space-y-4">
-          {[
-            { value: "94%", label: "AI Match Success Rate" },
-            { value: "12K+", label: "Active Builders" },
-            { value: "60+", label: "Countries" },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="flex items-center gap-4 p-4 rounded-xl bg-[color:var(--card)]/50 border border-[color:var(--border)] backdrop-blur-sm"
-            >
-              <div className="font-bold text-2xl gradient-text">{s.value}</div>
-              <div className="text-sm text-[color:var(--muted-foreground)]">
-                {s.label}
-              </div>
-            </div>
-          ))}
+          <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)]/50 p-4 text-sm text-[color:var(--muted-foreground)]">
+            Live account and platform metrics become available after authentication.
+          </div>
         </div>
       </div>
 
