@@ -1,6 +1,6 @@
 // frontend/src/dashboard/founders/section/components/founder/FounderProfile.tsx
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Globe, Twitter, ExternalLink, Check } from "lucide-react";
+import { Github, Linkedin, Globe, Twitter, ExternalLink, Check, Building2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   useFounderProfile,
@@ -177,7 +177,7 @@ export function FounderProfile() {
         className="block border border-slate-200 bg-white rounded-xl p-6 hover:border-violet-300 transition-colors"
       >
         <div className="flex items-start gap-4">
-          <span className="text-4xl">{p.logoEmoji}</span>
+                  <Building2 className="h-9 w-9 text-slate-500" aria-hidden="true" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900">{p.startupName}</h2>

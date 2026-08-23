@@ -5,6 +5,8 @@ import {
   HelpCircle,
   AlertCircle,
   Plus,
+  Target,
+  Star,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -31,8 +33,8 @@ const ChatSidebar = ({ onClose }: ChatSidebarProps) => {
   ];
 
   const shortcuts = [
-    { icon: "🎯", label: "First paying customer", delta: "-14d" },
-    { icon: "⭐", label: "Community Score", delta: "45/100" },
+    { icon: Target, label: "First paying customer", delta: "-14d" },
+    { icon: Star, label: "Community Score", delta: "45/100" },
   ];
 
   const activeUsers = [
@@ -126,12 +128,15 @@ const ChatSidebar = ({ onClose }: ChatSidebarProps) => {
           Shortcuts
         </p>
         {shortcuts.map((shortcut, i) => (
+          (() => {
+            const ShortcutIcon = shortcut.icon;
+            return (
           <button
             key={i}
             onClick={onClose}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800/50 transition-colors"
           >
-            <span className="text-lg">{shortcut.icon}</span>
+            <ShortcutIcon className="h-4 w-4 text-cyan-400" aria-hidden="true" />
             <div className="flex-1 text-left">
               <p className="text-sm">{shortcut.label}</p>
             </div>
@@ -145,6 +150,8 @@ const ChatSidebar = ({ onClose }: ChatSidebarProps) => {
               {shortcut.delta}
             </span>
           </button>
+            );
+          })()
         ))}
       </div>
     </aside>

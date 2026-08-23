@@ -7,6 +7,7 @@ import {
   Eye,
   Menu,
   X,
+  BarChart3,
 } from "lucide-react";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import MomentumWall from "@/components/chat/MomentumWall";
@@ -300,9 +301,11 @@ const Chat = () => {
       {/* Mobile Momentum Toggle */}
       <button
         onClick={() => setMomentumOpen(!momentumOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 p-3 bg-cyan-500 hover:bg-cyan-600 rounded-full text-white shadow-lg"
+        className="app-touch-target lg:hidden fixed bottom-6 right-6 z-40 inline-flex items-center justify-center bg-cyan-600 hover:bg-cyan-500 rounded-full text-white shadow-lg"
+        aria-label={momentumOpen ? "Close momentum wall" : "Open momentum wall"}
+        aria-expanded={momentumOpen}
       >
-        📊
+        <BarChart3 className="h-5 w-5" aria-hidden="true" />
       </button>
 
       {/* Mobile Momentum Overlay */}

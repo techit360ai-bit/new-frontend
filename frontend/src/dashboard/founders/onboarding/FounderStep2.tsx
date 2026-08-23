@@ -103,9 +103,9 @@ export function FounderStep2() {
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700">Logo emoji <span className="text-slate-400 font-normal">(optional)</span></label>
+            <label className="block mb-2 text-sm font-semibold text-slate-700">Logo symbol <span className="text-slate-400 font-normal">(optional)</span></label>
             <input value={logoEmoji} onChange={(e) => setLogoEmoji(e.target.value)} maxLength={4}
-              placeholder="🚀"
+              placeholder="TI"
               className="w-32 h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-2xl outline-none focus:border-violet-500 transition-colors" />
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Flame, MessageCircle, Send, Share2 } from 'lucide-react';
+import { Flame, MessageCircle, Send, Share2, Tag, type LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -32,10 +32,10 @@ function initials(value: string): string {
     .join('') || 'U';
 }
 
-function postMeta(kind: string): { label: string; emoji: string } {
+function postMeta(kind: string): { label: string; icon: LucideIcon } {
   return KIND_META[kind] ?? {
     label: kind.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
-    emoji: '',
+    icon: Tag,
   };
 }
 
@@ -143,6 +143,7 @@ export function PostDetailPage() {
   }
 
   const meta = postMeta(post.kind);
+  const KindIcon = meta.icon;
   const author = profiles[post.authorId];
   const authorName = author?.name || post.authorId;
   const ownName = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
@@ -170,8 +171,8 @@ export function PostDetailPage() {
           <time className="text-xs text-text-muted" dateTime={post.ts}>{formatTimestamp(post.ts)}</time>
         </div>
 
-        <p className={`mb-3 text-xs font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
-          {meta.emoji ? `${meta.emoji} ` : ''}{meta.label}
+        <p className={`mb-3 flex items-center gap-1.5 text-xs font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
+          <KindIcon className="h-4 w-4" aria-hidden="true" />{meta.label}
         </p>
         <p className="whitespace-pre-wrap text-base leading-relaxed text-text-primary">{post.body}</p>
 

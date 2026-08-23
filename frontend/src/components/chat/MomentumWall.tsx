@@ -1,3 +1,5 @@
+import { Gem, Info, TrendingUp } from "lucide-react";
+
 const MomentumWall = () => {
   return (
     <aside className="sticky top-4 right-0 w-full min-w-0 space-y-6">
@@ -68,7 +70,7 @@ const MomentumWall = () => {
             <div className="flex-1 h-full bg-emerald-500 rounded min-w-0" />
           </div>
           <p className="text-xs text-slate-500 flex items-center gap-1">
-            <span className="text-emerald-400">↑</span> Week 4 recovery +12 GSIS
+            <TrendingUp className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" /> Week 4 recovery +12 GSIS
           </p>
         </div>
 
@@ -78,7 +80,7 @@ const MomentumWall = () => {
             Next Milestone
           </p>
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-lg shrink-0">💎</span>
+            <Gem className="h-5 w-5 shrink-0 text-cyan-400" aria-hidden="true" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-white truncate">
                 First paying customer
@@ -86,8 +88,8 @@ const MomentumWall = () => {
               <p className="text-xs text-slate-500">~14 days away</p>
             </div>
           </div>
-          <p className="text-xs text-slate-500">
-            🟠 Platform estimate based on velocity
+          <p className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Info className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" /> Platform estimate based on velocity
           </p>
         </div>
       </div>

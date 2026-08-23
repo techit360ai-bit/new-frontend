@@ -7,6 +7,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Award, CheckCircle2, Layers3, Rocket, Wrench } from "lucide-react";
 
 type Range = "month" | "quarter" | "all";
 const RANGES: { value: Range; label: string }[] = [
@@ -14,6 +15,13 @@ const RANGES: { value: Range; label: string }[] = [
   { value: "quarter", label: "This quarter" },
   { value: "all",     label: "All time" },
 ];
+
+const ACHIEVEMENT_ICONS = {
+  shipper: Rocket,
+  impact: Award,
+  critical: Wrench,
+  "multi-workspace": Layers3,
+} as const;
 
 export function Reputation() {
   const [openBadge, setOpenBadge] = useState<CollaboratorAchievement | null>(null);
@@ -136,10 +144,10 @@ export function Reputation() {
                 <DialogTitle>{openBadge.title}</DialogTitle>
               </DialogHeader>
               <div className="text-center py-4">
-                <div className="text-5xl mb-3">{openBadge.icon}</div>
+                {(() => { const AchievementIcon = ACHIEVEMENT_ICONS[openBadge.id as keyof typeof ACHIEVEMENT_ICONS] ?? Award; return <AchievementIcon className="mx-auto mb-3 h-10 w-10 text-amber-500" aria-hidden="true" />; })()}
                 <p className="text-sm text-slate-600">{openBadge.description}</p>
                 <p className={`mt-4 text-xs font-semibold ${openBadge.earned ? "text-emerald-700" : "text-slate-500"}`}>
-                  {openBadge.earned ? "✓ Earned" : "Not yet earned"}
+                  {openBadge.earned ? <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />Earned</span> : "Not yet earned"}
                 </p>
               </div>
             </>

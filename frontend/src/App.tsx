@@ -1,154 +1,156 @@
 import { Routes, Route, Navigate, useLocation } from "react-router";
-import { useEffect } from "react";
-import Landing from "@/components/Landing";
-import { FounderStep1 } from "@/dashboard/founders/onboarding/FounderStep1";
-import { FounderStep2 } from "@/dashboard/founders/onboarding/FounderStep2";
-import { FounderStep3 } from "@/dashboard/founders/onboarding/FounderStep3";
-import { FounderStep4 } from "@/dashboard/founders/onboarding/FounderStep4";
-import { FounderStep5 } from "@/dashboard/founders/onboarding/FounderStep5";
-import { FounderStep6 } from "@/dashboard/founders/onboarding/FounderStep6";
-import { FounderLayout } from "@/dashboard/founders/section/components/founder/FounderLayout";
-import { Dashboard } from "@/dashboard/founders/section/components/founder/Dashboard";
-import { FounderProfile } from "@/dashboard/founders/section/components/founder/FounderProfile";
-import { Settings as FounderSettings } from "@/dashboard/founders/section/components/founder/Settings";
-import { Messages as FounderMessages } from "@/dashboard/founders/section/components/founder/Messages";
-import { TeamWorkspaceView } from "@/dashboard/founders/section/components/founder/TeamWorkspaceView";
-import { TrustCenter } from "@/dashboard/founders/section/components/founder/TrustCenter";
-import { CollabLayout } from "@/dashboard/collaborators/section/components/collab/CollabLayout";
-import { Dashboard as CollabDashboard } from "@/dashboard/collaborators/section/components/collab/Dashboard";
-import { Equity as CollabEquity } from "@/dashboard/collaborators/section/components/collab/Equity";
-import { Tasks as CollabTasks } from "@/dashboard/collaborators/section/components/collab/Tasks";
-import { Performance as CollabPerformance } from "@/dashboard/collaborators/section/components/collab/Performance";
-import { Earnings as CollabEarnings } from "@/dashboard/collaborators/section/components/collab/Earnings";
-import { Opportunities as CollabOpportunities } from "@/dashboard/collaborators/section/components/collab/Opportunities";
-import { Reputation as CollabReputation } from "@/dashboard/collaborators/section/components/collab/Reputation";
-import { Messages as CollabMessages } from "@/dashboard/collaborators/section/components/collab/Messages";
-import { Tools as CollabTools } from "@/dashboard/collaborators/section/components/collab/Tools";
-import { CollabProfile } from "@/dashboard/collaborators/section/components/collab/CollabProfile";
-import { AcademyPage as CollabAcademy } from "@/dashboard/collaborators/section/components/collab/AcademyPage";
-import { Settings as CollabSettings } from "@/dashboard/collaborators/section/components/collab/Settings";
-import IncubationHub from "@/dashboard/incubationHub";
-import MatchResults from "@/dashboard/matchResults";
-import OpportunityHub from "@/dashboard/founders/section/components/founder/OpportunityHub";
-import OpportunityDetail from "@/dashboard/founders/section/components/founder/OpportunityDetail";
-import InviteAcceptPage from "@/dashboard/founders/section/components/founder/InviteAcceptPage";
-import { WorkspaceInvitationPage } from "@/dashboard/workspaces/pages/WorkspaceInvitationPage";
-import ContractSigningPage from "@/dashboard/founders/section/components/founder/ContractSigningPage";
-import Wallet from "@/TechitWallet/Wallet";
-import NotFound from "@/dashboard/NotFound";
+import { lazy, Suspense, useEffect } from "react";
+const Landing = lazy(() => import("@/components/Landing"));
+const FounderStep1 = lazy(() => import("@/dashboard/founders/onboarding/FounderStep1").then((m) => ({ default: m.FounderStep1 })));
+const FounderStep2 = lazy(() => import("@/dashboard/founders/onboarding/FounderStep2").then((m) => ({ default: m.FounderStep2 })));
+const FounderStep3 = lazy(() => import("@/dashboard/founders/onboarding/FounderStep3").then((m) => ({ default: m.FounderStep3 })));
+const FounderStep4 = lazy(() => import("@/dashboard/founders/onboarding/FounderStep4").then((m) => ({ default: m.FounderStep4 })));
+const FounderStep5 = lazy(() => import("@/dashboard/founders/onboarding/FounderStep5").then((m) => ({ default: m.FounderStep5 })));
+const FounderStep6 = lazy(() => import("@/dashboard/founders/onboarding/FounderStep6").then((m) => ({ default: m.FounderStep6 })));
+const FounderLayout = lazy(() => import("@/dashboard/founders/section/components/founder/FounderLayout").then((m) => ({ default: m.FounderLayout })));
+const Dashboard = lazy(() => import("@/dashboard/founders/section/components/founder/Dashboard").then((m) => ({ default: m.Dashboard })));
+const FounderProfile = lazy(() => import("@/dashboard/founders/section/components/founder/FounderProfile").then((m) => ({ default: m.FounderProfile })));
+const FounderSettings = lazy(() => import("@/dashboard/founders/section/components/founder/Settings").then((m) => ({ default: m.Settings })));
+const FounderMessages = lazy(() => import("@/dashboard/founders/section/components/founder/Messages").then((m) => ({ default: m.Messages })));
+const TeamWorkspaceView = lazy(() => import("@/dashboard/founders/section/components/founder/TeamWorkspaceView").then((m) => ({ default: m.TeamWorkspaceView })));
+const TrustCenter = lazy(() => import("@/dashboard/founders/section/components/founder/TrustCenter").then((m) => ({ default: m.TrustCenter })));
+const CollabLayout = lazy(() => import("@/dashboard/collaborators/section/components/collab/CollabLayout").then((m) => ({ default: m.CollabLayout })));
+const CollabDashboard = lazy(() => import("@/dashboard/collaborators/section/components/collab/Dashboard").then((m) => ({ default: m.Dashboard })));
+const CollabEquity = lazy(() => import("@/dashboard/collaborators/section/components/collab/Equity").then((m) => ({ default: m.Equity })));
+const CollabTasks = lazy(() => import("@/dashboard/collaborators/section/components/collab/Tasks").then((m) => ({ default: m.Tasks })));
+const CollabPerformance = lazy(() => import("@/dashboard/collaborators/section/components/collab/Performance").then((m) => ({ default: m.Performance })));
+const CollabEarnings = lazy(() => import("@/dashboard/collaborators/section/components/collab/Earnings").then((m) => ({ default: m.Earnings })));
+const CollabOpportunities = lazy(() => import("@/dashboard/collaborators/section/components/collab/Opportunities").then((m) => ({ default: m.Opportunities })));
+const CollabReputation = lazy(() => import("@/dashboard/collaborators/section/components/collab/Reputation").then((m) => ({ default: m.Reputation })));
+const CollabMessages = lazy(() => import("@/dashboard/collaborators/section/components/collab/Messages").then((m) => ({ default: m.Messages })));
+const CollabTools = lazy(() => import("@/dashboard/collaborators/section/components/collab/Tools").then((m) => ({ default: m.Tools })));
+const CollabProfile = lazy(() => import("@/dashboard/collaborators/section/components/collab/CollabProfile").then((m) => ({ default: m.CollabProfile })));
+const CollabAcademy = lazy(() => import("@/dashboard/collaborators/section/components/collab/AcademyPage").then((m) => ({ default: m.AcademyPage })));
+const CollabSettings = lazy(() => import("@/dashboard/collaborators/section/components/collab/Settings").then((m) => ({ default: m.Settings })));
+const IncubationHub = lazy(() => import("@/dashboard/incubationHub"));
+const MatchResults = lazy(() => import("@/dashboard/matchResults"));
+const OpportunityHub = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityHub"));
+const OpportunityDetail = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityDetail"));
+const InviteAcceptPage = lazy(() => import("@/dashboard/founders/section/components/founder/InviteAcceptPage"));
+const WorkspaceInvitationPage = lazy(() => import("@/dashboard/workspaces/pages/WorkspaceInvitationPage").then((m) => ({ default: m.WorkspaceInvitationPage })));
+const ContractSigningPage = lazy(() => import("@/dashboard/founders/section/components/founder/ContractSigningPage"));
+const Wallet = lazy(() => import("@/TechitWallet/Wallet"));
+const NotFound = lazy(() => import("@/dashboard/NotFound"));
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CookieConsent } from "@/components/CookieConsent";
-import ExplorerHome from "@/dashboard/explorer/ExplorerHome";
+const ExplorerHome = lazy(() => import("@/dashboard/explorer/ExplorerHome"));
 import { ContextSwitcher } from "@/components/context/ContextSwitcher";
-import ComplianceCenter from "@/dashboard/ComplianceCenter";
-import { InvestorStep1 } from "@/dashboard/investors/onboarding/InvestorStep1";
-import { InvestorStep2 } from "@/dashboard/investors/onboarding/InvestorStep2";
-import { InvestorStep3 } from "@/dashboard/investors/onboarding/InvestorStep3";
-import { InvestorStep4 } from "@/dashboard/investors/onboarding/InvestorStep4";
-import { InvestorStep5 } from "@/dashboard/investors/onboarding/InvestorStep5";
-import { InvestorLayout } from "@/dashboard/investors/section/components/investor/InvestorLayout";
-import { Dashboard as InvestorDashboard } from "@/dashboard/investors/section/components/investor/Dashboard";
-import { DealIntelligence as InvestorDealIntelligence } from "@/dashboard/investors/section/components/investor/DealIntelligence";
-import { RiskAnalysis as InvestorRiskAnalysis } from "@/dashboard/investors/section/components/investor/RiskAnalysis";
-import { RiskRadar as InvestorRiskRadar } from "@/dashboard/investors/section/components/investor/RiskRadar";
-import { AllocationEngine as InvestorAllocationEngine } from "@/dashboard/investors/section/components/investor/AllocationEngine";
-import { Watchlist as InvestorWatchlist } from "@/dashboard/investors/section/components/investor/Watchlist";
-import { CapitalPools as InvestorCapitalPools } from "@/dashboard/investors/section/components/investor/CapitalPools";
-import { GlobalHeatmap as InvestorHeatmap } from "@/dashboard/investors/section/components/investor/GlobalHeatmap";
-import { DataRoom as InvestorDataRoom } from "@/dashboard/investors/section/components/investor/DataRoom";
-import { DataRooms as InvestorDataRooms } from "@/dashboard/investors/section/components/investor/DataRooms";
-import { DealRoom as InvestorDealRoom } from "@/dashboard/investors/section/components/investor/DealRoom";
-import { DealRooms as InvestorDealRooms } from "@/dashboard/investors/section/components/investor/DealRooms";
-import { Reputation as InvestorReputation } from "@/dashboard/investors/section/components/investor/Reputation";
-import { InvestorProfile } from "@/dashboard/investors/section/components/investor/InvestorProfile";
-import { InvestorTrustDashboard } from "@/dashboard/investors/section/components/investor/InvestorTrustDashboard";
-import { DealPipeline as InvestorDealPipeline } from "@/dashboard/investors/section/components/investor/DealPipeline";
-import { DealRoomPage as InvestorDealRoomPage } from "@/dashboard/investors/section/components/investor/DealRoomPage";
-import { StartupOverview as InvestorStartupOverview } from "@/dashboard/investors/section/components/investor/StartupOverview";
-import { InvestorIntelligenceDetail } from "@/dashboard/investors/section/components/investor/InvestorIntelligenceDetail";
-import { MentorshipGate } from "@/dashboard/_shared/mentorship/MentorshipGate";
-import { Overview as MentorshipOverview } from "@/dashboard/_shared/mentorship/Overview";
-import { Room as MentorshipRoom } from "@/dashboard/_shared/mentorship/Room";
-import { Applications as MentorshipApplications } from "@/dashboard/_shared/mentorship/Applications";
-import { CreateRoom as MentorshipCreateRoom } from "@/dashboard/_shared/mentorship/CreateRoom";
-import { Analytics as MentorshipAnalytics } from "@/dashboard/_shared/mentorship/Analytics";
-import { Payments as MentorshipPayments } from "@/dashboard/_shared/mentorship/Payments";
-import { AdvancedHub as MentorshipAdvancedHub } from "@/dashboard/_shared/mentorship/AdvancedHub";
-import { OrgLayout } from "@/dashboard/organization/section/components/org/OrgLayout";
-import { Dashboard as OrgDashboard } from "@/dashboard/organization/section/components/org/Dashboard";
-import { Teams as OrgTeams } from "@/dashboard/organization/section/components/org/Teams";
-import { Projects as OrgProjects } from "@/dashboard/organization/section/components/org/Projects";
-import { Incubator as OrgIncubator } from "@/dashboard/organization/section/components/org/Incubator";
-import { TalentPool as OrgTalentPool } from "@/dashboard/organization/section/components/org/TalentPool";
-import { AIOps as OrgAIOps } from "@/dashboard/organization/section/components/org/AIOps";
-import { Analytics as OrgAnalytics } from "@/dashboard/organization/section/components/org/Analytics";
-import { Marketplace as OrgMarketplace } from "@/dashboard/organization/section/components/org/Marketplace";
-import { MarketReady as OrgMarketReady } from "@/dashboard/organization/section/components/org/MarketReady";
-import { Hangout as OrgHangout } from "@/dashboard/organization/section/components/org/Hangout";
-import { Integrations as OrgIntegrations } from "@/dashboard/organization/section/components/org/Integrations";
-import { Billing as OrgBilling } from "@/dashboard/organization/section/components/org/Billing";
-import { Settings as OrgSettings } from "@/dashboard/organization/section/components/org/Settings";
-import { Hackathons as OrgHackathons } from "@/dashboard/organization/section/components/org/Hackathons";
-import { HackathonCreate as OrgHackathonCreate } from "@/dashboard/organization/section/components/org/HackathonCreate";
-import { HackathonDetail as OrgHackathonDetail } from "@/dashboard/organization/section/components/org/HackathonDetail";
-import { OrgProfile } from "@/dashboard/organization/section/components/org/OrgProfile";
-import { OrgIntelligenceLayout } from "@/dashboard/organization/section/components/org/intelligence/OrgIntelligenceLayout";
-import { CohortHealth as OrgCohortHealth } from "@/dashboard/organization/section/components/org/intelligence/CohortHealth";
-import { ImpactReporting as OrgImpactReporting } from "@/dashboard/organization/section/components/org/intelligence/ImpactReporting";
-import { DemoDayPipeline as OrgDemoDayPipeline } from "@/dashboard/organization/section/components/org/intelligence/DemoDayPipeline";
-import { AlumniOutcomes as OrgAlumniOutcomes, CohortBenchmarks as OrgCohortBenchmarks, ResourceAllocation as OrgResourceAllocation } from "@/dashboard/organization/section/components/org/intelligence/AdvancedIntelligence";
-import { OrgStep1 } from "@/dashboard/organization/onboarding/OrgStep1";
-import { OrgStep2 } from "@/dashboard/organization/onboarding/OrgStep2";
-import { OrgStep3 } from "@/dashboard/organization/onboarding/OrgStep3";
-import { OrgStep4 } from "@/dashboard/organization/onboarding/OrgStep4";
-import { OrgStep5 } from "@/dashboard/organization/onboarding/OrgStep5";
-import { VerificationCenter } from "@/components/authorization/VerificationCenter";
-import { MfaSetup } from "@/components/authorization/MfaSetup";
+const ComplianceCenter = lazy(() => import("@/dashboard/ComplianceCenter"));
+const InvestorStep1 = lazy(() => import("@/dashboard/investors/onboarding/InvestorStep1").then((m) => ({ default: m.InvestorStep1 })));
+const InvestorStep2 = lazy(() => import("@/dashboard/investors/onboarding/InvestorStep2").then((m) => ({ default: m.InvestorStep2 })));
+const InvestorStep3 = lazy(() => import("@/dashboard/investors/onboarding/InvestorStep3").then((m) => ({ default: m.InvestorStep3 })));
+const InvestorStep4 = lazy(() => import("@/dashboard/investors/onboarding/InvestorStep4").then((m) => ({ default: m.InvestorStep4 })));
+const InvestorStep5 = lazy(() => import("@/dashboard/investors/onboarding/InvestorStep5").then((m) => ({ default: m.InvestorStep5 })));
+const InvestorLayout = lazy(() => import("@/dashboard/investors/section/components/investor/InvestorLayout").then((m) => ({ default: m.InvestorLayout })));
+const InvestorDashboard = lazy(() => import("@/dashboard/investors/section/components/investor/Dashboard").then((m) => ({ default: m.Dashboard })));
+const InvestorDealIntelligence = lazy(() => import("@/dashboard/investors/section/components/investor/DealIntelligence").then((m) => ({ default: m.DealIntelligence })));
+const InvestorRiskAnalysis = lazy(() => import("@/dashboard/investors/section/components/investor/RiskAnalysis").then((m) => ({ default: m.RiskAnalysis })));
+const InvestorRiskRadar = lazy(() => import("@/dashboard/investors/section/components/investor/RiskRadar").then((m) => ({ default: m.RiskRadar })));
+const InvestorAllocationEngine = lazy(() => import("@/dashboard/investors/section/components/investor/AllocationEngine").then((m) => ({ default: m.AllocationEngine })));
+const InvestorWatchlist = lazy(() => import("@/dashboard/investors/section/components/investor/Watchlist").then((m) => ({ default: m.Watchlist })));
+const InvestorCapitalPools = lazy(() => import("@/dashboard/investors/section/components/investor/CapitalPools").then((m) => ({ default: m.CapitalPools })));
+const InvestorHeatmap = lazy(() => import("@/dashboard/investors/section/components/investor/GlobalHeatmap").then((m) => ({ default: m.GlobalHeatmap })));
+const InvestorDataRoom = lazy(() => import("@/dashboard/investors/section/components/investor/DataRoom").then((m) => ({ default: m.DataRoom })));
+const InvestorDataRooms = lazy(() => import("@/dashboard/investors/section/components/investor/DataRooms").then((m) => ({ default: m.DataRooms })));
+const InvestorDealRoom = lazy(() => import("@/dashboard/investors/section/components/investor/DealRoom").then((m) => ({ default: m.DealRoom })));
+const InvestorDealRooms = lazy(() => import("@/dashboard/investors/section/components/investor/DealRooms").then((m) => ({ default: m.DealRooms })));
+const InvestorReputation = lazy(() => import("@/dashboard/investors/section/components/investor/Reputation").then((m) => ({ default: m.Reputation })));
+const InvestorProfile = lazy(() => import("@/dashboard/investors/section/components/investor/InvestorProfile").then((m) => ({ default: m.InvestorProfile })));
+const InvestorTrustDashboard = lazy(() => import("@/dashboard/investors/section/components/investor/InvestorTrustDashboard").then((m) => ({ default: m.InvestorTrustDashboard })));
+const InvestorDealPipeline = lazy(() => import("@/dashboard/investors/section/components/investor/DealPipeline").then((m) => ({ default: m.DealPipeline })));
+const InvestorDealRoomPage = lazy(() => import("@/dashboard/investors/section/components/investor/DealRoomPage").then((m) => ({ default: m.DealRoomPage })));
+const InvestorStartupOverview = lazy(() => import("@/dashboard/investors/section/components/investor/StartupOverview").then((m) => ({ default: m.StartupOverview })));
+const InvestorIntelligenceDetail = lazy(() => import("@/dashboard/investors/section/components/investor/InvestorIntelligenceDetail").then((m) => ({ default: m.InvestorIntelligenceDetail })));
+const MentorshipGate = lazy(() => import("@/dashboard/_shared/mentorship/MentorshipGate").then((m) => ({ default: m.MentorshipGate })));
+const MentorshipOverview = lazy(() => import("@/dashboard/_shared/mentorship/Overview").then((m) => ({ default: m.Overview })));
+const MentorshipRoom = lazy(() => import("@/dashboard/_shared/mentorship/Room").then((m) => ({ default: m.Room })));
+const MentorshipApplications = lazy(() => import("@/dashboard/_shared/mentorship/Applications").then((m) => ({ default: m.Applications })));
+const MentorshipCreateRoom = lazy(() => import("@/dashboard/_shared/mentorship/CreateRoom").then((m) => ({ default: m.CreateRoom })));
+const MentorshipAnalytics = lazy(() => import("@/dashboard/_shared/mentorship/Analytics").then((m) => ({ default: m.Analytics })));
+const MentorshipPayments = lazy(() => import("@/dashboard/_shared/mentorship/Payments").then((m) => ({ default: m.Payments })));
+const MentorshipAdvancedHub = lazy(() => import("@/dashboard/_shared/mentorship/AdvancedHub").then((m) => ({ default: m.AdvancedHub })));
+const OrgLayout = lazy(() => import("@/dashboard/organization/section/components/org/OrgLayout").then((m) => ({ default: m.OrgLayout })));
+const OrgDashboard = lazy(() => import("@/dashboard/organization/section/components/org/Dashboard").then((m) => ({ default: m.Dashboard })));
+const OrgTeams = lazy(() => import("@/dashboard/organization/section/components/org/Teams").then((m) => ({ default: m.Teams })));
+const OrgProjects = lazy(() => import("@/dashboard/organization/section/components/org/Projects").then((m) => ({ default: m.Projects })));
+const OrgIncubator = lazy(() => import("@/dashboard/organization/section/components/org/Incubator").then((m) => ({ default: m.Incubator })));
+const OrgTalentPool = lazy(() => import("@/dashboard/organization/section/components/org/TalentPool").then((m) => ({ default: m.TalentPool })));
+const OrgAIOps = lazy(() => import("@/dashboard/organization/section/components/org/AIOps").then((m) => ({ default: m.AIOps })));
+const OrgAnalytics = lazy(() => import("@/dashboard/organization/section/components/org/Analytics").then((m) => ({ default: m.Analytics })));
+const OrgMarketplace = lazy(() => import("@/dashboard/organization/section/components/org/Marketplace").then((m) => ({ default: m.Marketplace })));
+const OrgMarketReady = lazy(() => import("@/dashboard/organization/section/components/org/MarketReady").then((m) => ({ default: m.MarketReady })));
+const OrgHangout = lazy(() => import("@/dashboard/organization/section/components/org/Hangout").then((m) => ({ default: m.Hangout })));
+const OrgIntegrations = lazy(() => import("@/dashboard/organization/section/components/org/Integrations").then((m) => ({ default: m.Integrations })));
+const OrgBilling = lazy(() => import("@/dashboard/organization/section/components/org/Billing").then((m) => ({ default: m.Billing })));
+const OrgSettings = lazy(() => import("@/dashboard/organization/section/components/org/Settings").then((m) => ({ default: m.Settings })));
+const OrgHackathons = lazy(() => import("@/dashboard/organization/section/components/org/Hackathons").then((m) => ({ default: m.Hackathons })));
+const OrgHackathonCreate = lazy(() => import("@/dashboard/organization/section/components/org/HackathonCreate").then((m) => ({ default: m.HackathonCreate })));
+const OrgHackathonDetail = lazy(() => import("@/dashboard/organization/section/components/org/HackathonDetail").then((m) => ({ default: m.HackathonDetail })));
+const OrgProfile = lazy(() => import("@/dashboard/organization/section/components/org/OrgProfile").then((m) => ({ default: m.OrgProfile })));
+const OrgIntelligenceLayout = lazy(() => import("@/dashboard/organization/section/components/org/intelligence/OrgIntelligenceLayout").then((m) => ({ default: m.OrgIntelligenceLayout })));
+const OrgCohortHealth = lazy(() => import("@/dashboard/organization/section/components/org/intelligence/CohortHealth").then((m) => ({ default: m.CohortHealth })));
+const OrgImpactReporting = lazy(() => import("@/dashboard/organization/section/components/org/intelligence/ImpactReporting").then((m) => ({ default: m.ImpactReporting })));
+const OrgDemoDayPipeline = lazy(() => import("@/dashboard/organization/section/components/org/intelligence/DemoDayPipeline").then((m) => ({ default: m.DemoDayPipeline })));
+const OrgAlumniOutcomes = lazy(() => import("@/dashboard/organization/section/components/org/intelligence/AdvancedIntelligence").then((m) => ({ default: m.AlumniOutcomes })));
+const OrgCohortBenchmarks = lazy(() => import("@/dashboard/organization/section/components/org/intelligence/AdvancedIntelligence").then((m) => ({ default: m.CohortBenchmarks })));
+const OrgResourceAllocation = lazy(() => import("@/dashboard/organization/section/components/org/intelligence/AdvancedIntelligence").then((m) => ({ default: m.ResourceAllocation })));
+const OrgStep1 = lazy(() => import("@/dashboard/organization/onboarding/OrgStep1").then((m) => ({ default: m.OrgStep1 })));
+const OrgStep2 = lazy(() => import("@/dashboard/organization/onboarding/OrgStep2").then((m) => ({ default: m.OrgStep2 })));
+const OrgStep3 = lazy(() => import("@/dashboard/organization/onboarding/OrgStep3").then((m) => ({ default: m.OrgStep3 })));
+const OrgStep4 = lazy(() => import("@/dashboard/organization/onboarding/OrgStep4").then((m) => ({ default: m.OrgStep4 })));
+const OrgStep5 = lazy(() => import("@/dashboard/organization/onboarding/OrgStep5").then((m) => ({ default: m.OrgStep5 })));
+const VerificationCenter = lazy(() => import("@/components/authorization/VerificationCenter").then((m) => ({ default: m.VerificationCenter })));
+const MfaSetup = lazy(() => import("@/components/authorization/MfaSetup").then((m) => ({ default: m.MfaSetup })));
 import { CapabilityGate } from "@/components/authorization/CapabilityGate";
-import { CollabStep1 } from "@/dashboard/collaborators/onboarding/CollabStep1";
-import { CollabStep2 } from "@/dashboard/collaborators/onboarding/CollabStep2";
-import { CollabStep3 } from "@/dashboard/collaborators/onboarding/CollabStep3";
-import { CollabStep4 } from "@/dashboard/collaborators/onboarding/CollabStep4";
-import { CollabStep5 } from "@/dashboard/collaborators/onboarding/CollabStep5";
-import { CollabStep6 } from "@/dashboard/collaborators/onboarding/CollabStep6";
+const CollabStep1 = lazy(() => import("@/dashboard/collaborators/onboarding/CollabStep1").then((m) => ({ default: m.CollabStep1 })));
+const CollabStep2 = lazy(() => import("@/dashboard/collaborators/onboarding/CollabStep2").then((m) => ({ default: m.CollabStep2 })));
+const CollabStep3 = lazy(() => import("@/dashboard/collaborators/onboarding/CollabStep3").then((m) => ({ default: m.CollabStep3 })));
+const CollabStep4 = lazy(() => import("@/dashboard/collaborators/onboarding/CollabStep4").then((m) => ({ default: m.CollabStep4 })));
+const CollabStep5 = lazy(() => import("@/dashboard/collaborators/onboarding/CollabStep5").then((m) => ({ default: m.CollabStep5 })));
+const CollabStep6 = lazy(() => import("@/dashboard/collaborators/onboarding/CollabStep6").then((m) => ({ default: m.CollabStep6 })));
 import { UserProvider } from "@/contexts/UserContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Chat from "@/dashboard/chat/Chat";
-import Signup from "@/components/SignUp";
-import Login from "@/components/Login";
-import ForgotPassword from "@/components/ForgotPassword";
-import ResetPassword from "@/components/ResetPassword";
+const Chat = lazy(() => import("@/dashboard/chat/Chat"));
+const Signup = lazy(() => import("@/components/SignUp"));
+const Login = lazy(() => import("@/components/Login"));
+const ForgotPassword = lazy(() => import("@/components/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/components/ResetPassword"));
 import { RedirectAuthenticated, RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
-import { MainLayout as WorkspacesLayout } from "@/dashboard/workspaces/components/layout/MainLayout";
-import { Build as WsBuild } from "@/dashboard/workspaces/pages/Build";
-import { Reports as WsReports } from "@/dashboard/workspaces/pages/Reports";
-import { Connectors as WsConnectors } from "@/dashboard/workspaces/pages/Connectors";
-import { Agents as WsAgents } from "@/dashboard/workspaces/pages/Agents";
-import { Chat as WsChat } from "@/dashboard/workspaces/pages/Chat";
-import { Copilot as WsCopilot } from "@/dashboard/workspaces/pages/Copilot";
-import { Files as WsFiles } from "@/dashboard/workspaces/pages/Files";
-import { Notifications as WsNotifications } from "@/dashboard/workspaces/pages/Notifications";
-import { Settings as WsSettings } from "@/dashboard/workspaces/pages/Settings";
-import { GitHub as WsGitHub } from "@/dashboard/workspaces/pages/GitHub";
-import { ComponentLibrary as WsComponentLibrary } from "@/dashboard/workspaces/components/ComponentLibrary";
-import { FeedLayout } from "@/dashboard/feed/components/FeedLayout";
-import { FeedPage } from "@/dashboard/feed/pages/FeedPage";
-import { DiscoveryPage } from "@/dashboard/feed/pages/DiscoveryPage";
-import { TribePage } from "@/dashboard/feed/pages/TribePage";
-import { BuildLogPage } from "@/dashboard/feed/pages/BuildLogPage";
-import { QuestionsPage } from "@/dashboard/feed/pages/QuestionsPage";
-import { ProblemsPage } from "@/dashboard/feed/pages/ProblemsPage";
-import { NotificationsPage as FeedNotificationsPage } from "@/dashboard/feed/pages/NotificationsPage";
-import { PostDetailPage } from "@/dashboard/feed/pages/PostDetailPage";
-import { MyLogPage } from "@/dashboard/feed/pages/MyLogPage";
-import { UserProfilePage } from "@/dashboard/feed/pages/UserProfilePage";
-import { DirectMessagePage } from "@/dashboard/feed/pages/DirectMessagePage";
+const WorkspacesLayout = lazy(() => import("@/dashboard/workspaces/components/layout/MainLayout").then((m) => ({ default: m.MainLayout })));
+const WsBuild = lazy(() => import("@/dashboard/workspaces/pages/Build").then((m) => ({ default: m.Build })));
+const WsReports = lazy(() => import("@/dashboard/workspaces/pages/Reports").then((m) => ({ default: m.Reports })));
+const WsConnectors = lazy(() => import("@/dashboard/workspaces/pages/Connectors").then((m) => ({ default: m.Connectors })));
+const WsAgents = lazy(() => import("@/dashboard/workspaces/pages/Agents").then((m) => ({ default: m.Agents })));
+const WsChat = lazy(() => import("@/dashboard/workspaces/pages/Chat").then((m) => ({ default: m.Chat })));
+const WsCopilot = lazy(() => import("@/dashboard/workspaces/pages/Copilot").then((m) => ({ default: m.Copilot })));
+const WsFiles = lazy(() => import("@/dashboard/workspaces/pages/Files").then((m) => ({ default: m.Files })));
+const WsNotifications = lazy(() => import("@/dashboard/workspaces/pages/Notifications").then((m) => ({ default: m.Notifications })));
+const WsSettings = lazy(() => import("@/dashboard/workspaces/pages/Settings").then((m) => ({ default: m.Settings })));
+const WsGitHub = lazy(() => import("@/dashboard/workspaces/pages/GitHub").then((m) => ({ default: m.GitHub })));
+const WsComponentLibrary = lazy(() => import("@/dashboard/workspaces/components/ComponentLibrary").then((m) => ({ default: m.ComponentLibrary })));
+const FeedLayout = lazy(() => import("@/dashboard/feed/components/FeedLayout").then((m) => ({ default: m.FeedLayout })));
+const FeedPage = lazy(() => import("@/dashboard/feed/pages/FeedPage").then((m) => ({ default: m.FeedPage })));
+const DiscoveryPage = lazy(() => import("@/dashboard/feed/pages/DiscoveryPage").then((m) => ({ default: m.DiscoveryPage })));
+const TribePage = lazy(() => import("@/dashboard/feed/pages/TribePage").then((m) => ({ default: m.TribePage })));
+const BuildLogPage = lazy(() => import("@/dashboard/feed/pages/BuildLogPage").then((m) => ({ default: m.BuildLogPage })));
+const QuestionsPage = lazy(() => import("@/dashboard/feed/pages/QuestionsPage").then((m) => ({ default: m.QuestionsPage })));
+const ProblemsPage = lazy(() => import("@/dashboard/feed/pages/ProblemsPage").then((m) => ({ default: m.ProblemsPage })));
+const FeedNotificationsPage = lazy(() => import("@/dashboard/feed/pages/NotificationsPage").then((m) => ({ default: m.NotificationsPage })));
+const PostDetailPage = lazy(() => import("@/dashboard/feed/pages/PostDetailPage").then((m) => ({ default: m.PostDetailPage })));
+const MyLogPage = lazy(() => import("@/dashboard/feed/pages/MyLogPage").then((m) => ({ default: m.MyLogPage })));
+const UserProfilePage = lazy(() => import("@/dashboard/feed/pages/UserProfilePage").then((m) => ({ default: m.UserProfilePage })));
+const DirectMessagePage = lazy(() => import("@/dashboard/feed/pages/DirectMessagePage").then((m) => ({ default: m.DirectMessagePage })));
 import { MessagingProvider } from "@/contexts/MessagingProvider";
 import { setMessagingToken } from "@/lib/messaging/config";
-import { DemoList } from "@/dashboard/demos/DemoList";
-import { DemoCreate } from "@/dashboard/demos/DemoCreate";
-import { DemoRoom } from "@/dashboard/demos/DemoRoom";
-import PluginsDashboard from "@/dashboard/plugins/PluginsDashboard";
+const DemoList = lazy(() => import("@/dashboard/demos/DemoList").then((m) => ({ default: m.DemoList })));
+const DemoCreate = lazy(() => import("@/dashboard/demos/DemoCreate").then((m) => ({ default: m.DemoCreate })));
+const DemoRoom = lazy(() => import("@/dashboard/demos/DemoRoom").then((m) => ({ default: m.DemoRoom })));
+const PluginsDashboard = lazy(() => import("@/dashboard/plugins/PluginsDashboard"));
 import { RequirePluginsAccess } from "@/components/RequirePluginsAccess";
 import { getAuthToken } from "@/lib/api/client";
 
@@ -158,12 +160,26 @@ setMessagingToken(() => {
 
 function RouteMemory() { const location = useLocation(); useEffect(() => { if (!location.pathname.startsWith('/signin') && !location.pathname.startsWith('/signup')) sessionStorage.setItem('techit_last_route', `${location.pathname}${location.search}`) }, [location.pathname, location.search]); return null }
 
+function RouteLoadingState() {
+  return (
+    <div className="app-shell flex min-h-screen items-center justify-center p-6" role="status" aria-live="polite">
+      <div className="w-full max-w-md space-y-4" aria-label="Loading page">
+        <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+        <div className="h-8 w-3/4 animate-pulse rounded-lg bg-muted" />
+        <div className="h-32 w-full animate-pulse rounded-xl bg-muted" />
+        <span className="sr-only">Loading page</span>
+      </div>
+    </div>
+  );
+}
+
 const App = () => {
   return (
     <AuthProvider>
     <UserProvider>
       <MessagingProvider>
       <RouteMemory />
+      <Suspense fallback={<RouteLoadingState />}>
       <Routes>
         <Route path="/" element={<RedirectAuthenticated><Landing /></RedirectAuthenticated>} />
         <Route
@@ -362,6 +378,7 @@ const App = () => {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
       <ThemeToggle />
       <div className="fixed bottom-5 left-5 z-30"><ContextSwitcher /></div>
       <CookieConsent />

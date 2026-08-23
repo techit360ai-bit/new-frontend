@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Building2 } from "lucide-react";
 import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
 
 interface Props {
@@ -89,7 +90,7 @@ export function OpportunityCard({ opportunity, variant = "grid" }: Props) {
           {opportunity.title}
         </h3>
         <p className="text-xs text-slate-500 mb-3">
-          {opportunity.organizer.logoEmoji && <span className="mr-1">{opportunity.organizer.logoEmoji}</span>}
+          <Building2 className="mr-1 inline-block h-4 w-4 text-slate-500" aria-hidden="true" />
           {opportunity.organizer.name}
         </p>
         <p className={`text-sm text-slate-600 mb-4 ${isFeatured ? "" : "line-clamp-2"}`}>

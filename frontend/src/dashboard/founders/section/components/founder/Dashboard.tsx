@@ -2,7 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
-import { ArrowRight, CheckCircle, TrendingUp, Plus } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle, TrendingUp, Plus, Building2 } from "lucide-react";
 import { useFounderProfile, type FounderStage } from "@/contexts/UserContext";
 import {
   computeGsisV2,
@@ -278,7 +278,7 @@ export function Dashboard() {
       {p.startupName || activeVenture ? (
       <Link to="/incubation-hub" className="block group border border-slate-200 bg-white rounded-xl p-6 hover:border-violet-300 transition-colors">
         <div className="flex items-start gap-4">
-          <span className="text-4xl">{p.logoEmoji}</span>
+                          <Building2 className="h-9 w-9 text-slate-500" aria-hidden="true" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900">{activeVenture?.title ?? p.startupName}</h2>
@@ -411,7 +411,7 @@ export function Dashboard() {
             <ul className="space-y-0.5">
               {riskFlags.slice(0, 3).map((f, i) => (
                 <li key={i} className="text-xs text-amber-700 flex items-start gap-1.5">
-                  <span className="mt-0.5">⚠</span>
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                   <span>{f.message ?? f.type ?? "Risk flag"}</span>
                 </li>
               ))}
@@ -516,7 +516,7 @@ export function Dashboard() {
           {builds.map((b) => (
             <div key={b.id} className="border border-slate-200 bg-white rounded-xl p-4">
               <div className="flex items-start gap-3 mb-3">
-                <span className="text-2xl">{b.logoEmoji}</span>
+                <Building2 className="h-6 w-6 text-slate-500" aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-900 truncate">{b.name}</p>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded ${stageStyles[b.stage] ?? "bg-slate-100 text-slate-700"}`}>{b.stage}</span>

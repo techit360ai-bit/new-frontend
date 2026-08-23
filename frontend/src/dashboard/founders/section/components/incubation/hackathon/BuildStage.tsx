@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Clock, AlertTriangle, Rocket, ExternalLink } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Rocket, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import type { HackathonRegistration, CheckIn } from "@/contexts/UserContext";
 import { useFounderProfile } from "@/contexts/UserContext";
@@ -32,10 +32,11 @@ function relativeTime(iso: string, now: number): string {
 }
 
 const MAX_UPDATE = 140;
+const EMPTY_CHECK_INS: CheckIn[] = [];
 
 export function BuildStage({ registration }: Props) {
   const { registerForHackathon } = useFounderProfile();
-  const now = useMemo(() => Date.now(), [registration.checkIns.length]);
+  const now = useMemo(() => Date.now(), []);
 
   const [status, setStatus] = useState<CheckIn["status"]>("on-track");
   const [update, setUpdate] = useState("");
@@ -44,7 +45,7 @@ export function BuildStage({ registration }: Props) {
   const generate = useGenerateTeamWorkspace();
   const [promoteOpen, setPromoteOpen] = useState(false);
 
-  const checkIns = registration.checkIns ?? [];
+  const checkIns = useMemo(() => registration.checkIns ?? EMPTY_CHECK_INS, [registration.checkIns]);
   const ordered = useMemo(
     () => [...checkIns].sort((a, b) => new Date(b.loggedAt).getTime() - new Date(a.loggedAt).getTime()),
     [checkIns],
@@ -152,7 +153,7 @@ export function BuildStage({ registration }: Props) {
           </div>
 
           {registration.promotedProjectId ? (
-            <p className="text-xs text-emerald-700 mt-3">Promoted to a startup ✓</p>
+            <p className="flex items-center gap-1.5 text-xs text-emerald-700 mt-3"><CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />Promoted to a startup</p>
           ) : (
             <button type="button" onClick={() => setPromoteOpen(true)}
               className="w-full text-sm font-medium px-4 py-2 rounded-lg border border-violet-300 text-violet-700 hover:bg-violet-50 mt-3">

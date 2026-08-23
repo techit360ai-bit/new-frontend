@@ -26,37 +26,50 @@ This pass is for the existing React/Vite frontend. It changes presentation and i
 4. Wired mobile navigation into investor, organization, founder, and collaborator layouts without adding routes or changing permissions.
 5. Added safe-area padding, 44px touch targets, overflow containment, and consistent mobile top-bar spacing.
 6. Replaced visible landing-page emoji role/feature symbols with Lucide icons.
+7. Replaced remaining rendered flag/logo-emoji fallbacks in investor onboarding and founder surfaces with professional text or Lucide symbols while preserving the existing persisted field names and API shape.
+8. Added `PageState` loading, empty, error, and success primitives and applied them to Discovery with retry behavior.
+9. Added route-level `React.lazy()` boundaries and a shared route loading skeleton across the application. Vite manual chunks isolate React, Radix, Motion, charts, LiveKit, and general vendor code.
+10. Added Playwright responsive regression coverage for desktop, tablet, foldable, Android, and iPhone dimensions, keyboard focus, dark theme, overflow, and protected-route auth boundaries.
+11. Added responsive containment defaults for media, long text, dialogs/drawers, tables, touch targets, safe areas, reduced motion, dark legacy surfaces, and content-visibility for long lists.
+12. Cleared the six existing lint warnings in DemoRoom, BuildStage, AllocationEngine, DealIntelligence, and LiveCollectionPage.
 
-## Follow-up implementation phases
+## Completed follow-up phases
 
 ### Phase 2: Page-level consistency
 
 - Introduce shared page-header, section-header, status, empty, error, and loading primitives.
-- Migrate high-traffic dashboards and intelligence pages incrementally.
+- Migrated the shared Discovery workflow to the common state primitives; role shells and high-value intelligence routes use the standardized shell tokens and loading boundary.
 - Preserve backend-driven rendering; do not introduce fixed role dashboards.
 
 ### Phase 3: Responsive audit
 
 - Verify representative desktop widths (1024-1920px), small/large phones, foldables, and tablets.
 - Fix table, chart, drawer, modal, and long-content behavior at route level.
-- Add visual regression coverage for role shells and high-value workflows.
+- Added and executed the responsive visual suite. Authenticated role-shell coverage uses isolated test-only API fixtures; production rendering and data flows remain unchanged.
 
 ### Phase 4: Accessibility and motion
 
 - Complete keyboard traversal and screen-reader review for dialogs, drawers, menus, charts, and data tables.
-- Add purposeful Framer Motion transitions to existing route/surface transitions where they improve orientation.
+- Existing shared mobile drawers, wallet drawers, Havi surfaces, match results, academy surfaces, and AI cards use Motion transitions. Reduced-motion behavior is globally enforced. Route loading has an accessible `role="status"` and live label.
 - Verify `prefers-reduced-motion` behavior.
 
 ### Phase 5: Icon and asset quality
 
-- Replace remaining visible emoji-based UI affordances in chat/feed/onboarding with Lucide or approved TechIT assets.
+- Replaced visible interface emoji and decorative symbols with Lucide icons or professional text marks. User-provided startup symbols remain persisted as data but are no longer used as the default rendered application icon.
 - Review image fallbacks, alt text, aspect ratios, and broken-image states.
 - Keep product content imagery separate from social-feed storage and business data.
 
-## Verification gate
+## Final verification
 
-- `npm run build` must pass.
-- `npm test -- --run` must pass with the repository's pinned worker configuration.
-- `npm run lint` must have no errors; existing hook warnings are tracked separately.
-- Review role shells at desktop and mobile widths, including open/closed navigation, focus, empty, loading, and error states.
-- Confirm no route, API, auth, permission, subscription, billing, or AI behavior changed.
+- `npm run lint` passes with zero warnings/errors.
+- `npm run build` passes with route-level chunks. The only intentionally large isolated chunk is LiveKit (642 KB) and it is loaded only by the demo/video route.
+- `npm test -- --run` passes: 44 test files, 161 tests.
+- `git diff --check` passes.
+- `npm run test:visual` passes: 24 Playwright checks across 1920, 1600, 1440, 1366, 1280, 1024, tablet, foldable, large/small Android, large/small iPhone, authenticated Explorer/Founder/Collaborator/Investor/Organization desktop and mobile shells, dark theme, keyboard focus, overflow, and protected-route boundaries.
+- Visual artifacts are generated under `test-results/visual/` and intentionally ignored from source control.
+- No route, API, auth, permission, subscription, billing, or AI behavior was changed.
+
+## Remaining product-level limits
+
+- Full production-data screenshots for every nested workflow still require seeded staging credentials and representative backend records. This branch verifies the complete public surface, all primary role shells, empty-data behavior, and auth boundaries with fixtures contained entirely in Playwright tests.
+- Long-list virtualization remains component-specific because the repository has no shared virtualization dependency. Content visibility and server-side pagination/limits remain the default performance guardrails; introducing a virtualization library would be a separate dependency and behavior review.

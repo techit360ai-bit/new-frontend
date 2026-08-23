@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Compass, RefreshCw, Search } from 'lucide-react'
 import { RecommendationCard } from '../components/RecommendationCard'
+import { PageEmptyState, PageErrorState, PageLoadingState } from '@/components/ui/page-state'
 import {
   listRecommendations,
   recordRecommendationExposure,
@@ -99,19 +100,15 @@ export function DiscoveryPage() {
         </label>
       </div>
 
-      {loading && <div className="py-16 text-center text-sm text-text-secondary">Loading recommendations...</div>}
-      {!loading && error && <div className="py-16 text-center text-sm text-score-red">{error}</div>}
+      {loading && <PageLoadingState label="Loading recommendations" />}
+      {!loading && error && <PageErrorState title="Recommendations unavailable" description={error} action={<button type="button" onClick={load} className="min-h-11 rounded-md border border-border-default px-4 text-sm font-medium text-text-primary hover:bg-bg-elevated">Try again</button>} />}
       {!loading && !error && recommendations.length > 0 && (
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {recommendations.map(item => <RecommendationCard key={item.id} recommendation={item} onDismiss={query ? undefined : dismiss} onAction={(rec, action) => { if (!rec.id.startsWith('search:')) void recordRecommendationExposure(rec.id, action, 'discovery').catch(() => undefined) }} />)}
         </div>
       )}
       {!loading && !error && recommendations.length === 0 && (
-        <div className="flex flex-col items-center py-16 text-center">
-          <Compass className="h-8 w-8 text-text-muted" />
-          <p className="mt-3 text-sm font-medium text-text-primary">No persisted matches yet</p>
-          <p className="mt-1 max-w-md text-sm text-text-secondary">Recommendations will appear as relevant TechIT members and opportunities become available.</p>
-        </div>
+        <PageEmptyState title="No persisted matches yet" description="Recommendations will appear as relevant TechIT members and opportunities become available." action={<Compass className="h-5 w-5 text-text-muted" aria-hidden="true" />} />
       )}
     </div>
   )

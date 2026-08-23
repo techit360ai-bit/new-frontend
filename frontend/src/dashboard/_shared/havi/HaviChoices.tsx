@@ -81,7 +81,7 @@ export function HaviChoices({
               >
                 <div className="flex items-center justify-between">
                   <h4 className={`text-sm font-semibold ${isSelected ? "text-cyan-700" : "text-slate-900"}`}>
-                    {info.emoji} {info.name}
+                    <span className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${info.colorClass}`} aria-hidden="true" />{info.name}
                   </h4>
                   {isSelected && <Check className="w-4 h-4 text-cyan-600" />}
                 </div>

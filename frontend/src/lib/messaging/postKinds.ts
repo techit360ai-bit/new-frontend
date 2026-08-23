@@ -1,4 +1,22 @@
 import { normalizeRole } from "./roles";
+import {
+  Award,
+  BarChart3,
+  BriefcaseBusiness,
+  CalendarDays,
+  CircleHelp,
+  Compass,
+  FolderKanban,
+  Globe2,
+  Handshake,
+  Lightbulb,
+  Megaphone,
+  Puzzle,
+  Sparkles,
+  Target,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 
 // Canonical generic kinds (every role). Mirrors store.GenericKinds (Go); the
 // backend also accepts legacy aliases build/collab/update, but the composer
@@ -24,23 +42,23 @@ export function kindsForRole(role: string): string[] {
   return [...GENERIC_KINDS, ...(ROLE_KINDS[normalizeRole(role)] ?? [])];
 }
 
-/** Display label + emoji for every kind, for composer chips. */
-export const KIND_META: Record<string, { label: string; emoji: string }> = {
-  milestone: { label: "Milestone Hit", emoji: "🏆" },
-  insight: { label: "Insight", emoji: "💡" },
-  "build-update": { label: "Build Update", emoji: "📊" },
-  "collab-call": { label: "Collab Call", emoji: "🤝" },
-  question: { label: "Question", emoji: "❓" },
-  problem: { label: "Problem Signal", emoji: "🌍" },
-  "contribution-update": { label: "Contribution Update", emoji: "🧱" },
-  "skill-showcase": { label: "Skill Showcase", emoji: "🎯" },
-  "role-available": { label: "Role Available", emoji: "🧩" },
-  "investment-signal": { label: "Investment Signal", emoji: "📈" },
-  "portfolio-update": { label: "Portfolio Update", emoji: "📁" },
-  "thesis-post": { label: "Thesis", emoji: "🧭" },
-  "opportunity-post": { label: "Opportunity", emoji: "📣" },
-  "programme-announcement": { label: "Programme", emoji: "📅" },
-  "community-spotlight": { label: "Community Spotlight", emoji: "🌟" },
+/** Display label + professional icon for every kind, for composer chips. */
+export const KIND_META: Record<string, { label: string; icon: LucideIcon }> = {
+  milestone: { label: "Milestone Hit", icon: Award },
+  insight: { label: "Insight", icon: Lightbulb },
+  "build-update": { label: "Build Update", icon: BarChart3 },
+  "collab-call": { label: "Collab Call", icon: Handshake },
+  question: { label: "Question", icon: CircleHelp },
+  problem: { label: "Problem Signal", icon: Globe2 },
+  "contribution-update": { label: "Contribution Update", icon: BriefcaseBusiness },
+  "skill-showcase": { label: "Skill Showcase", icon: Target },
+  "role-available": { label: "Role Available", icon: Puzzle },
+  "investment-signal": { label: "Investment Signal", icon: TrendingUp },
+  "portfolio-update": { label: "Portfolio Update", icon: FolderKanban },
+  "thesis-post": { label: "Thesis", icon: Compass },
+  "opportunity-post": { label: "Opportunity", icon: Megaphone },
+  "programme-announcement": { label: "Programme", icon: CalendarDays },
+  "community-spotlight": { label: "Community Spotlight", icon: Sparkles },
 };
 
 /** Semantic styling shared by composer, cards, and post detail. */

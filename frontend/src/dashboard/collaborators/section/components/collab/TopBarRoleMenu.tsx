@@ -84,7 +84,7 @@ export function TopBarRoleMenu() {
                   className="w-full flex items-center justify-between px-4 py-2.5 text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-default">
                   <span className="text-slate-700">{roleLabel[role]}</span>
                   <span className="text-xs text-slate-500 flex items-center gap-1">
-                    {isCurrent ? <>✓ current</> : active ? <><Check className="w-3 h-3" /> active</> : <>Activate</>}
+                    {isCurrent ? <><Check className="w-3 h-3" /> current</> : active ? <><Check className="w-3 h-3" /> active</> : <>Activate</>}
                   </span>
                 </button>
               );

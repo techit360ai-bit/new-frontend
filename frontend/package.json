@@ -15,7 +15,8 @@
     "scalability:check": "node scripts/scalability-check.mjs",
     "smoke:deploy": "node scripts/smoke.mjs",
     "test": "vitest run",
-    "test:local": "node --no-warnings --experimental-strip-types scripts/run-tests.mjs src"
+    "test:local": "node --no-warnings --experimental-strip-types scripts/run-tests.mjs src",
+    "test:visual": "playwright test"
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.23",
@@ -75,6 +76,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

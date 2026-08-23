@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Lock, Trophy, ExternalLink } from "lucide-react";
+import { CheckCircle, Lock, Trophy, ExternalLink } from "lucide-react";
 import type { HackathonRegistration } from "@/contexts/UserContext";
 import { momentumColor } from "@/dashboard/_shared/hackathon/momentum";
 import { roleDashboardPath } from "@/lib/roleRoutes";
@@ -119,7 +119,7 @@ export function ResultsView({ registration }: Props) {
 
       {registration.promotedProjectId ? (
         <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5">
-          <p className="text-sm font-semibold text-emerald-800 mb-2">Promoted to startup ✓</p>
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-800 mb-2"><CheckCircle className="h-4 w-4" aria-hidden="true" />Promoted to startup</p>
           <div className="flex flex-wrap gap-3">
             <Link to={`/team-workspace/${registration.teamId}`} className="text-sm font-medium text-violet-700 hover:underline">Open workspace</Link>
             <Link to={roleDashboardPath.founder} className="text-sm font-medium text-violet-700 hover:underline">View in portfolio</Link>

@@ -12,6 +12,8 @@ import {
   Star,
   Handshake,
   KeyRound,
+  BriefcaseBusiness,
+  Sparkles,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
@@ -566,17 +568,20 @@ const Landing = () => {
                   <div className="feed-tags">
                     {[
                       {
-                        label: "⚡ PAID COLLAB",
+                        label: "PAID COLLAB",
+                        icon: Zap,
                         bg: "rgba(124,58,237,0.18)",
                         border: "#7c3aed",
                       },
                       {
-                        label: "🤝 FREE COLLAB",
+                        label: "FREE COLLAB",
+                        icon: Handshake,
                         bg: "rgba(234,179,8,0.14)",
                         border: "#eab308",
                       },
                       {
-                        label: "🚀 HIRING",
+                        label: "HIRING",
+                        icon: BriefcaseBusiness,
                         bg: "rgba(236,72,153,0.14)",
                         border: "#ec4899",
                       },
@@ -589,7 +594,7 @@ const Landing = () => {
                           border: `1px solid ${tag.border}`,
                         }}
                       >
-                        {tag.label}
+                        <tag.icon size={14} strokeWidth={1.8} aria-hidden="true" />{tag.label}
                       </span>
                     ))}
                   </div>
@@ -604,7 +609,7 @@ const Landing = () => {
         <section className="section">
           <Reveal>
             <div className="cta-card">
-              <div className="cta-star">✦</div>
+              <div className="cta-star"><Sparkles size={22} strokeWidth={1.8} aria-hidden="true" /></div>
               <h2 className="cta-title">Ready to Build Something Real?</h2>
               <p className="cta-sub">
                 Join founders, collaborators, investors, and organisations building on TechIT Network.

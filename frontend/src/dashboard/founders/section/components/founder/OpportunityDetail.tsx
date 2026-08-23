@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
 import { applyToOpportunity, fetchFounderOpportunity } from "@/lib/api/opportunities";
@@ -91,7 +91,7 @@ export default function OpportunityDetail() {
           </div>
           <h1 className="text-2xl font-semibold text-slate-900">{opp.title}</h1>
           <p className="text-sm text-slate-500 mt-1">
-            {opp.organizer.logoEmoji && <span className="mr-1">{opp.organizer.logoEmoji}</span>}
+            <Building2 className="mr-1 inline-block h-4 w-4 text-slate-500" aria-hidden="true" />
             {opp.organizer.name}
           </p>
           <p className="text-base text-slate-700 mt-4">{opp.summary}</p>
@@ -165,7 +165,7 @@ export default function OpportunityDetail() {
               </button>
             ) : applied ? (
               <span className="text-sm font-medium px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Applied ✓
+                <><CheckCircle className="h-4 w-4" aria-hidden="true" /> Applied</>
               </span>
             ) : (
               <button
