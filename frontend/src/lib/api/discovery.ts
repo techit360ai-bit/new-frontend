@@ -102,7 +102,17 @@ export function listRecommendations(options: { surface?: string; type?: string; 
 }
 
 export function getReturnSummary() {
-  return coreRequest<ReturnSummary>('/discovery/return-summary')
+  return coreRequest<Partial<ReturnSummary>>('/discovery/return-summary').then((data): ReturnSummary => ({
+    available: Boolean(data.available),
+    state: data.state || 'unavailable',
+    headline: data.headline,
+    message: data.message,
+    anchor: data.anchor,
+    hoursAway: data.hoursAway,
+    categories: Array.isArray(data.categories) ? data.categories : [],
+    items: Array.isArray(data.items) ? data.items : [],
+    completed: data.completed,
+  }))
 }
 
 export function searchDiscovery(query: string, options: { type?: string; limit?: number; personalized?: boolean } = {}) {

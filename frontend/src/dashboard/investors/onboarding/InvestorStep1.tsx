@@ -14,12 +14,12 @@ const investorTypes = [
   "Accelerator",
 ];
 const locations = [
-  "🇺🇸 United States",
-  "🇬🇧 United Kingdom",
-  "🇨🇦 Canada",
-  "🇩🇪 Germany",
-  "🇸🇬 Singapore",
-  "🇦🇺 Australia",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Germany",
+  "Singapore",
+  "Australia",
 ];
 const fundSizes = ["<$1M", "$1M–$10M", "$10M–$100M", "$100M+"];
 

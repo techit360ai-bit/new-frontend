@@ -47,7 +47,18 @@ export interface SessionContext {
 }
 
 export async function fetchSessionContext(): Promise<SessionContext> {
-  return domainGet<SessionContext>("/context/session");
+  const data = await domainGet<Partial<SessionContext>>("/context/session");
+  return {
+    greeting: data.greeting || "Welcome back",
+    awayMessage: data.awayMessage ?? null,
+    decayStatus: data.decayStatus ?? null,
+    currentState: data.currentState || "",
+    gsisScore: Number(data.gsisScore) || 0,
+    resume: Array.isArray(data.resume) ? data.resume : [],
+    doNow: data.doNow ?? null,
+    newSinceLeft: Array.isArray(data.newSinceLeft) ? data.newSinceLeft : [],
+    weeklyPriority: data.weeklyPriority ?? null,
+  };
 }
 
 export async function createCheckpoint(data: {

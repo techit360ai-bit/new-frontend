@@ -73,6 +73,28 @@
   --post-problem-signal: #ef4444;
   --border-default: rgba(255, 255, 255, 0.06);
   --border-active: rgba(79, 110, 247, 0.4);
+
+  /* Shared application design tokens. Feature-scoped themes may override these
+     values, but role shells and primitives use the same semantic vocabulary. */
+  --techit-app-bg: #f6f8fb;
+  --techit-app-surface: #ffffff;
+  --techit-app-surface-raised: #ffffff;
+  --techit-app-border: #e4e8ef;
+  --techit-app-border-strong: #cbd3df;
+  --techit-app-text: #172033;
+  --techit-app-muted: #64748b;
+  --techit-app-subtle: #f0f3f7;
+  --techit-app-brand: #2563eb;
+  --techit-app-brand-strong: #1d4ed8;
+  --techit-app-brand-soft: #eff6ff;
+  --techit-app-success: #15803d;
+  --techit-app-success-soft: #f0fdf4;
+  --techit-app-warning: #b45309;
+  --techit-app-warning-soft: #fffbeb;
+  --techit-app-danger: #b91c1c;
+  --techit-app-danger-soft: #fef2f2;
+  --techit-app-info: #0369a1;
+  --techit-app-info-soft: #f0f9ff;
 }
 
 .dark {
@@ -108,7 +130,122 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  --techit-app-bg: #0f141c;
+  --techit-app-surface: #151c26;
+  --techit-app-surface-raised: #1b2430;
+  --techit-app-border: #293545;
+  --techit-app-border-strong: #3b4a5e;
+  --techit-app-text: #f3f6fa;
+  --techit-app-muted: #9aa9bb;
+  --techit-app-subtle: #202b38;
+  --techit-app-brand: #60a5fa;
+  --techit-app-brand-strong: #93c5fd;
+  --techit-app-brand-soft: #172554;
+  --techit-app-success: #4ade80;
+  --techit-app-success-soft: #052e16;
+  --techit-app-warning: #fbbf24;
+  --techit-app-warning-soft: #451a03;
+  --techit-app-danger: #f87171;
+  --techit-app-danger-soft: #450a0a;
+  --techit-app-info: #38bdf8;
+  --techit-app-info-soft: #082f49;
 }
+
+/* Shared shell primitives. These classes provide a stable visual baseline for
+   dynamic role-driven screens without changing their data or routing. */
+.app-shell {
+  background: var(--techit-app-bg);
+  color: var(--techit-app-text);
+}
+
+.app-surface {
+  background: var(--techit-app-surface);
+  border: 1px solid var(--techit-app-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.app-page {
+  width: min(100%, 1600px);
+  margin-inline: auto;
+  padding: 24px clamp(16px, 3vw, 40px) 40px;
+}
+
+.app-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.app-page-header > :first-child { min-width: 0; }
+
+.app-nav-link {
+  min-height: 44px;
+  border-radius: 10px;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.app-touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.app-safe-area-top { padding-top: env(safe-area-inset-top); }
+.app-safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+@media (max-width: 767px) {
+  .app-page { padding-top: 20px; padding-bottom: 28px; }
+  .app-page-header { flex-direction: column; margin-bottom: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body { min-width: 320px; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+*:focus-visible { outline: 2px solid var(--techit-app-brand); outline-offset: 2px; }
+
+/* Cross-page responsive quality baseline for dynamic content. */
+.app-shell :where(img, video, canvas) { max-width: 100%; height: auto; }
+.app-shell :where(p, li, td, th, dd) { overflow-wrap: anywhere; }
+.app-shell :where(table) { width: 100%; border-collapse: collapse; }
+.app-shell :where([role="dialog"], [data-slot="dialog-content"], [data-slot="sheet-content"]) {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.app-shell :where(button, a, input, select, textarea):disabled { cursor: not-allowed; }
+
+@supports (content-visibility: auto) {
+  .app-shell :where(article, tbody tr),
+  .feed-scope :where(article) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 160px;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-shell :where(input, select, textarea) { min-height: 44px; }
+  .app-shell :where(table) { min-width: 640px; }
+  .app-shell :where(.overflow-x-auto) { overscroll-behavior-inline: contain; }
+}
+
+/* Legacy light role pages inherit a coherent dark surface system even where
+   their feature CSS predates semantic color tokens. */
+.dark .app-shell :where(.bg-white) { background-color: var(--techit-app-surface); }
+.dark .app-shell :where(.bg-gray-50, .bg-slate-50) { background-color: var(--techit-app-bg); }
+.dark .app-shell :where(.text-gray-900, .text-slate-900) { color: var(--techit-app-text); }
+.dark .app-shell :where(.text-gray-700, .text-slate-700) { color: #cbd5e1; }
+.dark .app-shell :where(.text-gray-600, .text-slate-600, .text-gray-500, .text-slate-500) { color: var(--techit-app-muted); }
+.dark .app-shell :where(.border-gray-200, .border-slate-200, .border-gray-100, .border-slate-100) { border-color: var(--techit-app-border); }
 
 @theme inline {
   --color-background: var(--background);

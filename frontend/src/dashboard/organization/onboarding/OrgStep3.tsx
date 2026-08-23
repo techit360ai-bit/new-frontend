@@ -2,15 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrgProfile } from "@/contexts/UserContext";
 import { OrgProgressBar } from "./OrgProgressBar";
-import { Target, MapPin } from "lucide-react";
+import { Target, MapPin, Trophy, Rocket, HandCoins, Compass, UserSearch, Handshake } from "lucide-react";
 
 const PROGRAMMES = [
-  { id: "Hackathons", emoji: "🏆", desc: "Theme-driven build sprints" },
-  { id: "Accelerator", emoji: "🚀", desc: "Structured 8–16 week cohorts" },
-  { id: "Grants", emoji: "💸", desc: "Funding for early-stage projects" },
-  { id: "Mentorship", emoji: "🧭", desc: "1-on-1 founder support" },
-  { id: "Hiring", emoji: "🎯", desc: "Recruit verified builders" },
-  { id: "Sponsorship", emoji: "🤝", desc: "Back third-party events" },
+  { id: "Hackathons", icon: Trophy, desc: "Theme-driven build sprints" },
+  { id: "Accelerator", icon: Rocket, desc: "Structured 8–16 week cohorts" },
+  { id: "Grants", icon: HandCoins, desc: "Funding for early-stage projects" },
+  { id: "Mentorship", icon: Compass, desc: "1-on-1 founder support" },
+  { id: "Hiring", icon: UserSearch, desc: "Recruit verified builders" },
+  { id: "Sponsorship", icon: Handshake, desc: "Back third-party events" },
 ];
 
 const SECTORS = [
@@ -88,6 +88,7 @@ export function OrgStep3() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PROGRAMMES.map((p) => {
                 const active = programmes.includes(p.id);
+                const Icon = p.icon;
                 return (
                   <button
                     key={p.id}
@@ -99,7 +100,7 @@ export function OrgStep3() {
                     }`}
                   >
                     <div className="flex items-center gap-3 mb-1">
-                      <span className="text-xl">{p.emoji}</span>
+                      <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
                       <p className="font-bold text-slate-900 dark:text-white">
                         {p.id}
                       </p>

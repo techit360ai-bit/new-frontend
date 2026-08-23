@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
+import { RoleMobileMenu } from "@/components/RoleMobileMenu";
 
 interface NavItem {
   name: string;
@@ -45,6 +46,7 @@ export function CollabLayout() {
   const { collaboratorProfile } = useCollaboratorProfile();
   const { profile } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     writeStoredActiveRole("collaborator");
@@ -80,7 +82,7 @@ export function CollabLayout() {
     const active = isActive(item.path);
     return (
       <Link key={item.path} to={item.path}
-        className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+        className={`app-nav-link flex items-center gap-3 px-4 transition-colors text-sm ${
           active
             ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-500"
             : "text-slate-300 hover:bg-slate-800 hover:text-white"
@@ -92,7 +94,7 @@ export function CollabLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="app-shell flex h-screen overflow-hidden bg-slate-50">
       <aside className={`hidden lg:flex lg:flex-col bg-slate-900 border-r border-slate-800 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-5 border-b border-slate-800">
           <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-amber-400">
@@ -121,8 +123,23 @@ export function CollabLayout() {
         </Link>}
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-slate-200 bg-white flex items-center justify-between px-6">
+      <RoleMobileMenu
+        brand="TECHIT"
+        title="Collaborator Portal"
+        open={mobileMenuOpen}
+        onToggle={() => setMobileMenuOpen((value) => !value)}
+        onNavigate={() => setMobileMenuOpen(false)}
+        backPath={roleDashboardPath.collaborator}
+        items={[...primaryNav, ...accountNav].map((item) => ({
+          label: item.name,
+          path: item.path,
+          icon: item.icon,
+          active: isActive(item.path),
+        }))}
+      />
+
+      <main className="flex-1 flex flex-col overflow-hidden pt-16 lg:pt-0">
+        <header className="flex min-h-14 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6">
           <div className="text-sm text-slate-500">
             {primaryNav.find((n) => isActive(n.path))?.name ?? accountNav.find((n) => isActive(n.path))?.name ?? ""}
           </div>

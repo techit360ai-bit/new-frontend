@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Ban, Bookmark, EyeOff, Flag, Flame, MessageCircle, Share2, VolumeX } from 'lucide-react';
+import { Ban, Bookmark, EyeOff, Flag, Flame, MessageCircle, Share2, Tag, VolumeX, type LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { likePost, unlikePost } from '@/lib/messaging/feed';
 import { KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
@@ -14,10 +14,10 @@ function formatTimestamp(value: string): string {
   return date.toLocaleString();
 }
 
-function kindMeta(kind: string): { label: string; emoji: string } {
+function kindMeta(kind: string): { label: string; icon: LucideIcon } {
   return KIND_META[kind] ?? {
     label: kind.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
-    emoji: '',
+    icon: Tag,
   };
 }
 
@@ -44,6 +44,7 @@ export function LivePostCard({
   const [saved, setSaved] = useState(false);
   const [hidden, setHidden] = useState(false);
   const meta = kindMeta(post.kind);
+  const KindIcon = meta.icon;
   const author = authorName || post.authorId;
 
   const toggleLike = async () => {
@@ -108,8 +109,8 @@ export function LivePostCard({
         </div>
 
         <Link to={`/feed/post/${encodeURIComponent(post.id)}`} className="block">
-          <p className={`mb-2 text-[11px] font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
-            {meta.emoji ? `${meta.emoji} ` : ''}{meta.label}
+          <p className={`mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
+            <KindIcon className="h-3.5 w-3.5" aria-hidden="true" />{meta.label}
           </p>
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">{post.body}</p>
         </Link>

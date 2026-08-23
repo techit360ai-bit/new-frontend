@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, RefreshCw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +10,8 @@ import { createOrganizationSectionRecord, fetchOrganizationSection, updateOrgani
 export type LiveField = { key: string; label: string; placeholder?: string; multiline?: boolean; type?: string };
 export function LiveCollectionPage({ section, title, description, itemLabel, fields }: { section: OrganizationLiveSection; title: string; description: string; itemLabel: string; fields: LiveField[] }) {
   const [records, setRecords] = useState<OrganizationLiveRecord[]>([]); const [loading, setLoading] = useState(true); const [creating, setCreating] = useState(false); const [draft, setDraft] = useState<Record<string, string>>({});
-  const load = () => { setLoading(true); fetchOrganizationSection(section).then(setRecords).catch(() => toast.error(`Unable to load ${title.toLowerCase()}.`)).finally(() => setLoading(false)); };
-  useEffect(load, [section]);
+  const load = useCallback(() => { setLoading(true); fetchOrganizationSection(section).then(setRecords).catch(() => toast.error(`Unable to load ${title.toLowerCase()}.`)).finally(() => setLoading(false)); }, [section, title]);
+  useEffect(() => { void load(); }, [load]);
   const summaryFields = useMemo(() => fields.slice(0, 4), [fields]);
   const create = async () => { if (!String(draft[fields[0].key] || "").trim()) return toast.error(`${fields[0].label} is required.`); setCreating(true); try { const record = await createOrganizationSectionRecord(section, draft); setRecords((current) => [record, ...current]); setDraft({}); toast.success(`${itemLabel} created.`); } catch { toast.error(`Unable to create ${itemLabel.toLowerCase()}.`); } finally { setCreating(false); } };
   const changeStatus = async (record: OrganizationLiveRecord, status: string) => { try { const updated = await updateOrganizationSectionRecord(section, record.id, { status }); setRecords((current) => current.map((item) => item.id === record.id ? updated : item)); toast.success("Status updated."); } catch { toast.error("Unable to update status."); } };

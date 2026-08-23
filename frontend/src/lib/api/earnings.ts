@@ -43,8 +43,17 @@ export const EMPTY_EARNINGS: CollaboratorEarnings = {
 };
 
 /** GET /api/domain/collaborator/earnings — per-project earnings + payout ledger + totals. */
-export function fetchCollaboratorEarnings(): Promise<CollaboratorEarnings> {
-  return domainGet<CollaboratorEarnings>("/collaborator/earnings");
+export async function fetchCollaboratorEarnings(): Promise<CollaboratorEarnings> {
+  const data = await domainGet<Partial<CollaboratorEarnings>>("/collaborator/earnings");
+  return {
+    cashEarnings: Array.isArray(data.cashEarnings) ? data.cashEarnings : [],
+    payouts: Array.isArray(data.payouts) ? data.payouts : [],
+    totals: {
+      lifetimeUSD: Number(data.totals?.lifetimeUSD) || 0,
+      pendingUSD: Number(data.totals?.pendingUSD) || 0,
+      revenueShareTTMUsd: Number(data.totals?.revenueShareTTMUsd) || 0,
+    },
+  };
 }
 
 export interface WithdrawRequest {

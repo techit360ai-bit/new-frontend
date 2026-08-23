@@ -50,7 +50,7 @@ export function DemoRoom() {
     let alive = true;
     listQuestions(id).then((qs) => { if (alive) setSeed(qs); });
     return () => { alive = false; };
-  }, [event?.id, id]);
+  }, [event, id]);
 
   if (loading) return <div className="p-8 text-sm text-slate-400">Loading…</div>;
   if (!event) return (

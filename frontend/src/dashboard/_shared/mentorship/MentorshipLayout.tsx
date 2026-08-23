@@ -47,7 +47,7 @@ export function MentorshipLayout() {
           </div>
           <Link to={`${BASE}/create-room`}>
             <button
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-colors ${ACCENT_SOLID}`}
+              className={`flex min-h-11 items-center gap-2 rounded-lg px-4 py-2 transition-colors ${ACCENT_SOLID}`}
             >
               <Plus className="h-4 w-4" />
               Create Room
@@ -55,6 +55,19 @@ export function MentorshipLayout() {
           </Link>
         </div>
       </header>
+
+      <nav className="sticky top-16 z-30 flex gap-1 overflow-x-auto border-b border-border bg-background/95 px-4 py-2 backdrop-blur md:hidden" aria-label="Mentorship sections">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path, item.end);
+          return (
+            <Link key={item.path} to={item.path} className={`app-nav-link flex shrink-0 items-center gap-2 px-3 text-sm ${active ? `${ACCENT_SOFT} font-medium` : "text-muted-foreground"}`}>
+              <Icon className="h-4 w-4" />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       <div className="mx-auto flex max-w-7xl">
         {/* Sidebar */}

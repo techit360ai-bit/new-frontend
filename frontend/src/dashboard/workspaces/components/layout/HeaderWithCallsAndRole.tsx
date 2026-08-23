@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Settings, Video, Phone, ChevronDown } from 'lucide-react';
+import { Bell, Settings, Video, Phone, ChevronDown, Code2, Palette, ClipboardList, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -60,10 +60,10 @@ export function HeaderWithCallsAndRole() {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const roles = [
-    { id: 'developer' as const, name: 'Software Developer', icon: '💻' },
-    { id: 'designer' as const, name: 'UI/UX Designer', icon: '🎨' },
-    { id: 'manager' as const, name: 'Project Manager', icon: '📊' },
-    { id: 'admin' as const, name: 'Administrator', icon: '⚙️' },
+    { id: 'developer' as const, name: 'Software Developer', icon: Code2 },
+    { id: 'designer' as const, name: 'UI/UX Designer', icon: Palette },
+    { id: 'manager' as const, name: 'Project Manager', icon: ClipboardList },
+    { id: 'admin' as const, name: 'Administrator', icon: Shield },
   ];
 
   const handleRoleChange = (role: typeof currentRole) => {
@@ -196,19 +196,21 @@ export function HeaderWithCallsAndRole() {
               <DropdownMenuLabel className="text-xs text-gray-500 font-normal">
                 Switch Role
               </DropdownMenuLabel>
-              {roles.map(role => (
+              {roles.map(role => {
+                const RoleIcon = role.icon;
+                return (
                 <DropdownMenuItem
                   key={role.id}
                   onClick={() => handleRoleChange(role.id)}
                   className={currentRole === role.id ? 'bg-[#2196F3]/10 text-[#2196F3]' : ''}
                 >
-                  <span className="mr-2">{role.icon}</span>
+                  <RoleIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                   {role.name}
                   {currentRole === role.id && (
                     <Badge className="ml-auto bg-[#2196F3] text-white text-xs">Active</Badge>
                   )}
                 </DropdownMenuItem>
-              ))}
+              );})}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/workspaces/settings')}>Settings</DropdownMenuItem>
               <DropdownMenuItem onClick={() => { void signOut(); }}>Sign Out</DropdownMenuItem>

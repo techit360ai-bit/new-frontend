@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { fetchDealFlow, type InvestorStartup, type RiskLevel } from '@/lib/api/dealFlow';
 
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4'];
+const BASE_REGIONS = ['North America', 'Europe', 'Asia', 'Africa', 'West Africa', 'East Africa', 'Southern Africa', 'North Africa', 'Latin America', 'Middle East', 'South Asia', 'South-East Asia'];
 
 function riskAllowed(maxRisk: string, riskLevel: RiskLevel) {
   if (maxRisk === 'high') return true;
@@ -59,7 +60,6 @@ export function AllocationEngine() {
     return () => { alive = false; };
   }, []);
 
-  const BASE_REGIONS = ['North America', 'Europe', 'Asia', 'Africa', 'West Africa', 'East Africa', 'Southern Africa', 'North Africa', 'Latin America', 'Middle East', 'South Asia', 'South-East Asia'];
   const regions = useMemo(
     () => ['all', ...Array.from(new Set([...BASE_REGIONS, ...startups.map((startup) => startup.region).filter(Boolean)]))],
     [startups],

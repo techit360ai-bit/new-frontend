@@ -396,7 +396,7 @@ export function Settings() {
                 </Row>
                 <Row label="Founding year"><Input value={String(sFoundingYear)} onChange={(v) => setSFoundingYear(Number(v) || 0)} type="number" /></Row>
                 <Row label="Website"><Input value={sWebsite} onChange={setSWebsite} /></Row>
-                <Row label="Logo emoji"><Input value={sLogoEmoji} onChange={setSLogoEmoji} /></Row>
+                <Row label="Logo symbol"><Input value={sLogoEmoji} onChange={setSLogoEmoji} /></Row>
               </div>
 
               <hr className="border-slate-100" />

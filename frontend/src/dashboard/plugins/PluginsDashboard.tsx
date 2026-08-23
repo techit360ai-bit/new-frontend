@@ -659,7 +659,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
             {tools.map((t) => (
               <option key={`${t.plugin}.${t.tool.name}`} value={`${t.plugin}.${t.tool.name}`}>
                 {t.plugin}.{t.tool.name}
-                {t.tool.destructive ? " ⚠" : ""}
+                {t.tool.destructive ? " (destructive)" : ""}
               </option>
             ))}
           </select>

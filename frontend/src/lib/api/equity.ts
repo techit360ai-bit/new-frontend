@@ -51,8 +51,18 @@ export const EMPTY_EQUITY: CollaboratorEquity = {
 };
 
 /** GET /api/domain/collaborator/equity — holdings + totals + vesting timeline. */
-export function fetchCollaboratorEquity(): Promise<CollaboratorEquity> {
-  return domainGet<CollaboratorEquity>("/collaborator/equity");
+export async function fetchCollaboratorEquity(): Promise<CollaboratorEquity> {
+  const data = await domainGet<Partial<CollaboratorEquity>>("/collaborator/equity");
+  return {
+    holdings: Array.isArray(data.holdings) ? data.holdings : [],
+    vestingTimeline: Array.isArray(data.vestingTimeline) ? data.vestingTimeline : [],
+    totals: {
+      totalValueUSD: Number(data.totals?.totalValueUSD) || 0,
+      blendedEquityPercent: Number(data.totals?.blendedEquityPercent) || 0,
+      vestedThisQuarterUSD: Number(data.totals?.vestedThisQuarterUSD) || 0,
+      nextVest: data.totals?.nextVest ?? null,
+    },
+  };
 }
 
 export interface DilutionRequest {

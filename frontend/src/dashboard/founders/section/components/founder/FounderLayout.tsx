@@ -13,6 +13,7 @@ import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { RoleMobileMenu } from "@/components/RoleMobileMenu";
 
 type NavKind = "link" | "external" | "placeholder";
 interface NavItem { name: string; path: string; icon: typeof LayoutDashboard; kind: NavKind; }
@@ -49,6 +50,7 @@ export function FounderLayout() {
   const { founderProfile } = useFounderProfile();
   const { profile } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     writeStoredActiveRole("founder");
@@ -106,7 +108,7 @@ export function FounderLayout() {
     const active = isActive(item.path);
     return (
       <Link key={item.path} to={item.path}
-        className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+        className={`app-nav-link flex items-center gap-3 px-4 transition-colors text-sm ${
           active
             ? "bg-violet-50 text-violet-700 border-l-2 border-violet-600"
             : "text-slate-700 hover:bg-slate-50"
@@ -118,7 +120,7 @@ export function FounderLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="app-shell flex h-screen overflow-hidden bg-slate-50">
       <aside className={`hidden lg:flex lg:flex-col bg-white border-r border-slate-200 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-5 border-b border-slate-200">
           <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-violet-600">
@@ -152,8 +154,25 @@ export function FounderLayout() {
         </Link>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-slate-200 bg-white flex items-center justify-between px-6">
+      <RoleMobileMenu
+        brand="TECHIT"
+        title="Founder Portal"
+        open={mobileMenuOpen}
+        onToggle={() => setMobileMenuOpen((value) => !value)}
+        onNavigate={() => setMobileMenuOpen(false)}
+        backPath={roleDashboardPath.founder}
+        items={[...primaryNav, ...comingSoonNav.map((item) => ({ ...item })), ...utilityNav, ...accountNav].map((item) => ({
+          label: item.name,
+          path: item.path,
+          icon: item.icon,
+          disabled: item.kind === "placeholder",
+          badge: item.kind === "placeholder" ? "Soon" : undefined,
+          active: item.kind !== "placeholder" && isActive(item.path),
+        }))}
+      />
+
+      <main className="flex-1 flex flex-col overflow-hidden pt-16 lg:pt-0">
+        <header className="flex min-h-14 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6">
           <div className="text-sm text-slate-500">
             {[...primaryNav, ...utilityNav, ...accountNav].find((n) => isActive(n.path))?.name ?? ""}
           </div>

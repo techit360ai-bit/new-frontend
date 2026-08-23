@@ -43,7 +43,7 @@ export function computeMomentum(reg: HackathonRegistration, now: number = Date.n
 
   // nextAction derivation
   if (reg.stage === "submitted-final") {
-    return { score, nextAction: "complete", nextActionLabel: "Submitted ✓" };
+    return { score, nextAction: "complete", nextActionLabel: "Submitted" };
   }
   if (!hasBrief) {
     return { score, nextAction: "submit-brief", nextActionLabel: "Submit brief to unlock Build" };

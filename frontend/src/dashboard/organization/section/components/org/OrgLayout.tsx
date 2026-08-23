@@ -18,8 +18,6 @@ import {
   Rss,
   UserCircle,
   ArrowLeft,
-  Menu,
-  X,
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
@@ -29,6 +27,7 @@ import { useEffect, useState } from "react";
 import { useOrgProfile } from "@/contexts/UserContext";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { RoleMobileMenu } from "@/components/RoleMobileMenu";
 
 interface NavItem {
   name: string;
@@ -104,7 +103,7 @@ export function OrgLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="app-shell flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar - Desktop */}
       <aside className={`hidden lg:flex lg:flex-col bg-white border-r border-gray-200 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-6 border-b border-gray-200">
@@ -129,7 +128,7 @@ export function OrgLayout() {
           <Link
             to="/org/profile"
             onClick={() => setMobileMenuOpen(false)}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+        className={`app-nav-link flex items-center gap-3 px-4 transition-colors ${
               location.pathname === "/org/profile"
                 ? "bg-indigo-50 text-indigo-600"
                 : "text-gray-700 hover:bg-gray-50"
@@ -158,51 +157,20 @@ export function OrgLayout() {
         </div>}
       </aside>
 
-      {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
-        <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold text-indigo-600">TECHIT</h1>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-white pt-16 overflow-y-auto">
-          <nav className="p-4 space-y-1">
-            {navigation.map(renderNavItem)}
-            <Link
-              to="/org/profile"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                location.pathname === "/org/profile"
-                  ? "bg-indigo-50 text-indigo-600"
-                  : "text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <UserCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">Profile</span>
-            </Link>
-            <Link
-              to={roleDashboardPath.org}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:bg-gray-50 mt-4 border-t border-gray-100 pt-4"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">Back to TechIT</span>
-            </Link>
-          </nav>
-        </div>
-      )}
+      <RoleMobileMenu
+        brand="TECHIT"
+        title="Organization Portal"
+        open={mobileMenuOpen}
+        onToggle={() => setMobileMenuOpen((value) => !value)}
+        onNavigate={() => setMobileMenuOpen(false)}
+        backPath={roleDashboardPath.org}
+        items={[...navigation, { name: "Profile", path: "/org/profile", icon: UserCircle }].map((item) => ({
+          label: item.name,
+          path: item.path,
+          icon: item.icon,
+          active: item.path === "/org/profile" ? location.pathname === item.path : isActive(item.path),
+        }))}
+      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pt-16 lg:pt-0">

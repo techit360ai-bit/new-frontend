@@ -32,7 +32,8 @@ export function PostComposer({
   const viewerRole = normalizeRole(profile?.role);
   const postTypes = kindsForRole(viewerRole).map((kind) => ({
     id: kind,
-    label: `${KIND_META[kind].emoji} ${KIND_META[kind].label}`,
+    label: KIND_META[kind].label,
+    icon: KIND_META[kind].icon,
   }));
   const name = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
     || profile?.username
@@ -88,7 +89,7 @@ export function PostComposer({
                   : 'border-border-default text-text-secondary hover:border-border-active'
               }`}
             >
-              {type.label}
+              <type.icon className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />{type.label}
             </button>
           ))}
         </div>
@@ -123,7 +124,8 @@ export function PostComposer({
             onClick={() => setExpanded(true)}
             className="flex items-center gap-1.5 rounded-lg bg-bg-elevated px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-bg-overlay"
           >
-            {KIND_META[selectedType]?.emoji} {KIND_META[selectedType]?.label}
+            {KIND_META[selectedType] && (() => { const Icon = KIND_META[selectedType].icon; return <Icon className="h-3.5 w-3.5" aria-hidden="true" />; })()}
+            {KIND_META[selectedType]?.label}
             <ChevronDown className="h-3 w-3" />
           </button>
         )}
