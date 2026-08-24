@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useInvestorProfile } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { uploadProfileAvatar } from "@/lib/api/users";
+import { toast } from "sonner";
 import {
   User,
   MapPin,
@@ -17,6 +21,16 @@ import {
 
 export function InvestorProfile() {
   const { investorProfile } = useInvestorProfile();
+  const { profile, refreshProfile } = useAuth();
+  const [avatarBusy, setAvatarBusy] = useState(false);
+
+  const changeAvatar = async (file: File | undefined) => {
+    if (!file) return;
+    setAvatarBusy(true);
+    try { await uploadProfileAvatar(file); await refreshProfile(); toast.success("Profile picture updated"); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Profile picture upload failed"); }
+    finally { setAvatarBusy(false); }
+  };
 
   // Completeness check — each step considered "complete" if its required fields are filled
   const stepStatus = {
@@ -42,6 +56,14 @@ export function InvestorProfile() {
       {/* Header */}
       <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-gray-700 bg-gray-900">
+              {profile?.avatarUrl ? <img src={profile.avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : <User className="m-auto h-7 w-7 text-gray-500" />}
+              <label className="absolute inset-x-0 bottom-0 cursor-pointer bg-black/70 py-1 text-center text-[10px] text-white">
+                {avatarBusy ? "..." : "Update"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={avatarBusy} onChange={(event) => void changeAvatar(event.target.files?.[0])} />
+              </label>
+            </div>
           <div>
             <p className="text-xs text-gray-500 font-mono uppercase tracking-wider mb-1">
               Investor profile
@@ -58,6 +80,8 @@ export function InvestorProfile() {
               How TechIT prioritises deal flow for you. Everything below comes
               from your onboarding answers.
             </p>
+          </div>
+
           </div>
 
           <Link

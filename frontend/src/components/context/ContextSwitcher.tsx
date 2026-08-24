@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, ChevronDown, Compass, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth, type Role } from "@/contexts/AuthContext";
 
 const labels: Record<Role, string> = {
@@ -16,10 +16,36 @@ const onboardingPath: Partial<Record<Role, string>> = { founder: "/founder/onboa
 
 export function ContextSwitcher() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
-  const { user, activeContext, roleAssignments, contextLoading, switchContext, activateRole } = useAuth();
+  const { user, profile, activeContext, roleAssignments, contextLoading, switchContext, activateRole } = useAuth();
   if (!user) return null;
-  const current = activeContext?.role || "explorer";
+
+  // Context authorization is server-owned. These fallbacks are display-only so
+  // the shell never labels a registered founder/investor as Explorer while the
+  // context request is still resolving or when an older session has no context.
+  const routeRole: Role | null = location.pathname.startsWith("/founder") || location.pathname === "/dashboard"
+    ? "founder"
+    : location.pathname.startsWith("/collaborator")
+      ? "collaborator"
+      : location.pathname.startsWith("/investor")
+        ? "investor"
+        : location.pathname.startsWith("/org")
+          ? "organisation"
+          : null;
+  const current = activeContext?.role || profile?.role || routeRole || "explorer";
+  const activeRoles = roleAssignments.filter((assignment) => assignment.status === "active");
+  const hasMultipleContexts = activeRoles.length > 1;
+
+  if (contextLoading) {
+    return (
+      <div className="rounded-lg border border-border-default bg-card px-3 py-2 text-sm text-text-muted" aria-live="polite">
+        Loading context...
+      </div>
+    );
+  }
+
+  if (!hasMultipleContexts) return null;
 
   const choose = async (role: Role, active: boolean) => {
     if (!active) {

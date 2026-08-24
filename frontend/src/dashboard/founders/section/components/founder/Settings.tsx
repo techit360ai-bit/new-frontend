@@ -12,6 +12,7 @@ import {
   type FounderNotificationPrefs,
 } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { uploadProfileAvatar } from "@/lib/api/users";
 import { roleDashboardPath, roleOnboardingPath } from "@/lib/roleRoutes";
 import { fetchNotificationPreferences, saveNotificationPreferences } from "@/lib/api/settings";
 
@@ -187,6 +188,17 @@ export function Settings() {
     toast.success("Profile saved");
   };
 
+  const uploadAvatar = async (file?: File) => {
+    if (!file) return;
+    try {
+      const result = await uploadProfileAvatar(file);
+      setIAvatar(result.avatarUrl);
+      toast.success("Profile picture uploaded.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Profile picture upload failed.");
+    }
+  };
+
   const saveStartup = async () => {
     setSaving("startup");
     const updates = {
@@ -318,7 +330,7 @@ export function Settings() {
             <h2 className="text-lg font-semibold text-slate-900 mb-1">Account & Identity</h2>
             <p className="text-sm text-slate-500 mb-6">Edit your name, role, and contact details.</p>
             <div className="space-y-4">
-              <Row label="Avatar URL"><Input value={iAvatar} onChange={setIAvatar} type="url" /></Row>
+              <Row label="Profile picture"><div className="space-y-2"><div className="flex items-center gap-3">{iAvatar ? <img src={iAvatar} alt="Profile" className="h-12 w-12 rounded-full object-cover" /> : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-sm text-slate-500">{iName.slice(0, 1).toUpperCase()}</div>}<label className="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">Upload picture<input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => void uploadAvatar(event.target.files?.[0])} /></label></div><p className="text-xs text-slate-500">Stored in private object storage and scanned before activation.</p></div></Row>
               <Row label="Name"><Input value={iName} onChange={setIName} /></Row>
               <Row label="Professional title"><Input value={iTitle} onChange={setITitle} /></Row>
               <Row label="Location"><Input value={iLocation} onChange={setILocation} /></Row>

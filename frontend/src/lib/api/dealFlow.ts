@@ -2,7 +2,7 @@
 //
 // Investor deal-flow ranking — BACKEND /api/domain/investor/deal-flow.
 
-import { domainGet, domainPost } from "@/lib/domainApi";
+import { domainDelete, domainGet, domainPatch, domainPost } from "@/lib/domainApi";
 import type { GsisV2Input } from "@/lib/api/gsis";
 
 export type RiskLevel = "low" | "moderate" | "high" | "unknown";
@@ -323,6 +323,26 @@ export function fetchDealFlow(): Promise<DealFlowResponse> {
 export function addToWatchlist(projectId: string, notes = ""): Promise<{ ok: boolean }> {
   return domainPost<{ ok?: boolean }>("/investor/watchlist", { projectId, notes })
     .then((data) => ({ ok: data.ok !== false }));
+}
+
+export function removeFromWatchlist(projectId: string): Promise<{ ok: boolean }> {
+  return domainDelete<{ ok?: boolean }>(`/investor/watchlist/${encodeURIComponent(projectId)}`).then((data) => ({ ok: data.ok !== false }));
+}
+
+export interface WatchlistPreferences {
+  velocity: boolean;
+  risk: boolean;
+  milestone: boolean;
+  trust: boolean;
+  dealStatus: boolean;
+}
+
+export function fetchWatchlistPreferences(): Promise<{ preferences: WatchlistPreferences }> {
+  return domainGet<{ preferences: WatchlistPreferences }>("/investor/watchlist/preferences");
+}
+
+export function updateWatchlistPreferences(input: Partial<WatchlistPreferences>): Promise<{ preferences: WatchlistPreferences }> {
+  return domainPatch<{ preferences: WatchlistPreferences }>("/investor/watchlist/preferences", input);
 }
 
 /** EVI signal selected from the live deal-flow projection. */
