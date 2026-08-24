@@ -104,6 +104,10 @@ export function InvestorTrustDashboard() {
         setSelectedId(initialId);
         if (!startupId) navigate(`/investor/trust/${initialId}`, { replace: true });
       }
+    }).catch(() => {
+      if (!alive) return;
+      setStartups([]);
+      setWatchlistIds([]);
     });
     return () => { alive = false; };
   }, [navigate, startupId]);
@@ -120,6 +124,10 @@ export function InvestorTrustDashboard() {
       setDashboard(data);
       setNotes(data.investorNotes);
       setSaved(false);
+    }).catch(() => {
+      if (!alive) return;
+      setDashboard(null);
+      setNotes(null);
     });
     return () => { alive = false; };
   }, [selectedId]);

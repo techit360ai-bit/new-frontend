@@ -169,11 +169,15 @@ export function FounderLayout() {
           badge: item.kind === "placeholder" ? "Soon" : undefined,
           active: item.kind !== "placeholder" && isActive(item.path),
         }))}
-        primaryItems={primaryNav.slice(0, 3).concat(utilityNav.slice(0, 1)).map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
+  primaryItems={[primaryNav[0], primaryNav[1], primaryNav[5], primaryNav[4], primaryNav[2]].map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
+        headerActions={<>
+          <Link to="/founder/messages" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/founder/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
+        </>}
       />
 
-      <main className="flex-1 flex flex-col overflow-hidden pt-16 lg:pt-0">
-        <header className="flex min-h-14 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6">
+      <main className="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
+        <header className="hidden min-h-14 items-center justify-between border-b border-slate-200 bg-white px-4 lg:flex lg:px-6">
           <div className="text-sm text-slate-500">
             {[...primaryNav, ...utilityNav, ...accountNav].find((n) => isActive(n.path))?.name ?? ""}
           </div>

@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Menu, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useMobileChromeVisibility } from "@/components/mobile/useMobileChromeVisibility";
 
 export interface RoleMobileMenuItem {
   label: string;
@@ -23,6 +24,7 @@ interface RoleMobileMenuProps {
   backLabel?: string;
   onToggle: () => void;
   onNavigate: () => void;
+  headerActions?: ReactNode;
 }
 
 /** Shared mobile shell for role workspaces. Content remains driven by each
@@ -32,14 +34,16 @@ export function RoleMobileMenu({
   title,
   open,
   items,
-  primaryItems = items.slice(0, 4),
+  primaryItems = items.slice(0, 5),
   backPath,
   backLabel = "Back to TechIT",
   onToggle,
   onNavigate,
+  headerActions,
 }: RoleMobileMenuProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const chromeVisible = useMobileChromeVisibility(open);
 
   useEffect(() => {
     if (!open) return;
@@ -75,23 +79,26 @@ export function RoleMobileMenu({
 
   return (
     <>
-      <header className="app-safe-area-top fixed inset-x-0 top-0 z-50 border-b border-border bg-background/95 backdrop-blur lg:hidden">
-        <div className="flex min-h-16 items-center justify-between gap-3 px-4">
+      <header className={cn("app-safe-area-top fixed inset-x-0 top-0 z-50 border-b border-border bg-background/95 backdrop-blur transition-transform duration-200 lg:hidden", !chromeVisible && !open && "-translate-y-full pointer-events-none")}>
+        <div className="flex min-h-14 items-center justify-between gap-3 px-4">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">{brand}</p>
             <p className="truncate text-xs text-muted-foreground">{title}</p>
           </div>
-          <button
-            ref={triggerRef}
-            type="button"
-            onClick={onToggle}
-            className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground motion-reduce:transition-none"
-            style={{ transitionDuration: "var(--app-motion-duration)" }}
-            aria-label={open ? "Close navigation" : "Open navigation"}
-            aria-expanded={open}
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              ref={triggerRef}
+              type="button"
+              onClick={onToggle}
+              className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground motion-reduce:transition-none"
+              style={{ transitionDuration: "var(--app-motion-duration)" }}
+              aria-label={open ? "Close navigation" : "Open navigation"}
+              aria-expanded={open}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+            {headerActions}
+          </div>
         </div>
       </header>
 
@@ -103,7 +110,7 @@ export function RoleMobileMenu({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.16 }}
-          className="fixed inset-0 z-40 bg-background pt-16 lg:hidden"
+          className="fixed inset-0 z-40 bg-background pt-14 lg:hidden"
           role="dialog"
           aria-modal="true"
           aria-label={`${title} navigation`}
@@ -159,9 +166,9 @@ export function RoleMobileMenu({
       </AnimatePresence>
       <nav
         aria-label={`${title} quick navigation`}
-        className="app-safe-area-bottom fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-background/95 backdrop-blur lg:hidden"
+        className={cn("app-safe-area-bottom fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border bg-background/95 backdrop-blur transition-transform duration-200 lg:hidden", !chromeVisible && !open && "translate-y-full pointer-events-none")}
       >
-        {primaryItems.slice(0, 4).map(({ label, path, icon: Icon, active, disabled, badge }) => (
+        {primaryItems.slice(0, 5).map(({ label, path, icon: Icon, active, disabled, badge }) => (
           disabled ? (
             <span key={`${path}-${label}`} aria-disabled="true" className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] text-muted-foreground/50">
               <Icon className="h-5 w-5" />

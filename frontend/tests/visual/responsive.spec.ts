@@ -171,6 +171,14 @@ const roleRoutes = [
   { role: "organisation", route: "/org/dashboard" },
 ] as const;
 
+const mobileNavContracts: Record<AuthRole, string[]> = {
+  explorer: ["Personalized Feed", "Discover", "Events and Hackathons", "Opportunities", "Learning and AI Guide"],
+  founder: ["Dashboard", "Incubation Hub", "Feed", "Workspaces", "Opportunity Hub"],
+  collaborator: ["Dashboard", "Tasks", "Feed", "Opportunities", "Earnings"],
+  investor: ["Dashboard", "Deal Intelligence", "Feed", "Mentorship Hub", "Watchlist"],
+  organisation: ["Dashboard", "Intelligence", "Feed", "Teams", "Projects"],
+};
+
 for (const { role, route } of roleRoutes) {
   for (const viewport of [
     { name: "desktop", width: 1440, height: 900 },
@@ -189,7 +197,11 @@ for (const { role, route } of roleRoutes) {
       await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
       await page.screenshot({ path: `test-results/visual/${role}-${viewport.name}.png`, fullPage: true });
       if (viewport.name === "mobile") {
-        await expect(page.getByRole("navigation", { name: /quick navigation/i })).toBeVisible();
+        const quickNavigation = page.getByRole("navigation", { name: /quick navigation/i });
+        await expect(quickNavigation).toBeVisible();
+        await expect(quickNavigation.locator("a, [aria-disabled='true']")).toHaveCount(5);
+        for (const label of mobileNavContracts[role]) await expect(quickNavigation.getByText(label, { exact: true })).toBeVisible();
+        await expect(quickNavigation.getByText("Messages", { exact: true })).toHaveCount(0);
         const accessibility = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
           .analyze();
@@ -198,6 +210,66 @@ for (const { role, route } of roleRoutes) {
     });
   }
 }
+
+test("role mobile chrome hides on downward scroll and returns on upward scroll", async ({ page }) => {
+  await authenticateAs(page, "founder");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/founder/dashboard");
+  const header = page.locator("header.app-safe-area-top");
+  const navigation = page.getByRole("navigation", { name: /quick navigation/i });
+  await expect(header).toBeVisible();
+  await page.evaluate(() => {
+    const scrollContainer = document.querySelector<HTMLElement>(".app-role-content") ?? document.documentElement;
+    scrollContainer.scrollTo({ top: 500, behavior: "instant" });
+  });
+  await expect(header).toHaveClass(/-translate-y-full/);
+  await expect(navigation).toHaveClass(/translate-y-full/);
+  await page.evaluate(() => {
+    const scrollContainer = document.querySelector<HTMLElement>(".app-role-content") ?? document.documentElement;
+    scrollContainer.scrollTo({ top: 0, behavior: "instant" });
+  });
+  await expect(header).not.toHaveClass(/-translate-y-full/);
+  await expect(navigation).not.toHaveClass(/translate-y-full/);
+});
+
+const allRoleMobileRoutes = [
+  { role: "founder", routes: ["/founder/dashboard", "/incubation-hub", "/opportunity-hub", "/founder/trust", "/founder/mentorship", "/founder/messages", "/founder/profile", "/founder/settings"] },
+  { role: "collaborator", routes: ["/collaborator/dashboard", "/collaborator/tasks", "/collaborator/performance", "/collaborator/earnings", "/collaborator/equity", "/collaborator/opportunities", "/collaborator/reputation", "/collaborator/messages", "/collaborator/tools", "/collaborator/profile", "/collaborator/settings"] },
+  { role: "investor", routes: ["/investor", "/investor/deal-intelligence", "/investor/risk-analysis", "/investor/allocation", "/investor/watchlist", "/investor/capital-pools", "/investor/heatmap", "/investor/data-rooms", "/investor/deal-rooms", "/investor/reputation", "/investor/profile", "/investor/trust", "/investor/mentorship"] },
+  { role: "organisation", routes: ["/org/dashboard", "/org/intelligence", "/org/teams", "/org/projects", "/org/incubator", "/org/hackathons", "/org/talent", "/org/ai-ops", "/org/analytics", "/org/marketplace", "/org/market-ready", "/org/hangout", "/org/profile", "/org/settings"] },
+] as const;
+
+for (const suite of allRoleMobileRoutes) {
+  test(`${suite.role} mobile route family stays full-width`, async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    await authenticateAs(page, suite.role);
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of suite.routes) {
+      await test.step(route, async () => {
+        await page.goto(route);
+        await expect(page.getByText("Loading page", { exact: true })).toBeHidden({ timeout: 15000 });
+        await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+        await expect(page.getByRole("navigation", { name: /quick navigation/i })).toBeVisible({ timeout: 15000 });
+        await expect(page.locator("#root > *").first()).toBeVisible({ timeout: 15000 });
+        expect(pageErrors, `page errors on ${route}`).toEqual([]);
+      });
+    }
+  });
+}
+
+test("independent workspace layouts remain full-width on mobile", async ({ page }) => {
+  await authenticateAs(page, "founder");
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ["/workspaces", "/workspaces/chat", "/workspaces/files", "/workspaces/settings"]) {
+    await test.step(route, async () => {
+      await page.goto(route);
+      await expect(page.getByText("Loading page", { exact: true })).toBeHidden({ timeout: 15000 });
+      await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+      await expect(page.locator("#root > *").first()).toBeVisible({ timeout: 15000 });
+    });
+  }
+});
 
 test("mobile role navigation opens and traps the page behind the drawer", async ({ page }) => {
   await authenticateAs(page, "investor");

@@ -25,24 +25,25 @@ function clampProgress(value: number): number {
 }
 
 function buildJourney(profile: FounderProfileData): JourneyStage[] {
+  const founderProjects = profile.founderProjects ?? [];
+  const openRoles = profile.openRoles ?? [];
   const activeIndex = Math.max(0, FOUNDER_STAGES.indexOf(profile.stage));
   const primaryProject =
-    profile.founderProjects.find((project) => project.isPrimary) ??
-    profile.founderProjects[0];
+    founderProjects.find((project) => project.isPrimary) ?? founderProjects[0];
   const activeProgress = primaryProject ? clampProgress(primaryProject.gsisScore) : 0;
   const details: Record<FounderStage, string> = {
     Idea:
-      profile.founderProjects.length > 0
-        ? `${profile.founderProjects.length} persisted venture${profile.founderProjects.length === 1 ? "" : "s"} in your portfolio.`
+      founderProjects.length > 0
+        ? `${founderProjects.length} persisted venture${founderProjects.length === 1 ? "" : "s"} in your portfolio.`
         : "No persisted venture has been added yet.",
     MVP:
-      profile.openRoles.length > 0
-        ? `${profile.currentTeamSize} team members and ${profile.openRoles.length} open role${profile.openRoles.length === 1 ? "" : "s"}.`
+      openRoles.length > 0
+        ? `${profile.currentTeamSize} team members and ${openRoles.length} open role${openRoles.length === 1 ? "" : "s"}.`
         : `${profile.currentTeamSize} team members and no open roles.`,
     Beta: primaryProject
       ? `${primaryProject.title} has a GSIS score of ${clampProgress(primaryProject.gsisScore)}.`
       : "Add a persisted venture to track execution progress.",
-    Launch: `Launch status: ${profile.launchStatus.replace(/-/g, " ")}.`,
+    Launch: `Launch status: ${(profile.launchStatus ?? "pre-launch").replace(/-/g, " ")}.`,
     Growth: profile.nextMilestone
       ? `Next milestone: ${profile.nextMilestone}`
       : "No next milestone has been recorded.",
@@ -58,7 +59,28 @@ function buildJourney(profile: FounderProfileData): JourneyStage[] {
 }
 
 export function FounderProfile() {
-  const { founderProfile: p } = useFounderProfile();
+  const { founderProfile: rawProfile } = useFounderProfile();
+  const p = useMemo(() => ({
+    ...rawProfile,
+    name: rawProfile.name || "Founder",
+    openRoles: Array.isArray(rawProfile.openRoles) ? rawProfile.openRoles : [],
+    industries: Array.isArray(rawProfile.industries) ? rawProfile.industries : [],
+    founderProjects: Array.isArray(rawProfile.founderProjects) ? rawProfile.founderProjects : [],
+    pinnedWork: Array.isArray(rawProfile.pinnedWork) ? rawProfile.pinnedWork : [],
+    hackathonRegistrations: Array.isArray(rawProfile.hackathonRegistrations) ? rawProfile.hackathonRegistrations : [],
+    teamWorkspaces: Array.isArray(rawProfile.teamWorkspaces) ? rawProfile.teamWorkspaces : [],
+    needsFromTechIT: Array.isArray(rawProfile.needsFromTechIT) ? rawProfile.needsFromTechIT : [],
+    links: rawProfile.links ?? { github: "", linkedin: "", twitter: "", personal: "" },
+    verification: {
+      github: rawProfile.verification?.github ?? { verified: false },
+      twitter: rawProfile.verification?.twitter ?? { verified: false },
+      linkedin: rawProfile.verification?.linkedin ?? { verified: false },
+      personalSite: rawProfile.verification?.personalSite ?? { verified: false },
+      nin: rawProfile.verification?.nin ?? { status: "unverified" },
+    },
+  } as FounderProfileData), [rawProfile]);
+  const openRoles = p.openRoles;
+  const industries = p.industries;
   const [endorsements, setEndorsements] = useState<Endorsement[]>([]);
   const [endorsementsLoading, setEndorsementsLoading] = useState(true);
   const [endorsementsError, setEndorsementsError] = useState<string | null>(null);
@@ -69,7 +91,7 @@ export function FounderProfile() {
     setEndorsementsError(null);
     fetchEndorsements()
       .then((rows) => {
-        if (alive) setEndorsements(rows);
+        if (alive) setEndorsements(Array.isArray(rows) ? rows : []);
       })
       .catch((error) => {
         if (!alive) return;
@@ -101,27 +123,27 @@ export function FounderProfile() {
     v.personalSite.verified ||
     v.nin.status === "verified";
 
-  const ownershipLabel: Record<typeof p.ownershipPhilosophy, string> = {
+  const ownershipLabel: Record<string, string> = {
     "equity-day-one": "Collaborators earn equity from day one",
     "cash-first-equity-later": "Cash-first now, equity at seed",
     custom: "Custom — negotiated per-person",
   };
-  const compLabel: Record<typeof p.compensationOffered, string> = {
+  const compLabel: Record<string, string> = {
     "equity-heavy": "Equity-heavy",
     "cash-equity-mix": "Cash + equity",
     "cash-heavy": "Cash-heavy",
   };
-  const launchLabel: Record<typeof p.launchStatus, string> = {
+  const launchLabel: Record<string, string> = {
     "pre-launch": "Pre-launch",
     "private-beta": "Private beta",
     public: "Public",
   };
-  const founderTypeLabel: Record<typeof p.founderType, string> = {
+  const founderTypeLabel: Record<string, string> = {
     "first-time": "First time",
     "some-experience": "Some experience",
     serial: "Serial",
   };
-  const stageStyles: Record<typeof p.stage, string> = {
+  const stageStyles: Record<string, string> = {
     Idea: "bg-slate-100 text-slate-700",
     MVP: "bg-violet-50 text-violet-700",
     Beta: "bg-amber-50 text-amber-700",
@@ -129,9 +151,9 @@ export function FounderProfile() {
     Growth: "bg-emerald-50 text-emerald-700",
   };
 
-  const rolesQuery = encodeURIComponent(p.openRoles.join(","));
+  const rolesQuery = encodeURIComponent(openRoles.join(","));
   const matchresultsHref =
-    p.openRoles.length > 0 ? `/matchresults?roles=${rolesQuery}` : "/matchresults";
+    openRoles.length > 0 ? `/matchresults?roles=${rolesQuery}` : "/matchresults";
 
   const journey = useMemo(() => buildJourney(p), [p]);
 
@@ -155,12 +177,12 @@ export function FounderProfile() {
           </div>
           <p className="text-sm text-slate-600">
             {p.title} · {p.location} · {p.yearsBuilding} years building ·{" "}
-            {founderTypeLabel[p.founderType]}
+            {founderTypeLabel[p.founderType] ?? "Founder"}
           </p>
           <p className="text-base text-slate-700 italic mt-2">"{p.headline}"</p>
           <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
             <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full" />
-            Building · {p.currentTeamSize} cofounders · {p.openRoles.length} of 5 roles open
+            Building · {p.currentTeamSize} cofounders · {openRoles.length} of 5 roles open
           </p>
         </div>
         <Link
@@ -181,36 +203,36 @@ export function FounderProfile() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900">{p.startupName}</h2>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[p.stage]}`}>
-                {p.stage}
+              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[p.stage] ?? stageStyles.Idea}`}>
+                {p.stage ?? "Idea"}
               </span>
             </div>
-            <p className="text-sm text-slate-600 mb-1">{p.oneLiner}</p>
+            <p className="text-sm text-slate-600 mb-1">{p.oneLiner ?? "No venture summary has been added yet."}</p>
             <p className="text-xs text-slate-500 mb-4">
-              Founded {p.foundingYear} · {p.industries.join(" · ")}
+              Founded {p.foundingYear} · {industries.join(" · ")}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm border-t border-slate-100 pt-4">
               <div>
                 <p className="text-2xl font-bold text-slate-900 tabular-nums">
-                  {p.users.toLocaleString()}
+                  {(p.users ?? 0).toLocaleString()}
                 </p>
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Active users</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900 tabular-nums">
-                  ${p.revenueMonthly.toLocaleString()}/mo
+                  ${(p.revenueMonthly ?? 0).toLocaleString()}/mo
                 </p>
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Revenue</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">
-                  {launchLabel[p.launchStatus]}
+                  {launchLabel[p.launchStatus] ?? "Pre-launch"}
                 </p>
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Launch status</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900 tabular-nums">
-                  ${p.fundingRaised.toLocaleString()}
+                  ${(p.fundingRaised ?? 0).toLocaleString()}
                 </p>
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Funding</p>
               </div>
@@ -246,27 +268,27 @@ export function FounderProfile() {
         </h2>
         <p className="text-base text-slate-900">{ownershipLabel[p.ownershipPhilosophy]}</p>
         <p className="text-sm text-slate-700 mt-1">
-          {p.equityRangeMin}%–{p.equityRangeMax}% range · {compLabel[p.compensationOffered]}
+          {p.equityRangeMin ?? 0}%–{p.equityRangeMax ?? 0}% range · {compLabel[p.compensationOffered] ?? "Not specified"}
         </p>
       </div>
 
       {/* 5. Open roles */}
       <div className="border border-slate-200 bg-white rounded-xl p-6">
         <h2 className="text-sm font-semibold text-slate-700 mb-4">
-          Open roles ({p.openRoles.length} of 5)
+          Open roles ({openRoles.length} of 5)
         </h2>
-        {p.openRoles.length === 0 ? (
+        {openRoles.length === 0 ? (
           <p className="text-sm text-slate-500">No open roles right now.</p>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {p.openRoles.map((role) => (
+              {openRoles.map((role) => (
                 <div key={role} className="border border-slate-200 bg-white rounded-lg p-3">
                   <p className="text-sm font-semibold text-slate-900">{role}</p>
                   <p className="text-xs text-slate-600 mt-1 tabular-nums">
-                    {p.equityRangeMin}–{p.equityRangeMax}% equity
+                    {p.equityRangeMin ?? 0}–{p.equityRangeMax ?? 0}% equity
                   </p>
-                  <p className="text-xs text-slate-500">{compLabel[p.compensationOffered]}</p>
+                  <p className="text-xs text-slate-500">{compLabel[p.compensationOffered] ?? "Not specified"}</p>
                 </div>
               ))}
             </div>
@@ -350,11 +372,11 @@ export function FounderProfile() {
       <StartupPassport />
 
       {/* 8. Pinned work (only if present) */}
-      {p.pinnedWork.length > 0 && (
+      {(p.pinnedWork ?? []).length > 0 && (
         <div className="border border-slate-200 bg-white rounded-xl p-6">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">Pinned work</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {p.pinnedWork.slice(0, 3).map((url) => (
+            {(p.pinnedWork ?? []).slice(0, 3).map((url) => (
               <a
                 key={url}
                 href={url}
@@ -412,7 +434,7 @@ export function FounderProfile() {
       <div className="border border-slate-200 bg-white rounded-xl p-6">
         <h2 className="text-sm font-semibold text-slate-700 mb-4">Links</h2>
         <div className="flex flex-wrap gap-4 text-sm">
-          {p.links.github && (
+          {p.links?.github && (
             <a
               href={`https://${p.links.github.replace(/^https?:\/\//, "")}`}
               target="_blank"
@@ -422,7 +444,7 @@ export function FounderProfile() {
               <Github className="w-4 h-4" /> {p.links.github}
             </a>
           )}
-          {p.links.linkedin && (
+          {p.links?.linkedin && (
             <a
               href={`https://${p.links.linkedin.replace(/^https?:\/\//, "")}`}
               target="_blank"
@@ -432,12 +454,12 @@ export function FounderProfile() {
               <Linkedin className="w-4 h-4" /> {p.links.linkedin}
             </a>
           )}
-          {p.links.twitter && (
+          {p.links?.twitter && (
             <span className="flex items-center gap-1.5 text-slate-700">
               <Twitter className="w-4 h-4" /> {p.links.twitter}
             </span>
           )}
-          {p.links.personal && (
+          {p.links?.personal && (
             <a
               href={`https://${p.links.personal.replace(/^https?:\/\//, "")}`}
               target="_blank"

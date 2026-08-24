@@ -170,11 +170,12 @@ export function OrgLayout() {
           icon: item.icon,
           active: item.path === "/org/profile" ? location.pathname === item.path : isActive(item.path),
         }))}
-        primaryItems={navigation.slice(0, 3).concat(navigation[3]).map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
+        primaryItems={[navigation[0], navigation[1], navigation[12], navigation[2], navigation[3]].map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
+        headerActions={<Link to="/org/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>}
       />
 
       {/* Main Content */}
-      <main className="app-role-content flex-1 overflow-y-auto pt-16 lg:pt-0">
+      <main className="app-role-content flex-1 overflow-y-auto pt-14 lg:pt-0">
         <ProfileCompletionBanner role="organisation" profilePath="/org/profile" />
         <Outlet />
       </main>

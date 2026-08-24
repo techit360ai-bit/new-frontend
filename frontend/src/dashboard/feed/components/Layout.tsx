@@ -10,6 +10,7 @@ import {
   type FeedNotification,
 } from '@/lib/api/notifications';
 import { NotificationsPanel } from './NotificationsPanel';
+import { useMobileChromeVisibility } from '@/components/mobile/useMobileChromeVisibility';
 
 export function Layout({ children }: { children: ReactNode }) {
   const [notifOpen, setNotifOpen] = useState(false);
@@ -69,6 +70,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
 function GlobalNav({ unreadCount, onNotifClick }: { unreadCount: number; onNotifClick: () => void }) {
   const location = useLocation();
+  const chromeVisible = useMobileChromeVisibility();
   const { profile } = useAuth();
   const dashboardPath = roleSafeReturnPath({
     currentPath: location.pathname,
@@ -82,7 +84,7 @@ function GlobalNav({ unreadCount, onNotifClick }: { unreadCount: number; onNotif
   const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
 
   return (
-    <nav className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border-default bg-bg-surface px-4 sm:px-8">
+    <nav className={`sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border-default bg-bg-surface px-4 sm:px-8 transition-transform duration-200 ${chromeVisible ? '' : '-translate-y-full pointer-events-none'}`}>
       <div className="flex items-center gap-8">
         <Link to="/feed" className="text-[16px] font-bold text-text-primary">
           TECH<span className="text-accent-primary">•</span>IT
@@ -126,6 +128,7 @@ function NavLink({ to, label, active }: { to: string; label: string; active?: bo
 
 function MobileTabBar() {
   const location = useLocation();
+  const chromeVisible = useMobileChromeVisibility();
   const tabs = [
     { id: 'feed', path: '/feed', icon: Globe, label: 'Feed' },
     { id: 'tribe', path: '/feed/tribe', icon: Users, label: 'Tribe' },
@@ -134,7 +137,7 @@ function MobileTabBar() {
     { id: 'discover', path: '/feed/discover', icon: Compass, label: 'Discover' },
   ];
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-border-default bg-bg-surface lg:hidden">
+    <div className={`fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-border-default bg-bg-surface transition-transform duration-200 lg:hidden ${chromeVisible ? '' : 'translate-y-full pointer-events-none'}`}>
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = location.pathname === tab.path;

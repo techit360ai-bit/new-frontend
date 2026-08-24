@@ -15,6 +15,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 }
 
 function RecordCard({ record }: { record: PassportRecord }) {
+  const teammates = record.teammates ?? [];
   const briefColor = record.briefOverall != null ? momentumColor(record.briefOverall) : null;
   return (
     <div className="border border-slate-200 rounded-xl p-4 bg-white">
@@ -50,13 +51,13 @@ function RecordCard({ record }: { record: PassportRecord }) {
         <p className="text-xs text-slate-600 italic mt-3">“{record.topJudgeComment}”</p>
       )}
 
-      {record.teammates.length > 0 && (
+      {teammates.length > 0 && (
         <div className="mt-3">
           <p className="text-[11px] text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
             <Users className="w-3 h-3" /> Team
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {record.teammates.map((t) => (
+            {teammates.map((t) => (
               <Link
                 key={t.collaboratorId}
                 to="/matchresults"
@@ -75,7 +76,7 @@ function RecordCard({ record }: { record: PassportRecord }) {
 export function StartupPassport() {
   const { founderProfile } = useFounderProfile();
   const passport = useMemo(
-    () => derivePassport(founderProfile.hackathonRegistrations, Date.now()),
+    () => derivePassport(founderProfile.hackathonRegistrations ?? [], Date.now()),
     [founderProfile.hackathonRegistrations],
   );
 
@@ -112,7 +113,7 @@ export function StartupPassport() {
             <StatCard label="Demos shipped" value={String(passport.demosShipped)} />
           </div>
 
-          {passport.badges.length > 0 && (
+          {(passport.badges ?? []).length > 0 && (
             <div className="flex flex-wrap gap-2 mb-5">
               {passport.badges.map((b) => (
                 <span
