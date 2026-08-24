@@ -67,32 +67,32 @@ export function HaviWidget({
       initial={{ y: 80, opacity: 0 }}
       animate={{ x: position.x, y: position.y, opacity: 1 }}
       transition={{ type: "spring", damping: 22, stiffness: 220 }}
-      className="fixed bottom-6 right-6 z-[120] cursor-grab active:cursor-grabbing select-none"
+      className="fixed bottom-3 right-14 z-[120] cursor-grab active:cursor-grabbing select-none sm:bottom-4 sm:right-16"
       style={{ touchAction: "none" }}
     >
       <button
         type="button"
         onClick={handleClick}
-        className={`flex items-center gap-3 pl-2 pr-4 py-2.5 rounded-2xl border-2 bg-white ${s.ring} transition-all hover:scale-[1.03]`}
+        className={`flex size-9 items-center justify-center rounded-lg border bg-white p-0 ${s.ring} transition-all hover:scale-[1.03] sm:size-10`}
         aria-label="Open Havi"
       >
         {/* drag affordance */}
-        <GripVertical className="w-4 h-4 text-slate-300 shrink-0" />
+        <GripVertical className="hidden h-3 w-3 text-slate-300" />
 
         <div className="relative shrink-0">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-cyan-400 to-blue-500">
             {status === "celebration" ? (
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="h-3.5 w-3.5 text-white" />
             ) : (
-              <Bot className="w-5 h-5 text-white" />
+              <Bot className="h-3.5 w-3.5 text-white" />
             )}
           </div>
           <span
-            className={`absolute -top-0.5 -right-0.5 w-3 h-3 ${s.dot} rounded-full border-2 border-white`}
+            className={`absolute -right-0.5 -top-0.5 h-2 w-2 ${s.dot} rounded-full border border-white`}
           />
         </div>
 
-        <div className="flex flex-col items-start max-w-[180px] text-left">
+        <div className="hidden max-w-[180px] flex-col items-start text-left">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-900">
             Havi
             <span

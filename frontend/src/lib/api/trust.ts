@@ -134,3 +134,35 @@ export function connectTrustSource(source: string): Promise<TrustVerificationRes
 export function previewTrustNotifications(events: Array<Record<string, unknown>>): Promise<TrustNotificationPreview> {
   return apiPost<TrustNotificationPreview>("/trust/notifications/preview", { events });
 }
+
+export function previewTrustShare(input: Record<string, unknown> = {}) {
+  return apiPost<Record<string, unknown>>("/trust/share-profile/preview", input);
+}
+
+export function verifyTrustAdapter(provider: string, input: Record<string, unknown> = {}) {
+  return apiPost<TrustVerificationResult>(`/trust/adapters/${encodeURIComponent(provider)}/verify`, input);
+}
+
+export function createTrustRefreshPlan(connections: Array<Record<string, unknown>>) {
+  return apiPost<Record<string, unknown>>("/trust/refresh-plan", { connections });
+}
+
+export function runContinuousTrustVerification(input: { connections?: Array<Record<string, unknown>>; adapter_payloads?: Record<string, unknown>; execute?: boolean } = {}) {
+  return apiPost<Record<string, unknown>>("/trust/continuous-verification/run", input);
+}
+
+export function submitTrustMilestone(input: Record<string, unknown>) {
+  return apiPost<TrustVerificationResult>("/trust/milestone", input);
+}
+
+export function reviewTrustMilestone(input: Record<string, unknown>) {
+  return apiPost<Record<string, unknown>>("/trust/milestone/review", input);
+}
+
+export function inviteTrustTeamMember(input: Record<string, unknown>) {
+  return apiPost<Record<string, unknown>>("/trust/team/invite", input);
+}
+
+export function verifyTrustTeamMember(input: Record<string, unknown>) {
+  return apiPost<Record<string, unknown>>("/trust/team/verify", input);
+}

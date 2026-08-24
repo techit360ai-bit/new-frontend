@@ -122,3 +122,19 @@ export async function connectWithUser(userId: string, invitation?: Collaboration
     body: invitation ? JSON.stringify({ invitation }) : undefined,
   });
 }
+
+export async function uploadProfileAvatar(file: File): Promise<{ avatarUrl: string }> {
+  const base = BACKEND_API_BASE_URL
+  const headers: Record<string, string> = { "Content-Type": "application/json" }
+  const token = getAuthToken(); if (token) headers.Authorization = `Bearer ${token}`
+  const start = await fetch(`${base}/users/me/avatar/upload-url`, { method: "POST", headers, body: JSON.stringify({ contentType: file.type, sizeBytes: file.size }) })
+  const upload = await parse<{ uploadUrl: string; objectKey: string; requiredHeaders?: Record<string, string> }>(start)
+  const objectResponse = await fetch(upload.uploadUrl, { method: "PUT", headers: upload.requiredHeaders, body: file })
+  if (!objectResponse.ok) throw new Error("Avatar upload failed")
+  const finalize = await fetch(`${base}/users/me/avatar/finalize`, { method: "POST", headers, body: JSON.stringify({ objectKey: upload.objectKey, contentType: file.type, sizeBytes: file.size }) })
+  return parse<{ avatarUrl: string }>(finalize)
+}
+
+export async function removeProfileAvatar(): Promise<void> {
+  await request<void>("/me/avatar", { method: "DELETE" })
+}

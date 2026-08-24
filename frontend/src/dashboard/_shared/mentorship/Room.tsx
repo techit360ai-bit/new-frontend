@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { Copy, Plus, Send, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,8 @@ import { ACCENT_SOLID, ACCENT_SOFT, HERO_GRADIENT, NEUTRAL_BTN, statusBadge } fr
 
 export function Room() {
   const { roomId } = useParams();
+  const location = useLocation();
+  const base = location.pathname.startsWith("/founder/") ? "/founder/mentorship" : "/investor/mentorship";
   const [room, setRoom] = useState<MentorshipRoom | null>(null);
   const [mentees, setMentees] = useState<Array<Record<string, any>>>([]);
   const [tasks, setTasks] = useState<MentorshipTask[]>([]);

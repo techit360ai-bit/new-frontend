@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
+import { fetchDealFlow, fetchWatchlistPreferences, removeFromWatchlist, updateWatchlistPreferences, type InvestorStartup, type WatchlistPreferences } from '@/lib/api/dealFlow';
 import {
   Eye,
   TrendingUp,
@@ -21,18 +21,21 @@ export function Watchlist() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [alertStates, setAlertStates] = useState<Record<string, boolean>>({
+  const [alertStates, setAlertStates] = useState<WatchlistPreferences>({
     velocity: true,
     risk: true,
     milestone: false,
+    trust: false,
+    dealStatus: false,
   });
 
   useEffect(() => {
     let alive = true;
-    fetchDealFlow()
-      .then((data) => {
+    Promise.all([fetchDealFlow(), fetchWatchlistPreferences()])
+      .then(([data, preferences]) => {
         if (!alive) return;
         setWatchedStartups(data.ranking.filter((startup) => startup.watchlisted));
+        setAlertStates(preferences.preferences);
         setError(null);
       })
       .catch(() => {
@@ -48,8 +51,21 @@ export function Watchlist() {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const toggleAlert = (key: string) => {
-    setAlertStates((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleAlert = (key: keyof WatchlistPreferences) => {
+    setAlertStates((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      void updateWatchlistPreferences({ [key]: next[key] }).catch(() => setError('Unable to save alert preference.'));
+      return next;
+    });
+  };
+
+  const remove = async (projectId: string) => {
+    try {
+      await removeFromWatchlist(projectId);
+      setWatchedStartups((items) => items.filter((item) => item.id !== projectId));
+    } catch {
+      setError('Unable to remove this startup from the watchlist.');
+    }
   };
 
   return (
@@ -219,7 +235,7 @@ export function Watchlist() {
                       </button>
                       <button
                         className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); void remove(startup.id); }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

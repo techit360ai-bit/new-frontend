@@ -45,7 +45,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <div
       ref={ref}
       className={cn(
-        "fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2",
+        "fixed bottom-3 right-3 z-50 flex flex-col items-end gap-2 sm:bottom-4 sm:right-4",
         className,
       )}
     >
@@ -82,14 +82,14 @@ export function ThemeToggle({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex size-12 items-center justify-center rounded-full border-2 border-violet-500/50 dark:border-violet-600/50 bg-linear-to-br from-violet-50 to-cyan-50 dark:from-violet-950 dark:to-cyan-950 text-violet-600 dark:text-violet-400 shadow-xl shadow-violet-500/25 dark:shadow-violet-600/25 ring-2 ring-violet-500/10 hover:bg-linear-to-br hover:from-violet-100 hover:to-cyan-100 dark:hover:from-violet-900 dark:hover:to-cyan-900 hover:border-violet-500 dark:hover:border-violet-500 transition-all"
+        className="flex size-9 items-center justify-center rounded-lg border border-border bg-card text-text-muted shadow-md transition-colors hover:bg-muted hover:text-text-primary sm:size-10"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Theme"
       >
         <span className="flex flex-col items-center gap-0.5">
-          <Icon className="size-5" />
-          <ChevronDown className="size-3 opacity-70" />
+          <Icon className="size-4" />
+          <ChevronDown className="size-2.5 opacity-70" />
         </span>
       </button>
     </div>

@@ -74,6 +74,8 @@ const MentorshipCreateRoom = lazy(() => import("@/dashboard/_shared/mentorship/C
 const MentorshipAnalytics = lazy(() => import("@/dashboard/_shared/mentorship/Analytics").then((m) => ({ default: m.Analytics })));
 const MentorshipPayments = lazy(() => import("@/dashboard/_shared/mentorship/Payments").then((m) => ({ default: m.Payments })));
 const MentorshipAdvancedHub = lazy(() => import("@/dashboard/_shared/mentorship/AdvancedHub").then((m) => ({ default: m.AdvancedHub })));
+const MentorshipInviteAccept = lazy(() => import("@/dashboard/_shared/mentorship/InviteAccept").then((m) => ({ default: m.MentorshipInviteAccept })));
+const FounderMentorshipHub = lazy(() => import("@/dashboard/founders/mentorship/FounderMentorshipHub").then((m) => ({ default: m.FounderMentorshipHub })));
 const OrgLayout = lazy(() => import("@/dashboard/organization/section/components/org/OrgLayout").then((m) => ({ default: m.OrgLayout })));
 const OrgDashboard = lazy(() => import("@/dashboard/organization/section/components/org/Dashboard").then((m) => ({ default: m.Dashboard })));
 const OrgTeams = lazy(() => import("@/dashboard/organization/section/components/org/Teams").then((m) => ({ default: m.Teams })));
@@ -269,6 +271,7 @@ const App = () => {
           <Route path="payments" element={<MentorshipPayments />} />
           <Route path="hub" element={<MentorshipAdvancedHub />} />
         </Route>
+        <Route path="/mentorship/invite/:token" element={<RequireAuth><MentorshipInviteAccept /></RequireAuth>} />
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
         <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
@@ -278,6 +281,8 @@ const App = () => {
           <Route path="/dashboard"        element={<Navigate to="/founder/dashboard" replace />} />
           <Route path="/team-workspace/:teamId" element={<TeamWorkspaceView />} />
           <Route path="/founder/trust"    element={<TrustCenter />} />
+          <Route path="/founder/mentorship" element={<FounderMentorshipHub />} />
+          <Route path="/founder/mentorship/rooms/:roomId" element={<MentorshipRoom />} />
           <Route path="/founder/profile"  element={<FounderProfile />} />
           <Route path="/founder/settings" element={<FounderSettings />} />
           <Route path="/founder/messages" element={<FounderMessages />} />

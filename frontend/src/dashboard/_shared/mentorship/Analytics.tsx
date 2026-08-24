@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { TrendingUp, Users, CheckCircle, DollarSign } from "lucide-react";
 import {
   Card,
@@ -17,13 +18,25 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { analyticsData, mentees } from "./liveData";
+import { fetchMentorshipAnalytics, getMentorshipRoom, listMentorshipRooms, type MentorshipAnalytics } from "@/lib/api/mentorship";
 import { ACCENT_FILL, ACCENT_TEXT, CHART_PRIMARY, CHART_SECONDARY } from "./theme";
 
 export function Analytics() {
+  const [analyticsData, setAnalyticsData] = useState<MentorshipAnalytics & { monthlyGrowth: Array<{ month: string; mentees: number; revenue: number }>; totalRevenue: number; equityDistributed: number }>({ totalRooms: 0, totalApplications: 0, pendingApplications: 0, activeMentees: 0, completedMentees: 0, totalTasks: 0, completedTasks: 0, monthlyGrowth: [], totalRevenue: 0, equityDistributed: 0 });
+  const [mentees, setMentees] = useState<Array<Record<string, unknown>>>([]);
+  useEffect(() => {
+    let alive = true;
+    Promise.all([fetchMentorshipAnalytics(), listMentorshipRooms(true)]).then(async ([metrics, roomData]) => {
+      if (!alive) return;
+      const details = await Promise.all((roomData.rooms ?? []).map((room) => getMentorshipRoom(room.id).catch(() => null)));
+      if (!alive) return;
+      setAnalyticsData({ ...metrics, monthlyGrowth: [], totalRevenue: 0, equityDistributed: 0 });
+      setMentees(details.flatMap((detail) => detail?.mentees ?? []));
+    }).catch(() => { if (alive) { setAnalyticsData((current) => ({ ...current, monthlyGrowth: [] })); setMentees([]); } });
+    return () => { alive = false; };
+  }, []);
   const taskCompletionRate = (
-    (analyticsData.tasksCompleted / analyticsData.totalTasks) *
-    100
+    analyticsData.totalTasks ? (analyticsData.completedTasks / analyticsData.totalTasks) * 100 : 0
   ).toFixed(1);
 
   // Recharts axes/grid don't read CSS tokens; use muted neutrals that read on
@@ -45,7 +58,7 @@ export function Analytics() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Mentees</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-1 text-3xl font-semibold">{analyticsData.totalMentees}</div>
+            <div className="mb-1 text-3xl font-semibold">{analyticsData.activeMentees + analyticsData.completedMentees}</div>
             <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
               <TrendingUp className="h-4 w-4" />
               <span>+25% from last quarter</span>
@@ -87,7 +100,7 @@ export function Analytics() {
           <CardContent>
             <div className="mb-1 text-3xl font-semibold">{taskCompletionRate}%</div>
             <div className="text-sm text-muted-foreground">
-              {analyticsData.tasksCompleted} of {analyticsData.totalTasks} tasks
+              {analyticsData.completedTasks} of {analyticsData.totalTasks} tasks
             </div>
           </CardContent>
         </Card>
@@ -161,21 +174,17 @@ export function Analytics() {
         <CardContent>
           <div className="space-y-4">
             {mentees.map((mentee) => (
-              <div key={mentee.id} className="flex items-center gap-4">
-                <img
-                  src={mentee.avatar}
-                  alt={mentee.name}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
+                <div key={String(mentee.id ?? mentee.userId ?? "mentee")} className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">{String(mentee.name ?? mentee.userId ?? "M").slice(0, 1).toUpperCase()}</div>
                 <div className="flex-1">
                   <div className="mb-1 flex items-center justify-between">
-                    <h4 className="font-medium">{mentee.name}</h4>
-                    <span className="text-sm font-medium">{mentee.progress}%</span>
+                    <h4 className="font-medium">{String(mentee.name ?? mentee.userId ?? "Mentee")}</h4>
+                    <span className="text-sm font-medium">{Number(mentee.progress ?? 0)}%</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-muted">
                     <div
                       className={`h-full transition-all duration-300 ${ACCENT_FILL}`}
-                      style={{ width: `${mentee.progress}%` }}
+                      style={{ width: `${Number(mentee.progress ?? 0)}%` }}
                     />
                   </div>
                 </div>
@@ -195,8 +204,8 @@ export function Analytics() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="mb-2 text-3xl font-semibold">94%</div>
-            <p className="text-sm text-muted-foreground">Mentees continue past 3 months</p>
+            <div className="mb-2 text-3xl font-semibold">Not tracked</div>
+            <p className="text-sm text-muted-foreground">Awaiting persisted retention history</p>
           </CardContent>
         </Card>
 
@@ -208,8 +217,8 @@ export function Analytics() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="mb-2 text-3xl font-semibold">87%</div>
-            <p className="text-sm text-muted-foreground">Mentees achieve their goals</p>
+            <div className="mb-2 text-3xl font-semibold">Not tracked</div>
+            <p className="text-sm text-muted-foreground">Awaiting persisted outcome history</p>
           </CardContent>
         </Card>
 
@@ -221,8 +230,8 @@ export function Analytics() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="mb-2 text-3xl font-semibold">$2,042</div>
-            <p className="text-sm text-muted-foreground">Per month across all rooms</p>
+            <div className="mb-2 text-3xl font-semibold">Not tracked</div>
+            <p className="text-sm text-muted-foreground">Financial metrics remain available when persisted</p>
           </CardContent>
         </Card>
       </div>
@@ -247,16 +256,16 @@ export function Analytics() {
               <div className="rounded-lg border border-border p-3">
                 <div className="text-sm text-muted-foreground">Average per mentee</div>
                 <div className="text-xl font-semibold">
-                  {(analyticsData.equityDistributed / analyticsData.totalMentees).toFixed(2)}%
+                  {analyticsData.activeMentees ? (analyticsData.equityDistributed / analyticsData.activeMentees).toFixed(2) : "0.00"}%
                 </div>
               </div>
               <div className="rounded-lg border border-border p-3">
                 <div className="text-sm text-muted-foreground">Equity rooms</div>
-                <div className="text-xl font-semibold">2</div>
+                  <div className="text-xl font-semibold">Not tracked</div>
               </div>
               <div className="rounded-lg border border-border p-3">
                 <div className="text-sm text-muted-foreground">Active equity deals</div>
-                <div className="text-xl font-semibold">5</div>
+                  <div className="text-xl font-semibold">Not tracked</div>
               </div>
             </div>
           </div>
