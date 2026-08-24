@@ -14,7 +14,9 @@ import {
   Lock,
   ArrowRight,
   Download,
+  SlidersHorizontal,
 } from 'lucide-react';
+import { MobileBottomSheet } from '@/components/mobile/MobilePageTemplates';
 
 const SECTION_STYLE = [
   { icon: BarChart3, label: 'Metrics Dashboard', color: 'text-blue-400', bgColor: 'bg-blue-500/10' },
@@ -34,6 +36,7 @@ function sectionStyle(label: string) {
 export function DataRooms() {
   const [search, setSearch] = useState('');
   const [filterSector, setFilterSector] = useState('all');
+  const [filterOpen, setFilterOpen] = useState(false);
   const [rooms, setRooms] = useState<DataRoomMeta[]>([]);
   const [sections, setSections] = useState<string[]>(SECTION_LABELS);
   const [totals, setTotals] = useState({
@@ -77,16 +80,16 @@ export function DataRooms() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
-        <div className="flex items-center justify-between">
+      <div className="border-b border-gray-800 bg-[#111111] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Data Rooms</h1>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">Data Rooms</h1>
             <p className="text-gray-400 mt-1">
               Auto-generated structured repositories for every startup in your pipeline
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-medium rounded-lg transition-all flex items-center gap-2">
+            <button className="app-touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-2 font-medium text-emerald-400 transition-all hover:bg-emerald-500/20 sm:w-auto">
               <Download className="w-4 h-4" />
               Bulk Export
             </button>
@@ -94,9 +97,9 @@ export function DataRooms() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4 sm:gap-4">
           <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Active Data Rooms</p>
             <p className="text-3xl font-bold font-mono text-white">{totals.activeRooms}</p>
@@ -116,8 +119,8 @@ export function DataRooms() {
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative flex-1 max-w-sm">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:max-w-sm sm:flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
@@ -127,10 +130,18 @@ export function DataRooms() {
               className="w-full pl-9 pr-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
           </div>
+          <button
+            type="button"
+            onClick={() => setFilterOpen(true)}
+            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg border border-gray-800 bg-[#111111] px-4 text-sm text-white sm:hidden"
+          >
+            <SlidersHorizontal className="h-4 w-4" /> Filters
+          </button>
           <select
             value={filterSector}
             onChange={(e) => setFilterSector(e.target.value)}
-            className="px-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            aria-label="Filter data rooms by sector"
+            className="hidden px-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:block"
           >
             {sectors.map((s) => (
               <option key={s} value={s}>
@@ -138,8 +149,22 @@ export function DataRooms() {
               </option>
             ))}
           </select>
-          <span className="text-sm text-gray-400 ml-auto">{filtered.length} rooms</span>
+          <span className="text-sm text-gray-400 sm:ml-auto">{filtered.length} rooms</span>
         </div>
+
+        <MobileBottomSheet open={filterOpen} title="Filter data rooms" onClose={() => setFilterOpen(false)}>
+          <label className="block text-sm font-medium text-foreground" htmlFor="mobile-sector-filter">Sector</label>
+          <select
+            id="mobile-sector-filter"
+            value={filterSector}
+            onChange={(event) => { setFilterSector(event.target.value); setFilterOpen(false); }}
+            className="app-touch-target mt-2 w-full rounded-lg border border-border bg-background px-3 text-foreground"
+          >
+            {sectors.map((sector) => (
+              <option key={sector} value={sector}>{sector === 'all' ? 'All Sectors' : sector}</option>
+            ))}
+          </select>
+        </MobileBottomSheet>
 
         {error && (
           <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -190,7 +215,7 @@ export function DataRooms() {
               </div>
 
               {/* Document sections */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="grid grid-cols-2 gap-2 mb-4 sm:grid-cols-3">
                 {roomSections.map((label) => {
                   const section = sectionStyle(label);
                   const Icon = section.icon;
@@ -209,7 +234,7 @@ export function DataRooms() {
               </div>
 
               {/* Metrics row */}
-              <div className="flex items-center gap-4 text-sm mb-4 pb-4 border-b border-gray-800">
+              <div className="flex flex-wrap items-center gap-3 text-sm mb-4 pb-4 border-b border-gray-800">
                 <div className="flex items-center gap-1.5 text-gray-400">
                   <FileText className="w-3.5 h-3.5" />
                   <span>{room.docCount || roomSections.length} documents</span>
@@ -232,23 +257,23 @@ export function DataRooms() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
                 <Link
                   to={`/investor/data-room/${room.projectId}`}
-                  className="flex-1 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                  className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-blue-500/10 py-2.5 text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20"
                 >
                   Open Data Room
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   to={`/investor/risk-radar/${room.projectId}`}
-                  className="px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-all"
+                  className="app-touch-target inline-flex items-center justify-center rounded-lg bg-gray-800 px-3 py-2.5 text-sm font-medium text-gray-300 transition-all hover:bg-gray-700"
                 >
                   Risk
                 </Link>
                 <Link
                   to={`/investor/deal-room/${room.projectId}`}
-                  className="px-3 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-sm font-medium rounded-lg transition-all"
+                  className="app-touch-target inline-flex items-center justify-center rounded-lg bg-purple-500/10 px-3 py-2.5 text-sm font-medium text-purple-400 transition-all hover:bg-purple-500/20"
                 >
                   Deal
                 </Link>

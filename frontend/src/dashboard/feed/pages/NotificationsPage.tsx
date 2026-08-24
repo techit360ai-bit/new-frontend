@@ -20,6 +20,7 @@ import {
 } from '@/lib/api/notifications';
 import { BackButton } from '../components/BackButton';
 import { FeedErrorState, FeedLoadingState } from '../components/FeedStates';
+import { VirtualizedList } from '@/components/mobile/VirtualizedList';
 
 const TYPE_CONFIG: Record<FeedNotificationType, { icon: React.ReactNode; label: string }> = {
   fire: { icon: <Flame className="h-3.5 w-3.5" />, label: 'Reactions' },
@@ -129,9 +130,7 @@ export function NotificationsPage() {
       {!loading && error && <FeedErrorState message={error} />}
       {!loading && !error && (
         <div className="overflow-hidden border-y border-border-default bg-bg-surface sm:rounded-lg sm:border">
-          {filtered.map((notification) => (
-            <NotificationRow key={notification.id} notification={notification} onRead={markRead} />
-          ))}
+          <VirtualizedList items={filtered} className="h-[min(70dvh,680px)]" itemContent={(_, notification) => <NotificationRow key={notification.id} notification={notification} onRead={markRead} />} />
           {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-2 py-16">
               <Bell className="h-7 w-7 text-text-muted" />

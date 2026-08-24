@@ -87,10 +87,10 @@ export function DealRoom() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
-        <div className="flex items-center justify-between">
+      <div className="border-b border-gray-800 bg-[#111111] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">{name} - Deal Room</h1>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">{name} - Deal Room</h1>
             <p className="text-gray-400 mt-1">Secure negotiation and structuring environment</p>
           </div>
           <div className="flex items-center gap-2">
@@ -102,7 +102,7 @@ export function DealRoom() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {error && (
           <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {error}
@@ -184,9 +184,9 @@ export function DealRoom() {
                   ))}
                 </div>
               )}
-              <button
+                <button
                 disabled={documents.length === 0}
-                className="w-full mt-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-800 disabled:text-gray-500 text-white font-semibold rounded-lg transition-colors"
+                className="app-touch-target mt-4 w-full rounded-lg bg-emerald-500 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 disabled:bg-gray-800 disabled:text-gray-500"
               >
                 Review & Sign Documents
               </button>
@@ -236,13 +236,13 @@ export function DealRoom() {
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="space-y-2">
-                <Link to={`/investor/data-room/${projectId}`} className="block w-full py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded transition-all text-center">
+                <Link to={`/investor/data-room/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-blue-500/10 py-2 text-center text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20">
                   View Data Room
                 </Link>
-                <Link to={`/investor/risk-radar/${projectId}`} className="block w-full py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-sm font-medium rounded transition-all text-center">
+                <Link to={`/investor/risk-radar/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-purple-500/10 py-2 text-center text-sm font-medium text-purple-400 transition-all hover:bg-purple-500/20">
                   Risk Analysis
                 </Link>
-                <button className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded transition-all">
+                <button className="app-touch-target w-full rounded bg-gray-800 py-2 text-sm font-medium text-gray-300 transition-all hover:bg-gray-700">
                   Schedule Call
                 </button>
               </div>

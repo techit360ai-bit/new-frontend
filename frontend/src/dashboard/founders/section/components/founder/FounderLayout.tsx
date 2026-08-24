@@ -169,6 +169,7 @@ export function FounderLayout() {
           badge: item.kind === "placeholder" ? "Soon" : undefined,
           active: item.kind !== "placeholder" && isActive(item.path),
         }))}
+        primaryItems={primaryNav.slice(0, 3).concat(utilityNav.slice(0, 1)).map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
       />
 
       <main className="flex-1 flex flex-col overflow-hidden pt-16 lg:pt-0">
@@ -178,7 +179,7 @@ export function FounderLayout() {
           </div>
           <TopBarRoleMenu />
         </header>
-        <div className="flex-1 overflow-y-auto">
+        <div className="app-role-content flex-1 overflow-y-auto">
           <ProfileCompletionBanner role="founder" profilePath="/founder/profile" />
           <Outlet />
         </div>

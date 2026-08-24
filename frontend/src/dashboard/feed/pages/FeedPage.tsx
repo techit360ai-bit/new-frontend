@@ -24,6 +24,7 @@ import {
 } from '@/lib/api/discovery';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { CaughtUpNotice, ReturnSummaryBanner } from '../components/ReturnIntelligence';
+import { VirtualizedList } from '@/components/mobile/VirtualizedList';
 
 const CATEGORY_IDS: Record<string, string> = {
   'For You': 'for-you', Following: 'following', Startups: 'startups', Funding: 'funding',
@@ -166,9 +167,14 @@ export function FeedPage() {
             <div className="space-y-3 py-4 sm:px-4 lg:pt-0">
               {loading && <FeedLoadingState />}
               {!loading && error && <FeedErrorState message={error} />}
-              {!loading && !error && visiblePosts.map((post) => (
-                <LivePostCard key={post.id} post={post} />
-              ))}
+              {!loading && !error && (
+                <VirtualizedList
+                  items={visiblePosts}
+                  threshold={30}
+                  useWindowScroll
+                  itemContent={(_, post) => <div className="pb-3"><LivePostCard key={post.id} post={post} /></div>}
+                />
+              )}
               {!loading && !error && visiblePosts.length === 0 && (
                 <FeedEmptyState
                   title={`No live posts in ${activeZone}`}

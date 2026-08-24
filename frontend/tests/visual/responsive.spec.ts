@@ -1,4 +1,7 @@
 import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+test.setTimeout(60_000);
 
 type AuthRole = "explorer" | "founder" | "collaborator" | "investor" | "organisation";
 
@@ -44,6 +47,9 @@ async function authenticateAs(page: import("@playwright/test").Page, role: AuthR
     sessionStorage.setItem("techit_access_token", "visual-test-token");
     localStorage.setItem("techit_user", JSON.stringify(storedUser));
     localStorage.setItem("techit-theme", "light");
+    localStorage.setItem("techit_cookie_consent", "essential-only");
+    localStorage.setItem("techit:havi:first-landing:founder", "visual-test");
+    localStorage.setItem("techit:havi:first-landing:collaborator", "visual-test");
   }, { storedUser: user });
 
   await page.route("http://localhost:3000/api/**", async (route) => {
@@ -61,7 +67,38 @@ async function authenticateAs(page: import("@playwright/test").Page, role: AuthR
     if (path.endsWith("/collaborator/equity")) return route.fulfill({ json: { holdings: [], totals: { totalValueUSD: 0, blendedEquityPercent: 0, vestedThisQuarterUSD: 0, nextVest: null }, vestingTimeline: [] } });
     if (path.endsWith("/collaborator/earnings")) return route.fulfill({ json: { cashEarnings: [], payouts: [], totals: { lifetimeUSD: 0, pendingUSD: 0, revenueShareTTMUsd: 0 } } });
     if (path.endsWith("/collaborator/scores")) return route.fulfill({ json: { scores: { cbs: 0, tss: {}, crs: 0 } } });
-    if (path.endsWith("/investor/deal-flow")) return route.fulfill({ json: { ranking: [], watchlistProjectIds: [] } });
+    if (path.endsWith("/investor/deal-flow")) return route.fulfill({ json: {
+      watchlistProjectIds: ["startup-mobile-1"],
+      ranking: [{
+        projectId: "startup-mobile-1", startupName: "Mobility Systems International With A Long Name",
+        sector: "Climate fintech and infrastructure", region: "Budapest, Hungary", watchlisted: true,
+        readinessScore: 82, readinessDelta: 7, executionVelocity: 78, velocityDelta: 7,
+        riskLevel: "moderate", riskDelta: "improved", mrr: 128000, revenueGrowth: 18,
+        revenueDelta: 18, investorsWatching: 14, complianceVerified: true, aiGovernanceVerified: true,
+        about: { summary: "A production-shaped infrastructure platform with a deliberately long summary for mobile wrapping checks.", useCase: "Automated settlement and reporting for distributed mobility operators.", marketSize: "European mobility operations and payments.", marketSizeValue: "$4.2B" },
+      }],
+    } });
+    if (path.endsWith("/investor/watchlist/preferences")) return route.fulfill({ json: { preferences: { velocity: true, risk: true, milestone: false, trust: true, dealStatus: true } } });
+    if (path.endsWith("/investor/data-rooms")) return route.fulfill({ json: { dataRooms: [{
+      projectId: "startup-mobile-1", startupName: "Mobility Systems International With A Long Name",
+      sector: "Climate fintech and infrastructure", sections: ["Metrics Dashboard", "Financials", "Testing Reports", "Compliance", "Governance", "Execution History"],
+      docCount: 38, complianceVerified: true, aiGovernanceVerified: true, updatedLabel: "Updated 12 minutes ago",
+    }] } });
+    if (path.endsWith("/investor/deal-rooms")) return route.fulfill({ json: { dealRooms: [{
+      id: "deal-mobile-1", projectId: "startup-mobile-1", startupName: "Mobility Systems International With A Long Name",
+      status: "active", stage: "Term Sheet", daysOpen: 12, messages: 27, docs: 8, lastActivity: "12 minutes ago",
+      valuationUSD: 6000000,
+      termSheet: { valuationUSD: 6000000, investmentUSD: 500000, equityPercent: 8, instrument: "SAFE", discountPercent: 15, valuationCapUSD: 6500000, extraTerms: { proRata: "Included", rights: "Observer" } },
+      milestones: [{ milestone: "Enterprise pilot", amount: 200000, condition: "Three paid operators live", status: "pending" }],
+      documents: [{ name: "Mobility Systems investor rights agreement final review.pdf", status: "ready" }],
+      negotiation: [{ step: "NDA signed", state: "completed" }, { step: "Term sheet review", state: "active" }],
+    }] } });
+    if (path.endsWith("/notifications")) return route.fulfill({ json: { notifications: Array.from({ length: 80 }, (_, index) => ({
+      id: `notification-${index}`, type: index % 2 ? "comment" : "milestone", read: index > 7,
+      content: `Production-shaped notification ${index + 1} with enough text to wrap naturally on a narrow mobile viewport.`,
+      author: index % 2 ? "Alexandra Longname" : "TechIT Platform", avatar: "from-blue-500 to-violet-500",
+      timeAgo: `${index + 1}m`, linkTo: "/feed",
+    })) } });
     if (path.endsWith("/investor-intelligence/overview")) return route.fulfill({ json: { portfolio: { total: 0, healthy: 0, onTrack: 0, highRisk: 0 }, startups: [], changes: [], deterministic: true } });
     if (path.endsWith("/investor-intelligence/alerts")) return route.fulfill({ json: { alerts: [], deterministic: true } });
     if (path.endsWith("/investor-intelligence/reports")) return route.fulfill({ json: { reports: [], deterministic: true } });
@@ -151,9 +188,113 @@ for (const { role, route } of roleRoutes) {
       expect(pageErrors).toEqual([]);
       await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
       await page.screenshot({ path: `test-results/visual/${role}-${viewport.name}.png`, fullPage: true });
+      if (viewport.name === "mobile") {
+        await expect(page.getByRole("navigation", { name: /quick navigation/i })).toBeVisible();
+        const accessibility = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+          .analyze();
+        expect(accessibility.violations).toEqual([]);
+      }
     });
   }
 }
+
+test("mobile role navigation opens and traps the page behind the drawer", async ({ page }) => {
+  await authenticateAs(page, "investor");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/investor");
+  const navigation = page.getByRole("navigation", { name: /quick navigation/i });
+  await expect(navigation).toBeVisible();
+  const menuButton = page.getByRole("button", { name: /open navigation/i });
+  await menuButton.click();
+  await expect(page.getByRole("dialog", { name: /navigation/i })).toBeVisible();
+  await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  await expect(page.getByRole("dialog", { name: /navigation/i }).locator(":focus")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: /navigation/i })).toBeHidden();
+  await expect(menuButton).toBeFocused();
+});
+
+const denseMobileRoutes = [
+  { role: "investor", route: "/investor/watchlist", heading: /Watchlist & Signals/i },
+  { role: "investor", route: "/investor/data-rooms", heading: /Data Rooms/i },
+  { role: "investor", route: "/investor/deal-room/startup-mobile-1", heading: /Deal Room/i },
+  { role: "founder", route: "/founder/trust", heading: /Trust/i },
+  { role: "founder", route: "/founder/mentorship", heading: /Find a mentor/i },
+  { role: "organisation", route: "/org/intelligence", heading: /Intelligence|Cohort/i },
+] as const;
+
+for (const scenario of denseMobileRoutes) {
+  test(`${scenario.route} is mobile-safe with production-shaped data`, async ({ page }) => {
+    await authenticateAs(page, scenario.role);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(scenario.route);
+    await expect(page.getByRole("heading", { name: scenario.heading }).first()).toBeVisible({ timeout: 10000 });
+    await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    await expect(page.getByRole("navigation", { name: /quick navigation/i })).toBeVisible();
+    expect(await page.getByRole("navigation", { name: /quick navigation/i }).locator("a, [aria-disabled='true']").evaluateAll((elements) => elements.every((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.width >= 44 && rect.height >= 44;
+    }))).toBe(true);
+  });
+}
+
+test("long mobile notification collections are virtualized", async ({ page }) => {
+  await authenticateAs(page, "explorer");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/feed/notifications");
+  await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
+  await expect(page.locator("[data-testid='virtuoso-item-list']")).toBeVisible();
+  expect(await page.getByText(/Production-shaped notification/).count()).toBeLessThan(80);
+  await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+test("mobile filter sheets lock scroll, close with Escape, and restore focus", async ({ page }) => {
+  await authenticateAs(page, "investor");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/investor/data-rooms");
+  const trigger = page.getByRole("button", { name: "Filters" });
+  await trigger.click();
+  const sheet = page.getByRole("dialog", { name: "Filter data rooms" });
+  await expect(sheet).toBeVisible();
+  await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  await page.keyboard.press("Escape");
+  await expect(sheet).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
+test("mobile fixed controls stay above the bottom navigation", async ({ page }) => {
+  await authenticateAs(page, "founder");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/founder/dashboard");
+  const nav = page.getByRole("navigation", { name: /quick navigation/i });
+  const theme = page.getByRole("button", { name: "Theme" });
+  const havi = page.getByRole("button", { name: "Open Havi" });
+  const [navBox, themeBox, haviBox] = await Promise.all([nav.boundingBox(), theme.boundingBox(), havi.boundingBox()]);
+  expect(navBox && themeBox && themeBox.y + themeBox.height <= navBox.y).toBeTruthy();
+  expect(navBox && haviBox && haviBox.y + haviBox.height <= navBox.y).toBeTruthy();
+});
+
+test("reduced motion removes meaningful mobile transition duration", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await authenticateAs(page, "investor");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/investor");
+  const duration = await page.getByRole("button", { name: "Open navigation" }).evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration) || 0);
+  expect(duration).toBeLessThanOrEqual(0.001);
+});
+
+test("mobile route shell stays within the local performance budget", async ({ page }) => {
+  await authenticateAs(page, "investor");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/investor/watchlist");
+  await expect(page.getByRole("heading", { name: /Watchlist & Signals/i })).toBeVisible();
+  const metrics = await page.evaluate(() => {
+    const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    return { domContentLoaded: navigation?.domContentLoadedEventEnd ?? Number.POSITIVE_INFINITY };
+  });
+  expect(metrics.domContentLoaded).toBeLessThan(5_000);
+});
 
 test("protected role routes preserve the authentication boundary", async ({ page }) => {
   for (const route of ["/founder/dashboard", "/collaborator/dashboard", "/investor", "/org/dashboard", "/workspaces", "/feed"]) {

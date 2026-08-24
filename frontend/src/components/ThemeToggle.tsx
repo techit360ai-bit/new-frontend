@@ -45,7 +45,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <div
       ref={ref}
       className={cn(
-        "fixed bottom-3 right-3 z-50 flex flex-col items-end gap-2 sm:bottom-4 sm:right-4",
+        "fixed bottom-20 right-3 z-50 flex flex-col items-end gap-2 sm:right-4 lg:bottom-4",
         className,
       )}
     >

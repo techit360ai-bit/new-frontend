@@ -71,20 +71,20 @@ export function Watchlist() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
-        <div className="flex items-center justify-between">
+      <div className="border-b border-gray-800 bg-[#111111] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Watchlist & Signals</h1>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">Watchlist & Signals</h1>
             <p className="text-gray-400 mt-1">Track execution velocity and get real-time alerts</p>
           </div>
-          <button className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium rounded-lg transition-all flex items-center gap-2">
+          <button className="app-touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500/10 px-4 py-2 font-medium text-blue-400 transition-all hover:bg-blue-500/20 sm:w-auto">
             <Bell className="w-4 h-4" />
             Manage Alerts
           </button>
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {error && (
           <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {error}
@@ -93,7 +93,7 @@ export function Watchlist() {
 
         <div className="bg-[#111111] border border-gray-800 rounded-lg overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-800/50 border-b border-gray-800 text-sm font-medium text-gray-400">
+          <div className="hidden grid-cols-12 gap-4 border-b border-gray-800 bg-gray-800/50 px-6 py-4 text-sm font-medium text-gray-400 md:grid">
             <div className="col-span-3">Startup</div>
             <div className="col-span-1 text-center">Readiness</div>
             <div className="col-span-1 text-center">7d Δ</div>
@@ -132,12 +132,12 @@ export function Watchlist() {
                 <div key={startup.id}>
                   {/* Main row */}
                   <div
-                    className={`grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-800/30 transition-colors cursor-pointer ${
+                    className={`grid cursor-pointer grid-cols-2 gap-4 px-4 py-5 transition-colors hover:bg-gray-800/30 sm:px-6 md:grid-cols-12 md:py-4 ${
                       isExpanded ? 'bg-gray-800/20' : ''
                     }`}
                     onClick={() => toggleExpanded(startup.id)}
                   >
-                    <div className="col-span-3 flex items-center gap-2">
+                    <div className="col-span-2 flex items-center gap-2 md:col-span-3">
                       <span className="text-gray-500 hover:text-gray-300 transition-colors">
                         {isExpanded ? (
                           <ChevronDown className="w-4 h-4" />
@@ -159,11 +159,13 @@ export function Watchlist() {
                       </div>
                     </div>
 
-                    <div className="col-span-1 text-center flex items-center justify-center">
+                    <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">Readiness</span>
                       <p className="font-mono font-semibold text-white">{startup.readinessScore}</p>
                     </div>
 
-                    <div className="col-span-1 text-center flex items-center justify-center">
+                    <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">7d change</span>
                       <div
                         className={`inline-flex items-center gap-1 text-sm font-medium ${
                           readinessDelta > 0
@@ -183,7 +185,8 @@ export function Watchlist() {
                       </div>
                     </div>
 
-                    <div className="col-span-1 text-center flex items-center justify-center">
+                    <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">Risk</span>
                       <span
                         className={`text-sm font-medium capitalize ${
                           startup.riskLevel === 'low'
@@ -199,7 +202,8 @@ export function Watchlist() {
                       </span>
                     </div>
 
-                    <div className="col-span-1 text-center flex items-center justify-center">
+                    <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">Risk change</span>
                       <span
                         className={`text-sm font-medium ${
                           riskDelta === 'improved' ? 'text-emerald-400' : 'text-gray-400'
@@ -209,33 +213,38 @@ export function Watchlist() {
                       </span>
                     </div>
 
-                    <div className="col-span-2 text-center flex items-center justify-center">
+                    <div className="col-span-1 flex flex-col items-start justify-center md:col-span-2 md:items-center md:text-center">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">Revenue</span>
                       <p className="font-mono font-semibold text-white">
                         ${(startup.mrr / 1000).toFixed(0)}K MRR
                       </p>
                     </div>
 
-                    <div className="col-span-1 text-center flex items-center justify-center">
+                    <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">Revenue change</span>
                       <div className="inline-flex items-center gap-1 text-sm font-medium text-emerald-400">
                         <TrendingUp className="w-4 h-4" />
                         +{startup.revenueDelta}%
                       </div>
                     </div>
 
-                    <div className="col-span-1 text-center flex items-center justify-center">
+                    <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">Watching</span>
                       <p className="font-mono text-blue-400">{startup.investorsWatching}</p>
                     </div>
 
-                    <div className="col-span-1 flex justify-end items-center gap-2">
+                    <div className="col-span-1 flex items-end justify-end gap-2 md:items-center">
                       <button
-                        className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded transition-colors"
+                        className="app-touch-target inline-flex items-center justify-center rounded text-blue-400 transition-colors hover:bg-blue-500/10"
                         onClick={(e) => e.stopPropagation()}
+                        aria-label={`Manage alerts for ${startup.name}`}
                       >
                         <Bell className="w-4 h-4" />
                       </button>
                       <button
-                        className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                        className="app-touch-target inline-flex items-center justify-center rounded text-red-400 transition-colors hover:bg-red-500/10"
                         onClick={(e) => { e.stopPropagation(); void remove(startup.id); }}
+                        aria-label={`Remove ${startup.name} from watchlist`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -244,8 +253,8 @@ export function Watchlist() {
 
                   {/* About section - expanded */}
                   {isExpanded && (
-                    <div className="px-6 pb-6 pt-2 bg-[#0d0d0d] border-t border-gray-800/60">
-                      <div className="ml-6">
+                    <div className="border-t border-gray-800/60 bg-[#0d0d0d] px-4 pb-6 pt-4 sm:px-6 md:pt-2">
+                      <div className="md:ml-6">
                         <div className="flex items-center gap-2 mb-4">
                           <span className="text-xs font-mono font-semibold tracking-widest text-emerald-400 uppercase">
                             Project Overview
@@ -307,24 +316,24 @@ export function Watchlist() {
                         </div>
 
                         {/* Quick actions */}
-                        <div className="flex gap-3 mt-4">
+                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
                           <Link
                             to={`/investor/risk-radar/${startup.id}`}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded-lg transition-all"
+                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400 transition-all hover:bg-emerald-500/20"
                           >
                             Full Risk Analysis
                             <ArrowRight className="w-4 h-4" />
                           </Link>
                           <Link
                             to={`/investor/data-room/${startup.id}`}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded-lg transition-all"
+                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20"
                           >
                             Data Room
                             <ArrowRight className="w-4 h-4" />
                           </Link>
                           <Link
                             to={`/investor/deal-room/${startup.id}`}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-sm font-medium rounded-lg transition-all"
+                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-400 transition-all hover:bg-purple-500/20"
                           >
                             Deal Room
                             <ArrowRight className="w-4 h-4" />

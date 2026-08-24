@@ -108,7 +108,7 @@ export function HaviPanel(props: HaviPanelProps) {
                       : `${progress.daysRemaining} days left`}
                   </span>
                 </div>
-                <Progress value={progress.percentElapsed} className="h-2 mt-2" />
+                <Progress value={progress.percentElapsed} className="h-2 mt-2" aria-label="Time to MVP elapsed" />
                 <div className="flex justify-between text-xs text-slate-500 mt-1.5">
                   <span>{progress.percentElapsed}% elapsed</span>
                   <span>Target {progress.targetLabel}</span>
@@ -144,7 +144,7 @@ export function HaviPanel(props: HaviPanelProps) {
                       </h3>
                       <span className="font-semibold text-amber-600">{momentumScore}/100</span>
                     </div>
-                    <Progress value={momentumScore} className="h-2" />
+                    <Progress value={momentumScore} className="h-2" aria-label="Momentum score" />
                     <p className="text-xs text-slate-600 mt-2">
                       {momentumScore >= 70
                         ? "Strong and steady — keep the streak alive."
@@ -222,7 +222,7 @@ export function HaviPanel(props: HaviPanelProps) {
                         <span className="text-slate-600">Completion</span>
                         <span className="font-semibold text-cyan-600">{completionPercentage}%</span>
                       </div>
-                      <Progress value={completionPercentage} className="h-2 mt-2" />
+                      <Progress value={completionPercentage} className="h-2 mt-2" aria-label="Daily task completion" />
                     </div>
                   </div>
 
@@ -316,7 +316,7 @@ function TabBtn({
     <button
       onClick={onClick}
       className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-        active ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+        active ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-800"
       }`}
     >
       {icon}

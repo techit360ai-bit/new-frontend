@@ -20,12 +20,11 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Scale,
-  Menu,
-  X,
 } from 'lucide-react';
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
+import { RoleMobileMenu } from '@/components/RoleMobileMenu';
 
 interface NavItem {
   path: string;
@@ -153,26 +152,31 @@ export function InvestorLayout() {
         </div>}
       </aside>
 
-      <div className="lg:hidden">
-        <header className="app-safe-area-top fixed inset-x-0 top-0 z-50 border-b border-gray-800 bg-[#111111]/95 backdrop-blur">
-          <div className="flex min-h-16 items-center justify-between gap-3 px-4">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">TECH<span className="text-emerald-400">IT</span></p>
-              <p className="truncate text-xs text-gray-400">Investor Intelligence</p>
-            </div>
-            <button type="button" onClick={() => setMobileMenuOpen((value) => !value)} className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-300 hover:bg-gray-800" aria-label={mobileMenuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileMenuOpen}>
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </header>
-        {mobileMenuOpen && <div className="fixed inset-0 z-40 bg-[#111111] pt-16"><nav className="app-safe-area-bottom h-full overflow-y-auto space-y-1 p-4">
-          {navItems.map((item) => { const Icon = item.icon; const active = isActive(item.path); return <Link key={item.label} to={item.path} onClick={() => setMobileMenuOpen(false)} className={`app-nav-link flex items-center gap-3 px-3 text-sm ${active ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-300 hover:bg-gray-800'}`}><Icon className="h-5 w-5" /><span className="min-w-0 flex-1 truncate">{item.label}</span></Link>; })}
-          <Link to={roleDashboardPath.investor} onClick={() => setMobileMenuOpen(false)} className="app-nav-link mt-4 flex items-center gap-3 border-t border-gray-800 px-3 pt-5 text-sm text-gray-400"><ArrowLeft className="h-5 w-5" />Back to TechIT</Link>
-        </nav></div>}
-      </div>
+      <RoleMobileMenu
+        brand="TECHIT"
+        title="Investor Intelligence"
+        open={mobileMenuOpen}
+        onToggle={() => setMobileMenuOpen((value) => !value)}
+        onNavigate={() => setMobileMenuOpen(false)}
+        backPath={roleDashboardPath.investor}
+        items={navItems.map((item) => ({
+          label: item.label,
+          path: item.path,
+          icon: item.icon,
+          active: !item.external && isActive(item.path),
+          disabled: item.comingSoon,
+          badge: item.comingSoon ? 'Soon' : undefined,
+        }))}
+        primaryItems={[navItems[0], navItems[1], navItems[4], navItems[10]].map((item) => ({
+          label: item.label,
+          path: item.path,
+          icon: item.icon,
+          active: !item.external && isActive(item.path),
+        }))}
+      />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-16 lg:pt-0">
+      <main className="app-role-content flex-1 overflow-auto pt-16 lg:pt-0">
         <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
         <Outlet />
       </main>

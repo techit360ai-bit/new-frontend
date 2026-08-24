@@ -170,10 +170,11 @@ export function OrgLayout() {
           icon: item.icon,
           active: item.path === "/org/profile" ? location.pathname === item.path : isActive(item.path),
         }))}
+        primaryItems={navigation.slice(0, 3).concat(navigation[3]).map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pt-16 lg:pt-0">
+      <main className="app-role-content flex-1 overflow-y-auto pt-16 lg:pt-0">
         <ProfileCompletionBanner role="organisation" profilePath="/org/profile" />
         <Outlet />
       </main>

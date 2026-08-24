@@ -4,6 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --app-motion-duration: 150ms;
   --font-size: 16px;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
@@ -196,18 +197,17 @@
 .app-safe-area-top { padding-top: env(safe-area-inset-top); }
 .app-safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
+.app-mobile-page { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+.app-mobile-page button, .app-mobile-page a { touch-action: manipulation; }
+.app-role-content { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+
+@media (min-width: 1024px) {
+  .app-role-content { padding-bottom: 0; }
+}
+
 @media (max-width: 767px) {
   .app-page { padding-top: 20px; padding-bottom: 28px; }
   .app-page-header { flex-direction: column; margin-bottom: 20px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 body { min-width: 320px; }
@@ -524,4 +524,14 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .feed-scope .card-hover:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --app-motion-duration: 0.01ms; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

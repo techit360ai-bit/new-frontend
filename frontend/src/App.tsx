@@ -385,7 +385,7 @@ const App = () => {
       </Routes>
       </Suspense>
       <ThemeToggle />
-      <div className="fixed bottom-5 left-5 z-30"><ContextSwitcher /></div>
+      <div className="fixed bottom-20 left-5 z-30 lg:bottom-5"><ContextSwitcher /></div>
       <CookieConsent />
       </MessagingProvider>
     </UserProvider>

@@ -67,7 +67,7 @@ export function HaviWidget({
       initial={{ y: 80, opacity: 0 }}
       animate={{ x: position.x, y: position.y, opacity: 1 }}
       transition={{ type: "spring", damping: 22, stiffness: 220 }}
-      className="fixed bottom-3 right-14 z-[120] cursor-grab active:cursor-grabbing select-none sm:bottom-4 sm:right-16"
+      className="fixed bottom-20 right-14 z-[120] cursor-grab select-none active:cursor-grabbing sm:right-16 lg:bottom-4"
       style={{ touchAction: "none" }}
     >
       <button

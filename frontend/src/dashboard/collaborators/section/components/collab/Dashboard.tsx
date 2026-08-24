@@ -123,7 +123,7 @@ export function Dashboard() {
         <Link to="/collaborator/equity" className="lg:col-span-2 group border border-slate-200 bg-white rounded-xl p-6 hover:border-amber-300 transition-colors">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Building for Equity</p>
-            <span className="text-amber-600 text-sm group-hover:translate-x-0.5 transition-transform">View full equity →</span>
+            <span className="text-amber-700 text-sm group-hover:translate-x-0.5 transition-transform">View full equity →</span>
           </div>
           <div className="flex items-baseline gap-6 mt-2">
             <div>
@@ -169,7 +169,7 @@ export function Dashboard() {
             <div className="flex justify-between"><span className="text-slate-600">Pending payout</span><span className="font-semibold tabular-nums text-slate-900">${earnings.totals.pendingUSD.toLocaleString()}</span></div>
             <div className="flex justify-between"><span className="text-slate-600">Revenue share (TTM)</span><span className="font-semibold tabular-nums text-slate-900">${earnings.totals.revenueShareTTMUsd.toLocaleString()}</span></div>
           </div>
-          <p className="text-amber-600 text-sm mt-4 group-hover:translate-x-0.5 transition-transform">View earnings →</p>
+          <p className="text-amber-700 text-sm mt-4 group-hover:translate-x-0.5 transition-transform">View earnings →</p>
         </Link>
       </div>
 

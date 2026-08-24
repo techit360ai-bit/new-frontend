@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Menu, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,6 +18,7 @@ interface RoleMobileMenuProps {
   title: string;
   open: boolean;
   items: RoleMobileMenuItem[];
+  primaryItems?: RoleMobileMenuItem[];
   backPath: string;
   backLabel?: string;
   onToggle: () => void;
@@ -31,22 +32,44 @@ export function RoleMobileMenu({
   title,
   open,
   items,
+  primaryItems = items.slice(0, 4),
   backPath,
   backLabel = "Back to TechIT",
   onToggle,
   onNavigate,
 }: RoleMobileMenuProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const trigger = triggerRef.current;
     document.body.style.overflow = "hidden";
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onToggle();
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
+    requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLElement>('a[href], button:not([disabled])')?.focus());
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", closeOnEscape);
+      (previousFocus ?? trigger)?.focus();
     };
   }, [onToggle, open]);
 
@@ -59,9 +82,11 @@ export function RoleMobileMenu({
             <p className="truncate text-xs text-muted-foreground">{title}</p>
           </div>
           <button
+            ref={triggerRef}
             type="button"
             onClick={onToggle}
-            className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground motion-reduce:transition-none"
+            style={{ transitionDuration: "var(--app-motion-duration)" }}
             aria-label={open ? "Close navigation" : "Open navigation"}
             aria-expanded={open}
           >
@@ -73,6 +98,7 @@ export function RoleMobileMenu({
       <AnimatePresence>
       {open && (
         <motion.div
+          ref={dialogRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -131,6 +157,24 @@ export function RoleMobileMenu({
         </motion.div>
       )}
       </AnimatePresence>
+      <nav
+        aria-label={`${title} quick navigation`}
+        className="app-safe-area-bottom fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-background/95 backdrop-blur lg:hidden"
+      >
+        {primaryItems.slice(0, 4).map(({ label, path, icon: Icon, active, disabled, badge }) => (
+          disabled ? (
+            <span key={`${path}-${label}`} aria-disabled="true" className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] text-muted-foreground/50">
+              <Icon className="h-5 w-5" />
+              <span className="max-w-full truncate">{badge || label}</span>
+            </span>
+          ) : (
+            <Link key={`${path}-${label}`} to={path} onClick={onNavigate} aria-current={active ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] font-medium", active ? "text-primary" : "text-muted-foreground")}>
+              <Icon className="h-5 w-5" />
+              <span className="max-w-full truncate">{label}</span>
+            </Link>
+          )
+        ))}
+      </nav>
     </>
   );
 }

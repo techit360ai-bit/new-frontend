@@ -136,6 +136,7 @@ export function CollabLayout() {
           icon: item.icon,
           active: isActive(item.path),
         }))}
+        primaryItems={primaryNav.slice(0, 3).concat(primaryNav[7]).map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
       />
 
       <main className="flex-1 flex flex-col overflow-hidden pt-16 lg:pt-0">
@@ -146,7 +147,7 @@ export function CollabLayout() {
           <TopBarRoleMenu />
         </header>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="app-role-content flex-1 overflow-y-auto">
           <ProfileCompletionBanner role="collaborator" profilePath="/collaborator/profile" />
           <Outlet />
         </div>
