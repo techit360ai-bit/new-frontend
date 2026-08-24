@@ -21,7 +21,7 @@ export interface CreateEndorsementInput {
 
 export function fetchEndorsements(): Promise<Endorsement[]> {
   return domainGet<{ endorsements: Endorsement[] }>("/endorsements")
-    .then(({ endorsements }) => endorsements);
+    .then((response) => Array.isArray(response?.endorsements) ? response.endorsements : []);
 }
 
 export function createEndorsement(input: CreateEndorsementInput): Promise<Endorsement> {

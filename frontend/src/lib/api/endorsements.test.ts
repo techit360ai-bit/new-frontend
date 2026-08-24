@@ -40,6 +40,16 @@ test("endorsements read the authenticated domain endpoint and accept an empty li
   }
 });
 
+test("endorsements normalize a sparse successful response to an empty collection", async () => {
+  const fetchMock = stubFetch(async () => response({ data: [] }));
+
+  try {
+    await expect(fetchEndorsements()).resolves.toEqual([]);
+  } finally {
+    fetchMock.restore();
+  }
+});
+
 test("endorsement creation writes the target, quote, and optional project to the domain endpoint", async () => {
   const endorsement = {
     id: "endorsement_1",

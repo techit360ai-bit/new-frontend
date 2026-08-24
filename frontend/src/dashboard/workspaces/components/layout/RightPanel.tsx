@@ -111,7 +111,7 @@ export function RightPanel() {
     location.pathname === '/workspaces/'
   ) {
     return (
-      <div className="w-[320px] bg-white border-l border-gray-200 flex flex-col">
+      <div className="w-[320px] shrink-0 bg-white border-l border-gray-200 flex flex-col max-md:hidden">
         <div className="p-4 border-b border-gray-200">
           <h3 className="font-semibold">Team Activity</h3>
           <p className="text-xs text-gray-500 mt-1">Live workspace updates</p>

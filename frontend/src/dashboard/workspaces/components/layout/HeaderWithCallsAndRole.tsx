@@ -75,10 +75,10 @@ export function HeaderWithCallsAndRole() {
     Promise.allSettled([fetchWorkspaces(), listTasks(), listNotifications()]).then((results) => {
       if (!alive) return;
       const [workspaceResult, taskResult, notificationResult] = results;
-      setWorkspaces(workspaceResult.status === 'fulfilled' ? workspaceResult.value : []);
-      setTasks(taskResult.status === 'fulfilled' ? taskResult.value : []);
+      setWorkspaces(workspaceResult.status === 'fulfilled' && Array.isArray(workspaceResult.value) ? workspaceResult.value : []);
+      setTasks(taskResult.status === 'fulfilled' && Array.isArray(taskResult.value) ? taskResult.value : []);
       setUnreadNotifications(
-        notificationResult.status === 'fulfilled'
+        notificationResult.status === 'fulfilled' && Array.isArray(notificationResult.value)
           ? notificationResult.value.filter((notification) => !notification.read).length
           : 0,
       );

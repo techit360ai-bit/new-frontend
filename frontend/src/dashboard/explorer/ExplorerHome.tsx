@@ -28,7 +28,7 @@ export default function ExplorerHome() {
       onNavigate={() => setMobileMenuOpen(false)}
       backPath="/"
       items={mobileItems}
-      primaryItems={mobileItems.slice(0, 4)}
+      primaryItems={[mobileItems[0], mobileItems[1], mobileItems[3], mobileItems[4], mobileItems[5]]}
     />
     <header className="hidden border-b border-border-default bg-card/90 px-5 py-4 backdrop-blur lg:block">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">

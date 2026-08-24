@@ -211,6 +211,7 @@
 }
 
 body { min-width: 320px; }
+html, body, #root { max-width: 100%; overflow-x: clip; }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 *:focus-visible { outline: 2px solid var(--techit-app-brand); outline-offset: 2px; }
 
@@ -233,9 +234,19 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 }
 
 @media (max-width: 767px) {
+  .app-shell { width: 100%; min-width: 0; min-height: 100dvh; height: auto !important; overflow-x: clip !important; overflow-y: visible !important; }
+  .app-shell > main, .app-shell .app-role-content { min-width: 0; width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
   .app-shell :where(input, select, textarea) { min-height: 44px; }
   .app-shell :where(table) { min-width: 640px; }
   .app-shell :where(.overflow-x-auto) { overscroll-behavior-inline: contain; }
+}
+
+.app-incubation-layout { min-width: 0; }
+@media (max-width: 767px) {
+  .app-incubation-layout { min-height: calc(100dvh - 3.5rem); flex-direction: column; }
+  .app-incubation-layout > aside { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: .5rem; border-right: 0; border-bottom: 1px solid var(--techit-app-border); }
+  .app-incubation-layout > aside > button { flex: 0 0 auto; margin: 0; min-width: 76px; }
+  .app-incubation-layout > div { min-width: 0; width: 100%; }
 }
 
 /* Legacy light role pages inherit a coherent dark surface system even where

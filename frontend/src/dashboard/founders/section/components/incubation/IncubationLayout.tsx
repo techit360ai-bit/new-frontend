@@ -28,7 +28,7 @@ export default function IncubationLayout() {
   );
 
   return (
-    <div className="flex h-full min-h-[calc(100vh-3.5rem)]">
+    <div className="app-incubation-layout flex h-full min-h-[calc(100vh-3.5rem)]">
       <aside className="w-16 shrink-0 bg-white border-r border-slate-200 flex flex-col items-stretch py-4 gap-2">
         <SidebarPill
           label="Main"

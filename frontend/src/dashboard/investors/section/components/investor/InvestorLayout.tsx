@@ -20,6 +20,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Scale,
+  MessageSquare,
 } from 'lucide-react';
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
@@ -58,6 +59,7 @@ export function InvestorLayout() {
     { path: '/investor/profile', label: 'Profile', icon: UserCircle },
     { path: '/investor/trust', label: 'Trust Dashboard', icon: ShieldCheck },
     { path: '/investor/mentorship', label: 'Mentorship Hub', icon: GraduationCap },
+    { path: '/workspaces/chat', label: 'Messages', icon: MessageSquare },
     { path: '/compliance', label: 'Privacy & Compliance', icon: Scale },
     // Cross-section
     { path: '/feed', label: 'Feed', icon: Rss, external: true },
@@ -167,16 +169,20 @@ export function InvestorLayout() {
           disabled: item.comingSoon,
           badge: item.comingSoon ? 'Soon' : undefined,
         }))}
-        primaryItems={[navItems[0], navItems[1], navItems[4], navItems[10]].map((item) => ({
+        primaryItems={[navItems[0], navItems[1], navItems[15], navItems[12], navItems[4]].map((item) => ({
           label: item.label,
           path: item.path,
           icon: item.icon,
           active: !item.external && isActive(item.path),
         }))}
+        headerActions={<>
+          <Link to="/workspaces/chat" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/investor/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
+        </>}
       />
 
       {/* Main Content */}
-      <main className="app-role-content flex-1 overflow-auto pt-16 lg:pt-0">
+      <main className="app-role-content flex-1 overflow-auto pt-14 lg:pt-0">
         <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
         <Outlet />
       </main>

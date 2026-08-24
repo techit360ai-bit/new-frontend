@@ -47,11 +47,10 @@ export function Sidebar() {
 
   return (
     <aside 
-      className={`${isCollapsed ? 'w-[72px]' : 'w-[240px]'} bg-[#0A1929] text-white flex flex-col transition-all duration-300`}
-      style={{ height: 'calc(100vh - 60px)' }}
+      className={`${isCollapsed ? 'w-[72px]' : 'w-[240px]'} bg-[#0A1929] text-white flex flex-col transition-all duration-300 max-md:w-full max-md:h-auto max-md:flex-row max-md:overflow-x-auto md:h-[calc(100vh-60px)]`}
     >
       {/* Logo/Branding */}
-      <div className="p-6 flex items-center justify-between">
+      <div className="p-6 flex items-center justify-between max-md:hidden">
         {!isCollapsed && (
           <div>
             <div className="text-lg font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -69,7 +68,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-3 space-y-1 max-md:flex max-md:min-w-max max-md:gap-1 max-md:py-2">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
