@@ -29,6 +29,7 @@ const CollabAcademy = lazy(() => import("@/dashboard/collaborators/section/compo
 const CollabSettings = lazy(() => import("@/dashboard/collaborators/section/components/collab/Settings").then((m) => ({ default: m.Settings })));
 const IncubationHub = lazy(() => import("@/dashboard/incubationHub"));
 const PublicValidation = lazy(() => import("@/dashboard/PublicValidation"));
+const PublicEvidenceSummary = lazy(() => import("@/dashboard/PublicEvidenceSummary"));
 const MatchResults = lazy(() => import("@/dashboard/matchResults"));
 const OpportunityHub = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityHub"));
 const OpportunityDetail = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityDetail"));
@@ -274,6 +275,7 @@ const App = () => {
         </Route>
         <Route path="/mentorship/invite/:token" element={<RequireAuth><MentorshipInviteAccept /></RequireAuth>} />
         <Route path="/validate/:token" element={<PublicValidation />} />
+        <Route path="/validation-evidence/:token" element={<PublicEvidenceSummary />} />
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
         <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
