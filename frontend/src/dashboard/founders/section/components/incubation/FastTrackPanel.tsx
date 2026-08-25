@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Briefcase,
   FileText,
@@ -61,6 +61,7 @@ const PIPELINE_STEPS = [
 
 export function FastTrackPanel() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Step 1 state
@@ -144,6 +145,11 @@ export function FastTrackPanel() {
       setProjectId(result.project_id || null);
       setWorkspaceCreated(Boolean(result.workspace_id));
       setPipelineRunning(false);
+      if (result.incubation_session_id) {
+        const next = new URLSearchParams(searchParams);
+        next.set("validationSession", result.incubation_session_id);
+        setSearchParams(next, { replace: true });
+      }
       setTimeout(() => setStep(3), 800);
     } else {
       setPipelineRunning(false);

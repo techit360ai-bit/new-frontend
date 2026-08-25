@@ -32,6 +32,11 @@ function arrayValue(value: unknown): Array<Record<string, unknown>> {
   return Array.isArray(value) ? value.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object") : [];
 }
 
+function answerValue(value: unknown): Record<string, string> {
+  const record = objectValue(value);
+  return Object.fromEntries(Object.entries(record).map(([key, answer]) => [key, typeof answer === "string" ? answer : String(answer ?? "")]));
+}
+
 export function IncubationHumanLoopPanel({
   validation,
   workspaceId,
@@ -44,10 +49,10 @@ export function IncubationHumanLoopPanel({
   const navigate = useNavigate();
   const [session, setSession] = useState<IncubationSession | null>(validation?.session ?? null);
   const [questions, setQuestions] = useState<FounderQuestion[]>(validation?.founder_questions ?? []);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>(() => answerValue(validation?.founder_answers ?? validation?.session.state?.founder_answers));
   const [busy, setBusy] = useState<string | null>(null);
-  const [pmf, setPmf] = useState<Record<string, unknown>>({});
-  const [mvp, setMvp] = useState<Record<string, unknown>>({});
+  const [pmf, setPmf] = useState<Record<string, unknown>>(() => objectValue(validation?.pmf_validation ?? validation?.session.state?.pmf_validation));
+  const [mvp, setMvp] = useState<Record<string, unknown>>(() => objectValue(validation?.mvp_plan ?? validation?.session.state?.roadmap));
   const [scope, setScope] = useState("one_week_mvp");
   const [build, setBuild] = useState<SandboxBuild | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -55,7 +60,10 @@ export function IncubationHumanLoopPanel({
 
   useEffect(() => {
     setSession(validation?.session ?? null);
-    setQuestions(validation?.founder_questions ?? []);
+    setQuestions(Array.isArray(validation?.founder_questions) ? validation.founder_questions : []);
+    setAnswers(answerValue(validation?.founder_answers ?? validation?.session.state?.founder_answers));
+    setPmf(objectValue(validation?.pmf_validation ?? validation?.session.state?.pmf_validation));
+    setMvp(objectValue(validation?.mvp_plan ?? validation?.session.state?.roadmap));
   }, [validation]);
 
   const state = objectValue(session?.state);
@@ -74,7 +82,7 @@ export function IncubationHumanLoopPanel({
     setBusy("answers");
     try {
       const result = await submitFounderAnswers(session.id, answers);
-      setSession(result.session); setQuestions(result.founder_questions);
+      setSession(result.session); setQuestions(Array.isArray(result.founder_questions) ? result.founder_questions : []);
       toast.success(result.validation_blocked ? "Answers saved; critical gaps remain" : "Founder questions answered");
     } catch (error) { toast.error(error instanceof Error ? error.message : "Could not save answers"); }
     finally { setBusy(null); }
