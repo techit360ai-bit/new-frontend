@@ -149,6 +149,7 @@ const PostDetailPage = lazy(() => import("@/dashboard/feed/pages/PostDetailPage"
 const MyLogPage = lazy(() => import("@/dashboard/feed/pages/MyLogPage").then((m) => ({ default: m.MyLogPage })));
 const UserProfilePage = lazy(() => import("@/dashboard/feed/pages/UserProfilePage").then((m) => ({ default: m.UserProfilePage })));
 const DirectMessagePage = lazy(() => import("@/dashboard/feed/pages/DirectMessagePage").then((m) => ({ default: m.DirectMessagePage })));
+const SupportCenter = lazy(() => import("@/dashboard/support/SupportCenter"));
 import { MessagingProvider } from "@/contexts/MessagingProvider";
 import { setMessagingToken } from "@/lib/messaging/config";
 const DemoList = lazy(() => import("@/dashboard/demos/DemoList").then((m) => ({ default: m.DemoList })));
@@ -380,6 +381,8 @@ const App = () => {
           <Route path="profile/:userId" element={<UserProfilePage />} />
           <Route path="messages/:userId" element={<DirectMessagePage />} />
         </Route>
+
+        <Route path="/support" element={<RequireAuth><SupportCenter /></RequireAuth>} />
 
         <Route path="/demos"     element={<RequireAuth><DemoList /></RequireAuth>} />
         <Route path="/demos/new" element={<RequireAuth><DemoCreate /></RequireAuth>} />

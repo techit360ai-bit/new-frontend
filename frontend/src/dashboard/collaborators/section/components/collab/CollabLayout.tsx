@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, CheckSquare, TrendingUp, DollarSign, PieChart,
   Sparkles, Award, MessageSquare, Wrench, Rss, UserCircle,
-  Settings as SettingsIcon, ArrowLeft, PanelLeftClose, PanelLeftOpen, Scale,
+  Settings as SettingsIcon, ArrowLeft, PanelLeftClose, PanelLeftOpen, Scale, Ticket,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
@@ -30,6 +30,7 @@ const primaryNav: NavItem[] = [
   { name: "Opportunities", path: "/collaborator/opportunities", icon: Sparkles },
   { name: "Reputation",    path: "/collaborator/reputation",    icon: Award },
   { name: "Messages",      path: "/collaborator/messages",      icon: MessageSquare },
+  { name: "Support",       path: "/support",                    icon: Ticket, external: true },
   { name: "Tools",         path: "/collaborator/tools",         icon: Wrench },
   { name: "Feed",          path: "/feed",                       icon: Rss, external: true },
 ];
@@ -139,6 +140,7 @@ export function CollabLayout() {
   primaryItems={[primaryNav[0], primaryNav[1], primaryNav[9], primaryNav[5], primaryNav[3]].map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
         headerActions={<>
           <Link to="/collaborator/messages" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link>
           <Link to="/collaborator/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
         </>}
       />

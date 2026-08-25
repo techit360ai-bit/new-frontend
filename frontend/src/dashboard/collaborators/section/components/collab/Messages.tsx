@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Paperclip, Send } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Paperclip, Send, Ticket } from "lucide-react";
 import { createConversation, fetchConversations, fetchHistory, markConvRead, restSendDM } from "@/lib/messaging/conversations";
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
 import type { UIConversation, UIMessage } from "@/lib/messaging/types";
@@ -178,8 +179,7 @@ export function Messages() {
           <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
           <p className="text-sm text-slate-500 mt-0.5">{loading ? "Loading live conversations..." : `${convos.length} conversations · ${unreadCount} unread`}</p>
         </div>
-        <button onClick={() => setComposeOpen(true)}
-          className="h-9 px-4 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-sm font-semibold">Compose</button>
+        <div className="flex items-center gap-2"><Link to="/support" className="app-touch-target inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button onClick={() => setComposeOpen(true)} className="h-9 px-4 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-sm font-semibold">Compose</button></div>
       </div>
 
       <div className="flex-1 px-6 lg:px-8 pb-6 max-w-6xl mx-auto w-full overflow-hidden">

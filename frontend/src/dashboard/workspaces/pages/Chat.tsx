@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MoreVertical, Paperclip, Search, Send, Smile } from 'lucide-react';
+import { MoreVertical, Paperclip, Search, Send, Smile, Ticket } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { fetchChannelHistory, fetchChannels, markChannelRead, restSendChannel } from '@/lib/messaging/channels';
@@ -177,9 +178,7 @@ export function Chat() {
               {selectedChannel ? `${liveMessages.length} persisted message${liveMessages.length === 1 ? '' : 's'}` : 'Connect messaging channels to start chatting'}
             </p>
           </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg" aria-label="Channel actions">
-            <MoreVertical className="w-5 h-5 text-gray-600" />
-          </button>
+          <div className="flex items-center gap-2"><Link to="/support" className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button className="p-2 hover:bg-gray-100 rounded-lg" aria-label="Channel actions"><MoreVertical className="w-5 h-5 text-gray-600" /></button></div>
         </div>
 
         {error && (

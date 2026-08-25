@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Paperclip, Send } from "lucide-react";
+import { Paperclip, Send, Ticket } from "lucide-react";
 import {
   createConversation,
   fetchConversations,
@@ -275,12 +275,7 @@ export function Messages() {
               : `${conversations.length} conversations · ${unreadCount} unread`}
           </p>
         </div>
-        <button
-          onClick={() => setComposeOpen(true)}
-          className="h-9 px-4 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-semibold transition-colors"
-        >
-          Compose
-        </button>
+        <div className="flex items-center gap-2"><Link to="/support" className="app-touch-target inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button onClick={() => setComposeOpen(true)} className="h-9 px-4 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-semibold transition-colors">Compose</button></div>
       </div>
 
       <div className="flex-1 px-6 lg:px-8 pb-6 max-w-6xl mx-auto w-full overflow-hidden">
