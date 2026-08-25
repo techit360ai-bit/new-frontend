@@ -68,6 +68,57 @@ export interface ValidationSessionSummary {
   updatedAt?: string;
 }
 
+export interface CustomerValidationSession {
+  id: string;
+  projectId: string;
+  title: string;
+  description?: string | null;
+  objective: string;
+  mode: string;
+  stage: string;
+  questions: Array<{ id: string; question: string; answer_type?: string; required?: boolean; options?: string[] }>;
+  status: string;
+  configurationLocked: boolean;
+  totalResponseCount: number;
+  qualifiedResponseCount: number;
+  qualityCounts: Record<string, number>;
+  confidenceLevel: string;
+  expiresAt?: string | null;
+  publicToken?: string;
+  publicUrlPath?: string;
+}
+
+export function createCustomerValidationSession(body: Record<string, unknown>) {
+  return apiPost<CustomerValidationSession>("/incubation/validate/sessions", body);
+}
+
+export function fetchCustomerValidationSessions(limit = 20) {
+  return apiGet<{ sessions: CustomerValidationSession[] }>(`/incubation/validate/sessions?limit=${limit}`);
+}
+
+export function transitionCustomerValidationSession(sessionId: string, action: "activate" | "pause" | "complete") {
+  return apiPost<CustomerValidationSession>(`/incubation/validate/sessions/${encodeURIComponent(sessionId)}/${action}`);
+}
+
+export async function fetchPublicCustomerValidation(token: string) {
+  const response = await fetch(apiUrl(`/validate/${encodeURIComponent(token)}`));
+  if (!response.ok) throw new Error("Validation link is unavailable");
+  return response.json() as Promise<CustomerValidationSession>;
+}
+
+export async function submitPublicCustomerValidation(token: string, answers: Record<string, unknown>) {
+  const anonymousKey = "techit_validation_anonymous_id";
+  let anonymousId = localStorage.getItem(anonymousKey);
+  if (!anonymousId) { anonymousId = crypto.randomUUID(); localStorage.setItem(anonymousKey, anonymousId); }
+  const response = await fetch(apiUrl(`/validate/${encodeURIComponent(token)}`), {
+    method: "POST", headers: { "Content-Type": "application/json", "X-Validation-Anonymous-Id": anonymousId },
+    body: JSON.stringify({ answers }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(String(data.detail || "Response could not be recorded"));
+  return data as { message: string };
+}
+
 export interface SandboxBuild {
   id: string;
   status: string;

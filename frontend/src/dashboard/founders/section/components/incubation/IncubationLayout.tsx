@@ -6,6 +6,7 @@ import { MainIncubationPanel } from "./MainIncubationPanel";
 import { FastTrackPanel } from "./FastTrackPanel";
 import { HackathonPanel } from "./HackathonPanel";
 import { Academy } from "@/dashboard/_shared/academy/Academy";
+import { CustomerValidationPanel } from "./CustomerValidationPanel";
 
 type Panel = "main" | "fast-track" | "hackathon" | "learn";
 
@@ -60,6 +61,7 @@ export default function IncubationLayout() {
       </aside>
       <div className="min-w-0 flex-1">
         {panel === "main" && <MainIncubationPanel />}
+        {panel === "main" && <div className="px-4 pb-8 md:px-6"><CustomerValidationPanel /></div>}
         {panel === "fast-track" && <FastTrackPanel />}
         {panel === "hackathon" && <HackathonPanel />}
         {panel === "learn" && <Academy role="founder" userName={founderProfile.name.split(" ")[0]} />}
