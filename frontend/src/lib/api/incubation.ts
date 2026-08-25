@@ -92,12 +92,55 @@ export function createCustomerValidationSession(body: Record<string, unknown>) {
   return apiPost<CustomerValidationSession>("/incubation/validate/sessions", body);
 }
 
+export function draftCustomerValidationQuestions(body: Record<string, unknown>) {
+  return apiPost<{ questions: Array<{ id: string; question: string; answer_type: string; required: boolean; options: string[] }>; modelUsed?: string }>("/incubation/validate/questions", body);
+}
+
+export function customerValidationEmbedCode(url: string) {
+  return `<iframe title="Customer validation" src="${url}?embed=true" loading="lazy" style="width:100%;min-height:520px;border:0"></iframe>`;
+}
+
+
 export function fetchCustomerValidationSessions(limit = 20) {
   return apiGet<{ sessions: CustomerValidationSession[] }>(`/incubation/validate/sessions?limit=${limit}`);
 }
 
 export function transitionCustomerValidationSession(sessionId: string, action: "activate" | "pause" | "complete") {
   return apiPost<CustomerValidationSession>(`/incubation/validate/sessions/${encodeURIComponent(sessionId)}/${action}`);
+}
+
+export function fetchCustomerValidationFindings(sessionId: string) {
+  return apiGet<{ recurringPainPoints: Array<{ theme: string; count: number; share: number; quotes: string[] }>; whatWeLearned: string[]; whatRemainsUncertain: string[] }>(`/incubation/validate/sessions/${encodeURIComponent(sessionId)}/findings`);
+}
+
+export function fetchCustomerValidationRecommendations(sessionId: string) {
+  return apiGet<{ recommendations: Array<{ id: string; title: string; reason: string; urgency: string; confidence: string; sourceEngines: string[]; status: string }> }>(`/incubation/validate/sessions/${encodeURIComponent(sessionId)}/recommendations`);
+}
+
+export function createCustomerValidationSynthesis(sessionId: string) {
+  return apiPost<{ synthesis: { verdict: string; confidence: string; findings: Record<string, unknown>; limitations: string[] } }>(`/incubation/validate/sessions/${encodeURIComponent(sessionId)}/synthesis`);
+}
+
+export function createCustomerValidationShare(sessionId: string, scope: string) {
+  return apiPost<{ shareToken: string; report: Record<string, unknown> }>(`/incubation/validate/sessions/${encodeURIComponent(sessionId)}/share`, { scope });
+}
+
+export function customerValidationShareTargets(url: string) {
+  const encoded = encodeURIComponent(url);
+  return {
+    whatsapp: `https://wa.me/?text=${encoded}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`,
+    x: `https://x.com/intent/post?url=${encoded}`,
+    telegram: `https://t.me/share/url?url=${encoded}`,
+    email: `mailto:?subject=Customer%20evidence&body=${encoded}`,
+    sms: `sms:?body=${encoded}`,
+  };
+}
+
+export function openCustomerValidationStream(sessionId: string, onSnapshot: (snapshot: { response_count: number; qualified_count: number; confidence: string; synthesis_status: string }) => void) {
+  const source = new EventSource(apiUrl(`/incubation/validate/sessions/${encodeURIComponent(sessionId)}/stream`), { withCredentials: true });
+  source.addEventListener("validation_snapshot", (event) => { try { onSnapshot(JSON.parse((event as MessageEvent).data)); } catch { /* ignore malformed freshness events */ } });
+  return () => source.close();
 }
 
 export async function fetchPublicCustomerValidation(token: string) {

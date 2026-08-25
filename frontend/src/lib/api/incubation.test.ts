@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { setAuthTokenGetter } from "./client";
-import { analyzePivot, createSandboxBuild, fetchValidationSession, fetchValidationSessions, runVenturePipeline, startValidation, submitFounderAnswers } from "./incubation";
+import { analyzePivot, createCustomerValidationSession, createCustomerValidationShare, createSandboxBuild, fetchValidationSession, fetchValidationSessions, runVenturePipeline, startValidation, submitFounderAnswers } from "./incubation";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -61,4 +61,16 @@ test("validation resume endpoints list and load persisted founder sessions", asy
 test("validation session listing normalizes a sparse response", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => response({ data: [] })));
   await expect(fetchValidationSessions()).resolves.toEqual([]);
+});
+
+test("customer validation uses the immutable evidence endpoints and public share scope", async () => {
+  const fetchMock = vi.fn(async (..._args: Parameters<typeof fetch>) => response({ id: "cv1", publicToken: "token" }));
+  vi.stubGlobal("fetch", fetchMock);
+  await createCustomerValidationSession({ project_id: "p1", objective: "problem_discovery", mode: "survey", questions: [] });
+  await createCustomerValidationShare("cv1", "public");
+  expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+    "http://localhost:8000/api/v1/incubation/validate/sessions",
+    "http://localhost:8000/api/v1/incubation/validate/sessions/cv1/share",
+  ]);
+  expect((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1]).toMatchObject({ body: JSON.stringify({ scope: "public" }) });
 });
