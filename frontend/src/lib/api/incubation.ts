@@ -3,7 +3,7 @@
 // Incubation Hub pipeline — ai-router /api/v1/incubation/pipeline/run.
 // Returns the persisted project_id so the analyzed venture can flow into a workspace.
 
-import { apiPost, apiUpload, getAuthToken, withFallback } from "./client";
+import { apiGet, apiPost, apiUpload, getAuthToken, withFallback } from "./client";
 import { apiUrl } from "./config";
 import { domainPost } from "@/lib/domainApi";
 
@@ -35,15 +35,37 @@ export interface IncubationSession {
   currentPhase: number;
   version: number;
   state: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ValidationStartResult {
   session: IncubationSession;
   founder_questions: FounderQuestion[];
+  founder_answers?: Record<string, string>;
   evidence?: Record<string, unknown>;
   geography?: Record<string, unknown>;
   company_building?: Record<string, unknown>;
+  pmf_validation?: Record<string, unknown>;
+  mvp_plan?: Record<string, unknown>;
+  venture_data?: Record<string, unknown>;
+  blueprint?: Record<string, unknown>;
   workspace_id?: string;
+}
+
+export interface ValidationSessionSummary {
+  id: string;
+  projectId?: string | null;
+  status: string;
+  currentPhase: number;
+  version: number;
+  ventureName: string;
+  summary: string;
+  workspaceId?: string | null;
+  questionCount: number;
+  answeredCount: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SandboxBuild {
@@ -217,6 +239,14 @@ export function persistIndividualAnalysis(
 
 export const startValidation = (ventureData: Record<string, unknown>) =>
   apiPost<ValidationStartResult>("/incubation/validation/start", ventureData);
+
+export const fetchValidationSessions = async (limit = 20): Promise<ValidationSessionSummary[]> => {
+  const response = await apiGet<{ sessions?: ValidationSessionSummary[] }>(`/incubation/validation/sessions?limit=${encodeURIComponent(limit)}`);
+  return Array.isArray(response?.sessions) ? response.sessions : [];
+};
+
+export const fetchValidationSession = (sessionId: string) =>
+  apiGet<ValidationStartResult>(`/incubation/validation/sessions/${encodeURIComponent(sessionId)}`);
 
 export const submitFounderAnswers = (sessionId: string, answers: Record<string, string>) =>
   apiPost<{ session: IncubationSession; founder_questions: FounderQuestion[]; validation_blocked: boolean }>(`/incubation/validation/${encodeURIComponent(sessionId)}/answers`, { answers });

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Activity,
   AlertCircle,
@@ -12,6 +12,7 @@ import {
   Download,
   FileText,
   Lightbulb,
+  History,
   RefreshCw,
   Rocket,
   Send,
@@ -43,8 +44,11 @@ import {
   designTechStack,
   uploadIncubationDocument,
   downloadProjectAnalysis,
+  fetchValidationSession,
+  fetchValidationSessions,
   persistIndividualAnalysis,
   type PipelineBlueprint,
+  type ValidationSessionSummary,
   type ValidationStartResult,
 } from "@/lib/api/incubation";
 import { IncubationHumanLoopPanel } from "./IncubationHumanLoopPanel";
@@ -160,16 +164,22 @@ function EvaluationBar({ label, score }: { label: string; score: number }) {
 
 export function MainIncubationPanel() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedSessionId = searchParams.get("validationSession") ?? "";
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisType | null>(null);
   const [ideaInput, setIdeaInput] = useState("");
   const [copilotInput, setCopilotInput] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
-  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1280);
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
   const [analysisResult, setAnalysisResult] = useState<Record<string, unknown> | null>(null);
   const [blueprintData, setBlueprintData] = useState<PipelineBlueprint | null>(null);
   const [targetGeography, setTargetGeography] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
+  const [validationSessions, setValidationSessions] = useState<ValidationSessionSummary[]>([]);
+  const [resumeLoading, setResumeLoading] = useState(true);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+  const [resumeDismissed, setResumeDismissed] = useState(false);
   const ideaTextareaRef = useRef<HTMLTextAreaElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
@@ -201,6 +211,69 @@ export function MainIncubationPanel() {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    setResumeLoading(true);
+    setResumeError(null);
+    void fetchValidationSessions()
+      .then(async (sessions) => {
+        if (!active) return;
+        setValidationSessions(sessions);
+        if (resumeDismissed && !requestedSessionId) return;
+        const targetId = requestedSessionId || sessions[0]?.id;
+        if (!targetId) return;
+        const resumed = await fetchValidationSession(targetId);
+        if (!active) return;
+        const venture = resumed.venture_data ?? {};
+        const blueprint = resumed.blueprint ?? {};
+        const sessionProjectId = resumed.session.projectId ?? undefined;
+        setBlueprintData({
+          ...blueprint,
+          project_id: sessionProjectId,
+          venture_name: asText(blueprint.venture_name) || asText(venture.startup_name) || "Your Startup",
+          workspace_id: resumed.workspace_id,
+          incubation_session_id: resumed.session.id,
+          validation: resumed,
+        });
+        setAnalysisResult(Object.keys(blueprint).length > 0 ? blueprint : null);
+        setIdeaInput(asText(venture.solution) || asText(venture.problem) || asText(venture.startup_name));
+        setTargetGeography(asText(venture.target_geography));
+        if (!requestedSessionId) {
+          setSearchParams((current) => {
+            const next = new URLSearchParams(current);
+            next.set("validationSession", targetId);
+            return next;
+          }, { replace: true });
+        }
+      })
+      .catch((error) => {
+        if (active) setResumeError(error instanceof Error ? error.message : "Saved validations could not be loaded.");
+      })
+      .finally(() => {
+        if (active) setResumeLoading(false);
+      });
+    return () => { active = false; };
+  }, [requestedSessionId, resumeDismissed, setSearchParams]);
+
+  const selectValidationSession = (sessionId: string) => {
+    setResumeDismissed(false);
+    const next = new URLSearchParams(searchParams);
+    next.set("validationSession", sessionId);
+    setSearchParams(next);
+  };
+
+  const startNewValidation = () => {
+    setResumeDismissed(true);
+    setBlueprintData(null);
+    setAnalysisResult(null);
+    setIdeaInput("");
+    setTargetGeography("");
+    const next = new URLSearchParams(searchParams);
+    next.delete("validationSession");
+    setSearchParams(next);
+    requestAnimationFrame(() => ideaTextareaRef.current?.focus());
+  };
+
   const projectId = asText(blueprintData?.project_id);
   const ventureName = asText(blueprintData?.venture_name) || "Your Startup";
   const unicornScore = asScore(blueprintData?.unicorn_potential_score);
@@ -227,6 +300,12 @@ export function MainIncubationPanel() {
       }
       setBlueprintData(result);
       setAnalysisResult(result);
+      setResumeDismissed(false);
+      if (result.incubation_session_id) {
+        const next = new URLSearchParams(searchParams);
+        next.set("validationSession", result.incubation_session_id);
+        setSearchParams(next, { replace: true });
+      }
       toast.success("Full pipeline analysis complete");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Analysis failed";
@@ -361,9 +440,9 @@ export function MainIncubationPanel() {
   };
 
   return (
-    <div className="flex h-screen bg-violet-50">
+    <div className="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col overflow-x-clip bg-violet-50 lg:h-screen lg:flex-row">
       {/* LEFT SIDEBAR - 264px */}
-      <aside className="w-[264px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col">
+      <aside className="hidden w-[264px] flex-shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
         <div className="border-b border-gray-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Brain className="h-5 w-5 text-violet-600" />
@@ -425,10 +504,10 @@ export function MainIncubationPanel() {
       </aside>
 
       {/* CENTER PANEL - flex-1 */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="border-b border-gray-200 bg-white px-6 py-4">
-          <div className="flex items-center justify-between">
+        <header className="border-b border-gray-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h1 className="text-xl font-bold text-gray-900">Real-Time AI Analysis</h1>
               <div className="flex items-center gap-2 mt-1">
@@ -443,16 +522,62 @@ export function MainIncubationPanel() {
             <button
               onClick={() => void handleExportReport().catch((err) => toast.error(err instanceof Error ? err.message : "Download failed"))}
               disabled={!projectId}
-              className="flex items-center gap-2 bg-violet-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
+              className="app-touch-target flex shrink-0 items-center gap-2 rounded bg-violet-600 px-3 text-sm font-medium text-white hover:bg-violet-700 disabled:bg-gray-300 sm:px-4"
             >
               <Download className="h-4 w-4" />
-              Download Analysis
+              <span className="hidden sm:inline">Download Analysis</span>
             </button>
           </div>
+          <label className="mt-3 block lg:hidden">
+            <span className="sr-only">Choose analysis type</span>
+            <select
+              value={selectedAnalysis ?? ""}
+              onChange={(event) => { if (event.target.value) void handleRunIndividualAnalysis(event.target.value as AnalysisType); }}
+              disabled={analyzing}
+              className="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-800"
+            >
+              <option value="">Choose an analysis type</option>
+              {ANALYSIS_TYPES.map((analysis) => <option key={analysis.id} value={analysis.id}>{analysis.label}</option>)}
+            </select>
+          </label>
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <section className="mb-6 border border-violet-200 bg-white p-4 sm:rounded-lg">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <History className="h-5 w-5 shrink-0 text-violet-600" />
+                <div className="min-w-0">
+                  <h2 className="text-sm font-semibold text-slate-900">Saved idea validations</h2>
+                  <p className="text-xs text-slate-500">Continue your latest founder Q&amp;A or open another persisted session.</p>
+                </div>
+              </div>
+              <button type="button" onClick={startNewValidation} className="min-h-11 rounded-md border border-violet-300 px-3 text-xs font-semibold text-violet-800 hover:bg-violet-50">Start new analysis</button>
+            </div>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <label className="min-w-0 flex-1">
+                <span className="sr-only">Select saved validation</span>
+                <select
+                  value={requestedSessionId}
+                  onChange={(event) => event.target.value ? selectValidationSession(event.target.value) : startNewValidation()}
+                  disabled={resumeLoading || validationSessions.length === 0}
+                  className="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400"
+                >
+                  {validationSessions.length === 0 && <option value="">No saved validations</option>}
+                  {validationSessions.length > 0 && <option value="">New analysis</option>}
+                  {validationSessions.map((session) => (
+                    <option key={session.id} value={session.id}>
+                      {session.ventureName} - {session.status.replaceAll("_", " ")} - {session.answeredCount}/{session.questionCount} answered
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {resumeLoading && <span className="text-xs text-slate-500">Loading saved work...</span>}
+              {resumeError && <span className="text-xs text-red-600">{resumeError}</span>}
+            </div>
+          </section>
+
           {/* Success Banner */}
           {blueprintData && projectId && (
             <div className="mb-6 border border-emerald-200 bg-emerald-50 rounded-lg p-4">
@@ -470,7 +595,7 @@ export function MainIncubationPanel() {
 
           {/* Hero Score Cards */}
           {(unicornScore !== null || investmentScore !== null) && (
-            <div className="mb-6 grid grid-cols-2 gap-4">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {unicornScore !== null && (
                 <div className="bg-gradient-to-br from-violet-600 to-violet-900 rounded-lg p-6 text-white">
                   <div className="flex items-center justify-between mb-4">
@@ -579,7 +704,7 @@ export function MainIncubationPanel() {
           {analysisResult && (
             <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Next AI Actions</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   onClick={async () => {
                     if (!ideaInput.trim()) { toast.error("Please enter your startup idea first"); return; }
@@ -670,7 +795,7 @@ export function MainIncubationPanel() {
           )}
 
           {/* Empty State */}
-          {!analysisResult && !analyzing && (
+          {!analysisResult && !analyzing && !blueprintData?.incubation_session_id && (
             <div className="flex flex-col items-center justify-center min-h-96 text-center">
               <Brain className="h-16 w-16 text-violet-300 mb-4" />
               <h2 className="text-xl font-bold text-gray-900 mb-2">No Analysis Yet</h2>
@@ -687,7 +812,7 @@ export function MainIncubationPanel() {
             <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="Country, city or region" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
             <ModelSelector value={selectedModel} onChange={setSelectedModel} />
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <textarea
               ref={ideaTextareaRef}
               value={ideaInput}
@@ -696,7 +821,7 @@ export function MainIncubationPanel() {
               rows={2}
               className="flex-1 text-sm border border-gray-300 rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
             />
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
               <button
                 onClick={() => void handleRunFullAnalysis()}
                 disabled={!ideaInput.trim() || analyzing}
@@ -727,7 +852,9 @@ export function MainIncubationPanel() {
 
       {/* RIGHT PANEL - 420px, collapsible */}
       {rightPanelOpen && (
-        <aside className="w-[420px] flex-shrink-0 border-l border-gray-200 bg-white flex flex-col">
+        <>
+        <button type="button" aria-label="Close document preview" onClick={() => setRightPanelOpen(false)} className="fixed inset-0 z-[60] bg-black/35 xl:hidden" />
+        <aside className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[420px] flex-shrink-0 flex-col border-l border-gray-200 bg-white xl:static xl:z-auto xl:w-[420px]">
           <div className="border-b border-gray-200 p-4 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900">Document Preview</h2>
             <button onClick={() => setRightPanelOpen(false)} className="text-gray-500 hover:text-gray-700">
@@ -822,13 +949,15 @@ export function MainIncubationPanel() {
             </button>
           </div>
         </aside>
+        </>
       )}
 
       {/* Toggle button when panel is closed */}
       {!rightPanelOpen && (
         <button
           onClick={() => setRightPanelOpen(true)}
-          className="fixed right-4 top-1/2 -translate-y-1/2 bg-violet-600 text-white p-2 rounded-l shadow-lg hover:bg-violet-700"
+          className="fixed right-4 top-1/2 z-30 -translate-y-1/2 rounded-l bg-violet-600 p-2 text-white shadow-lg hover:bg-violet-700"
+          aria-label="Open document preview"
         >
           <ChevronRight className="h-5 w-5 rotate-180" />
         </button>

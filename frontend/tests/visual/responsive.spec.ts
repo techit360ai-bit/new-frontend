@@ -287,6 +287,60 @@ test("mobile role navigation opens and traps the page behind the drawer", async 
   await expect(menuButton).toBeFocused();
 });
 
+test("founder idea-validation Q&A resumes after refresh", async ({ page }) => {
+  await authenticateAs(page, "founder");
+  await page.route("http://localhost:8000/api/v1/incubation/validation/sessions?limit=20", (route) => route.fulfill({ json: {
+    sessions: [{
+      id: "validation-resume-1",
+      projectId: "project-resume-1",
+      status: "questions_pending",
+      currentPhase: 2,
+      version: 3,
+      ventureName: "Persistent Mobility",
+      summary: "A saved founder validation session.",
+      workspaceId: "workspace-resume-1",
+      questionCount: 2,
+      answeredCount: 1,
+      updatedAt: "2026-08-25T08:00:00.000Z",
+    }],
+  } }));
+  await page.route("http://localhost:8000/api/v1/incubation/validation/sessions/validation-resume-1", (route) => route.fulfill({ json: {
+    session: {
+      id: "validation-resume-1",
+      projectId: "project-resume-1",
+      status: "questions_pending",
+      currentPhase: 2,
+      version: 3,
+      state: { founder_answers: { customer: "Regional fleet operators" } },
+    },
+    founder_questions: [
+      { id: "customer", question: "Who is the first paying customer?", why_it_matters: "Defines the initial buyer." },
+      { id: "problem", question: "Which urgent problem do they have?", why_it_matters: "Tests problem intensity." },
+    ],
+    founder_answers: { customer: "Regional fleet operators" },
+    evidence: { research_mode: "live", sources: [] },
+    geography: { primary_geography: { country: "Hungary" } },
+    company_building: {},
+    pmf_validation: { status: "blocked" },
+    mvp_plan: {},
+    workspace_id: "workspace-resume-1",
+    venture_data: { startup_name: "Persistent Mobility", solution: "Fleet settlement automation", target_geography: "Hungary" },
+    blueprint: { venture_name: "Persistent Mobility", investment_score: 62 },
+  } }));
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/incubation-hub");
+  await expect(page).toHaveURL(/validationSession=validation-resume-1/);
+  await expect(page.getByRole("heading", { name: "Founder Validation & Human Decisions" })).toBeVisible();
+  await expect(page.getByText("Who is the first paying customer?")).toBeVisible();
+  await expect(page.getByText("Who is the first paying customer?").locator("..").locator("textarea")).toHaveValue("Regional fleet operators");
+
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Founder Validation & Human Decisions" })).toBeVisible();
+  await expect(page.getByText("Who is the first paying customer?").locator("..").locator("textarea")).toHaveValue("Regional fleet operators");
+  await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
 const denseMobileRoutes = [
   { role: "investor", route: "/investor/watchlist", heading: /Watchlist & Signals/i },
   { role: "investor", route: "/investor/data-rooms", heading: /Data Rooms/i },

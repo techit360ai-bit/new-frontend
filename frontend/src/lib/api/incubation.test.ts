@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { setAuthTokenGetter } from "./client";
-import { analyzePivot, createSandboxBuild, runVenturePipeline, startValidation, submitFounderAnswers } from "./incubation";
+import { analyzePivot, createSandboxBuild, fetchValidationSession, fetchValidationSessions, runVenturePipeline, startValidation, submitFounderAnswers } from "./incubation";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -41,4 +41,24 @@ test("validation and sandbox endpoints expose approval workflow", async () => {
     "http://localhost:8000/api/v1/incubation/validation/s1/answers",
     "http://localhost:8000/api/v1/incubation/validation/s1/builds",
   ]);
+});
+
+test("validation resume endpoints list and load persisted founder sessions", async () => {
+  const fetchMock = vi.fn(async (url: string) => {
+    if (url.includes("/validation/sessions?")) return response({ sessions: [{ id: "s1", ventureName: "Venture" }] });
+    return response({ session: { id: "s1", status: "questions_pending", currentPhase: 2, version: 1, state: {} }, founder_questions: [], founder_answers: { customer: "SMBs" } });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  await expect(fetchValidationSessions()).resolves.toEqual([{ id: "s1", ventureName: "Venture" }]);
+  await expect(fetchValidationSession("s1")).resolves.toMatchObject({ founder_answers: { customer: "SMBs" } });
+  expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+    "http://localhost:8000/api/v1/incubation/validation/sessions?limit=20",
+    "http://localhost:8000/api/v1/incubation/validation/sessions/s1",
+  ]);
+});
+
+test("validation session listing normalizes a sparse response", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => response({ data: [] })));
+  await expect(fetchValidationSessions()).resolves.toEqual([]);
 });

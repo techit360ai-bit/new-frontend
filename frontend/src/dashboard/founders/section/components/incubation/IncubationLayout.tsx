@@ -12,7 +12,9 @@ type Panel = "main" | "fast-track" | "hackathon" | "learn";
 export default function IncubationLayout() {
   const [searchParams] = useSearchParams();
   const initialPanel: Panel =
-    searchParams.get("panel") === "fast-track"
+    searchParams.get("validationSession")
+      ? "main"
+      : searchParams.get("panel") === "fast-track"
       ? "fast-track"
       : searchParams.get("panel") === "hackathon"
       ? "hackathon"
@@ -28,8 +30,8 @@ export default function IncubationLayout() {
   );
 
   return (
-    <div className="app-incubation-layout flex h-full min-h-[calc(100vh-3.5rem)]">
-      <aside className="w-16 shrink-0 bg-white border-r border-slate-200 flex flex-col items-stretch py-4 gap-2">
+    <div className="app-incubation-layout flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-col md:h-full md:flex-row">
+      <aside className="flex w-full shrink-0 flex-row items-stretch gap-2 overflow-x-auto border-b border-slate-200 bg-white p-2 md:w-16 md:flex-col md:overflow-visible md:border-b-0 md:border-r md:py-4">
         <SidebarPill
           label="Main"
           icon={<Brain className="w-5 h-5" />}
@@ -56,7 +58,7 @@ export default function IncubationLayout() {
           onClick={() => setPanel("learn")}
         />
       </aside>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         {panel === "main" && <MainIncubationPanel />}
         {panel === "fast-track" && <FastTrackPanel />}
         {panel === "hackathon" && <HackathonPanel />}
@@ -83,7 +85,7 @@ function SidebarPill({
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex flex-col items-center gap-1 py-3 mx-2 rounded-lg text-[10px] font-medium uppercase tracking-wider transition ${
+      className={`relative mx-0 flex min-w-[72px] flex-1 flex-col items-center gap-1 rounded-lg py-2 text-[10px] font-medium uppercase tracking-wider transition md:mx-2 md:min-w-0 md:flex-none md:py-3 ${
         active
           ? "border-l-2 border-violet-500 bg-violet-50 text-violet-700"
           : "text-slate-600 hover:bg-slate-50"
