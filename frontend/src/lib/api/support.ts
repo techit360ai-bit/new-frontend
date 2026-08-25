@@ -31,3 +31,5 @@ export const createSupportCase = async (input: { category: string; subcategory?:
   (await request<{ case: SupportCase }>('/support/cases', { method: 'POST', body: JSON.stringify(input) })).case;
 export const getSupportCase = (caseId: string) => request<{ case: SupportCase; messages: Array<{ id: string; senderType: string; message: string; createdAt: string }>; events: Array<Record<string, unknown>> }>(`/support/cases/${encodeURIComponent(caseId)}`);
 export const replyToSupportCase = (caseId: string, message: string) => request(`/support/cases/${encodeURIComponent(caseId)}/messages`, { method: 'POST', body: JSON.stringify({ message }) });
+export const reopenSupportCase = (caseId: string) => request<{ case: SupportCase }>(`/support/cases/${encodeURIComponent(caseId)}/reopen`, { method: 'POST' });
+export const submitSupportFeedback = (caseId: string, input: { rating: number; resolutionStatus?: string; comment?: string }) => request(`/support/cases/${encodeURIComponent(caseId)}/feedback`, { method: 'POST', body: JSON.stringify(input) });
