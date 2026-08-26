@@ -150,6 +150,8 @@ const MyLogPage = lazy(() => import("@/dashboard/feed/pages/MyLogPage").then((m)
 const UserProfilePage = lazy(() => import("@/dashboard/feed/pages/UserProfilePage").then((m) => ({ default: m.UserProfilePage })));
 const DirectMessagePage = lazy(() => import("@/dashboard/feed/pages/DirectMessagePage").then((m) => ({ default: m.DirectMessagePage })));
 const SupportCenter = lazy(() => import("@/dashboard/support/SupportCenter"));
+const MomentsPage = lazy(() => import("@/dashboard/moments/MomentsPage"));
+const PublicMomentPage = lazy(() => import("@/dashboard/moments/PublicMomentPage"));
 import { MessagingProvider } from "@/contexts/MessagingProvider";
 import { setMessagingToken } from "@/lib/messaging/config";
 const DemoList = lazy(() => import("@/dashboard/demos/DemoList").then((m) => ({ default: m.DemoList })));
@@ -277,6 +279,7 @@ const App = () => {
         <Route path="/mentorship/invite/:token" element={<RequireAuth><MentorshipInviteAccept /></RequireAuth>} />
         <Route path="/validate/:token" element={<PublicValidation />} />
         <Route path="/validation-evidence/:token" element={<PublicEvidenceSummary />} />
+        <Route path="/moments/:slug" element={<PublicMomentPage />} />
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
         <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
@@ -383,6 +386,7 @@ const App = () => {
         </Route>
 
         <Route path="/support" element={<RequireAuth><SupportCenter /></RequireAuth>} />
+        <Route path="/moments" element={<RequireAuth><MomentsPage /></RequireAuth>} />
 
         <Route path="/demos"     element={<RequireAuth><DemoList /></RequireAuth>} />
         <Route path="/demos/new" element={<RequireAuth><DemoCreate /></RequireAuth>} />

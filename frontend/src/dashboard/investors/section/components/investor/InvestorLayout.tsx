@@ -62,6 +62,7 @@ export function InvestorLayout() {
     { path: '/investor/mentorship', label: 'Mentorship Hub', icon: GraduationCap },
     { path: '/workspaces/chat', label: 'Messages', icon: MessageSquare },
     { path: '/support', label: 'Support', icon: Ticket, external: true },
+    { path: '/moments', label: 'TechIT Moments', icon: Award, external: true },
     { path: '/compliance', label: 'Privacy & Compliance', icon: Scale },
     // Cross-section
     { path: '/feed', label: 'Feed', icon: Rss, external: true },
