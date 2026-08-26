@@ -22,6 +22,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Scale,
+  Ticket,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOrgProfile } from "@/contexts/UserContext";
@@ -56,6 +57,7 @@ const navigation: NavItem[] = [
   { name: "Billing & Usage", path: "/org/billing", icon: CreditCard },
   { name: "Settings", path: "/org/settings", icon: SettingsIcon },
   { name: "Privacy & Compliance", path: "/compliance", icon: Scale },
+  { name: "Support", path: "/support", icon: Ticket, external: true },
 ];
 
 export function OrgLayout() {
@@ -171,7 +173,7 @@ export function OrgLayout() {
           active: item.path === "/org/profile" ? location.pathname === item.path : isActive(item.path),
         }))}
         primaryItems={[navigation[0], navigation[1], navigation[12], navigation[2], navigation[3]].map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
-        headerActions={<Link to="/org/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>}
+        headerActions={<><Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link><Link to="/org/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link></>}
       />
 
       {/* Main Content */}

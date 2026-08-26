@@ -4,7 +4,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FlaskConical, PanelsTopLeft, Rss, Compass, Lightbulb,
   Route as RouteIcon, MessageSquare, Wallet, UserCircle,
-  Settings as SettingsIcon, ArrowLeft, ShieldCheck, PanelLeftClose, PanelLeftOpen, Plug, Scale,
+  Settings as SettingsIcon, ArrowLeft, ShieldCheck, PanelLeftClose, PanelLeftOpen, Plug, Scale, Ticket,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
@@ -34,6 +34,7 @@ const comingSoonNav: NavItem[] = [
 
 const utilityNav: NavItem[] = [
   { name: "Messages",  path: "/founder/messages",         icon: MessageSquare, kind: "link" },
+  { name: "Support", path: "/support", icon: Ticket, kind: "external" },
   { name: "Wallet",    path: "/wallet",       icon: Wallet,        kind: "external" },
 ];
 
@@ -172,6 +173,7 @@ export function FounderLayout() {
   primaryItems={[primaryNav[0], primaryNav[1], primaryNav[5], primaryNav[4], primaryNav[2]].map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
         headerActions={<>
           <Link to="/founder/messages" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link>
           <Link to="/founder/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
         </>}
       />

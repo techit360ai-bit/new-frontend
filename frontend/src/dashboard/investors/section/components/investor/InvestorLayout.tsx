@@ -21,6 +21,7 @@ import {
   PanelLeftOpen,
   Scale,
   MessageSquare,
+  Ticket,
 } from 'lucide-react';
 import { useInvestorProfile } from '@/contexts/UserContext';
 import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
@@ -60,6 +61,7 @@ export function InvestorLayout() {
     { path: '/investor/trust', label: 'Trust Dashboard', icon: ShieldCheck },
     { path: '/investor/mentorship', label: 'Mentorship Hub', icon: GraduationCap },
     { path: '/workspaces/chat', label: 'Messages', icon: MessageSquare },
+    { path: '/support', label: 'Support', icon: Ticket, external: true },
     { path: '/compliance', label: 'Privacy & Compliance', icon: Scale },
     // Cross-section
     { path: '/feed', label: 'Feed', icon: Rss, external: true },
@@ -177,6 +179,7 @@ export function InvestorLayout() {
         }))}
         headerActions={<>
           <Link to="/workspaces/chat" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link>
           <Link to="/investor/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
         </>}
       />
