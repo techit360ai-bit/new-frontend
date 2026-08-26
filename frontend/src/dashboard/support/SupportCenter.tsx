@@ -3,6 +3,8 @@ import { ArrowLeft, Clock3, LifeBuoy, Plus, Send, TicketCheck } from 'lucide-rea
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { createSupportCase, getSupportCase, listSupportCases, reopenSupportCase, replyToSupportCase, submitSupportFeedback, type SupportCase } from '@/lib/api/support';
+import { useAuth } from '@/contexts/AuthContext';
+import { authRoleDashboardPath } from '@/lib/roleRoutes';
 
 const categories = [
   ['account', 'Account'], ['billing', 'Subscription & Billing'], ['credits', 'AI & Credits'],
@@ -15,6 +17,8 @@ function dueLabel(value: string) {
 }
 
 export default function SupportCenter() {
+  const { profile, activeContext } = useAuth();
+  const backPath = authRoleDashboardPath(activeContext?.role || profile?.role);
   const [cases, setCases] = useState<SupportCase[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [detail, setDetail] = useState<Awaited<ReturnType<typeof getSupportCase>> | null>(null);
@@ -56,7 +60,7 @@ export default function SupportCenter() {
   return <main className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between px-4">
-        <div className="flex items-center gap-3"><Link to="/feed" aria-label="Back" className="app-touch-target inline-flex items-center justify-center rounded-lg hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Link><div><p className="text-sm font-semibold">Customer Care</p><p className="text-xs text-muted-foreground">Cases, updates, and responses</p></div></div>
+        <div className="flex items-center gap-3"><Link to={backPath} aria-label="Back to dashboard" className="app-touch-target inline-flex items-center justify-center rounded-lg hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Link><div><p className="text-sm font-semibold">Customer Care</p><p className="text-xs text-muted-foreground">Cases, updates, and responses</p></div></div>
         <button type="button" onClick={() => setCreating(true)} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground"><Plus className="h-4 w-4" />New case</button>
       </div>
     </header>

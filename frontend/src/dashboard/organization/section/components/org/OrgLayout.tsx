@@ -23,7 +23,6 @@ import {
   PanelLeftOpen,
   Scale,
   Ticket,
-  Award,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOrgProfile } from "@/contexts/UserContext";
@@ -59,7 +58,6 @@ const navigation: NavItem[] = [
   { name: "Settings", path: "/org/settings", icon: SettingsIcon },
   { name: "Privacy & Compliance", path: "/compliance", icon: Scale },
   { name: "Support", path: "/support", icon: Ticket, external: true },
-  { name: "TechIT Moments", path: "/moments", icon: Award, external: true },
 ];
 
 export function OrgLayout() {

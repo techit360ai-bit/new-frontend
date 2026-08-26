@@ -150,9 +150,9 @@ const MyLogPage = lazy(() => import("@/dashboard/feed/pages/MyLogPage").then((m)
 const UserProfilePage = lazy(() => import("@/dashboard/feed/pages/UserProfilePage").then((m) => ({ default: m.UserProfilePage })));
 const DirectMessagePage = lazy(() => import("@/dashboard/feed/pages/DirectMessagePage").then((m) => ({ default: m.DirectMessagePage })));
 const SupportCenter = lazy(() => import("@/dashboard/support/SupportCenter"));
-const MomentsPage = lazy(() => import("@/dashboard/moments/MomentsPage"));
 const PublicMomentPage = lazy(() => import("@/dashboard/moments/PublicMomentPage"));
 import { MessagingProvider } from "@/contexts/MessagingProvider";
+import { TechitMomentPrompt } from "@/components/moments/TechitMomentPrompt";
 import { setMessagingToken } from "@/lib/messaging/config";
 const DemoList = lazy(() => import("@/dashboard/demos/DemoList").then((m) => ({ default: m.DemoList })));
 const DemoCreate = lazy(() => import("@/dashboard/demos/DemoCreate").then((m) => ({ default: m.DemoCreate })));
@@ -386,8 +386,6 @@ const App = () => {
         </Route>
 
         <Route path="/support" element={<RequireAuth><SupportCenter /></RequireAuth>} />
-        <Route path="/moments" element={<RequireAuth><MomentsPage /></RequireAuth>} />
-
         <Route path="/demos"     element={<RequireAuth><DemoList /></RequireAuth>} />
         <Route path="/demos/new" element={<RequireAuth><DemoCreate /></RequireAuth>} />
         <Route path="/demos/:id" element={<RequireAuth><DemoRoom /></RequireAuth>} />
@@ -395,6 +393,7 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
+      <TechitMomentPrompt />
       <ThemeToggle />
       <div className="fixed bottom-20 left-5 z-30 lg:bottom-5"><ContextSwitcher /></div>
       <CookieConsent />

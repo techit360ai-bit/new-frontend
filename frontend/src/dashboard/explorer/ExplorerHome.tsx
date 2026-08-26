@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Compass, Lightbulb, MessageCircle, Rocket, Search, Sparkles, Users, CalendarDays, Ticket, Award } from "lucide-react";
+import { Compass, Lightbulb, MessageCircle, Rocket, Search, Sparkles, Users, CalendarDays, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ContextSwitcher } from "@/components/context/ContextSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +10,6 @@ const destinations = [
   { href: "/feed/discover", label: "Discover", icon: Search, description: "Explore founders, collaborators, investors, organizations, and projects." },
   { href: "/feed/messages", label: "Messages", icon: MessageCircle, description: "Continue conversations where TechIT allows connection." },
   { href: "/support", label: "Support", icon: Ticket, description: "Open and track a TechIT customer care case." },
-  { href: "/moments", label: "TechIT Moments", icon: Award, description: "Share meaningful progress from your TechIT journey." },
   { href: "/demos", label: "Events and Hackathons", icon: CalendarDays, description: "Join challenges and meet people building around real problems." },
   { href: "/matches", label: "Opportunities", icon: Users, description: "Find places where your skills, interests, and time can create value." },
   { href: "/workspaces", label: "Learning and AI Guide", icon: Sparkles, description: "Learn the ecosystem and get contextual guidance." },

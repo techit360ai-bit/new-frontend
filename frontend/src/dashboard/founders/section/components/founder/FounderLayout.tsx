@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FlaskConical, PanelsTopLeft, Rss, Compass, Lightbulb,
-  Route as RouteIcon, MessageSquare, Wallet, UserCircle, Sparkles,
+  Route as RouteIcon, MessageSquare, Wallet, UserCircle,
   Settings as SettingsIcon, ArrowLeft, ShieldCheck, PanelLeftClose, PanelLeftOpen, Plug, Scale, Ticket,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
@@ -35,7 +35,6 @@ const comingSoonNav: NavItem[] = [
 const utilityNav: NavItem[] = [
   { name: "Messages",  path: "/founder/messages",         icon: MessageSquare, kind: "link" },
   { name: "Support", path: "/support", icon: Ticket, kind: "external" },
-  { name: "TechIT Moments", path: "/moments", icon: Sparkles, kind: "external" },
   { name: "Wallet",    path: "/wallet",       icon: Wallet,        kind: "external" },
 ];
 
