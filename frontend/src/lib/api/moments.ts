@@ -12,11 +12,11 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 export type MomentMetric = { key: string; label: string; value: number; source: string };
 export type TechitMoment = {
   id: string; role: string; kind: string; title: string; subtitle: string; body: string;
-  metrics: MomentMetric[]; publicSlug: string; publicUrl: string; createdAt: string; generatedAt: string; shareCount: number;
+  metrics: MomentMetric[]; publicSlug: string; publicUrl: string; status: 'pending' | 'published' | 'dismissed'; createdAt: string; generatedAt: string; shareCount: number;
 };
 
-export function listMoments() { return request<{ ok: boolean; moments: TechitMoment[] }>('/moments'); }
-export function generateMoments() { return request<{ ok: boolean; moments: TechitMoment[] }>('/moments/generate', { method: 'POST', body: '{}' }); }
+export function getPendingMoment() { return request<{ ok: boolean; moment: TechitMoment | null }>('/moments/prompt'); }
+export function dismissMoment(momentId: string) { return request<{ ok: boolean }>(`/moments/${encodeURIComponent(momentId)}/dismiss`, { method: 'POST', body: '{}' }); }
 export function shareMoment(momentId: string, channel: string) {
   return request<{ ok: boolean; shareId: string; channel: string; publicUrl: string; shareText: string; channelUrl: string | null; workflow: 'native_share_or_copy' | 'direct_or_copy' }>(`/moments/${encodeURIComponent(momentId)}/share`, { method: 'POST', body: JSON.stringify({ channel }) });
 }

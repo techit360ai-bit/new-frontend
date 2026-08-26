@@ -31,7 +31,6 @@ const primaryNav: NavItem[] = [
   { name: "Reputation",    path: "/collaborator/reputation",    icon: Award },
   { name: "Messages",      path: "/collaborator/messages",      icon: MessageSquare },
   { name: "Support",       path: "/support",                    icon: Ticket, external: true },
-  { name: "TechIT Moments", path: "/moments",                   icon: Award, external: true },
   { name: "Tools",         path: "/collaborator/tools",         icon: Wrench },
   { name: "Feed",          path: "/feed",                       icon: Rss, external: true },
 ];
