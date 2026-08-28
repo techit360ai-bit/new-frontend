@@ -68,10 +68,27 @@ jobs:
       - name: Local test harness
         run: cd frontend && npm run test:local
 
+  webcontainer-runtime:
+    name: Live WebContainer Runtime
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci
+      - run: cd frontend && npx playwright install --with-deps chromium
+      - name: Execute a real Node test and preview inside WebContainer
+        run: cd frontend && npx playwright test tests/visual/code-editor.spec.ts --grep "boots a real WebContainer"
+        env:
+          TECHIT_LIVE_WEBCONTAINER: "1"
+
   deploy:
     name: Deploy Frontend to Render
     runs-on: ubuntu-latest
-    needs: quality
+    needs: [quality, webcontainer-runtime]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.RENDER_FRONTEND_DEPLOY_ENABLED == 'true'
     steps:
       - name: Verify merged PR provenance

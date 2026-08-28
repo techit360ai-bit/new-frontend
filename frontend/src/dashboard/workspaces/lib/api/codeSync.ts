@@ -30,23 +30,25 @@ function data<T>(result: InvokeResult): T {
   return result.data as T;
 }
 
-export async function getRemoteRepositoryState(projectId: string, repo: string, branch: string): Promise<RemoteRepositoryState> {
-  return data<RemoteRepositoryState>(await techitApi.invoke('github', 'get_repository_state', { projectId, repo, branch }));
+export type CodeDestinationProvider = 'github' | 'gitlab' | 'bitbucket';
+
+export async function getRemoteRepositoryState(projectId: string, repo: string, branch: string, provider: CodeDestinationProvider = 'github'): Promise<RemoteRepositoryState> {
+  return data<RemoteRepositoryState>(await techitApi.invoke(provider, 'get_repository_state', { projectId, repo, branch }));
 }
 
-export async function pullRemoteFiles(projectId: string, repo: string, branch: string, paths: string[]): Promise<{ headSha: string; files: Array<{ path: string; content: string }> }> {
+export async function pullRemoteFiles(projectId: string, repo: string, branch: string, paths: string[], provider: CodeDestinationProvider = 'github'): Promise<{ headSha: string; files: Array<{ path: string; content: string }> }> {
   if (paths.length > 50) throw new Error('Pull is limited to 50 selected files per request.');
   if (paths.some(path => !isCodeSyncPathSafe(path))) throw new Error('Pull contains an unsafe or sensitive path.');
-  const state = await getRemoteRepositoryState(projectId, repo, branch);
-  const files = await Promise.all(paths.map(async path => ({ path, content: data<string>(await techitApi.invoke('github', 'read_file', { projectId, repo, path, ref: state.headSha })) })));
+  const state = await getRemoteRepositoryState(projectId, repo, branch, provider);
+  const files = await Promise.all(paths.map(async path => ({ path, content: data<string>(await techitApi.invoke(provider, 'read_file', { projectId, repo, path, ref: state.headSha })) })));
   return { headSha: state.headSha, files };
 }
 
-export function pushToDestination(input: PushDestinationInput & { approvalRequestId?: string }): Promise<InvokeResult> {
-  return techitApi.invoke('github', 'push_files', input);
+export function pushToDestination(input: PushDestinationInput & { approvalRequestId?: string }, provider: CodeDestinationProvider = 'github'): Promise<InvokeResult> {
+  return techitApi.invoke(provider, 'push_files', input);
 }
 
-export async function approveAndPushToDestination(input: PushDestinationInput, approvalRequestId: string): Promise<InvokeResult> {
+export async function approveAndPushToDestination(input: PushDestinationInput, approvalRequestId: string, provider: CodeDestinationProvider = 'github'): Promise<InvokeResult> {
   await techitApi.approve(approvalRequestId);
-  return pushToDestination({ ...input, approvalRequestId });
+  return pushToDestination({ ...input, approvalRequestId }, provider);
 }

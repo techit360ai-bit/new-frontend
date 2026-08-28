@@ -34,3 +34,4 @@ export const platformGet = <T>(path: string) => request<T>(path, 'GET');
 export const platformPost = <T>(path: string, body?: unknown) => request<T>(path, 'POST', body);
 export const platformPatch = <T>(path: string, body?: unknown) => request<T>(path, 'PATCH', body);
 export const platformDelete = <T>(path: string, body?: unknown) => request<T>(path, 'DELETE', body);
+export const platformApiOrigin = () => BASE.replace(/\/api$/, '');
