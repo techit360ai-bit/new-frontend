@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Code2, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   createCollaboratorTool,
   fetchCollaboratorTools,
@@ -24,6 +25,7 @@ function formatLastSync(iso: string | null): string {
 }
 
 export function Tools() {
+  const navigate = useNavigate();
   const [toolList, setToolList] = useState<CollaboratorToolIntegration[]>([]);
   const [workspaces, setWorkspaces] = useState<CollaboratorToolWorkspace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,6 +137,11 @@ export function Tools() {
           </button>
         </div>
       )}
+
+      <div className="flex flex-col gap-4 rounded-xl border border-cyan-200 bg-cyan-50 p-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3"><Code2 className="mt-0.5 h-6 w-6 text-cyan-700" /><div><h2 className="font-semibold text-slate-900">Code Editor</h2><p className="mt-1 text-sm text-slate-600">Write, run, test and improve the current project inside its existing TechIT Workspace.</p></div></div>
+        <button onClick={() => navigate(`/workspaces/code${workspaces[0]?.id ? `?workspace=${encodeURIComponent(workspaces[0].id)}` : ''}`)} disabled={!workspaces.length} className="min-h-10 rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white disabled:opacity-50">Open Code Editor</button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {loading && <p className="text-sm text-slate-500 md:col-span-3">Loading live tools...</p>}

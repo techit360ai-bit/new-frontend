@@ -12,12 +12,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { VideoCall } from '../calls/VideoCall';
 import { AudioCall } from '../calls/AudioCall';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchWorkspaces, type WorkspaceRef } from '@/lib/api/workspaces';
 import { listNotifications } from '@/lib/api/notifications';
 import { listTasks } from '../../lib/api/tasks';
 import type { AgentTask } from '../../lib/types';
+import { setActiveWorkspaceId } from '../../lib/api/client';
 
 interface ShellMember {
   name: string;
@@ -50,6 +51,7 @@ function buildMembers(tasks: AgentTask[]): ShellMember[] {
 
 export function HeaderWithCallsAndRole() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile, signOut } = useAuth();
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [showAudioCall, setShowAudioCall] = useState(false);
@@ -86,7 +88,8 @@ export function HeaderWithCallsAndRole() {
     return () => { alive = false; };
   }, []);
 
-  const activeWorkspace = workspaces[0];
+  const selectedWorkspaceId = new URLSearchParams(location.search).get('workspace');
+  const activeWorkspace = workspaces.find(workspace => workspace.id === selectedWorkspaceId) || workspaces[0];
   const teamMembers = useMemo(() => buildMembers(tasks), [tasks]);
   const userName = displayName(profile);
   const userInitials = initials(userName);
@@ -115,9 +118,9 @@ export function HeaderWithCallsAndRole() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[280px]">
               {workspaces.length > 0 ? (
-                workspaces.map((workspace, index) => (
-                  <DropdownMenuItem key={workspace.id}>
-                    {workspace.name}{index === 0 ? ' (Current)' : ''}
+                workspaces.map((workspace) => (
+                  <DropdownMenuItem key={workspace.id} onClick={() => { const query = new URLSearchParams(location.search); query.set('workspace', workspace.id); setActiveWorkspaceId(workspace.id); navigate(`${location.pathname}?${query.toString()}`); }}>
+                    {workspace.name}{workspace.id === activeWorkspace?.id ? ' (Current)' : ''}
                   </DropdownMenuItem>
                 ))
               ) : (

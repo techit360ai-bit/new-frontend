@@ -8,6 +8,10 @@ export type AcademyBadge = {
   projectId?: string;
   role?: string;
   earnedAt?: string;
+  name?: string;
+  description?: string;
+  category?: string;
+  level?: number;
 };
 
 interface BadgeDisplayProps {
@@ -64,7 +68,7 @@ export function BadgeDisplay({ badges, earnedBadgeIds }: BadgeDisplayProps) {
                 <div
                   className={`p-4 rounded-lg border-2 transition-all ${
                     earned
-                      ? getBadgeColor(badge.category) + " shadow-sm"
+                      ? getBadgeColor(badge.category || badge.role || "") + " shadow-sm"
                       : "bg-gray-50 border-gray-200 opacity-60"
                   }`}
                 >
@@ -78,14 +82,14 @@ export function BadgeDisplay({ badges, earnedBadgeIds }: BadgeDisplayProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-sm text-gray-900">{badge.name}</h4>
+                        <h4 className="font-medium text-sm text-gray-900">{badge.name || badge.badgeId || "Academy badge"}</h4>
                         {badge.level && (
                           <BadgePrimitive variant="outline" className="h-5 px-1.5 text-xs">
                             L{badge.level}
                           </BadgePrimitive>
                         )}
                       </div>
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{badge.description}</p>
+                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{badge.description || "Earned through verified Academy progress."}</p>
                     </div>
                   </div>
                 </div>
