@@ -1,16 +1,45 @@
-import { Bot } from "lucide-react";
+import { Bot, Send } from "lucide-react";
+import { useState } from "react";
 import type { HaviRole } from "./haviData";
+import { converseWithHavi } from "@/lib/api/tourGuide";
 
-export function HaviChat({ role }: { role: HaviRole }) {
+export function HaviChat({ role, route, profile }: { role: HaviRole; route?: string; profile: Record<string, unknown> }) {
+  const [message, setMessage] = useState("");
+  const [history, setHistory] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const [pending, setPending] = useState(false);
+
+  const send = async () => {
+    const content = message.trim();
+    if (!content || pending) return;
+    setMessage("");
+    const next = [...history, { role: "user" as const, content }];
+    setHistory(next);
+    setPending(true);
+    try {
+      const response = await converseWithHavi({ source: "havi", role, route, profile, conversation: history, message: content });
+      setHistory(current => [...current, {
+        role: "assistant",
+        content: response?.message || "Havi is temporarily unavailable. Your work is unchanged; try again shortly.",
+      }]);
+    } finally {
+      setPending(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-[420px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cyan-100">
-        <Bot className="h-6 w-6 text-cyan-700" />
+    <div className="flex min-h-[420px] flex-col rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100"><Bot className="h-5 w-5 text-cyan-700" /></div>
+        <div><h3 className="font-semibold text-slate-900">Ask Havi</h3><p className="text-xs text-slate-600">Answers use your current TechIT context.</p></div>
       </div>
-      <h3 className="font-semibold text-slate-900">Live Havi chat is unavailable</h3>
-      <p className="mt-2 max-w-sm text-sm text-slate-600">
-        {role === "founder" ? "Founder" : "Collaborator"} guidance appears in the Today tab when the persisted tour-guide service returns it. This screen will not generate scripted answers.
-      </p>
+      <div className="flex-1 space-y-2 overflow-y-auto rounded-lg bg-white p-3">
+        {history.length === 0 && <p className="text-sm text-slate-500">Ask about your next step, TechIT tools, or how to move this project forward.</p>}
+        {history.map((item, index) => <div key={`${item.role}-${index}`} className={`rounded-lg p-2 text-sm ${item.role === "user" ? "ml-8 bg-cyan-50 text-slate-800" : "mr-8 bg-slate-100 text-slate-700"}`}>{item.content}</div>)}
+      </div>
+      <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void send(); }}>
+        <input value={message} onChange={event => setMessage(event.target.value)} placeholder="Ask Havi..." className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" disabled={pending} />
+        <button type="submit" aria-label="Send to Havi" disabled={pending || !message.trim()} className="rounded-lg bg-cyan-600 px-3 py-2 text-white disabled:opacity-50"><Send className="h-4 w-4" /></button>
+      </form>
     </div>
   );
 }

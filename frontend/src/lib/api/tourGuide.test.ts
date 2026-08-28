@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { fetchTourGuideCheckIn, type TourGuideCheckInPayload } from "./tourGuide";
+import { converseWithHavi, fetchTourGuideCheckIn, type TourGuideCheckInPayload } from "./tourGuide";
 
 function response(body: unknown, init: ResponseInit = {}) {
   return new Response(JSON.stringify(body), {
@@ -49,6 +49,22 @@ test("fetchTourGuideCheckIn posts Havi state to the tour guide endpoint", async 
     expect(url).toBe("http://localhost:8000/api/v1/tour-guide/daily-check-in");
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual(payload);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("converseWithHavi uses the live tour-guide conversation route", async () => {
+  const original = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = (async (url, init) => {
+    calls.push(String(url));
+    expect(JSON.parse(String(init?.body))).toMatchObject({ source: "havi", role: "collaborator", message: "What next?" });
+    return response({ message: "Use the next assigned task." });
+  }) as typeof fetch;
+  try {
+    await expect(converseWithHavi({ source: "havi", role: "collaborator", profile: {}, conversation: [], message: "What next?" })).resolves.toMatchObject({ message: "Use the next assigned task." });
+    expect(calls[0]).toBe("http://localhost:8000/api/v1/tour-guide/conversation");
   } finally {
     globalThis.fetch = original;
   }

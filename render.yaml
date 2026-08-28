@@ -11,7 +11,7 @@ services:
         value: same-origin
       - path: /*
         name: Cross-Origin-Embedder-Policy
-        value: credentialless
+        value: require-corp
       - path: /*
         name: Cross-Origin-Resource-Policy
         value: cross-origin

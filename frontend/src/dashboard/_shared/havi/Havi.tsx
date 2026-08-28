@@ -51,7 +51,7 @@ export function Havi({ role, userName = "there", stage, route, profileContext = 
   const [guidance, setGuidance] = useState<TourGuideCheckIn | null>(null);
   const [guidanceLoading, setGuidanceLoading] = useState(false);
 
-  const [timeSpentToday] = useState(0);
+  const timeSpentToday = Number(profileContext.time_logged_today ?? profileContext.timeLoggedToday ?? 0) || 0;
 
   const completedTasks = tasks.filter((t) => t.completed).length;
   const completionPercentage = tasks.length
@@ -135,6 +135,23 @@ export function Havi({ role, userName = "there", stage, route, profileContext = 
     };
   }, [completionPercentage, firstLanding, plan.targetDate, profileContext, progress.daysRemaining, progress.overdue, role, route, tasks]);
 
+  useEffect(() => {
+    if (tasks.length || !guidance?.daily_plan || !Array.isArray(guidance.daily_plan)) return;
+    const nextTasks = guidance.daily_plan
+      .map((item, index) => {
+        if (typeof item === "string") return { id: `havi-live-${index}`, title: item, completed: false, estimatedMinutes: 30 };
+        if (!item || typeof item !== "object") return null;
+        const row = item as Record<string, unknown>;
+        const title = String(row.action ?? row.title ?? "").trim();
+        if (!title) return null;
+        const estimatedMinutes = Number(row.est_min ?? row.estimatedMinutes ?? 30) || 30;
+        return { id: String(row.id ?? `havi-live-${index}`), title, completed: false, estimatedMinutes };
+      })
+      .filter((item): item is HaviTask => Boolean(item))
+      .slice(0, 5);
+    if (nextTasks.length) setTasks(nextTasks);
+  }, [guidance, tasks.length]);
+
   const toggleTask = (id: string) =>
     setTasks((cur) => cur.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
 
@@ -168,6 +185,8 @@ export function Havi({ role, userName = "there", stage, route, profileContext = 
         firstLanding={Boolean(firstLanding)}
         guidance={guidance}
         guidanceLoading={guidanceLoading}
+        route={route}
+        profileContext={profileContext}
         onPersonalityChange={setPersonality}
         onTargetDateChange={changeTargetDate}
       />

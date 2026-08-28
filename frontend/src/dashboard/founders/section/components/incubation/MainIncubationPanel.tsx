@@ -52,7 +52,6 @@ import {
   type ValidationStartResult,
 } from "@/lib/api/incubation";
 import { IncubationHumanLoopPanel } from "./IncubationHumanLoopPanel";
-import { ModelSelector } from "./ModelSelector";
 import { provisionWorkspace } from "@/lib/api/workspaces";
 import { checkHealth } from "@/lib/api/health";
 
@@ -175,7 +174,6 @@ export function MainIncubationPanel() {
   const [analysisResult, setAnalysisResult] = useState<Record<string, unknown> | null>(null);
   const [blueprintData, setBlueprintData] = useState<PipelineBlueprint | null>(null);
   const [targetGeography, setTargetGeography] = useState("");
-  const [selectedModel, setSelectedModel] = useState("");
   const [validationSessions, setValidationSessions] = useState<ValidationSessionSummary[]>([]);
   const [resumeLoading, setResumeLoading] = useState(true);
   const [resumeError, setResumeError] = useState<string | null>(null);
@@ -290,7 +288,6 @@ export function MainIncubationPanel() {
       solution: ideaInput.trim(),
       focus_areas: ["ai", "deeptech"],
       target_geography: targetGeography.trim() || undefined,
-      model_id: selectedModel || undefined,
     };
 
     try {
@@ -329,7 +326,6 @@ export function MainIncubationPanel() {
       solution: ideaInput.trim(),
       focus_areas: ["ai", "deeptech"],
       target_geography: targetGeography.trim() || undefined,
-      model_id: selectedModel || undefined,
     };
 
     try {
@@ -808,9 +804,8 @@ export function MainIncubationPanel() {
 
         {/* Bottom Input Area */}
         <div className="border-t border-gray-200 bg-white p-4">
-          <div className="mb-3 grid gap-3 md:grid-cols-2">
+          <div className="mb-3">
             <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="Country, city or region" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
-            <ModelSelector value={selectedModel} onChange={setSelectedModel} />
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <textarea
