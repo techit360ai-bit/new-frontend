@@ -103,7 +103,7 @@ export function RightPanel() {
   const completedTasks = tasks.filter((task) => task.status === 'done').length;
   const progress = tasks.length === 0 ? 0 : Math.round((completedTasks / tasks.length) * 100);
 
-  if (location.pathname === '/workspaces/copilot') return null;
+  if (location.pathname === '/workspaces/copilot' || location.pathname === '/workspaces/code') return null;
 
   if (
     location.pathname === '/workspaces/build' ||

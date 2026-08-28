@@ -67,6 +67,10 @@ export interface ContributionEvent {
   actorId: string;
   actorKind: "human" | "agent";
   sourceTool: string;
+  workspaceId?: string;
+  projectId?: string;
+  artifactId?: string;
+  metadata?: Record<string, unknown>;
   timestamp: string;
 }
 

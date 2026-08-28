@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { KanbanColumn } from '../components/kanban/KanbanColumn';
 import type { Task } from '../components/kanban/type';
-import { Plus, Github } from 'lucide-react';
+import { Plus, Github, Code2 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { listTasks } from '../lib/api/tasks';
 import type { AgentTask } from '../lib/types';
@@ -36,6 +37,8 @@ function normalizeTask(task: AgentTask): Task {
 }
 
 export function Build() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [tasks, setTasks] = useState<Record<ColumnType, Task[]>>(EMPTY_COLUMNS);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,6 +109,7 @@ export function Build() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={() => navigate(`/workspaces/code${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"><Code2 className="w-4 h-4" /><span className="text-sm font-medium">Open Code</span></button>
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               <Github className="w-4 h-4" />
               <span className="text-sm font-medium">GitHub</span>

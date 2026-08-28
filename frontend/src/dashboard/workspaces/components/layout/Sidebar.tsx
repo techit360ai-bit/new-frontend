@@ -10,6 +10,7 @@ import {
   Github,
   ArrowLeft,
   Plug,
+  Code2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,6 +37,7 @@ export function Sidebar() {
 
   const navItems: NavItem[] = [
     { path: '/workspaces/build', label: 'Build', icon: <Hammer className="w-5 h-5" /> },
+    { path: `/workspaces/code${location.search}`, label: 'Code', icon: <Code2 className="w-5 h-5" />, glow: true },
     { path: '/workspaces/connectors', label: 'Connectors', icon: <Plug className="w-5 h-5" /> },
     { path: '/workspaces/agents', label: 'Agents', icon: <Bot className="w-5 h-5" />, glow: true },
     { path: `/workspaces/copilot${location.search}`, label: 'AI Copilot', icon: <BrainCircuit className="w-5 h-5" />, glow: true },

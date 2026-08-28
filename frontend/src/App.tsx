@@ -126,6 +126,8 @@ const ForgotPassword = lazy(() => import("@/components/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/components/ResetPassword"));
 import { RedirectAuthenticated, RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
 const WorkspacesLayout = lazy(() => import("@/dashboard/workspaces/components/layout/MainLayout").then((m) => ({ default: m.MainLayout })));
+const WsCode = lazy(() => import("@/dashboard/workspaces/pages/Code").then((m) => ({ default: m.Code })));
+import { CodeErrorBoundary } from "@/dashboard/workspaces/components/code/CodeErrorBoundary";
 const WsBuild = lazy(() => import("@/dashboard/workspaces/pages/Build").then((m) => ({ default: m.Build })));
 const WsReports = lazy(() => import("@/dashboard/workspaces/pages/Reports").then((m) => ({ default: m.Reports })));
 const WsConnectors = lazy(() => import("@/dashboard/workspaces/pages/Connectors").then((m) => ({ default: m.Connectors })));
@@ -316,6 +318,7 @@ const App = () => {
         <Route path="/workspaces" element={<RequireAuth><WorkspacesLayout /></RequireAuth>}>
           <Route index element={<Navigate to="build" replace />} />
           <Route path="build" element={<WsBuild />} />
+          <Route path="code" element={<CodeErrorBoundary><WsCode /></CodeErrorBoundary>} />
           <Route path="connectors" element={<WsConnectors />} />
           <Route path="agents" element={<WsAgents />} />
           <Route path="ai-agents" element={<Navigate to="/workspaces/agents" replace />} />

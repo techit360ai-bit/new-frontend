@@ -3,8 +3,17 @@ import { fetchWorkspaces } from '@/lib/api/workspaces';
 
 let activeWorkspaceId: string | null | undefined;
 
+export function setActiveWorkspaceId(workspaceId: string | null) {
+  activeWorkspaceId = workspaceId;
+}
+
 export async function resolveWorkspaceId(): Promise<string | null> {
   if (activeWorkspaceId !== undefined) return activeWorkspaceId;
+  if (typeof window !== 'undefined') {
+    const query = new URLSearchParams(window.location.search);
+    const explicit = query.get('workspace');
+    if (explicit) { activeWorkspaceId = explicit; return explicit; }
+  }
   const workspaces = await fetchWorkspaces();
   activeWorkspaceId = workspaces[0]?.id ?? null;
   return activeWorkspaceId;
