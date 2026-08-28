@@ -32,7 +32,6 @@ import {
 } from "@/lib/api/incubation";
 import { provisionWorkspace } from "@/lib/api/workspaces";
 import { IncubationHumanLoopPanel } from "./IncubationHumanLoopPanel";
-import { ModelSelector } from "./ModelSelector";
 
 const STAGES = ["pre-seed", "seed", "series-a", "series-b", "growth"] as const;
 type Stage = (typeof STAGES)[number];
@@ -72,7 +71,6 @@ export function FastTrackPanel() {
   const [repoUrl, setRepoUrl] = useState("");
   const [targetGeography, setTargetGeography] = useState("");
   const [timeConstraint, setTimeConstraint] = useState("1 week");
-  const [selectedModel, setSelectedModel] = useState("");
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docId, setDocId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -133,7 +131,6 @@ export function FastTrackPanel() {
       focus_areas: [industry.toLowerCase().replace(/\s+/g, "_")],
       target_geography: targetGeography.trim() || undefined,
       founder_constraints: { preferred_mvp_timeline: timeConstraint },
-      model_id: selectedModel || undefined,
     };
 
     const result = await runFastTrack(payload);
@@ -213,7 +210,6 @@ export function FastTrackPanel() {
     setOneLiner("");
     setRepoUrl("");
     setTargetGeography("");
-    setSelectedModel("");
     setDocFile(null);
     setDocId(null);
     setBlueprint(null);
@@ -329,8 +325,6 @@ export function FastTrackPanel() {
               <label className="block"><span className="mb-2 block text-sm font-semibold text-slate-700">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="e.g. Budapest, Hungary or West Africa" className="h-12 w-full rounded-lg border-2 border-slate-300 bg-white px-4 text-sm outline-none focus:border-violet-500" /></label>
               <label className="block"><span className="mb-2 block text-sm font-semibold text-slate-700">Preferred MVP timeline</span><select value={timeConstraint} onChange={(event) => setTimeConstraint(event.target.value)} className="h-12 w-full rounded-lg border-2 border-slate-300 bg-white px-4 text-sm"><option>1 day</option><option>3 days</option><option>1 week</option><option>2–6 weeks</option></select></label>
             </div>
-
-            <ModelSelector value={selectedModel} onChange={setSelectedModel} />
 
             {/* Document Upload */}
             <div>

@@ -30,6 +30,8 @@ interface HaviPanelProps {
   personality: PersonalityMode;
   firstLanding: boolean;
   guidance: TourGuideCheckIn | null;
+  route?: string;
+  profileContext: Record<string, unknown>;
   guidanceLoading: boolean;
   onPersonalityChange: (m: PersonalityMode) => void;
   onTargetDateChange: (date: string) => void;
@@ -44,7 +46,7 @@ export function HaviPanel(props: HaviPanelProps) {
   const {
     isOpen, onClose, role, userName, tasks, onToggleTask, timeSpentToday,
     completionPercentage, momentumScore, plan, progress, personality,
-    firstLanding, guidance, guidanceLoading, onPersonalityChange, onTargetDateChange,
+    firstLanding, guidance, guidanceLoading, route, profileContext, onPersonalityChange, onTargetDateChange,
   } = props;
 
   const navigate = useNavigate();
@@ -133,6 +135,20 @@ export function HaviPanel(props: HaviPanelProps) {
                       <p className="text-xs text-slate-700 leading-relaxed mt-1">
                         {role === "founder" ? haviMessages.welcomeFounder : haviMessages.welcomeCollaborator}
                       </p>
+                    </div>
+                  )}
+
+                  {firstLanding && guidance?.introduction && (
+                    <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                      <p className="text-sm font-semibold text-slate-900">{guidance.introduction.title}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-700">{guidance.introduction.summary}</p>
+                      <div className="mt-3 space-y-2">
+                        {guidance.introduction.capabilities.map(item => (
+                          <button key={item.path} type="button" onClick={() => { onClose(); navigate(item.path); }} className="block w-full rounded-lg border border-indigo-100 bg-white p-2 text-left hover:border-indigo-300">
+                            <span className="text-xs font-semibold text-indigo-700">{item.title}</span><span className="block text-xs text-slate-600">{item.description}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -243,7 +259,7 @@ export function HaviPanel(props: HaviPanelProps) {
                 </div>
               )}
 
-              {tab === "ask" && <HaviChat role={role} />}
+              {tab === "ask" && <HaviChat role={role} route={route} profile={profileContext} />}
 
               {tab === "choices" && (
                 <HaviChoices

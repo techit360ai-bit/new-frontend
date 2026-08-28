@@ -11,12 +11,12 @@ function response(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
 
-test("pipeline forwards founder geography and selected model", async () => {
+test("pipeline forwards founder geography without requiring a model override", async () => {
   setAuthTokenGetter(() => "jwt-incubation");
   const fetchMock = vi.fn(async () => response({ project_id: "p1", incubation_session_id: "s1" }));
   vi.stubGlobal("fetch", fetchMock);
-  await expect(runVenturePipeline({ startup_name: "Venture", target_geography: "Hungary", model_id: "gpt-5.6-sol" })).resolves.toMatchObject({ project_id: "p1" });
-  expect((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]).toMatchObject({ body: JSON.stringify({ startup_name: "Venture", target_geography: "Hungary", model_id: "gpt-5.6-sol" }) });
+  await expect(runVenturePipeline({ startup_name: "Venture", target_geography: "Hungary" })).resolves.toMatchObject({ project_id: "p1" });
+  expect((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]).toMatchObject({ body: JSON.stringify({ startup_name: "Venture", target_geography: "Hungary" }) });
 });
 
 test("pivot contract wraps venture data and score", async () => {
