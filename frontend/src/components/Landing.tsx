@@ -439,18 +439,18 @@ const Landing = () => {
             {/* Explorer */}
             <Reveal delay={100}>
               <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-[#00FF00]/50 transition-colors">
-                <div className="w-24 h-24 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Compass size={40} className="text-blue-400" />
+                <div className="w-24 h-24 shrink-0 rounded-full bg-[#00FF00]/10 flex items-center justify-center">
+                  <Compass size={40} className="text-[#00FF00]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-blue-400 tracking-widest mb-2 uppercase">Explorer</h3>
+                  <h3 className="text-sm font-bold text-[#00FF00] tracking-widest mb-2 uppercase">Explorer</h3>
                   <h4 className="text-2xl font-bold mb-4">EXPLORE WITHOUT COMMITTING</h4>
                   <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Your curiosity is enough to start. You don't need a startup. You don't need a team. You don't even need to know exactly what you're looking for.<br/><br/>
                     As an Explorer, TechIT helps you discover ideas, opportunities, people, startups, knowledge, and possibilities across the ecosystem.<br/><br/>
                     <strong className="text-white">Discover. Learn. Connect. Find where you belong.</strong>
                   </p>
-                  <button onClick={handleExplorerStart} className="px-4 py-2 text-sm rounded-full bg-blue-500/20 text-blue-300 font-semibold hover:bg-blue-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleExplorerStart} className="px-4 py-2 text-sm rounded-full bg-[#00FF00]/10 text-[#00FF00] font-semibold hover:bg-[#00FF00]/20 transition-colors flex items-center gap-2 w-fit">
                     Enter as Explorer <ArrowRight size={16} />
                   </button>
                 </div>
@@ -460,18 +460,18 @@ const Landing = () => {
             {/* Founder */}
             <Reveal delay={150}>
               <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-[#FE2784]/50 transition-colors">
-                <div className="w-24 h-24 shrink-0 rounded-full bg-[#FE2784]/20 flex items-center justify-center">
-                  <Rocket size={40} className="text-[#FE2784]" />
+                <div className="w-24 h-24 shrink-0 rounded-full bg-[#00FF00]/10 flex items-center justify-center">
+                  <Rocket size={40} className="text-[#00FF00]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-[#FE2784] tracking-widest mb-2 uppercase">Founder</h3>
+                  <h3 className="text-sm font-bold text-[#00FF00] tracking-widest mb-2 uppercase">Founder</h3>
                   <h4 className="text-2xl font-bold mb-4">TURN YOUR IDEA INTO SOMETHING REAL</h4>
                   <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     You have the idea. Let's build it.<br/><br/>
                     As a Founder, TechIT becomes your AI-powered execution infrastructure — helping you challenge your assumptions, validate your idea, understand your market, plan your MVP, execute your roadmap, and know what to do next.<br/><br/>
                     You don't have to have everything figured out. <strong className="text-white">Start with what you have. TechIT helps you build from there.</strong>
                   </p>
-                  <button onClick={handleFounderStart} className="px-4 py-2 text-sm rounded-full bg-[#FE2784]/20 text-[#FE2784] font-semibold hover:bg-[#FE2784]/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleFounderStart} className="px-4 py-2 text-sm rounded-full bg-[#00FF00]/10 text-[#00FF00] font-semibold hover:bg-[#00FF00]/20 transition-colors flex items-center gap-2 w-fit">
                     Enter as Founder <ArrowRight size={16} />
                   </button>
                 </div>
@@ -480,19 +480,19 @@ const Landing = () => {
 
             {/* Collaborator */}
             <Reveal delay={200}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-purple-500/50 transition-colors">
-                <div className="w-24 h-24 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center">
-                  <Zap size={40} className="text-purple-400" />
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-[#00FF00]/50 transition-colors">
+                <div className="w-24 h-24 shrink-0 rounded-full bg-[#00FF00]/10 flex items-center justify-center">
+                  <Zap size={40} className="text-[#00FF00]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-purple-400 tracking-widest mb-2 uppercase">Collaborator</h3>
+                  <h3 className="text-sm font-bold text-[#00FF00] tracking-widest mb-2 uppercase">Collaborator</h3>
                   <h4 className="text-2xl font-bold mb-4">YOUR SKILLS CAN BUILD SOMETHING BIGGER</h4>
                   <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Don't just look for a job. Find something worth building.<br/><br/>
                     As a Collaborator, discover startups, ideas, and projects where your skills can make a real difference. Connect with founders, contribute to meaningful projects, build your experience, and grow alongside the companies you help create.<br/><br/>
                     <strong className="text-white">Find a problem worth solving. Find people worth building with.</strong>
                   </p>
-                  <button onClick={handleCollaboratorStart} className="px-4 py-2 text-sm rounded-full bg-purple-500/20 text-purple-300 font-semibold hover:bg-purple-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleCollaboratorStart} className="px-4 py-2 text-sm rounded-full bg-[#00FF00]/10 text-[#00FF00] font-semibold hover:bg-[#00FF00]/20 transition-colors flex items-center gap-2 w-fit">
                     Enter as Collaborator <ArrowRight size={16} />
                   </button>
                 </div>
@@ -501,19 +501,19 @@ const Landing = () => {
 
             {/* Investor */}
             <Reveal delay={250}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-teal-500/50 transition-colors">
-                <div className="w-24 h-24 shrink-0 rounded-full bg-teal-500/20 flex items-center justify-center">
-                  <Gem size={40} className="text-teal-400" />
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-[#00FF00]/50 transition-colors">
+                <div className="w-24 h-24 shrink-0 rounded-full bg-[#00FF00]/10 flex items-center justify-center">
+                  <Gem size={40} className="text-[#00FF00]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-teal-400 tracking-widest mb-2 uppercase">Investor</h3>
+                  <h3 className="text-sm font-bold text-[#00FF00] tracking-widest mb-2 uppercase">Investor</h3>
                   <h4 className="text-2xl font-bold mb-4">DISCOVER WHAT COULD BE NEXT</h4>
                   <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Find opportunities before they become obvious.<br/><br/>
                     As an Investor, TechIT gives you intelligence into emerging startups, founder execution, market signals, startup health, and growth potential.<br/><br/>
                     <strong className="text-white">Go beyond the pitch. Understand the idea. Understand the execution. Understand the opportunity.</strong>
                   </p>
-                  <button onClick={handleInvestorStart} className="px-4 py-2 text-sm rounded-full bg-teal-500/20 text-teal-300 font-semibold hover:bg-teal-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleInvestorStart} className="px-4 py-2 text-sm rounded-full bg-[#00FF00]/10 text-[#00FF00] font-semibold hover:bg-[#00FF00]/20 transition-colors flex items-center gap-2 w-fit">
                     Enter as Investor <ArrowRight size={16} />
                   </button>
                 </div>
@@ -522,19 +522,19 @@ const Landing = () => {
 
             {/* Organization */}
             <Reveal delay={300}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-orange-500/50 transition-colors">
-                <div className="w-24 h-24 shrink-0 rounded-full bg-orange-500/20 flex items-center justify-center">
-                  <Building2 size={40} className="text-orange-400" />
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-[#00FF00]/50 transition-colors">
+                <div className="w-24 h-24 shrink-0 rounded-full bg-[#00FF00]/10 flex items-center justify-center">
+                  <Building2 size={40} className="text-[#00FF00]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-orange-400 tracking-widest mb-2 uppercase">Organization</h3>
+                  <h3 className="text-sm font-bold text-[#00FF00] tracking-widest mb-2 uppercase">Organization</h3>
                   <h4 className="text-2xl font-bold mb-4">ACCELERATE THE ECOSYSTEM</h4>
                   <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Your organization can help more founders succeed.<br/><br/>
                     As an Organization, use TechIT to support entrepreneurs, manage programs and cohorts, monitor startup progress, Hackathons, identify risks, connect founders with resources, and understand what is happening across your ecosystem.<br/><br/>
                     <strong className="text-white">Move from managing programs to building measurable entrepreneurial outcomes.</strong>
                   </p>
-                  <button onClick={handleOrganizationStart} className="px-4 py-2 text-sm rounded-full bg-orange-500/20 text-orange-300 font-semibold hover:bg-orange-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleOrganizationStart} className="px-4 py-2 text-sm rounded-full bg-[#00FF00]/10 text-[#00FF00] font-semibold hover:bg-[#00FF00]/20 transition-colors flex items-center gap-2 w-fit">
                     Enter as Organization <ArrowRight size={16} />
                   </button>
                 </div>
