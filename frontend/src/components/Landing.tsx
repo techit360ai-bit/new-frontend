@@ -169,7 +169,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
               <Link to="/signin" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
                 Sign In
               </Link>
-              <button onClick={onGetStarted} className="flex items-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white px-5 py-2 rounded-full text-sm font-bold transition-all hover:-translate-y-0.5">
+              <button onClick={onGetStarted} className="flex items-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white px-4 py-2 rounded-full text-sm font-bold transition-all hover:-translate-y-0.5">
                 Get Started <ArrowRight size={14} />
               </button>
             </div>
@@ -209,7 +209,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors">
               Sign In
             </Link>
-            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white py-3 mt-2 rounded-xl text-lg font-bold">
+            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white py-2.5 mt-2 rounded-xl text-base font-bold">
               Get Started <ArrowRight size={14} />
             </button>
           </motion.div>
@@ -331,11 +331,11 @@ const Landing = () => {
 
         <Reveal delay={400}>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <button onClick={handleFounderStart} className="px-6 py-3 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] hover:opacity-90 rounded-full font-bold text-base md:text-lg shadow-[0_0_30px_rgba(254,39,132,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-2">
-              Bring My Idea to Life <Rocket size={20} />
+            <button onClick={handleFounderStart} className="px-5 py-2.5 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] hover:opacity-90 rounded-full font-bold text-base shadow-[0_0_30px_rgba(254,39,132,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-2">
+              Bring My Idea to Life <Rocket size={18} />
             </button>
-            <button onClick={handleExplorerStart} className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md rounded-full font-bold text-base md:text-lg transition-all flex items-center justify-center gap-2">
-              Explore TechIT Network <Compass size={20} />
+            <button onClick={handleExplorerStart} className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md rounded-full font-bold text-base transition-all flex items-center justify-center gap-2">
+              Explore TechIT Network <Compass size={18} />
             </button>
           </div>
         </Reveal>
@@ -451,7 +451,7 @@ const Landing = () => {
                     As an Explorer, TechIT helps you discover ideas, opportunities, people, startups, knowledge, and possibilities across the ecosystem.<br/><br/>
                     <strong className="text-white">Discover. Learn. Connect. Find where you belong.</strong>
                   </p>
-                  <button onClick={handleExplorerStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-blue-500/20 text-blue-300 font-semibold hover:bg-blue-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleExplorerStart} className="px-4 py-2 text-sm rounded-full bg-blue-500/20 text-blue-300 font-semibold hover:bg-blue-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Explorer <ArrowRight size={16} />
                   </button>
                 </div>
@@ -472,7 +472,7 @@ const Landing = () => {
                     As a Founder, TechIT becomes your AI-powered execution infrastructure — helping you challenge your assumptions, validate your idea, understand your market, plan your MVP, execute your roadmap, and know what to do next.<br/><br/>
                     You don't have to have everything figured out. <strong className="text-white">Start with what you have. TechIT helps you build from there.</strong>
                   </p>
-                  <button onClick={handleFounderStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-[var(--brand-pink)]/20 text-[var(--brand-pink)] font-semibold hover:bg-[var(--brand-pink)]/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleFounderStart} className="px-4 py-2 text-sm rounded-full bg-[var(--brand-pink)]/20 text-[var(--brand-pink)] font-semibold hover:bg-[var(--brand-pink)]/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Founder <ArrowRight size={16} />
                   </button>
                 </div>
@@ -493,7 +493,7 @@ const Landing = () => {
                     As a Collaborator, discover startups, ideas, and projects where your skills can make a real difference. Connect with founders, contribute to meaningful projects, build your experience, and grow alongside the companies you help create.<br/><br/>
                     <strong className="text-white">Find a problem worth solving. Find people worth building with.</strong>
                   </p>
-                  <button onClick={handleCollaboratorStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-purple-500/20 text-purple-300 font-semibold hover:bg-purple-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleCollaboratorStart} className="px-4 py-2 text-sm rounded-full bg-purple-500/20 text-purple-300 font-semibold hover:bg-purple-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Collaborator <ArrowRight size={16} />
                   </button>
                 </div>
@@ -514,7 +514,7 @@ const Landing = () => {
                     As an Investor, TechIT gives you intelligence into emerging startups, founder execution, market signals, startup health, and growth potential.<br/><br/>
                     <strong className="text-white">Go beyond the pitch. Understand the idea. Understand the execution. Understand the opportunity.</strong>
                   </p>
-                  <button onClick={handleInvestorStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-teal-500/20 text-teal-300 font-semibold hover:bg-teal-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleInvestorStart} className="px-4 py-2 text-sm rounded-full bg-teal-500/20 text-teal-300 font-semibold hover:bg-teal-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Investor <ArrowRight size={16} />
                   </button>
                 </div>
@@ -535,7 +535,7 @@ const Landing = () => {
                     As an Organization, use TechIT to support entrepreneurs, manage programs and cohorts, monitor startup progress, Hackathons, identify risks, connect founders with resources, and understand what is happening across your ecosystem.<br/><br/>
                     <strong className="text-white">Move from managing programs to building measurable entrepreneurial outcomes.</strong>
                   </p>
-                  <button onClick={handleOrganizationStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-orange-500/20 text-orange-300 font-semibold hover:bg-orange-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleOrganizationStart} className="px-4 py-2 text-sm rounded-full bg-orange-500/20 text-orange-300 font-semibold hover:bg-orange-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Organization <ArrowRight size={16} />
                   </button>
                 </div>
@@ -562,8 +562,8 @@ const Landing = () => {
                 No Idea Should Be Lost.
               </p>
             </div>
-            <button onClick={handleGetStarted} className="px-8 py-4 bg-white text-black rounded-full font-bold text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-3 mx-auto">
-              Start Your Journey <ArrowRight size={20} />
+            <button onClick={handleGetStarted} className="px-6 py-3 bg-white text-black rounded-full font-bold text-base shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-2 mx-auto">
+              Start Your Journey <ArrowRight size={18} />
             </button>
           </Reveal>
         </div>
