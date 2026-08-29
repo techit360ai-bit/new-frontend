@@ -122,20 +122,19 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             to="/" 
             className={`shrink-0 flex items-center transition-all duration-300 rounded-md ${
               isScrolled 
-                ? 'bg-slate-900/80 backdrop-blur-2xl border border-white/10 p-2' 
-                : 'gap-3 p-2 border border-transparent'
+                ? 'bg-slate-900/80 backdrop-blur-2xl border border-white/10 p-1.5' 
+                : 'gap-2 p-1.5 border border-transparent'
             }`}
           >
             <img 
               src="/TechIT-logo.png" 
               alt="TechIT Logo" 
-              className="w-8 h-8 rounded-md object-contain" 
+              className="w-10 h-10 rounded-md object-contain" 
             />
-            <div className={`flex flex-col leading-none transition-all duration-300 overflow-hidden whitespace-nowrap ${
-              isScrolled ? 'w-0 opacity-0' : 'w-[80px] opacity-100'
+            <div className={`flex flex-col justify-center leading-none transition-all duration-300 overflow-hidden whitespace-nowrap ${
+              isScrolled ? 'w-0 opacity-0' : 'w-[65px] opacity-100'
             }`}>
-              <span className="font-bold text-white tracking-wider text-lg">TECHIT</span>
-              <span className="text-[10px] font-medium tracking-widest text-[var(--neon-green)]">NETWORK</span>
+              <span className="font-bold text-white tracking-wider text-base">TECHIT</span>
             </div>
           </Link>
 
@@ -143,10 +142,10 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
           <motion.div
             animate={{
               borderRadius: isScrolled ? 999 : 0,
-              paddingLeft: isScrolled ? 24 : 0,
-              paddingRight: isScrolled ? 24 : 0,
-              paddingTop: isScrolled ? 12 : 0,
-              paddingBottom: isScrolled ? 12 : 0,
+              paddingLeft: isScrolled ? 16 : 0,
+              paddingRight: isScrolled ? 16 : 0,
+              paddingTop: isScrolled ? 8 : 0,
+              paddingBottom: isScrolled ? 8 : 0,
             }}
             className={`flex items-center justify-end md:justify-between transition-colors duration-300 ${
               isScrolled 
@@ -155,21 +154,21 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             }`}
           >
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex gap-6 items-center justify-center">
+            <div className="hidden md:flex gap-4 lg:gap-6 items-center justify-center">
               {navLinks.map((link) => (
                 <a 
                   key={link.name} 
                   href={link.href}
-                  className="text-sm font-medium transition-colors text-slate-300 hover:text-[var(--neon-green)]"
+                  className="text-xs lg:text-sm font-medium transition-colors text-slate-300 hover:text-[var(--neon-green)]"
                 >
                   {link.name}
                 </a>
               ))}
-              <div className="w-px h-4 bg-white/10 mx-2"></div>
-              <Link to="/signin" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+              <div className="w-px h-4 bg-white/10 mx-1 lg:mx-2"></div>
+              <Link to="/signin" className="text-xs lg:text-sm font-bold text-white bg-[var(--brand-pink)]/20 hover:bg-[var(--brand-pink)]/40 border border-[var(--brand-pink)]/50 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full transition-colors">
                 Sign In
               </Link>
-              <button onClick={onGetStarted} className="flex items-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white px-4 py-2 rounded-full text-sm font-bold transition-all hover:-translate-y-0.5">
+              <button onClick={onGetStarted} className="flex items-center gap-1.5 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-0.5">
                 Get Started <ArrowRight size={14} />
               </button>
             </div>
@@ -201,15 +200,15 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
                 key={link.name} 
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-lg font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors border-b border-white/5"
+                className="text-base font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors border-b border-white/5"
               >
                 {link.name}
               </a>
             ))}
-            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors">
+            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors">
               Sign In
             </Link>
-            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white py-2.5 mt-2 rounded-xl text-base font-bold">
+            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] text-white py-2.5 mt-2 rounded-xl text-base font-bold">
               Get Started <ArrowRight size={14} />
             </button>
           </motion.div>
