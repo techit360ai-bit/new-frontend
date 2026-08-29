@@ -122,14 +122,14 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             to="/" 
             className={`shrink-0 flex items-center transition-all duration-300 rounded-md ${
               isScrolled 
-                ? 'bg-slate-900/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-2' 
+                ? 'bg-slate-900/80 backdrop-blur-2xl border border-white/10 p-2' 
                 : 'gap-3 p-2 border border-transparent'
             }`}
           >
             <img 
               src="/TechIT-logo.png" 
               alt="TechIT Logo" 
-              className="w-8 h-8 rounded-md drop-shadow-[0_0_8px_rgba(254,39,132,0.5)] object-contain" 
+              className="w-8 h-8 rounded-md object-contain" 
             />
             <div className={`flex flex-col leading-none transition-all duration-300 overflow-hidden whitespace-nowrap ${
               isScrolled ? 'w-0 opacity-0' : 'w-[80px] opacity-100'
@@ -147,9 +147,6 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
               paddingRight: isScrolled ? 24 : 0,
               paddingTop: isScrolled ? 12 : 0,
               paddingBottom: isScrolled ? 12 : 0,
-              boxShadow: isScrolled
-                ? "0 12px 32px -10px rgba(0,0,0,0.5)"
-                : "0 0px 0px rgba(0,0,0,0)",
             }}
             className={`flex items-center justify-end md:justify-between transition-colors duration-300 ${
               isScrolled 
@@ -172,7 +169,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
               <Link to="/signin" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
                 Sign In
               </Link>
-              <button onClick={onGetStarted} className="flex items-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md shadow-[#00FF00]/20 hover:shadow-lg hover:shadow-[#00FF00]/40 hover:-translate-y-0.5">
+              <button onClick={onGetStarted} className="flex items-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white px-5 py-2 rounded-full text-sm font-bold transition-all hover:-translate-y-0.5">
                 Get Started <ArrowRight size={14} />
               </button>
             </div>
@@ -212,7 +209,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors">
               Sign In
             </Link>
-            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white py-3 mt-2 rounded-xl text-lg font-bold shadow-md shadow-[#00FF00]/20">
+            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--brand-green)] to-[var(--neon-green)] text-white py-3 mt-2 rounded-xl text-lg font-bold">
               Get Started <ArrowRight size={14} />
             </button>
           </motion.div>
@@ -311,7 +308,7 @@ const Landing = () => {
         </Reveal>
         
         <Reveal delay={100}>
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight mb-8">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-8">
             No Idea Should Be <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-pink)] to-[var(--neon-green)]">Lost.</span>
             <br />
             Turn your idea into <span className="italic font-light">something real.</span>
@@ -319,13 +316,13 @@ const Landing = () => {
         </Reveal>
 
         <Reveal delay={200}>
-          <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-3xl font-light leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-3xl font-light leading-relaxed">
             TechIT Network is AI-powered execution infrastructure for creating, validating, building, and growing startups.
           </p>
         </Reveal>
 
         <Reveal delay={300}>
-          <p className="text-lg text-gray-500 mb-12 max-w-2xl">
+          <p className="text-base md:text-lg text-gray-500 mb-12 max-w-2xl">
             From your first idea to your first customer — TechIT brings the intelligence, structure, tools, people, and execution guidance you need to move forward.
             <br /><br />
             <strong className="text-white font-medium">Your idea is the beginning.<br />TechIT helps you build what comes next.</strong>
@@ -334,10 +331,10 @@ const Landing = () => {
 
         <Reveal delay={400}>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <button onClick={handleFounderStart} className="px-8 py-4 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] hover:opacity-90 rounded-full font-bold text-lg shadow-[0_0_30px_rgba(254,39,132,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-2">
+            <button onClick={handleFounderStart} className="px-6 py-3 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] hover:opacity-90 rounded-full font-bold text-base md:text-lg shadow-[0_0_30px_rgba(254,39,132,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-2">
               Bring My Idea to Life <Rocket size={20} />
             </button>
-            <button onClick={handleExplorerStart} className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md rounded-full font-bold text-lg transition-all flex items-center justify-center gap-2">
+            <button onClick={handleExplorerStart} className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md rounded-full font-bold text-base md:text-lg transition-all flex items-center justify-center gap-2">
               Explore TechIT Network <Compass size={20} />
             </button>
           </div>
@@ -348,14 +345,14 @@ const Landing = () => {
       <section id="problem" className="py-24 px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
           <Reveal>
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">The Problem</h2>
-            <p className="text-xl md:text-2xl text-gray-300 font-light mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">The Problem</h2>
+            <p className="text-lg md:text-xl text-gray-300 font-light mb-16">
               Great ideas don't fail because they aren't good enough.<br />
               <strong className="text-white">Many never get the chance to be built.</strong>
             </p>
           </Reveal>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-lg font-medium text-gray-400">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-base md:text-lg font-medium text-gray-400">
             <Reveal delay={100}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of capital.</div></Reveal>
             <Reveal delay={150}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of expertise.</div></Reveal>
             <Reveal delay={200}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of direction.</div></Reveal>
@@ -365,7 +362,7 @@ const Landing = () => {
           </div>
 
           <Reveal delay={450}>
-            <p className="mt-16 text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[var(--neon-green)] to-[var(--brand-green)]">
+            <p className="mt-16 text-2xl md:text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[var(--neon-green)] to-[var(--brand-green)]">
               TechIT Network exists to close that gap.
             </p>
           </Reveal>
@@ -377,8 +374,8 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">One Idea. One Infrastructure.</h2>
-              <p className="text-xl text-[var(--neon-green)]">From Concept to Company.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">One Idea. One Infrastructure.</h2>
+              <p className="text-lg md:text-xl text-[var(--neon-green)]">From Concept to Company.</p>
             </div>
           </Reveal>
 
@@ -396,8 +393,8 @@ const Landing = () => {
                   <div className="w-14 h-14 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <step.icon size={28} className="text-[var(--neon-green)]" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 tracking-wide">{step.title}</h3>
-                  <p className="text-gray-400 leading-relaxed">{step.desc}</p>
+                  <h3 className="text-xl md:text-2xl font-bold mb-4 tracking-wide">{step.title}</h3>
+                  <p className="text-sm md:text-base text-gray-400 leading-relaxed">{step.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -409,19 +406,19 @@ const Landing = () => {
       <section className="py-24 px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
           <Reveal>
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">Not Just an AI Assistant.</h2>
-            <p className="text-2xl font-medium mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">Not Just an AI Assistant.</h2>
+            <p className="text-xl md:text-2xl font-medium mb-12">
               TechIT doesn't just answer questions.<br />
               <span className="text-[var(--brand-pink)]">It helps you move.</span>
             </p>
-            <p className="text-xl text-gray-400 font-light leading-relaxed mb-16">
+            <p className="text-lg md:text-xl text-gray-400 font-light leading-relaxed mb-16">
               It understands your startup's context, monitors your progress, identifies what is holding you back, and continuously helps you determine what should happen next.
             </p>
             <div className="p-10 rounded-3xl bg-gradient-to-r from-[var(--brand-pink)]/10 to-[var(--neon-green)]/10 border border-white/10">
-              <p className="text-2xl md:text-3xl font-bold italic">
+              <p className="text-xl md:text-2xl font-bold italic">
                 From "I have an idea" <br className="md:hidden" /> <span className="text-gray-500">to</span> <br className="md:hidden" /> "I am building a company."
               </p>
-              <p className="mt-6 text-lg text-gray-400">That's the journey TechIT is designed for.</p>
+              <p className="mt-6 text-base md:text-lg text-gray-400">That's the journey TechIT is designed for.</p>
             </div>
           </Reveal>
         </div>
@@ -432,8 +429,8 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Choose Your Path</h2>
-              <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Choose Your Path</h2>
+              <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
                 Every person enters the startup ecosystem differently. Your role can change. Your journey doesn't have to stop.
               </p>
             </div>
@@ -448,13 +445,13 @@ const Landing = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-bold text-blue-400 tracking-widest mb-2 uppercase">Explorer</h3>
-                  <h4 className="text-3xl font-bold mb-4">EXPLORE WITHOUT COMMITTING</h4>
-                  <p className="text-gray-300 mb-6 leading-relaxed">
+                  <h4 className="text-2xl font-bold mb-4">EXPLORE WITHOUT COMMITTING</h4>
+                  <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Your curiosity is enough to start. You don't need a startup. You don't need a team. You don't even need to know exactly what you're looking for.<br/><br/>
                     As an Explorer, TechIT helps you discover ideas, opportunities, people, startups, knowledge, and possibilities across the ecosystem.<br/><br/>
                     <strong className="text-white">Discover. Learn. Connect. Find where you belong.</strong>
                   </p>
-                  <button onClick={handleExplorerStart} className="px-6 py-3 rounded-full bg-blue-500/20 text-blue-300 font-semibold hover:bg-blue-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleExplorerStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-blue-500/20 text-blue-300 font-semibold hover:bg-blue-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Explorer <ArrowRight size={16} />
                   </button>
                 </div>
@@ -469,13 +466,13 @@ const Landing = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-bold text-[var(--brand-pink)] tracking-widest mb-2 uppercase">Founder</h3>
-                  <h4 className="text-3xl font-bold mb-4">TURN YOUR IDEA INTO SOMETHING REAL</h4>
-                  <p className="text-gray-300 mb-6 leading-relaxed">
+                  <h4 className="text-2xl font-bold mb-4">TURN YOUR IDEA INTO SOMETHING REAL</h4>
+                  <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     You have the idea. Let's build it.<br/><br/>
                     As a Founder, TechIT becomes your AI-powered execution infrastructure — helping you challenge your assumptions, validate your idea, understand your market, plan your MVP, execute your roadmap, and know what to do next.<br/><br/>
                     You don't have to have everything figured out. <strong className="text-white">Start with what you have. TechIT helps you build from there.</strong>
                   </p>
-                  <button onClick={handleFounderStart} className="px-6 py-3 rounded-full bg-[var(--brand-pink)]/20 text-[var(--brand-pink)] font-semibold hover:bg-[var(--brand-pink)]/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleFounderStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-[var(--brand-pink)]/20 text-[var(--brand-pink)] font-semibold hover:bg-[var(--brand-pink)]/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Founder <ArrowRight size={16} />
                   </button>
                 </div>
@@ -490,13 +487,13 @@ const Landing = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-bold text-purple-400 tracking-widest mb-2 uppercase">Collaborator</h3>
-                  <h4 className="text-3xl font-bold mb-4">YOUR SKILLS CAN BUILD SOMETHING BIGGER</h4>
-                  <p className="text-gray-300 mb-6 leading-relaxed">
+                  <h4 className="text-2xl font-bold mb-4">YOUR SKILLS CAN BUILD SOMETHING BIGGER</h4>
+                  <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Don't just look for a job. Find something worth building.<br/><br/>
                     As a Collaborator, discover startups, ideas, and projects where your skills can make a real difference. Connect with founders, contribute to meaningful projects, build your experience, and grow alongside the companies you help create.<br/><br/>
                     <strong className="text-white">Find a problem worth solving. Find people worth building with.</strong>
                   </p>
-                  <button onClick={handleCollaboratorStart} className="px-6 py-3 rounded-full bg-purple-500/20 text-purple-300 font-semibold hover:bg-purple-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleCollaboratorStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-purple-500/20 text-purple-300 font-semibold hover:bg-purple-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Collaborator <ArrowRight size={16} />
                   </button>
                 </div>
@@ -511,13 +508,13 @@ const Landing = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-bold text-teal-400 tracking-widest mb-2 uppercase">Investor</h3>
-                  <h4 className="text-3xl font-bold mb-4">DISCOVER WHAT COULD BE NEXT</h4>
-                  <p className="text-gray-300 mb-6 leading-relaxed">
+                  <h4 className="text-2xl font-bold mb-4">DISCOVER WHAT COULD BE NEXT</h4>
+                  <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Find opportunities before they become obvious.<br/><br/>
                     As an Investor, TechIT gives you intelligence into emerging startups, founder execution, market signals, startup health, and growth potential.<br/><br/>
                     <strong className="text-white">Go beyond the pitch. Understand the idea. Understand the execution. Understand the opportunity.</strong>
                   </p>
-                  <button onClick={handleInvestorStart} className="px-6 py-3 rounded-full bg-teal-500/20 text-teal-300 font-semibold hover:bg-teal-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleInvestorStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-teal-500/20 text-teal-300 font-semibold hover:bg-teal-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Investor <ArrowRight size={16} />
                   </button>
                 </div>
@@ -532,13 +529,13 @@ const Landing = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-bold text-orange-400 tracking-widest mb-2 uppercase">Organization</h3>
-                  <h4 className="text-3xl font-bold mb-4">ACCELERATE THE ECOSYSTEM</h4>
-                  <p className="text-gray-300 mb-6 leading-relaxed">
+                  <h4 className="text-2xl font-bold mb-4">ACCELERATE THE ECOSYSTEM</h4>
+                  <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     Your organization can help more founders succeed.<br/><br/>
                     As an Organization, use TechIT to support entrepreneurs, manage programs and cohorts, monitor startup progress, Hackathons, identify risks, connect founders with resources, and understand what is happening across your ecosystem.<br/><br/>
                     <strong className="text-white">Move from managing programs to building measurable entrepreneurial outcomes.</strong>
                   </p>
-                  <button onClick={handleOrganizationStart} className="px-6 py-3 rounded-full bg-orange-500/20 text-orange-300 font-semibold hover:bg-orange-500/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleOrganizationStart} className="px-5 py-2.5 text-sm md:text-base rounded-full bg-orange-500/20 text-orange-300 font-semibold hover:bg-orange-500/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Organization <ArrowRight size={16} />
                   </button>
                 </div>
@@ -552,20 +549,20 @@ const Landing = () => {
       <section className="py-32 px-6 relative text-center">
         <div className="max-w-4xl mx-auto">
           <Reveal>
-            <h2 className="text-5xl font-bold mb-12">The Mission</h2>
-            <p className="text-2xl text-gray-300 font-light mb-16 leading-relaxed">
+            <h2 className="text-4xl md:text-5xl font-bold mb-12">The Mission</h2>
+            <p className="text-xl md:text-2xl text-gray-300 font-light mb-16 leading-relaxed">
               We believe the world has too many ideas that never get the opportunity to become real.<br/><br/>
               A solution someone never built.<br/>
               A company someone never started.<br/>
               A problem someone never solved.
             </p>
             <div className="p-10 mb-16">
-              <h3 className="text-4xl font-extrabold mb-6">TechIT Network exists to change that.</h3>
-              <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-pink)] to-[var(--neon-green)]">
+              <h3 className="text-3xl md:text-4xl font-extrabold mb-6">TechIT Network exists to change that.</h3>
+              <p className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-pink)] to-[var(--neon-green)]">
                 No Idea Should Be Lost.
               </p>
             </div>
-            <button onClick={handleGetStarted} className="px-10 py-5 bg-white text-black rounded-full font-bold text-xl shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-3 mx-auto">
+            <button onClick={handleGetStarted} className="px-8 py-4 bg-white text-black rounded-full font-bold text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-3 mx-auto">
               Start Your Journey <ArrowRight size={20} />
             </button>
           </Reveal>
