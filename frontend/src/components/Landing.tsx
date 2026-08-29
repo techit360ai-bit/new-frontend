@@ -331,7 +331,7 @@ const Landing = () => {
 
         <Reveal delay={400}>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <button onClick={handleFounderStart} className="px-5 py-2.5 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] hover:opacity-90 rounded-full font-bold text-base shadow-[0_0_30px_rgba(254,39,132,0.3)] transition-all hover:scale-105 flex items-center justify-center gap-2">
+            <button onClick={handleFounderStart} className="px-5 py-2.5 bg-gradient-to-r from-[var(--brand-pink)] via-[var(--brand-green)] to-[var(--brand-pink)] bg-[length:200%_auto] animate-gradient-x hover:opacity-90 rounded-full font-bold text-base transition-all hover:scale-105 flex items-center justify-center gap-2">
               Bring My Idea to Life <Rocket size={18} />
             </button>
             <button onClick={handleExplorerStart} className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md rounded-full font-bold text-base transition-all flex items-center justify-center gap-2">
