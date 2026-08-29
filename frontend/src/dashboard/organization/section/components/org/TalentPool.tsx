@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function TalentPool() { return <LiveCollectionPage section="talent" title="Talent Pool" description="Manage live talent records available to your organization." itemLabel="Talent record" fields={[{ key: "name", label: "Name" }, { key: "role", label: "Role" }, { key: "skills", label: "Skills" }, { key: "location", label: "Location" }, { key: "notes", label: "Notes", multiline: true }]} />; }

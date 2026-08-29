@@ -1,0 +1,13 @@
+export function ZoneSwitcher({ active, onChange }: { active: string; onChange: (zone: string) => void }) {
+  const zones = ['For You', 'Following', 'Startups', 'Funding', 'Hackathons', 'Organizations', 'Learning', 'AI Recommendations'];
+  return (
+    <div className="sticky top-14 bg-bg-surface border-b border-border-default h-12 flex items-center gap-6 px-6 overflow-x-auto z-40">
+      {zones.map((zone) => (
+        <button key={zone} onClick={() => onChange(zone)} className={`relative h-full text-sm font-medium transition-colors whitespace-nowrap ${active === zone ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}>
+          {zone}
+          {active === zone && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-primary"></div>}
+        </button>
+      ))}
+    </div>
+  );
+}

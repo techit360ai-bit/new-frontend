@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function Integrations() { return <LiveCollectionPage section="integrations" title="Integrations" description="Configure live integration metadata. Secret credentials are never rendered in this view." itemLabel="Integration" fields={[{ key: "name", label: "Integration name" }, { key: "provider", label: "Provider" }, { key: "endpoint", label: "Endpoint", type: "url" }, { key: "description", label: "Description", multiline: true }]} />; }

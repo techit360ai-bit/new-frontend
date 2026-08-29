@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function Settings() { return <LiveCollectionPage section="settings" title="Organization Settings" description="Persist organization-level policies and operating preferences." itemLabel="Setting" fields={[{ key: "name", label: "Setting name" }, { key: "value", label: "Value" }, { key: "description", label: "Description", multiline: true }, { key: "scope", label: "Scope" }]} />; }
