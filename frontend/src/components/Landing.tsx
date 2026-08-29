@@ -569,44 +569,44 @@ const Landing = () => {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/5 bg-[#131313] py-16 px-6 relative overflow-hidden">
-        {/* Glow accent */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-[#00FF00]/30 to-transparent"></div>
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-[#00FF00]/5 blur-[100px] rounded-full pointer-events-none"></div>
+      <footer className="border-t border-[#FE2784]/20 bg-[#006400] py-16 px-6 relative overflow-hidden">
+        {/* Glow accent (Pink Sun Effect) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[1px] bg-gradient-to-r from-transparent via-[#FE2784]/80 to-transparent"></div>
+        <div className="absolute -top-[150px] left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-[#FE2784]/30 blur-[120px] rounded-[100%] pointer-events-none"></div>
         
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 relative z-10">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img src="/TechIT-logo.png" alt="TechIT Logo" className="w-8 h-8 object-contain" />
-              <span className="font-bold text-white tracking-widest text-lg">TECHIT</span>
+              <img src="/TechIT-logo.png" alt="TechIT Logo" className="w-8 h-8 object-contain drop-shadow-md" />
+              <span className="font-bold text-white tracking-widest text-lg drop-shadow-md">TECHIT</span>
             </div>
-            <p className="text-gray-400 text-sm md:text-base max-w-sm leading-relaxed">
+            <p className="text-white/80 text-sm md:text-base max-w-sm leading-relaxed">
               AI-powered execution infrastructure for creating, validating, building, and growing startups. No idea should be lost.
             </p>
           </div>
           
           <div>
-            <h4 className="font-semibold text-white mb-6 tracking-wide">Platform</h4>
-            <ul className="space-y-4 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">How it Works</a></li>
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">Pricing</a></li>
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">Features</a></li>
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">For Founders</a></li>
+            <h4 className="font-bold text-white mb-6 tracking-wide uppercase text-sm">Platform</h4>
+            <ul className="space-y-4 text-sm text-white/70">
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">How it Works</a></li>
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">Pricing</a></li>
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">Features</a></li>
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">For Founders</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold text-white mb-6 tracking-wide">Company</h4>
-            <ul className="space-y-4 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-[#00FF00] transition-colors">Terms of Service</a></li>
+            <h4 className="font-bold text-white mb-6 tracking-wide uppercase text-sm">Company</h4>
+            <ul className="space-y-4 text-sm text-white/70">
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">About Us</a></li>
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">Contact</a></li>
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-[#00FF00] hover:translate-x-1 transition-all inline-block">Terms of Service</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs md:text-sm text-gray-500 relative z-10">
+        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs md:text-sm text-white/50 relative z-10">
           <p>© 2026 TechIT Network. Built for builders.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-white transition-colors">Twitter</a>
