@@ -291,7 +291,7 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#000d04] text-white font-sans overflow-x-hidden">
       <Navbar onGetStarted={handleGetStarted} />
 
       {/* 1. HERO */}
@@ -352,12 +352,12 @@ const Landing = () => {
           </Reveal>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-base md:text-lg font-medium text-gray-400">
-            <Reveal delay={100}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[#FE2784]/30 transition-colors">Lack of capital.</div></Reveal>
-            <Reveal delay={150}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[#FE2784]/30 transition-colors">Lack of expertise.</div></Reveal>
-            <Reveal delay={200}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[#FE2784]/30 transition-colors">Lack of direction.</div></Reveal>
-            <Reveal delay={250}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[#FE2784]/30 transition-colors">Lack of validation.</div></Reveal>
-            <Reveal delay={300}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[#FE2784]/30 transition-colors">Lack of the right people.</div></Reveal>
-            <Reveal delay={350}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[#FE2784]/30 transition-colors">Lack of execution.</div></Reveal>
+            <Reveal delay={100}><div className="p-6 bg-[#006400]/10 rounded-2xl border border-[#006400]/30 hover:border-[#00FF00]/40 transition-colors">Lack of capital.</div></Reveal>
+            <Reveal delay={150}><div className="p-6 bg-[#006400]/10 rounded-2xl border border-[#006400]/30 hover:border-[#00FF00]/40 transition-colors">Lack of expertise.</div></Reveal>
+            <Reveal delay={200}><div className="p-6 bg-[#006400]/10 rounded-2xl border border-[#006400]/30 hover:border-[#00FF00]/40 transition-colors">Lack of direction.</div></Reveal>
+            <Reveal delay={250}><div className="p-6 bg-[#006400]/10 rounded-2xl border border-[#006400]/30 hover:border-[#00FF00]/40 transition-colors">Lack of validation.</div></Reveal>
+            <Reveal delay={300}><div className="p-6 bg-[#006400]/10 rounded-2xl border border-[#006400]/30 hover:border-[#00FF00]/40 transition-colors">Lack of the right people.</div></Reveal>
+            <Reveal delay={350}><div className="p-6 bg-[#006400]/10 rounded-2xl border border-[#006400]/30 hover:border-[#00FF00]/40 transition-colors">Lack of execution.</div></Reveal>
           </div>
 
           <Reveal delay={450}>
@@ -369,7 +369,7 @@ const Landing = () => {
       </section>
 
       {/* 3. INFRASTRUCTURE */}
-      <section id="infrastructure" className="py-24 px-6 relative bg-gradient-to-b from-transparent via-[#006400]/5 to-transparent">
+      <section id="infrastructure" className="py-24 px-6 relative bg-gradient-to-b from-transparent via-[#006400]/15 to-transparent">
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
@@ -388,7 +388,7 @@ const Landing = () => {
               { title: "GROW", icon: TrendingUp, desc: "Continue receiving intelligence as your startup evolves from building to launching and scaling." }
             ].map((step, i) => (
               <Reveal key={step.title} delay={i * 100}>
-                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:-translate-y-2 transition-transform duration-300 group h-full">
+                <div className="p-8 rounded-3xl bg-[#006400]/10 border border-[#006400]/30 backdrop-blur-sm hover:border-[#00FF00]/50 hover:-translate-y-2 transition-transform duration-300 group h-full">
                   <div className="w-14 h-14 rounded-full bg-[#006400]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <step.icon size={28} className="text-[#00FF00]" />
                   </div>
@@ -413,7 +413,7 @@ const Landing = () => {
             <p className="text-lg md:text-xl text-gray-400 font-light leading-relaxed mb-16">
               It understands your startup's context, monitors your progress, identifies what is holding you back, and continuously helps you determine what should happen next.
             </p>
-            <div className="p-10 rounded-3xl bg-gradient-to-r from-[#FE2784]/10 to-[#00FF00]/10 border border-white/10">
+            <div className="p-10 rounded-3xl bg-gradient-to-r from-[#006400]/20 to-[#00FF00]/10 border border-[#006400]/50">
               <p className="text-xl md:text-2xl font-bold italic">
                 From "I have an idea" <br className="md:hidden" /> <span className="text-gray-500">to</span> <br className="md:hidden" /> "I am building a company."
               </p>
@@ -438,7 +438,7 @@ const Landing = () => {
           <div className="space-y-12">
             {/* Explorer */}
             <Reveal delay={100}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-[#00FF00]/50 transition-colors">
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-[#00FF00]/50 transition-colors">
                 <div className="w-24 h-24 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center">
                   <Compass size={40} className="text-blue-400" />
                 </div>
@@ -459,7 +459,7 @@ const Landing = () => {
 
             {/* Founder */}
             <Reveal delay={150}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-gradient-to-r from-[#FE2784]/10 to-transparent border border-[#FE2784]/30">
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-[#FE2784]/50 transition-colors">
                 <div className="w-24 h-24 shrink-0 rounded-full bg-[#FE2784]/20 flex items-center justify-center">
                   <Rocket size={40} className="text-[#FE2784]" />
                 </div>
@@ -480,7 +480,7 @@ const Landing = () => {
 
             {/* Collaborator */}
             <Reveal delay={200}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-purple-500/50 transition-colors">
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-purple-500/50 transition-colors">
                 <div className="w-24 h-24 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center">
                   <Zap size={40} className="text-purple-400" />
                 </div>
@@ -501,7 +501,7 @@ const Landing = () => {
 
             {/* Investor */}
             <Reveal delay={250}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-teal-500/50 transition-colors">
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-teal-500/50 transition-colors">
                 <div className="w-24 h-24 shrink-0 rounded-full bg-teal-500/20 flex items-center justify-center">
                   <Gem size={40} className="text-teal-400" />
                 </div>
@@ -522,7 +522,7 @@ const Landing = () => {
 
             {/* Organization */}
             <Reveal delay={300}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-[#006400]/10 border border-[#006400]/30 hover:border-orange-500/50 transition-colors">
                 <div className="w-24 h-24 shrink-0 rounded-full bg-orange-500/20 flex items-center justify-center">
                   <Building2 size={40} className="text-orange-400" />
                 </div>
