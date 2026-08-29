@@ -111,19 +111,22 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
           initial={false}
           animate={{
             width: isScrolled ? "auto" : "100%",
+            borderRadius: isScrolled ? 999 : 0,
+            paddingTop: isScrolled ? 6 : 0,
+            paddingBottom: isScrolled ? 6 : 0,
           }}
           transition={{ type: "spring", stiffness: 300, damping: 24, mass: 0.8 }}
           className={`pointer-events-auto flex items-center justify-between max-w-7xl mx-auto transition-all duration-300 ${
-            isScrolled ? 'px-4 sm:px-6 gap-8' : 'px-6 py-2 w-full gap-0'
+            isScrolled 
+              ? 'px-4 sm:px-6 gap-6 lg:gap-12 bg-[#006400]/40 backdrop-blur-2xl border border-[#006400]/50 shadow-xl' 
+              : 'px-6 py-2 w-full gap-0 bg-transparent border-transparent'
           }`}
         >
-          {/* Separate Floating Logo Pill */}
+          {/* 1. Logo (Left) */}
           <Link 
             to="/" 
             className={`shrink-0 flex items-center transition-all duration-300 rounded-md ${
-              isScrolled 
-                ? 'bg-[#006400]/20 backdrop-blur-2xl border border-[#006400]/30 p-1.5' 
-                : 'gap-2 p-1.5 border border-transparent'
+              isScrolled ? 'gap-0' : 'gap-2'
             }`}
           >
             <img 
@@ -138,43 +141,33 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             </div>
           </Link>
 
-          {/* Main Floating Nav Pill */}
-          <motion.div
-            animate={{
-              borderRadius: isScrolled ? 999 : 0,
-              paddingLeft: isScrolled ? 16 : 0,
-              paddingRight: isScrolled ? 16 : 0,
-              paddingTop: isScrolled ? 8 : 0,
-              paddingBottom: isScrolled ? 8 : 0,
-            }}
-            className={`flex items-center justify-end md:justify-between transition-colors duration-300 ${
-              isScrolled 
-                ? 'bg-[#006400]/20 backdrop-blur-2xl border border-[#006400]/30' 
-                : 'bg-transparent border-transparent'
-            }`}
-          >
-            {/* Desktop Nav Links */}
-            <div className="hidden md:flex gap-4 lg:gap-6 items-center justify-center">
-              {navLinks.map((link) => (
-                <a 
-                  key={link.name} 
-                  href={link.href}
-                  className="text-xs lg:text-sm font-medium transition-colors text-slate-300 hover:text-[#00FF00]"
-                >
-                  {link.name}
-                </a>
-              ))}
-              <div className="w-px h-4 bg-white/10 mx-1 lg:mx-2"></div>
+          {/* 2. Nav Links (Middle) */}
+          <div className="hidden md:flex items-center justify-center gap-6 lg:gap-8 transition-all duration-300">
+            {navLinks.map((link) => (
+              <a 
+                key={link.name} 
+                href={link.href}
+                className="text-sm font-medium transition-colors text-slate-300 hover:text-[#00FF00]"
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
+
+          {/* 3. Action Buttons & Mobile Toggle (Right) */}
+          <div className="flex items-center justify-end gap-3 lg:gap-4 transition-colors duration-300">
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center gap-3 lg:gap-4">
               <Link to="/signin" className="text-xs lg:text-sm font-bold text-white bg-[#FE2784]/20 hover:bg-[#FE2784]/40 border border-[#FE2784]/50 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full transition-colors">
                 Sign In
               </Link>
-              <button onClick={onGetStarted} className="flex items-center gap-1.5 bg-gradient-to-r from-[#FE2784] to-[#006400] text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-0.5">
+              <button onClick={onGetStarted} className="flex items-center gap-1.5 bg-gradient-to-r from-[#FE2784] to-[#006400] text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-0.5 shadow-lg shadow-[#FE2784]/20">
                 Get Started <ArrowRight size={14} />
               </button>
             </div>
 
+            {/* Mobile Menu Toggle */}
             <div className="flex items-center md:hidden">
-              {/* Mobile Menu Toggle */}
               <button 
                 className="p-2 rounded-full transition-colors bg-white/5 text-slate-200 hover:bg-white/10"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -182,7 +175,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 
