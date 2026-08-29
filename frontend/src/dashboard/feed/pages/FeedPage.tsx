@@ -25,6 +25,7 @@ import {
 import { RecommendationCard } from '../components/RecommendationCard';
 import { CaughtUpNotice, ReturnSummaryBanner } from '../components/ReturnIntelligence';
 import { VirtualizedList } from '@/components/mobile/VirtualizedList';
+import { FeedSearchPopover } from '../components/FeedSearchPopover';
 
 const CATEGORY_IDS: Record<string, string> = {
   'For You': 'for-you', Following: 'following', Startups: 'startups', Funding: 'funding',
@@ -41,6 +42,7 @@ export function FeedPage() {
   const [returnSummary, setReturnSummary] = useState<ReturnSummary | null>(null);
   const [catchUpMode, setCatchUpMode] = useState(false);
   const [caughtUp, setCaughtUp] = useState(false);
+  const [feedSearchOpen, setFeedSearchOpen] = useState(false);
   const backendZone = activeZone === 'Following' ? 'tribe' : 'global';
   const { posts, loading, error, reload } = useFeedPosts(backendZone, CATEGORY_IDS[activeZone]);
 
@@ -101,7 +103,7 @@ export function FeedPage() {
     <div className="flex pb-14 lg:pb-0">
       <LeftSidebar />
       <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px]">
-        <ZoneSwitcher active={activeZone} onChange={changeZone} />
+        <div className="relative"><ZoneSwitcher active={activeZone} onChange={changeZone} onSearch={() => setFeedSearchOpen(current => !current)} />{feedSearchOpen && <FeedSearchPopover onClose={() => setFeedSearchOpen(false)} />}</div>
 
         {catchUpMode && returnSummary ? (
           <div className="space-y-4 px-4 py-5">
