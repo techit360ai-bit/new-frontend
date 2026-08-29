@@ -104,7 +104,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
         className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center transition-all duration-300 ${
           isScrolled 
             ? 'pt-4' 
-            : 'border-b border-[var(--brand-green)]/20 bg-[var(--brand-green)]/10 backdrop-blur-md pt-0'
+            : 'border-b border-brand-green/20 bg-brand-green/10 backdrop-blur-md pt-0'
         }`}
       >
         <motion.div
@@ -122,7 +122,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             to="/" 
             className={`shrink-0 flex items-center transition-all duration-300 rounded-md ${
               isScrolled 
-                ? 'bg-[var(--brand-green)]/20 backdrop-blur-2xl border border-[var(--brand-green)]/30 p-1.5' 
+                ? 'bg-brand-green/20 backdrop-blur-2xl border border-brand-green/30 p-1.5' 
                 : 'gap-2 p-1.5 border border-transparent'
             }`}
           >
@@ -149,7 +149,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             }}
             className={`flex items-center justify-end md:justify-between transition-colors duration-300 ${
               isScrolled 
-                ? 'bg-[var(--brand-green)]/20 backdrop-blur-2xl border border-[var(--brand-green)]/30' 
+                ? 'bg-brand-green/20 backdrop-blur-2xl border border-brand-green/30' 
                 : 'bg-transparent border-transparent'
             }`}
           >
@@ -159,16 +159,16 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
                 <a 
                   key={link.name} 
                   href={link.href}
-                  className="text-xs lg:text-sm font-medium transition-colors text-slate-300 hover:text-[var(--neon-green)]"
+                  className="text-xs lg:text-sm font-medium transition-colors text-slate-300 hover:text-neon-green"
                 >
                   {link.name}
                 </a>
               ))}
               <div className="w-px h-4 bg-white/10 mx-1 lg:mx-2"></div>
-              <Link to="/signin" className="text-xs lg:text-sm font-bold text-white bg-[var(--brand-pink)]/20 hover:bg-[var(--brand-pink)]/40 border border-[var(--brand-pink)]/50 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full transition-colors">
+              <Link to="/signin" className="text-xs lg:text-sm font-bold text-white bg-brand-pink/20 hover:bg-brand-pink/40 border border-brand-pink/50 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full transition-colors">
                 Sign In
               </Link>
-              <button onClick={onGetStarted} className="flex items-center gap-1.5 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-0.5">
+              <button onClick={onGetStarted} className="flex items-center gap-1.5 bg-gradient-to-r from-brand-pink to-brand-green text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-0.5">
                 Get Started <ArrowRight size={14} />
               </button>
             </div>
@@ -193,22 +193,22 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-4 top-24 z-40 md:hidden rounded-2xl bg-[#001a00]/95 backdrop-blur-xl border border-[var(--brand-green)]/50 shadow-[0_0_40px_rgba(0,100,0,0.3)] overflow-hidden p-4 flex flex-col gap-4"
+            className="fixed inset-x-4 top-24 z-40 md:hidden rounded-2xl bg-[#001a00]/95 backdrop-blur-xl border border-brand-green/50 shadow-[0_0_40px_rgba(0,100,0,0.3)] overflow-hidden p-4 flex flex-col gap-4"
           >
             {navLinks.map((link) => (
               <a 
                 key={link.name} 
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-base font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors border-b border-white/5"
+                className="text-base font-semibold text-slate-200 hover:text-neon-green p-2 transition-colors border-b border-white/5"
               >
                 {link.name}
               </a>
             ))}
-            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-semibold text-slate-200 hover:text-[var(--neon-green)] p-2 transition-colors">
+            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-semibold text-slate-200 hover:text-neon-green p-2 transition-colors">
               Sign In
             </Link>
-            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--brand-pink)] to-[var(--brand-green)] text-white py-2.5 mt-2 rounded-xl text-base font-bold">
+            <button onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-pink to-brand-green text-white py-2.5 mt-2 rounded-xl text-base font-bold">
               Get Started <ArrowRight size={14} />
             </button>
           </motion.div>
@@ -297,18 +297,18 @@ const Landing = () => {
       {/* 1. HERO */}
       <section className="relative pt-40 pb-32 px-6 flex flex-col items-center text-center max-w-5xl mx-auto min-h-screen justify-center">
         {/* Blur Effects */}
-        <div className="absolute top-1/4 -left-[20%] w-[50vw] h-[50vw] bg-[var(--neon-green)] opacity-[0.15] blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
-        <div className="absolute bottom-1/4 -right-[20%] w-[50vw] h-[50vw] bg-[var(--brand-pink)] opacity-[0.15] blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
+        <div className="absolute top-1/4 -left-[20%] w-[50vw] h-[50vw] bg-neon-green opacity-[0.15] blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
+        <div className="absolute bottom-1/4 -right-[20%] w-[50vw] h-[50vw] bg-brand-pink opacity-[0.15] blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
 
         <Reveal delay={0}>
-          <div className="inline-block px-4 py-1.5 mb-8 rounded-full bg-white/5 border border-white/10 text-[var(--neon-green)] text-sm font-semibold tracking-widest backdrop-blur-md">
+          <div className="inline-block px-4 py-1.5 mb-8 rounded-full bg-white/5 border border-white/10 text-neon-green text-sm font-semibold tracking-widest backdrop-blur-md">
             TECHIT NETWORK
           </div>
         </Reveal>
         
         <Reveal delay={100}>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-8">
-            No Idea Should Be <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-pink)] to-[var(--neon-green)]">Lost.</span>
+            No Idea Should Be <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-neon-green">Lost.</span>
             <br />
             Turn your idea into <span className="italic font-light">something real.</span>
           </h1>
@@ -330,7 +330,7 @@ const Landing = () => {
 
         <Reveal delay={400}>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <button onClick={handleFounderStart} className="px-5 py-2.5 bg-gradient-to-r from-[var(--brand-pink)] via-[var(--brand-green)] to-[var(--brand-pink)] bg-[length:200%_auto] animate-gradient-x hover:opacity-90 rounded-full font-bold text-base transition-all hover:scale-105 flex items-center justify-center gap-2">
+            <button onClick={handleFounderStart} className="px-5 py-2.5 bg-gradient-to-r from-brand-pink via-brand-green to-brand-pink bg-[length:200%_auto] animate-gradient-x hover:opacity-90 rounded-full font-bold text-base transition-all hover:scale-105 flex items-center justify-center gap-2">
               Bring My Idea to Life <Rocket size={18} />
             </button>
             <button onClick={handleExplorerStart} className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md rounded-full font-bold text-base transition-all flex items-center justify-center gap-2">
@@ -352,16 +352,16 @@ const Landing = () => {
           </Reveal>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-base md:text-lg font-medium text-gray-400">
-            <Reveal delay={100}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of capital.</div></Reveal>
-            <Reveal delay={150}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of expertise.</div></Reveal>
-            <Reveal delay={200}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of direction.</div></Reveal>
-            <Reveal delay={250}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of validation.</div></Reveal>
-            <Reveal delay={300}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of the right people.</div></Reveal>
-            <Reveal delay={350}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-[var(--brand-pink)]/30 transition-colors">Lack of execution.</div></Reveal>
+            <Reveal delay={100}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-brand-pink/30 transition-colors">Lack of capital.</div></Reveal>
+            <Reveal delay={150}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-brand-pink/30 transition-colors">Lack of expertise.</div></Reveal>
+            <Reveal delay={200}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-brand-pink/30 transition-colors">Lack of direction.</div></Reveal>
+            <Reveal delay={250}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-brand-pink/30 transition-colors">Lack of validation.</div></Reveal>
+            <Reveal delay={300}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-brand-pink/30 transition-colors">Lack of the right people.</div></Reveal>
+            <Reveal delay={350}><div className="p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-brand-pink/30 transition-colors">Lack of execution.</div></Reveal>
           </div>
 
           <Reveal delay={450}>
-            <p className="mt-16 text-2xl md:text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[var(--neon-green)] to-[var(--brand-green)]">
+            <p className="mt-16 text-2xl md:text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-brand-green">
               TechIT Network exists to close that gap.
             </p>
           </Reveal>
@@ -374,7 +374,7 @@ const Landing = () => {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">One Idea. One Infrastructure.</h2>
-              <p className="text-lg md:text-xl text-[var(--neon-green)]">From Concept to Company.</p>
+              <p className="text-lg md:text-xl text-neon-green">From Concept to Company.</p>
             </div>
           </Reveal>
 
@@ -389,8 +389,8 @@ const Landing = () => {
             ].map((step, i) => (
               <Reveal key={step.title} delay={i * 100}>
                 <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:-translate-y-2 transition-transform duration-300 group h-full">
-                  <div className="w-14 h-14 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <step.icon size={28} className="text-[var(--neon-green)]" />
+                  <div className="w-14 h-14 rounded-full bg-brand-green/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <step.icon size={28} className="text-neon-green" />
                   </div>
                   <h3 className="text-xl md:text-2xl font-bold mb-4 tracking-wide">{step.title}</h3>
                   <p className="text-sm md:text-base text-gray-400 leading-relaxed">{step.desc}</p>
@@ -408,12 +408,12 @@ const Landing = () => {
             <h2 className="text-3xl md:text-4xl font-bold mb-8">Not Just an AI Assistant.</h2>
             <p className="text-xl md:text-2xl font-medium mb-12">
               TechIT doesn't just answer questions.<br />
-              <span className="text-[var(--brand-pink)]">It helps you move.</span>
+              <span className="text-brand-pink">It helps you move.</span>
             </p>
             <p className="text-lg md:text-xl text-gray-400 font-light leading-relaxed mb-16">
               It understands your startup's context, monitors your progress, identifies what is holding you back, and continuously helps you determine what should happen next.
             </p>
-            <div className="p-10 rounded-3xl bg-gradient-to-r from-[var(--brand-pink)]/10 to-[var(--neon-green)]/10 border border-white/10">
+            <div className="p-10 rounded-3xl bg-gradient-to-r from-brand-pink/10 to-neon-green/10 border border-white/10">
               <p className="text-xl md:text-2xl font-bold italic">
                 From "I have an idea" <br className="md:hidden" /> <span className="text-gray-500">to</span> <br className="md:hidden" /> "I am building a company."
               </p>
@@ -438,7 +438,7 @@ const Landing = () => {
           <div className="space-y-12">
             {/* Explorer */}
             <Reveal delay={100}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-[var(--neon-green)]/50 transition-colors">
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-neon-green/50 transition-colors">
                 <div className="w-24 h-24 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center">
                   <Compass size={40} className="text-blue-400" />
                 </div>
@@ -459,19 +459,19 @@ const Landing = () => {
 
             {/* Founder */}
             <Reveal delay={150}>
-              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-gradient-to-r from-[var(--brand-pink)]/10 to-transparent border border-[var(--brand-pink)]/30">
-                <div className="w-24 h-24 shrink-0 rounded-full bg-[var(--brand-pink)]/20 flex items-center justify-center">
-                  <Rocket size={40} className="text-[var(--brand-pink)]" />
+              <div className="flex flex-col md:flex-row gap-12 items-center p-10 rounded-[40px] bg-gradient-to-r from-brand-pink/10 to-transparent border border-brand-pink/30">
+                <div className="w-24 h-24 shrink-0 rounded-full bg-brand-pink/20 flex items-center justify-center">
+                  <Rocket size={40} className="text-brand-pink" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-[var(--brand-pink)] tracking-widest mb-2 uppercase">Founder</h3>
+                  <h3 className="text-sm font-bold text-brand-pink tracking-widest mb-2 uppercase">Founder</h3>
                   <h4 className="text-2xl font-bold mb-4">TURN YOUR IDEA INTO SOMETHING REAL</h4>
                   <p className="text-sm md:text-base text-gray-300 mb-6 leading-relaxed">
                     You have the idea. Let's build it.<br/><br/>
                     As a Founder, TechIT becomes your AI-powered execution infrastructure — helping you challenge your assumptions, validate your idea, understand your market, plan your MVP, execute your roadmap, and know what to do next.<br/><br/>
                     You don't have to have everything figured out. <strong className="text-white">Start with what you have. TechIT helps you build from there.</strong>
                   </p>
-                  <button onClick={handleFounderStart} className="px-4 py-2 text-sm rounded-full bg-[var(--brand-pink)]/20 text-[var(--brand-pink)] font-semibold hover:bg-[var(--brand-pink)]/30 transition-colors flex items-center gap-2 w-fit">
+                  <button onClick={handleFounderStart} className="px-4 py-2 text-sm rounded-full bg-brand-pink/20 text-brand-pink font-semibold hover:bg-brand-pink/30 transition-colors flex items-center gap-2 w-fit">
                     Enter as Founder <ArrowRight size={16} />
                   </button>
                 </div>
@@ -557,7 +557,7 @@ const Landing = () => {
             </p>
             <div className="p-10 mb-16">
               <h3 className="text-3xl md:text-4xl font-extrabold mb-6">TechIT Network exists to change that.</h3>
-              <p className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-pink)] to-[var(--neon-green)]">
+              <p className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-neon-green">
                 No Idea Should Be Lost.
               </p>
             </div>

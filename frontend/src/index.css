@@ -4,6 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --color-brand-green: #006400;
+  --color-brand-pink: #FE2784;
+  --color-neon-green: #00FF00;
+
   --animate-gradient-x: gradient-x 3s ease infinite;
 
   @keyframes gradient-x {
