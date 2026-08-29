@@ -5,6 +5,7 @@ import { createPost } from '@/lib/messaging/feed';
 import { VIEWER_ROLES, normalizeRole } from '@/lib/messaging/roles';
 import { kindsForRole, KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import { useAuth } from '@/contexts/AuthContext';
+import { MentionTextarea } from '@/components/messaging/MentionTextarea';
 
 function initials(value: string): string {
   return value
@@ -101,9 +102,9 @@ export function PostComposer({
         </div>
         <div className="flex-1">
           {expanded ? (
-            <textarea
+            <MentionTextarea
               value={body}
-              onChange={(event) => setBody(event.target.value)}
+              onChange={setBody}
               className="min-h-[120px] w-full resize-none rounded-lg bg-bg-elevated px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
               placeholder="What did you build, ship, or learn today?"
               autoFocus

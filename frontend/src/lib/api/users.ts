@@ -19,6 +19,7 @@ export interface PublicUserActivity {
 export interface PublicUserProfile {
   id: string;
   name: string;
+  username?: string | null;
   role: string;
   category: string;
   stage: string;
@@ -29,6 +30,13 @@ export interface PublicUserProfile {
   bio: string;
   website: string;
   avatar: string;
+  avatarUrl?: string;
+  isVerified?: boolean;
+  credibilityScore?: number;
+  credibilityLevel?: string;
+  subscriber?: boolean;
+  subscriptionLabel?: string | null;
+  sharedContext?: boolean;
   isOwnProfile: boolean;
   stats: {
     decay: number;
@@ -44,6 +52,7 @@ export interface PublicUserProfile {
 export interface CollaboratorDirectoryEntry {
   id: string;
   name: string;
+  username?: string | null;
   role: string;
   title: string;
   headline: string;
@@ -62,6 +71,10 @@ export interface CollaboratorDirectoryEntry {
   avatarUrl: string;
   credibilityScore: number;
   isVerified: boolean;
+  subscriber?: boolean;
+  subscriptionLabel?: string | null;
+  credibilityLevel?: string;
+  sharedContext?: boolean;
 }
 
 export interface CollaborationInvitation {

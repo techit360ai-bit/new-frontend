@@ -16,6 +16,7 @@ export function mapMessage(m: WireMessage, currentUserId: string, authorName = "
     authorName: mine ? "You" : authorName || m.senderId,
     body: m.body,
     timestamp: m.ts,
+    mentions: m.mentions,
   };
 }
 
@@ -26,7 +27,15 @@ export function mapConvSummary(s: WireConvSummary): UIConversation {
   return {
     id: s.id,
     participantName: s.otherName || s.otherUserId,
-    participantAvatar: initials(s.otherName || s.otherUserId),
+    participantAvatar: s.otherAvatarUrl || initials(s.otherName || s.otherUserId),
+    participantId: s.otherUserId,
+    participantUsername: s.otherUsername,
+    participantRole: s.otherRole,
+    participantVerified: s.otherVerified,
+    participantSubscriber: s.otherSubscriber,
+    participantCredibilityScore: s.otherCredibilityScore,
+    requestStatus: s.requestStatus,
+    initiatedBy: s.initiatedBy,
     projectName: "",
     subject: s.lastBody,
     unread: s.unread > 0,
