@@ -104,7 +104,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
         className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center transition-all duration-300 ${
           isScrolled 
             ? 'pt-4' 
-            : 'border-b border-white/5 bg-slate-950/50 backdrop-blur-md pt-0'
+            : 'border-b border-[var(--brand-green)]/20 bg-[var(--brand-green)]/10 backdrop-blur-md pt-0'
         }`}
       >
         <motion.div
@@ -122,7 +122,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             to="/" 
             className={`shrink-0 flex items-center transition-all duration-300 rounded-md ${
               isScrolled 
-                ? 'bg-slate-900/80 backdrop-blur-2xl border border-white/10 p-1.5' 
+                ? 'bg-[var(--brand-green)]/20 backdrop-blur-2xl border border-[var(--brand-green)]/30 p-1.5' 
                 : 'gap-2 p-1.5 border border-transparent'
             }`}
           >
@@ -149,7 +149,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             }}
             className={`flex items-center justify-end md:justify-between transition-colors duration-300 ${
               isScrolled 
-                ? 'bg-slate-900/80 backdrop-blur-2xl border border-white/10' 
+                ? 'bg-[var(--brand-green)]/20 backdrop-blur-2xl border border-[var(--brand-green)]/30' 
                 : 'bg-transparent border-transparent'
             }`}
           >
@@ -193,7 +193,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-4 top-24 z-40 md:hidden rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden p-4 flex flex-col gap-4"
+            className="fixed inset-x-4 top-24 z-40 md:hidden rounded-2xl bg-[#001a00]/95 backdrop-blur-xl border border-[var(--brand-green)]/50 shadow-[0_0_40px_rgba(0,100,0,0.3)] overflow-hidden p-4 flex flex-col gap-4"
           >
             {navLinks.map((link) => (
               <a 
