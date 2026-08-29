@@ -4,13 +4,16 @@ import { toast } from "sonner";
 import { Paperclip, Send, Ticket } from "lucide-react";
 import {
   createConversation,
+  acceptMessageRequest,
+  declineMessageRequest,
   fetchConversations,
   fetchHistory,
   markConvRead,
   restSendDM,
+  searchMessageRecipients,
 } from "@/lib/messaging/conversations";
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
-import type { UIConversation, UIMessage } from "@/lib/messaging/types";
+import type { MessageIdentity, UIConversation, UIMessage } from "@/lib/messaging/types";
 import { useMessaging } from "@/contexts/MessagingProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -20,6 +23,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { RecipientSearch } from "@/components/messaging/RecipientSearch";
+import { MentionTextarea } from "@/components/messaging/MentionTextarea";
+import { MentionText } from "@/components/messaging/MentionText";
+import { IdentityBadges } from "@/components/messaging/IdentityBadges";
 
 function conversationMeta(conversation: Pick<UIConversation, "projectName" | "subject">): string {
   return [conversation.projectName, conversation.subject].filter(Boolean).join(" · ");
@@ -35,7 +42,7 @@ export function Messages() {
   const [sending, setSending] = useState(false);
   const [draft, setDraft] = useState("");
   const [composeOpen, setComposeOpen] = useState(false);
-  const [recipientId, setRecipientId] = useState("");
+  const [recipient, setRecipient] = useState<MessageIdentity | null>(null);
   const [composeBody, setComposeBody] = useState("");
 
   const { store, socket } = useMessaging();
@@ -43,8 +50,11 @@ export function Messages() {
   useEffect(() => {
     const recipient = searchParams.get("recipient")?.trim();
     if (!recipient) return;
-    setRecipientId(recipient);
     setComposeOpen(true);
+    void searchMessageRecipients(recipient).then((results) => {
+      const match = results.find(item => item.id === recipient);
+      if (match) setRecipient(match);
+    }).catch(() => undefined);
   }, [searchParams]);
 
   const clearComposeRecipient = () => {
@@ -198,10 +208,19 @@ export function Messages() {
   };
 
   const handleAttach = () => toast("Attachment uploads are not available yet.");
-  const canCompose = Boolean(recipientId.trim() && composeBody.trim());
+  const respondToRequest = async (status: "active" | "declined") => {
+    if (!active) return;
+    try {
+      if (status === "active") await acceptMessageRequest(active.id);
+      else await declineMessageRequest(active.id);
+      setConversations(current => current.map(item => item.id === active.id ? { ...item, requestStatus: status } : item));
+      toast(status === "active" ? "Message request accepted" : "Message request declined");
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Request could not be updated."); }
+  };
+  const canCompose = Boolean(recipient?.id && composeBody.trim());
 
   const resetCompose = () => {
-    setRecipientId("");
+    setRecipient(null);
     setComposeBody("");
   };
 
@@ -209,8 +228,8 @@ export function Messages() {
     if (!canCompose) return;
     setSending(true);
     try {
-      const recipient = recipientId.trim();
-      const conversation = await createConversation(recipient);
+      if (!recipient) return;
+      const conversation = await createConversation(recipient.id);
       if (!conversation?.id) {
         toast.error("Conversation was not created.");
         return;
@@ -226,9 +245,9 @@ export function Messages() {
 
       const newConversation: UIConversation = {
         id: conversation.id,
-        participantName: recipient,
+        participantName: recipient.displayName,
         participantAvatar:
-          recipient
+          recipient.displayName
             .split(/\s+/)
             .filter(Boolean)
             .slice(0, 2)
@@ -237,6 +256,14 @@ export function Messages() {
         projectName: "",
         subject: body,
         unread: false,
+        participantId: recipient.id,
+        participantUsername: recipient.username,
+        participantRole: recipient.role,
+        participantVerified: recipient.verified,
+        participantSubscriber: recipient.subscriber,
+        participantCredibilityScore: recipient.credibilityScore,
+        requestStatus: conversation.requestStatus,
+        initiatedBy: user?.id,
         lastMessageId: sent.msgId || clientMsgId,
         thread: [
           {
@@ -256,7 +283,7 @@ export function Messages() {
       setComposeOpen(false);
       resetCompose();
       clearComposeRecipient();
-      toast("Message sent");
+      toast(conversation.deliveryMode === "request" ? "Message request sent" : "Message sent");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Message was not sent.");
     } finally {
@@ -302,17 +329,13 @@ export function Messages() {
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-full bg-violet-100 text-violet-700 font-semibold flex items-center justify-center text-sm shrink-0">
-                        {conversation.participantAvatar}
-                      </div>
+                      {/^(https?:)?\//.test(conversation.participantAvatar) ? <img src={conversation.participantAvatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" /> : <div className="w-9 h-9 rounded-full bg-violet-100 text-violet-700 font-semibold flex items-center justify-center text-sm shrink-0">{conversation.participantAvatar}</div>}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           {conversation.unread && (
                             <span className="w-2 h-2 rounded-full bg-violet-500 shrink-0" />
                           )}
-                          <p className="text-sm font-semibold text-slate-900 truncate">
-                            {conversation.participantName}
-                          </p>
+                          <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">{conversation.participantName}<IdentityBadges verified={conversation.participantVerified} subscriber={conversation.participantSubscriber} credibilityScore={conversation.participantCredibilityScore} compact /></p>
                         </div>
                         <p className="text-xs text-slate-500 truncate">
                           {conversationMeta(conversation) || "Conversation"}
@@ -337,11 +360,17 @@ export function Messages() {
             ) : (
               <>
                 <div className="px-5 py-3 border-b border-slate-100">
-                  <p className="font-semibold text-slate-900">{active.participantName}</p>
+                  <p className="flex items-center gap-1.5 font-semibold text-slate-900">{active.participantName}<IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} /></p>
                   <p className="text-xs text-slate-500">
-                    {conversationMeta(active) || "Conversation"}
+                    {active.participantUsername ? `@${active.participantUsername} · ` : ''}{active.requestStatus === 'pending' ? 'Message request' : conversationMeta(active) || "Conversation"}
                   </p>
                 </div>
+                {active.requestStatus === 'pending' && (
+                  <div className="flex items-center justify-between gap-3 border-b border-violet-100 bg-violet-50 px-5 py-3 text-sm text-violet-900">
+                    <span>{active.initiatedBy === user?.id ? 'Waiting for this member to accept your message request.' : 'This member sent you a message request.'}</span>
+                    {active.initiatedBy !== user?.id && <span className="flex gap-2"><button type="button" onClick={() => void respondToRequest('declined')} className="rounded border border-violet-200 px-3 py-1.5 text-xs font-medium">Decline</button><button type="button" onClick={() => void respondToRequest('active')} className="rounded bg-violet-600 px-3 py-1.5 text-xs font-medium text-white">Accept</button></span>}
+                  </div>
+                )}
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   {active.thread.length === 0 && (
                     <p className="text-sm text-slate-500">No persisted messages in this conversation.</p>
@@ -358,7 +387,7 @@ export function Messages() {
                             : "bg-slate-100 text-slate-900"
                         }`}
                       >
-                        <p>{message.body}</p>
+                        <MentionText body={message.body} mentions={message.mentions} />
                         <p
                           className={`text-[10px] mt-1 ${
                             message.fromMe ? "text-violet-200" : "text-slate-500"
@@ -374,9 +403,10 @@ export function Messages() {
                   ))}
                 </div>
                 <div className="border-t border-slate-100 p-3 flex items-end gap-2">
-                  <textarea
+                  <MentionTextarea
                     value={draft}
-                    onChange={(event) => setDraft(event.target.value)}
+                    onChange={setDraft}
+                    containerClassName="flex-1"
                     placeholder="Reply..."
                     rows={2}
                     className="flex-1 resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
@@ -396,7 +426,7 @@ export function Messages() {
                   </button>
                   <button
                     onClick={() => void handleSend()}
-                    disabled={!draft.trim() || sending}
+                    disabled={!draft.trim() || sending || active.requestStatus !== 'active'}
                     className="h-9 px-4 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 flex items-center gap-1.5 transition-colors"
                   >
                     <Send className="w-3.5 h-3.5" />
@@ -426,18 +456,13 @@ export function Messages() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">To</label>
-              <input
-                value={recipientId}
-                onChange={(event) => setRecipientId(event.target.value)}
-                placeholder="Recipient user ID"
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm focus:outline-none focus:border-violet-500"
-              />
+              <RecipientSearch selected={recipient} onSelect={setRecipient} accentClass="focus:border-violet-500" />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Message</label>
-              <textarea
+              <MentionTextarea
                 value={composeBody}
-                onChange={(event) => setComposeBody(event.target.value)}
+                onChange={setComposeBody}
                 rows={5}
                 className="w-full resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
               />

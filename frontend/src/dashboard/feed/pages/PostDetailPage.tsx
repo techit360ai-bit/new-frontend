@@ -16,6 +16,9 @@ import { fetchPublicUserProfile, type PublicUserProfile } from '@/lib/api/users'
 import { ShareModal } from '../components/ShareModal';
 import { BackButton } from '../components/BackButton';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
+import { IdentityBadges } from '@/components/messaging/IdentityBadges';
+import { MentionText } from '@/components/messaging/MentionText';
+import { MentionTextarea } from '@/components/messaging/MentionTextarea';
 
 function formatTimestamp(value: string): string {
   const date = new Date(value);
@@ -145,7 +148,7 @@ export function PostDetailPage() {
   const meta = postMeta(post.kind);
   const KindIcon = meta.icon;
   const author = profiles[post.authorId];
-  const authorName = author?.name || post.authorId;
+  const authorName = author?.name || post.author?.displayName || post.authorId;
   const ownName = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
     || profile?.username
     || profile?.email
@@ -162,7 +165,7 @@ export function PostDetailPage() {
               {initials(authorName)}
             </div>
             <div className="min-w-0">
-              <p className="truncate font-medium text-text-primary">{authorName}</p>
+              <p className="flex items-center gap-1.5 truncate font-medium text-text-primary">{authorName}<IdentityBadges verified={author?.isVerified ?? post.author?.verified} subscriber={author?.subscriber ?? post.author?.subscriber} credibilityScore={author?.credibilityScore ?? post.author?.credibilityScore} /></p>
               <p className="text-sm capitalize text-text-secondary">
                 {author ? `${author.role} · ${author.category} · ${author.stage}` : post.authorRole}
               </p>
@@ -174,7 +177,7 @@ export function PostDetailPage() {
         <p className={`mb-3 flex items-center gap-1.5 text-xs font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
           <KindIcon className="h-4 w-4" aria-hidden="true" />{meta.label}
         </p>
-        <p className="whitespace-pre-wrap text-base leading-relaxed text-text-primary">{post.body}</p>
+        <MentionText body={post.body} mentions={post.mentions} className="whitespace-pre-wrap text-base leading-relaxed text-text-primary" />
 
         <div className="mt-6 flex items-center gap-6 border-t border-border-default pt-4">
           <button
@@ -208,9 +211,9 @@ export function PostDetailPage() {
             {initials(ownName)}
           </div>
           <div className="flex-1">
-            <textarea
+            <MentionTextarea
               value={commentText}
-              onChange={(event) => setCommentText(event.target.value)}
+              onChange={setCommentText}
               className="min-h-[80px] w-full resize-none rounded-lg bg-bg-elevated px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
               placeholder="Share your thoughts..."
             />
@@ -257,7 +260,7 @@ function CommentItem({
   comment: WireComment;
   profile?: PublicUserProfile;
 }) {
-  const name = profile?.name || comment.authorId;
+  const name = profile?.name || comment.author?.displayName || comment.authorId;
   return (
     <div className="flex gap-3 border-b border-border-default pb-4 last:border-b-0">
       <Link
@@ -268,8 +271,8 @@ function CommentItem({
       </Link>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
-          <Link to={`/feed/profile/${encodeURIComponent(comment.authorId)}`} className="text-sm font-medium text-text-primary hover:text-accent-primary">
-            {name}
+          <Link to={`/feed/profile/${encodeURIComponent(comment.authorId)}`} className="flex items-center gap-1.5 text-sm font-medium text-text-primary hover:text-accent-primary">
+            {name}<IdentityBadges verified={profile?.isVerified ?? comment.author?.verified} subscriber={profile?.subscriber ?? comment.author?.subscriber} credibilityScore={profile?.credibilityScore ?? comment.author?.credibilityScore} compact />
           </Link>
           <time className="shrink-0 text-xs text-text-muted" dateTime={comment.ts}>
             {formatTimestamp(comment.ts)}
@@ -278,7 +281,7 @@ function CommentItem({
         {profile && (
           <p className="text-xs text-text-secondary">{profile.category} · {profile.stage}</p>
         )}
-        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-primary">{comment.body}</p>
+        <MentionText body={comment.body} mentions={comment.mentions} className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-primary" />
       </div>
     </div>
   );

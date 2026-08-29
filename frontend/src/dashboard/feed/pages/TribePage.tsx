@@ -14,6 +14,7 @@ import { RightPanel } from '../components/RightPanel';
 import { BackButton } from '../components/BackButton';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
 import { useFeedPosts } from '../useFeedPosts';
+import { IdentityBadges } from '@/components/messaging/IdentityBadges';
 
 function ProfileAvatar({ profile }: { profile: PublicUserProfile }) {
   if (/^(https?:)?\//.test(profile.avatar)) {
@@ -121,9 +122,7 @@ function TribeMemberCard({ profile }: { profile: PublicUserProfile }) {
         </Link>
         <div className="min-w-0 flex-1">
           <Link to={`/feed/profile/${encodeURIComponent(profile.id)}`}>
-            <h2 className="truncate text-sm font-medium text-text-primary hover:text-accent-primary">
-              {profile.name}
-            </h2>
+            <h2 className="flex items-center gap-1.5 truncate text-sm font-medium text-text-primary hover:text-accent-primary">{profile.name}<IdentityBadges verified={profile.isVerified} subscriber={profile.subscriber} credibilityScore={profile.credibilityScore ?? profile.gsis} compact /></h2>
           </Link>
           <p className="text-xs text-text-secondary">
             {profile.role} · {profile.category} · {profile.stage}

@@ -2,14 +2,18 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Paperclip, Send, Ticket } from "lucide-react";
-import { createConversation, fetchConversations, fetchHistory, markConvRead, restSendDM } from "@/lib/messaging/conversations";
+import { acceptMessageRequest, createConversation, declineMessageRequest, fetchConversations, fetchHistory, markConvRead, restSendDM } from "@/lib/messaging/conversations";
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
-import type { UIConversation, UIMessage } from "@/lib/messaging/types";
+import type { MessageIdentity, UIConversation, UIMessage } from "@/lib/messaging/types";
 import { useMessaging } from "@/contexts/MessagingProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { RecipientSearch } from "@/components/messaging/RecipientSearch";
+import { MentionTextarea } from "@/components/messaging/MentionTextarea";
+import { MentionText } from "@/components/messaging/MentionText";
+import { IdentityBadges } from "@/components/messaging/IdentityBadges";
 
 function metaLine(conversation: Pick<UIConversation, "projectName" | "subject">): string {
   return [conversation.projectName, conversation.subject].filter(Boolean).join(" · ");
@@ -25,7 +29,7 @@ export function Messages() {
   const [composeOpen, setComposeOpen] = useState(false);
 
   // Compose state
-  const [cRecipient, setCRecipient] = useState("");
+  const [cRecipient, setCRecipient] = useState<MessageIdentity | null>(null);
   const [cSubject,   setCSubject]   = useState("");
   const [cBody,      setCBody]      = useState("");
 
@@ -130,16 +134,21 @@ export function Messages() {
   };
 
   const handleAttach = () => toast("Attachment uploads are not available yet.");
+  const respondToRequest = async (status: "active" | "declined") => {
+    if (!active) return;
+    try { if (status === "active") await acceptMessageRequest(active.id); else await declineMessageRequest(active.id); setConvos(current => current.map(item => item.id === active.id ? { ...item, requestStatus: status } : item)); toast(status === "active" ? "Message request accepted" : "Message request declined"); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Request could not be updated."); }
+  };
 
-  const canCompose = Boolean(cRecipient.trim() && cSubject.trim() && cBody.trim());
-  const resetCompose = () => { setCRecipient(""); setCSubject(""); setCBody(""); };
+  const canCompose = Boolean(cRecipient?.id && cSubject.trim() && cBody.trim());
+  const resetCompose = () => { setCRecipient(null); setCSubject(""); setCBody(""); };
 
   const handleCompose = async () => {
     if (!canCompose) return;
     setSending(true);
     try {
-      const recipient = cRecipient.trim();
-      const convo = await createConversation(recipient);
+      if (!cRecipient) return;
+      const convo = await createConversation(cRecipient.id);
       if (!convo?.id) {
         toast.error("Conversation was not created.");
         return;
@@ -150,11 +159,19 @@ export function Messages() {
         toast.error("Message was not sent.");
         return;
       }
-      const initials = cRecipient.trim().split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2) || "?";
+      const initials = cRecipient.displayName.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2) || "?";
       const newConvo: UIConversation = {
         id: convo.id,
-        participantName: recipient,
-        participantAvatar: initials,
+        participantName: cRecipient.displayName,
+        participantAvatar: cRecipient.avatarUrl || initials,
+        participantId: cRecipient.id,
+        participantUsername: cRecipient.username,
+        participantRole: cRecipient.role,
+        participantVerified: cRecipient.verified,
+        participantSubscriber: cRecipient.subscriber,
+        participantCredibilityScore: cRecipient.credibilityScore,
+        requestStatus: convo.requestStatus,
+        initiatedBy: user?.id,
         projectName: "",
         subject: cSubject.trim(),
         unread: false,
@@ -164,7 +181,7 @@ export function Messages() {
       setActiveId(newConvo.id);
       setComposeOpen(false);
       resetCompose();
-      toast("Message sent");
+      toast(convo.deliveryMode === "request" ? "Message request sent" : "Message sent");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Message was not sent.");
     } finally {
@@ -199,11 +216,11 @@ export function Messages() {
                   <button onClick={() => handleSelect(c.id)}
                     className={`w-full text-left p-4 hover:bg-slate-50 transition-colors ${c.id === activeId ? "bg-amber-50" : ""}`}>
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 font-semibold flex items-center justify-center text-sm shrink-0">{c.participantAvatar}</div>
+                      {/^(https?:)?\//.test(c.participantAvatar) ? <img src={c.participantAvatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" /> : <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 font-semibold flex items-center justify-center text-sm shrink-0">{c.participantAvatar}</div>}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           {c.unread && <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>}
-                          <p className="text-sm font-semibold text-slate-900 truncate">{c.participantName}</p>
+                          <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">{c.participantName}<IdentityBadges verified={c.participantVerified} subscriber={c.participantSubscriber} credibilityScore={c.participantCredibilityScore} compact /></p>
                         </div>
                         <p className="text-xs text-slate-500 truncate">{metaLine(c) || "Conversation"}</p>
                         <p className="text-xs text-slate-400 truncate mt-0.5">{c.thread[c.thread.length - 1]?.body}</p>
@@ -222,25 +239,27 @@ export function Messages() {
             ) : (
               <>
                 <div className="px-5 py-3 border-b border-slate-100">
-                  <p className="font-semibold text-slate-900">{active.participantName}</p>
-                  <p className="text-xs text-slate-500">{metaLine(active) || "Conversation"}</p>
+                  <p className="flex items-center gap-1.5 font-semibold text-slate-900">{active.participantName}<IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} /></p>
+                  <p className="text-xs text-slate-500">{active.participantUsername ? `@${active.participantUsername} · ` : ''}{active.requestStatus === 'pending' ? 'Message request' : metaLine(active) || "Conversation"}</p>
                 </div>
+                {active.requestStatus === 'pending' && <div className="flex items-center justify-between gap-3 border-b border-amber-100 bg-amber-50 px-5 py-3 text-sm text-amber-950"><span>{active.initiatedBy === user?.id ? 'Waiting for this member to accept your message request.' : 'This member sent you a message request.'}</span>{active.initiatedBy !== user?.id && <span className="flex gap-2"><button type="button" onClick={() => void respondToRequest('declined')} className="rounded border border-amber-200 px-3 py-1.5 text-xs font-medium">Decline</button><button type="button" onClick={() => void respondToRequest('active')} className="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-slate-900">Accept</button></span>}</div>}
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   {active.thread.map((m) => (
                     <div key={m.id} className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-md px-3 py-2 rounded-lg text-sm ${m.fromMe ? "bg-amber-500 text-slate-900" : "bg-slate-100 text-slate-900"}`}>
-                        <p>{m.body}</p>
+                        <MentionText body={m.body} mentions={m.mentions} />
                         <p className={`text-[10px] mt-1 ${m.fromMe ? "text-slate-800/70" : "text-slate-500"}`}>{new Date(m.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="border-t border-slate-100 p-3 flex items-end gap-2">
-                  <textarea value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Reply…"
+                  <MentionTextarea value={draft} onChange={setDraft} placeholder="Reply…"
+                    containerClassName="flex-1"
                     rows={2}
                     className="flex-1 resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
                   <button onClick={handleAttach} className="h-9 w-9 text-slate-500 hover:bg-slate-100 rounded-lg flex items-center justify-center"><Paperclip className="w-4 h-4" /></button>
-                  <button onClick={() => void handleSend()} disabled={!draft.trim() || sending}
+                  <button onClick={() => void handleSend()} disabled={!draft.trim() || sending || active.requestStatus !== 'active'}
                     className="h-9 px-4 bg-amber-500 text-slate-900 font-semibold rounded-lg hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-400 flex items-center gap-1.5">
                     <Send className="w-3.5 h-3.5" /> Send
                   </button>
@@ -257,8 +276,7 @@ export function Messages() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">To</label>
-              <input value={cRecipient} onChange={(e) => setCRecipient(e.target.value)} placeholder="Recipient user ID"
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm focus:outline-none focus:border-amber-500" />
+              <RecipientSearch selected={cRecipient} onSelect={setCRecipient} accentClass="focus:border-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Subject</label>
@@ -267,7 +285,7 @@ export function Messages() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Body</label>
-              <textarea value={cBody} onChange={(e) => setCBody(e.target.value)} rows={4}
+              <MentionTextarea value={cBody} onChange={setCBody} rows={4}
                 className="w-full resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
             </div>
           </div>

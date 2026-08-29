@@ -7,6 +7,8 @@ import { KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import type { WirePost } from '@/lib/messaging/types';
 import { ShareModal } from './ShareModal';
 import { blockUser, muteUser, postFeedback, savePost, unsavePost } from '@/lib/messaging/discovery';
+import { IdentityBadges } from '@/components/messaging/IdentityBadges';
+import { MentionText } from '@/components/messaging/MentionText';
 
 function formatTimestamp(value: string): string {
   const date = new Date(value);
@@ -45,7 +47,7 @@ export function LivePostCard({
   const [hidden, setHidden] = useState(false);
   const meta = kindMeta(post.kind);
   const KindIcon = meta.icon;
-  const author = authorName || post.authorId;
+  const author = authorName || post.author?.displayName || post.authorId;
 
   const toggleLike = async () => {
     if (liking) return;
@@ -99,8 +101,8 @@ export function LivePostCard({
               {initials(author)}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-text-primary">{author}</p>
-              <p className="text-xs capitalize text-text-secondary">{post.authorRole}</p>
+              <p className="flex items-center gap-1.5 truncate text-sm font-medium text-text-primary">{author}<IdentityBadges verified={post.author?.verified} subscriber={post.author?.subscriber} credibilityScore={post.author?.credibilityScore} compact /></p>
+              <p className="text-xs capitalize text-text-secondary">{post.author?.username ? `@${post.author.username} · ` : ''}{post.authorRole}</p>
             </div>
           </Link>
           <time className="shrink-0 text-xs text-text-muted" dateTime={post.ts}>
@@ -112,7 +114,7 @@ export function LivePostCard({
           <p className={`mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
             <KindIcon className="h-3.5 w-3.5" aria-hidden="true" />{meta.label}
           </p>
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">{post.body}</p>
+          <MentionText body={post.body} mentions={post.mentions} className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary" />
         </Link>
 
         {(post.audience ?? []).length > 0 && !(post.audience ?? []).includes('all') && (

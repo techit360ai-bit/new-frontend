@@ -5,12 +5,19 @@ import {
   fetchConversations,
   fetchHistory,
   createConversation,
+  acceptMessageRequest,
+  declineMessageRequest,
   restSendDM,
   markConvRead,
 } from '@/lib/messaging/conversations';
-import type { WireMessage, WireConvSummary } from '@/lib/messaging/types';
+import type { MessageIdentity, WireMessage, WireConvSummary } from '@/lib/messaging/types';
+import { MentionTextarea } from '@/components/messaging/MentionTextarea';
+import { MentionText } from '@/components/messaging/MentionText';
+import { IdentityBadges } from '@/components/messaging/IdentityBadges';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function DirectMessagePage() {
+  const { user } = useAuth();
   const { userId } = useParams<{ userId: string }>();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<WireMessage[]>([]);
@@ -19,6 +26,10 @@ export function DirectMessagePage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [otherName, setOtherName] = useState<string>('');
+  const [otherIdentity, setOtherIdentity] = useState<MessageIdentity | null>(null);
+  const [requestStatus, setRequestStatus] = useState<'active' | 'pending' | 'declined'>('active');
+  const [initiatedBy, setInitiatedBy] = useState('');
+  const [requestMessageSent, setRequestMessageSent] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -42,6 +53,9 @@ export function DirectMessagePage() {
           if (!alive) return;
           setConversationId(existing.id);
           setOtherName(existing.otherName || userId || '');
+          setOtherIdentity({ id: existing.otherUserId, displayName: existing.otherName, username: existing.otherUsername, avatarUrl: existing.otherAvatarUrl, role: existing.otherRole, verified: existing.otherVerified, subscriber: existing.otherSubscriber, credibilityScore: existing.otherCredibilityScore });
+          setRequestStatus(existing.requestStatus || 'active');
+          setInitiatedBy(existing.initiatedBy || '');
 
           // Load message history
           const history = await fetchHistory(existing.id);
@@ -58,7 +72,10 @@ export function DirectMessagePage() {
           if (!alive) return;
           if (created && created.id) {
             setConversationId(created.id);
-            setOtherName(userId || '');
+            setOtherName(created.recipient?.displayName || userId || '');
+            setOtherIdentity(created.recipient || null);
+            setRequestStatus(created.requestStatus || 'active');
+            setInitiatedBy(user?.id || '');
           } else {
             setError('Could not create conversation. The messaging service may be unavailable.');
           }
@@ -73,7 +90,7 @@ export function DirectMessagePage() {
 
     init();
     return () => { alive = false; };
-  }, [userId]);
+  }, [user?.id, userId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -106,6 +123,7 @@ export function DirectMessagePage() {
         setMessages((prev) =>
           prev.map((m) => (m.id === clientMsgId ? { ...m, id: result.msgId } : m)),
         );
+        if (requestStatus === 'pending') setRequestMessageSent(true);
       }
     } catch (err) {
       // Mark optimistic message as failed
@@ -119,7 +137,13 @@ export function DirectMessagePage() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const respondToRequest = async (status: 'active' | 'declined') => {
+    if (!conversationId) return;
+    try { if (status === 'active') await acceptMessageRequest(conversationId); else await declineMessageRequest(conversationId); setRequestStatus(status); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Message request could not be updated.'); }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -166,13 +190,13 @@ export function DirectMessagePage() {
             </span>
           </div>
           <div>
-            <h2 className="text-text-primary font-semibold text-base">
-              {otherName || userId}
-            </h2>
-            <p className="text-text-muted text-xs">Direct message</p>
+            <h2 className="flex items-center gap-1.5 text-text-primary font-semibold text-base">{otherName || userId}<IdentityBadges verified={otherIdentity?.verified} subscriber={otherIdentity?.subscriber} credibilityScore={otherIdentity?.credibilityScore} /></h2>
+            <p className="text-text-muted text-xs">{otherIdentity?.username ? `@${otherIdentity.username} · ` : ''}{requestStatus === 'pending' ? 'Message request' : 'Direct message'}</p>
           </div>
         </div>
       </div>
+
+      {requestStatus === 'pending' && <div className="flex items-center justify-between gap-3 border-b border-border-default bg-bg-elevated px-6 py-3 text-sm text-text-primary"><span>{initiatedBy === user?.id ? 'Waiting for this member to accept your request.' : 'Review this message request before replying.'}</span>{initiatedBy !== user?.id && <span className="flex gap-2"><button type="button" onClick={() => void respondToRequest('declined')} className="rounded border border-border-default px-3 py-1.5 text-xs">Decline</button><button type="button" onClick={() => void respondToRequest('active')} className="rounded bg-accent-primary px-3 py-1.5 text-xs text-white">Accept</button></span>}</div>}
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
@@ -195,7 +219,7 @@ export function DirectMessagePage() {
                     : 'bg-bg-elevated text-text-primary rounded-bl-md'
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap break-words">{msg.body}</p>
+                <MentionText body={msg.body} mentions={msg.mentions} className="text-sm whitespace-pre-wrap break-words" />
                 <p
                   className={`text-[10px] mt-1 ${
                     isMe ? 'text-white/70' : 'text-text-muted'
@@ -213,18 +237,18 @@ export function DirectMessagePage() {
       {/* Input area */}
       <div className="border-t border-border-default px-6 py-4 bg-bg-surface">
         <div className="flex items-center gap-3">
-          <input
-            type="text"
+          <MentionTextarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={setInput}
+            containerClassName="flex-1"
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            disabled={!conversationId || sending}
-            className="flex-1 px-4 py-2.5 bg-bg-elevated border border-border-default rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 focus:border-accent-primary disabled:opacity-50"
+            rows={2}
+            className="w-full resize-none px-4 py-2.5 bg-bg-elevated border border-border-default rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 focus:border-accent-primary disabled:opacity-50"
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim() || !conversationId || sending}
+            disabled={!input.trim() || !conversationId || sending || requestStatus === 'declined' || (requestStatus === 'pending' && (initiatedBy !== user?.id || requestMessageSent || messages.some(message => message.senderId === user?.id || message.senderId === 'me')))}
             className="p-2.5 bg-accent-primary text-white rounded-xl hover:bg-accent-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? (

@@ -1,3 +1,23 @@
+export interface Mention {
+  userId: string;
+  username: string;
+  start: number;
+  end: number;
+}
+export interface MessageIdentity {
+  id: string;
+  displayName: string;
+  username?: string;
+  avatarUrl?: string;
+  role?: string;
+  verified?: boolean;
+  subscriber?: boolean;
+  subscriptionLabel?: string | null;
+  credibilityScore?: number;
+  sharedContext?: boolean;
+  canMessage?: boolean;
+  deliveryMode?: "direct" | "request" | "unavailable";
+}
 // Backend wire shapes (what the Go service returns).
 export interface WireMessage {
   id: string;
@@ -8,11 +28,20 @@ export interface WireMessage {
   body: string;
   ts: string;
   category?: string;
+  mentions?: Mention[];
 }
 export interface WireConvSummary {
   id: string;
   otherUserId: string;
   otherName: string;
+  otherUsername?: string;
+  otherAvatarUrl?: string;
+  otherRole?: string;
+  otherVerified?: boolean;
+  otherSubscriber?: boolean;
+  otherCredibilityScore?: number;
+  requestStatus?: "active" | "pending" | "declined";
+  initiatedBy?: string;
   lastBody: string;
   lastTs: string;
   lastMsgId: string;
@@ -27,6 +56,8 @@ export interface WirePost {
   kind: string;
   body: string;
   ts: string;
+  mentions?: Mention[];
+  author?: MessageIdentity | null;
 }
 export interface WireComment {
   id: string;
@@ -34,6 +65,8 @@ export interface WireComment {
   authorId: string;
   body: string;
   ts: string;
+  mentions?: Mention[];
+  author?: MessageIdentity | null;
 }
 
 // UI shapes the screens already use (kept identical to the existing mock types).
@@ -43,6 +76,7 @@ export interface UIMessage {
   authorName: string;
   body: string;
   timestamp: string;
+  mentions?: Mention[];
 }
 export interface UIConversation {
   id: string;
@@ -52,5 +86,13 @@ export interface UIConversation {
   subject: string;
   unread: boolean;
   lastMessageId?: string;
+  participantId?: string;
+  participantUsername?: string;
+  participantRole?: string;
+  participantVerified?: boolean;
+  participantSubscriber?: boolean;
+  participantCredibilityScore?: number;
+  requestStatus?: "active" | "pending" | "declined";
+  initiatedBy?: string;
   thread: UIMessage[];
 }

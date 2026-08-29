@@ -25,8 +25,10 @@ function headers(extra?: HeadersInit): HeadersInit {
 }
 
 async function parse<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error(`messaging ${res.status}`);
-  return (await res.json()) as T;
+  const text = await res.text();
+  const body = text ? JSON.parse(text) as { error?: string; message?: string } : null;
+  if (!res.ok) throw new Error(body?.message || body?.error || `messaging ${res.status}`);
+  return body as T;
 }
 
 export async function msgGet<T>(path: string, init?: RequestInit): Promise<T> {
