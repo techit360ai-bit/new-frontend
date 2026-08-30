@@ -76,7 +76,7 @@ export function PostComposer({
   };
 
   return (
-    <div className="mb-4 border-y border-border-default bg-bg-surface p-4 sm:rounded-lg sm:border">
+    <div className="mb-4 border-y border-border-default bg-surface-primary p-4 sm:rounded-lg sm:border">
       {expanded && (
         <div className="mb-3 flex gap-2 overflow-x-auto pb-2">
           {postTypes.map((type) => (
@@ -105,7 +105,7 @@ export function PostComposer({
             <MentionTextarea
               value={body}
               onChange={setBody}
-              className="min-h-[120px] w-full resize-none rounded-lg bg-bg-elevated px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
+              className="min-h-[120px] w-full resize-none rounded-lg bg-surface-secondary px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
               placeholder="What did you build, ship, or learn today?"
               autoFocus
             />
@@ -113,7 +113,7 @@ export function PostComposer({
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="h-11 w-full rounded-lg bg-bg-elevated px-4 text-left text-sm text-text-muted transition-colors hover:bg-bg-overlay"
+              className="h-11 w-full rounded-lg bg-surface-secondary px-4 text-left text-sm text-text-muted transition-colors hover:bg-surface-overlay"
             >
               What did you build, ship, or learn today?
             </button>
@@ -123,7 +123,7 @@ export function PostComposer({
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-bg-elevated px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-bg-overlay"
+            className="flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-surface-overlay"
           >
             {KIND_META[selectedType] && (() => { const Icon = KIND_META[selectedType].icon; return <Icon className="h-3.5 w-3.5" aria-hidden="true" />; })()}
             {KIND_META[selectedType]?.label}

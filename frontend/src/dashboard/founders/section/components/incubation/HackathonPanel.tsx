@@ -71,8 +71,8 @@ export function HackathonPanel() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-900">Hackathon</h1>
-        <p className="text-sm text-slate-600 mt-1">
+        <h1 className="text-xl font-semibold text-text-primary">Hackathon</h1>
+        <p className="text-sm text-text-muted mt-1">
           Browse hackathons, register a team, and ship together.
         </p>
       </div>
@@ -88,7 +88,7 @@ export function HackathonPanel() {
               onClick={() => setStage(stage.id)}
             />
             {i < STAGES.length - 1 && (
-              <span className="text-slate-300 text-xs">— — —</span>
+              <span className="text-text-on-inverse-secondary text-xs">— — —</span>
             )}
           </div>
         ))}
@@ -120,9 +120,9 @@ export function HackathonPanel() {
 
 function NoTeam({ onRegister }: { onRegister: () => void }) {
   return (
-    <div className="border border-slate-200 bg-white rounded-xl p-12 flex flex-col items-center justify-center text-center">
-      <h2 className="text-base font-semibold text-slate-700 mb-2">No team yet</h2>
-      <p className="text-sm text-slate-500 max-w-md mb-4">
+    <div className="border border-border-default bg-surface-primary rounded-xl p-12 flex flex-col items-center justify-center text-center">
+      <h2 className="text-base font-semibold text-text-secondary mb-2">No team yet</h2>
+      <p className="text-sm text-text-muted max-w-md mb-4">
         Register a team for a hackathon to submit an idea brief and start building.
       </p>
       <button

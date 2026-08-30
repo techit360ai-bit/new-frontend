@@ -36,7 +36,7 @@ function NotificationItem({
         onRead(notification.id);
         onClose();
       }}
-      className="flex items-start gap-3 border-b border-border-default/40 px-4 py-3 transition-colors hover:bg-bg-elevated"
+      className="flex items-start gap-3 border-b border-border-default/40 px-4 py-3 transition-colors hover:bg-surface-secondary"
       style={{ backgroundColor: !notification.read ? 'rgba(79,110,247,0.04)' : undefined }}
     >
       <div className="relative mt-0.5 shrink-0">
@@ -79,7 +79,7 @@ export function NotificationsPanel({
   return createPortal(
     <div className="fixed inset-0 z-[150] flex">
       <button type="button" className="absolute inset-0 bg-black/50" onClick={onClose} aria-label="Close notifications" />
-      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[380px] flex-col border-l border-border-default bg-bg-surface shadow-2xl">
+      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[380px] flex-col border-l border-border-default bg-surface-primary shadow-2xl">
         <div className="flex shrink-0 items-center justify-between border-b border-border-default px-5 py-4">
           <div className="flex items-center gap-2.5">
             <Bell className="h-4 w-4 text-text-secondary" />
@@ -96,7 +96,7 @@ export function NotificationsPanel({
                 <CheckCheck className="h-3.5 w-3.5" />Mark all read
               </button>
             )}
-            <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1.5 text-text-muted hover:bg-bg-elevated hover:text-text-primary">
+            <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1.5 text-text-muted hover:bg-surface-secondary hover:text-text-primary">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -104,7 +104,7 @@ export function NotificationsPanel({
 
         <div className="flex-1 overflow-y-auto">
           {loading && <p className="px-4 py-8 text-center text-sm text-text-muted">Loading live notifications...</p>}
-          {!loading && error && <p className="px-4 py-8 text-center text-sm text-red-300">{error}</p>}
+          {!loading && error && <p className="px-4 py-8 text-center text-sm text-status-error">{error}</p>}
           {!loading && !error && unread.length > 0 && (
             <>
               <p className="px-4 pb-1.5 pt-3 text-[10px] font-medium uppercase text-text-muted">New · {unread.length}</p>

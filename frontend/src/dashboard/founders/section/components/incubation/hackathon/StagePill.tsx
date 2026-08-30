@@ -19,8 +19,8 @@ export function StagePill({
     state === "active"
       ? "border-violet-500 bg-violet-50 text-violet-700"
       : state === "completed"
-      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-      : "border-slate-200 bg-white text-slate-500";
+      ? "border-status-success bg-status-success-soft text-status-success"
+      : "border-border-default bg-surface-primary text-text-muted";
 
   const Tag = onClick ? "button" : "div";
   return (
@@ -36,7 +36,7 @@ export function StagePill({
         className={`flex items-center justify-center rounded-full ${
           compact ? "w-4 h-4 text-[10px]" : "w-5 h-5 text-xs"
         } font-semibold ${
-          state === "completed" ? "bg-emerald-500 text-white" : state === "active" ? "bg-violet-500 text-white" : "bg-slate-100 text-slate-500"
+          state === "completed" ? "bg-status-success text-white" : state === "active" ? "bg-violet-500 text-white" : "bg-surface-secondary text-text-muted"
         }`}
       >
         {state === "completed" ? <Check className="w-3 h-3" /> : index}

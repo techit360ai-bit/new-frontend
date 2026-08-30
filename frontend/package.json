@@ -5,17 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run theme:generate && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "env:check": "node scripts/validate-env.mjs",
+    "theme:generate": "node --no-warnings --experimental-strip-types scripts/generate-theme-css.mjs",
+    "theme:audit": "node scripts/theme-audit.mjs",
     "workflow:check": "node scripts/validate-workflows.mjs",
     "live-data:audit": "node scripts/live-data-audit.mjs",
     "release:journeys": "node scripts/validate-release-journeys.mjs",
     "scalability:check": "node scripts/scalability-check.mjs",
     "smoke:deploy": "node scripts/smoke.mjs",
     "test": "vitest run",
-    "test:local": "node --no-warnings --experimental-strip-types scripts/run-tests.mjs src",
+    "test:local": "vitest run",
     "test:visual": "playwright test"
   },
   "dependencies": {

@@ -46,11 +46,11 @@ export function OrgStep2() {
         <OrgProgressBar currentStep={2} totalSteps={5} />
 
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2 flex items-center gap-3">
-            <ShieldCheck className="w-9 h-9 text-indigo-600" />
+          <h1 className="text-4xl font-bold text-text-primary dark:text-white tracking-tight mb-2 flex items-center gap-3">
+            <ShieldCheck className="w-9 h-9 text-brand-accent" />
             Verification
           </h1>
-          <p className="text-base text-slate-600 dark:text-slate-400">
+          <p className="text-base text-text-muted dark:text-text-disabled">
             Verified organisations get a trust badge across the platform and can
             post Opportunities, run Hackathons, and broadcast to builders.
           </p>
@@ -59,16 +59,16 @@ export function OrgStep2() {
         <div className="space-y-7">
           {/* Document upload */}
           <div>
-            <label className="block mb-3 text-slate-900 dark:text-white font-semibold">
+            <label className="block mb-3 text-text-primary dark:text-white font-semibold">
               Registration documents
             </label>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+            <p className="text-sm text-text-muted dark:text-text-disabled mb-3">
               Upload your business registration certificate, tax ID or
               equivalent government-issued document.
             </p>
             <label
               htmlFor="org-docs-input"
-              className="block w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/5 transition-colors"
+              className="block w-full border-2 border-dashed border-border-strong dark:border-border-inverse-strong rounded-xl p-8 text-center cursor-pointer hover:border-brand-accent hover:bg-status-info-soft/50 dark:hover:bg-status-info-soft/5 transition-colors"
             >
               <input
                 id="org-docs-input"
@@ -78,11 +78,11 @@ export function OrgStep2() {
                 className="sr-only"
                 accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
               />
-              <Upload className="w-8 h-8 text-indigo-500 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+              <Upload className="w-8 h-8 text-brand-accent mx-auto mb-2" />
+              <p className="text-sm font-semibold text-text-primary dark:text-white">
                 Click to upload documents
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-text-muted dark:text-text-disabled mt-1">
                 PDF, PNG, JPG or DOC up to 10MB each
               </p>
             </label>
@@ -92,15 +92,15 @@ export function OrgStep2() {
                 {docs.map((d) => (
                   <li
                     key={d}
-                    className="flex items-center gap-3 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2.5"
+                    className="flex items-center gap-3 bg-surface-primary dark:bg-surface-inverse-muted/60 border border-border-default dark:border-border-inverse-strong rounded-lg px-4 py-2.5"
                   >
-                    <FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-                    <span className="text-sm text-slate-700 dark:text-slate-300 flex-1 truncate">
+                    <FileText className="w-4 h-4 text-brand-accent flex-shrink-0" />
+                    <span className="text-sm text-text-secondary dark:text-text-on-inverse-secondary flex-1 truncate">
                       {d}
                     </span>
                     <button
                       onClick={() => removeDoc(d)}
-                      className="text-slate-400 hover:text-red-500 transition-colors"
+                      className="text-text-disabled hover:text-status-error transition-colors"
                       aria-label="Remove"
                     >
                       <X className="w-4 h-4" />
@@ -113,16 +113,16 @@ export function OrgStep2() {
 
           {/* Business email domain */}
           <div>
-            <label className="flex items-center gap-2 mb-3 text-slate-900 dark:text-white font-semibold">
-              <Mail className="w-4 h-4 text-indigo-500" />
+            <label className="flex items-center gap-2 mb-3 text-text-primary dark:text-white font-semibold">
+              <Mail className="w-4 h-4 text-brand-accent" />
               Business email domain
             </label>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+            <p className="text-sm text-text-muted dark:text-text-disabled mb-3">
               We'll send a verification email and check that your admin contacts
               use this domain.
             </p>
-            <div className="flex items-center bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 h-14 focus-within:border-indigo-500 transition-colors">
-              <span className="text-slate-500 dark:text-slate-400 text-base">
+            <div className="flex items-center bg-surface-primary dark:bg-surface-inverse-muted/60 border-2 border-border-strong dark:border-border-inverse-strong rounded-xl px-5 h-14 focus-within:border-brand-accent transition-colors">
+              <span className="text-text-muted dark:text-text-disabled text-base">
                 @
               </span>
               <input
@@ -132,19 +132,19 @@ export function OrgStep2() {
                   setEmailDomain(e.target.value.toLowerCase().trim())
                 }
                 placeholder="yourcompany.org"
-                className="flex-1 bg-transparent border-0 outline-none text-base text-slate-900 dark:text-white px-2"
+                className="flex-1 bg-transparent border-0 outline-none text-base text-text-primary dark:text-white px-2"
               />
             </div>
           </div>
 
           {/* Note */}
-          <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-xl p-4 flex items-start gap-3">
-            <Info className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-indigo-900 dark:text-indigo-200">
+          <div className="bg-status-info-soft dark:bg-indigo-950/40 border border-brand-accent dark:border-indigo-800/50 rounded-xl p-4 flex items-start gap-3">
+            <Info className="w-5 h-5 text-brand-accent dark:text-brand-accent flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-indigo-900 dark:text-brand-accent">
               <p className="font-semibold mb-1">
                 Verification takes 1–3 business days
               </p>
-              <p className="text-indigo-700 dark:text-indigo-300">
+              <p className="text-brand-accent dark:text-brand-accent">
                 You can still finish onboarding and explore the dashboard.
                 Posting Opportunities to the public Board requires a verified
                 badge.
@@ -156,13 +156,13 @@ export function OrgStep2() {
         <div className="mt-12 flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary font-semibold hover:border-brand-accent transition-colors"
           >
             Back
           </button>
           <button
             onClick={handleNext}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-brand-accent to-violet-600 hover:from-brand-accent hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Continue
           </button>

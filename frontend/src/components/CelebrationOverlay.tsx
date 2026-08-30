@@ -7,11 +7,11 @@ type CelebrationOverlayProps = {
 const confettiPieces = Array.from({ length: 18 })
 
 const colors = [
-  "bg-[#38bdf8]",
-  "bg-[#a78bfa]",
-  "bg-[#f97316]",
-  "bg-[#22c55e]",
-  "bg-[#ef4444]",
+  "bg-chart-2",
+  "bg-chart-3",
+  "bg-chart-4",
+  "bg-chart-1",
+  "bg-status-error",
 ]
 
 const CelebrationOverlay = ({ visible, message, label }: CelebrationOverlayProps) => {
@@ -23,7 +23,7 @@ const CelebrationOverlay = ({ visible, message, label }: CelebrationOverlayProps
 
       <div className="relative z-10 flex flex-col items-center gap-4 px-6">
         <div className="relative flex flex-col items-center gap-3 rounded-3xl bg-background/90 border border-border px-6 py-5 shadow-2xl shadow-black/40 backdrop-blur">
-          <span className="text-xs font-semibold tracking-[0.2em] text-[#38bdf8] uppercase">
+          <span className="text-xs font-semibold tracking-[0.2em] text-chart-2 uppercase">
             {label ?? "Founder Journey"}
           </span>
           <p className="text-lg sm:text-xl font-semibold text-foreground text-center">
@@ -59,4 +59,3 @@ const CelebrationOverlay = ({ visible, message, label }: CelebrationOverlayProps
 }
 
 export default CelebrationOverlay
-

@@ -133,56 +133,56 @@ export function Chat() {
   };
 
   return (
-    <div className="h-full bg-white flex">
-      <div className="w-[240px] border-r border-gray-200 bg-gray-50">
-        <div className="p-4 border-b border-gray-200">
+    <div className="h-full bg-surface-primary flex">
+      <div className="w-[240px] border-r border-border-default bg-background-primary">
+        <div className="p-4 border-b border-border-default">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-disabled" />
             <input
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search channels..."
-              className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-[#2196F3] focus:ring-1 focus:ring-[#2196F3] outline-none"
+              className="w-full pl-9 pr-3 py-2 bg-surface-primary border border-border-default rounded-lg text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
             />
           </div>
         </div>
         <ScrollArea className="h-[calc(100vh-180px)]">
           <div className="p-2">
-            <div className="text-xs font-semibold text-gray-500 mb-2 px-2">CHANNELS</div>
+            <div className="text-xs font-semibold text-text-muted mb-2 px-2">CHANNELS</div>
             {filteredChannels.map((channel) => (
               <button
                 key={channel.id}
                 onClick={() => setSelectedChannelId(channel.id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg mb-1 transition-colors ${
                   selectedChannelId === channel.id
-                    ? 'bg-[#2196F3] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-brand-primary text-white'
+                    : 'text-text-secondary hover:bg-surface-secondary'
                 }`}
               >
                 <span className="text-sm font-medium"># {channel.name}</span>
               </button>
             ))}
             {!loadingChannels && filteredChannels.length === 0 && (
-              <p className="px-2 py-3 text-xs text-gray-500">No live channels found.</p>
+              <p className="px-2 py-3 text-xs text-text-muted">No live channels found.</p>
             )}
           </div>
         </ScrollArea>
       </div>
 
       <div className="flex-1 flex flex-col">
-        <div className="h-[60px] border-b border-gray-200 px-6 flex items-center justify-between">
+        <div className="h-[60px] border-b border-border-default px-6 flex items-center justify-between">
           <div>
             <h2 className="font-semibold">{selectedChannel ? `# ${selectedChannel.name}` : 'No channel selected'}</h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-text-muted">
               {selectedChannel ? `${liveMessages.length} persisted message${liveMessages.length === 1 ? '' : 's'}` : 'Connect messaging channels to start chatting'}
             </p>
           </div>
-          <div className="flex items-center gap-2"><Link to="/support" className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button className="p-2 hover:bg-gray-100 rounded-lg" aria-label="Channel actions"><MoreVertical className="w-5 h-5 text-gray-600" /></button></div>
+          <div className="flex items-center gap-2"><Link to="/support" className="inline-flex items-center gap-2 rounded-lg border border-border-default px-3 py-2 text-sm text-text-secondary hover:bg-background-primary" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button className="p-2 hover:bg-surface-secondary rounded-lg" aria-label="Channel actions"><MoreVertical className="w-5 h-5 text-text-muted" /></button></div>
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mx-6 mt-4 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
@@ -190,34 +190,34 @@ export function Chat() {
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-4">
             {loadingChannels || loadingMessages ? (
-              <p className="text-sm text-gray-500">Loading live channel messages...</p>
+              <p className="text-sm text-text-muted">Loading live channel messages...</p>
             ) : liveMessages.length > 0 ? (
               liveMessages.map((msg) => (
                 <div key={msg.id} className="flex gap-3">
                   <Avatar className="w-10 h-10 flex-shrink-0">
-                    <AvatarFallback className={`${msg.fromMe ? 'bg-[#2196F3]' : 'bg-slate-500'} text-white`}>
+                    <AvatarFallback className={`${msg.fromMe ? 'bg-brand-primary' : 'bg-status-inactive'} text-white`}>
                       {messageInitials(msg.authorName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-baseline gap-2 mb-1">
                       <span className="font-semibold">{msg.authorName}</span>
-                      <span className="text-xs text-gray-500">{formatTime(msg.timestamp)}</span>
+                      <span className="text-xs text-text-muted">{formatTime(msg.timestamp)}</span>
                     </div>
-                    <p className="text-gray-700">{msg.body}</p>
+                    <p className="text-text-secondary">{msg.body}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-500">No persisted messages in this channel yet.</p>
+              <p className="text-sm text-text-muted">No persisted messages in this channel yet.</p>
             )}
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200 focus-within:border-[#2196F3] focus-within:ring-1 focus-within:ring-[#2196F3]">
+        <div className="p-4 border-t border-border-default">
+          <div className="flex items-center gap-2 bg-background-primary rounded-lg p-2 border border-border-default focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-[#2196F3]">
             <button className="p-2 hover:bg-gray-200 rounded transition-colors" aria-label="Attach file" disabled={!selectedChannel}>
-              <Paperclip className="w-4 h-4 text-gray-600" />
+              <Paperclip className="w-4 h-4 text-text-muted" />
             </button>
             <input
               type="text"
@@ -229,12 +229,12 @@ export function Chat() {
               className="flex-1 bg-transparent outline-none disabled:cursor-not-allowed"
             />
             <button className="p-2 hover:bg-gray-200 rounded transition-colors" aria-label="Emoji" disabled={!selectedChannel}>
-              <Smile className="w-4 h-4 text-gray-600" />
+              <Smile className="w-4 h-4 text-text-muted" />
             </button>
             <button
               onClick={() => { void handleChannelSend(); }}
               disabled={!selectedChannel || sending || !draft.trim()}
-              className="p-2 bg-[#2196F3] text-white rounded hover:bg-[#2196F3]/90 transition-colors disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="p-2 bg-brand-primary text-white rounded hover:bg-brand-primary/90 transition-colors disabled:cursor-not-allowed disabled:bg-gray-300"
               aria-label="Send message"
             >
               <Send className="w-4 h-4" />

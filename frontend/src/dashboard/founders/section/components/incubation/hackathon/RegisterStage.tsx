@@ -62,16 +62,16 @@ export function RegisterStage() {
   } | null>(null);
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading live hackathons...</p>;
+    return <p className="text-sm text-text-muted">Loading live hackathons...</p>;
   }
 
   if (loadError) {
-    return <p className="text-sm text-red-600">Live hackathons are unavailable: {loadError}</p>;
+    return <p className="text-sm text-status-error">Live hackathons are unavailable: {loadError}</p>;
   }
 
   if (!hackathon && !success) {
     return (
-      <div className="border border-amber-200 bg-amber-50 rounded-xl p-5">
+      <div className="border border-status-warning bg-status-warning-soft rounded-xl p-5">
         <p className="text-sm text-amber-900">Pick a hackathon to register for.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
           {allHackathons.map((h) => (
@@ -79,11 +79,11 @@ export function RegisterStage() {
               key={h.id}
               type="button"
               onClick={() => setHackathonId(h.id)}
-              className="text-left border border-slate-200 rounded-lg p-3 bg-white hover:border-violet-300"
+              className="text-left border border-border-default rounded-lg p-3 bg-surface-primary hover:border-violet-300"
             >
-              <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">Hackathon</p>
-              <p className="text-sm font-semibold text-slate-900">{h.title}</p>
-              <p className="text-xs text-slate-600 mt-1 line-clamp-2">{h.theme}</p>
+              <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Hackathon</p>
+              <p className="text-sm font-semibold text-text-primary">{h.title}</p>
+              <p className="text-xs text-text-muted mt-1 line-clamp-2">{h.theme}</p>
             </button>
           ))}
         </div>
@@ -149,15 +149,15 @@ export function RegisterStage() {
   }
 
   return (
-    <div className="border border-slate-200 rounded-xl p-6 bg-white max-w-2xl">
+    <div className="border border-border-default rounded-xl p-6 bg-surface-primary max-w-2xl">
       <div className="flex items-center gap-3 mb-5">
         <Trophy className="w-5 h-5 text-violet-600" />
-        <h2 className="text-base font-semibold text-slate-900">Register for {hackathon!.title}</h2>
+        <h2 className="text-base font-semibold text-text-primary">Register for {hackathon!.title}</h2>
       </div>
 
       <div className="space-y-5">
         <div>
-          <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5">
             Team name
           </label>
           <input
@@ -165,13 +165,13 @@ export function RegisterStage() {
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
             placeholder="BrightBridge"
-            className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-500"
+            className="w-full text-sm border border-border-strong rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-500"
           />
           {errors.teamName && <p className="text-xs text-rose-600 mt-1">{errors.teamName}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
             Team size
           </label>
           <div className="flex gap-2">
@@ -183,7 +183,7 @@ export function RegisterStage() {
                 className={`flex-1 py-2 text-sm font-medium rounded-lg border ${
                   teamSize === n
                     ? "border-violet-500 bg-violet-50 text-violet-700"
-                    : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                    : "border-border-strong text-text-secondary hover:bg-background-primary"
                 }`}
               >
                 {n}
@@ -194,27 +194,27 @@ export function RegisterStage() {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
             Roles to fill ({selectedRoles.length} selected)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {founderProfile.openRoles.map((role) => (
-              <label key={role} className="flex items-center gap-2 text-sm border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-50">
+              <label key={role} className="flex items-center gap-2 text-sm border border-border-default rounded-lg px-3 py-2 cursor-pointer hover:bg-background-primary">
                 <input
                   type="checkbox"
                   checked={selectedRoles.includes(role)}
                   onChange={() => toggleRole(role)}
                   className="rounded text-violet-600 focus:ring-violet-500"
                 />
-                <span className="text-slate-700">{role}</span>
+                <span className="text-text-secondary">{role}</span>
               </label>
             ))}
           </div>
           {errors.roles && <p className="text-xs text-rose-600 mt-1">{errors.roles}</p>}
         </div>
 
-        <div className="flex justify-between items-center pt-3 border-t border-slate-100">
-          <Link to="/incubation-hub?panel=hackathon" className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1">
+        <div className="flex justify-between items-center pt-3 border-t border-border-subtle">
+          <Link to="/incubation-hub?panel=hackathon" className="text-xs font-medium text-text-muted hover:text-text-primary flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" />
             Back
           </Link>
@@ -261,42 +261,42 @@ function SuccessCard({
   const wa = `https://wa.me/?text=${encodeURIComponent(`Join ${teamName} for ${hackathonTitle}: ${url}`)}`;
 
   return (
-    <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-6 max-w-2xl">
+    <div className="border border-status-success bg-status-success-soft rounded-xl p-6 max-w-2xl">
       <div className="flex items-center gap-2 mb-3">
-        <Check className="w-5 h-5 text-emerald-600" />
+        <Check className="w-5 h-5 text-status-success" />
         <h2 className="text-base font-semibold text-emerald-900">You're registered as team leader for {hackathonTitle}</h2>
       </div>
-      <p className="text-sm text-emerald-800 mb-4">Share this link with collaborators to invite them to {teamName}:</p>
+      <p className="text-sm text-status-success mb-4">Share this link with collaborators to invite them to {teamName}:</p>
       <div className="flex items-center gap-2 mb-4">
         <input
           type="text"
           readOnly
           value={url}
-          className="flex-1 text-xs border border-emerald-200 rounded-lg px-3 py-2 bg-white text-slate-700 font-mono truncate"
+          className="flex-1 text-xs border border-status-success rounded-lg px-3 py-2 bg-surface-primary text-text-secondary font-mono truncate"
           aria-label="Invite link"
         />
         <button
           type="button"
           onClick={handleCopy}
-          className="text-xs font-medium px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1"
+          className="text-xs font-medium px-3 py-2 rounded-lg bg-status-success text-white hover:bg-status-success flex items-center gap-1"
         >
           {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
-        <a href={mailto} className="text-xs font-medium px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-800 bg-white hover:bg-emerald-50 flex items-center gap-1">
+        <a href={mailto} className="text-xs font-medium px-3 py-1.5 rounded-lg border border-status-success text-status-success bg-surface-primary hover:bg-status-success-soft flex items-center gap-1">
           <Mail className="w-3.5 h-3.5" />
           Email
         </a>
-        <a href={wa} target="_blank" rel="noreferrer noopener" className="text-xs font-medium px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-800 bg-white hover:bg-emerald-50 flex items-center gap-1">
+        <a href={wa} target="_blank" rel="noreferrer noopener" className="text-xs font-medium px-3 py-1.5 rounded-lg border border-status-success text-status-success bg-surface-primary hover:bg-status-success-soft flex items-center gap-1">
           <Send className="w-3.5 h-3.5" />
           WhatsApp
         </a>
         <button
           type="button"
           onClick={onFindCollaborators}
-          className="text-xs font-medium px-3 py-1.5 rounded-lg border border-violet-300 text-violet-700 bg-white hover:bg-violet-50"
+          className="text-xs font-medium px-3 py-1.5 rounded-lg border border-violet-300 text-violet-700 bg-surface-primary hover:bg-violet-50"
         >
           Find Hackathon Collaborator →
         </button>

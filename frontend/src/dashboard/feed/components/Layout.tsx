@@ -48,7 +48,7 @@ export function Layout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-bg-base text-text-primary">
+    <div className="min-h-screen bg-background-primary text-text-primary">
       <GlobalNav
         unreadCount={notifications.filter((notification) => !notification.read).length}
         onNotifClick={() => setNotifOpen(true)}
@@ -84,7 +84,7 @@ function GlobalNav({ unreadCount, onNotifClick }: { unreadCount: number; onNotif
   const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
 
   return (
-    <nav className={`sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border-default bg-bg-surface px-4 sm:px-8 transition-transform duration-200 ${chromeVisible ? '' : '-translate-y-full pointer-events-none'}`}>
+    <nav className={`sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border-default bg-surface-primary px-4 sm:px-8 transition-transform duration-200 ${chromeVisible ? '' : '-translate-y-full pointer-events-none'}`}>
       <div className="flex items-center gap-8">
         <Link to="/feed" className="text-[16px] font-bold text-text-primary">
           TECH<span className="text-accent-primary">•</span>IT
@@ -99,8 +99,8 @@ function GlobalNav({ unreadCount, onNotifClick }: { unreadCount: number; onNotif
       </div>
 
       <div className="flex items-center gap-5">
-        <Link to="/support" className="rounded-lg p-1.5 hover:bg-bg-elevated" aria-label="Open support tickets"><Ticket className="h-5 w-5 text-text-secondary hover:text-text-primary" /></Link>
-        <button type="button" onClick={onNotifClick} className="group relative rounded-lg p-1.5 hover:bg-bg-elevated" aria-label="Open notifications">
+        <Link to="/support" className="rounded-lg p-1.5 hover:bg-surface-secondary" aria-label="Open support tickets"><Ticket className="h-5 w-5 text-text-secondary hover:text-text-primary" /></Link>
+        <button type="button" onClick={onNotifClick} className="group relative rounded-lg p-1.5 hover:bg-surface-secondary" aria-label="Open notifications">
           <Bell className="h-5 w-5 text-text-secondary group-hover:text-text-primary" />
           {unreadCount > 0 && (
             <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-primary px-1 text-[9px] font-bold text-white">
@@ -138,7 +138,7 @@ function MobileTabBar() {
     { id: 'discover', path: '/feed/discover', icon: Compass, label: 'Discover' },
   ];
   return (
-    <div className={`fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-border-default bg-bg-surface transition-transform duration-200 lg:hidden ${chromeVisible ? '' : 'translate-y-full pointer-events-none'}`}>
+    <div className={`fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-border-default bg-surface-primary transition-transform duration-200 lg:hidden ${chromeVisible ? '' : 'translate-y-full pointer-events-none'}`}>
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = location.pathname === tab.path;

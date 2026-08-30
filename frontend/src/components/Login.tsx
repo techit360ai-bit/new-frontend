@@ -54,12 +54,12 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[color:var(--background)] flex">
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-[color:var(--primary)]/20 via-blue-500/10 to-[color:var(--background)] overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-[color:var(--primary)]/20 via-brand-primary/10 to-[color:var(--background)] overflow-hidden flex-col justify-between p-12">
         <div className="orb orb-violet w-[400px] h-[400px] -top-20 -left-20 absolute" />
         <div className="orb orb-cyan w-[300px] h-[300px] bottom-0 right-0 absolute" />
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-2.5 mb-16">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[color:var(--primary)] to-blue-400 flex items-center justify-center shadow-lg">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[color:var(--primary)] to-brand-primary flex items-center justify-center shadow-lg">
               <Zap className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -90,7 +90,7 @@ export default function Login() {
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2.5 mb-8">
             <Link to="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-blue-400 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-brand-primary flex items-center justify-center">
                 <Zap className="h-4 w-4 text-white" />
               </div>
               <span className="font-bold text-sm">TECHIT NETWORK</span>
@@ -111,7 +111,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-sm text-red-500">
+            <div className="mb-4 p-4 rounded-xl bg-status-error/10 border border-status-error/30 text-sm text-status-error">
               {error}
             </div>
           )}

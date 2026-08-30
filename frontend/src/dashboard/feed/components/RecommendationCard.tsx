@@ -35,9 +35,9 @@ export function RecommendationCard({
   const primary = recommendation.entity.actions?.[0]
 
   return (
-    <article className="flex min-h-[196px] flex-col border border-border-default bg-bg-surface p-4 shadow-sm">
+    <article className="flex min-h-[196px] flex-col border border-border-default bg-surface-primary p-4 shadow-sm">
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-bg-elevated text-accent-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-accent-primary">
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -46,7 +46,7 @@ export function RecommendationCard({
           {recommendation.entity.subtitle && <p className="mt-1 line-clamp-2 text-xs text-text-secondary">{recommendation.entity.subtitle}</p>}
         </div>
         {onDismiss && (
-          <button type="button" onClick={() => onDismiss(recommendation)} className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-primary" aria-label="Hide recommendation">
+          <button type="button" onClick={() => onDismiss(recommendation)} className="rounded-md p-1 text-text-muted hover:bg-surface-secondary hover:text-text-primary" aria-label="Hide recommendation">
             <X className="h-4 w-4" />
           </button>
         )}
@@ -71,7 +71,7 @@ export function RecommendationCard({
           <Link
             to={recommendation.entity.actions[1].href}
             onClick={() => onAction?.(recommendation, recommendation.entity.actions[1].id)}
-            className="inline-flex h-9 items-center justify-center rounded-md border border-border-default px-3 text-xs font-semibold text-text-primary hover:bg-bg-elevated"
+            className="inline-flex h-9 items-center justify-center rounded-md border border-border-default px-3 text-xs font-semibold text-text-primary hover:bg-surface-secondary"
           >
             {recommendation.entity.actions[1].label}
           </Link>

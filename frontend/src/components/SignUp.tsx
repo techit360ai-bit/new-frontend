@@ -43,9 +43,9 @@ const Toast = ({
   }, [onClose]);
 
   const colors = {
-    success: "bg-emerald-500/10 border-emerald-500/30 text-emerald-500",
-    error: "bg-red-500/10 border-red-500/30 text-red-500",
-    info: "bg-blue-500/10 border-blue-500/30 text-blue-500",
+    success: "bg-status-success/10 border-status-success/30 text-status-success",
+    error: "bg-status-error/10 border-status-error/30 text-status-error",
+    info: "bg-status-info/10 border-status-info/30 text-status-info",
   };
 
   return (
@@ -458,11 +458,11 @@ export default function Signup() {
       )}
 
       {/* Left decorative */}
-      <div className="hidden lg:flex lg:w-5/12 relative bg-gradient-to-br from-[color:var(--primary)]/15 via-blue-500/8 to-[color:var(--background)] overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-5/12 relative bg-gradient-to-br from-[color:var(--primary)]/15 via-brand-primary/8 to-[color:var(--background)] overflow-hidden flex-col justify-between p-12">
         <div className="orb orb-violet w-[400px] h-[400px] -top-20 -left-20 absolute" />
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-2.5 mb-12">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[color:var(--primary)] to-blue-400 flex items-center justify-center shadow-lg">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[color:var(--primary)] to-brand-primary flex items-center justify-center shadow-lg">
               <Zap className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -507,7 +507,7 @@ export default function Signup() {
       <div className="flex-1 flex items-center justify-center px-6 py-12 overflow-y-auto">
         <div className="w-full max-w-md">
           <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-blue-400 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-brand-primary flex items-center justify-center">
               <Zap className="h-4 w-4 text-white" />
             </div>
             <span className="font-bold text-sm">TECHIT NETWORK</span>
@@ -536,7 +536,7 @@ export default function Signup() {
                 className={cn(
                   "h-1 flex-1 rounded-full transition-all duration-500",
                   n < step
-                    ? "bg-emerald-500"
+                    ? "bg-status-success"
                     : n === step
                       ? "bg-[color:var(--primary)]"
                       : "bg-[color:var(--muted)]",
@@ -561,7 +561,7 @@ export default function Signup() {
                     disabled={loading}
                   />
                   {form.firstName && form.firstName.length < 2 && (
-                    <p className="text-xs text-red-500 mt-1">
+                    <p className="text-xs text-status-error mt-1">
                       Minimum 2 characters
                     </p>
                   )}
@@ -575,7 +575,7 @@ export default function Signup() {
                     disabled={loading}
                   />
                   {form.lastName && form.lastName.length < 2 && (
-                    <p className="text-xs text-red-500 mt-1">
+                    <p className="text-xs text-status-error mt-1">
                       Minimum 2 characters
                     </p>
                   )}
@@ -632,7 +632,7 @@ export default function Signup() {
                   disabled={loading}
                 />
                 {form.email && !validateEmail(form.email) && (
-                  <p className="text-xs text-red-500 mt-1">
+                  <p className="text-xs text-status-error mt-1">
                     Enter a valid email address
                   </p>
                 )}
@@ -688,14 +688,14 @@ export default function Signup() {
               />
 
               {otpError && (
-                <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-500">
+                <div className="flex items-center gap-2 rounded-xl border border-status-error/20 bg-status-error/10 p-3 text-sm text-status-error">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   {otpError}
                 </div>
               )}
 
               {otpVerified && (
-                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-500">
+                <div className="flex items-center gap-2 rounded-xl border border-status-success/20 bg-status-success/10 p-3 text-sm text-status-success">
                   <Check className="h-4 w-4 flex-shrink-0" />
                   Email verified successfully.
                 </div>
@@ -764,11 +764,11 @@ export default function Signup() {
                   </button>
                 </div>
                 {form.password && passwordErrors.length > 0 && (
-                  <div className="mt-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                    <p className="text-xs text-yellow-600 mb-1">
+                  <div className="mt-2 p-2 rounded-lg bg-status-warning/10 border border-status-warning/30">
+                    <p className="text-xs text-status-warning mb-1">
                       Password must contain:
                     </p>
-                    <ul className="text-xs text-yellow-600 space-y-0.5">
+                    <ul className="text-xs text-status-warning space-y-0.5">
                       {passwordErrors.map((err) => (
                         <li key={err}>• {err}</li>
                       ))}
@@ -787,7 +787,7 @@ export default function Signup() {
                 />
                 {form.confirmPassword &&
                   form.password !== form.confirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">
+                    <p className="text-xs text-status-error mt-1">
                       Passwords do not match
                     </p>
                   )}

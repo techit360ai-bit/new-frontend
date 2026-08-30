@@ -25,11 +25,11 @@ export function BadgeDisplay({ badges, earnedBadgeIds }: BadgeDisplayProps) {
   const getBadgeColor = (category: string) => {
     switch (category) {
       case "founder":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "bg-status-info-soft text-status-info border-status-info";
       case "collaborator":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-status-success-soft text-status-success border-status-success";
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-surface-secondary text-text-secondary border-border-default";
     }
   };
 
@@ -43,14 +43,14 @@ export function BadgeDisplay({ badges, earnedBadgeIds }: BadgeDisplayProps) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-900">Your Badges</h3>
-            <p className="text-sm text-gray-600 mt-1">
+            <h3 className="font-semibold text-text-primary">Your Badges</h3>
+            <p className="text-sm text-text-muted mt-1">
               {earnedCount} of {totalCount} earned
             </p>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-semibold text-gray-900">{Math.round(progressPercent)}%</div>
-            <div className="text-xs text-gray-600">Complete</div>
+            <div className="text-2xl font-semibold text-text-primary">{Math.round(progressPercent)}%</div>
+            <div className="text-xs text-text-muted">Complete</div>
           </div>
         </div>
 
@@ -69,27 +69,27 @@ export function BadgeDisplay({ badges, earnedBadgeIds }: BadgeDisplayProps) {
                   className={`p-4 rounded-lg border-2 transition-all ${
                     earned
                       ? getBadgeColor(badge.category || badge.role || "") + " shadow-sm"
-                      : "bg-gray-50 border-gray-200 opacity-60"
+                      : "bg-background-primary border-border-default opacity-60"
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${earned ? "bg-white/80" : "bg-gray-100"}`}>
+                    <div className={`p-2 rounded-lg ${earned ? "bg-surface-primary/80" : "bg-surface-secondary"}`}>
                       {earned ? (
                         <CheckCircle2 className="size-5 text-current" />
                       ) : (
-                        <Lock className="size-5 text-gray-400" />
+                        <Lock className="size-5 text-text-disabled" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-sm text-gray-900">{badge.name || badge.badgeId || "Academy badge"}</h4>
+                        <h4 className="font-medium text-sm text-text-primary">{badge.name || badge.badgeId || "Academy badge"}</h4>
                         {badge.level && (
                           <BadgePrimitive variant="outline" className="h-5 px-1.5 text-xs">
                             L{badge.level}
                           </BadgePrimitive>
                         )}
                       </div>
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{badge.description || "Earned through verified Academy progress."}</p>
+                      <p className="text-xs text-text-muted mt-1 line-clamp-2">{badge.description || "Earned through verified Academy progress."}</p>
                     </div>
                   </div>
                 </div>
@@ -99,7 +99,7 @@ export function BadgeDisplay({ badges, earnedBadgeIds }: BadgeDisplayProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-2 pt-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center gap-2 pt-2 text-sm text-text-muted bg-background-primary p-3 rounded-lg">
           <Award className="size-4" />
           <span>Badges boost your credibility score and investor visibility</span>
         </div>

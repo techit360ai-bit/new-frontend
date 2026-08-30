@@ -16,9 +16,9 @@ const TYPE_LABEL: Record<Opportunity["type"], string> = {
 };
 
 const STATUS_STYLES = {
-  open: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", label: "Open" },
-  "closing-soon": { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", label: "Closing soon" },
-  closed: { bg: "bg-slate-50", text: "text-slate-600", border: "border-slate-200", label: "Closed" },
+  open: { bg: "bg-status-success-soft", text: "text-status-success", border: "border-status-success", label: "Open" },
+  "closing-soon": { bg: "bg-status-warning-soft", text: "text-status-warning", border: "border-status-warning", label: "Closing soon" },
+  closed: { bg: "bg-background-primary", text: "text-text-muted", border: "border-border-default", label: "Closed" },
 };
 
 function daysUntil(iso: string): number {
@@ -75,34 +75,34 @@ export function OpportunityCard({ opportunity, variant = "grid" }: Props) {
 
   return (
     <article
-      className={`border border-slate-200 rounded-xl bg-white overflow-hidden flex flex-col ${
+      className={`border border-border-default rounded-xl bg-surface-primary overflow-hidden flex flex-col ${
         isFeatured ? "h-full" : ""
       }`}
     >
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-3 mb-3">
           <span className="text-3xl shrink-0" aria-hidden="true">{opportunity.poster}</span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary bg-surface-secondary px-2 py-0.5 rounded">
             {TYPE_LABEL[opportunity.type]}
           </span>
         </div>
-        <h3 className={`font-semibold text-slate-900 ${isFeatured ? "text-xl" : "text-base"} mb-1`}>
+        <h3 className={`font-semibold text-text-primary ${isFeatured ? "text-xl" : "text-base"} mb-1`}>
           {opportunity.title}
         </h3>
-        <p className="text-xs text-slate-500 mb-3">
-          <Building2 className="mr-1 inline-block h-4 w-4 text-slate-500" aria-hidden="true" />
+        <p className="text-xs text-text-muted mb-3">
+          <Building2 className="mr-1 inline-block h-4 w-4 text-text-muted" aria-hidden="true" />
           {opportunity.organizer.name}
         </p>
-        <p className={`text-sm text-slate-600 mb-4 ${isFeatured ? "" : "line-clamp-2"}`}>
+        <p className={`text-sm text-text-muted mb-4 ${isFeatured ? "" : "line-clamp-2"}`}>
           {opportunity.summary}
         </p>
-        <p className="text-xs text-slate-500 mb-4 font-medium">{metricLine(opportunity)}</p>
-        <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-slate-100">
+        <p className="text-xs text-text-muted mb-4 font-medium">{metricLine(opportunity)}</p>
+        <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-border-subtle">
           <div className="flex items-center gap-2 text-xs">
             <span className={`px-2 py-0.5 rounded border ${status.bg} ${status.text} ${status.border} font-medium`}>
               {status.label}
             </span>
-            <span className="text-slate-500">{countdown(opportunity.applyDeadline)}</span>
+            <span className="text-text-muted">{countdown(opportunity.applyDeadline)}</span>
           </div>
           <button
             type="button"

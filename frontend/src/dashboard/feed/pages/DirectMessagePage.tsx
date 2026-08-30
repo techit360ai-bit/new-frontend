@@ -158,7 +158,7 @@ export function DirectMessagePage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-bg-surface">
+      <div className="flex-1 flex items-center justify-center bg-surface-primary">
         <div className="flex items-center gap-3 text-text-muted">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span>Loading conversation...</span>
@@ -169,9 +169,9 @@ export function DirectMessagePage() {
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-bg-surface">
+      <div className="flex-1 flex items-center justify-center bg-surface-primary">
         <div className="flex flex-col items-center gap-3 text-center px-4">
-          <AlertCircle className="w-8 h-8 text-red-500" />
+          <AlertCircle className="w-8 h-8 text-status-error" />
           <p className="text-text-primary font-medium">Could not load messages</p>
           <p className="text-text-muted text-sm max-w-md">{error}</p>
         </div>
@@ -180,9 +180,9 @@ export function DirectMessagePage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-bg-surface h-full">
+    <div className="flex-1 flex flex-col bg-surface-primary h-full">
       {/* Header */}
-      <div className="border-b border-border-default px-6 py-4 bg-bg-surface">
+      <div className="border-b border-border-default px-6 py-4 bg-surface-primary">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-accent-primary/20 flex items-center justify-center">
             <span className="text-sm font-semibold text-accent-primary">
@@ -196,7 +196,7 @@ export function DirectMessagePage() {
         </div>
       </div>
 
-      {requestStatus === 'pending' && <div className="flex items-center justify-between gap-3 border-b border-border-default bg-bg-elevated px-6 py-3 text-sm text-text-primary"><span>{initiatedBy === user?.id ? 'Waiting for this member to accept your request.' : 'Review this message request before replying.'}</span>{initiatedBy !== user?.id && <span className="flex gap-2"><button type="button" onClick={() => void respondToRequest('declined')} className="rounded border border-border-default px-3 py-1.5 text-xs">Decline</button><button type="button" onClick={() => void respondToRequest('active')} className="rounded bg-accent-primary px-3 py-1.5 text-xs text-white">Accept</button></span>}</div>}
+      {requestStatus === 'pending' && <div className="flex items-center justify-between gap-3 border-b border-border-default bg-surface-secondary px-6 py-3 text-sm text-text-primary"><span>{initiatedBy === user?.id ? 'Waiting for this member to accept your request.' : 'Review this message request before replying.'}</span>{initiatedBy !== user?.id && <span className="flex gap-2"><button type="button" onClick={() => void respondToRequest('declined')} className="rounded border border-border-default px-3 py-1.5 text-xs">Decline</button><button type="button" onClick={() => void respondToRequest('active')} className="rounded bg-accent-primary px-3 py-1.5 text-xs text-white">Accept</button></span>}</div>}
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
@@ -216,7 +216,7 @@ export function DirectMessagePage() {
                 className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
                   isMe
                     ? 'bg-accent-primary text-white rounded-br-md'
-                    : 'bg-bg-elevated text-text-primary rounded-bl-md'
+                    : 'bg-surface-secondary text-text-primary rounded-bl-md'
                 }`}
               >
                 <MentionText body={msg.body} mentions={msg.mentions} className="text-sm whitespace-pre-wrap break-words" />
@@ -235,7 +235,7 @@ export function DirectMessagePage() {
       </div>
 
       {/* Input area */}
-      <div className="border-t border-border-default px-6 py-4 bg-bg-surface">
+      <div className="border-t border-border-default px-6 py-4 bg-surface-primary">
         <div className="flex items-center gap-3">
           <MentionTextarea
             value={input}
@@ -244,7 +244,7 @@ export function DirectMessagePage() {
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={2}
-            className="w-full resize-none px-4 py-2.5 bg-bg-elevated border border-border-default rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 focus:border-accent-primary disabled:opacity-50"
+            className="w-full resize-none px-4 py-2.5 bg-surface-secondary border border-border-default rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 focus:border-accent-primary disabled:opacity-50"
           />
           <button
             onClick={handleSend}

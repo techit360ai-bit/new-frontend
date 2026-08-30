@@ -71,7 +71,7 @@ export default function InviteAcceptPage() {
   if (state.kind === "loading") {
     return (
       <Wrapper>
-        <p className="text-sm text-slate-500">Loading live team invite...</p>
+        <p className="text-sm text-text-muted">Loading live team invite...</p>
       </Wrapper>
     );
   }
@@ -80,16 +80,16 @@ export default function InviteAcceptPage() {
     const url = `https://techit.ai/h/${state.hackathonId}/team/${state.teamId}?token=${state.inviteToken}`;
     return (
       <Wrapper>
-        <h1 className="text-xl font-semibold text-slate-900">You're the leader of this team</h1>
-        <p className="text-sm text-slate-600 mt-2">
+        <h1 className="text-xl font-semibold text-text-primary">You're the leader of this team</h1>
+        <p className="text-sm text-text-muted mt-2">
           Share this invite link with collaborators instead of clicking it yourself.
         </p>
         <div className="flex items-center gap-2 mt-4">
-          <input readOnly value={url} className="flex-1 text-xs px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700" />
+          <input readOnly value={url} className="flex-1 text-xs px-3 py-2 border border-border-strong rounded-lg bg-background-primary text-text-secondary" />
           <button
             type="button"
             onClick={() => { navigator.clipboard.writeText(url); toast.success("Invite link copied"); }}
-            className="text-xs font-medium px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1"
+            className="text-xs font-medium px-3 py-2 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary flex items-center gap-1"
           >
             <Copy className="w-3.5 h-3.5" /> Copy
           </button>
@@ -116,7 +116,7 @@ export default function InviteAcceptPage() {
 
   const messages: Record<Exclude<InviteState["kind"], "ok" | "leader" | "loading">, { title: string; body: React.ReactNode }> = {
     "token-mismatch":     { title: "This invite link is invalid or has expired.", body: <BackLink to="/opportunity-hub" /> },
-    "not-found":          { title: "We can't find that team.", body: <p className="text-sm text-slate-600 mt-2">The invite link may be from a hackathon you're not signed in for. <BackLink to="/opportunity-hub" /></p> },
+    "not-found":          { title: "We can't find that team.", body: <p className="text-sm text-text-muted mt-2">The invite link may be from a hackathon you're not signed in for. <BackLink to="/opportunity-hub" /></p> },
     "team-full":          { title: "This team is already full.", body: <Link to={`/opportunity-hub/${(state as { hackathonId: string }).hackathonId}`} className="inline-block mt-4 text-sm font-medium text-violet-700 hover:underline">Find another team in the hackathon →</Link> },
     "roster-closed":      { title: "This team's roster is closed.", body: <BackLink to="/opportunity-hub" /> },
     "hackathon-missing":  { title: "This hackathon is no longer available.", body: <BackLink to="/opportunity-hub" /> },
@@ -124,7 +124,7 @@ export default function InviteAcceptPage() {
   const m = messages[state.kind];
   return (
     <Wrapper>
-      <h1 className="text-xl font-semibold text-slate-900">{m.title}</h1>
+      <h1 className="text-xl font-semibold text-text-primary">{m.title}</h1>
       {m.body}
     </Wrapper>
   );
@@ -178,38 +178,38 @@ function AcceptForm({
   };
   return (
     <Wrapper>
-      <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">You're invited to join</p>
+      <p className="text-xs text-text-muted uppercase tracking-wider font-medium">You're invited to join</p>
       <div className="flex items-center gap-3 mt-2">
         <span className="text-3xl" aria-hidden="true">{state.hackathon.poster}</span>
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">{state.hackathon.title}</h1>
-          <p className="text-xs text-slate-500">{state.hackathon.organizer.name} · {state.hackathon.startDate} → {state.hackathon.endDate}</p>
+          <h1 className="text-xl font-semibold text-text-primary">{state.hackathon.title}</h1>
+          <p className="text-xs text-text-muted">{state.hackathon.organizer.name} · {state.hackathon.startDate} → {state.hackathon.endDate}</p>
         </div>
       </div>
-      <hr className="my-5 border-slate-200" />
-      <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">Team</p>
-      <h2 className="text-base font-semibold text-slate-900 mt-1">{state.teamName}</h2>
-      <p className="text-xs text-slate-500 mt-0.5">Led by {state.leaderName}</p>
-      <p className="text-xs text-slate-500 mt-3 font-medium uppercase tracking-wider">
+      <hr className="my-5 border-border-default" />
+      <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Team</p>
+      <h2 className="text-base font-semibold text-text-primary mt-1">{state.teamName}</h2>
+      <p className="text-xs text-text-muted mt-0.5">Led by {state.leaderName}</p>
+      <p className="text-xs text-text-muted mt-3 font-medium uppercase tracking-wider">
         Members ({state.memberCount} of {state.teamSize}) · {state.openRoles.length} role{state.openRoles.length === 1 ? "" : "s"} open
       </p>
       <ul className="mt-2 space-y-1.5">
         {state.openRoles.map((r) => (
-          <li key={r} className="text-sm text-slate-700 border border-dashed border-slate-200 rounded-lg px-3 py-2">○ {r}</li>
+          <li key={r} className="text-sm text-text-secondary border border-dashed border-border-default rounded-lg px-3 py-2">○ {r}</li>
         ))}
       </ul>
-      <hr className="my-5 border-slate-200" />
-      <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">Choose your role</label>
+      <hr className="my-5 border-border-default" />
+      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5">Choose your role</label>
       <select
         value={selectedRole}
         onChange={(e) => setSelectedRole(e.target.value)}
         disabled={state.openRoles.length === 1}
-        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+        className="w-full px-3 py-2 border border-border-strong rounded-lg text-sm"
       >
         {state.openRoles.map((r) => (<option key={r} value={r}>{r}</option>))}
       </select>
       <div className="flex items-center justify-between gap-3 mt-6">
-        <button type="button" onClick={handleDecline} className="text-sm font-medium px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
+        <button type="button" onClick={handleDecline} className="text-sm font-medium px-4 py-2 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary">
           Decline
         </button>
         <button
@@ -229,10 +229,10 @@ function Wrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="p-6">
       <div className="max-w-xl mx-auto">
-        <Link to="/opportunity-hub" className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 mb-4">
+        <Link to="/opportunity-hub" className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Opportunity Hub
         </Link>
-        <div className="border border-slate-200 rounded-xl bg-white p-6">{children}</div>
+        <div className="border border-border-default rounded-xl bg-surface-primary p-6">{children}</div>
       </div>
     </div>
   );

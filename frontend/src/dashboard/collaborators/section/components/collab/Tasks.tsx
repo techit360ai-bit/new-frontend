@@ -35,10 +35,10 @@ function deadlineTime(deadlineIso: string): number {
 
 function priorityPillClass(p: Priority): string {
   switch (p) {
-    case "critical": return "bg-red-50 text-red-700";
-    case "high":     return "bg-amber-50 text-amber-700";
-    case "medium":   return "bg-slate-100 text-slate-700";
-    case "low":      return "bg-slate-100 text-slate-500";
+    case "critical": return "bg-status-error-soft text-status-error";
+    case "high":     return "bg-status-warning-soft text-status-warning";
+    case "medium":   return "bg-surface-secondary text-text-secondary";
+    case "low":      return "bg-surface-secondary text-text-muted";
   }
 }
 
@@ -172,44 +172,44 @@ export function Tasks() {
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Tasks</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-text-primary">Tasks</h1>
+          <p className="text-sm text-text-muted mt-0.5">
             {loading ? "Loading live task assignments..." : `${counts.open} open · ${counts.critical} critical · ${counts.dueThisWeek} due this week`}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}
-            className="h-9 border border-slate-300 rounded-lg px-3 text-sm bg-white">
+            className="h-9 border border-border-strong rounded-lg px-3 text-sm bg-surface-primary">
             <option value="all">All projects</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="h-9 border border-slate-300 rounded-lg px-3 text-sm bg-white">
+            className="h-9 border border-border-strong rounded-lg px-3 text-sm bg-surface-primary">
             <option value="impact">Sort: Impact</option>
             <option value="deadline">Sort: Deadline</option>
             <option value="project">Sort: Project</option>
           </select>
           <button onClick={() => setAddOpen(true)}
             disabled={loading || projects.length === 0}
-            className="h-9 px-3 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-sm font-semibold flex items-center gap-1">
+            className="h-9 px-3 bg-status-warning hover:bg-amber-400 text-text-primary rounded-lg text-sm font-semibold flex items-center gap-1">
             <Plus className="w-4 h-4" /> Add task
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="border border-red-200 bg-red-50 rounded-xl p-4">
-          <p className="text-sm font-semibold text-red-700">Live tasks are unavailable.</p>
-          <p className="text-sm text-red-600 mt-1">{error}</p>
+        <div className="border border-status-error bg-status-error-soft rounded-xl p-4">
+          <p className="text-sm font-semibold text-status-error">Live tasks are unavailable.</p>
+          <p className="text-sm text-status-error mt-1">{error}</p>
           <button onClick={() => void loadTasks()}
-            className="mt-3 text-xs px-3 py-1.5 border border-red-300 rounded-lg text-red-700 hover:bg-red-100">
+            className="mt-3 text-xs px-3 py-1.5 border border-status-error rounded-lg text-status-error hover:bg-status-error-soft">
             Try again
           </button>
         </div>
       )}
 
       {!loading && !error && taskList.length === 0 && (
-        <div className="border border-dashed border-slate-300 bg-white rounded-xl p-5 text-sm text-slate-500">
+        <div className="border border-dashed border-border-strong bg-surface-primary rounded-xl p-5 text-sm text-text-muted">
           No live task assignments yet. Workspace tasks will appear here when assigned.
         </div>
       )}
@@ -220,17 +220,17 @@ export function Tasks() {
           <Section title="This week" rows={thisWeek} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due this week." />
           <Section title="Later" rows={later} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="No upcoming tasks." />
 
-          <div className="border border-slate-200 bg-white rounded-xl">
+          <div className="border border-border-default bg-surface-primary rounded-xl">
             <button onClick={() => setCompletedOpen((v) => !v)}
-              className="w-full p-4 text-left text-sm font-semibold text-slate-700 flex items-center justify-between">
+              className="w-full p-4 text-left text-sm font-semibold text-text-secondary flex items-center justify-between">
               <span>Completed ({completed.length})</span>
-              <span className="text-slate-400">{completedOpen ? "Hide" : "Show"}</span>
+              <span className="text-text-disabled">{completedOpen ? "Hide" : "Show"}</span>
             </button>
             {completedOpen && (
-              <ul className="border-t border-slate-100 divide-y divide-slate-100">
-                {completed.length === 0 && <li className="p-4 text-sm text-slate-500">No completed tasks yet.</li>}
+              <ul className="border-t border-border-subtle divide-y divide-slate-100">
+                {completed.length === 0 && <li className="p-4 text-sm text-text-muted">No completed tasks yet.</li>}
                 {completed.map((t) => (
-                  <li key={t.id} className="p-4 text-sm text-slate-500 line-through">{t.title}</li>
+                  <li key={t.id} className="p-4 text-sm text-text-muted line-through">{t.title}</li>
                 ))}
               </ul>
             )}
@@ -245,44 +245,44 @@ export function Tasks() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Project</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Project</label>
               <select value={nfProject} onChange={(e) => setNfProject(e.target.value)}
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm bg-white">
+                className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm bg-surface-primary">
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Title</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Title</label>
               <input value={nfTitle} onChange={(e) => setNfTitle(e.target.value)}
                 placeholder="What needs to be done?"
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm focus:outline-none focus:border-amber-500" />
+                className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm focus:outline-none focus:border-status-warning" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Due date</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Due date</label>
               <input type="date" value={nfDue} onChange={(e) => setNfDue(e.target.value)}
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm focus:outline-none focus:border-amber-500" />
+                className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm focus:outline-none focus:border-status-warning" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Priority</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Priority</label>
               <div className="grid grid-cols-4 gap-2">
                 {PRIORITIES.map((p) => (
                   <button key={p} type="button" onClick={() => setNfPriority(p)}
-                    className={`h-9 rounded-lg border-2 text-xs font-medium ${nfPriority === p ? "border-amber-500 bg-amber-50 text-amber-700" : "border-slate-300 bg-white text-slate-600"}`}>
+                    className={`h-9 rounded-lg border-2 text-xs font-medium ${nfPriority === p ? "border-status-warning bg-status-warning-soft text-status-warning" : "border-border-strong bg-surface-primary text-text-muted"}`}>
                     {p}
                   </button>
                 ))}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Impact ({nfImpact})</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Impact ({nfImpact})</label>
               <input type="range" min={0} max={100} value={nfImpact} onChange={(e) => setNfImpact(Number(e.target.value))}
                 className="w-full accent-amber-500" />
             </div>
           </div>
           <DialogFooter>
-            <button onClick={() => setAddOpen(false)} className="px-4 py-2 text-sm rounded-lg text-slate-700 hover:bg-slate-100">Cancel</button>
+            <button onClick={() => setAddOpen(false)} className="px-4 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-secondary">Cancel</button>
             <button onClick={() => void handleAdd()} disabled={!canSubmit || saving}
-              className="px-4 py-2 text-sm rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-400">{saving ? "Adding..." : "Add"}</button>
+              className="px-4 py-2 text-sm rounded-lg bg-status-warning text-text-primary font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-text-disabled">{saving ? "Adding..." : "Add"}</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -302,12 +302,12 @@ function Section({
   emptyText: string;
 }) {
   return (
-    <div className="border border-slate-200 bg-white rounded-xl">
-      <div className="px-5 py-3 border-b border-slate-100">
-        <h2 className="text-sm font-semibold text-slate-700">{title} ({rows.length})</h2>
+    <div className="border border-border-default bg-surface-primary rounded-xl">
+      <div className="px-5 py-3 border-b border-border-subtle">
+        <h2 className="text-sm font-semibold text-text-secondary">{title} ({rows.length})</h2>
       </div>
       {rows.length === 0 ? (
-        <p className="p-5 text-sm text-slate-500">{emptyText}</p>
+        <p className="p-5 text-sm text-text-muted">{emptyText}</p>
       ) : (
         <ul className="divide-y divide-slate-100">
           {rows.map((t) => (
@@ -315,15 +315,15 @@ function Section({
               <input type="checkbox" checked={false} readOnly className="mt-1 accent-amber-500" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm text-slate-900">{t.title}</p>
+                  <p className="text-sm text-text-primary">{t.title}</p>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${priorityPillClass(t.priority)}`}>{t.priority}</span>
                 </div>
-                <p className="text-xs text-slate-500">{t.projectName} · Impact {t.impactScore} · Due {t.deadline || "No deadline"}</p>
+                <p className="text-xs text-text-muted">{t.projectName} · Impact {t.impactScore} · Due {t.deadline || "No deadline"}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => void onComplete(t.id)} className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">Mark complete</button>
-                <button onClick={() => onWorkspace(t.projectId)} className="text-xs px-3 py-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800">Open in workspace</button>
-                <button onClick={() => void onSnooze(t.id, t.deadline)} className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">Snooze 1d</button>
+                <button onClick={() => void onComplete(t.id)} className="text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">Mark complete</button>
+                <button onClick={() => onWorkspace(t.projectId)} className="text-xs px-3 py-1.5 bg-background-inverse text-white rounded-lg hover:bg-surface-inverse-muted">Open in workspace</button>
+                <button onClick={() => void onSnooze(t.id, t.deadline)} className="text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">Snooze 1d</button>
               </div>
             </li>
           ))}

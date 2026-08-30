@@ -27,10 +27,10 @@ function ScoreBar({ score, label }: { score: number; label: string }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium text-slate-700">{label}</span>
+        <span className="text-xs font-medium text-text-secondary">{label}</span>
         <span className={`text-xs font-semibold ${color.text}`}>{score}</span>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-slate-100">
+      <div className="h-1.5 w-full rounded-full bg-surface-secondary">
         <div className={`h-1.5 rounded-full ${color.bar}`} style={{ width: `${score}%` }} />
       </div>
     </div>
@@ -40,9 +40,9 @@ function ScoreBar({ score, label }: { score: number; label: string }) {
 // Placement standing → color band: top third emerald, middle amber, lower slate.
 function placementColor(placement: number, cohortSize: number): { text: string; ring: string } {
   const pct = placement / cohortSize;
-  if (pct <= 1 / 3) return { text: "text-emerald-700", ring: "border-emerald-200 bg-emerald-50" };
-  if (pct <= 2 / 3) return { text: "text-amber-700", ring: "border-amber-200 bg-amber-50" };
-  return { text: "text-slate-600", ring: "border-slate-200 bg-slate-50" };
+  if (pct <= 1 / 3) return { text: "text-status-success", ring: "border-status-success bg-status-success-soft" };
+  if (pct <= 2 / 3) return { text: "text-status-warning", ring: "border-status-warning bg-status-warning-soft" };
+  return { text: "text-text-muted", ring: "border-border-default bg-background-primary" };
 }
 
 export function ResultsView({ registration }: Props) {
@@ -51,9 +51,9 @@ export function ResultsView({ registration }: Props) {
 
   if (!finalSubmission) {
     return (
-      <div className="border border-slate-200 bg-white rounded-xl p-12 text-center">
-        <h2 className="text-base font-semibold text-slate-700 mb-2">Results unavailable</h2>
-        <p className="text-sm text-slate-500">Submit your final pitch to see judging results.</p>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-12 text-center">
+        <h2 className="text-base font-semibold text-text-secondary mb-2">Results unavailable</h2>
+        <p className="text-sm text-text-muted">Submit your final pitch to see judging results.</p>
       </div>
     );
   }
@@ -61,9 +61,9 @@ export function ResultsView({ registration }: Props) {
   if (!judgeFeedback) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="border border-amber-200 bg-amber-50 rounded-xl p-6">
+        <div className="border border-status-warning bg-status-warning-soft rounded-xl p-6">
           <h2 className="text-base font-semibold text-amber-900">Judging pending</h2>
-          <p className="mt-1 text-sm text-amber-800">
+          <p className="mt-1 text-sm text-status-warning">
             Your final pitch is persisted. Results will appear after judge feedback is recorded.
           </p>
         </div>
@@ -81,19 +81,19 @@ export function ResultsView({ registration }: Props) {
       <div className={`border rounded-xl p-6 flex items-center gap-4 ${band.ring}`}>
         <Trophy className={`w-8 h-8 shrink-0 ${band.text}`} />
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Final results</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-text-muted">Final results</p>
           <p className={`text-2xl font-bold ${band.text}`}>
             #{judgeFeedback.placement}{" "}
-            <span className="text-base font-medium text-slate-500">of {judgeFeedback.cohortSize}</span>
+            <span className="text-base font-medium text-text-muted">of {judgeFeedback.cohortSize}</span>
           </p>
         </div>
       </div>
 
       {/* Score breakdown */}
       {briefScore && overallColor && (
-        <div className="border border-slate-200 bg-white rounded-xl p-6 space-y-5">
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-900">Score breakdown</h3>
+            <h3 className="text-base font-semibold text-text-primary">Score breakdown</h3>
             <span className={`text-2xl font-bold ${overallColor.text}`}>{briefScore.overall}</span>
           </div>
           {SUB_SCORES.map((s) => (
@@ -103,12 +103,12 @@ export function ResultsView({ registration }: Props) {
       )}
 
       {/* Judge comments */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h3 className="text-base font-semibold text-slate-900 mb-3">Judge feedback</h3>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h3 className="text-base font-semibold text-text-primary mb-3">Judge feedback</h3>
         <ul className="space-y-2">
           {judgeFeedback.comments.map((c, i) => (
-            <li key={i} className="text-sm text-slate-700 flex gap-2">
-              <span className="text-slate-300">•</span>
+            <li key={i} className="text-sm text-text-secondary flex gap-2">
+              <span className="text-text-on-inverse-secondary">•</span>
               <span>{c}</span>
             </li>
           ))}
@@ -118,8 +118,8 @@ export function ResultsView({ registration }: Props) {
       <SubmissionDetails registration={registration} />
 
       {registration.promotedProjectId ? (
-        <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5">
-          <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-800 mb-2"><CheckCircle className="h-4 w-4" aria-hidden="true" />Promoted to startup</p>
+        <div className="border border-status-success bg-status-success-soft rounded-xl p-5">
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-status-success mb-2"><CheckCircle className="h-4 w-4" aria-hidden="true" />Promoted to startup</p>
           <div className="flex flex-wrap gap-3">
             <Link to={`/team-workspace/${registration.teamId}`} className="text-sm font-medium text-violet-700 hover:underline">Open workspace</Link>
             <Link to={roleDashboardPath.founder} className="text-sm font-medium text-violet-700 hover:underline">View in portfolio</Link>
@@ -143,20 +143,20 @@ function SubmissionDetails({ registration }: Props) {
   if (!submission) return null;
 
   return (
-    <div className="border border-slate-200 bg-white rounded-xl p-6">
+    <div className="border border-border-default bg-surface-primary rounded-xl p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Lock className="w-4 h-4 text-slate-400" />
-        <h3 className="text-base font-semibold text-slate-900">Final submission</h3>
-        <span className="ml-auto text-xs text-slate-500">Locked</span>
+        <Lock className="w-4 h-4 text-text-disabled" />
+        <h3 className="text-base font-semibold text-text-primary">Final submission</h3>
+        <span className="ml-auto text-xs text-text-muted">Locked</span>
       </div>
       <dl className="space-y-3">
         <div>
-          <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">Summary</dt>
-          <dd className="text-sm text-slate-800 mt-0.5 whitespace-pre-wrap">{submission.summary}</dd>
+          <dt className="text-xs font-medium text-text-muted uppercase tracking-wider">Summary</dt>
+          <dd className="text-sm text-text-primary mt-0.5 whitespace-pre-wrap">{submission.summary}</dd>
         </div>
         {LINKS.map((link) => (
           <div key={link.key}>
-            <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">{link.label}</dt>
+            <dt className="text-xs font-medium text-text-muted uppercase tracking-wider">{link.label}</dt>
             <dd className="mt-0.5">
               <a
                 href={submission[link.key]}

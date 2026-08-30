@@ -52,31 +52,31 @@ export function InvestorProfile() {
   const completePct = Math.round((completedSteps / 5) * 100);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background-inverse">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
+      <div className="border-b border-border-inverse bg-surface-inverse px-8 py-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-gray-700 bg-gray-900">
-              {profile?.avatarUrl ? <img src={profile.avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : <User className="m-auto h-7 w-7 text-gray-500" />}
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border-inverse-strong bg-background-inverse">
+              {profile?.avatarUrl ? <img src={profile.avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : <User className="m-auto h-7 w-7 text-text-on-inverse-disabled" />}
               <label className="absolute inset-x-0 bottom-0 cursor-pointer bg-black/70 py-1 text-center text-[10px] text-white">
                 {avatarBusy ? "..." : "Update"}
                 <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={avatarBusy} onChange={(event) => void changeAvatar(event.target.files?.[0])} />
               </label>
             </div>
           <div>
-            <p className="text-xs text-gray-500 font-mono uppercase tracking-wider mb-1">
+            <p className="text-xs text-text-on-inverse-disabled font-mono uppercase tracking-wider mb-1">
               Investor profile
             </p>
             <h1 className="text-3xl font-bold text-white">
               {investorProfile.investorType || "Untitled Investor"}
               {investorProfile.location && (
-                <span className="text-gray-400 font-normal ml-2 text-xl">
+                <span className="text-text-on-inverse-muted font-normal ml-2 text-xl">
                   · {investorProfile.location}
                 </span>
               )}
             </h1>
-            <p className="text-gray-400 mt-1 text-sm">
+            <p className="text-text-on-inverse-muted mt-1 text-sm">
               How TechIT prioritises deal flow for you. Everything below comes
               from your onboarding answers.
             </p>
@@ -86,7 +86,7 @@ export function InvestorProfile() {
 
           <Link
             to="/investor/onboarding/step-1"
-            className="px-4 py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-semibold flex items-center gap-2 transition-colors"
+            className="px-4 py-2.5 rounded-lg bg-status-success/10 hover:bg-status-success/20 border border-status-success/30 text-status-success text-sm font-semibold flex items-center gap-2 transition-colors"
           >
             <Pencil className="w-4 h-4" />
             Re-run full onboarding
@@ -96,16 +96,16 @@ export function InvestorProfile() {
         {/* Completeness bar */}
         <div className="mt-5">
           <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-            <span className="text-gray-400 uppercase tracking-wider">
+            <span className="text-text-on-inverse-muted uppercase tracking-wider">
               Profile completeness
             </span>
             <span
-              className={`font-bold ${completePct === 100 ? "text-emerald-400" : completePct >= 60 ? "text-amber-400" : "text-rose-400"}`}
+              className={`font-bold ${completePct === 100 ? "text-status-success" : completePct >= 60 ? "text-status-warning" : "text-rose-400"}`}
             >
               {completedSteps} / 5 sections · {completePct}%
             </span>
           </div>
-          <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-2 bg-surface-inverse-muted rounded-full overflow-hidden">
             <div
               className={`h-full transition-all duration-700 ${
                 completePct === 100
@@ -162,7 +162,7 @@ export function InvestorProfile() {
           complete={stepStatus.step2}
         >
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 font-mono mb-2">
+            <p className="text-[10px] uppercase tracking-wider text-text-on-inverse-disabled font-mono mb-2">
               Industries
             </p>
             {investorProfile.industries.length > 0 ? (
@@ -170,7 +170,7 @@ export function InvestorProfile() {
                 {investorProfile.industries.map((ind) => (
                   <span
                     key={ind}
-                    className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium"
+                    className="px-2.5 py-1 rounded-full bg-status-success/10 border border-status-success/20 text-status-success text-xs font-medium"
                   >
                     {ind}
                   </span>
@@ -196,23 +196,23 @@ export function InvestorProfile() {
               {investorProfile.portfolio.map((co) => (
                 <li
                   key={co.id}
-                  className="flex items-center justify-between rounded-lg bg-gray-800/40 border border-gray-800 px-3 py-2"
+                  className="flex items-center justify-between rounded-lg bg-surface-inverse-muted/40 border border-border-inverse px-3 py-2"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-white truncate">
                       {co.name}
                     </div>
-                    <div className="text-[10px] text-gray-500 font-mono uppercase tracking-wider">
+                    <div className="text-[10px] text-text-on-inverse-disabled font-mono uppercase tracking-wider">
                       {co.stage}
                     </div>
                   </div>
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-mono uppercase tracking-wider flex-shrink-0 ml-2 ${
                       co.outcome === "Exited" || co.outcome === "Acquired"
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        ? "bg-status-success/10 text-status-success border border-status-success/20"
                         : co.outcome === "Failed"
                           ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                          : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                          : "bg-status-info/10 text-status-info border border-status-info/20"
                     }`}
                   >
                     {co.outcome}
@@ -233,8 +233,8 @@ export function InvestorProfile() {
           complete={stepStatus.step4}
         >
           {investorProfile.riskAppetite ? (
-            <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-4">
-              <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-mono mb-1.5">
+            <div className="bg-gradient-to-br from-emerald-500/10 to-brand-primary/10 border border-status-success/20 rounded-lg p-4">
+              <div className="text-[10px] uppercase tracking-wider text-status-success font-mono mb-1.5">
                 Preferred stage
               </div>
               <div className="text-base font-semibold text-white">
@@ -258,9 +258,9 @@ export function InvestorProfile() {
               {investorProfile.dashboardMetrics.map((m) => (
                 <li
                   key={m}
-                  className="flex items-center gap-2 text-sm text-gray-200"
+                  className="flex items-center gap-2 text-sm text-text-on-inverse-secondary"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-status-success flex-shrink-0" />
                   {m}
                 </li>
               ))}
@@ -271,21 +271,21 @@ export function InvestorProfile() {
         </ProfileSection>
 
         {/* Summary footer card */}
-        <div className="lg:col-span-3 rounded-lg border border-gray-800 bg-[#111111] p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="lg:col-span-3 rounded-lg border border-border-inverse bg-surface-inverse p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-white">
               {completePct === 100
                 ? "Your profile is fully tuned."
                 : "Finish setting up your profile to unlock sharper deal flow."}
             </h3>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-text-on-inverse-muted mt-1">
               Each completed section makes the dashboard and watchlist
               recommendations more precise.
             </p>
           </div>
           <Link
             to="/investor"
-            className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-gray-700 text-gray-200 text-sm font-medium flex items-center gap-2 transition-colors flex-shrink-0"
+            className="px-4 py-2 rounded-lg bg-surface-primary/5 hover:bg-surface-primary/10 border border-border-inverse-strong text-text-on-inverse-secondary text-sm font-medium flex items-center gap-2 transition-colors flex-shrink-0"
           >
             Open dashboard
             <ArrowRight className="w-4 h-4" />
@@ -310,26 +310,26 @@ function ProfileSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 flex flex-col">
+    <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5 flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center ${complete ? "bg-emerald-500/10" : "bg-gray-800"}`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${complete ? "bg-status-success/10" : "bg-surface-inverse-muted"}`}
           >
             <Icon
-              className={`w-4 h-4 ${complete ? "text-emerald-400" : "text-gray-500"}`}
+              className={`w-4 h-4 ${complete ? "text-status-success" : "text-text-on-inverse-disabled"}`}
             />
           </div>
           <h3 className="text-sm font-semibold text-white">{title}</h3>
           {complete ? (
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-status-success" />
           ) : (
-            <CircleSlash className="w-3.5 h-3.5 text-gray-600" />
+            <CircleSlash className="w-3.5 h-3.5 text-text-muted" />
           )}
         </div>
         <Link
           to={editPath}
-          className="text-[11px] font-mono uppercase tracking-wider text-gray-500 hover:text-emerald-400 flex items-center gap-1 transition-colors"
+          className="text-[11px] font-mono uppercase tracking-wider text-text-on-inverse-disabled hover:text-status-success flex items-center gap-1 transition-colors"
         >
           <Pencil className="w-3 h-3" />
           Edit
@@ -351,12 +351,12 @@ function Field({
 }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-gray-500 font-mono mb-1">
+      <p className="text-[10px] uppercase tracking-wider text-text-on-inverse-disabled font-mono mb-1">
         {label}
       </p>
       {value ? (
         <p className="text-sm text-white font-medium flex items-center gap-2">
-          {Icon && <Icon className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />}
+          {Icon && <Icon className="w-3.5 h-3.5 text-text-on-inverse-disabled flex-shrink-0" />}
           {value}
         </p>
       ) : (
@@ -368,6 +368,6 @@ function Field({
 
 function EmptyHint({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs italic text-gray-600 font-medium">{children}</p>
+    <p className="text-xs italic text-text-muted font-medium">{children}</p>
   );
 }

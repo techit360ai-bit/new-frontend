@@ -23,7 +23,7 @@ const plans: {
     price: "$0/mo",
     features: ["1 active programme", "Up to 50 builders", "Basic analytics"],
     icon: Sparkles,
-    accent: "border-slate-300 dark:border-slate-700",
+    accent: "border-border-strong dark:border-border-inverse-strong",
   },
   {
     id: "growth",
@@ -38,7 +38,7 @@ const plans: {
       "Talent pool search",
     ],
     icon: Rocket,
-    accent: "border-indigo-500",
+    accent: "border-brand-accent",
   },
   {
     id: "enterprise",
@@ -87,10 +87,10 @@ export function OrgStep5() {
         <OrgProgressBar currentStep={5} totalSteps={5} />
 
         <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+          <h1 className="text-4xl font-bold text-text-primary dark:text-white tracking-tight mb-2">
             Choose your plan
           </h1>
-          <p className="text-base text-slate-600 dark:text-slate-400">
+          <p className="text-base text-text-muted dark:text-text-disabled">
             You can change this any time from Billing &amp; Usage.
           </p>
         </div>
@@ -105,37 +105,37 @@ export function OrgStep5() {
                 onClick={() => setPlan(p.id)}
                 className={`text-left p-6 rounded-2xl border-2 transition-all ${
                   active
-                    ? `${p.accent} bg-white dark:bg-slate-800/60 shadow-xl ring-2 ring-indigo-500/20`
-                    : "border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/40 hover:border-indigo-300"
+                    ? `${p.accent} bg-surface-primary dark:bg-surface-inverse-muted/60 shadow-xl ring-2 ring-indigo-500/20`
+                    : "border-border-default dark:border-border-inverse-strong bg-surface-primary/60 dark:bg-surface-inverse-muted/40 hover:border-brand-accent"
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${active ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700/50 text-slate-500"}`}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${active ? "bg-status-info-soft dark:bg-status-info-soft/20 text-brand-accent dark:text-brand-accent" : "bg-surface-secondary dark:bg-slate-700/50 text-text-muted"}`}
                   >
                     <Icon className="w-5 h-5" />
                   </div>
                   {active && (
-                    <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                    <CheckCircle2 className="w-5 h-5 text-brand-accent" />
                   )}
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
+                <h3 className="text-xl font-bold text-text-primary dark:text-white mb-1">
                   {p.name}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                <p className="text-xs text-text-muted dark:text-text-disabled mb-3">
                   {p.blurb}
                 </p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+                <p className="text-2xl font-bold text-text-primary dark:text-white mb-4">
                   {p.price}
                 </p>
                 <ul className="space-y-1.5 text-sm">
                   {p.features.map((f) => (
                     <li
                       key={f}
-                      className="flex items-start gap-2 text-slate-700 dark:text-slate-300"
+                      className="flex items-start gap-2 text-text-secondary dark:text-text-on-inverse-secondary"
                     >
                       <CheckCircle2
-                        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${active ? "text-indigo-600" : "text-slate-400"}`}
+                        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${active ? "text-brand-accent" : "text-text-disabled"}`}
                       />
                       <span>{f}</span>
                     </li>
@@ -149,20 +149,20 @@ export function OrgStep5() {
         <div className="flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary font-semibold hover:border-brand-accent transition-colors"
           >
             Back
           </button>
           <button
             onClick={() => void handleComplete()}
             disabled={finishing}
-            className="px-12 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-12 py-4 rounded-xl bg-gradient-to-r from-brand-accent to-violet-600 hover:from-brand-accent hover:to-violet-500 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             {finishing ? "Completing..." : "Complete setup"}
           </button>
         </div>
         {completionError && (
-          <p role="alert" className="mt-3 text-right text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="mt-3 text-right text-sm text-status-error dark:text-status-error">
             {completionError}
           </p>
         )}

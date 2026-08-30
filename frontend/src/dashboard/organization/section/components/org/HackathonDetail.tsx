@@ -57,10 +57,10 @@ const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
 ];
 
 const statusStyles: Record<OrganizerHackathon["hackathonStatus"], string> = {
-  upcoming: "bg-blue-50 text-blue-700",
-  live: "bg-emerald-50 text-emerald-700",
-  judging: "bg-amber-50 text-amber-700",
-  completed: "bg-gray-100 text-gray-700",
+  upcoming: "bg-status-info-soft text-status-info",
+  live: "bg-status-success-soft text-status-success",
+  judging: "bg-status-warning-soft text-status-warning",
+  completed: "bg-surface-secondary text-text-secondary",
 };
 
 function dateLabel(value: string): string {
@@ -146,7 +146,7 @@ export function HackathonDetail() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <Link
           to="/org/hackathons"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600"
+          className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-brand-accent"
         >
           <ArrowLeft className="h-4 w-4" />
           All hackathons
@@ -155,7 +155,7 @@ export function HackathonDetail() {
           type="button"
           onClick={() => void load()}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm font-medium text-text-secondary hover:bg-background-primary disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -163,7 +163,7 @@ export function HackathonDetail() {
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-start gap-3 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
           <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <div>
             <p className="font-medium">Live hackathon data could not be loaded.</p>
@@ -173,14 +173,14 @@ export function HackathonDetail() {
       )}
 
       {loading && !data ? (
-        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+        <div className="rounded-lg border border-border-default bg-surface-primary px-6 py-12 text-center text-sm text-text-muted">
           Loading persisted hackathon data...
         </div>
       ) : data ? (
         <>
           <EventHeader event={data.event} overview={data.overview} />
 
-          <div className="mb-6 flex gap-1 overflow-x-auto border-b border-gray-200">
+          <div className="mb-6 flex gap-1 overflow-x-auto border-b border-border-default">
             {tabs.map((item) => {
               const Icon = item.icon;
               const active = tab === item.id;
@@ -191,8 +191,8 @@ export function HackathonDetail() {
                   onClick={() => setTab(item.id)}
                   className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold ${
                     active
-                      ? "border-indigo-600 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-900"
+                      ? "border-brand-accent text-brand-accent"
+                      : "border-transparent text-text-muted hover:text-text-primary"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -228,20 +228,20 @@ function EventHeader({
   overview: HackathonOverview;
 }) {
   return (
-    <section className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
+    <section className="mb-6 rounded-lg border border-border-default bg-surface-primary p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-3">
-            <span className="rounded-lg bg-indigo-100 p-2">
-              <Trophy className="h-6 w-6 text-indigo-600" />
+            <span className="rounded-lg bg-status-info-soft p-2">
+              <Trophy className="h-6 w-6 text-brand-accent" />
             </span>
-            <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
+            <h1 className="text-2xl font-bold text-text-primary">{event.title}</h1>
             <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[event.hackathonStatus]}`}>
               {titleLabel(event.hackathonStatus)}
             </span>
           </div>
-          <p className="text-sm text-gray-600">{event.theme || "No theme has been persisted."}</p>
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500">
+          <p className="text-sm text-text-muted">{event.theme || "No theme has been persisted."}</p>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-muted">
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />
               {dateLabel(event.startDate)} to {dateLabel(event.endDate)}
@@ -258,17 +258,17 @@ function EventHeader({
           </div>
         </div>
         <div className="max-w-md">
-          <p className="mb-2 text-xs font-medium text-gray-500">Partners</p>
+          <p className="mb-2 text-xs font-medium text-text-muted">Partners</p>
           {event.partners.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {event.partners.map((partner) => (
-                <span key={partner} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                <span key={partner} className="rounded-full bg-surface-secondary px-2.5 py-1 text-xs font-medium text-text-secondary">
                   {partner}
                 </span>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">No partners are attached.</p>
+            <p className="text-sm text-text-muted">No partners are attached.</p>
           )}
         </div>
       </div>
@@ -291,8 +291,8 @@ function OverviewTab({ event }: { event: OrganizerHackathon }) {
           <div className="divide-y divide-gray-100">
             {event.prizes.map((prize, index) => (
               <div key={`${prize.rank}-${index}`} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-                <span className="text-sm font-medium text-gray-700">{prize.rank || "Prize tier"}</span>
-                <span className="text-sm font-bold text-gray-900">{prize.amount || "Amount not set"}</span>
+                <span className="text-sm font-medium text-text-secondary">{prize.rank || "Prize tier"}</span>
+                <span className="text-sm font-bold text-text-primary">{prize.amount || "Amount not set"}</span>
               </div>
             ))}
           </div>
@@ -305,7 +305,7 @@ function OverviewTab({ event }: { event: OrganizerHackathon }) {
         {event.judgingDimensions.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {event.judgingDimensions.map((dimension) => (
-              <span key={dimension} className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700">
+              <span key={dimension} className="rounded-full bg-status-info-soft px-3 py-1.5 text-xs font-medium text-brand-accent">
                 {titleLabel(dimension)}
               </span>
             ))}
@@ -316,7 +316,7 @@ function OverviewTab({ event }: { event: OrganizerHackathon }) {
       </Card>
 
       <Card title="Event summary" icon={ClipboardList}>
-        <p className="text-sm leading-6 text-gray-700">
+        <p className="text-sm leading-6 text-text-secondary">
           {event.summary || event.theme || "No event summary has been persisted."}
         </p>
       </Card>
@@ -345,7 +345,7 @@ function RegistrationTab({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-left text-xs font-semibold uppercase text-gray-500">
+                <tr className="border-b border-border-default text-left text-xs font-semibold uppercase text-text-muted">
                   <th className="px-3 py-2">Team</th>
                   <th className="px-3 py-2">Build velocity</th>
                   <th className="px-3 py-2">Composite score</th>
@@ -354,11 +354,11 @@ function RegistrationTab({
               </thead>
               <tbody>
                 {teams.map((team) => (
-                  <tr key={team.id} className="border-b border-gray-100 last:border-0">
-                    <td className="px-3 py-3 font-semibold text-gray-900">{team.name}</td>
-                    <td className="px-3 py-3 tabular-nums text-gray-700">{team.activity}</td>
-                    <td className="px-3 py-3 tabular-nums text-gray-700">{team.composite}</td>
-                    <td className="px-3 py-3 text-gray-700">{titleLabel(team.crsBand)}</td>
+                  <tr key={team.id} className="border-b border-border-subtle last:border-0">
+                    <td className="px-3 py-3 font-semibold text-text-primary">{team.name}</td>
+                    <td className="px-3 py-3 tabular-nums text-text-secondary">{team.activity}</td>
+                    <td className="px-3 py-3 tabular-nums text-text-secondary">{team.composite}</td>
+                    <td className="px-3 py-3 text-text-secondary">{titleLabel(team.crsBand)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -397,10 +397,10 @@ function LiveTab({
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
               {velocity.map((team) => {
                 const color = team.activity > 66
-                  ? "bg-emerald-500"
+                  ? "bg-status-success"
                   : team.activity > 33
                     ? "bg-amber-400"
-                    : "bg-red-500";
+                    : "bg-status-error";
                 return (
                   <div
                     key={team.teamId}
@@ -413,10 +413,10 @@ function LiveTab({
                 );
               })}
             </div>
-            <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
-              <Legend color="bg-emerald-500" label="High" />
+            <div className="mt-4 flex flex-wrap gap-4 text-xs text-text-muted">
+              <Legend color="bg-status-success" label="High" />
               <Legend color="bg-amber-400" label="Medium" />
-              <Legend color="bg-red-500" label="Stalled" />
+              <Legend color="bg-status-error" label="Stalled" />
             </div>
           </>
         ) : (
@@ -425,7 +425,7 @@ function LiveTab({
       </Card>
 
       <Card title="Idea submission progress" icon={ClipboardList}>
-        <Progress label="Submitted" value={overview.ideaSubmissions} total={overview.totalTeams} color="bg-emerald-500" />
+        <Progress label="Submitted" value={overview.ideaSubmissions} total={overview.totalTeams} color="bg-status-success" />
         <div className="mt-4">
           <Progress label="Not submitted" value={pendingIdeas} total={overview.totalTeams} color="bg-amber-400" />
         </div>
@@ -451,7 +451,7 @@ function JudgingTab({
         {event.judgingDimensions.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {event.judgingDimensions.map((dimension) => (
-              <span key={dimension} className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700">
+              <span key={dimension} className="rounded-full bg-surface-secondary px-3 py-1.5 text-xs font-medium text-text-secondary">
                 {titleLabel(dimension)}
               </span>
             ))}
@@ -466,7 +466,7 @@ function JudgingTab({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-left text-xs font-semibold uppercase text-gray-500">
+                <tr className="border-b border-border-default text-left text-xs font-semibold uppercase text-text-muted">
                   <th className="px-3 py-2">Rank</th>
                   <th className="px-3 py-2">Team</th>
                   <th className="px-3 py-2">Composite</th>
@@ -475,11 +475,11 @@ function JudgingTab({
               </thead>
               <tbody>
                 {leaderboard.map((team, index) => (
-                  <tr key={team.teamId} className="border-b border-gray-100 last:border-0">
-                    <td className="px-3 py-3 font-bold text-gray-900">{index + 1}</td>
-                    <td className="px-3 py-3 font-semibold text-gray-900">{team.name || "Untitled team"}</td>
-                    <td className="px-3 py-3 font-bold tabular-nums text-indigo-700">{team.composite}</td>
-                    <td className="px-3 py-3 text-gray-700">{titleLabel(team.crsBand)}</td>
+                  <tr key={team.teamId} className="border-b border-border-subtle last:border-0">
+                    <td className="px-3 py-3 font-bold text-text-primary">{index + 1}</td>
+                    <td className="px-3 py-3 font-semibold text-text-primary">{team.name || "Untitled team"}</td>
+                    <td className="px-3 py-3 font-bold tabular-nums text-brand-accent">{team.composite}</td>
+                    <td className="px-3 py-3 text-text-secondary">{titleLabel(team.crsBand)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -527,10 +527,10 @@ function ReportTab({
             {leaderboard.slice(0, 10).map((team, index) => (
               <div key={team.teamId} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-gray-900">{index + 1}. {team.name || "Untitled team"}</p>
-                  <p className="text-xs text-gray-500">{titleLabel(team.crsBand)}</p>
+                  <p className="truncate text-sm font-semibold text-text-primary">{index + 1}. {team.name || "Untitled team"}</p>
+                  <p className="text-xs text-text-muted">{titleLabel(team.crsBand)}</p>
                 </div>
-                <span className="text-lg font-bold tabular-nums text-indigo-700">{team.composite}</span>
+                <span className="text-lg font-bold tabular-nums text-brand-accent">{team.composite}</span>
               </div>
             ))}
           </div>
@@ -543,7 +543,7 @@ function ReportTab({
         {event.partners.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {event.partners.map((partner) => (
-              <span key={partner} className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700">
+              <span key={partner} className="rounded-full bg-surface-secondary px-3 py-1.5 text-sm font-medium text-text-secondary">
                 {partner}
               </span>
             ))}
@@ -551,7 +551,7 @@ function ReportTab({
         ) : (
           <EmptyState>No partner records are attached to this event.</EmptyState>
         )}
-        <p className="mt-4 text-xs text-gray-500">
+        <p className="mt-4 text-xs text-text-muted">
           Sponsor-specific attribution is not recorded, so this report does not assign event-wide outcomes to individual partners.
         </p>
       </Card>
@@ -573,9 +573,9 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5">
-      <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-gray-900">
-        <Icon className="h-5 w-5 text-indigo-600" />
+    <section className="rounded-lg border border-border-default bg-surface-primary p-5">
+      <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-text-primary">
+        <Icon className="h-5 w-5 text-brand-accent" />
         {title}
       </h2>
       {children}
@@ -593,9 +593,9 @@ function Stat({
   tone?: "warn" | "neutral";
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
-      <p className="text-xs font-medium uppercase text-gray-500">{label}</p>
-      <p className={`mt-1 text-2xl font-bold tabular-nums ${tone === "warn" ? "text-amber-700" : "text-gray-900"}`}>
+    <div className="rounded-lg border border-border-default bg-surface-primary p-4">
+      <p className="text-xs font-medium uppercase text-text-muted">{label}</p>
+      <p className={`mt-1 text-2xl font-bold tabular-nums ${tone === "warn" ? "text-status-warning" : "text-text-primary"}`}>
         {value}
       </p>
     </div>
@@ -604,16 +604,16 @@ function Stat({
 
 function Definition({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-gray-100 py-3 first:pt-0 last:border-0 last:pb-0">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-right text-sm font-medium text-gray-900">{value}</span>
+    <div className="flex items-start justify-between gap-4 border-b border-border-subtle py-3 first:pt-0 last:border-0 last:pb-0">
+      <span className="text-sm text-text-muted">{label}</span>
+      <span className="text-right text-sm font-medium text-text-primary">{value}</span>
     </div>
   );
 }
 
 function EmptyState({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center text-sm text-gray-500">
+    <div className="rounded-lg border border-dashed border-border-strong bg-background-primary px-5 py-8 text-center text-sm text-text-muted">
       {children}
     </div>
   );
@@ -621,8 +621,8 @@ function EmptyState({ children }: { children: React.ReactNode }) {
 
 function UnavailablePanel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-500" />
+    <div className="flex items-start gap-3 rounded-lg border border-border-default bg-background-primary px-4 py-3 text-sm text-text-muted">
+      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-text-muted" />
       <p>{children}</p>
     </div>
   );
@@ -642,11 +642,11 @@ function Progress({
   const percent = total > 0 ? Math.min(100, Math.max(0, (value / total) * 100)) : 0;
   return (
     <div>
-      <div className="mb-1 flex justify-between gap-4 text-xs text-gray-600">
+      <div className="mb-1 flex justify-between gap-4 text-xs text-text-muted">
         <span className="font-medium">{label}</span>
         <span className="tabular-nums">{value} / {total}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+      <div className="h-2 overflow-hidden rounded-full bg-surface-secondary">
         <div className={`h-full ${color}`} style={{ width: `${percent}%` }} />
       </div>
     </div>
@@ -664,9 +664,9 @@ function Legend({ color, label }: { color: string; label: string }) {
 
 function PipelineMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border-l-2 border-indigo-200 pl-4">
-      <p className="text-xs font-medium uppercase text-gray-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">{value}</p>
+    <div className="border-l-2 border-brand-accent pl-4">
+      <p className="text-xs font-medium uppercase text-text-muted">{label}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{value}</p>
     </div>
   );
 }

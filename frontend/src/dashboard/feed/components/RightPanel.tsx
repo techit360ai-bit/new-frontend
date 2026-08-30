@@ -17,7 +17,7 @@ export function RightPanel() {
 
   return (
     <aside className="sticky top-14 hidden h-[calc(100vh-56px)] w-[320px] overflow-y-auto p-5 xl:block">
-      <section className="border border-border-default bg-bg-surface p-5 sm:rounded-lg">
+      <section className="border border-border-default bg-surface-primary p-5 sm:rounded-lg">
         <p className="text-[11px] font-medium uppercase text-text-muted">Your live activity</p>
         <div className="mt-4 flex items-end justify-between">
           <div>
@@ -35,10 +35,10 @@ export function RightPanel() {
           <Metric label="Posts" value={loading ? '...' : ownPosts.length} />
           <Metric label="Questions" value={loading ? '...' : ownPosts.filter((post) => post.kind === 'question').length} />
         </div>
-        {error && <p className="mt-4 text-xs text-red-300">{error}</p>}
+        {error && <p className="mt-4 text-xs text-status-error">{error}</p>}
       </section>
 
-      <section className="mt-4 border border-border-default bg-bg-surface p-5 sm:rounded-lg">
+      <section className="mt-4 border border-border-default bg-surface-primary p-5 sm:rounded-lg">
         <p className="mb-3 text-[11px] font-medium uppercase text-text-muted">Recent contributors</p>
         <div className="space-y-3">
           {contributors.map((post) => (
@@ -53,7 +53,7 @@ export function RightPanel() {
         </div>
       </section>
 
-      <section className="mt-4 border border-border-default bg-bg-surface p-5 sm:rounded-lg">
+      <section className="mt-4 border border-border-default bg-surface-primary p-5 sm:rounded-lg">
         <p className="mb-3 text-[11px] font-medium uppercase text-text-muted">Problem signals</p>
         <div className="space-y-3">
           {problems.map((post) => (

@@ -78,10 +78,10 @@ export function InvestorStep5() {
         <InvestorProgressBar currentStep={5} totalSteps={5} />
 
         <div className="mb-12">
-          <h1 className="text-5xl sm:text-4xl mb-3 text-slate-900 dark:text-white font-bold tracking-tight">
+          <h1 className="text-5xl sm:text-4xl mb-3 text-text-primary dark:text-white font-bold tracking-tight">
             Customize Your Deal Discovery Feed
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
+          <p className="text-lg text-text-muted dark:text-text-disabled font-medium">
             These metrics will prioritize which startups appear in your deal
             flow
           </p>
@@ -99,21 +99,21 @@ export function InvestorStep5() {
                 className={`p-6 rounded-xl border-2 transition-all duration-200 text-left ${
                   isActive
                     ? "border-teal-500 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-500/20 dark:to-teal-600/10 shadow-[0_8px_24px_rgba(20,184,166,0.15)]"
-                    : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+                    : "border-border-strong dark:border-border-inverse-strong bg-surface-primary dark:bg-surface-inverse-muted/40 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div
-                    className={`p-3 rounded-lg transition-all ${isActive ? "bg-teal-200 dark:bg-teal-500/40" : "bg-slate-100 dark:bg-slate-700/40"}`}
+                    className={`p-3 rounded-lg transition-all ${isActive ? "bg-teal-200 dark:bg-teal-500/40" : "bg-surface-secondary dark:bg-slate-700/40"}`}
                   >
                     <Icon
-                      className={`w-6 h-6 ${isActive ? "text-teal-700 dark:text-teal-300" : "text-slate-600 dark:text-slate-500"}`}
+                      className={`w-6 h-6 ${isActive ? "text-teal-700 dark:text-teal-300" : "text-text-muted dark:text-text-muted"}`}
                     />
                   </div>
                   <div
                     className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all cursor-pointer ${
                       isActive
-                        ? "bg-white border-2 border-teal-500 shadow-md"
+                        ? "bg-surface-primary border-2 border-teal-500 shadow-md"
                         : "bg-slate-300 dark:bg-slate-600"
                     }`}
                   >
@@ -121,15 +121,15 @@ export function InvestorStep5() {
                       className={`inline-block h-7 w-7 transform rounded-full ${
                         isActive
                           ? "bg-teal-500 translate-x-6 shadow-md"
-                          : "bg-white translate-x-0.5 shadow-md"
+                          : "bg-surface-primary translate-x-0.5 shadow-md"
                       } transition-all`}
                     />
                   </div>
                 </div>
-                <h3 className="text-slate-900 dark:text-white mb-2 font-bold text-base">
+                <h3 className="text-text-primary dark:text-white mb-2 font-bold text-base">
                   {metric.label}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                <p className="text-sm text-text-muted dark:text-text-disabled font-medium">
                   {metric.description}
                 </p>
               </button>
@@ -141,10 +141,10 @@ export function InvestorStep5() {
           <div className="flex items-start gap-4">
             <div className="w-2 h-2 rounded-full bg-teal-500 dark:bg-teal-400 mt-2 flex-shrink-0 animate-pulse" />
             <div>
-              <p className="text-slate-900 dark:text-white mb-2 font-bold text-base">
+              <p className="text-text-primary dark:text-white mb-2 font-bold text-base">
                 Selected Metrics: {dashboardMetrics.length} of {metrics.length}
               </p>
-              <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+              <p className="text-sm text-text-secondary dark:text-text-on-inverse-secondary font-medium">
                 Our AI will surface startups that excel in your chosen metrics,
                 ensuring your deal pipeline matches your investment thesis.
               </p>
@@ -156,7 +156,7 @@ export function InvestorStep5() {
           <Button
             onClick={handleBack}
             variant="outline"
-            className="px-8 py-6 text-base font-semibold border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
+            className="px-8 py-6 text-base font-semibold border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
           >
             Back
           </Button>
@@ -169,7 +169,7 @@ export function InvestorStep5() {
           </Button>
         </div>
         {completionError && (
-          <p role="alert" className="mt-3 text-right text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="mt-3 text-right text-sm text-status-error dark:text-status-error">
             {completionError}
           </p>
         )}

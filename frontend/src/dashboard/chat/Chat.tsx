@@ -82,7 +82,7 @@ const SAMPLE_POSTS: Post[] = [
       comments: 6,
     },
     actions: [{ label: "View Build Log →", href: "#" }],
-    borderColor: "border-l-4 border-green-500",
+    borderColor: "border-l-4 border-status-success",
   },
   {
     id: "2",
@@ -91,7 +91,7 @@ const SAMPLE_POSTS: Post[] = [
       role: "Co-founder · FinTech · Beta Stage · Lagos",
       avatar: "KM",
       initials: "KM",
-      avatarColor: "from-blue-400 to-blue-500",
+      avatarColor: "from-brand-primary to-brand-primary",
     },
     timestamp: "5h ago",
     gsis: 74,
@@ -104,7 +104,7 @@ const SAMPLE_POSTS: Post[] = [
       likes: 41,
       comments: 12,
     },
-    borderColor: "border-l-4 border-blue-500",
+    borderColor: "border-l-4 border-status-info",
   },
   {
     id: "3",
@@ -113,7 +113,7 @@ const SAMPLE_POSTS: Post[] = [
       role: "Co-founder · EdTech · Idea Stage",
       avatar: "FH",
       initials: "FH",
-      avatarColor: "from-purple-400 to-purple-500",
+      avatarColor: "from-status-pending to-status-pending",
     },
     timestamp: "1d ago",
     gsis: 61,
@@ -127,8 +127,8 @@ const SAMPLE_POSTS: Post[] = [
       likes: 0,
       comments: 0,
     },
-    actions: [{ label: "Express Interest", href: "#", color: "bg-purple-500" }],
-    borderColor: "border-l-4 border-purple-500",
+    actions: [{ label: "Express Interest", href: "#", color: "bg-status-pending" }],
+    borderColor: "border-l-4 border-status-pending",
   },
   {
     id: "4",
@@ -146,16 +146,16 @@ const SAMPLE_POSTS: Post[] = [
     description: "Platform Verified",
     stats: [
       { label: "Beta Users", value: "247" },
-      { label: "MRR", value: "$3,200", color: "text-green-400" },
-      { label: "Burn", value: "$4,100", color: "text-red-400" },
-      { label: "Runway", value: "8mo", color: "text-yellow-400" },
+      { label: "MRR", value: "$3,200", color: "text-status-success" },
+      { label: "Burn", value: "$4,100", color: "text-status-error" },
+      { label: "Runway", value: "8mo", color: "text-status-warning" },
     ],
     engagement: {
       likes: 67,
       comments: 14,
     },
     actions: [{ label: "See full Build Log", href: "#" }],
-    borderColor: "border-l-4 border-orange-500",
+    borderColor: "border-l-4 border-status-warning",
   },
   {
     id: "5",
@@ -178,7 +178,7 @@ const SAMPLE_POSTS: Post[] = [
       comments: 8,
     },
     actions: [
-      { label: "AI routing to 3 experts", href: "#", color: "text-purple-400" },
+      { label: "AI routing to 3 experts", href: "#", color: "text-status-pending" },
       { label: "Answer this question →", href: "#", color: "text-pink-400" },
     ],
     borderColor: "border-l-4 border-pink-500",
@@ -198,17 +198,17 @@ const SAMPLE_POSTS: Post[] = [
     title: "Rural maternal mortality rate 3x urban average in West Africa",
     description: "",
     stats: [
-      { label: "Impact Score", value: "75/100", color: "text-green-400" },
+      { label: "Impact Score", value: "75/100", color: "text-status-success" },
     ],
     engagement: {
       likes: 18,
       comments: 23,
     },
     actions: [
-      { label: "Explore Solutions →", href: "#", color: "text-blue-400" },
+      { label: "Explore Solutions →", href: "#", color: "text-status-info" },
       { label: "Join Discussion", href: "#" },
     ],
-    borderColor: "border-l-4 border-red-500",
+    borderColor: "border-l-4 border-status-error",
   },
 ];
 
@@ -260,7 +260,7 @@ const Chat = () => {
       {/* Mobile Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden absolute top-4 left-4 z-50 p-2 hover:bg-slate-800 rounded-lg"
+        className="lg:hidden absolute top-4 left-4 z-50 p-2 hover:bg-surface-inverse-muted rounded-lg"
       >
         {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -315,12 +315,12 @@ const Chat = () => {
             className="lg:hidden fixed inset-0 bg-black/50 z-40"
             onClick={() => setMomentumOpen(false)}
           />
-          <div className="lg:hidden fixed bottom-20 right-4 bg-slate-900 border border-slate-800 rounded-xl p-4 w-80 max-h-96 overflow-y-auto z-50 shadow-lg">
+          <div className="lg:hidden fixed bottom-20 right-4 bg-background-inverse border border-border-inverse rounded-xl p-4 w-80 max-h-96 overflow-y-auto z-50 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-white">Your Momentum Wall</h3>
               <button
                 onClick={() => setMomentumOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-text-disabled hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>

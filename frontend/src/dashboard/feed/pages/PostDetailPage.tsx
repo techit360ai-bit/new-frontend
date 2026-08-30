@@ -158,7 +158,7 @@ export function PostDetailPage() {
     <div className="mx-auto max-w-3xl px-4 py-6 pb-20 lg:pb-6">
       <BackButton label="Back to Feed" className="mb-6" />
 
-      <article className={`mb-6 border-y border-border-default border-l-4 bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6 ${kindColorClass(post.kind).split(' ')[0]}`}>
+      <article className={`mb-6 border-y border-border-default border-l-4 bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6 ${kindColorClass(post.kind).split(' ')[0]}`}>
         <div className="mb-4 flex items-start justify-between gap-3">
           <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-primary text-sm font-semibold text-white">
@@ -204,7 +204,7 @@ export function PostDetailPage() {
         </div>
       </article>
 
-      <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+      <section className="border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-text-primary">Comments ({comments.length})</h2>
         <div className="mb-6 flex gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-semibold text-white">
@@ -214,7 +214,7 @@ export function PostDetailPage() {
             <MentionTextarea
               value={commentText}
               onChange={setCommentText}
-              className="min-h-[80px] w-full resize-none rounded-lg bg-bg-elevated px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
+              className="min-h-[80px] w-full resize-none rounded-lg bg-surface-secondary px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
               placeholder="Share your thoughts..."
             />
             <div className="mt-2 flex justify-end">
@@ -265,7 +265,7 @@ function CommentItem({
     <div className="flex gap-3 border-b border-border-default pb-4 last:border-b-0">
       <Link
         to={`/feed/profile/${encodeURIComponent(comment.authorId)}`}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg-elevated text-xs font-semibold text-text-primary"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-xs font-semibold text-text-primary"
       >
         {initials(name)}
       </Link>

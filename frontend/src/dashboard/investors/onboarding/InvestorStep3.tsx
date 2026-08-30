@@ -18,9 +18,9 @@ const investmentStages = [
 const outcomes = ["Active", "Exited", "Failed", "Acquired"] as const;
 
 const outcomeColors: Record<string, string> = {
-  Active: "bg-blue-500",
+  Active: "bg-status-info",
   Exited: "bg-teal-500",
-  Failed: "bg-red-500",
+  Failed: "bg-status-error",
   Acquired: "bg-violet-500",
 };
 
@@ -76,19 +76,19 @@ export function InvestorStep3() {
         <InvestorProgressBar currentStep={3} totalSteps={5} />
 
         <div className="mb-12">
-          <h1 className="text-5xl sm:text-4xl mb-3 text-slate-900 dark:text-white font-bold tracking-tight">
+          <h1 className="text-5xl sm:text-4xl mb-3 text-text-primary dark:text-white font-bold tracking-tight">
             Your Investment Track Record
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
+          <p className="text-lg text-text-muted dark:text-text-disabled font-medium">
             This builds your Investor Credibility Score
           </p>
         </div>
 
         {/* Add Investment Form */}
-        <div className="bg-white dark:bg-slate-800/40 border-2 border-slate-300 dark:border-slate-700 rounded-xl p-7 mb-8 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+        <div className="bg-surface-primary dark:bg-surface-inverse-muted/40 border-2 border-border-strong dark:border-border-inverse-strong rounded-xl p-7 mb-8 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
             <div>
-              <label className="block mb-3 text-sm text-slate-700 dark:text-slate-400 font-semibold">
+              <label className="block mb-3 text-sm text-text-secondary dark:text-text-disabled font-semibold">
                 Startup Name
               </label>
               <input
@@ -98,23 +98,23 @@ export function InvestorStep3() {
                   setNewCompany({ ...newCompany, name: e.target.value })
                 }
                 placeholder="e.g., TechCorp"
-                className="w-full h-11 bg-white dark:bg-slate-900/30 border-2 border-slate-300 dark:border-slate-700 rounded-lg px-4 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-600 focus:border-teal-500 dark:focus:border-teal-400 focus:shadow-[0_0_0_3px_rgba(20,184,166,0.1)] transition-all outline-none font-medium hover:border-slate-400"
+                className="w-full h-11 bg-surface-primary dark:bg-background-inverse/30 border-2 border-border-strong dark:border-border-inverse-strong rounded-lg px-4 text-text-primary dark:text-white placeholder:text-text-muted dark:placeholder:text-text-muted focus:border-teal-500 dark:focus:border-teal-400 focus:shadow-[0_0_0_3px_rgba(20,184,166,0.1)] transition-all outline-none font-medium hover:border-slate-400"
               />
             </div>
 
             <div>
-              <label className="block mb-3 text-sm text-slate-700 dark:text-slate-400 font-semibold">
+              <label className="block mb-3 text-sm text-text-secondary dark:text-text-disabled font-semibold">
                 Stage at Investment
               </label>
               <div className="relative">
                 <button
                   onClick={() => setShowStageDropdown(!showStageDropdown)}
-                  className="w-full h-11 bg-white dark:bg-slate-900/30 border-2 border-slate-300 dark:border-slate-700 rounded-lg px-4 text-slate-900 dark:text-white text-left transition-all hover:border-teal-400 dark:hover:border-teal-500 font-medium"
+                  className="w-full h-11 bg-surface-primary dark:bg-background-inverse/30 border-2 border-border-strong dark:border-border-inverse-strong rounded-lg px-4 text-text-primary dark:text-white text-left transition-all hover:border-teal-400 dark:hover:border-teal-500 font-medium"
                 >
                   {newCompany.stage || "Select stage"}
                 </button>
                 {showStageDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg shadow-xl z-50">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-surface-primary dark:bg-surface-inverse-muted border-2 border-border-strong dark:border-border-inverse-strong rounded-lg shadow-xl z-50">
                     {investmentStages.map((s) => (
                       <button
                         key={s}
@@ -122,7 +122,7 @@ export function InvestorStep3() {
                           setNewCompany({ ...newCompany, stage: s });
                           setShowStageDropdown(false);
                         }}
-                        className="w-full text-left px-4 py-3 hover:bg-teal-50 dark:hover:bg-slate-700/50 hover:text-teal-700 dark:hover:text-teal-300 transition-all text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700/50 last:border-b-0 font-medium"
+                        className="w-full text-left px-4 py-3 hover:bg-teal-50 dark:hover:bg-slate-700/50 hover:text-teal-700 dark:hover:text-teal-300 transition-all text-text-secondary dark:text-text-on-inverse-secondary border-b border-border-default dark:border-border-inverse-strong/50 last:border-b-0 font-medium"
                       >
                         {s}
                       </button>
@@ -133,18 +133,18 @@ export function InvestorStep3() {
             </div>
 
             <div>
-              <label className="block mb-3 text-sm text-slate-700 dark:text-slate-400 font-semibold">
+              <label className="block mb-3 text-sm text-text-secondary dark:text-text-disabled font-semibold">
                 Outcome
               </label>
               <div className="relative">
                 <button
                   onClick={() => setShowOutcomeDropdown(!showOutcomeDropdown)}
-                  className="w-full h-11 bg-white dark:bg-slate-900/30 border-2 border-slate-300 dark:border-slate-700 rounded-lg px-4 text-slate-900 dark:text-white text-left transition-all hover:border-teal-400 dark:hover:border-teal-500 font-medium"
+                  className="w-full h-11 bg-surface-primary dark:bg-background-inverse/30 border-2 border-border-strong dark:border-border-inverse-strong rounded-lg px-4 text-text-primary dark:text-white text-left transition-all hover:border-teal-400 dark:hover:border-teal-500 font-medium"
                 >
                   {newCompany.outcome}
                 </button>
                 {showOutcomeDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg shadow-xl z-50">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-surface-primary dark:bg-surface-inverse-muted border-2 border-border-strong dark:border-border-inverse-strong rounded-lg shadow-xl z-50">
                     {outcomes.map((o) => (
                       <button
                         key={o}
@@ -155,7 +155,7 @@ export function InvestorStep3() {
                           });
                           setShowOutcomeDropdown(false);
                         }}
-                        className="w-full text-left px-4 py-3 hover:bg-teal-50 dark:hover:bg-slate-700/50 hover:text-teal-700 dark:hover:text-teal-300 transition-all text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700/50 last:border-b-0 font-medium"
+                        className="w-full text-left px-4 py-3 hover:bg-teal-50 dark:hover:bg-slate-700/50 hover:text-teal-700 dark:hover:text-teal-300 transition-all text-text-secondary dark:text-text-on-inverse-secondary border-b border-border-default dark:border-border-inverse-strong/50 last:border-b-0 font-medium"
                       >
                         {o}
                       </button>
@@ -182,11 +182,11 @@ export function InvestorStep3() {
           {portfolio.map((company) => (
             <div
               key={company.id}
-              className="bg-white dark:bg-slate-800/40 border-2 border-slate-300 dark:border-slate-700 rounded-xl p-5 flex items-center justify-between hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+              className="bg-surface-primary dark:bg-surface-inverse-muted/40 border-2 border-border-strong dark:border-border-inverse-strong rounded-xl p-5 flex items-center justify-between hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg text-slate-900 dark:text-white font-bold">
+                  <h3 className="text-lg text-text-primary dark:text-white font-bold">
                     {company.name}
                   </h3>
                   <span
@@ -195,22 +195,22 @@ export function InvestorStep3() {
                     {company.outcome}
                   </span>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                <p className="text-sm text-text-muted dark:text-text-disabled mt-2 font-medium">
                   Invested at {company.stage}
                 </p>
               </div>
               <button
                 onClick={() => handleRemoveCompany(company.id)}
-                className="p-2.5 hover:bg-red-500/10 rounded-lg transition-all flex-shrink-0"
+                className="p-2.5 hover:bg-status-error/10 rounded-lg transition-all flex-shrink-0"
               >
-                <X className="w-5 h-5 text-red-500 dark:text-red-400" />
+                <X className="w-5 h-5 text-status-error dark:text-status-error" />
               </button>
             </div>
           ))}
 
           {portfolio.length === 0 && (
-            <div className="text-center py-16 text-slate-500 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/20 rounded-xl">
-              <BarChart3 className="mx-auto mb-3 h-10 w-10 text-slate-400" aria-hidden="true" />
+            <div className="text-center py-16 text-text-muted dark:text-text-muted bg-background-primary dark:bg-surface-inverse-muted/20 rounded-xl">
+              <BarChart3 className="mx-auto mb-3 h-10 w-10 text-text-disabled" aria-hidden="true" />
               <p className="font-medium text-base">No investments added yet.</p>
               <p className="text-sm mt-1">
                 Add your first investment above to get started.
@@ -223,7 +223,7 @@ export function InvestorStep3() {
           <Button
             onClick={handleBack}
             variant="outline"
-            className="px-8 py-6 text-base font-semibold border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
+            className="px-8 py-6 text-base font-semibold border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
           >
             Back
           </Button>

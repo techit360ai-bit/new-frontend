@@ -13,7 +13,7 @@ const PIE_COLORS = ["#4f46e5", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5
 
 function EmptyPanel({ children }: { children: string }) {
   return (
-    <div className="flex min-h-[160px] items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 text-center text-sm text-gray-500">
+    <div className="flex min-h-[160px] items-center justify-center rounded-lg border border-dashed border-border-default bg-background-primary px-6 text-center text-sm text-text-muted">
       {children}
     </div>
   );
@@ -44,9 +44,9 @@ export function ImpactReporting() {
 
   const cards = report
     ? [
-        { label: "Startups", value: report.metrics.startups, icon: Briefcase, tone: "text-indigo-600", bg: "bg-indigo-50" },
-        { label: "Products Launched", value: report.metrics.productsLaunched, icon: Rocket, tone: "text-emerald-600", bg: "bg-emerald-50" },
-        { label: "Total MRR", value: `$${report.metrics.totalMrr.toLocaleString()}`, icon: DollarSign, tone: "text-amber-600", bg: "bg-amber-50" },
+        { label: "Startups", value: report.metrics.startups, icon: Briefcase, tone: "text-brand-accent", bg: "bg-status-info-soft" },
+        { label: "Products Launched", value: report.metrics.productsLaunched, icon: Rocket, tone: "text-status-success", bg: "bg-status-success-soft" },
+        { label: "Total MRR", value: `$${report.metrics.totalMrr.toLocaleString()}`, icon: DollarSign, tone: "text-status-warning", bg: "bg-status-warning-soft" },
         { label: "Jobs Supported", value: report.metrics.jobs, icon: TrendingUp, tone: "text-rose-600", bg: "bg-rose-50" },
       ]
     : [];
@@ -59,7 +59,7 @@ export function ImpactReporting() {
         <select
           value={template}
           onChange={(event) => setTemplate(event.target.value)}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+          className="rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm text-text-secondary"
         >
           {TEMPLATES.map((t) => (
             <option key={t.value} value={t.value}>
@@ -71,21 +71,21 @@ export function ImpactReporting() {
           type="button"
           onClick={() => window.print()}
           disabled={!hasData}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm font-medium text-text-secondary hover:bg-background-primary disabled:opacity-50"
         >
           <Download className="h-4 w-4" /> Export
         </button>
       </div>
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
           <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
       {loading && !report ? (
-        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+        <div className="rounded-lg border border-border-default bg-surface-primary px-6 py-12 text-center text-sm text-text-muted">
           Loading impact report...
         </div>
       ) : hasData ? (
@@ -94,10 +94,10 @@ export function ImpactReporting() {
             {cards.map((card) => {
               const Icon = card.icon;
               return (
-                <div key={card.label} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                <div key={card.label} className="rounded-lg border border-border-default bg-surface-primary p-5 shadow-sm">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">{card.label}</p>
+                      <p className="text-sm text-text-muted">{card.label}</p>
                       <p className={`mt-2 text-3xl font-bold ${card.tone}`}>{card.value}</p>
                     </div>
                     <div className={`rounded-lg p-3 ${card.bg}`}>
@@ -110,8 +110,8 @@ export function ImpactReporting() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold text-gray-900">Stage progression</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-bold text-text-primary">Stage progression</h2>
               {report!.stageProgression.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={report!.stageProgression}>
@@ -127,8 +127,8 @@ export function ImpactReporting() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold text-gray-900">Industry breakdown</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-bold text-text-primary">Industry breakdown</h2>
               {report!.industryBreakdown.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
@@ -146,7 +146,7 @@ export function ImpactReporting() {
             </section>
           </div>
 
-          <p className="mt-6 text-xs text-gray-400">
+          <p className="mt-6 text-xs text-text-disabled">
             Metrics are aggregated from your portfolio&apos;s current records. Users-acquired and
             milestone metrics will appear once those fields are tracked.
           </p>

@@ -16,11 +16,11 @@ export function VoiceWaveform({ duration = '0:45' }: VoiceWaveformProps) {
   const bars = Array.from({ length: 40 }, () => Math.random() * 100 + 20);
 
   return (
-    <div className="flex items-center gap-3 bg-[#2196F3]/10 rounded-lg p-3 max-w-sm">
+    <div className="flex items-center gap-3 bg-brand-primary/10 rounded-lg p-3 max-w-sm">
       {/* Play/Pause Button */}
       <button
         onClick={() => setIsPlaying(!isPlaying)}
-        className="w-8 h-8 bg-[#2196F3] text-white rounded-full flex items-center justify-center hover:bg-[#2196F3]/90 transition-colors flex-shrink-0"
+        className="w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center hover:bg-brand-primary/90 transition-colors flex-shrink-0"
       >
         {isPlaying ? (
           <Pause className="w-4 h-4" fill="currentColor" />
@@ -34,7 +34,7 @@ export function VoiceWaveform({ duration = '0:45' }: VoiceWaveformProps) {
         {bars.map((height, idx) => (
           <div
             key={idx}
-            className="flex-1 bg-[#2196F3] rounded-full transition-all"
+            className="flex-1 bg-brand-primary rounded-full transition-all"
             style={{
               height: `${height}%`,
               opacity: isPlaying && idx < 20 ? 1 : 0.4,
@@ -44,7 +44,7 @@ export function VoiceWaveform({ duration = '0:45' }: VoiceWaveformProps) {
       </div>
 
       {/* Duration */}
-      <span className="text-xs text-gray-600 font-medium">{duration}</span>
+      <span className="text-xs text-text-muted font-medium">{duration}</span>
     </div>
   );
 }

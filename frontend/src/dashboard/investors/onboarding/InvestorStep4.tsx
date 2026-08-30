@@ -12,7 +12,7 @@ const riskProfiles = [
     icon: Zap,
     description:
       "Invest in founders with bold visions before product-market fit",
-    color: "text-red-500",
+    color: "text-status-error",
   },
   {
     id: "Validated Prototypes",
@@ -69,16 +69,16 @@ export function InvestorStep4() {
         <InvestorProgressBar currentStep={4} totalSteps={5} />
 
         <div className="mb-12">
-          <h1 className="text-5xl sm:text-4xl mb-3 text-slate-900 dark:text-white font-bold tracking-tight">
+          <h1 className="text-5xl sm:text-4xl mb-3 text-text-primary dark:text-white font-bold tracking-tight">
             Your Investment Risk Profile
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
+          <p className="text-lg text-text-muted dark:text-text-disabled font-medium">
             Define your risk tolerance and investment stage preference
           </p>
         </div>
 
         {/* Risk Spectrum Slider */}
-        <div className="mb-12 bg-white dark:bg-slate-800/40 border-2 border-slate-300 dark:border-slate-700 rounded-xl p-8 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+        <div className="mb-12 bg-surface-primary dark:bg-surface-inverse-muted/40 border-2 border-border-strong dark:border-border-inverse-strong rounded-xl p-8 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
           <div className="relative py-10 px-2">
             <div className="w-full h-3 bg-gradient-to-r from-red-500 via-teal-500 to-cyan-500 rounded-full shadow-lg"></div>
             <input
@@ -145,7 +145,7 @@ export function InvestorStep4() {
           <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/15 dark:to-teal-600/10 border-2 border-teal-300 dark:border-teal-500/30 rounded-xl p-6 mt-8">
             <div className="flex items-start gap-4">
               <div className="w-2 h-2 rounded-full bg-teal-500 dark:bg-teal-400 mt-2 flex-shrink-0 animate-pulse" />
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+              <p className="text-text-secondary dark:text-text-on-inverse-secondary leading-relaxed font-medium">
                 {riskDescriptions[riskAppetite]}
               </p>
             </div>
@@ -168,14 +168,14 @@ export function InvestorStep4() {
                 className={`p-6 rounded-xl border-2 transition-all duration-200 text-left ${
                   riskAppetite === profile.id
                     ? "border-teal-500 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-500/20 dark:to-teal-600/10 shadow-[0_8px_24px_rgba(20,184,166,0.15)]"
-                    : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+                    : "border-border-strong dark:border-border-inverse-strong bg-surface-primary dark:bg-surface-inverse-muted/40 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
                 }`}
               >
                 <Icon className={`w-8 h-8 mb-3 ${profile.color}`} />
-                <h3 className="text-slate-900 dark:text-white mb-2 font-bold text-base">
+                <h3 className="text-text-primary dark:text-white mb-2 font-bold text-base">
                   {profile.label}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                <p className="text-sm text-text-muted dark:text-text-disabled font-medium">
                   {profile.description}
                 </p>
               </button>
@@ -187,7 +187,7 @@ export function InvestorStep4() {
           <Button
             onClick={handleBack}
             variant="outline"
-            className="px-8 py-6 text-base font-semibold border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
+            className="px-8 py-6 text-base font-semibold border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
           >
             Back
           </Button>

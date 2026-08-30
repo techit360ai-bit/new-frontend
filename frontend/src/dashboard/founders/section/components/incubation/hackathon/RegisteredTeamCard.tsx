@@ -77,24 +77,24 @@ export function RegisteredTeamCard({ registration, hackathon }: Props) {
 
   return (
     <>
-      <div className="border border-slate-200 rounded-xl p-5 bg-white">
+      <div className="border border-border-default rounded-xl p-5 bg-surface-primary">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0">
             <span className="text-2xl shrink-0" aria-hidden="true">{hackathon.poster}</span>
             <div className="min-w-0">
-              <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">{hackathon.title}</p>
-              <h3 className="text-base font-semibold text-slate-900 truncate">{registration.teamName}</h3>
-              <div className="flex items-center gap-3 text-xs text-slate-600 mt-1.5">
+              <p className="text-xs text-text-muted uppercase tracking-wider font-medium">{hackathon.title}</p>
+              <h3 className="text-base font-semibold text-text-primary truncate">{registration.teamName}</h3>
+              <div className="flex items-center gap-3 text-xs text-text-muted mt-1.5">
                 <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{memberCount} of {teamSize}</span>
                 <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />Starts in {days} days</span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">{momentum.nextActionLabel}</p>
+              <p className="text-xs text-text-muted mt-1">{momentum.nextActionLabel}</p>
             </div>
           </div>
           <div className="text-right shrink-0">
             <p className={`text-2xl font-bold leading-none ${momColor.text}`}>{momentum.score}</p>
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">Momentum</p>
-            <div className="h-1.5 w-16 rounded-full bg-slate-100 mt-1">
+            <p className="text-[10px] text-text-disabled uppercase tracking-wider mt-0.5">Momentum</p>
+            <div className="h-1.5 w-16 rounded-full bg-surface-secondary mt-1">
               <div className={`h-1.5 rounded-full ${momColor.bar}`} style={{ width: `${momentum.score}%` }} />
             </div>
           </div>
@@ -103,14 +103,14 @@ export function RegisteredTeamCard({ registration, hackathon }: Props) {
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary"
           >
             Manage team →
           </button>
           <button
             type="button"
             onClick={() => navigate(`/matches?hackathon=${registration.hackathonId}`)}
-            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary"
           >
             Find collaborators →
           </button>
@@ -126,56 +126,56 @@ export function RegisteredTeamCard({ registration, hackathon }: Props) {
 
       {drawerOpen && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-slate-900/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-          <div className="w-full max-w-md bg-white shadow-xl overflow-y-auto" role="dialog" aria-label="Manage team">
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">Manage team</h2>
+          <div className="flex-1 bg-background-inverse/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+          <div className="w-full max-w-md bg-surface-primary shadow-xl overflow-y-auto" role="dialog" aria-label="Manage team">
+            <div className="flex items-center justify-between p-5 border-b border-border-default">
+              <h2 className="text-base font-semibold text-text-primary">Manage team</h2>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="p-1 rounded hover:bg-slate-100"
+                className="p-1 rounded hover:bg-surface-secondary"
                 aria-label="Close"
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5 text-text-muted" />
               </button>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">{hackathon.title}</p>
-                <h3 className="text-lg font-semibold text-slate-900">{registration.teamName}</h3>
+                <p className="text-xs text-text-muted uppercase tracking-wider font-medium">{hackathon.title}</p>
+                <h3 className="text-lg font-semibold text-text-primary">{registration.teamName}</h3>
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-700 uppercase tracking-wider mb-2">Members ({memberCount} of {teamSize})</p>
+                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">Members ({memberCount} of {teamSize})</p>
                 <ul className="space-y-2">
-                  <li className="flex items-center justify-between text-sm border border-slate-200 rounded-lg px-3 py-2">
-                    <span className="text-slate-900">You · Leader</span>
+                  <li className="flex items-center justify-between text-sm border border-border-default rounded-lg px-3 py-2">
+                    <span className="text-text-primary">You · Leader</span>
                   </li>
                   {registration.members.map((m) => (
-                    <li key={m.collaboratorId} className="flex items-center justify-between text-sm border border-slate-200 rounded-lg px-3 py-2">
-                      <span className="text-slate-900">{m.name} · {m.role}</span>
+                    <li key={m.collaboratorId} className="flex items-center justify-between text-sm border border-border-default rounded-lg px-3 py-2">
+                      <span className="text-text-primary">{m.name} · {m.role}</span>
                     </li>
                   ))}
                   {registration.openRoles.map((r) => (
-                    <li key={r} className="flex items-center justify-between text-sm border border-dashed border-slate-300 rounded-lg px-3 py-2 text-slate-500">
+                    <li key={r} className="flex items-center justify-between text-sm border border-dashed border-border-strong rounded-lg px-3 py-2 text-text-muted">
                       <span>Open: {r}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-700 uppercase tracking-wider mb-2">Invite link</p>
+                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">Invite link</p>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     readOnly
                     value={inviteUrl(registration)}
-                    className="flex-1 text-xs border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 text-slate-700 font-mono truncate"
+                    className="flex-1 text-xs border border-border-default rounded-lg px-3 py-2 bg-background-primary text-text-secondary font-mono truncate"
                     aria-label="Invite link"
                   />
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="text-xs font-medium px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1"
+                    className="text-xs font-medium px-3 py-2 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary flex items-center gap-1"
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? "Copied" : "Copy"}
@@ -187,7 +187,7 @@ export function RegisteredTeamCard({ registration, hackathon }: Props) {
                   type="button"
                   onClick={() => void handleToggleRoster()}
                   disabled={updatingRoster}
-                  className="text-xs font-medium px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+                  className="text-xs font-medium px-3 py-2 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary"
                 >
                   {updatingRoster
                     ? "Saving..."
@@ -195,7 +195,7 @@ export function RegisteredTeamCard({ registration, hackathon }: Props) {
                       ? "Reopen roster"
                       : "Close roster"}
                 </button>
-                <p className="text-xs text-slate-500 mt-1.5">
+                <p className="text-xs text-text-muted mt-1.5">
                   {registration.rosterClosed
                     ? "Roster is closed. Invite link shows 'team is full' to visitors."
                     : "Closing the roster prevents new members from joining via the invite link."}

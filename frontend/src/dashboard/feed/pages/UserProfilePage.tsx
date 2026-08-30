@@ -87,7 +87,7 @@ export function UserProfilePage() {
     <div className="mx-auto max-w-4xl px-4 py-6 pb-20 lg:pb-6">
       {!profile.isOwnProfile && <BackButton label="Back" className="mb-6" />}
 
-      <section className="mb-6 border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+      <section className="mb-6 border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6">
         <div className="flex flex-col gap-6 md:flex-row">
           <ProfileAvatar profile={profile} />
           <div className="min-w-0 flex-1">
@@ -157,7 +157,7 @@ export function UserProfilePage() {
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6 lg:col-span-2">
+        <section className="border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6 lg:col-span-2">
           <h2 className="mb-4 text-lg font-semibold text-text-primary">Recent activity</h2>
           {profile.recentActivity.length > 0 ? (
             <div className="space-y-3">
@@ -174,11 +174,11 @@ export function UserProfilePage() {
         </section>
 
         <div className="space-y-6">
-          <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+          <section className="border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6">
             <h2 className="mb-4 text-base font-semibold text-text-primary">Skills & interests</h2>
             <div className="flex flex-wrap gap-2">
               {profile.skills.map((skill) => (
-                <span key={skill} className="rounded-lg border border-border-default bg-bg-elevated px-3 py-1.5 text-xs text-text-secondary">
+                <span key={skill} className="rounded-lg border border-border-default bg-surface-secondary px-3 py-1.5 text-xs text-text-secondary">
                   {skill}
                 </span>
               ))}
@@ -187,7 +187,7 @@ export function UserProfilePage() {
           </section>
 
           {profile.email && (
-            <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+            <section className="border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6">
               <h2 className="mb-4 text-base font-semibold text-text-primary">Contact</h2>
               <a href={`mailto:${profile.email}`} className="flex items-center gap-3 text-sm text-accent-primary hover:underline">
                 <Mail className="h-4 w-4" />{profile.email}

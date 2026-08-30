@@ -14,8 +14,8 @@ interface Props {
 }
 
 const STATUS_META: Record<CheckIn["status"], { label: string; pill: string }> = {
-  "on-track": { label: "On track", pill: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-  "blocked":  { label: "Blocked",  pill: "bg-amber-50 text-amber-700 border border-amber-200" },
+  "on-track": { label: "On track", pill: "bg-status-success-soft text-status-success border border-status-success" },
+  "blocked":  { label: "Blocked",  pill: "bg-status-warning-soft text-status-warning border border-status-warning" },
   "pivoted":  { label: "Pivoted",  pill: "bg-violet-50 text-violet-700 border border-violet-200" },
 };
 
@@ -85,9 +85,9 @@ export function BuildStage({ registration }: Props) {
   return (
     <div className="max-w-6xl mx-auto">
       {showReminder && lastCheckIn && (
-        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-5">
-          <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-          <p className="text-sm text-amber-800">
+        <div className="flex items-center gap-2 bg-status-warning-soft border border-status-warning rounded-lg px-4 py-3 mb-5">
+          <Clock className="w-4 h-4 text-status-warning shrink-0" />
+          <p className="text-sm text-status-warning">
             <span className="font-medium">Time for a check-in</span> — last update {relativeTime(lastCheckIn.loggedAt, now)}.
           </p>
         </div>
@@ -96,26 +96,26 @@ export function BuildStage({ registration }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Timeline */}
         <div className="lg:col-span-2">
-          <h2 className="text-base font-semibold text-slate-900 mb-3">Build timeline</h2>
+          <h2 className="text-base font-semibold text-text-primary mb-3">Build timeline</h2>
           {ordered.length === 0 ? (
-            <div className="border border-dashed border-slate-300 rounded-xl p-10 text-center">
-              <p className="text-sm text-slate-500">No check-ins yet. Log your first one →</p>
+            <div className="border border-dashed border-border-strong rounded-xl p-10 text-center">
+              <p className="text-sm text-text-muted">No check-ins yet. Log your first one →</p>
             </div>
           ) : (
             <ul className="space-y-3">
               {ordered.map((c) => {
                 const meta = STATUS_META[c.status];
                 return (
-                  <li key={c.id} className="border border-slate-200 rounded-xl p-4 bg-white">
+                  <li key={c.id} className="border border-border-default rounded-xl p-4 bg-surface-primary">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${meta.pill}`}>{meta.label}</span>
-                      <span className="text-xs text-slate-400">{relativeTime(c.loggedAt, now)}</span>
+                      <span className="text-xs text-text-disabled">{relativeTime(c.loggedAt, now)}</span>
                     </div>
-                    <p className="text-sm text-slate-800">{c.update}</p>
+                    <p className="text-sm text-text-primary">{c.update}</p>
                     {c.blocker && (
-                      <div className="flex items-start gap-2 mt-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
-                        <p className="text-xs text-slate-600">{c.blocker}</p>
+                      <div className="flex items-start gap-2 mt-2 bg-background-primary border border-border-default rounded-lg px-3 py-2">
+                        <AlertTriangle className="w-3.5 h-3.5 text-status-warning mt-0.5 shrink-0" />
+                        <p className="text-xs text-text-muted">{c.blocker}</p>
                       </div>
                     )}
                   </li>
@@ -128,12 +128,12 @@ export function BuildStage({ registration }: Props) {
         {/* Log form */}
         <div className="lg:col-span-1">
           {/* Team workspace — pipe the analyzed brief into a shared build space */}
-          <div className="border border-slate-200 rounded-xl p-5 bg-white mb-6">
+          <div className="border border-border-default rounded-xl p-5 bg-surface-primary mb-6">
             <div className="flex items-center gap-2 mb-1">
               <Rocket className="w-4 h-4 text-violet-600" />
-              <h3 className="text-base font-semibold text-slate-900">Team workspace</h3>
+              <h3 className="text-base font-semibold text-text-primary">Team workspace</h3>
             </div>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-xs text-text-muted mb-4">
               Pipe your analyzed brief into a shared workspace your whole team can build in.
             </p>
             {registration.workspaceId ? (
@@ -144,16 +144,16 @@ export function BuildStage({ registration }: Props) {
               <>
                 <button type="button" disabled={!registration.brief}
                   onClick={() => { void generate(registration); }}
-                  className={`w-full text-sm font-medium px-4 py-2 rounded-lg ${registration.brief ? "bg-violet-600 text-white hover:bg-violet-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}>
+                  className={`w-full text-sm font-medium px-4 py-2 rounded-lg ${registration.brief ? "bg-violet-600 text-white hover:bg-violet-700" : "bg-surface-secondary text-text-disabled cursor-not-allowed"}`}>
                   Create team workspace
                 </button>
-                {!registration.brief && <p className="text-xs text-slate-400 mt-2">Submit your brief first to unlock this.</p>}
+                {!registration.brief && <p className="text-xs text-text-disabled mt-2">Submit your brief first to unlock this.</p>}
               </>
             )}
           </div>
 
           {registration.promotedProjectId ? (
-            <p className="flex items-center gap-1.5 text-xs text-emerald-700 mt-3"><CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />Promoted to a startup</p>
+            <p className="flex items-center gap-1.5 text-xs text-status-success mt-3"><CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />Promoted to a startup</p>
           ) : (
             <button type="button" onClick={() => setPromoteOpen(true)}
               className="w-full text-sm font-medium px-4 py-2 rounded-lg border border-violet-300 text-violet-700 hover:bg-violet-50 mt-3">
@@ -161,14 +161,14 @@ export function BuildStage({ registration }: Props) {
             </button>
           )}
 
-          <div className="border border-slate-200 rounded-xl p-5 bg-white lg:sticky lg:top-6">
-            <h3 className="text-base font-semibold text-slate-900 mb-4">Log check-in</h3>
+          <div className="border border-border-default rounded-xl p-5 bg-surface-primary lg:sticky lg:top-6">
+            <h3 className="text-base font-semibold text-text-primary mb-4">Log check-in</h3>
 
             <fieldset className="mb-4">
-              <legend className="text-xs font-medium text-slate-700 uppercase tracking-wider mb-2">Status</legend>
+              <legend className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">Status</legend>
               <div className="space-y-1.5">
                 {(["on-track", "blocked", "pivoted"] as const).map((s) => (
-                  <label key={s} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                  <label key={s} className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
                     <input
                       type="radio"
                       name="status"
@@ -184,29 +184,29 @@ export function BuildStage({ registration }: Props) {
             </fieldset>
 
             <div className="mb-4">
-              <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">Update</label>
+              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5">Update</label>
               <textarea
                 rows={3}
                 maxLength={MAX_UPDATE}
                 value={update}
                 onChange={(e) => setUpdate(e.target.value)}
                 placeholder="What moved since the last check-in?"
-                className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
+                className="w-full text-sm border border-border-strong rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
               />
               <div className="flex justify-end mt-1">
-                <span className="text-xs text-slate-400">{update.length}/{MAX_UPDATE}</span>
+                <span className="text-xs text-text-disabled">{update.length}/{MAX_UPDATE}</span>
               </div>
             </div>
 
             {status === "blocked" && (
               <div className="mb-4">
-                <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">Blocker</label>
+                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5">Blocker</label>
                 <textarea
                   rows={2}
                   value={blocker}
                   onChange={(e) => setBlocker(e.target.value)}
                   placeholder="What's in the way?"
-                  className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
+                  className="w-full text-sm border border-border-strong rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
                 />
               </div>
             )}
@@ -218,7 +218,7 @@ export function BuildStage({ registration }: Props) {
               className={`w-full text-sm font-medium px-4 py-2 rounded-lg ${
                 update.trim().length > 0
                   ? "bg-violet-600 text-white hover:bg-violet-700"
-                  : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                  : "bg-surface-secondary text-text-disabled cursor-not-allowed"
               }`}
             >
               {submitting ? "Logging..." : "Log check-in"}

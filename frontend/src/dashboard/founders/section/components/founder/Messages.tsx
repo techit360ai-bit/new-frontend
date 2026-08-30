@@ -295,36 +295,36 @@ export function Messages() {
     <div className="h-full flex flex-col">
       <div className="p-6 lg:p-8 pb-4 max-w-6xl mx-auto w-full flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-text-primary">Messages</h1>
+          <p className="text-sm text-text-muted mt-0.5">
             {loading
               ? "Loading live conversations..."
               : `${conversations.length} conversations · ${unreadCount} unread`}
           </p>
         </div>
-        <div className="flex items-center gap-2"><Link to="/support" className="app-touch-target inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button onClick={() => setComposeOpen(true)} className="h-9 px-4 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-semibold transition-colors">Compose</button></div>
+        <div className="flex items-center gap-2"><Link to="/support" className="app-touch-target inline-flex items-center gap-2 rounded-lg border border-border-default px-3 text-sm font-medium text-text-secondary hover:bg-background-primary" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button onClick={() => setComposeOpen(true)} className="h-9 px-4 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-semibold transition-colors">Compose</button></div>
       </div>
 
       <div className="flex-1 px-6 lg:px-8 pb-6 max-w-6xl mx-auto w-full overflow-hidden">
         <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border border-slate-200 bg-white rounded-xl overflow-y-auto">
+          <div className="border border-border-default bg-surface-primary rounded-xl overflow-y-auto">
             <ul className="divide-y divide-slate-100">
               {loading && (
-                <li className="p-4 text-sm text-slate-500">Loading live conversations...</li>
+                <li className="p-4 text-sm text-text-muted">Loading live conversations...</li>
               )}
               {!loading && error && (
-                <li className="p-4 text-sm text-red-600">
+                <li className="p-4 text-sm text-status-error">
                   Live conversations are unavailable: {error}
                 </li>
               )}
               {!loading && !error && conversations.length === 0 && (
-                <li className="p-4 text-sm text-slate-500">No live conversations yet.</li>
+                <li className="p-4 text-sm text-text-muted">No live conversations yet.</li>
               )}
               {conversations.map((conversation) => (
                 <li key={conversation.id}>
                   <button
                     onClick={() => handleSelect(conversation.id)}
-                    className={`w-full text-left p-4 hover:bg-slate-50 transition-colors ${
+                    className={`w-full text-left p-4 hover:bg-background-primary transition-colors ${
                       conversation.id === activeId ? "bg-violet-50" : ""
                     }`}
                   >
@@ -335,12 +335,12 @@ export function Messages() {
                           {conversation.unread && (
                             <span className="w-2 h-2 rounded-full bg-violet-500 shrink-0" />
                           )}
-                          <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">{conversation.participantName}<IdentityBadges verified={conversation.participantVerified} subscriber={conversation.participantSubscriber} credibilityScore={conversation.participantCredibilityScore} compact /></p>
+                          <p className="flex items-center gap-1.5 text-sm font-semibold text-text-primary truncate">{conversation.participantName}<IdentityBadges verified={conversation.participantVerified} subscriber={conversation.participantSubscriber} credibilityScore={conversation.participantCredibilityScore} compact /></p>
                         </div>
-                        <p className="text-xs text-slate-500 truncate">
+                        <p className="text-xs text-text-muted truncate">
                           {conversationMeta(conversation) || "Conversation"}
                         </p>
-                        <p className="text-xs text-slate-400 truncate mt-0.5">
+                        <p className="text-xs text-text-disabled truncate mt-0.5">
                           {conversation.thread[conversation.thread.length - 1]?.body ||
                             conversation.subject}
                         </p>
@@ -352,16 +352,16 @@ export function Messages() {
             </ul>
           </div>
 
-          <div className="md:col-span-2 border border-slate-200 bg-white rounded-xl flex flex-col overflow-hidden">
+          <div className="md:col-span-2 border border-border-default bg-surface-primary rounded-xl flex flex-col overflow-hidden">
             {!active ? (
-              <div className="flex-1 flex items-center justify-center text-sm text-slate-500">
+              <div className="flex-1 flex items-center justify-center text-sm text-text-muted">
                 {loading ? "Loading conversation..." : "Select a conversation"}
               </div>
             ) : (
               <>
-                <div className="px-5 py-3 border-b border-slate-100">
-                  <p className="flex items-center gap-1.5 font-semibold text-slate-900">{active.participantName}<IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} /></p>
-                  <p className="text-xs text-slate-500">
+                <div className="px-5 py-3 border-b border-border-subtle">
+                  <p className="flex items-center gap-1.5 font-semibold text-text-primary">{active.participantName}<IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} /></p>
+                  <p className="text-xs text-text-muted">
                     {active.participantUsername ? `@${active.participantUsername} · ` : ''}{active.requestStatus === 'pending' ? 'Message request' : conversationMeta(active) || "Conversation"}
                   </p>
                 </div>
@@ -373,7 +373,7 @@ export function Messages() {
                 )}
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   {active.thread.length === 0 && (
-                    <p className="text-sm text-slate-500">No persisted messages in this conversation.</p>
+                    <p className="text-sm text-text-muted">No persisted messages in this conversation.</p>
                   )}
                   {active.thread.map((message) => (
                     <div
@@ -384,13 +384,13 @@ export function Messages() {
                         className={`max-w-md px-3 py-2 rounded-lg text-sm ${
                           message.fromMe
                             ? "bg-violet-600 text-white"
-                            : "bg-slate-100 text-slate-900"
+                            : "bg-surface-secondary text-text-primary"
                         }`}
                       >
                         <MentionText body={message.body} mentions={message.mentions} />
                         <p
                           className={`text-[10px] mt-1 ${
-                            message.fromMe ? "text-violet-200" : "text-slate-500"
+                            message.fromMe ? "text-violet-200" : "text-text-muted"
                           }`}
                         >
                           {new Date(message.timestamp).toLocaleTimeString([], {
@@ -402,14 +402,14 @@ export function Messages() {
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-slate-100 p-3 flex items-end gap-2">
+                <div className="border-t border-border-subtle p-3 flex items-end gap-2">
                   <MentionTextarea
                     value={draft}
                     onChange={setDraft}
                     containerClassName="flex-1"
                     placeholder="Reply..."
                     rows={2}
-                    className="flex-1 resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
+                    className="flex-1 resize-none border border-border-strong rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && !event.shiftKey) {
                         event.preventDefault();
@@ -420,14 +420,14 @@ export function Messages() {
                   <button
                     onClick={handleAttach}
                     aria-label="Attach file"
-                    className="h-9 w-9 text-slate-500 hover:bg-slate-100 rounded-lg flex items-center justify-center"
+                    className="h-9 w-9 text-text-muted hover:bg-surface-secondary rounded-lg flex items-center justify-center"
                   >
                     <Paperclip className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => void handleSend()}
                     disabled={!draft.trim() || sending || active.requestStatus !== 'active'}
-                    className="h-9 px-4 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 flex items-center gap-1.5 transition-colors"
+                    className="h-9 px-4 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-500 disabled:bg-slate-200 disabled:text-text-disabled flex items-center gap-1.5 transition-colors"
                   >
                     <Send className="w-3.5 h-3.5" />
                     {sending ? "Sending..." : "Send"}
@@ -455,30 +455,30 @@ export function Messages() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">To</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">To</label>
               <RecipientSearch selected={recipient} onSelect={setRecipient} accentClass="focus:border-violet-500" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Message</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Message</label>
               <MentionTextarea
                 value={composeBody}
                 onChange={setComposeBody}
                 rows={5}
-                className="w-full resize-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
+                className="w-full resize-none border border-border-strong rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500"
               />
             </div>
           </div>
           <DialogFooter>
             <button
               onClick={() => setComposeOpen(false)}
-              className="px-4 py-2 text-sm rounded-lg text-slate-700 hover:bg-slate-100"
+              className="px-4 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-secondary"
             >
               Cancel
             </button>
             <button
               onClick={() => void handleCompose()}
               disabled={!canCompose || sending}
-              className="px-4 py-2 text-sm rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
+              className="px-4 py-2 text-sm rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-text-disabled transition-colors"
             >
               {sending ? "Sending..." : "Send"}
             </button>

@@ -42,13 +42,13 @@ interface PostProps {
 const FeedPost = ({ post }: PostProps) => {
   const getBadgeColor = (type: string) => {
     const colors: Record<string, string> = {
-      milestone: "bg-green-500/20 text-green-300",
-      insight: "bg-blue-500/20 text-blue-300",
-      problem: "bg-red-500/20 text-red-300",
-      question: "bg-purple-500/20 text-purple-300",
-      "collab-call": "bg-purple-500/20 text-purple-300",
+      milestone: "bg-status-success/20 text-status-success",
+      insight: "bg-status-info/20 text-status-info",
+      problem: "bg-status-error/20 text-status-error",
+      question: "bg-status-pending/20 text-status-pending",
+      "collab-call": "bg-status-pending/20 text-status-pending",
     };
-    return colors[type] || "bg-slate-500/20 text-slate-300";
+    return colors[type] || "bg-status-inactive/20 text-text-on-inverse-secondary";
   };
 
   const getTypeLabel = (type: string) => {
@@ -64,7 +64,7 @@ const FeedPost = ({ post }: PostProps) => {
 
   return (
     <div
-      className={`bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 hover:border-slate-700 transition-colors ${
+      className={`bg-background-inverse border border-border-inverse rounded-xl p-5 space-y-4 hover:border-border-inverse-strong transition-colors ${
         post.borderColor || ""
       }`}
     >
@@ -81,7 +81,7 @@ const FeedPost = ({ post }: PostProps) => {
             <p className="font-semibold text-white truncate">
               {post.author.name}
             </p>
-            <p className="text-xs text-slate-400 truncate">
+            <p className="text-xs text-text-disabled truncate">
               {post.author.role}
             </p>
           </div>
@@ -89,8 +89,8 @@ const FeedPost = ({ post }: PostProps) => {
 
         {/* GSIS Badge */}
         {post.gsis > 0 && (
-          <div className="shrink-0 px-3 py-1 bg-slate-800 border border-slate-700 rounded-lg">
-            <span className="text-xs font-semibold text-slate-300">
+          <div className="shrink-0 px-3 py-1 bg-surface-inverse-muted border border-border-inverse-strong rounded-lg">
+            <span className="text-xs font-semibold text-text-on-inverse-secondary">
               GSIS {post.gsis}
             </span>
           </div>
@@ -108,7 +108,7 @@ const FeedPost = ({ post }: PostProps) => {
             </span>
           )}
         </div>
-        <span className="text-xs text-slate-500">{post.timestamp}</span>
+        <span className="text-xs text-text-muted">{post.timestamp}</span>
       </div>
 
       {/* Title/Main Content */}
@@ -120,19 +120,19 @@ const FeedPost = ({ post }: PostProps) => {
         {/* Looking for (Collab Call) */}
         {post.lookingFor && (
           <div className="space-y-2 pt-2">
-            <p className="text-sm text-slate-400">Looking for:</p>
-            <div className="inline-block px-3 py-1.5 border border-purple-500/30 rounded-full text-sm text-purple-300">
+            <p className="text-sm text-text-disabled">Looking for:</p>
+            <div className="inline-block px-3 py-1.5 border border-status-pending/30 rounded-full text-sm text-status-pending">
               {post.lookingFor}
             </div>
 
             {post.skillsNeeded && (
               <div>
-                <p className="text-sm text-slate-400 mb-2">Skills needed:</p>
+                <p className="text-sm text-text-disabled mb-2">Skills needed:</p>
                 <div className="flex gap-2 flex-wrap">
                   {post.skillsNeeded.map((skill, i) => (
                     <span
                       key={i}
-                      className="text-xs px-2 py-1 bg-slate-800 text-slate-300 rounded"
+                      className="text-xs px-2 py-1 bg-surface-inverse-muted text-text-on-inverse-secondary rounded"
                     >
                       {skill}
                     </span>
@@ -143,14 +143,14 @@ const FeedPost = ({ post }: PostProps) => {
 
             {post.matchScore && (
               <div className="pt-2">
-                <p className="text-sm text-slate-400 mb-2">Your match:</p>
-                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <p className="text-sm text-text-disabled mb-2">Your match:</p>
+                <div className="w-full h-1.5 bg-surface-inverse-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-linear-to-r from-green-500 to-emerald-500"
                     style={{ width: `${post.matchScore}%` }}
                   />
                 </div>
-                <p className="text-xs text-green-400 font-semibold mt-1">
+                <p className="text-xs text-status-success font-semibold mt-1">
                   {post.matchScore}%
                 </p>
               </div>
@@ -167,8 +167,8 @@ const FeedPost = ({ post }: PostProps) => {
               key={i}
               className={`text-xs px-2 py-1 rounded ${
                 tag.startsWith("+")
-                  ? "text-green-400"
-                  : "text-slate-400 bg-slate-800/50"
+                  ? "text-status-success"
+                  : "text-text-disabled bg-surface-inverse-muted/50"
               }`}
             >
               {tag}
@@ -179,10 +179,10 @@ const FeedPost = ({ post }: PostProps) => {
 
       {/* Stats Grid */}
       {post.stats && post.stats.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-800">
+        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border-inverse">
           {post.stats.map((stat, i) => (
             <div key={i}>
-              <p className="text-xs text-slate-500">{stat.label}</p>
+              <p className="text-xs text-text-muted">{stat.label}</p>
               <p className={`text-lg font-bold ${stat.color || "text-white"}`}>
                 {stat.value}
               </p>
@@ -200,10 +200,10 @@ const FeedPost = ({ post }: PostProps) => {
               href={action.href}
               className={`text-sm font-medium text-center py-2 px-4 rounded-lg transition-colors ${
                 action.color
-                  ? action.color === "bg-purple-500"
-                    ? "bg-purple-500 hover:bg-purple-600 text-white font-semibold"
+                  ? action.color === "bg-status-pending"
+                    ? "bg-status-pending hover:bg-status-pending text-white font-semibold"
                     : action.color
-                  : "text-blue-400 hover:text-blue-300"
+                  : "text-status-info hover:text-status-info"
               }`}
             >
               {action.label}
@@ -213,13 +213,13 @@ const FeedPost = ({ post }: PostProps) => {
       )}
 
       {/* Footer - Engagement Metrics */}
-      <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-slate-400">
+      <div className="flex items-center justify-between pt-3 border-t border-border-inverse text-text-disabled">
         <div className="flex items-center gap-4 text-xs">
-          <button className="flex items-center gap-1 hover:text-red-400 transition-colors">
+          <button className="flex items-center gap-1 hover:text-status-error transition-colors">
             <Heart className="w-4 h-4" />
             <span>{post.engagement.likes}</span>
           </button>
-          <button className="flex items-center gap-1 hover:text-blue-400 transition-colors">
+          <button className="flex items-center gap-1 hover:text-status-info transition-colors">
             <MessageCircle className="w-4 h-4" />
             <span>{post.engagement.comments} comments</span>
           </button>
@@ -230,7 +230,7 @@ const FeedPost = ({ post }: PostProps) => {
             </div>
           )}
         </div>
-        <button className="hover:text-slate-300 transition-colors">
+        <button className="hover:text-text-on-inverse-secondary transition-colors">
           <Share2 className="w-4 h-4" />
         </button>
       </div>

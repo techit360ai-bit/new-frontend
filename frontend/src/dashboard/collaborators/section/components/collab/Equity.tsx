@@ -47,13 +47,13 @@ export function Equity() {
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex items-baseline justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Equity</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Ownership you've earned across {holdings.length} startups.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Equity</h1>
+          <p className="text-sm text-text-muted mt-0.5">Ownership you've earned across {holdings.length} startups.</p>
         </div>
-        <a href="#equity-philosophy" className="text-sm text-amber-600 hover:underline">Equity philosophy →</a>
+        <a href="#equity-philosophy" className="text-sm text-status-warning hover:underline">Equity philosophy →</a>
       </div>
       {error && (
-        <div className="border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">
+        <div className="border border-status-error bg-status-error-soft text-status-error rounded-xl px-4 py-3 text-sm">
           Live equity records could not be loaded: {error}
         </div>
       )}
@@ -67,10 +67,10 @@ export function Equity() {
       </div>
 
       {/* Vesting timeline */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Vesting timeline</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Vesting timeline</h2>
         {timeline.length === 0 ? (
-          <p className="text-sm text-slate-500">No vesting schedule has been recorded yet.</p>
+          <p className="text-sm text-text-muted">No vesting schedule has been recorded yet.</p>
         ) : (
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
@@ -91,36 +91,36 @@ export function Equity() {
       {/* Per-startup cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {holdings.length > 0 ? holdings.map((h) => (
-          <div key={h.projectId} id={`startup-${h.projectId}`} className="border border-slate-200 bg-white rounded-xl p-5">
+          <div key={h.projectId} id={`startup-${h.projectId}`} className="border border-border-default bg-surface-primary rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-2xl">{h.projectLogo || ""}</span>
-              <h3 className="font-semibold text-slate-900">{h.projectName}</h3>
+              <h3 className="font-semibold text-text-primary">{h.projectName}</h3>
             </div>
             <div className="flex items-baseline gap-3 mb-2">
-              <p className="text-2xl font-bold text-slate-900 tabular-nums">{h.equityPercent}%</p>
-              <p className="text-sm text-slate-600 tabular-nums">${(h.valueUSD / 1000).toFixed(1)}K</p>
+              <p className="text-2xl font-bold text-text-primary tabular-nums">{h.equityPercent}%</p>
+              <p className="text-sm text-text-muted tabular-nums">${(h.valueUSD / 1000).toFixed(1)}K</p>
             </div>
-            <p className="text-xs text-slate-500 mb-3">Vested {h.vestedPercent}% · {h.vestingSchedule?.years ?? 0}y/{h.vestingSchedule?.cliffMonths ?? 0}m cliff</p>
-            <p className="text-xs text-slate-500 mb-4">Granted {h.grantDate ?? "—"}</p>
+            <p className="text-xs text-text-muted mb-3">Vested {h.vestedPercent}% · {h.vestingSchedule?.years ?? 0}y/{h.vestingSchedule?.cliffMonths ?? 0}m cliff</p>
+            <p className="text-xs text-text-muted mb-4">Granted {h.grantDate ?? "—"}</p>
             {h.nextVest && (
-              <p className="text-xs text-amber-600 mb-4 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Next vest {h.nextVest.date} · +{h.nextVest.deltaPercent}%</p>
+              <p className="text-xs text-status-warning mb-4 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Next vest {h.nextVest.date} · +{h.nextVest.deltaPercent}%</p>
             )}
             <div className="flex gap-2">
-              <button onClick={() => setCapHolding(h)} className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">View cap table</button>
-              <button onClick={() => toast("No grant document is attached to this record yet.")} className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">Grant document →</button>
+              <button onClick={() => setCapHolding(h)} className="flex-1 text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">View cap table</button>
+              <button onClick={() => toast("No grant document is attached to this record yet.")} className="flex-1 text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">Grant document →</button>
             </div>
           </div>
         )) : (
-          <div className="border border-dashed border-slate-300 rounded-xl p-6 text-sm text-slate-500 lg:col-span-3">
+          <div className="border border-dashed border-border-strong rounded-xl p-6 text-sm text-text-muted lg:col-span-3">
             No equity grants are recorded yet.
           </div>
         )}
       </div>
 
       {/* Philosophy explainer */}
-      <details id="equity-philosophy" className="border border-slate-200 bg-white rounded-xl p-6">
-        <summary className="cursor-pointer text-sm font-semibold text-slate-700">How equity works on TechIT</summary>
-        <ul className="mt-3 space-y-2 text-sm text-slate-600 list-disc list-inside">
+      <details id="equity-philosophy" className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <summary className="cursor-pointer text-sm font-semibold text-text-secondary">How equity works on TechIT</summary>
+        <ul className="mt-3 space-y-2 text-sm text-text-muted list-disc list-inside">
           <li>Every grant follows your chosen vesting schedule. We track it on your behalf and surface upcoming events here.</li>
           <li>Dilution protection: equity already vested cannot be diluted without your consent. Future grants are protected up to a threshold defined at signing.</li>
           <li>TechIT acts as the cap-table custodian. You get a copy of every grant document; we keep the canonical ledger so founders and collaborators have a single source of truth.</li>
@@ -130,20 +130,20 @@ export function Equity() {
       {/* Cap table dialog */}
       {capHolding && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setCapHolding(null)}>
-          <div className="bg-white rounded-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-surface-primary rounded-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-900">{capHolding.projectName} · Cap table</h3>
-              <button onClick={() => setCapHolding(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+              <h3 className="font-semibold text-text-primary">{capHolding.projectName} · Cap table</h3>
+              <button onClick={() => setCapHolding(null)} className="text-text-disabled hover:text-text-muted"><X className="w-4 h-4" /></button>
             </div>
             <ul className="space-y-2">
               {(capHolding.capTable ?? []).map((row) => (
-                <li key={row.label} className={`flex justify-between text-sm p-2 rounded ${row.highlighted ? "bg-amber-50" : ""}`}>
-                  <span className={row.highlighted ? "font-semibold text-amber-700" : "text-slate-700"}>{row.label}</span>
+                <li key={row.label} className={`flex justify-between text-sm p-2 rounded ${row.highlighted ? "bg-status-warning-soft" : ""}`}>
+                  <span className={row.highlighted ? "font-semibold text-status-warning" : "text-text-secondary"}>{row.label}</span>
                   <span className="tabular-nums">{row.percent}%</span>
                 </li>
               ))}
               {(capHolding.capTable ?? []).length === 0 && (
-                <li className="text-sm text-slate-500">No cap table rows are attached to this grant yet.</li>
+                <li className="text-sm text-text-muted">No cap table rows are attached to this grant yet.</li>
               )}
             </ul>
           </div>
@@ -155,10 +155,10 @@ export function Equity() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="border border-slate-200 bg-white rounded-xl p-5">
-      <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">{label}</p>
-      <p className="text-2xl font-bold text-slate-900 tabular-nums mt-2">{value}</p>
-      {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
+    <div className="border border-border-default bg-surface-primary rounded-xl p-5">
+      <p className="text-xs uppercase tracking-wider text-text-muted font-semibold">{label}</p>
+      <p className="text-2xl font-bold text-text-primary tabular-nums mt-2">{value}</p>
+      {sub && <p className="text-xs text-text-muted mt-1">{sub}</p>}
     </div>
   );
 }

@@ -75,8 +75,8 @@ export function SubmitStage({ registration }: Props) {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-5">
-        <h2 className="text-base font-semibold text-slate-900">Submit &amp; pitch</h2>
-        <p className="text-sm text-slate-600 mt-1">
+        <h2 className="text-base font-semibold text-text-primary">Submit &amp; pitch</h2>
+        <p className="text-sm text-text-muted mt-1">
           Share your demo, deck, and video, plus a short summary. Submission locks after it is persisted.
         </p>
       </div>
@@ -86,7 +86,7 @@ export function SubmitStage({ registration }: Props) {
           Open team workspace →
         </Link>
       ) : (
-        <p className="text-xs text-slate-400 mb-4">Create your team workspace in the Build stage.</p>
+        <p className="text-xs text-text-disabled mb-4">Create your team workspace in the Build stage.</p>
       )}
 
       <div className="space-y-5">
@@ -95,8 +95,8 @@ export function SubmitStage({ registration }: Props) {
           const invalid = val.trim().length > 0 && !isHttpUrl(val);
           return (
             <div key={f.key}>
-              <label className="block text-sm font-medium text-slate-800">{f.label}</label>
-              <p className="text-xs text-slate-500 mb-1.5">{f.helper}</p>
+              <label className="block text-sm font-medium text-text-primary">{f.label}</label>
+              <p className="text-xs text-text-muted mb-1.5">{f.helper}</p>
               <input
                 type="url"
                 value={val}
@@ -104,28 +104,28 @@ export function SubmitStage({ registration }: Props) {
                 placeholder="https://"
                 className={`w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
                   invalid
-                    ? "border-amber-400 focus:ring-amber-200"
-                    : "border-slate-300 focus:ring-violet-200 focus:border-violet-400"
+                    ? "border-status-warning focus:ring-amber-200"
+                    : "border-border-strong focus:ring-violet-200 focus:border-violet-400"
                 }`}
               />
               {invalid && (
-                <p className="text-xs text-amber-600 mt-1">Enter a valid http(s) URL.</p>
+                <p className="text-xs text-status-warning mt-1">Enter a valid http(s) URL.</p>
               )}
             </div>
           );
         })}
 
         <div>
-          <label className="block text-sm font-medium text-slate-800">Summary</label>
-          <p className="text-xs text-slate-500 mb-1.5">What you built and why it matters — at least {MIN_SUMMARY} characters.</p>
+          <label className="block text-sm font-medium text-text-primary">Summary</label>
+          <p className="text-xs text-text-muted mb-1.5">What you built and why it matters — at least {MIN_SUMMARY} characters.</p>
           <textarea
             rows={4}
             value={values.summary}
             onChange={(e) => setValues((p) => ({ ...p, summary: e.target.value }))}
-            className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
+            className="w-full text-sm border border-border-strong rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
           />
           <div className="flex justify-end mt-1">
-            <span className={`text-xs ${summaryValid ? "text-slate-400" : "text-amber-600"}`}>
+            <span className={`text-xs ${summaryValid ? "text-text-disabled" : "text-status-warning"}`}>
               {values.summary.trim().length}/{MIN_SUMMARY} min
             </span>
           </div>
@@ -140,7 +140,7 @@ export function SubmitStage({ registration }: Props) {
           className={`text-sm font-medium px-4 py-2 rounded-lg ${
             canSubmit
               ? "bg-violet-600 text-white hover:bg-violet-700"
-              : "bg-slate-100 text-slate-400 cursor-not-allowed"
+              : "bg-surface-secondary text-text-disabled cursor-not-allowed"
           }`}
         >
           {submitting ? "Submitting..." : "Submit pitch"}

@@ -16,10 +16,10 @@ interface HaviWidgetProps {
 }
 
 const STATUS_STYLES: Record<HaviStatus, { ring: string; dot: string }> = {
-  idle: { ring: "border-slate-300", dot: "bg-slate-400" },
+  idle: { ring: "border-border-strong", dot: "bg-slate-400" },
   active: { ring: "border-cyan-400 shadow-lg shadow-cyan-200/50", dot: "bg-cyan-500" },
-  alert: { ring: "border-amber-400 shadow-lg shadow-amber-200/50", dot: "bg-amber-500" },
-  celebration: { ring: "border-purple-400 shadow-lg shadow-purple-200/50", dot: "bg-purple-500" },
+  alert: { ring: "border-status-warning shadow-lg shadow-amber-200/50", dot: "bg-status-warning" },
+  celebration: { ring: "border-status-pending shadow-lg shadow-purple-200/50", dot: "bg-status-pending" },
 };
 
 export function HaviWidget({
@@ -73,14 +73,14 @@ export function HaviWidget({
       <button
         type="button"
         onClick={handleClick}
-        className={`flex size-9 items-center justify-center rounded-lg border bg-white p-0 ${s.ring} transition-all hover:scale-[1.03] sm:size-10`}
+        className={`flex size-9 items-center justify-center rounded-lg border bg-surface-primary p-0 ${s.ring} transition-all hover:scale-[1.03] sm:size-10`}
         aria-label="Open Havi"
       >
         {/* drag affordance */}
-        <GripVertical className="hidden h-3 w-3 text-slate-300" />
+        <GripVertical className="hidden h-3 w-3 text-text-on-inverse-secondary" />
 
         <div className="relative shrink-0">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-cyan-400 to-blue-500">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-cyan-400 to-brand-primary">
             {status === "celebration" ? (
               <Sparkles className="h-3.5 w-3.5 text-white" />
             ) : (
@@ -93,17 +93,17 @@ export function HaviWidget({
         </div>
 
         <div className="hidden max-w-[180px] flex-col items-start text-left">
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-900">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
             Havi
             <span
               className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-                overdue ? "bg-amber-100 text-amber-700" : "bg-cyan-100 text-cyan-700"
+                overdue ? "bg-status-warning-soft text-status-warning" : "bg-cyan-100 text-cyan-700"
               }`}
             >
               {countdownLabel}
             </span>
           </span>
-          <span className="text-xs text-slate-500 line-clamp-1">{message}</span>
+          <span className="text-xs text-text-muted line-clamp-1">{message}</span>
         </div>
       </button>
     </motion.div>

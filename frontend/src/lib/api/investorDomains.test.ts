@@ -98,7 +98,7 @@ test("investor domain APIs read canonical BACKEND live endpoints", async () => {
     if (url.endsWith("/investor/heatmap")) {
       return response({
         heatmap: {
-          regions: [{ name: "Europe", avgReadiness: 81, complianceRate: 75, color: "text-blue-400" }],
+          regions: [{ name: "Europe", avgReadiness: 81, complianceRate: 75, color: "text-status-info" }],
           sectors: [{ sector: "AI", avgGrowth: 12 }],
         },
       });

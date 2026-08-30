@@ -141,18 +141,18 @@ function ScoreCircle({ score, label, size = "md" }: { score: number; label: stri
           </span>
         </div>
       </div>
-      <p className={`text-center font-medium text-gray-700 ${size === "sm" ? "text-xs" : "text-sm"}`}>{label}</p>
+      <p className={`text-center font-medium text-text-secondary ${size === "sm" ? "text-xs" : "text-sm"}`}>{label}</p>
     </div>
   );
 }
 
 function EvaluationBar({ label, score }: { label: string; score: number }) {
-  const color = score >= 70 ? "bg-emerald-500" : score >= 40 ? "bg-amber-500" : "bg-red-500";
+  const color = score >= 70 ? "bg-status-success-soft" : score >= 40 ? "bg-status-warning" : "bg-status-error-soft";
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700">{label}</span>
-        <span className="text-sm font-bold text-gray-900">{Math.round(score)}</span>
+        <span className="text-sm font-medium text-text-secondary">{label}</span>
+        <span className="text-sm font-bold text-text-primary">{Math.round(score)}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-gray-200">
         <div className={`h-full ${color}`} style={{ width: `${score}%` }} />
@@ -438,15 +438,15 @@ export function MainIncubationPanel() {
   return (
     <div className="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col overflow-x-clip bg-violet-50 lg:h-screen lg:flex-row">
       {/* LEFT SIDEBAR - 264px */}
-      <aside className="hidden w-[264px] flex-shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
-        <div className="border-b border-gray-200 p-4">
+      <aside className="hidden w-[264px] flex-shrink-0 flex-col border-r border-border-default bg-surface-primary lg:flex">
+        <div className="border-b border-border-default p-4">
           <div className="flex items-center gap-2 mb-2">
             <Brain className="h-5 w-5 text-violet-600" />
-            <h2 className="font-semibold text-gray-900">Analysis Types</h2>
+            <h2 className="font-semibold text-text-primary">Analysis Types</h2>
           </div>
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${engineOnline ? "bg-emerald-500" : "bg-gray-300"}`} />
-            <span className="text-xs text-gray-600">
+            <div className={`h-2 w-2 rounded-full ${engineOnline ? "bg-status-success" : "bg-gray-300"}`} />
+            <span className="text-xs text-text-muted">
               {engineOnline === null ? "Checking..." : engineOnline ? "AI Engine Active" : "Engine Offline"}
             </span>
           </div>
@@ -464,7 +464,7 @@ export function MainIncubationPanel() {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-medium text-left transition-colors rounded ${
                   isSelected
                     ? "bg-violet-100 text-violet-900"
-                    : "text-gray-700 hover:bg-violet-50 hover:text-violet-800"
+                    : "text-text-secondary hover:bg-violet-50 hover:text-violet-800"
                 } disabled:opacity-50`}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -474,14 +474,14 @@ export function MainIncubationPanel() {
           })}
         </nav>
 
-        <div className="border-t border-gray-200 p-4">
-          <h3 className="text-xs font-semibold text-gray-500 mb-2">AI Copilot</h3>
+        <div className="border-t border-border-default p-4">
+          <h3 className="text-xs font-semibold text-text-muted mb-2">AI Copilot</h3>
           <textarea
             value={copilotInput}
             onChange={(e) => setCopilotInput(e.target.value)}
             placeholder="Ask AI anything..."
             rows={3}
-            className="w-full text-sm border border-gray-300 rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
+            className="w-full text-sm border border-border-strong rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
           />
           <button
             onClick={() => {
@@ -502,10 +502,10 @@ export function MainIncubationPanel() {
       {/* CENTER PANEL - flex-1 */}
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="border-b border-gray-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
+        <header className="border-b border-border-default bg-surface-primary px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Real-Time AI Analysis</h1>
+              <h1 className="text-xl font-bold text-text-primary">Real-Time AI Analysis</h1>
               <div className="flex items-center gap-2 mt-1">
                 {analyzing && (
                   <>
@@ -530,7 +530,7 @@ export function MainIncubationPanel() {
               value={selectedAnalysis ?? ""}
               onChange={(event) => { if (event.target.value) void handleRunIndividualAnalysis(event.target.value as AnalysisType); }}
               disabled={analyzing}
-              className="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-800"
+              className="min-h-11 w-full rounded-md border border-border-strong bg-surface-primary px-3 text-sm text-text-primary"
             >
               <option value="">Choose an analysis type</option>
               {ANALYSIS_TYPES.map((analysis) => <option key={analysis.id} value={analysis.id}>{analysis.label}</option>)}
@@ -540,13 +540,13 @@ export function MainIncubationPanel() {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <section className="mb-6 border border-violet-200 bg-white p-4 sm:rounded-lg">
+          <section className="mb-6 border border-violet-200 bg-surface-primary p-4 sm:rounded-lg">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <History className="h-5 w-5 shrink-0 text-violet-600" />
                 <div className="min-w-0">
-                  <h2 className="text-sm font-semibold text-slate-900">Saved idea validations</h2>
-                  <p className="text-xs text-slate-500">Continue your latest founder Q&amp;A or open another persisted session.</p>
+                  <h2 className="text-sm font-semibold text-text-primary">Saved idea validations</h2>
+                  <p className="text-xs text-text-muted">Continue your latest founder Q&amp;A or open another persisted session.</p>
                 </div>
               </div>
               <button type="button" onClick={startNewValidation} className="min-h-11 rounded-md border border-violet-300 px-3 text-xs font-semibold text-violet-800 hover:bg-violet-50">Start new analysis</button>
@@ -558,7 +558,7 @@ export function MainIncubationPanel() {
                   value={requestedSessionId}
                   onChange={(event) => event.target.value ? selectValidationSession(event.target.value) : startNewValidation()}
                   disabled={resumeLoading || validationSessions.length === 0}
-                  className="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400"
+                  className="min-h-11 w-full rounded-md border border-border-strong bg-surface-primary px-3 text-sm text-text-primary disabled:bg-background-primary disabled:text-text-disabled"
                 >
                   {validationSessions.length === 0 && <option value="">No saved validations</option>}
                   {validationSessions.length > 0 && <option value="">New analysis</option>}
@@ -569,20 +569,20 @@ export function MainIncubationPanel() {
                   ))}
                 </select>
               </label>
-              {resumeLoading && <span className="text-xs text-slate-500">Loading saved work...</span>}
-              {resumeError && <span className="text-xs text-red-600">{resumeError}</span>}
+              {resumeLoading && <span className="text-xs text-text-muted">Loading saved work...</span>}
+              {resumeError && <span className="text-xs text-status-error">{resumeError}</span>}
             </div>
           </section>
 
           {/* Success Banner */}
           {blueprintData && projectId && (
-            <div className="mb-6 border border-emerald-200 bg-emerald-50 rounded-lg p-4">
+            <div className="mb-6 border border-status-success bg-status-success-soft rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  <CheckCircle2 className="h-5 w-5 text-status-success" />
                   <div>
                     <p className="font-semibold text-emerald-900">{ventureName} analyzed successfully</p>
-                    <p className="text-xs text-emerald-700">Project ID: {projectId}</p>
+                    <p className="text-xs text-status-success">Project ID: {projectId}</p>
                   </div>
                 </div>
               </div>
@@ -599,8 +599,8 @@ export function MainIncubationPanel() {
                     <Sparkles className="h-6 w-6" />
                   </div>
                   <p className="text-5xl font-bold">{Math.round(unicornScore)}</p>
-                  <div className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white" style={{ width: `${unicornScore}%` }} />
+                  <div className="mt-3 h-2 bg-surface-primary/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-surface-primary" style={{ width: `${unicornScore}%` }} />
                   </div>
                 </div>
               )}
@@ -611,8 +611,8 @@ export function MainIncubationPanel() {
                     <Target className="h-6 w-6" />
                   </div>
                   <p className="text-5xl font-bold">{Math.round(investmentScore)}</p>
-                  <div className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white" style={{ width: `${investmentScore}%` }} />
+                  <div className="mt-3 h-2 bg-surface-primary/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-surface-primary" style={{ width: `${investmentScore}%` }} />
                   </div>
                 </div>
               )}
@@ -621,8 +621,8 @@ export function MainIncubationPanel() {
 
           {/* Detailed Evaluation Bars */}
           {analysisResult && (
-            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Detailed Evaluation</h3>
+            <div className="mb-6 bg-surface-primary rounded-lg border border-border-default p-6">
+              <h3 className="text-lg font-bold text-text-primary mb-4">Detailed Evaluation</h3>
               <div className="space-y-4">
                 {Object.entries(analysisResult)
                   .filter(([key, val]) => typeof val === "number" && key.includes("score"))
@@ -639,8 +639,8 @@ export function MainIncubationPanel() {
 
           {/* Circular Score Indicators */}
           {analysisResult && Object.keys(analysisResult).some((k) => k.includes("score")) && (
-            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Key Metrics</h3>
+            <div className="mb-6 bg-surface-primary rounded-lg border border-border-default p-6">
+              <h3 className="text-lg font-bold text-text-primary mb-4">Key Metrics</h3>
               <div className="flex flex-wrap gap-8 justify-center">
                 {Object.entries(analysisResult)
                   .filter(([key, val]) => typeof val === "number" && key.includes("score"))
@@ -659,8 +659,8 @@ export function MainIncubationPanel() {
 
           {/* AI Insights */}
           {analysisResult && (
-            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="mb-6 bg-surface-primary rounded-lg border border-border-default p-6">
+              <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Brain className="h-5 w-5 text-violet-600" />
                 AI Insights
               </h3>
@@ -670,10 +670,10 @@ export function MainIncubationPanel() {
                   .slice(0, 3)
                   .map(([key, val]) => (
                     <div key={key} className="border-l-4 border-violet-600 pl-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-1">
+                      <p className="text-sm font-semibold text-text-secondary mb-1">
                         {key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                       </p>
-                      <p className="text-sm text-gray-600">{String(val)}</p>
+                      <p className="text-sm text-text-muted">{String(val)}</p>
                     </div>
                   ))}
               </div>
@@ -698,8 +698,8 @@ export function MainIncubationPanel() {
 
           {/* Next AI Actions */}
           {analysisResult && (
-            <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Next AI Actions</h3>
+            <div className="mb-6 bg-surface-primary rounded-lg border border-border-default p-6">
+              <h3 className="text-lg font-bold text-text-primary mb-4">Next AI Actions</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   onClick={async () => {
@@ -794,8 +794,8 @@ export function MainIncubationPanel() {
           {!analysisResult && !analyzing && !blueprintData?.incubation_session_id && (
             <div className="flex flex-col items-center justify-center min-h-96 text-center">
               <Brain className="h-16 w-16 text-violet-300 mb-4" />
-              <h2 className="text-xl font-bold text-gray-900 mb-2">No Analysis Yet</h2>
-              <p className="text-gray-600 mb-6 max-w-md">
+              <h2 className="text-xl font-bold text-text-primary mb-2">No Analysis Yet</h2>
+              <p className="text-text-muted mb-6 max-w-md">
                 Enter your startup idea below and run an analysis to see detailed insights, scores, and recommendations.
               </p>
             </div>
@@ -803,9 +803,9 @@ export function MainIncubationPanel() {
         </div>
 
         {/* Bottom Input Area */}
-        <div className="border-t border-gray-200 bg-white p-4">
+        <div className="border-t border-border-default bg-surface-primary p-4">
           <div className="mb-3">
-            <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="Country, city or region" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+            <label className="block"><span className="mb-1 block text-xs font-semibold text-text-muted">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="Country, city or region" className="w-full rounded-md border border-border-strong px-3 py-2 text-sm" /></label>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <textarea
@@ -814,7 +814,7 @@ export function MainIncubationPanel() {
               onChange={(e) => setIdeaInput(e.target.value)}
               placeholder="Describe your startup idea..."
               rows={2}
-              className="flex-1 text-sm border border-gray-300 rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
+              className="flex-1 text-sm border border-border-strong rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
             />
             <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
               <button
@@ -833,7 +833,7 @@ export function MainIncubationPanel() {
                 onChange={(e) => { void handleDocUpload(e); }}
               />
               <button
-                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 text-sm font-medium rounded hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
+                className="flex items-center gap-2 bg-surface-secondary text-text-secondary px-4 py-2 text-sm font-medium rounded hover:bg-gray-200 disabled:bg-surface-secondary disabled:text-text-disabled"
                 onClick={() => docInputRef.current?.click()}
                 disabled={analyzing}
               >
@@ -849,10 +849,10 @@ export function MainIncubationPanel() {
       {rightPanelOpen && (
         <>
         <button type="button" aria-label="Close document preview" onClick={() => setRightPanelOpen(false)} className="fixed inset-0 z-[60] bg-black/35 xl:hidden" />
-        <aside className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[420px] flex-shrink-0 flex-col border-l border-gray-200 bg-white xl:static xl:z-auto xl:w-[420px]">
-          <div className="border-b border-gray-200 p-4 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">Document Preview</h2>
-            <button onClick={() => setRightPanelOpen(false)} className="text-gray-500 hover:text-gray-700">
+        <aside className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[420px] flex-shrink-0 flex-col border-l border-border-default bg-surface-primary xl:static xl:z-auto xl:w-[420px]">
+          <div className="border-b border-border-default p-4 flex items-center justify-between">
+            <h2 className="font-semibold text-text-primary">Document Preview</h2>
+            <button onClick={() => setRightPanelOpen(false)} className="text-text-muted hover:text-text-secondary">
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
@@ -861,19 +861,19 @@ export function MainIncubationPanel() {
             {analysisResult ? (
               <div className="space-y-4">
                 <section>
-                  <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-2">
                     <ChevronDown className="h-4 w-4 text-violet-600" />
                     Idea Summary
                   </h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">{ideaInput || "Your startup idea"}</p>
+                  <p className="text-sm text-text-secondary leading-relaxed">{ideaInput || "Your startup idea"}</p>
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-2">
                     <ChevronDown className="h-4 w-4 text-violet-600" />
                     AI Analysis Summary
                   </h3>
-                  <div className="text-sm text-gray-700 space-y-2">
+                  <div className="text-sm text-text-secondary space-y-2">
                     {Object.entries(analysisResult)
                       .filter(([, val]) => typeof val === "string")
                       .slice(0, 2)
@@ -887,18 +887,18 @@ export function MainIncubationPanel() {
 
                 {typeof blueprintData?.business_plan === "string" && blueprintData.business_plan && (
                   <section>
-                    <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-2">
                       <ChevronDown className="h-4 w-4 text-violet-600" />
                       Business Plan Excerpt
                     </h3>
-                    <p className="text-sm text-gray-700 leading-relaxed">
+                    <p className="text-sm text-text-secondary leading-relaxed">
                       {String(blueprintData.business_plan).slice(0, 300)}...
                     </p>
                   </section>
                 )}
 
                 <section>
-                  <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-2">
                     <ChevronDown className="h-4 w-4 text-violet-600" />
                     Recommendations & Risks
                   </h3>
@@ -907,10 +907,10 @@ export function MainIncubationPanel() {
                       .filter(([key]) => key.includes("risk") || key.includes("recommendation"))
                       .map(([key, val]) => (
                         <div key={key} className="text-sm">
-                          <p className="font-medium text-gray-800">
+                          <p className="font-medium text-text-primary">
                             {key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                           </p>
-                          <p className="text-gray-600">{String(val)}</p>
+                          <p className="text-text-muted">{String(val)}</p>
                         </div>
                       ))}
                   </div>
@@ -918,14 +918,14 @@ export function MainIncubationPanel() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <FileText className="h-12 w-12 text-gray-300 mb-3" />
-                <p className="text-sm text-gray-500">No document to preview yet</p>
+                <FileText className="h-12 w-12 text-text-on-inverse-secondary mb-3" />
+                <p className="text-sm text-text-muted">No document to preview yet</p>
               </div>
             )}
           </div>
 
           {/* Action Buttons */}
-          <div className="border-t border-gray-200 p-4 space-y-2">
+          <div className="border-t border-border-default p-4 space-y-2">
             <button
               onClick={() => void handleExportReport().catch((err) => toast.error(err instanceof Error ? err.message : "Export failed"))}
               disabled={!projectId}
@@ -937,7 +937,7 @@ export function MainIncubationPanel() {
             <button
               onClick={() => void handleCreateWorkspace()}
               disabled={!projectId}
-              className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 text-sm font-medium rounded hover:bg-gray-50 disabled:bg-gray-100"
+              className="w-full flex items-center justify-center gap-2 bg-surface-primary border border-border-strong text-text-secondary px-4 py-2.5 text-sm font-medium rounded hover:bg-background-primary disabled:bg-surface-secondary"
             >
               <Briefcase className="h-4 w-4" />
               {asText(blueprintData?.workspace_id) ? "Open Workspace Copilot" : "Create Workspace"}

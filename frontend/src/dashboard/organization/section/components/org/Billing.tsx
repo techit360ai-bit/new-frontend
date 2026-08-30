@@ -174,15 +174,15 @@ function invoiceDownloadUrl(invoice: WalletInvoice): string {
 function statusTone(status: string): string {
   const value = status.toLowerCase();
   if (value.includes("paid") || value.includes("active") || value.includes("complete")) {
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    return "border-status-success bg-status-success-soft text-status-success";
   }
   if (value.includes("pending") || value.includes("processing")) {
-    return "border-amber-200 bg-amber-50 text-amber-700";
+    return "border-status-warning bg-status-warning-soft text-status-warning";
   }
   if (value.includes("failed") || value.includes("past") || value.includes("cancel")) {
-    return "border-red-200 bg-red-50 text-red-700";
+    return "border-status-error bg-status-error-soft text-status-error";
   }
-  return "border-gray-200 bg-gray-50 text-gray-700";
+  return "border-border-default bg-background-primary text-text-secondary";
 }
 
 export function Billing() {
@@ -260,15 +260,15 @@ export function Billing() {
     <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Billing &amp; Usage</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-text-primary">Billing &amp; Usage</h1>
+          <p className="mt-2 text-text-muted">
             Persisted subscription, credit usage, invoices, and payment status
           </p>
         </div>
         <button
           type="button"
           onClick={() => navigate("/wallet")}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand-accent px-5 text-sm font-semibold text-white hover:bg-brand-accent"
         >
           <WalletCards className="h-5 w-5" />
           Open Wallet
@@ -276,19 +276,19 @@ export function Billing() {
       </div>
 
       {loading && (
-        <div className="rounded-lg border border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
+        <div className="rounded-lg border border-border-default bg-surface-primary p-10 text-center text-sm text-text-muted">
           Loading persisted billing data...
         </div>
       )}
 
       {!loading && error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <AlertCircle className="mx-auto mb-3 h-7 w-7 text-red-500" />
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="rounded-lg border border-status-error bg-status-error-soft p-8 text-center">
+          <AlertCircle className="mx-auto mb-3 h-7 w-7 text-status-error" />
+          <p className="text-sm text-status-error">{error}</p>
           <button
             type="button"
             onClick={() => void loadBilling()}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-status-error px-4 py-2 text-sm font-semibold text-white hover:bg-status-error"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
@@ -298,12 +298,12 @@ export function Billing() {
 
       {!loading && !error && (
         <>
-          <section className="mb-8 rounded-lg border border-indigo-200 bg-indigo-50 p-6 lg:p-8">
+          <section className="mb-8 rounded-lg border border-brand-accent bg-status-info-soft p-6 lg:p-8">
             {activeSubscription ? (
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="mb-2 flex flex-wrap items-center gap-3">
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-bold text-text-primary">
                       {activePlan?.name || activeSubscription.planName || "Persisted subscription"}
                     </h2>
                     <span className={`rounded-full border px-3 py-1 text-xs font-medium ${statusTone(asText(activeSubscription.status))}`}>
@@ -311,20 +311,20 @@ export function Billing() {
                     </span>
                   </div>
                   {activePlan?.features?.length ? (
-                    <p className="max-w-2xl text-sm text-gray-700">
+                    <p className="max-w-2xl text-sm text-text-secondary">
                       {activePlan.features.slice(0, 3).join(" · ")}
                     </p>
                   ) : (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-text-muted">
                       No persisted plan feature summary is available.
                     </p>
                   )}
                   <div className="mt-4 flex flex-wrap items-baseline gap-2">
-                    <span className="text-3xl font-bold text-gray-900">
+                    <span className="text-3xl font-bold text-text-primary">
                       {planPrice || "Price unavailable"}
                     </span>
                     {activeSubscription.currentPeriodEnd && (
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-text-muted">
                         renews {dateLabel(activeSubscription.currentPeriodEnd)}
                       </span>
                     )}
@@ -333,7 +333,7 @@ export function Billing() {
                 <button
                   type="button"
                   onClick={() => navigate("/wallet")}
-                  className="rounded-lg border border-indigo-200 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
+                  className="rounded-lg border border-brand-accent bg-surface-primary px-5 py-2.5 text-sm font-semibold text-brand-accent hover:bg-status-info-soft"
                 >
                   View Plans
                 </button>
@@ -341,8 +341,8 @@ export function Billing() {
             ) : (
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">No active subscription</h2>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <h2 className="text-xl font-bold text-text-primary">No active subscription</h2>
+                  <p className="mt-1 text-sm text-text-muted">
                     {plans.length > 0
                       ? `${plans.length} persisted billing plan${plans.length === 1 ? "" : "s"} available.`
                       : "No billing plans are available for this account."}
@@ -351,7 +351,7 @@ export function Billing() {
                 <button
                   type="button"
                   onClick={() => navigate("/wallet")}
-                  className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                  className="rounded-lg bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-accent"
                 >
                   Manage Plans
                 </button>
@@ -387,9 +387,9 @@ export function Billing() {
           </div>
 
           <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
-            <section className="rounded-lg border border-gray-200 bg-white p-6">
-              <h2 className="mb-1 text-lg font-bold text-gray-900">Usage Trends</h2>
-              <p className="mb-6 text-sm text-gray-500">Persisted credit usage by month</p>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6">
+              <h2 className="mb-1 text-lg font-bold text-text-primary">Usage Trends</h2>
+              <p className="mb-6 text-sm text-text-muted">Persisted credit usage by month</p>
               {usageTrend.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={usageTrend}>
@@ -409,9 +409,9 @@ export function Billing() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6">
-              <h2 className="mb-1 text-lg font-bold text-gray-900">Usage Breakdown</h2>
-              <p className="mb-6 text-sm text-gray-500">Credits grouped by persisted feature labels</p>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6">
+              <h2 className="mb-1 text-lg font-bold text-text-primary">Usage Breakdown</h2>
+              <p className="mb-6 text-sm text-text-muted">Credits grouped by persisted feature labels</p>
               {usageCategories.length > 0 ? (
                 <div className="space-y-5">
                   {usageCategories.map((category) => {
@@ -420,12 +420,12 @@ export function Billing() {
                     return (
                       <div key={category.name}>
                         <div className="mb-2 flex items-center justify-between gap-4 text-sm">
-                          <span className="truncate font-medium text-gray-900">{category.name}</span>
-                          <span className="flex-shrink-0 text-gray-600">
+                          <span className="truncate font-medium text-text-primary">{category.name}</span>
+                          <span className="flex-shrink-0 text-text-muted">
                             {category.credits.toLocaleString()} credits
                           </span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                        <div className="h-2 overflow-hidden rounded-full bg-surface-secondary">
                           <div className="h-full rounded-full bg-cyan-500" style={{ width: `${width}%` }} />
                         </div>
                       </div>
@@ -443,13 +443,13 @@ export function Billing() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-lg border border-gray-200 bg-white p-6">
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">Billing History</h2>
-                  <p className="mt-1 text-sm text-gray-500">Persisted invoices</p>
+                  <h2 className="text-lg font-bold text-text-primary">Billing History</h2>
+                  <p className="mt-1 text-sm text-text-muted">Persisted invoices</p>
                 </div>
-                <span className="text-xs font-medium text-gray-500">{invoices.length} records</span>
+                <span className="text-xs font-medium text-text-muted">{invoices.length} records</span>
               </div>
               {invoices.length > 0 ? (
                 <div className="space-y-4">
@@ -461,13 +461,13 @@ export function Billing() {
                     return (
                       <div
                         key={invoice.id}
-                        className="flex items-center justify-between gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                        className="flex items-center justify-between gap-4 border-b border-border-subtle pb-4 last:border-0 last:pb-0"
                       >
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-text-primary">
                             {moneyLabel(amount, currency)}
                           </p>
-                          <p className="mt-1 truncate text-xs text-gray-500">
+                          <p className="mt-1 truncate text-xs text-text-muted">
                             {invoice.invoiceNumber || invoice.number || invoice.id}
                             {" · "}
                             {dateLabel(invoice.issuedAt || invoice.createdAt)}
@@ -483,14 +483,14 @@ export function Billing() {
                               target="_blank"
                               rel="noreferrer"
                               title="Download invoice"
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:bg-surface-secondary hover:text-text-primary"
                             >
                               <Download className="h-4 w-4" />
                             </a>
                           ) : (
                             <span
                               title="No invoice download is persisted"
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-300"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-text-on-inverse-secondary"
                             >
                               <Download className="h-4 w-4" />
                             </span>
@@ -509,19 +509,19 @@ export function Billing() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6">
-              <h2 className="mb-1 text-lg font-bold text-gray-900">Payment Method</h2>
-              <p className="mb-6 text-sm text-gray-500">Canonical wallet account payment details</p>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6">
+              <h2 className="mb-1 text-lg font-bold text-text-primary">Payment Method</h2>
+              <p className="mb-6 text-sm text-text-muted">Canonical wallet account payment details</p>
               {paymentMethod ? (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+                <div className="rounded-lg border border-border-default bg-background-primary p-5">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs font-medium uppercase text-gray-500">{paymentMethod.brand}</p>
-                      <p className="mt-2 font-mono text-lg text-gray-900">•••• {paymentMethod.last4}</p>
+                      <p className="text-xs font-medium uppercase text-text-muted">{paymentMethod.brand}</p>
+                      <p className="mt-2 font-mono text-lg text-text-primary">•••• {paymentMethod.last4}</p>
                     </div>
-                    <CreditCard className="h-7 w-7 text-indigo-600" />
+                    <CreditCard className="h-7 w-7 text-brand-accent" />
                   </div>
-                  <p className="mt-6 text-sm text-gray-600">Expires {paymentMethod.expiry}</p>
+                  <p className="mt-6 text-sm text-text-muted">Expires {paymentMethod.expiry}</p>
                 </div>
               ) : (
                 <EmptySection
@@ -533,7 +533,7 @@ export function Billing() {
               <button
                 type="button"
                 onClick={() => navigate("/wallet")}
-                className="mt-4 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="mt-4 w-full rounded-lg border border-border-default px-4 py-3 text-sm font-semibold text-text-secondary hover:bg-background-primary"
               >
                 Manage in Wallet
               </button>
@@ -541,11 +541,11 @@ export function Billing() {
           </div>
 
           {summary.pendingPayments > 0 && (
-            <div className="mt-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+            <div className="mt-6 flex items-start gap-3 rounded-lg border border-status-warning bg-status-warning-soft p-4">
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-warning" />
               <div>
                 <h3 className="font-medium text-amber-900">Payment action pending</h3>
-                <p className="mt-1 text-sm text-amber-800">
+                <p className="mt-1 text-sm text-status-warning">
                   {summary.pendingPayments} persisted payment
                   {summary.pendingPayments === 1 ? "" : "s"} still require completion.
                 </p>
@@ -554,11 +554,11 @@ export function Billing() {
           )}
 
           {usagePercent !== null && usagePercent >= 80 && (
-            <div className="mt-4 flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
-              <Gauge className="mt-0.5 h-5 w-5 flex-shrink-0 text-orange-600" />
+            <div className="mt-4 flex items-start gap-3 rounded-lg border border-status-warning bg-status-warning-soft p-4">
+              <Gauge className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-warning" />
               <div>
                 <h3 className="font-medium text-orange-900">Monthly credit limit</h3>
-                <p className="mt-1 text-sm text-orange-800">
+                <p className="mt-1 text-sm text-status-warning">
                   Persisted usage is at {usagePercent}% of the account limit.
                 </p>
               </div>
@@ -566,7 +566,7 @@ export function Billing() {
           )}
 
           {transactions.length > 0 && (
-            <p className="mt-6 text-xs text-gray-500">
+            <p className="mt-6 text-xs text-text-muted">
               {transactions.length} persisted wallet transaction
               {transactions.length === 1 ? "" : "s"} are available in Wallet.
             </p>
@@ -589,18 +589,18 @@ function MetricCard({
   tone: "purple" | "orange" | "green" | "blue";
 }) {
   const tones = {
-    purple: "bg-purple-50 text-purple-600",
-    orange: "bg-orange-50 text-orange-600",
-    green: "bg-emerald-50 text-emerald-600",
-    blue: "bg-blue-50 text-blue-600",
+    purple: "bg-status-pending-soft text-status-pending",
+    orange: "bg-status-warning-soft text-status-warning",
+    green: "bg-status-success-soft text-status-success",
+    blue: "bg-status-info-soft text-status-info",
   };
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5">
+    <div className="rounded-lg border border-border-default bg-surface-primary p-5">
       <span className={`mb-4 flex h-9 w-9 items-center justify-center rounded-lg ${tones[tone]}`}>
         <Icon className="h-5 w-5" />
       </span>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
-      <p className="mt-1 text-sm text-gray-600">{label}</p>
+      <p className="text-3xl font-bold text-text-primary">{value}</p>
+      <p className="mt-1 text-sm text-text-muted">{label}</p>
     </div>
   );
 }
@@ -615,10 +615,10 @@ function EmptySection({
   detail: string;
 }) {
   return (
-    <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 px-6 py-8 text-center">
-      <Icon className="mb-3 h-7 w-7 text-gray-400" />
-      <p className="font-medium text-gray-900">{title}</p>
-      <p className="mt-1 max-w-sm text-sm text-gray-500">{detail}</p>
+    <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-border-strong px-6 py-8 text-center">
+      <Icon className="mb-3 h-7 w-7 text-text-disabled" />
+      <p className="font-medium text-text-primary">{title}</p>
+      <p className="mt-1 max-w-sm text-sm text-text-muted">{detail}</p>
     </div>
   );
 }

@@ -28,42 +28,42 @@ export function FounderStep2() {
   const handleSaveExit = () => { persist(); navigate("/"); };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-background-primary flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-2xl">
         <div className="flex justify-end mb-4">
-          <button onClick={handleSaveExit} className="text-sm text-slate-500 hover:text-slate-900">Save &amp; exit</button>
+          <button onClick={handleSaveExit} className="text-sm text-text-muted hover:text-text-primary">Save &amp; exit</button>
         </div>
         <FounderProgressBar currentStep={2} totalSteps={6} />
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Tell us about your startup</h1>
-          <p className="text-base text-slate-600">Give us the snapshot. This is what collaborators and investors will see first.</p>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">Tell us about your startup</h1>
+          <p className="text-base text-text-muted">Give us the snapshot. This is what collaborators and investors will see first.</p>
         </div>
 
         <div className="space-y-5">
           <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700">Startup name</label>
+            <label className="block mb-2 text-sm font-semibold text-text-secondary">Startup name</label>
             <input value={startupName} onChange={(e) => setStartupName(e.target.value)} placeholder="Acme Inc."
-              className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors" />
+              className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors" />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700">
-              One-liner <span className="text-slate-400 font-normal">({oneLiner.length}/140)</span>
+            <label className="block mb-2 text-sm font-semibold text-text-secondary">
+              One-liner <span className="text-text-disabled font-normal">({oneLiner.length}/140)</span>
             </label>
             <input value={oneLiner} onChange={(e) => setOneLiner(e.target.value)} maxLength={140}
               placeholder="We help African SMEs access working capital in under 24 hours."
-              className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors" />
+              className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors" />
           </div>
 
           <div>
-            <label className="block mb-3 text-sm font-semibold text-slate-700">Stage</label>
+            <label className="block mb-3 text-sm font-semibold text-text-secondary">Stage</label>
             <div className="grid grid-cols-5 gap-2">
               {STAGES.map((s) => (
                 <button key={s} type="button" onClick={() => setStage(s)}
                   className={`px-3 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
                     stage === s
                       ? "border-violet-500 bg-violet-50 text-violet-700"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-violet-300"
+                      : "border-border-strong bg-surface-primary text-text-secondary hover:border-violet-300"
                   }`}>
                   {s}
                 </button>
@@ -72,8 +72,8 @@ export function FounderStep2() {
           </div>
 
           <div>
-            <label className="block mb-3 text-sm font-semibold text-slate-700">
-              Industries <span className="text-slate-400 font-normal">({industries.length} of 1–3 selected)</span>
+            <label className="block mb-3 text-sm font-semibold text-text-secondary">
+              Industries <span className="text-text-disabled font-normal">({industries.length} of 1–3 selected)</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {INDUSTRIES.map((ind) => (
@@ -81,7 +81,7 @@ export function FounderStep2() {
                   className={`px-3 py-1.5 rounded-full border text-sm transition-all ${
                     industries.includes(ind)
                       ? "border-violet-500 bg-violet-50 text-violet-700"
-                      : "border-slate-300 bg-white text-slate-600 hover:border-violet-300"
+                      : "border-border-strong bg-surface-primary text-text-muted hover:border-violet-300"
                   }`}>
                   {ind}
                 </button>
@@ -90,30 +90,30 @@ export function FounderStep2() {
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700">Founding year</label>
+            <label className="block mb-2 text-sm font-semibold text-text-secondary">Founding year</label>
             <input type="number" min={1990} max={2030} value={foundingYear}
               onChange={(e) => setFoundingYear(Number(e.target.value) || new Date().getFullYear())}
-              className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors tabular-nums" />
+              className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors tabular-nums" />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700">Website <span className="text-slate-400 font-normal">(optional)</span></label>
+            <label className="block mb-2 text-sm font-semibold text-text-secondary">Website <span className="text-text-disabled font-normal">(optional)</span></label>
             <input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourstartup.com"
-              className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors" />
+              className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors" />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-slate-700">Logo symbol <span className="text-slate-400 font-normal">(optional)</span></label>
+            <label className="block mb-2 text-sm font-semibold text-text-secondary">Logo symbol <span className="text-text-disabled font-normal">(optional)</span></label>
             <input value={logoEmoji} onChange={(e) => setLogoEmoji(e.target.value)} maxLength={4}
               placeholder="TI"
-              className="w-32 h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-2xl outline-none focus:border-violet-500 transition-colors" />
+              className="w-32 h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-2xl outline-none focus:border-violet-500 transition-colors" />
           </div>
         </div>
 
         <div className="flex justify-between mt-10">
-          <button onClick={handleBack} className="px-6 py-3 rounded-lg text-slate-700 hover:bg-slate-100 font-semibold transition-colors">← Back</button>
+          <button onClick={handleBack} className="px-6 py-3 rounded-lg text-text-secondary hover:bg-surface-secondary font-semibold transition-colors">← Back</button>
           <button onClick={handleNext} disabled={!canContinue}
-            className="px-6 py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors">
+            className="px-6 py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-text-disabled disabled:cursor-not-allowed transition-colors">
             Continue →
           </button>
         </div>

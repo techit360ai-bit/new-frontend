@@ -18,18 +18,18 @@ export function Settings() {
   useEffect(() => { void getActiveSessions().then(data => setSessions(data.sessions)).catch(() => setSessions([])); }, []);
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-full flex flex-col bg-background-primary">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+      <div className="bg-surface-primary border-b border-border-default px-8 py-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#2196F3]/10 rounded-lg">
-            <SettingsIcon className="w-6 h-6 text-[#2196F3]" />
+          <div className="p-2 bg-brand-primary/10 rounded-lg">
+            <SettingsIcon className="w-6 h-6 text-brand-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Settings
             </h1>
-            <p className="text-sm text-gray-500">Manage your account and preferences</p>
+            <p className="text-sm text-text-muted">Manage your account and preferences</p>
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@ export function Settings() {
 
           {/* Profile Settings */}
           <TabsContent value="profile" className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
               <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -97,7 +97,7 @@ export function Settings() {
                   <Label htmlFor="bio">Bio</Label>
                   <textarea
                     id="bio"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-border-strong rounded-md"
                     rows={3}
                     defaultValue="Full-stack developer passionate about building scalable applications"
                   />
@@ -105,20 +105,20 @@ export function Settings() {
               </div>
               <div className="mt-6 flex justify-end gap-2">
                 <Button variant="outline">Cancel</Button>
-                <Button className="bg-[#2196F3] hover:bg-[#1976D2]">Save Changes</Button>
+                <Button className="bg-brand-primary hover:bg-brand-primary-hover">Save Changes</Button>
               </div>
             </div>
           </TabsContent>
 
           {/* Notifications Settings */}
           <TabsContent value="notifications" className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
               <h2 className="text-lg font-semibold mb-4">Notification Preferences</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Email Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive email updates about your activity</p>
+                    <p className="text-sm text-text-muted">Receive email updates about your activity</p>
                   </div>
                   <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
                 </div>
@@ -126,7 +126,7 @@ export function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Push Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive push notifications on your devices</p>
+                    <p className="text-sm text-text-muted">Receive push notifications on your devices</p>
                   </div>
                   <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
                 </div>
@@ -134,7 +134,7 @@ export function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Comment Mentions</Label>
-                    <p className="text-sm text-gray-500">Notify when someone mentions you</p>
+                    <p className="text-sm text-text-muted">Notify when someone mentions you</p>
                   </div>
                   <Switch defaultChecked />
                 </div>
@@ -142,7 +142,7 @@ export function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Build Status</Label>
-                    <p className="text-sm text-gray-500">Get notified about build completions</p>
+                    <p className="text-sm text-text-muted">Get notified about build completions</p>
                   </div>
                   <Switch defaultChecked />
                 </div>
@@ -150,7 +150,7 @@ export function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Pull Request Reviews</Label>
-                    <p className="text-sm text-gray-500">Notifications for PR reviews and comments</p>
+                    <p className="text-sm text-text-muted">Notifications for PR reviews and comments</p>
                   </div>
                   <Switch defaultChecked />
                 </div>
@@ -160,26 +160,26 @@ export function Settings() {
 
           {/* Appearance Settings */}
           <TabsContent value="appearance" className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
               <h2 className="text-lg font-semibold mb-4">Appearance</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Dark Mode</Label>
-                    <p className="text-sm text-gray-500">Enable dark theme across the platform</p>
+                    <p className="text-sm text-text-muted">Enable dark theme across the platform</p>
                   </div>
                   <Switch checked={darkMode} onCheckedChange={setDarkMode} />
                 </div>
                 <Separator />
                 <div>
                   <Label>Theme Color</Label>
-                  <p className="text-sm text-gray-500 mb-3">Choose your accent color</p>
+                  <p className="text-sm text-text-muted mb-3">Choose your accent color</p>
                   <div className="flex gap-3">
-                    <button className="w-10 h-10 rounded-lg bg-[#2196F3] border-2 border-[#2196F3] ring-2 ring-[#2196F3]/30" />
-                    <button className="w-10 h-10 rounded-lg bg-[#10B981] border-2 border-gray-200 hover:border-[#10B981]" />
-                    <button className="w-10 h-10 rounded-lg bg-[#F59E0B] border-2 border-gray-200 hover:border-[#F59E0B]" />
-                    <button className="w-10 h-10 rounded-lg bg-[#8B5CF6] border-2 border-gray-200 hover:border-[#8B5CF6]" />
-                    <button className="w-10 h-10 rounded-lg bg-[#EC4899] border-2 border-gray-200 hover:border-[#EC4899]" />
+                    <button className="w-10 h-10 rounded-lg bg-brand-primary border-2 border-brand-primary ring-2 ring-brand-primary/30" />
+                    <button className="w-10 h-10 rounded-lg bg-status-success border-2 border-border-default hover:border-status-success" />
+                    <button className="w-10 h-10 rounded-lg bg-status-warning border-2 border-border-default hover:border-status-warning" />
+                    <button className="w-10 h-10 rounded-lg bg-chart-3 border-2 border-border-default hover:border-chart-3" />
+                    <button className="w-10 h-10 rounded-lg bg-chart-5 border-2 border-border-default hover:border-chart-5" />
                   </div>
                 </div>
                 <Separator />
@@ -202,7 +202,7 @@ export function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Auto-save</Label>
-                    <p className="text-sm text-gray-500">Automatically save your work</p>
+                    <p className="text-sm text-text-muted">Automatically save your work</p>
                   </div>
                   <Switch checked={autoSave} onCheckedChange={setAutoSave} />
                 </div>
@@ -212,7 +212,7 @@ export function Settings() {
 
           {/* Security Settings */}
           <TabsContent value="security" className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
               <h2 className="text-lg font-semibold mb-4">Security</h2>
               <div className="space-y-4">
                 <div>
@@ -222,24 +222,24 @@ export function Settings() {
                     <Input type="password" placeholder="New password" />
                     <Input type="password" placeholder="Confirm new password" />
                   </div>
-                  <Button className="mt-3 bg-[#2196F3] hover:bg-[#1976D2]">Update Password</Button>
+                  <Button className="mt-3 bg-brand-primary hover:bg-brand-primary-hover">Update Password</Button>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Two-Factor Authentication</Label>
-                    <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                    <p className="text-sm text-text-muted">Add an extra layer of security</p>
                   </div>
                   <Button variant="outline">Enable 2FA</Button>
                 </div>
                 <Separator />
                 <div>
                   <Label>Active Sessions</Label>
-                  <p className="text-sm text-gray-500 mb-3">Manage your active sessions</p>
+                  <p className="text-sm text-text-muted mb-3">Manage your active sessions</p>
                   <div className="space-y-2">
-                    {sessions.map(session => <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div><p className="font-medium text-sm">{session.browser} on {session.platform}</p><p className="text-xs text-gray-500">{session.current ? 'Current session' : `Last active ${new Date(session.lastActiveAt).toLocaleString()}`}</p></div>{session.current ? <span className="text-xs text-green-600 font-medium">Active now</span> : <Button variant="ghost" size="sm" className="text-red-500" onClick={() => void revokeSession(session.sessionIdentifier).then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Revoke</Button>}</div>)}
+                    {sessions.map(session => <div key={session.id} className="flex items-center justify-between p-3 bg-background-primary rounded-lg"><div><p className="font-medium text-sm">{session.browser} on {session.platform}</p><p className="text-xs text-text-muted">{session.current ? 'Current session' : `Last active ${new Date(session.lastActiveAt).toLocaleString()}`}</p></div>{session.current ? <span className="text-xs text-status-success font-medium">Active now</span> : <Button variant="ghost" size="sm" className="text-status-error" onClick={() => void revokeSession(session.sessionIdentifier).then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Revoke</Button>}</div>)}
                     {sessions.length > 1 && <Button variant="outline" size="sm" onClick={() => void revokeOtherSessions().then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Sign out other devices</Button>}
-                    {!sessions.length && <p className="text-sm text-gray-500">No active sessions available.</p>}
+                    {!sessions.length && <p className="text-sm text-text-muted">No active sessions available.</p>}
                   </div>
                 </div>
               </div>
@@ -248,44 +248,44 @@ export function Settings() {
 
           {/* Integrations Settings */}
           <TabsContent value="integrations" className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
               <h2 className="text-lg font-semibold mb-4">Connected Integrations</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-border-default rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-900 rounded-lg">
+                    <div className="p-2 bg-background-inverse rounded-lg">
                       <Github className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <p className="font-medium">GitHub</p>
-                      <p className="text-sm text-gray-500">Connected as @johndoe</p>
+                      <p className="text-sm text-text-muted">Connected as @johndoe</p>
                     </div>
                   </div>
                   <Button variant="outline">Disconnect</Button>
                 </div>
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-border-default rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-[#0A66C2] rounded-lg">
+                    <div className="p-2 bg-integration-slack rounded-lg">
                       <Globe className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <p className="font-medium">Slack</p>
-                      <p className="text-sm text-gray-500">Not connected</p>
+                      <p className="text-sm text-text-muted">Not connected</p>
                     </div>
                   </div>
-                  <Button className="bg-[#2196F3] hover:bg-[#1976D2]">Connect</Button>
+                  <Button className="bg-brand-primary hover:bg-brand-primary-hover">Connect</Button>
                 </div>
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-border-default rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-[#FF6B6B] rounded-lg">
+                    <div className="p-2 bg-integration-jira rounded-lg">
                       <Zap className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <p className="font-medium">Jira</p>
-                      <p className="text-sm text-gray-500">Not connected</p>
+                      <p className="text-sm text-text-muted">Not connected</p>
                     </div>
                   </div>
-                  <Button className="bg-[#2196F3] hover:bg-[#1976D2]">Connect</Button>
+                  <Button className="bg-brand-primary hover:bg-brand-primary-hover">Connect</Button>
                 </div>
               </div>
             </div>

@@ -41,10 +41,10 @@ const DEFAULT_FILTERS = {
 };
 
 function riskColor(riskLevel: RiskLevel) {
-  if (riskLevel === 'low') return 'text-emerald-400';
-  if (riskLevel === 'moderate') return 'text-amber-400';
-  if (riskLevel === 'high') return 'text-red-400';
-  return 'text-gray-400';
+  if (riskLevel === 'low') return 'text-status-success';
+  if (riskLevel === 'moderate') return 'text-status-warning';
+  if (riskLevel === 'high') return 'text-status-error';
+  return 'text-text-on-inverse-muted';
 }
 
 function formatMoney(value: number) {
@@ -146,20 +146,20 @@ export function DealIntelligence() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background-inverse">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
+      <div className="border-b border-border-inverse bg-surface-inverse px-8 py-6">
         <h1 className="text-3xl font-bold text-white">Deal Intelligence Engine</h1>
-        <p className="text-gray-400 mt-1">
+        <p className="text-text-on-inverse-muted mt-1">
           Bloomberg Terminal for startup execution · Signal &gt; Noise
         </p>
       </div>
 
       <div className="flex h-[calc(100vh-120px)]">
         {/* Filter Sidebar */}
-        <aside className="w-80 bg-[#111111] border-r border-gray-800 overflow-y-auto p-6">
+        <aside className="w-80 bg-surface-inverse border-r border-border-inverse overflow-y-auto p-6">
           <div className="flex items-center gap-2 mb-6">
-            <Filter className="w-5 h-5 text-emerald-400" />
+            <Filter className="w-5 h-5 text-status-success" />
             <h2 className="text-lg font-semibold text-white">Advanced Filters</h2>
           </div>
 
@@ -219,11 +219,11 @@ export function DealIntelligence() {
                 max={100}
               />
               <div>
-                <label className="text-sm text-gray-400 mb-2 block">Detected stage</label>
+                <label className="text-sm text-text-on-inverse-muted mb-2 block">Detected stage</label>
                 <select
                   value={filters.stage}
                   onChange={(e) => setFilters({ ...filters, stage: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
+                  className="w-full px-3 py-2 bg-surface-inverse-muted border border-border-inverse-strong rounded-lg text-white text-sm"
                 >
                   <option value="all">All stages</option>
                   <option value="BUILD">Build</option>
@@ -246,9 +246,9 @@ export function DealIntelligence() {
                     onChange={(e) =>
                       setFilters({ ...filters, complianceVerified: e.target.checked })
                     }
-                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-gray-900"
+                    className="w-4 h-4 rounded border-gray-600 bg-surface-inverse-muted text-status-success focus:ring-emerald-500 focus:ring-offset-gray-900"
                   />
-                  <span className="text-sm text-gray-300">Compliance Verified Only</span>
+                  <span className="text-sm text-text-on-inverse-secondary">Compliance Verified Only</span>
                 </label>
                 <SliderFilter
                   label="Founder Reliability"
@@ -274,11 +274,11 @@ export function DealIntelligence() {
             >
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm text-gray-400 mb-2 block">Region</label>
+                  <label className="text-sm text-text-on-inverse-muted mb-2 block">Region</label>
                   <select
                     value={filters.region}
                     onChange={(e) => setFilters({ ...filters, region: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-surface-inverse-muted border border-border-inverse-strong rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     {regions.map((region) => (
                       <option key={region} value={region}>
@@ -288,11 +288,11 @@ export function DealIntelligence() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-400 mb-2 block">Sector</label>
+                  <label className="text-sm text-text-on-inverse-muted mb-2 block">Sector</label>
                   <select
                     value={filters.sector}
                     onChange={(e) => setFilters({ ...filters, sector: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-surface-inverse-muted border border-border-inverse-strong rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     {sectors.map((sector) => (
                       <option key={sector} value={sector}>
@@ -315,9 +315,9 @@ export function DealIntelligence() {
                     type="checkbox"
                     checked={filters.hasTrackRecord}
                     onChange={(e) => setFilters({ ...filters, hasTrackRecord: e.target.checked })}
-                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-gray-900"
+                    className="w-4 h-4 rounded border-gray-600 bg-surface-inverse-muted text-status-success focus:ring-emerald-500 focus:ring-offset-gray-900"
                   />
-                  <span className="text-sm text-gray-300">Has hackathon track record</span>
+                  <span className="text-sm text-text-on-inverse-secondary">Has hackathon track record</span>
                 </label>
                 <SliderFilter
                   label="Top placement (≤)"
@@ -331,7 +331,7 @@ export function DealIntelligence() {
 
             <button
               onClick={() => setFilters(DEFAULT_FILTERS)}
-              className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
+              className="w-full py-2 bg-surface-inverse-muted hover:bg-gray-700 text-text-on-inverse-secondary text-sm font-medium rounded-lg transition-colors"
             >
               Reset Filters
             </button>
@@ -341,19 +341,19 @@ export function DealIntelligence() {
         {/* Results Panel */}
         <div className="flex-1 overflow-y-auto p-8">
           {error && (
-            <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
               {error}
             </div>
           )}
 
           <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-gray-400 text-sm">
+              <p className="text-text-on-inverse-muted text-sm">
                 Showing <span className="text-white font-mono">{filteredStartups.length}</span> of{' '}
                 <span className="text-white font-mono">{startups.length}</span> startups
               </p>
               {startups.length > 0 && (
-                <p className="text-xs text-emerald-400 mt-0.5">
+                <p className="text-xs text-status-success mt-0.5">
                   ● Ranked by live EVI-I / WCRS domain projections
                 </p>
               )}
@@ -363,8 +363,8 @@ export function DealIntelligence() {
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                    ? 'bg-status-success/20 text-status-success'
+                    : 'bg-surface-inverse-muted text-text-on-inverse-muted hover:text-white'
                 }`}
                 aria-label="Grid view"
               >
@@ -374,8 +374,8 @@ export function DealIntelligence() {
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                    ? 'bg-status-success/20 text-status-success'
+                    : 'bg-surface-inverse-muted text-text-on-inverse-muted hover:text-white'
                 }`}
                 aria-label="List view"
               >
@@ -385,7 +385,7 @@ export function DealIntelligence() {
           </div>
 
           {isLoading ? (
-            <div className="rounded-lg border border-gray-800 bg-[#111111] p-10 text-center text-gray-400">
+            <div className="rounded-lg border border-border-inverse bg-surface-inverse p-10 text-center text-text-on-inverse-muted">
               Loading live deal intelligence...
             </div>
           ) : sortedStartups.length > 0 ? (
@@ -404,11 +404,11 @@ export function DealIntelligence() {
             )
           ) : (
             <div className="text-center py-16">
-              <Filter className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <Filter className="w-12 h-12 text-text-muted mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">
                 {startups.length === 0 ? 'No live deal-flow records yet' : 'No startups match your filters'}
               </h3>
-              <p className="text-gray-400">
+              <p className="text-text-on-inverse-muted">
                 {startups.length === 0
                   ? 'Persisted deal-flow snapshots will appear here once the backend has live investor projections.'
                   : 'Try adjusting your filter criteria.'}
@@ -430,10 +430,10 @@ interface FilterSectionProps {
 
 function FilterSection({ title, isExpanded, onToggle, children }: FilterSectionProps) {
   return (
-    <div className="border border-gray-800 rounded-lg overflow-hidden">
+    <div className="border border-border-inverse rounded-lg overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full px-4 py-3 bg-gray-800/50 flex items-center justify-between text-white hover:bg-gray-800 transition-colors"
+        className="w-full px-4 py-3 bg-surface-inverse-muted/50 flex items-center justify-between text-white hover:bg-surface-inverse-muted transition-colors"
       >
         <span className="font-medium text-sm">{title}</span>
         <ChevronDown
@@ -457,8 +457,8 @@ function SliderFilter({ label, value, onChange, min, max }: SliderFilterProps) {
   return (
     <div>
       <div className="flex justify-between items-center mb-2">
-        <label className="text-sm text-gray-400">{label}</label>
-        <span className="text-sm font-mono text-emerald-400">{value}</span>
+        <label className="text-sm text-text-on-inverse-muted">{label}</label>
+        <span className="text-sm font-mono text-status-success">{value}</span>
       </div>
       <input
         type="range"
@@ -466,7 +466,7 @@ function SliderFilter({ label, value, onChange, min, max }: SliderFilterProps) {
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+        className="w-full h-2 bg-surface-inverse-muted rounded-lg appearance-none cursor-pointer accent-emerald-500"
       />
     </div>
   );
@@ -480,15 +480,15 @@ interface StartupCardProps {
 
 function StartupCard({ startup, scorecard, onWatch }: StartupCardProps) {
   return (
-    <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-all">
+    <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5 hover:border-border-inverse-strong transition-all">
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="font-semibold text-white text-lg mb-1">{startup.name}</h3>
           <div className="flex items-center gap-2 text-sm">
-            <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded font-mono text-xs">
+            <span className="px-2 py-0.5 bg-status-pending/20 text-status-pending rounded font-mono text-xs">
               {startup.sector}
             </span>
-            <span className="text-gray-400 flex items-center gap-1">
+            <span className="text-text-on-inverse-muted flex items-center gap-1">
               <MapPin className="w-3 h-3" />
               {startup.region}
             </span>
@@ -503,7 +503,7 @@ function StartupCard({ startup, scorecard, onWatch }: StartupCardProps) {
         <MetricRow
           label="Revenue"
           value={`${formatMoney(startup.mrr)} MRR`}
-          valueColor="text-emerald-400"
+          valueColor="text-status-success"
         />
         <MetricRow
           label="Risk Level"
@@ -514,7 +514,7 @@ function StartupCard({ startup, scorecard, onWatch }: StartupCardProps) {
       </div>
 
       {startup.passport && (
-        <div className="flex items-center gap-1.5 text-xs text-amber-400 mb-3 font-mono">
+        <div className="flex items-center gap-1.5 text-xs text-status-warning mb-3 font-mono">
           <Trophy className="w-3.5 h-3.5" />
           <span>
             {startup.passport.bestPlacement != null
@@ -529,21 +529,21 @@ function StartupCard({ startup, scorecard, onWatch }: StartupCardProps) {
       <div className="flex gap-2">
         <Link
           to={`/investor/startup/${startup.id}`}
-          className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded transition-all text-center"
+          className="flex-1 py-2 bg-status-success/10 hover:bg-status-success/20 text-status-success text-sm font-medium rounded transition-all text-center"
         >
           Analyze
         </Link>
         <button
           onClick={() => onWatch(startup.id)}
           disabled={startup.watchlisted}
-          className="flex-1 py-2 bg-blue-500/10 hover:bg-blue-500/20 disabled:hover:bg-blue-500/10 text-blue-400 disabled:text-blue-300 text-sm font-medium rounded transition-all flex items-center justify-center gap-1"
+          className="flex-1 py-2 bg-status-info/10 hover:bg-status-info/20 disabled:hover:bg-status-info/10 text-status-info disabled:text-status-info text-sm font-medium rounded transition-all flex items-center justify-center gap-1"
         >
           <Eye className="w-4 h-4" />
           {startup.watchlisted ? 'Watching' : 'Watch'}
         </button>
         <Link
           to="/investor/allocation"
-          className="flex-1 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-sm font-medium rounded transition-all text-center"
+          className="flex-1 py-2 bg-status-pending/10 hover:bg-status-pending/20 text-status-pending text-sm font-medium rounded transition-all text-center"
         >
           Simulate
         </Link>
@@ -554,34 +554,34 @@ function StartupCard({ startup, scorecard, onWatch }: StartupCardProps) {
 
 function StartupListItem({ startup, scorecard, onWatch }: StartupCardProps) {
   return (
-    <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-all">
+    <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5 hover:border-border-inverse-strong transition-all">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6 flex-1">
           <div className="min-w-48">
             <h3 className="font-semibold text-white mb-1">{startup.name}</h3>
             <div className="flex items-center gap-2 text-sm">
-              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded font-mono text-xs">
+              <span className="px-2 py-0.5 bg-status-pending/20 text-status-pending rounded font-mono text-xs">
                 {startup.sector}
               </span>
-              <span className="text-gray-400">{startup.region}</span>
+              <span className="text-text-on-inverse-muted">{startup.region}</span>
             </div>
           </div>
 
           <div className="flex gap-8 flex-1">
             {scorecard && <V2SignalStrip scorecard={scorecard} compact />}
-            <SignalValue label="Readiness" value={startup.readinessScore} color="text-emerald-400" />
-            <SignalValue label="EVI" value={startup.executionVelocity} color="text-purple-400" />
-            <SignalValue label="Revenue" value={formatMoney(startup.mrr)} color="text-emerald-400" />
+            <SignalValue label="Readiness" value={startup.readinessScore} color="text-status-success" />
+            <SignalValue label="EVI" value={startup.executionVelocity} color="text-status-pending" />
+            <SignalValue label="Revenue" value={formatMoney(startup.mrr)} color="text-status-success" />
             <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">Risk</p>
+              <p className="text-xs text-text-on-inverse-muted mb-1">Risk</p>
               <p className={`text-sm font-medium capitalize ${riskColor(startup.riskLevel)}`}>
                 {startup.riskLevel}
               </p>
             </div>
             {startup.passport && (
               <div className="text-center">
-                <p className="text-xs text-gray-400 mb-1">Hackathon</p>
-                <p className="text-sm font-bold font-mono text-amber-400">
+                <p className="text-xs text-text-on-inverse-muted mb-1">Hackathon</p>
+                <p className="text-sm font-bold font-mono text-status-warning">
                   {startup.passport.bestPlacement != null ? `#${startup.passport.bestPlacement}` : '—'}
                 </p>
               </div>
@@ -592,14 +592,14 @@ function StartupListItem({ startup, scorecard, onWatch }: StartupCardProps) {
         <div className="flex gap-2">
           <Link
             to={`/investor/startup/${startup.id}`}
-            className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded transition-all"
+            className="px-4 py-2 bg-status-success/10 hover:bg-status-success/20 text-status-success text-sm font-medium rounded transition-all"
           >
             Analyze
           </Link>
           <button
             onClick={() => onWatch(startup.id)}
             disabled={startup.watchlisted}
-            className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 disabled:hover:bg-blue-500/10 text-blue-400 disabled:text-blue-300 text-sm font-medium rounded transition-all flex items-center gap-1"
+            className="px-4 py-2 bg-status-info/10 hover:bg-status-info/20 disabled:hover:bg-status-info/10 text-status-info disabled:text-status-info text-sm font-medium rounded transition-all flex items-center gap-1"
           >
             <Eye className="w-4 h-4" />
             {startup.watchlisted ? 'Watching' : 'Watch'}
@@ -620,13 +620,13 @@ function V2SignalStrip({ scorecard, compact = false }: { scorecard: GsisV2Scorec
   const momentum = (scorecard.momentum.score > 0 ? '+' : '') + scorecard.momentum.score;
   return (
     <div className={compact
-      ? 'grid min-w-[24rem] grid-cols-4 gap-2 border-y border-emerald-500/20 py-2'
-      : 'grid grid-cols-3 gap-2 border-y border-emerald-500/20 py-2'}
+      ? 'grid min-w-[24rem] grid-cols-4 gap-2 border-y border-status-success/20 py-2'
+      : 'grid grid-cols-3 gap-2 border-y border-status-success/20 py-2'}
     >
-      <SignalValue label="GSIS v2" value={scorecard.gsis == null ? '—' : Math.round(scorecard.gsis)} color="text-emerald-400" />
+      <SignalValue label="GSIS v2" value={scorecard.gsis == null ? '—' : Math.round(scorecard.gsis)} color="text-status-success" />
       <SignalValue label="Stage" value={scorecard.stage.detected_stage} color="text-white" />
-      <SignalValue label="PMF" value={scorecard.pmf.score == null ? 'N/A' : Math.round(scorecard.pmf.score)} color="text-purple-300" />
-      {compact && <SignalValue label="Momentum" value={momentum} color="text-amber-300" />}
+      <SignalValue label="PMF" value={scorecard.pmf.score == null ? 'N/A' : Math.round(scorecard.pmf.score)} color="text-status-pending" />
+      {compact && <SignalValue label="Momentum" value={momentum} color="text-status-warning" />}
     </div>
   );
 }
@@ -634,7 +634,7 @@ function V2SignalStrip({ scorecard, compact = false }: { scorecard: GsisV2Scorec
 function SignalValue({ label, value, color }: SignalValueProps) {
   return (
     <div className="text-center">
-      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <p className="text-xs text-text-on-inverse-muted mb-1">{label}</p>
       <p className={`text-lg font-bold font-mono ${color}`}>{value}</p>
     </div>
   );
@@ -650,7 +650,7 @@ interface MetricRowProps {
 function MetricRow({ label, value, isScore, valueColor }: MetricRowProps) {
   return (
     <div className="flex justify-between items-center text-sm">
-      <span className="text-gray-400">{label}</span>
+      <span className="text-text-on-inverse-muted">{label}</span>
       <span className={`font-mono font-medium ${isScore ? 'text-white' : valueColor || 'text-white'} capitalize`}>
         {value}
       </span>

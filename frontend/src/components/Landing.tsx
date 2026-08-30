@@ -34,8 +34,8 @@ const ROLE_CARDS: RoleCard[] = [
   {
     key: "Founder",
     icon: Rocket,
-    iconBg: "linear-gradient(135deg, #7c3aed, #a855f7)",
-    accentColor: "#a855f7",
+    iconBg: "var(--techit-marketing-founder-card-gradient)",
+    accentColor: "var(--techit-marketing-founder-card-accent)",
     tagline:
       "Launch your startup, validate ideas with AI, find your dream team",
     features: [
@@ -49,8 +49,8 @@ const ROLE_CARDS: RoleCard[] = [
   {
     key: "Collaborator",
     icon: Zap,
-    iconBg: "linear-gradient(135deg, #0ea5e9, #06b6d4)",
-    accentColor: "#06b6d4",
+    iconBg: "var(--techit-marketing-collaborator-card-gradient)",
+    accentColor: "var(--techit-marketing-collaborator-card-accent)",
     tagline: "Join exciting startups, earn credits & equity, build your legacy",
     features: [
       "Skill-matched Opportunities",
@@ -63,8 +63,8 @@ const ROLE_CARDS: RoleCard[] = [
   {
     key: "Investor",
     icon: Gem,
-    iconBg: "linear-gradient(135deg, #10b981, #06b6d4)",
-    accentColor: "#10b981",
+    iconBg: "var(--techit-marketing-investor-card-gradient)",
+    accentColor: "var(--techit-marketing-investor-card-accent)",
     tagline: "Discover pre-vetted startups, access AI-scored deal flow",
     features: [
       "AI-Scored Pipeline",
@@ -77,8 +77,8 @@ const ROLE_CARDS: RoleCard[] = [
   {
     key: "Organisation",
     icon: Building2,
-    iconBg: "linear-gradient(135deg, #f43f5e, #ec4899)",
-    accentColor: "#f43f5e",
+    iconBg: "var(--techit-marketing-organization-card-gradient)",
+    accentColor: "var(--techit-marketing-organization-card-accent)",
     tagline:
       "Post challenges, find tech talent, partner with builder community",
     features: [
@@ -212,7 +212,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
         borderBottomColor: scrolled
           ? "var(--nav-border-scrolled)"
           : "var(--nav-border-default)",
-        color: scrolled ? "#ffffff" : "var(--nav-text-default)",
+        color: scrolled ? "var(--techit-text-on-inverse)" : "var(--nav-text-default)",
       }}
     >
       {/* Logo mark + wordmark */}
@@ -223,7 +223,7 @@ function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
         <div>
           <div
             className="nav-logo-name"
-            style={{ color: scrolled ? "#ffffff" : "var(--nav-text-default)" }}
+            style={{ color: scrolled ? "var(--techit-text-on-inverse)" : "var(--nav-text-default)" }}
           >
             TECHIT
           </div>
@@ -570,20 +570,20 @@ const Landing = () => {
                       {
                         label: "PAID COLLAB",
                         icon: Zap,
-                        bg: "rgba(124,58,237,0.18)",
-                        border: "#7c3aed",
+                        bg: "var(--techit-marketing-paid-collaboration-soft)",
+                        border: "var(--techit-marketing-paid-collaboration)",
                       },
                       {
                         label: "FREE COLLAB",
                         icon: Handshake,
-                        bg: "rgba(234,179,8,0.14)",
-                        border: "#eab308",
+                        bg: "var(--techit-marketing-free-collaboration-soft)",
+                        border: "var(--techit-marketing-free-collaboration)",
                       },
                       {
                         label: "HIRING",
                         icon: BriefcaseBusiness,
-                        bg: "rgba(236,72,153,0.14)",
-                        border: "#ec4899",
+                        bg: "var(--techit-marketing-hiring-soft)",
+                        border: "var(--techit-marketing-hiring)",
                       },
                     ].map((tag) => (
                       <span

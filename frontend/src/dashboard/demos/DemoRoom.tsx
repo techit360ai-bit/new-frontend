@@ -52,9 +52,9 @@ export function DemoRoom() {
     return () => { alive = false; };
   }, [event, id]);
 
-  if (loading) return <div className="p-8 text-sm text-slate-400">Loading…</div>;
+  if (loading) return <div className="p-8 text-sm text-text-disabled">Loading…</div>;
   if (!event) return (
-    <div className="p-8 max-w-2xl mx-auto text-slate-500">
+    <div className="p-8 max-w-2xl mx-auto text-text-muted">
       Demo not found or unavailable. <Link to="/demos" className="text-violet-600 hover:underline">Back to demos</Link>
     </div>
   );
@@ -102,14 +102,14 @@ export function DemoRoom() {
     <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
       <Link to="/demos" className="text-xs text-violet-600 hover:underline">← All demos</Link>
 
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">{event.title}</h1>
-            <p className="text-sm text-slate-500 capitalize mt-0.5">{event.kind} demo · {event.status}</p>
+            <h1 className="text-xl font-bold text-text-primary">{event.title}</h1>
+            <p className="text-sm text-text-muted capitalize mt-0.5">{event.kind} demo · {event.status}</p>
           </div>
         </div>
-        {event.description && <p className="text-sm text-slate-600 mt-3">{event.description}</p>}
+        {event.description && <p className="text-sm text-text-muted mt-3">{event.description}</p>}
         {event.assetUrl && (
           <a href={event.assetUrl} target="_blank" rel="noreferrer" className="inline-block mt-3 text-sm text-violet-600 hover:underline">
             View asset →
@@ -120,50 +120,50 @@ export function DemoRoom() {
       {/* Live stage */}
       {event.status === "live" && (
         session ? (
-          <Suspense fallback={<div className="text-sm text-slate-400">Connecting live video…</div>}>
+          <Suspense fallback={<div className="text-sm text-text-disabled">Connecting live video…</div>}>
             <DemoStage session={session} />
           </Suspense>
         ) : (
-          <div className="border border-slate-200 bg-white rounded-xl p-6 text-sm text-slate-500">
+          <div className="border border-border-default bg-surface-primary rounded-xl p-6 text-sm text-text-muted">
             Live video is unavailable right now.
           </div>
         )
       )}
 
       {/* Audience Q&A */}
-      <div className="border border-slate-200 bg-white rounded-xl p-5">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Audience Q&amp;A</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-5">
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">Audience Q&amp;A</h2>
         {event.status === "live" ? (
           <div className="flex items-end gap-2 mb-4">
             <input value={qBody} onChange={(e) => setQBody(e.target.value)} placeholder="Ask a question…"
               onKeyDown={(e) => { if (e.key === "Enter") void submitQuestion(); }}
-              className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm" />
+              className="flex-1 rounded-lg border border-border-strong px-2.5 py-1.5 text-sm" />
             <button type="button" disabled={!qBody.trim()} onClick={() => void submitQuestion()}
               className="text-xs font-medium text-white bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 px-3 py-1.5 rounded-lg">
               Ask
             </button>
           </div>
         ) : (
-          <p className="text-xs text-slate-400 mb-3">Questions open when the demo goes live.</p>
+          <p className="text-xs text-text-disabled mb-3">Questions open when the demo goes live.</p>
         )}
         {questions.length === 0 ? (
-          <p className="text-xs text-slate-400">No questions yet.</p>
+          <p className="text-xs text-text-disabled">No questions yet.</p>
         ) : (
           <ul className="space-y-2">
             {questions.map((q) => (
-              <li key={q.id} className={`flex items-start gap-3 text-sm rounded-lg border px-3 py-2 ${q.state === "dismissed" ? "opacity-50 line-through border-slate-100" : q.state === "answered" ? "border-emerald-200 bg-emerald-50" : "border-slate-200"}`}>
+              <li key={q.id} className={`flex items-start gap-3 text-sm rounded-lg border px-3 py-2 ${q.state === "dismissed" ? "opacity-50 line-through border-border-subtle" : q.state === "answered" ? "border-status-success bg-status-success-soft" : "border-border-default"}`}>
                 <button type="button" disabled={event.status !== "live"} onClick={() => void toggleVote(q.id)}
-                  className={`flex flex-col items-center px-2 py-0.5 rounded ${q.mine ? "text-violet-600" : "text-slate-400"} disabled:opacity-40`}>
+                  className={`flex flex-col items-center px-2 py-0.5 rounded ${q.mine ? "text-violet-600" : "text-text-disabled"} disabled:opacity-40`}>
                   <span className="text-xs">▲</span>
                   <span className="text-xs font-semibold">{q.votes}</span>
                 </button>
-                <span className="flex-1 text-slate-700">{q.body}</span>
+                <span className="flex-1 text-text-secondary">{q.body}</span>
                 {canModerate && q.state === "open" && event.status === "live" && (
                   <span className="flex gap-1">
                     <button type="button" onClick={() => void setQState(q.id, "answered")}
-                      className="text-[10px] font-medium text-emerald-700 hover:underline">Answered</button>
+                      className="text-[10px] font-medium text-status-success hover:underline">Answered</button>
                     <button type="button" onClick={() => void setQState(q.id, "dismissed")}
-                      className="text-[10px] font-medium text-slate-400 hover:underline">Dismiss</button>
+                      className="text-[10px] font-medium text-text-disabled hover:underline">Dismiss</button>
                   </span>
                 )}
               </li>
@@ -174,25 +174,25 @@ export function DemoRoom() {
 
       {/* Host controls */}
       {isHost && (
-        <div className="border border-slate-200 bg-white rounded-xl p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-slate-700">Host controls</h2>
+        <div className="border border-border-default bg-surface-primary rounded-xl p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-text-secondary">Host controls</h2>
           <div className="flex flex-wrap gap-2">
-            {nextStatuses.length === 0 && <span className="text-xs text-slate-400">No status changes available.</span>}
+            {nextStatuses.length === 0 && <span className="text-xs text-text-disabled">No status changes available.</span>}
             {nextStatuses.map((s) => (
               <button key={s} type="button" disabled={busy} onClick={() => act(() => transitionStatus(id, s))}
-                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-40 capitalize">
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary disabled:opacity-40 capitalize">
                 Move to {s}
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap items-end gap-2 pt-2 border-t border-slate-100">
+          <div className="flex flex-wrap items-end gap-2 pt-2 border-t border-border-subtle">
             <label className="flex-1 min-w-[10rem]">
-              <span className="text-[10px] font-semibold text-slate-500 uppercase">Invite user id</span>
+              <span className="text-[10px] font-semibold text-text-muted uppercase">Invite user id</span>
               <input value={inviteUser} onChange={(e) => setInviteUser(e.target.value)} placeholder="user id"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm" />
+                className="mt-1 w-full rounded-lg border border-border-strong px-2.5 py-1.5 text-sm" />
             </label>
             <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}
-              className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm capitalize">
+              className="rounded-lg border border-border-strong px-2.5 py-1.5 text-sm capitalize">
               {ROOM_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
             <button type="button" disabled={busy || !inviteUser.trim()}
@@ -206,26 +206,26 @@ export function DemoRoom() {
 
       {/* Invitee response */}
       {!isHost && mine && mine.status === "invited" && (
-        <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 flex items-center gap-3">
-          <span className="text-sm text-amber-800 flex-1">You're invited as <strong>{mine.roomRole}</strong>.</span>
+        <div className="border border-status-warning bg-status-warning-soft rounded-xl p-4 flex items-center gap-3">
+          <span className="text-sm text-status-warning flex-1">You're invited as <strong>{mine.roomRole}</strong>.</span>
           <button type="button" disabled={busy} onClick={() => act(() => respondInvite(id, true))}
-            className="text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg">Accept</button>
+            className="text-xs font-medium text-white bg-status-success hover:bg-status-success px-3 py-1.5 rounded-lg">Accept</button>
           <button type="button" disabled={busy} onClick={() => act(() => respondInvite(id, false))}
-            className="text-xs font-medium text-slate-600 hover:text-slate-800 px-3 py-1.5">Decline</button>
+            className="text-xs font-medium text-text-muted hover:text-text-primary px-3 py-1.5">Decline</button>
         </div>
       )}
 
       {/* Roster */}
-      <div className="border border-slate-200 bg-white rounded-xl p-5">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Roster</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-5">
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">Roster</h2>
         {(event.roster ?? []).length === 0 ? (
-          <p className="text-xs text-slate-400">No participants yet.</p>
+          <p className="text-xs text-text-disabled">No participants yet.</p>
         ) : (
           <ul className="space-y-2">
             {(event.roster ?? []).map((r) => (
               <li key={r.userId} className="flex items-center justify-between text-sm">
-                <span className="text-slate-700">{r.userId}</span>
-                <span className="text-xs text-slate-500 capitalize">{r.roomRole} · {r.status}</span>
+                <span className="text-text-secondary">{r.userId}</span>
+                <span className="text-xs text-text-muted capitalize">{r.roomRole} · {r.status}</span>
               </li>
             ))}
           </ul>

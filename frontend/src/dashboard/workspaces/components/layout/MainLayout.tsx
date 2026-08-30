@@ -10,7 +10,7 @@ import { Toaster } from '@/components/ui/sonner';
 export function MainLayout() {
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="workspaces-scope min-h-screen flex flex-col bg-gray-50 overflow-x-clip">
+      <div className="workspaces-scope min-h-screen flex flex-col bg-background-primary overflow-x-clip">
         <HeaderWithCallsAndRole />
         <div className="flex flex-1 min-h-0 overflow-hidden max-md:overflow-visible max-md:flex-col">
           <Sidebar />

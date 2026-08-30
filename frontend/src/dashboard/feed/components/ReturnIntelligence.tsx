@@ -3,7 +3,7 @@ import type { ReturnSummary } from '@/lib/api/discovery'
 
 export function ReturnSummaryBanner({ summary, onStart }: { summary: ReturnSummary; onStart: () => void }) {
   return (
-    <section className="border-y border-border-default bg-bg-surface px-4 py-5 sm:border sm:p-5">
+    <section className="border-y border-border-default bg-surface-primary px-4 py-5 sm:border sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase text-accent-primary">Welcome back</p>
@@ -23,7 +23,7 @@ export function ReturnSummaryBanner({ summary, onStart }: { summary: ReturnSumma
 
 export function CaughtUpNotice() {
   return (
-    <div className="flex items-center gap-3 border-y border-border-default bg-bg-surface px-4 py-4 text-sm sm:border">
+    <div className="flex items-center gap-3 border-y border-border-default bg-surface-primary px-4 py-4 text-sm sm:border">
       <CheckCircle2 className="h-5 w-5 text-score-green" />
       <div>
         <p className="font-semibold text-text-primary">You're all caught up.</p>

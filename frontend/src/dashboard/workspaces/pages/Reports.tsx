@@ -108,14 +108,14 @@ export function Reports() {
   const totalEvents = tasks.reduce((sum, task) => sum + task.events.length, 0) + activity.length;
 
   return (
-    <div className="h-full bg-gray-50 overflow-auto">
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="h-full bg-background-primary overflow-auto">
+      <div className="bg-surface-primary border-b border-border-default px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Contribution Dashboard
             </h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-text-muted mt-1">
               Live workspace task and activity metrics
             </p>
           </div>
@@ -140,7 +140,7 @@ export function Reports() {
               toast.success('Report exported successfully');
             }}
             disabled={loading || tasks.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             <span className="text-sm font-medium">Export Report</span>
@@ -149,61 +149,61 @@ export function Reports() {
       </div>
 
       <div className="p-6 space-y-6">
-        {loading && <p className="text-sm text-gray-500">Loading live workspace report...</p>}
+        {loading && <p className="text-sm text-text-muted">Loading live workspace report...</p>}
         {!loading && error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
             Live workspace report could not be loaded: {error}
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-surface-primary rounded-xl p-6 shadow-sm border border-border-default">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#2196F3]/10 rounded-lg flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-[#2196F3]" />
+              <div className="w-12 h-12 bg-brand-primary/10 rounded-lg flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6 text-brand-primary" />
               </div>
-              <Badge className="bg-[#10B981] text-white">Live</Badge>
+              <Badge className="bg-status-success text-white">Live</Badge>
             </div>
             <div className="text-3xl font-bold mb-1">{completedTasks}</div>
-            <div className="text-sm text-gray-600">Completed Tasks</div>
-            <div className="text-xs text-gray-500 mt-2">{tasks.length} total recorded</div>
+            <div className="text-sm text-text-muted">Completed Tasks</div>
+            <div className="text-xs text-text-muted mt-2">{tasks.length} total recorded</div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-surface-primary rounded-xl p-6 shadow-sm border border-border-default">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#F59E0B]/10 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-[#F59E0B]" />
+              <div className="w-12 h-12 bg-status-warning/10 rounded-lg flex items-center justify-center">
+                <Clock className="w-6 h-6 text-status-warning" />
               </div>
-              <Badge className="bg-[#F59E0B] text-white">Open</Badge>
+              <Badge className="bg-status-warning text-white">Open</Badge>
             </div>
             <div className="text-3xl font-bold mb-1">{openTasks}</div>
-            <div className="text-sm text-gray-600">Open Workflow Items</div>
-            <div className="text-xs text-gray-500 mt-2">Queued, running, approval, or failed</div>
+            <div className="text-sm text-text-muted">Open Workflow Items</div>
+            <div className="text-xs text-text-muted mt-2">Queued, running, approval, or failed</div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-surface-primary rounded-xl p-6 shadow-sm border border-border-default">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#10B981]/10 rounded-lg flex items-center justify-center">
-                <Activity className="w-6 h-6 text-[#10B981]" />
+              <div className="w-12 h-12 bg-status-success/10 rounded-lg flex items-center justify-center">
+                <Activity className="w-6 h-6 text-status-success" />
               </div>
-              <Badge className="bg-[#10B981] text-white">Events</Badge>
+              <Badge className="bg-status-success text-white">Events</Badge>
             </div>
             <div className="text-3xl font-bold mb-1">{totalEvents}</div>
-            <div className="text-sm text-gray-600">Activity Events</div>
-            <div className="text-xs text-gray-500 mt-2">Task transcript events + workspace reports</div>
+            <div className="text-sm text-text-muted">Activity Events</div>
+            <div className="text-xs text-text-muted mt-2">Task transcript events + workspace reports</div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
+          <div className="lg:col-span-2 bg-surface-primary rounded-xl shadow-sm border border-border-default">
+            <div className="p-6 border-b border-border-default">
               <h2 className="font-semibold text-lg">Contributor Summary</h2>
-              <p className="text-sm text-gray-600 mt-1">Grouped by live agent or workspace owner</p>
+              <p className="text-sm text-text-muted mt-1">Grouped by live agent or workspace owner</p>
             </div>
             <div className="p-6 overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-sm text-gray-600 border-b">
+                  <tr className="text-left text-sm text-text-muted border-b">
                     <th className="pb-3 font-medium">Contributor</th>
                     <th className="pb-3 font-medium">Completed</th>
                     <th className="pb-3 font-medium">Total Tasks</th>
@@ -214,24 +214,24 @@ export function Reports() {
                 </thead>
                 <tbody>
                   {contributorData.map((contributor, idx) => (
-                    <tr key={contributor.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr key={contributor.id} className="border-b last:border-0 hover:bg-background-primary transition-colors">
                       <td className="py-4">
                         <div className="flex items-center gap-3">
                           <div className="relative">
                             <Avatar className="w-10 h-10">
-                              <AvatarFallback className="bg-[#2196F3] text-white">
+                              <AvatarFallback className="bg-brand-primary text-white">
                                 {contributor.avatar}
                               </AvatarFallback>
                             </Avatar>
                             {idx < 3 && (
-                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#FFD700] rounded-full flex items-center justify-center text-xs font-bold text-black">
+                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-brand-premium rounded-full flex items-center justify-center text-xs font-bold text-black">
                                 {idx + 1}
                               </div>
                             )}
                           </div>
                           <div>
                             <div className="font-medium">{contributor.name}</div>
-                            <div className="text-xs text-gray-500">{contributor.id}</div>
+                            <div className="text-xs text-text-muted">{contributor.id}</div>
                           </div>
                         </div>
                       </td>
@@ -241,36 +241,36 @@ export function Reports() {
                       <td className="py-4">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 max-w-[100px] h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div className="h-full bg-[#2196F3] rounded-full" style={{ width: `${contributor.powerScore}%` }} />
+                            <div className="h-full bg-brand-primary rounded-full" style={{ width: `${contributor.powerScore}%` }} />
                           </div>
                           <span className="text-sm font-medium">{contributor.powerScore}</span>
                         </div>
                       </td>
                       <td className="py-4">
                         {contributor.trend === 'up' ? (
-                          <TrendingUp className="w-5 h-5 text-[#10B981]" />
+                          <TrendingUp className="w-5 h-5 text-status-success" />
                         ) : (
-                          <TrendingDown className="w-5 h-5 text-red-500" />
+                          <TrendingDown className="w-5 h-5 text-status-error" />
                         )}
                       </td>
                     </tr>
                   ))}
                   {!loading && !error && contributorData.length === 0 && (
-                    <tr><td className="py-6 text-sm text-gray-500" colSpan={6}>No live task contributors are recorded yet.</td></tr>
+                    <tr><td className="py-6 text-sm text-text-muted" colSpan={6}>No live task contributors are recorded yet.</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-surface-primary rounded-xl shadow-sm border border-border-default">
+            <div className="p-6 border-b border-border-default">
               <h2 className="font-semibold text-lg">Task Status</h2>
-              <p className="text-sm text-gray-600 mt-1">Live workspace task distribution</p>
+              <p className="text-sm text-text-muted mt-1">Live workspace task distribution</p>
             </div>
             <div className="p-6">
               {statusData.length === 0 ? (
-                <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">No live tasks yet.</div>
+                <div className="h-[300px] flex items-center justify-center text-sm text-text-muted">No live tasks yet.</div>
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={statusData}>
@@ -294,18 +294,18 @@ export function Reports() {
                 </ResponsiveContainer>
               )}
 
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="mt-6 p-4 bg-background-primary rounded-lg">
                 <div className="text-sm font-medium mb-2">Recent Activity Reports</div>
                 {activity.slice(0, 4).length > 0 ? (
                   <ul className="space-y-2">
                     {activity.slice(0, 4).map((item) => (
-                      <li key={item.id} className="text-xs text-gray-600">
-                        {item.summary || item.kind} <span className="text-gray-400">{item.at}</span>
+                      <li key={item.id} className="text-xs text-text-muted">
+                        {item.summary || item.kind} <span className="text-text-disabled">{item.at}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-xs text-gray-500">No live activity reports yet.</p>
+                  <p className="text-xs text-text-muted">No live activity reports yet.</p>
                 )}
               </div>
             </div>

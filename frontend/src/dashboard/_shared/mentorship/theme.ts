@@ -12,25 +12,25 @@
 
 /** Solid accent button (primary call-to-action). */
 export const ACCENT_SOLID =
-  "bg-blue-600 hover:bg-blue-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-black";
+  "bg-action-primary hover:bg-action-primary text-white dark:bg-status-success dark:hover:bg-status-success dark:text-black";
 
 /** Accent text / links. */
-export const ACCENT_TEXT = "text-blue-600 hover:text-blue-700 dark:text-emerald-400 dark:hover:text-emerald-300";
+export const ACCENT_TEXT = "text-status-info hover:text-status-info dark:text-status-success dark:hover:text-status-success";
 
 /** Soft accent chip (skills, tags, highlights). */
 export const ACCENT_SOFT =
-  "bg-blue-50 text-blue-700 dark:bg-emerald-500/10 dark:text-emerald-400";
+  "bg-status-info-soft text-status-info dark:bg-status-success/10 dark:text-status-success";
 
 /** Accent progress-bar fill. */
-export const ACCENT_FILL = "bg-blue-600 dark:bg-emerald-500";
+export const ACCENT_FILL = "bg-action-primary dark:bg-status-success";
 
 /** Welcome / hero banner gradient. */
 export const HERO_GRADIENT =
-  "bg-gradient-to-r from-blue-600 to-purple-600 dark:from-emerald-600 dark:to-teal-700 text-white";
+  "bg-gradient-to-r from-brand-primary to-status-pending dark:from-emerald-600 dark:to-teal-700 text-white";
 
 /** Advanced-hub hero gradient (distinct from the primary hero). */
 export const HUB_GRADIENT =
-  "bg-gradient-to-r from-purple-600 to-pink-600 dark:from-violet-700 dark:to-fuchsia-800 text-white";
+  "bg-gradient-to-r from-status-pending to-pink-600 dark:from-violet-700 dark:to-fuchsia-800 text-white";
 
 /** Neutral outline button (cancel / secondary actions). */
 export const NEUTRAL_BTN =
@@ -49,18 +49,18 @@ export function statusBadge(status: string): string {
     case "completed":
     case "active":
     case "accepted":
-      return "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-400";
+      return "bg-status-success text-status-success dark:bg-status-success/15 dark:text-status-success";
     case "in-progress":
     case "processing":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400";
+      return "bg-status-info text-status-info dark:bg-status-info/15 dark:text-status-info";
     case "pending":
     case "invited":
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-400";
+      return "bg-status-warning text-status-warning dark:bg-status-warning/15 dark:text-status-warning";
     case "overdue":
     case "rejected":
-      return "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400";
+      return "bg-status-error text-status-error dark:bg-status-error/15 dark:text-status-error";
     case "vested":
-      return "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-400";
+      return "bg-status-pending text-status-pending dark:bg-status-pending/15 dark:text-status-pending";
     default:
       return "bg-muted text-muted-foreground";
   }

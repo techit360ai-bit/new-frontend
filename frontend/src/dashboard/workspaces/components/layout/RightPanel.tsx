@@ -111,24 +111,24 @@ export function RightPanel() {
     location.pathname === '/workspaces/'
   ) {
     return (
-      <div className="w-[320px] shrink-0 bg-white border-l border-gray-200 flex flex-col max-md:hidden">
-        <div className="p-4 border-b border-gray-200">
+      <div className="w-[320px] shrink-0 bg-surface-primary border-l border-border-default flex flex-col max-md:hidden">
+        <div className="p-4 border-b border-border-default">
           <h3 className="font-semibold">Team Activity</h3>
-          <p className="text-xs text-gray-500 mt-1">Live workspace updates</p>
+          <p className="text-xs text-text-muted mt-1">Live workspace updates</p>
         </div>
 
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-4">
-            {loading && <p className="text-sm text-gray-500">Loading live activity...</p>}
+            {loading && <p className="text-sm text-text-muted">Loading live activity...</p>}
             {!loading && error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              <div className="rounded-lg border border-status-error bg-status-error-soft px-3 py-2 text-xs text-status-error">
                 {error}
               </div>
             )}
             {!loading && activities.map((activityRow) => (
-              <div key={activityRow.id} className="flex gap-3 group hover:bg-gray-50 p-2 rounded-lg -mx-2 transition-colors">
+              <div key={activityRow.id} className="flex gap-3 group hover:bg-background-primary p-2 rounded-lg -mx-2 transition-colors">
                 <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarFallback className="bg-[#2196F3] text-white text-xs">
+                  <AvatarFallback className="bg-brand-primary text-white text-xs">
                     {activityRow.avatar}
                   </AvatarFallback>
                 </Avatar>
@@ -136,10 +136,10 @@ export function RightPanel() {
                   <p className="text-sm">
                     <span className="font-medium">{activityRow.actor}</span>
                     {' '}
-                    <span className="text-gray-600">{activityRow.action}</span>
+                    <span className="text-text-muted">{activityRow.action}</span>
                   </p>
-                  <p className="text-sm text-[#2196F3] truncate">{activityRow.detail}</p>
-                  <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                  <p className="text-sm text-brand-primary truncate">{activityRow.detail}</p>
+                  <div className="flex items-center gap-1 mt-1 text-xs text-text-muted">
                     <Clock className="w-3 h-3" />
                     {formatTimestamp(activityRow.at)}
                   </div>
@@ -147,29 +147,29 @@ export function RightPanel() {
               </div>
             ))}
             {!loading && !error && activities.length === 0 && (
-              <p className="text-sm text-gray-500">No live workspace activity is recorded yet.</p>
+              <p className="text-sm text-text-muted">No live workspace activity is recorded yet.</p>
             )}
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-gray-200">
-          <div className="bg-gradient-to-r from-[#2196F3]/10 to-purple-500/10 p-3 rounded-lg border border-[#2196F3]/20">
+        <div className="p-4 border-t border-border-default">
+          <div className="bg-gradient-to-r from-brand-primary/10 to-status-pending/10 p-3 rounded-lg border border-brand-primary/20">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+              <CheckCircle2 className="w-4 h-4 text-status-success" />
               <span className="text-sm font-medium">Task Progress</span>
             </div>
             {tasks.length > 0 ? (
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">{completedTasks} of {tasks.length} tasks</span>
+                  <span className="text-text-muted">{completedTasks} of {tasks.length} tasks</span>
                   <span className="font-medium">{progress}%</span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#10B981] rounded-full" style={{ width: `${progress}%` }} />
+                  <div className="h-full bg-status-success rounded-full" style={{ width: `${progress}%` }} />
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-gray-500">No live task progress yet.</p>
+              <p className="text-xs text-text-muted">No live task progress yet.</p>
             )}
           </div>
         </div>
