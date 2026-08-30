@@ -105,7 +105,7 @@ export function Applications() {
                     e.stopPropagation();
                     handleAccept(application.id);
                   }}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-status-success px-4 py-2 text-white transition-colors hover:bg-status-success"
                 >
                   <Check className="h-4 w-4" />
                   Accept
@@ -115,7 +115,7 @@ export function Applications() {
                     e.stopPropagation();
                     handleReject(application.id);
                   }}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-status-error px-4 py-2 text-white transition-colors hover:bg-status-error"
                 >
                   <X className="h-4 w-4" />
                   Reject
@@ -158,7 +158,7 @@ export function Applications() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Accepted</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold text-green-600 dark:text-green-400">
+            <div className="text-2xl font-semibold text-status-success dark:text-status-success">
               {acceptedApplications.length}
             </div>
           </CardContent>
@@ -168,7 +168,7 @@ export function Applications() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Rejected</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold text-red-600 dark:text-red-400">
+            <div className="text-2xl font-semibold text-status-error dark:text-status-error">
               {rejectedApplications.length}
             </div>
           </CardContent>
@@ -281,7 +281,7 @@ export function Applications() {
                         handleAccept(selectedApplication.id);
                         setSelectedApplication(null);
                       }}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-status-success px-4 py-2 text-white transition-colors hover:bg-status-success"
                     >
                       <Check className="h-4 w-4" />
                       Accept Application
@@ -291,7 +291,7 @@ export function Applications() {
                         handleReject(selectedApplication.id);
                         setSelectedApplication(null);
                       }}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-status-error px-4 py-2 text-white transition-colors hover:bg-status-error"
                     >
                       <X className="h-4 w-4" />
                       Reject Application

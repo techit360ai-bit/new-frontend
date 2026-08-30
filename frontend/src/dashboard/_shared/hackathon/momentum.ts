@@ -62,7 +62,7 @@ export function computeMomentum(reg: HackathonRegistration, now: number = Date.n
 
 // Shared color helper: emerald ≥70, amber 40-69, slate <40.
 export function momentumColor(score: number): { text: string; bar: string } {
-  if (score >= 70) return { text: "text-emerald-600", bar: "bg-emerald-500" };
-  if (score >= 40) return { text: "text-amber-600", bar: "bg-amber-500" };
-  return { text: "text-slate-500", bar: "bg-slate-400" };
+  if (score >= 70) return { text: "text-status-success", bar: "bg-status-success" };
+  if (score >= 40) return { text: "text-status-warning", bar: "bg-status-warning" };
+  return { text: "text-text-muted", bar: "bg-slate-400" };
 }

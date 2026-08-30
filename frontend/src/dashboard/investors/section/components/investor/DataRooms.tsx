@@ -19,10 +19,10 @@ import {
 import { MobileBottomSheet } from '@/components/mobile/MobilePageTemplates';
 
 const SECTION_STYLE = [
-  { icon: BarChart3, label: 'Metrics Dashboard', color: 'text-blue-400', bgColor: 'bg-blue-500/10' },
-  { icon: DollarSign, label: 'Financials', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10' },
-  { icon: Zap, label: 'Testing Reports', color: 'text-amber-400', bgColor: 'bg-amber-500/10' },
-  { icon: Shield, label: 'Compliance', color: 'text-purple-400', bgColor: 'bg-purple-500/10' },
+  { icon: BarChart3, label: 'Metrics Dashboard', color: 'text-status-info', bgColor: 'bg-status-info/10' },
+  { icon: DollarSign, label: 'Financials', color: 'text-status-success', bgColor: 'bg-status-success/10' },
+  { icon: Zap, label: 'Testing Reports', color: 'text-status-warning', bgColor: 'bg-status-warning/10' },
+  { icon: Shield, label: 'Compliance', color: 'text-status-pending', bgColor: 'bg-status-pending/10' },
   { icon: FileText, label: 'Governance', color: 'text-cyan-400', bgColor: 'bg-cyan-500/10' },
   { icon: FileText, label: 'Execution History', color: 'text-pink-400', bgColor: 'bg-pink-500/10' },
 ];
@@ -30,7 +30,7 @@ const SECTION_STYLE = [
 const SECTION_STYLE_BY_LABEL = Object.fromEntries(SECTION_STYLE.map((section) => [section.label, section]));
 
 function sectionStyle(label: string) {
-  return SECTION_STYLE_BY_LABEL[label] ?? { icon: FileText, label, color: 'text-gray-300', bgColor: 'bg-gray-800/70' };
+  return SECTION_STYLE_BY_LABEL[label] ?? { icon: FileText, label, color: 'text-text-on-inverse-secondary', bgColor: 'bg-surface-inverse-muted/70' };
 }
 
 export function DataRooms() {
@@ -78,18 +78,18 @@ export function DataRooms() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background-inverse">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+      <div className="border-b border-border-inverse bg-surface-inverse px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white sm:text-3xl">Data Rooms</h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-text-on-inverse-muted mt-1">
               Auto-generated structured repositories for every startup in your pipeline
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="app-touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-2 font-medium text-emerald-400 transition-all hover:bg-emerald-500/20 sm:w-auto">
+            <button className="app-touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-status-success/10 px-4 py-2 font-medium text-status-success transition-all hover:bg-status-success/20 sm:w-auto">
               <Download className="w-4 h-4" />
               Bulk Export
             </button>
@@ -100,40 +100,40 @@ export function DataRooms() {
       <div className="p-4 sm:p-6 lg:p-8">
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4 sm:gap-4">
-          <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Active Data Rooms</p>
+          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+            <p className="text-xs text-text-on-inverse-muted uppercase tracking-wider mb-2">Active Data Rooms</p>
             <p className="text-3xl font-bold font-mono text-white">{totals.activeRooms}</p>
           </div>
-          <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Total Documents</p>
-            <p className="text-3xl font-bold font-mono text-blue-400">{totals.totalDocs}</p>
+          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+            <p className="text-xs text-text-on-inverse-muted uppercase tracking-wider mb-2">Total Documents</p>
+            <p className="text-3xl font-bold font-mono text-status-info">{totals.totalDocs}</p>
           </div>
-          <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Compliance Verified</p>
-            <p className="text-3xl font-bold font-mono text-emerald-400">{totals.complianceVerified}</p>
+          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+            <p className="text-xs text-text-on-inverse-muted uppercase tracking-wider mb-2">Compliance Verified</p>
+            <p className="text-3xl font-bold font-mono text-status-success">{totals.complianceVerified}</p>
           </div>
-          <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">AI Summaries</p>
-            <p className="text-3xl font-bold font-mono text-purple-400">{totals.aiSummaries}</p>
+          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+            <p className="text-xs text-text-on-inverse-muted uppercase tracking-wider mb-2">AI Summaries</p>
+            <p className="text-3xl font-bold font-mono text-status-pending">{totals.aiSummaries}</p>
           </div>
         </div>
 
         {/* Filters */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative w-full sm:max-w-sm sm:flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-on-inverse-muted" />
             <input
               type="text"
               placeholder="Search data rooms..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full pl-9 pr-4 py-2 bg-surface-inverse border border-border-inverse rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
           </div>
           <button
             type="button"
             onClick={() => setFilterOpen(true)}
-            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg border border-gray-800 bg-[#111111] px-4 text-sm text-white sm:hidden"
+            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg border border-border-inverse bg-surface-inverse px-4 text-sm text-white sm:hidden"
           >
             <SlidersHorizontal className="h-4 w-4" /> Filters
           </button>
@@ -141,7 +141,7 @@ export function DataRooms() {
             value={filterSector}
             onChange={(e) => setFilterSector(e.target.value)}
             aria-label="Filter data rooms by sector"
-            className="hidden px-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:block"
+            className="hidden px-4 py-2 bg-surface-inverse border border-border-inverse rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:block"
           >
             {sectors.map((s) => (
               <option key={s} value={s}>
@@ -149,7 +149,7 @@ export function DataRooms() {
               </option>
             ))}
           </select>
-          <span className="text-sm text-gray-400 sm:ml-auto">{filtered.length} rooms</span>
+          <span className="text-sm text-text-on-inverse-muted sm:ml-auto">{filtered.length} rooms</span>
         </div>
 
         <MobileBottomSheet open={filterOpen} title="Filter data rooms" onClose={() => setFilterOpen(false)}>
@@ -167,23 +167,23 @@ export function DataRooms() {
         </MobileBottomSheet>
 
         {error && (
-          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
 
         {/* Data Room Grid */}
         {isLoading ? (
-          <div className="rounded-lg border border-gray-800 bg-[#111111] p-8 text-center text-gray-400">
+          <div className="rounded-lg border border-border-inverse bg-surface-inverse p-8 text-center text-text-on-inverse-muted">
             Loading live data rooms...
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-lg border border-gray-800 bg-[#111111] p-8 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
-              <Database className="h-6 w-6 text-gray-400" />
+          <div className="rounded-lg border border-border-inverse bg-surface-inverse p-8 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-inverse-muted">
+              <Database className="h-6 w-6 text-text-on-inverse-muted" />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">No live data rooms found</h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-text-on-inverse-muted text-sm">
               Persisted investor data rooms will appear here when founders grant access.
             </p>
           </div>
@@ -194,7 +194,7 @@ export function DataRooms() {
               return (
             <div
               key={room.projectId}
-              className="bg-[#111111] border border-gray-800 hover:border-gray-700 rounded-lg p-6 transition-all"
+              className="bg-surface-inverse border border-border-inverse hover:border-border-inverse-strong rounded-lg p-6 transition-all"
             >
               {/* Card header */}
               <div className="flex items-start justify-between mb-4">
@@ -202,15 +202,15 @@ export function DataRooms() {
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-white text-lg">{room.startupName ?? 'Untitled data room'}</h3>
                     {room.complianceVerified && (
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle className="w-4 h-4 text-status-success" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-400 mt-0.5">
+                  <p className="text-sm text-text-on-inverse-muted mt-0.5">
                     {room.sector ?? 'Uncategorized'}
                   </p>
                 </div>
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <Database className="w-5 h-5 text-blue-400" />
+                <div className="p-2 bg-status-info/10 rounded-lg">
+                  <Database className="w-5 h-5 text-status-info" />
                 </div>
               </div>
 
@@ -234,22 +234,22 @@ export function DataRooms() {
               </div>
 
               {/* Metrics row */}
-              <div className="flex flex-wrap items-center gap-3 text-sm mb-4 pb-4 border-b border-gray-800">
-                <div className="flex items-center gap-1.5 text-gray-400">
+              <div className="flex flex-wrap items-center gap-3 text-sm mb-4 pb-4 border-b border-border-inverse">
+                <div className="flex items-center gap-1.5 text-text-on-inverse-muted">
                   <FileText className="w-3.5 h-3.5" />
                   <span>{room.docCount || roomSections.length} documents</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-gray-400">
+                <div className="flex items-center gap-1.5 text-text-on-inverse-muted">
                   <Clock className="w-3.5 h-3.5" />
                   <span>{room.updatedLabel}</span>
                 </div>
                 {room.aiGovernanceVerified ? (
-                  <div className="flex items-center gap-1.5 text-emerald-400">
+                  <div className="flex items-center gap-1.5 text-status-success">
                     <Shield className="w-3.5 h-3.5" />
                     <span>AI Verified</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-gray-500">
+                  <div className="flex items-center gap-1.5 text-text-on-inverse-disabled">
                     <Lock className="w-3.5 h-3.5" />
                     <span>Pending</span>
                   </div>
@@ -260,20 +260,20 @@ export function DataRooms() {
               <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
                 <Link
                   to={`/investor/data-room/${room.projectId}`}
-                  className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-blue-500/10 py-2.5 text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20"
+                  className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-status-info/10 py-2.5 text-sm font-medium text-status-info transition-all hover:bg-status-info/20"
                 >
                   Open Data Room
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   to={`/investor/risk-radar/${room.projectId}`}
-                  className="app-touch-target inline-flex items-center justify-center rounded-lg bg-gray-800 px-3 py-2.5 text-sm font-medium text-gray-300 transition-all hover:bg-gray-700"
+                  className="app-touch-target inline-flex items-center justify-center rounded-lg bg-surface-inverse-muted px-3 py-2.5 text-sm font-medium text-text-on-inverse-secondary transition-all hover:bg-gray-700"
                 >
                   Risk
                 </Link>
                 <Link
                   to={`/investor/deal-room/${room.projectId}`}
-                  className="app-touch-target inline-flex items-center justify-center rounded-lg bg-purple-500/10 px-3 py-2.5 text-sm font-medium text-purple-400 transition-all hover:bg-purple-500/20"
+                  className="app-touch-target inline-flex items-center justify-center rounded-lg bg-status-pending/10 px-3 py-2.5 text-sm font-medium text-status-pending transition-all hover:bg-status-pending/20"
                 >
                   Deal
                 </Link>
@@ -285,18 +285,18 @@ export function DataRooms() {
         )}
 
         {/* Info banner */}
-        <div className="mt-8 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+        <div className="mt-8 bg-gradient-to-br from-brand-primary/10 to-status-pending/10 border border-status-info/20 rounded-lg p-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Database className="w-5 h-5 text-blue-400" />
+            <div className="p-2 bg-status-info/20 rounded-lg">
+              <Database className="w-5 h-5 text-status-info" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-blue-300 mb-2">AUTO-GENERATED DATA ROOMS</h4>
+              <h4 className="text-sm font-semibold text-status-info mb-2">AUTO-GENERATED DATA ROOMS</h4>
               <p className="text-white mb-1">
                 Every startup on TechIT automatically gets a structured data room populated from their
                 live execution data.
               </p>
-              <p className="text-gray-300 text-sm">
+              <p className="text-text-on-inverse-secondary text-sm">
                 Metrics, financials, compliance documents, and AI summaries are updated in real-time —
                 no manual uploads required. Investors can perform due diligence in minutes, not weeks.
               </p>

@@ -67,10 +67,10 @@ export function OrgStep3() {
         <OrgProgressBar currentStep={3} totalSteps={5} />
 
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+          <h1 className="text-4xl font-bold text-text-primary dark:text-white tracking-tight mb-2">
             Programmes & Focus
           </h1>
-          <p className="text-base text-slate-600 dark:text-slate-400">
+          <p className="text-base text-text-muted dark:text-text-disabled">
             What does your organisation offer, and where do you operate? We use
             this to route the right builders to you.
           </p>
@@ -80,8 +80,8 @@ export function OrgStep3() {
           {/* Programmes */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Target className="w-4 h-4 text-indigo-500" />
-              <h3 className="text-slate-900 dark:text-white font-semibold">
+              <Target className="w-4 h-4 text-brand-accent" />
+              <h3 className="text-text-primary dark:text-white font-semibold">
                 What you run
               </h3>
             </div>
@@ -95,17 +95,17 @@ export function OrgStep3() {
                     onClick={() => toggle(programmes, setProgrammes, p.id)}
                     className={`text-left p-4 rounded-xl border-2 transition-all ${
                       active
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10"
-                        : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 hover:border-indigo-300"
+                        ? "border-brand-accent bg-status-info-soft dark:bg-status-info-soft/10"
+                        : "border-border-strong dark:border-border-inverse-strong bg-surface-primary dark:bg-surface-inverse-muted/40 hover:border-brand-accent"
                     }`}
                   >
                     <div className="flex items-center gap-3 mb-1">
-                      <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
-                      <p className="font-bold text-slate-900 dark:text-white">
+                      <Icon className="h-5 w-5 text-brand-accent dark:text-brand-accent" aria-hidden="true" />
+                      <p className="font-bold text-text-primary dark:text-white">
                         {p.id}
                       </p>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                    <p className="text-xs text-text-muted dark:text-text-disabled">
                       {p.desc}
                     </p>
                   </button>
@@ -116,7 +116,7 @@ export function OrgStep3() {
 
           {/* Sectors */}
           <div>
-            <h3 className="text-slate-900 dark:text-white font-semibold mb-4">
+            <h3 className="text-text-primary dark:text-white font-semibold mb-4">
               Sectors of focus
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -128,8 +128,8 @@ export function OrgStep3() {
                     onClick={() => toggle(sectors, setSectors, s)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                       active
-                        ? "bg-indigo-600 text-white shadow-md"
-                        : "bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400"
+                        ? "bg-brand-accent text-white shadow-md"
+                        : "bg-surface-primary dark:bg-surface-inverse-muted/40 text-text-secondary dark:text-text-on-inverse-secondary border-2 border-border-strong dark:border-border-inverse-strong hover:border-brand-accent"
                     }`}
                   >
                     {s}
@@ -142,8 +142,8 @@ export function OrgStep3() {
           {/* Geographies */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <MapPin className="w-4 h-4 text-indigo-500" />
-              <h3 className="text-slate-900 dark:text-white font-semibold">
+              <MapPin className="w-4 h-4 text-brand-accent" />
+              <h3 className="text-text-primary dark:text-white font-semibold">
                 Where you operate
               </h3>
             </div>
@@ -157,7 +157,7 @@ export function OrgStep3() {
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                       active
                         ? "bg-violet-600 text-white shadow-md"
-                        : "bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-violet-400"
+                        : "bg-surface-primary dark:bg-surface-inverse-muted/40 text-text-secondary dark:text-text-on-inverse-secondary border-2 border-border-strong dark:border-border-inverse-strong hover:border-violet-400"
                     }`}
                   >
                     {g}
@@ -171,14 +171,14 @@ export function OrgStep3() {
         <div className="mt-12 flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary font-semibold hover:border-brand-accent transition-colors"
           >
             Back
           </button>
           <button
             onClick={handleNext}
             disabled={programmes.length === 0 || sectors.length === 0}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-brand-accent to-violet-600 hover:from-brand-accent hover:to-violet-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Continue
           </button>

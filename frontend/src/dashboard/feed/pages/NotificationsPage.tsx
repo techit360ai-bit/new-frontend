@@ -117,7 +117,7 @@ export function NotificationsPage() {
               className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs ${
                 activeFilter === tab.id
                   ? 'border-accent-primary bg-accent-primary/15 text-accent-primary'
-                  : 'border-border-default bg-bg-elevated text-text-secondary'
+                  : 'border-border-default bg-surface-secondary text-text-secondary'
               }`}
             >
               {tab.label}{count > 0 ? ` ${count}` : ''}
@@ -129,7 +129,7 @@ export function NotificationsPage() {
       {loading && <FeedLoadingState label="Loading live notifications..." />}
       {!loading && error && <FeedErrorState message={error} />}
       {!loading && !error && (
-        <div className="overflow-hidden border-y border-border-default bg-bg-surface sm:rounded-lg sm:border">
+        <div className="overflow-hidden border-y border-border-default bg-surface-primary sm:rounded-lg sm:border">
           <VirtualizedList items={filtered} className="h-[min(70dvh,680px)]" itemContent={(_, notification) => <NotificationRow key={notification.id} notification={notification} onRead={markRead} />} />
           {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-2 py-16">
@@ -155,12 +155,12 @@ function NotificationRow({
     <Link
       to={notification.linkTo}
       onClick={() => onRead(notification.id)}
-      className="flex items-start gap-3 border-b border-border-default px-4 py-4 last:border-b-0 hover:bg-bg-elevated"
+      className="flex items-start gap-3 border-b border-border-default px-4 py-4 last:border-b-0 hover:bg-surface-secondary"
       style={{ backgroundColor: !notification.read ? 'rgba(79,110,247,0.03)' : undefined }}
     >
       <div className="relative shrink-0">
         <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${notification.avatar}`} />
-        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-bg-surface bg-accent-primary/15 text-accent-primary">
+        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-border-default bg-accent-primary/15 text-accent-primary">
           {config.icon}
         </div>
       </div>

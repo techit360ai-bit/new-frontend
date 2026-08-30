@@ -49,12 +49,12 @@ const RESULT_META: Record<
   { cls: string; icon: ReactNode; label: string }
 > = {
   success: {
-    cls: "bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-400 dark:ring-emerald-500/30",
+    cls: "bg-status-success text-status-success ring-emerald-600/20 dark:bg-status-success/15 dark:text-status-success dark:ring-emerald-500/30",
     icon: <CircleCheck className="w-3.5 h-3.5" />,
     label: "success",
   },
   failure: {
-    cls: "bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/15 dark:text-red-400 dark:ring-red-500/30",
+    cls: "bg-status-error text-status-error ring-red-600/20 dark:bg-status-error/15 dark:text-status-error dark:ring-red-500/30",
     icon: <CircleX className="w-3.5 h-3.5" />,
     label: "failure",
   },
@@ -64,7 +64,7 @@ const RESULT_META: Record<
     label: "denied",
   },
   pending_approval: {
-    cls: "bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-400 dark:ring-amber-500/30",
+    cls: "bg-status-warning text-status-warning ring-amber-600/20 dark:bg-status-warning/15 dark:text-status-warning dark:ring-amber-500/30",
     icon: <Clock className="w-3.5 h-3.5" />,
     label: "pending",
   },
@@ -153,7 +153,7 @@ export default function PluginsDashboard() {
     // color-scheme follows the theme so native <select> dropdowns stay readable.
     <div className="min-h-screen bg-background text-foreground pb-16 [color-scheme:light] dark:[color-scheme:dark]">
       {/* ---- Gradient hero (reads well in both themes) ---- */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white">
+      <header className="relative overflow-hidden bg-gradient-to-br from-brand-accent via-violet-600 to-fuchsia-600 text-white">
         <div
           className="absolute inset-0 opacity-20"
           style={{
@@ -176,7 +176,7 @@ export default function PluginsDashboard() {
               <button
                 onClick={refresh}
                 aria-label="Refresh data"
-                className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-surface-primary/15 hover:bg-surface-primary/25 backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
                 <RefreshCw className={`w-4 h-4 ${busy ? "animate-spin" : ""}`} />
                 Refresh
@@ -185,7 +185,7 @@ export default function PluginsDashboard() {
           </div>
 
           <div className="mt-8 flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/15 backdrop-blur ring-1 ring-white/25">
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-surface-primary/15 backdrop-blur ring-1 ring-white/25">
               <Boxes className="w-6 h-6" />
             </span>
             <div>
@@ -285,14 +285,14 @@ function StatusBadge({
   const text =
     online === null ? "connecting…" : online ? `online · ${workspace}` : "offline";
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white/15 backdrop-blur ring-1 ring-white/25">
+    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-surface-primary/15 backdrop-blur ring-1 ring-white/25">
       <span className="relative flex w-2 h-2">
         {online && (
           <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-300 opacity-75 motion-safe:animate-ping" />
         )}
         <span
           className={`relative inline-flex w-2 h-2 rounded-full ${
-            online ? "bg-emerald-300" : online === false ? "bg-red-300" : "bg-white/60"
+            online ? "bg-emerald-300" : online === false ? "bg-red-300" : "bg-surface-primary/60"
           }`}
         />
       </span>
@@ -306,10 +306,10 @@ function StatusBadge({
 /* Stat card                                                           */
 /* ------------------------------------------------------------------ */
 const TONES: Record<string, string> = {
-  indigo: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-  amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  indigo: "bg-status-info-soft/10 text-brand-accent dark:text-brand-accent",
+  amber: "bg-status-warning/10 text-status-warning dark:text-status-warning",
   slate: "bg-muted text-muted-foreground",
-  emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  emerald: "bg-status-success/10 text-status-success dark:text-status-success",
 };
 
 function StatCard({
@@ -394,7 +394,7 @@ function ToolCatalogue({ tools, loading }: { tools: CatalogueEntry[]; loading: b
   return (
     <Panel
       title="MCP Tool Catalogue"
-      icon={<Boxes className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
+      icon={<Boxes className="w-5 h-5 text-brand-accent dark:text-brand-accent" />}
       count={tools.length}
     >
       {loading ? (
@@ -410,11 +410,11 @@ function ToolCatalogue({ tools, loading }: { tools: CatalogueEntry[]; loading: b
           {tools.map(({ plugin, tool }) => (
             <div
               key={`${plugin}.${tool.name}`}
-              className="group border border-border rounded-xl p-3.5 transition-all hover:border-indigo-400/60 hover:shadow-sm motion-safe:hover:-translate-y-0.5"
+              className="group border border-border rounded-xl p-3.5 transition-all hover:border-brand-accent/60 hover:shadow-sm motion-safe:hover:-translate-y-0.5"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-muted text-muted-foreground group-hover:bg-indigo-500/10 group-hover:text-indigo-500 transition-colors shrink-0">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-muted text-muted-foreground group-hover:bg-status-info-soft/10 group-hover:text-brand-accent transition-colors shrink-0">
                     <Plug className="w-3.5 h-3.5" />
                   </span>
                   <code className="text-sm font-semibold text-foreground font-mono truncate">
@@ -423,7 +423,7 @@ function ToolCatalogue({ tools, loading }: { tools: CatalogueEntry[]; loading: b
                   </code>
                 </div>
                 {tool.destructive && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 bg-amber-100 dark:bg-amber-500/15 dark:text-amber-400 rounded-full px-2 py-0.5 shrink-0">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-status-warning bg-status-warning dark:bg-status-warning/15 dark:text-status-warning rounded-full px-2 py-0.5 shrink-0">
                     <AlertTriangle className="w-3 h-3" /> gate
                   </span>
                 )}
@@ -460,7 +460,7 @@ function ApprovalsPanel({
   return (
     <Panel
       title="Pending Approvals"
-      icon={<ShieldCheck className="w-5 h-5 text-amber-500" />}
+      icon={<ShieldCheck className="w-5 h-5 text-status-warning" />}
       count={pending.length}
     >
       {pending.length === 0 ? (
@@ -470,10 +470,10 @@ function ApprovalsPanel({
           {pending.map((a) => (
             <li
               key={a.id}
-              className="rounded-xl border border-amber-200 bg-amber-50/60 dark:border-amber-500/30 dark:bg-amber-500/10 p-3.5"
+              className="rounded-xl border border-status-warning bg-status-warning/60 dark:border-status-warning/30 dark:bg-status-warning/10 p-3.5"
             >
               <div className="flex items-center gap-2">
-                <GitPullRequest className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <GitPullRequest className="w-4 h-4 text-status-warning dark:text-status-warning shrink-0" />
                 <code className="text-sm font-semibold text-foreground font-mono truncate">
                   {a.action}
                 </code>
@@ -484,7 +484,7 @@ function ApprovalsPanel({
               <button
                 onClick={() => approve(a.id)}
                 disabled={working === a.id}
-                className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-status-success text-white hover:bg-status-success disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
               >
                 {working === a.id ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
@@ -509,7 +509,7 @@ function ContributionFeed({ events }: { events: ContributionEvent[] }) {
   return (
     <Panel
       title="Contribution Feed"
-      icon={<Activity className="w-5 h-5 text-blue-500" />}
+      icon={<Activity className="w-5 h-5 text-status-info" />}
       count={events.length}
     >
       {events.length === 0 ? (
@@ -649,7 +649,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
   return (
     <Panel
       title="Invoke a Tool"
-      icon={<Play className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
+      icon={<Play className="w-5 h-5 text-brand-accent dark:text-brand-accent" />}
       action={<span className="text-[11px] font-medium text-muted-foreground">MCP Inspector</span>}
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -704,7 +704,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
       </label>
 
       {selected?.tool.destructive && (
-        <p className="text-xs text-amber-700 dark:text-amber-400 mt-2 flex items-start gap-1.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 rounded-lg px-2.5 py-2">
+        <p className="text-xs text-status-warning dark:text-status-warning mt-2 flex items-start gap-1.5 bg-status-warning dark:bg-status-warning/10 border border-status-warning dark:border-status-warning/20 rounded-lg px-2.5 py-2">
           <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
           <span>
             Destructive — first call returns <code className="font-mono">pending_approval</code>;
@@ -717,19 +717,19 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
       <button
         onClick={run}
         disabled={running}
-        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-brand-accent text-white hover:bg-brand-accent disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
       >
         {running ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         Invoke
       </button>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400 mt-2">{error}</p>}
+      {error && <p className="text-sm text-status-error dark:text-status-error mt-2">{error}</p>}
       {result && (
         <pre
           className={`mt-3 text-xs rounded-xl p-3.5 overflow-x-auto ring-1 ring-inset ${
             result.ok
-              ? "bg-emerald-50 text-emerald-900 ring-emerald-600/15 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/25"
-              : "bg-amber-50 text-amber-900 ring-amber-600/15 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-500/25"
+              ? "bg-status-success text-emerald-900 ring-emerald-600/15 dark:bg-status-success/10 dark:text-status-success dark:ring-emerald-500/25"
+              : "bg-status-warning text-amber-900 ring-amber-600/15 dark:bg-status-warning/10 dark:text-status-warning dark:ring-amber-500/25"
           }`}
         >
           {JSON.stringify(result, null, 2)}

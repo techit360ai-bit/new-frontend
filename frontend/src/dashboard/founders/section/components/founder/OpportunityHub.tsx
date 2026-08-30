@@ -82,8 +82,8 @@ export default function OpportunityHub() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Opportunity Hub</h1>
-        <p className="text-sm text-slate-600 mt-1">Programs, hackathons, funding, events and ownership-focused collaboration calls.</p>
+        <h1 className="text-2xl font-semibold text-text-primary">Opportunity Hub</h1>
+        <p className="text-sm text-text-muted mt-1">Programs, hackathons, funding, events and ownership-focused collaboration calls.</p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -96,7 +96,7 @@ export default function OpportunityHub() {
               className={`text-xs font-medium px-3 py-1.5 rounded-full border transition ${
                 typeFilter === t
                   ? "bg-violet-600 text-white border-violet-600"
-                  : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                  : "bg-surface-primary text-text-secondary border-border-strong hover:bg-background-primary"
               }`}
             >
               {TYPE_LABELS[t]} ({counts[t]})
@@ -107,7 +107,7 @@ export default function OpportunityHub() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="text-xs px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700"
+            className="text-xs px-2 py-1.5 rounded-lg border border-border-strong bg-surface-primary text-text-secondary"
             aria-label="Status filter"
           >
             <option value="all">All status</option>
@@ -116,13 +116,13 @@ export default function OpportunityHub() {
             <option value="closed">Closed</option>
           </select>
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-disabled" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search"
-              className="text-xs pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 bg-white"
+              className="text-xs pl-8 pr-3 py-1.5 rounded-lg border border-border-strong bg-surface-primary"
               aria-label="Search opportunities"
             />
           </div>
@@ -130,16 +130,16 @@ export default function OpportunityHub() {
       </div>
 
       {loading ? (
-        <div className="border border-dashed border-slate-300 rounded-xl p-10 text-center">
-          <p className="text-sm text-slate-500">Loading live opportunities...</p>
+        <div className="border border-dashed border-border-strong rounded-xl p-10 text-center">
+          <p className="text-sm text-text-muted">Loading live opportunities...</p>
         </div>
       ) : error ? (
-        <div className="border border-red-200 bg-red-50 rounded-xl p-10 text-center">
-          <p className="text-sm text-red-700">Live opportunities are unavailable: {error}</p>
+        <div className="border border-status-error bg-status-error-soft rounded-xl p-10 text-center">
+          <p className="text-sm text-status-error">Live opportunities are unavailable: {error}</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="border border-dashed border-slate-300 rounded-xl p-10 text-center">
-          <p className="text-sm text-slate-600">
+        <div className="border border-dashed border-border-strong rounded-xl p-10 text-center">
+          <p className="text-sm text-text-muted">
             {opportunities.length === 0
               ? "Organizations haven't published any opportunities yet."
               : `No ${typeFilter === "all" ? "" : TYPE_LABELS[typeFilter].toLowerCase() + " "}opportunities match. Try a different filter.`}

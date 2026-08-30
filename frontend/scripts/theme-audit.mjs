@@ -22,16 +22,31 @@ const patterns = {
   hueUtilities: /(?:bg|text|border|from|via|to)-(?:blue|purple|green|red|gray|slate|zinc|orange|indigo|emerald|amber|yellow|pink)-\d+/g,
 }
 
+const canonicalFiles = new Set([
+  'src/config/theme.config.ts',
+  'src/styles/themes.css',
+])
 const counts = Object.fromEntries(Object.keys(patterns).map(key => [key, 0]))
+const productCounts = Object.fromEntries(Object.keys(patterns).map(key => [key, 0]))
 const hotspots = []
+const productHotspots = []
 for (const { file, text } of source) {
   const row = { file: path.relative(process.cwd(), file), matches: 0 }
   for (const [key, pattern] of Object.entries(patterns)) {
     const matches = text.match(pattern) || []
     counts[key] += matches.length
+    if (!canonicalFiles.has(row.file)) productCounts[key] += matches.length
     row.matches += matches.length
   }
   if (row.matches) hotspots.push(row)
+  if (row.matches && !canonicalFiles.has(row.file)) productHotspots.push(row)
 }
 
-console.log(JSON.stringify({ files: source.length, counts, hotspots: hotspots.sort((a, b) => b.matches - a.matches).slice(0, 25) }, null, 2))
+console.log(JSON.stringify({
+  files: source.length,
+  counts,
+  productCounts,
+  canonicalFiles: [...canonicalFiles],
+  hotspots: hotspots.sort((a, b) => b.matches - a.matches).slice(0, 25),
+  productHotspots: productHotspots.sort((a, b) => b.matches - a.matches).slice(0, 25),
+}, null, 2))

@@ -76,7 +76,7 @@ export function DiscoveryPage() {
           <h1 className="text-xl font-semibold text-text-primary">Discover</h1>
           <p className="mt-1 text-sm text-text-secondary">People and opportunities where you can create value next.</p>
         </div>
-        <button type="button" onClick={load} className="rounded-md border border-border-default p-2 text-text-secondary hover:bg-bg-elevated" aria-label="Refresh recommendations" title="Refresh recommendations">
+        <button type="button" onClick={load} className="rounded-md border border-border-default p-2 text-text-secondary hover:bg-surface-secondary" aria-label="Refresh recommendations" title="Refresh recommendations">
           <RefreshCw className="h-4 w-4" />
         </button>
       </div>
@@ -92,7 +92,7 @@ export function DiscoveryPage() {
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <label className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-          <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search people, startups, projects, ideas, and opportunities" className="h-10 w-full rounded-md border border-border-default bg-bg-surface pl-9 pr-3 text-sm text-text-primary outline-none focus:border-accent-primary" />
+          <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search people, startups, projects, ideas, and opportunities" className="h-10 w-full rounded-md border border-border-default bg-surface-primary pl-9 pr-3 text-sm text-text-primary outline-none focus:border-accent-primary" />
         </label>
         <label className="flex h-10 items-center gap-2 text-xs text-text-secondary">
           <input type="checkbox" checked={personalized} onChange={event => setPersonalized(event.target.checked)} className="h-4 w-4 accent-accent-primary" />
@@ -101,7 +101,7 @@ export function DiscoveryPage() {
       </div>
 
       {loading && <PageLoadingState label="Loading recommendations" />}
-      {!loading && error && <PageErrorState title="Recommendations unavailable" description={error} action={<button type="button" onClick={load} className="min-h-11 rounded-md border border-border-default px-4 text-sm font-medium text-text-primary hover:bg-bg-elevated">Try again</button>} />}
+      {!loading && error && <PageErrorState title="Recommendations unavailable" description={error} action={<button type="button" onClick={load} className="min-h-11 rounded-md border border-border-default px-4 text-sm font-medium text-text-primary hover:bg-surface-secondary">Try again</button>} />}
       {!loading && !error && recommendations.length > 0 && (
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {recommendations.map(item => <RecommendationCard key={item.id} recommendation={item} onDismiss={query ? undefined : dismiss} onAction={(rec, action) => { if (!rec.id.startsWith('search:')) void recordRecommendationExposure(rec.id, action, 'discovery').catch(() => undefined) }} />)}

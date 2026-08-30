@@ -31,7 +31,7 @@ export function PageState({
       role={tone === "error" ? "alert" : "status"}
       aria-live={tone === "error" ? "assertive" : "polite"}
     >
-      <Icon className={cn("h-6 w-6 text-muted-foreground", tone === "loading" && "animate-spin", tone === "error" && "text-destructive", tone === "success" && "text-emerald-600")} aria-hidden="true" />
+      <Icon className={cn("h-6 w-6 text-muted-foreground", tone === "loading" && "animate-spin", tone === "error" && "text-destructive", tone === "success" && "text-status-success")} aria-hidden="true" />
       <div>
         <p className="text-sm font-semibold text-foreground">{title}</p>
         {description && <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>}

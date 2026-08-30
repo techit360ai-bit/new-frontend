@@ -188,8 +188,8 @@ export function CreateRoom() {
               </div>
             )}
 
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10">
-              <p className="text-sm text-amber-800 dark:text-amber-300">
+            <div className="rounded-lg border border-status-warning bg-status-warning p-4 dark:border-status-warning/30 dark:bg-status-warning/10">
+              <p className="text-sm text-status-warning dark:text-status-warning">
                 <strong>Note:</strong> All payments and equity agreements must be formalized with
                 proper legal documentation. TECHIT provides templates but consult with legal counsel.
               </p>

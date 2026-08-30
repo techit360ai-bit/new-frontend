@@ -51,13 +51,13 @@ const sourceLabels: Record<string, string> = {
 function statusClass(status?: string) {
   switch ((status ?? "").toLowerCase()) {
     case "verified":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+      return "border-status-success bg-status-success-soft text-status-success";
     case "expired":
-      return "border-amber-200 bg-amber-50 text-amber-700";
+      return "border-status-warning bg-status-warning-soft text-status-warning";
     case "failed":
       return "border-rose-200 bg-rose-50 text-rose-700";
     case "disconnected":
-      return "border-slate-200 bg-slate-100 text-slate-700";
+      return "border-border-default bg-surface-secondary text-text-secondary";
     default:
       return "border-cyan-200 bg-cyan-50 text-cyan-700";
   }
@@ -185,8 +185,8 @@ export function TrustCenter() {
             <ShieldCheck className="w-4 h-4" />
             Trust Engine Lite
           </div>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">Trust Center</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="mt-1 text-2xl font-bold text-text-primary">Trust Center</h1>
+          <p className="mt-1 text-sm text-text-muted">
             Metadata-only verification, expiring badges, immutable history, and founder-only alerts.
           </p>
         </div>
@@ -197,13 +197,13 @@ export function TrustCenter() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className="rounded-xl border border-border-default bg-surface-primary p-5">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-700">Trust score</p>
+              <p className="text-sm font-semibold text-text-secondary">Trust score</p>
               <div className="mt-3 flex items-end gap-3">
-                <span className="text-5xl font-bold tabular-nums text-slate-900">{score}</span>
-                <span className="pb-2 text-sm text-slate-500">/100</span>
+                <span className="text-5xl font-bold tabular-nums text-text-primary">{score}</span>
+                <span className="pb-2 text-sm text-text-muted">/100</span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge className="border-violet-200 bg-violet-50 text-violet-700" variant="outline">
@@ -215,54 +215,54 @@ export function TrustCenter() {
               </div>
             </div>
             <div className="grid min-w-[260px] gap-3 text-sm">
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs uppercase tracking-wider text-slate-400">Active badges</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">{activeBadges.length}</p>
+              <div className="rounded-lg border border-border-default p-3">
+                <p className="text-xs uppercase tracking-wider text-text-disabled">Active badges</p>
+                <p className="mt-1 text-xl font-semibold text-text-primary">{activeBadges.length}</p>
               </div>
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs uppercase tracking-wider text-slate-400">Last sync</p>
-                <p className="mt-1 font-medium text-slate-900">{formatDate(profile?.last_sync_at)}</p>
+              <div className="rounded-lg border border-border-default p-3">
+                <p className="text-xs uppercase tracking-wider text-text-disabled">Last sync</p>
+                <p className="mt-1 font-medium text-text-primary">{formatDate(profile?.last_sync_at)}</p>
               </div>
             </div>
           </div>
 
           <div className="mt-5 grid gap-3 md:grid-cols-4">
             {Object.entries(profile?.breakdown ?? {}).slice(0, 8).map(([key, value]) => (
-              <div key={key} className="rounded-lg bg-slate-50 p-3">
-                <p className="text-xs text-slate-500">{key.replaceAll("_", " ")}</p>
-                <p className="mt-1 text-lg font-semibold tabular-nums text-slate-900">{Math.round(value)}</p>
+              <div key={key} className="rounded-lg bg-background-primary p-3">
+                <p className="text-xs text-text-muted">{key.replaceAll("_", " ")}</p>
+                <p className="mt-1 text-lg font-semibold tabular-nums text-text-primary">{Math.round(value)}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className="rounded-xl border border-border-default bg-surface-primary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-700">Founder notifications</p>
-              <p className="text-xs text-slate-500">{actionRequired.length} item(s) need attention</p>
+              <p className="text-sm font-semibold text-text-secondary">Founder notifications</p>
+              <p className="text-xs text-text-muted">{actionRequired.length} item(s) need attention</p>
             </div>
-            <Bell className="w-5 h-5 text-amber-500" />
+            <Bell className="w-5 h-5 text-status-warning" />
           </div>
           <div className="mt-4 space-y-3">
             {notifications.length === 0 ? (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+              <div className="rounded-lg border border-status-success bg-status-success-soft p-3 text-sm text-status-success">
                 No Trust alerts right now.
               </div>
             ) : (
               notifications.slice(0, 4).map((notification) => (
-                <div key={notification.notification_id} className="rounded-lg border border-slate-200 p-3">
+                <div key={notification.notification_id} className="rounded-lg border border-border-default p-3">
                   <div className="flex items-start gap-2">
                     {notification.severity === "critical" ? (
                       <AlertTriangle className="mt-0.5 w-4 h-4 text-rose-500" />
                     ) : notification.action_required ? (
-                      <Clock className="mt-0.5 w-4 h-4 text-amber-500" />
+                      <Clock className="mt-0.5 w-4 h-4 text-status-warning" />
                     ) : (
-                      <CheckCircle2 className="mt-0.5 w-4 h-4 text-emerald-500" />
+                      <CheckCircle2 className="mt-0.5 w-4 h-4 text-status-success" />
                     )}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-900">{notification.message}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="text-sm font-medium text-text-primary">{notification.message}</p>
+                      <p className="mt-1 text-xs text-text-muted">
                         {sourceLabels[notification.source ?? ""] ?? notification.source ?? "Trust"} · investor visible: no
                       </p>
                     </div>
@@ -274,51 +274,51 @@ export function TrustCenter() {
         </section>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-violet-600" />
-              <h2 className="text-sm font-semibold text-slate-700">Verification badges</h2>
+              <h2 className="text-sm font-semibold text-text-secondary">Verification badges</h2>
             </div>
-            <p className="mt-1 text-xs text-slate-500">Badges expire with their source verification.</p>
+            <p className="mt-1 text-xs text-text-muted">Badges expire with their source verification.</p>
           </div>
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {badges.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+            <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">
               No active Trust badges yet.
             </div>
           ) : (
             badges.map((badge) => (
-              <div key={`${badge.badge_type}-${badge.source}`} className="rounded-lg border border-slate-200 p-4">
+              <div key={`${badge.badge_type}-${badge.source}`} className="rounded-lg border border-border-default p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-slate-900">{badge.label}</p>
-                    <p className="mt-1 text-xs text-slate-500">{sourceLabels[badge.source] ?? badge.source}</p>
+                    <p className="font-semibold text-text-primary">{badge.label}</p>
+                    <p className="mt-1 text-xs text-text-muted">{sourceLabels[badge.source] ?? badge.source}</p>
                   </div>
                   <Badge className={statusClass(String(badge.status))} variant="outline">
                     {badge.active === false ? "expired" : badge.status}
                   </Badge>
                 </div>
-                <p className="mt-4 text-xs text-slate-500">Expires {formatDate(badge.expires_at)}</p>
+                <p className="mt-4 text-xs text-text-muted">Expires {formatDate(badge.expires_at)}</p>
               </div>
             ))
           )}
         </div>
         {expiringBadges.length > 0 && (
-          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <div className="mt-4 rounded-lg border border-status-warning bg-status-warning-soft p-3 text-sm text-status-warning">
             Next expiry: {expiringBadges[0].label} on {formatDate(expiringBadges[0].expires_at)}.
           </div>
         )}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center gap-2">
           <Lock className="w-4 h-4 text-cyan-600" />
           <div>
-            <h2 className="text-sm font-semibold text-slate-700">Connected verification sources</h2>
-            <p className="mt-1 text-xs text-slate-500">Manual re-verification and disconnect controls.</p>
+            <h2 className="text-sm font-semibold text-text-secondary">Connected verification sources</h2>
+            <p className="mt-1 text-xs text-text-muted">Manual re-verification and disconnect controls.</p>
           </div>
         </div>
         <div className="grid gap-3 xl:grid-cols-2">
@@ -326,21 +326,21 @@ export function TrustCenter() {
             const latest = latestBySource.get(manifest.source);
             const disabled = busySource === manifest.source;
             return (
-              <div key={manifest.provider} className="rounded-lg border border-slate-200 p-4">
+              <div key={manifest.provider} className="rounded-lg border border-border-default p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-slate-900">{manifest.display_name}</p>
+                      <p className="font-semibold text-text-primary">{manifest.display_name}</p>
                       <Badge className={statusClass(String(latest?.status ?? "pending"))} variant="outline">
                         {latest?.status ?? "not verified"}
                       </Badge>
-                      <Badge className="border-slate-200 bg-slate-50 text-slate-600" variant="outline">
+                      <Badge className="border-border-default bg-background-primary text-text-muted" variant="outline">
                         {formatFrequency(manifest.sync_frequency_seconds)}
                       </Badge>
                     </div>
-                    <p className="mt-2 text-sm text-slate-600">{manifest.access_description}</p>
-                    <p className="mt-2 text-xs text-slate-500">{manifest.storage_description}</p>
-                    <p className="mt-3 text-xs text-slate-400">
+                    <p className="mt-2 text-sm text-text-muted">{manifest.access_description}</p>
+                    <p className="mt-2 text-xs text-text-muted">{manifest.storage_description}</p>
+                    <p className="mt-3 text-xs text-text-disabled">
                       Latest hash: {latest?.metadata_hash ? `${latest.metadata_hash.slice(0, 12)}...` : "none"}
                     </p>
                   </div>
@@ -369,7 +369,7 @@ export function TrustCenter() {
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {manifest.stored_fields.slice(0, 5).map((field) => (
-                    <span key={field} className="rounded bg-slate-100 px-2 py-1 text-xs text-slate-600">
+                    <span key={field} className="rounded bg-surface-secondary px-2 py-1 text-xs text-text-muted">
                       {field}
                     </span>
                   ))}
@@ -380,12 +380,12 @@ export function TrustCenter() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center gap-2">
           <Link2 className="w-4 h-4 text-violet-600" />
           <div>
-            <h2 className="text-sm font-semibold text-slate-700">Connect a Source</h2>
-            <p className="mt-1 text-xs text-slate-500">Initiate verification for sources not yet connected.</p>
+            <h2 className="text-sm font-semibold text-text-secondary">Connect a Source</h2>
+            <p className="mt-1 text-xs text-text-muted">Initiate verification for sources not yet connected.</p>
           </div>
         </div>
         {(() => {
@@ -464,37 +464,37 @@ export function TrustCenter() {
         })()}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center gap-2">
-          <History className="w-4 h-4 text-slate-600" />
+          <History className="w-4 h-4 text-text-muted" />
           <div>
-            <h2 className="text-sm font-semibold text-slate-700">Immutable Trust timeline</h2>
-            <p className="mt-1 text-xs text-slate-500">Append-only verification history with metadata hashes.</p>
+            <h2 className="text-sm font-semibold text-text-secondary">Immutable Trust timeline</h2>
+            <p className="mt-1 text-xs text-text-muted">Append-only verification history with metadata hashes.</p>
           </div>
         </div>
         <div className="space-y-3">
           {history.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+            <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">
               No Trust timeline entries yet.
             </div>
           ) : (
             history.map((item) => (
-              <div key={item.verification_id} className="grid gap-3 rounded-lg border border-slate-200 p-4 md:grid-cols-[1fr_auto]">
+              <div key={item.verification_id} className="grid gap-3 rounded-lg border border-border-default p-4 md:grid-cols-[1fr_auto]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium text-slate-900">{item.event_type || `${item.source}_${item.status}`}</p>
+                    <p className="font-medium text-text-primary">{item.event_type || `${item.source}_${item.status}`}</p>
                     <Badge className={statusClass(String(item.status))} variant="outline">
                       {item.status}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-text-muted">
                     {sourceLabels[item.source] ?? item.source} · created {formatDate(item.created_at)} · expires {formatDate(item.expires_at)}
                   </p>
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-2 text-xs text-text-disabled">
                     Hash: {item.metadata_hash ? `${item.metadata_hash.slice(0, 18)}...` : "none"}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="flex items-center gap-2 text-xs text-text-muted">
                   <Lock className="w-3 h-3" />
                   append-only
                 </div>

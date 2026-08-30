@@ -1,4 +1,4 @@
-/* Canonical TechIT palette. Change this file (or theme.config.ts) to rebrand. */
+/* Generated from src/config/theme.config.ts. Do not edit directly. */
 :root {
   color-scheme: light;
   --radius: 0.625rem;
@@ -7,6 +7,89 @@
   --techit-brand-secondary: #0a1929;
   --techit-brand-accent: #4f6ef7;
   --techit-brand-premium: #ffd700;
+  --techit-background-inverse: #0a0a0a;
+  --techit-background-inverse-secondary: #0d0d0d;
+  --techit-surface-inverse: #111111;
+  --techit-surface-inverse-muted: #1f2937;
+  --techit-text-on-inverse: #f3f4f6;
+  --techit-text-on-inverse-secondary: #d1d5db;
+  --techit-text-on-inverse-muted: #9ca3af;
+  --techit-text-on-inverse-disabled: #6b7280;
+  --techit-border-inverse: #1f2937;
+  --techit-border-inverse-strong: #374151;
+  --techit-status-success: #10b981;
+  --techit-status-warning: #f59e0b;
+  --techit-status-error: #ef4444;
+  --techit-status-info: #2196f3;
+  --techit-status-pending: #a855f7;
+  --techit-status-active: #10b981;
+  --techit-status-inactive: #64748b;
+  --techit-status-disabled: #94a3b8;
+  --techit-status-success-soft: rgba(16, 185, 129, 0.12);
+  --techit-status-warning-soft: rgba(245, 158, 11, 0.12);
+  --techit-status-error-soft: rgba(239, 68, 68, 0.12);
+  --techit-status-info-soft: rgba(33, 150, 243, 0.12);
+  --techit-status-pending-soft: rgba(168, 85, 247, 0.12);
+  --techit-role-explorer: #4f6ef7;
+  --techit-role-explorer-hover: #3b5de7;
+  --techit-role-explorer-soft: #eef2ff;
+  --techit-role-explorer-muted: #e0e7ff;
+  --techit-role-explorer-strong: #3730a3;
+  --techit-role-founder: #7c3aed;
+  --techit-role-founder-hover: #6d28d9;
+  --techit-role-founder-soft: #f5f3ff;
+  --techit-role-founder-muted: #ede9fe;
+  --techit-role-founder-strong: #5b21b6;
+  --techit-role-collaborator: #f59e0b;
+  --techit-role-collaborator-hover: #d97706;
+  --techit-role-collaborator-soft: #fffbeb;
+  --techit-role-collaborator-muted: #fef3c7;
+  --techit-role-collaborator-strong: #92400e;
+  --techit-role-investor: #10b981;
+  --techit-role-investor-hover: #059669;
+  --techit-role-investor-soft: #ecfdf5;
+  --techit-role-investor-muted: #d1fae5;
+  --techit-role-investor-strong: #065f46;
+  --techit-role-organization: #4f46e5;
+  --techit-role-organization-hover: #4338ca;
+  --techit-role-organization-soft: #eef2ff;
+  --techit-role-organization-muted: #e0e7ff;
+  --techit-role-organization-strong: #312e81;
+  --techit-feature-incubation: #7c3aed;
+  --techit-feature-incubation-hover: #6d28d9;
+  --techit-feature-incubation-soft: #f5f3ff;
+  --techit-feature-incubation-muted: #ede9fe;
+  --techit-feature-code: #06b6d4;
+  --techit-feature-code-strong: #0e7490;
+  --techit-feature-call-overlay: #1a2942;
+  --techit-chart-1: #10b981;
+  --techit-chart-2: #3b82f6;
+  --techit-chart-3: #8b5cf6;
+  --techit-chart-4: #f59e0b;
+  --techit-chart-5: #ec4899;
+  --techit-chart-6: #06b6d4;
+  --techit-integration-linkedin: #0a66c2;
+  --techit-integration-slack: #0a66c2;
+  --techit-integration-jira: #ff6b6b;
+  --techit-marketing-founder-card-gradient: linear-gradient(135deg, #7c3aed, #a855f7);
+  --techit-marketing-founder-card-accent: #a855f7;
+  --techit-marketing-collaborator-card-gradient: linear-gradient(135deg, #0ea5e9, #06b6d4);
+  --techit-marketing-collaborator-card-accent: #06b6d4;
+  --techit-marketing-investor-card-gradient: linear-gradient(135deg, #10b981, #06b6d4);
+  --techit-marketing-investor-card-accent: #10b981;
+  --techit-marketing-organization-card-gradient: linear-gradient(135deg, #f43f5e, #ec4899);
+  --techit-marketing-organization-card-accent: #f43f5e;
+  --techit-marketing-paid-collaboration-soft: rgba(124, 58, 237, 0.18);
+  --techit-marketing-paid-collaboration: #7c3aed;
+  --techit-marketing-free-collaboration-soft: rgba(234, 179, 8, 0.14);
+  --techit-marketing-free-collaboration: #eab308;
+  --techit-marketing-hiring-soft: rgba(236, 72, 153, 0.14);
+  --techit-marketing-hiring: #ec4899;
+  --techit-gradient-brand: linear-gradient(135deg, #2196f3, #4f6ef7);
+  --techit-gradient-brand-subtle: linear-gradient(135deg, rgba(33, 150, 243, 0.12), rgba(79, 110, 247, 0.08));
+  --techit-shadow-elevated: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --techit-shadow-focus: 0 0 0 3px rgba(33, 150, 243, 0.24);
+  --techit-editor-background: #1e1e1e;
   --techit-background-primary: #f6f8fb;
   --techit-background-secondary: #ffffff;
   --techit-background-tertiary: #f0f3f7;
@@ -26,20 +109,16 @@
   --techit-action-primary-hover: #1976d2;
   --techit-action-secondary: #0a1929;
   --techit-action-danger: #ef4444;
-  --techit-status-success: #10b981;
-  --techit-status-warning: #f59e0b;
-  --techit-status-error: #ef4444;
-  --techit-status-info: #2196f3;
-  --techit-status-pending: #a855f7;
-  --techit-role-explorer: #4f6ef7;
-  --techit-role-founder: #2196f3;
-  --techit-role-collaborator: #10b981;
-  --techit-role-investor: #a855f7;
-  --techit-role-organization: #f59e0b;
-  --techit-gradient-brand: linear-gradient(135deg, #2196f3, #4f6ef7);
-  --techit-gradient-brand-subtle: linear-gradient(135deg, rgba(33, 150, 243, 0.12), rgba(79, 110, 247, 0.08));
-  --techit-shadow-elevated: 0 8px 24px rgba(15, 23, 42, 0.12);
-  --techit-shadow-focus: 0 0 0 3px rgba(33, 150, 243, 0.24);
+  --techit-landing-background-primary: #ffffff;
+  --techit-landing-background-secondary: #f9f9ff;
+  --techit-landing-background-tertiary: #f0f0fa;
+  --techit-landing-text-primary: #050515;
+  --techit-landing-text-secondary: #666680;
+  --techit-landing-text-tertiary: #999999;
+  --techit-landing-border: #e5e5e8;
+  --techit-landing-accent-primary: #7c3aed;
+  --techit-landing-accent-secondary: #0891b2;
+  --techit-landing-accent-success: #059669;
 }
 
 .dark {
@@ -68,6 +147,16 @@
   --techit-gradient-brand-subtle: linear-gradient(135deg, rgba(79, 110, 247, 0.2), rgba(33, 150, 243, 0.12));
   --techit-shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.35);
   --techit-shadow-focus: 0 0 0 3px rgba(79, 110, 247, 0.3);
+  --techit-landing-background-primary: #05050f;
+  --techit-landing-background-secondary: #0a0a1f;
+  --techit-landing-background-tertiary: #151530;
+  --techit-landing-text-primary: #ffffff;
+  --techit-landing-text-secondary: #b0b0d0;
+  --techit-landing-text-tertiary: #808090;
+  --techit-landing-border: #2a2a4a;
+  --techit-landing-accent-primary: #7c3aed;
+  --techit-landing-accent-secondary: #06b6d4;
+  --techit-landing-accent-success: #10b981;
 }
 
 /* Legacy aliases keep existing feature-scoped styles visually stable while
@@ -83,7 +172,7 @@
   --techit-app-subtle: var(--techit-background-tertiary);
   --techit-app-brand: var(--techit-brand-primary);
   --techit-app-brand-strong: var(--techit-brand-primary-hover);
-  --techit-app-brand-soft: rgba(33, 150, 243, 0.1);
+  --techit-app-brand-soft: color-mix(in srgb, var(--techit-brand-primary) 10%, transparent);
   --techit-app-success: var(--techit-status-success);
   --techit-app-warning: var(--techit-status-warning);
   --techit-app-danger: var(--techit-status-error);
@@ -101,6 +190,20 @@
   --score-red: var(--techit-status-error);
   --score-blue: var(--techit-brand-primary);
   --score-purple: var(--techit-status-pending);
+  --landing-bg-primary: var(--techit-landing-background-primary);
+  --landing-bg-secondary: var(--techit-landing-background-secondary);
+  --landing-bg-tertiary: var(--techit-landing-background-tertiary);
+  --landing-text-primary: var(--techit-landing-text-primary);
+  --landing-text-secondary: var(--techit-landing-text-secondary);
+  --landing-text-tertiary: var(--techit-landing-text-tertiary);
+  --landing-border: var(--techit-landing-border);
+  --landing-accent-primary: var(--techit-landing-accent-primary);
+  --landing-accent-secondary: var(--techit-landing-accent-secondary);
+  --landing-accent-success: var(--techit-landing-accent-success);
 }
 
-.dark { --techit-app-brand-soft: rgba(79, 110, 247, 0.16); }
+:root, [data-techit-role="explorer"] { --techit-role-primary: var(--techit-role-explorer); }
+[data-techit-role="founder"] { --techit-role-primary: var(--techit-role-founder); }
+[data-techit-role="collaborator"] { --techit-role-primary: var(--techit-role-collaborator); }
+[data-techit-role="investor"] { --techit-role-primary: var(--techit-role-investor); }
+[data-techit-role="organisation"], [data-techit-role="organization"] { --techit-role-primary: var(--techit-role-organization); }

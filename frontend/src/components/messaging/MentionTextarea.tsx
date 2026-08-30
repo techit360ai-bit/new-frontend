@@ -38,9 +38,9 @@ export function MentionTextarea({ value, onChange, placeholder, rows = 3, classN
         onChange={(event) => { onChange(event.target.value); updateQuery(event.target.value, event.target.selectionStart); }}
         onClick={(event) => updateQuery(value, event.currentTarget.selectionStart)} onKeyDown={onKeyDown} className={className} />
       {suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-md border border-border-default bg-bg-surface py-1 shadow-xl">
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-md border border-border-default bg-surface-primary py-1 shadow-xl">
           {suggestions.map(person => (
-            <button key={person.id} type="button" onMouseDown={event => event.preventDefault()} onClick={() => select(person)} className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg-elevated">
+            <button key={person.id} type="button" onMouseDown={event => event.preventDefault()} onClick={() => select(person)} className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-surface-secondary">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-primary/10 text-xs font-semibold text-accent-primary"><AtSign className="h-3.5 w-3.5" /></span>
               <span className="min-w-0 flex-1"><span className="flex items-center gap-1.5 text-sm font-medium text-text-primary">{person.displayName}<IdentityBadges verified={person.verified} subscriber={person.subscriber} credibilityScore={person.credibilityScore} compact /></span><span className="block truncate text-xs text-text-muted">@{person.username || 'member'} · {person.role || 'member'}</span></span>
             </button>

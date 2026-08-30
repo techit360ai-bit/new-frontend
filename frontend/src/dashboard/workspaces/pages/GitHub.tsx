@@ -31,21 +31,21 @@ function resourceName(resource: string): string {
 function statusClass(status: Connector['status'] | undefined): string {
   switch (status) {
     case 'connected':
-      return 'bg-green-500';
+      return 'bg-status-success';
     case 'pending':
-      return 'bg-yellow-500';
+      return 'bg-status-warning';
     case 'error':
-      return 'bg-red-500';
+      return 'bg-status-error';
     default:
-      return 'bg-gray-500';
+      return 'bg-status-inactive';
   }
 }
 
 function EmptyState({ children }: { children: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-      <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-      <p className="text-sm text-gray-600">{children}</p>
+    <div className="bg-surface-primary border border-border-default rounded-lg p-8 text-center">
+      <AlertCircle className="w-8 h-8 text-text-disabled mx-auto mb-3" />
+      <p className="text-sm text-text-muted">{children}</p>
     </div>
   );
 }
@@ -54,13 +54,13 @@ function ActivityRow({ activity }: { activity: ActivityEvent }) {
   return (
     <div className="flex items-start gap-3 pb-4 border-b last:border-0">
       <Avatar className="w-8 h-8">
-        <AvatarFallback className="bg-[#2196F3] text-white text-xs">
+        <AvatarFallback className="bg-brand-primary text-white text-xs">
           {initials(activity.kind)}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <p className="text-sm text-gray-700">{activity.summary || activity.kind}</p>
-        <span className="text-xs text-gray-400">{formatTimestamp(activity.at)}</span>
+        <p className="text-sm text-text-secondary">{activity.summary || activity.kind}</p>
+        <span className="text-xs text-text-disabled">{formatTimestamp(activity.at)}</span>
       </div>
     </div>
   );
@@ -104,18 +104,18 @@ export function GitHub() {
   );
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+    <div className="h-full flex flex-col bg-background-primary">
+      <div className="bg-surface-primary border-b border-border-default px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-900 rounded-lg">
+            <div className="p-2 bg-background-inverse rounded-lg">
               <Github className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 GitHub Integration
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-muted">
                 {github ? `${github.name} is ${github.status}` : 'No live GitHub connector is attached'}
               </p>
             </div>
@@ -126,7 +126,7 @@ export function GitHub() {
               Refresh
             </Button>
             <Button
-              className="bg-[#2196F3] hover:bg-[#1976D2]"
+              className="bg-brand-primary hover:bg-brand-primary-hover"
               onClick={async () => {
                 const repoName = window.prompt('Enter the GitHub repository URL or name:');
                 if (!repoName?.trim()) return;
@@ -156,14 +156,14 @@ export function GitHub() {
       </div>
 
       <div className="flex-1 overflow-auto px-8 py-6">
-        {loading && <p className="text-sm text-gray-500 mb-4">Loading live GitHub workspace data...</p>}
+        {loading && <p className="text-sm text-text-muted mb-4">Loading live GitHub workspace data...</p>}
         {!loading && error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+          <div className="rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error mb-4">
             GitHub data could not be loaded: {error}
           </div>
         )}
 
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <div className="bg-surface-primary border border-border-default rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -171,13 +171,13 @@ export function GitHub() {
                 <h2 className="font-semibold">{github?.name ?? 'GitHub connector'}</h2>
                 <Badge variant="outline">{github?.status ?? 'missing'}</Badge>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-text-muted">
                 {github
                   ? `${github.capabilities.length} capabilities, ${github.tools.length} tools, ${resources.length} linked resources`
                   : 'Connect GitHub from workspace connectors to populate live repository resources.'}
               </p>
             </div>
-            <span className="text-xs text-gray-500">Last sync: {formatTimestamp(github?.lastSync)}</span>
+            <span className="text-xs text-text-muted">Last sync: {formatTimestamp(github?.lastSync)}</span>
           </div>
         </div>
 
@@ -205,16 +205,16 @@ export function GitHub() {
             {resources.map((resource) => (
               <div
                 key={resource}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all"
+                className="bg-surface-primary border border-border-default rounded-lg p-6 hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-semibold">{resourceName(resource)}</h3>
-                      <Badge className="bg-green-500/10 text-green-600 border-green-200">Live resource</Badge>
+                      <Badge className="bg-status-success/10 text-status-success border-status-success">Live resource</Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4">{resource}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <p className="text-sm text-text-muted mb-4">{resource}</p>
+                    <div className="flex items-center gap-4 text-sm text-text-muted">
                       <span>Source connector: GitHub</span>
                       <span>Updated {formatTimestamp(github?.lastSync)}</span>
                     </div>
@@ -248,14 +248,14 @@ export function GitHub() {
 
           <TabsContent value="prs" className="space-y-4">
             {pullRequestActivity.map((item) => (
-              <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6">
+              <div key={item.id} className="bg-surface-primary border border-border-default rounded-lg p-6">
                 <div className="flex items-start gap-4">
                   <div className={`w-2 h-2 rounded-full ${statusClass(github?.status)} mt-2`} />
                   <div className="flex-1">
                     <h3 className="font-semibold mb-1">{item.summary || item.kind}</h3>
-                    <p className="text-sm text-gray-500">{formatTimestamp(item.at)}</p>
+                    <p className="text-sm text-text-muted">{formatTimestamp(item.at)}</p>
                   </div>
-                  <Badge className="bg-[#2196F3] text-white">{item.kind}</Badge>
+                  <Badge className="bg-brand-primary text-white">{item.kind}</Badge>
                 </div>
               </div>
             ))}
@@ -266,13 +266,13 @@ export function GitHub() {
 
           <TabsContent value="branches" className="space-y-4">
             {branchActivity.map((item) => (
-              <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6">
+              <div key={item.id} className="bg-surface-primary border border-border-default rounded-lg p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <GitBranch className="w-5 h-5 text-[#2196F3]" />
+                    <GitBranch className="w-5 h-5 text-brand-primary" />
                     <div>
                       <h3 className="font-semibold">{item.summary || item.kind}</h3>
-                      <p className="text-sm text-gray-500">Updated {formatTimestamp(item.at)}</p>
+                      <p className="text-sm text-text-muted">Updated {formatTimestamp(item.at)}</p>
                     </div>
                   </div>
                   <Badge variant="outline">{item.kind}</Badge>
@@ -285,14 +285,14 @@ export function GitHub() {
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-4">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="bg-surface-primary border border-border-default rounded-lg p-6">
               <h3 className="font-semibold mb-4">Recent Activity</h3>
               <div className="space-y-4">
                 {activity.map((item) => (
                   <ActivityRow key={item.id} activity={item} />
                 ))}
                 {!loading && activity.length === 0 && (
-                  <p className="text-sm text-gray-500">No live GitHub activity reports are recorded yet.</p>
+                  <p className="text-sm text-text-muted">No live GitHub activity reports are recorded yet.</p>
                 )}
               </div>
             </div>

@@ -46,22 +46,22 @@ const METRIC_CARDS: MetricCard[] = [
     key: "activePrograms",
     label: "Active Programs",
     icon: GraduationCap,
-    iconClass: "text-blue-700",
-    iconBackground: "bg-blue-50",
+    iconClass: "text-status-info",
+    iconBackground: "bg-status-info-soft",
   },
   {
     key: "hackathons",
     label: "Hackathons",
     icon: Trophy,
-    iconClass: "text-amber-700",
-    iconBackground: "bg-amber-50",
+    iconClass: "text-status-warning",
+    iconBackground: "bg-status-warning-soft",
   },
   {
     key: "members",
     label: "Members",
     icon: Users,
-    iconClass: "text-emerald-700",
-    iconBackground: "bg-emerald-50",
+    iconClass: "text-status-success",
+    iconBackground: "bg-status-success-soft",
   },
   {
     key: "opportunities",
@@ -80,17 +80,17 @@ function formatTimestamp(value: string): string {
 
 function ActivityIcon({ row }: { row: OrganizationActivity }) {
   if (row.type === "success" || row.type === "completed") {
-    return <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />;
+    return <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-success" />;
   }
   if (row.type === "warning" || row.type === "risk") {
-    return <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />;
+    return <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-warning" />;
   }
-  return <Activity className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />;
+  return <Activity className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-info" />;
 }
 
 function EmptyPanel({ children }: { children: string }) {
   return (
-    <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 text-center text-sm text-gray-500">
+    <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed border-border-default bg-background-primary px-6 text-center text-sm text-text-muted">
       {children}
     </div>
   );
@@ -131,14 +131,14 @@ export function Dashboard() {
     <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Organization Dashboard</h1>
-          <p className="mt-2 text-gray-600">Persisted programs, members, opportunities, and operations.</p>
+          <h1 className="text-3xl font-bold text-text-primary">Organization Dashboard</h1>
+          <p className="mt-2 text-text-muted">Persisted programs, members, opportunities, and operations.</p>
         </div>
         <button
           type="button"
           onClick={() => void loadDashboard()}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm font-medium text-text-secondary hover:bg-background-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -153,7 +153,7 @@ export function Dashboard() {
       <OrganizationIntelligencePanel />
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
           <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <div>
             <p className="font-medium">Live organization data could not be loaded.</p>
@@ -163,7 +163,7 @@ export function Dashboard() {
       )}
 
       {loading && !dashboard ? (
-        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+        <div className="rounded-lg border border-border-default bg-surface-primary px-6 py-12 text-center text-sm text-text-muted">
           Loading organization data...
         </div>
       ) : dashboard ? (
@@ -172,11 +172,11 @@ export function Dashboard() {
             {METRIC_CARDS.map((metric) => {
               const Icon = metric.icon;
               return (
-                <div key={metric.key} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                <div key={metric.key} className="rounded-lg border border-border-default bg-surface-primary p-5 shadow-sm">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">{metric.label}</p>
-                      <p className="mt-2 text-3xl font-bold text-gray-900">
+                      <p className="text-sm text-text-muted">{metric.label}</p>
+                      <p className="mt-2 text-3xl font-bold text-text-primary">
                         {dashboard?.metrics[metric.key] ?? 0}
                       </p>
                     </div>
@@ -190,17 +190,17 @@ export function Dashboard() {
           </div>
 
           {!error && dashboard && !hasLiveData && (
-            <div className="mb-8 rounded-lg border border-dashed border-gray-300 bg-white px-6 py-8 text-center">
-              <p className="font-medium text-gray-900">No organization activity is recorded yet.</p>
-              <p className="mt-1 text-sm text-gray-500">
+            <div className="mb-8 rounded-lg border border-dashed border-border-strong bg-surface-primary px-6 py-8 text-center">
+              <p className="font-medium text-text-primary">No organization activity is recorded yet.</p>
+              <p className="mt-1 text-sm text-text-muted">
                 Programs, members, opportunities, and operational charts will appear as persisted records are created.
               </p>
             </div>
           )}
 
           <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">Project Health</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-text-primary">Project Health</h2>
               {dashboard && dashboard.projectHealth.length > 0 ? (
                 <>
                   <ResponsiveContainer width="100%" height={220}>
@@ -226,9 +226,9 @@ export function Dashboard() {
                       <div key={item.name} className="flex items-center justify-between gap-4 text-sm">
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="h-3 w-3 flex-shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="truncate text-gray-700">{item.name}</span>
+                          <span className="truncate text-text-secondary">{item.name}</span>
                         </div>
-                        <span className="font-medium text-gray-900">{item.value}</span>
+                        <span className="font-medium text-text-primary">{item.value}</span>
                       </div>
                     ))}
                   </div>
@@ -238,8 +238,8 @@ export function Dashboard() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">Talent Activity</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-text-primary">Talent Activity</h2>
               {dashboard && dashboard.talentActivity.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={dashboard.talentActivity}>
@@ -257,8 +257,8 @@ export function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">Automation Trends</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-text-primary">Automation Trends</h2>
               {dashboard && dashboard.automation.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={dashboard.automation}>
@@ -276,16 +276,16 @@ export function Dashboard() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">Recent Activity</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-text-primary">Recent Activity</h2>
               {dashboard && dashboard.activity.length > 0 ? (
                 <div className="space-y-4">
                   {dashboard.activity.map((row) => (
-                    <div key={row.id} className="flex items-start gap-3 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                    <div key={row.id} className="flex items-start gap-3 border-b border-border-subtle pb-4 last:border-0 last:pb-0">
                       <ActivityIcon row={row} />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900">{row.message}</p>
-                        <p className="mt-1 text-xs text-gray-500">{formatTimestamp(row.at)}</p>
+                        <p className="text-sm text-text-primary">{row.message}</p>
+                        <p className="mt-1 text-xs text-text-muted">{formatTimestamp(row.at)}</p>
                       </div>
                     </div>
                   ))}

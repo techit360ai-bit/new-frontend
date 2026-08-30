@@ -42,13 +42,13 @@ function statusBadge(status: Contract["status"]) {
   switch (status) {
     case "draft":
       return (
-        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+        <span className="inline-flex items-center gap-1 rounded-full border border-border-default bg-background-primary px-2.5 py-0.5 text-xs font-medium text-text-muted">
           <FileText className="h-3 w-3" /> Draft
         </span>
       );
     case "pending-signature":
       return (
-        <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+        <span className="inline-flex items-center gap-1 rounded-full border border-status-warning bg-status-warning-soft px-2.5 py-0.5 text-xs font-medium text-status-warning">
           <Clock className="h-3 w-3" /> Pending Signature
         </span>
       );
@@ -60,7 +60,7 @@ function statusBadge(status: Contract["status"]) {
       );
     case "active":
       return (
-        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+        <span className="inline-flex items-center gap-1 rounded-full border border-status-success bg-status-success-soft px-2.5 py-0.5 text-xs font-medium text-status-success">
           <CheckCircle2 className="h-3 w-3" /> Active
         </span>
       );
@@ -206,8 +206,8 @@ export default function ContractSigningPage() {
   // ── Empty state ──
   if (pageState === "empty") {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-slate-500">
-        <FileText className="h-12 w-12 text-slate-300" />
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-text-muted">
+        <FileText className="h-12 w-12 text-text-on-inverse-secondary" />
         <p className="text-lg font-medium">No contract selected</p>
         <p className="text-sm">Please provide a contract ID via the URL parameter <code>?id=xxx</code>.</p>
       </div>
@@ -220,7 +220,7 @@ export default function ContractSigningPage() {
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-rose-600">
         <AlertCircle className="h-12 w-12 text-rose-300" />
         <p className="text-lg font-medium">Error loading contract</p>
-        <p className="text-sm text-slate-500">{errorMsg}</p>
+        <p className="text-sm text-text-muted">{errorMsg}</p>
       </div>
     );
   }
@@ -232,8 +232,8 @@ export default function ContractSigningPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Contract Signing</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-text-primary">Contract Signing</h1>
+          <p className="mt-1 text-sm text-text-muted">
             Review and countersign the collaboration agreement
           </p>
         </div>
@@ -241,7 +241,7 @@ export default function ContractSigningPage() {
       </div>
 
       {/* Contract Terms Card */}
-      <div className="rounded-xl border border-violet-100 bg-white shadow-sm">
+      <div className="rounded-xl border border-violet-100 bg-surface-primary shadow-sm">
         <div className="border-b border-violet-50 px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-violet-900">
             <Shield className="h-5 w-5 text-violet-500" />
@@ -254,8 +254,8 @@ export default function ContractSigningPage() {
           <div className="flex items-start gap-3">
             <Briefcase className="mt-0.5 h-4 w-4 text-violet-400" />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Project</p>
-              <p className="text-sm font-medium text-slate-800">{contract.projectName}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-disabled">Project</p>
+              <p className="text-sm font-medium text-text-primary">{contract.projectName}</p>
             </div>
           </div>
 
@@ -263,8 +263,8 @@ export default function ContractSigningPage() {
           <div className="flex items-start gap-3">
             <User className="mt-0.5 h-4 w-4 text-violet-400" />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Collaborator</p>
-              <p className="text-sm font-medium text-slate-800">{contract.collaboratorName}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-disabled">Collaborator</p>
+              <p className="text-sm font-medium text-text-primary">{contract.collaboratorName}</p>
             </div>
           </div>
 
@@ -272,8 +272,8 @@ export default function ContractSigningPage() {
           <div className="flex items-start gap-3">
             <Briefcase className="mt-0.5 h-4 w-4 text-violet-400" />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Role</p>
-              <p className="text-sm font-medium text-slate-800">{contract.role}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-disabled">Role</p>
+              <p className="text-sm font-medium text-text-primary">{contract.role}</p>
             </div>
           </div>
 
@@ -281,8 +281,8 @@ export default function ContractSigningPage() {
           <div className="flex items-start gap-3">
             <Percent className="mt-0.5 h-4 w-4 text-violet-400" />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Equity</p>
-              <p className="text-sm font-medium text-slate-800">{contract.equityPercent}%</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-disabled">Equity</p>
+              <p className="text-sm font-medium text-text-primary">{contract.equityPercent}%</p>
             </div>
           </div>
 
@@ -290,8 +290,8 @@ export default function ContractSigningPage() {
           <div className="flex items-start gap-3">
             <Timer className="mt-0.5 h-4 w-4 text-violet-400" />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Weekly Hours</p>
-              <p className="text-sm font-medium text-slate-800">{contract.weeklyHours}h / week</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-disabled">Weekly Hours</p>
+              <p className="text-sm font-medium text-text-primary">{contract.weeklyHours}h / week</p>
             </div>
           </div>
 
@@ -299,8 +299,8 @@ export default function ContractSigningPage() {
           <div className="flex items-start gap-3">
             <Calendar className="mt-0.5 h-4 w-4 text-violet-400" />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Vesting</p>
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-xs font-medium uppercase tracking-wide text-text-disabled">Vesting</p>
+              <p className="text-sm font-medium text-text-primary">
                 {contract.vestingMonths} months ({contract.cliffMonths}-month cliff)
               </p>
             </div>
@@ -310,7 +310,7 @@ export default function ContractSigningPage() {
           <div className="flex items-start gap-3 sm:col-span-2">
             <PenTool className="mt-0.5 h-4 w-4 text-violet-400" />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Skills</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-disabled">Skills</p>
               <div className="mt-1 flex flex-wrap gap-1.5">
                 {contract.skills.map((skill) => (
                   <span
@@ -327,7 +327,7 @@ export default function ContractSigningPage() {
       </div>
 
       {/* Signing Timeline */}
-      <div className="rounded-xl border border-violet-100 bg-white shadow-sm">
+      <div className="rounded-xl border border-violet-100 bg-surface-primary shadow-sm">
         <div className="border-b border-violet-50 px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-violet-900">
             <Clock className="h-5 w-5 text-violet-500" />
@@ -341,8 +341,8 @@ export default function ContractSigningPage() {
             <div
               className={`flex h-9 w-9 items-center justify-center rounded-full ${
                 collaboratorSigned
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-slate-100 text-slate-400"
+                  ? "bg-status-success-soft text-status-success"
+                  : "bg-surface-secondary text-text-disabled"
               }`}
             >
               {collaboratorSigned ? (
@@ -352,13 +352,13 @@ export default function ContractSigningPage() {
               )}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-text-primary">
                 Collaborator Signature
                 {collaboratorSigned && (
-                  <span className="ml-2 text-xs text-emerald-600">Signed</span>
+                  <span className="ml-2 text-xs text-status-success">Signed</span>
                 )}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-text-muted">
                 {collaboratorSigned
                   ? formatDate(contract.collaboratorSignedAt)
                   : "Awaiting signature"}
@@ -371,8 +371,8 @@ export default function ContractSigningPage() {
             <div
               className={`flex h-9 w-9 items-center justify-center rounded-full ${
                 founderAlreadySigned
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-slate-100 text-slate-400"
+                  ? "bg-status-success-soft text-status-success"
+                  : "bg-surface-secondary text-text-disabled"
               }`}
             >
               {founderAlreadySigned ? (
@@ -382,13 +382,13 @@ export default function ContractSigningPage() {
               )}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-text-primary">
                 Founder Countersignature
                 {founderAlreadySigned && (
-                  <span className="ml-2 text-xs text-emerald-600">Signed</span>
+                  <span className="ml-2 text-xs text-status-success">Signed</span>
                 )}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-text-muted">
                 {founderAlreadySigned
                   ? formatDate(contract.founderSignedAt)
                   : "Awaiting countersignature"}
@@ -402,8 +402,8 @@ export default function ContractSigningPage() {
               <FileText className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-slate-800">Contract Created</p>
-              <p className="text-xs text-slate-500">{formatDate(contract.createdAt)}</p>
+              <p className="text-sm font-medium text-text-primary">Contract Created</p>
+              <p className="text-xs text-text-muted">{formatDate(contract.createdAt)}</p>
             </div>
           </div>
         </div>
@@ -411,13 +411,13 @@ export default function ContractSigningPage() {
 
       {/* E-Signature Section */}
       {canCountersign && (
-        <div className="rounded-xl border border-violet-100 bg-white shadow-sm">
+        <div className="rounded-xl border border-violet-100 bg-surface-primary shadow-sm">
           <div className="border-b border-violet-50 px-6 py-4">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-violet-900">
               <PenTool className="h-5 w-5 text-violet-500" />
               Your Signature
             </h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-text-muted">
               Draw your signature below to countersign this contract
             </p>
           </div>
@@ -448,7 +448,7 @@ export default function ContractSigningPage() {
               <button
                 type="button"
                 onClick={clearCanvas}
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-primary px-3 py-1.5 text-xs font-medium text-text-muted transition hover:bg-background-primary"
               >
                 <Eraser className="h-3.5 w-3.5" />
                 Clear
@@ -474,12 +474,12 @@ export default function ContractSigningPage() {
 
       {/* Already signed message for founder */}
       {isFounder && founderAlreadySigned && (
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-6">
+        <div className="rounded-xl border border-status-success bg-status-success-soft p-6">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+            <CheckCircle2 className="h-6 w-6 text-status-success" />
             <div>
-              <p className="font-medium text-emerald-800">You have signed this contract</p>
-              <p className="text-sm text-emerald-600">
+              <p className="font-medium text-status-success">You have signed this contract</p>
+              <p className="text-sm text-status-success">
                 Countersigned on {formatDate(contract.founderSignedAt)}
               </p>
             </div>
@@ -489,12 +489,12 @@ export default function ContractSigningPage() {
 
       {/* Waiting for collaborator */}
       {isFounder && contract.status === "pending-signature" && (
-        <div className="rounded-xl border border-amber-100 bg-amber-50 p-6">
+        <div className="rounded-xl border border-status-warning bg-status-warning-soft p-6">
           <div className="flex items-center gap-3">
-            <Clock className="h-6 w-6 text-amber-600" />
+            <Clock className="h-6 w-6 text-status-warning" />
             <div>
-              <p className="font-medium text-amber-800">Waiting for collaborator signature</p>
-              <p className="text-sm text-amber-600">
+              <p className="font-medium text-status-warning">Waiting for collaborator signature</p>
+              <p className="text-sm text-status-warning">
                 The collaborator has not yet signed this contract.
               </p>
             </div>
@@ -504,12 +504,12 @@ export default function ContractSigningPage() {
 
       {/* Contract is active */}
       {contract.status === "active" && (
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-6">
+        <div className="rounded-xl border border-status-success bg-status-success-soft p-6">
           <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-emerald-600" />
+            <Shield className="h-6 w-6 text-status-success" />
             <div>
-              <p className="font-medium text-emerald-800">Contract is fully executed</p>
-              <p className="text-sm text-emerald-600">
+              <p className="font-medium text-status-success">Contract is fully executed</p>
+              <p className="text-sm text-status-success">
                 Both parties have signed. This contract is now active.
               </p>
             </div>

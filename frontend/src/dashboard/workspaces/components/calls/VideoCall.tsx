@@ -21,11 +21,11 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
 
   if (isPIP) {
     return (
-      <div className="fixed bottom-6 right-6 w-80 bg-[#0A1929] rounded-lg shadow-2xl overflow-hidden border-2 border-[#2196F3] z-50">
+      <div className="fixed bottom-6 right-6 w-80 bg-brand-secondary rounded-lg shadow-2xl overflow-hidden border-2 border-brand-primary z-50">
         <div className="relative">
-          <div className="aspect-video bg-gray-900 flex items-center justify-center">
+          <div className="aspect-video bg-background-inverse flex items-center justify-center">
             <Avatar className="w-16 h-16">
-              <AvatarFallback className="bg-[#2196F3] text-white text-xl">{currentUser.avatar}</AvatarFallback>
+              <AvatarFallback className="bg-brand-primary text-white text-xl">{currentUser.avatar}</AvatarFallback>
             </Avatar>
           </div>
           <div className="absolute top-3 right-3 flex gap-2">
@@ -50,7 +50,7 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
             <Button
               size="sm"
               variant="secondary"
-              className={`w-10 h-10 p-0 rounded-full ${isMuted ? 'bg-red-500 hover:bg-red-600' : 'bg-white/20 hover:bg-white/30'}`}
+              className={`w-10 h-10 p-0 rounded-full ${isMuted ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/20 hover:bg-surface-primary/30'}`}
               onClick={() => setIsMuted(!isMuted)}
             >
               {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -58,7 +58,7 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
             <Button
               size="sm"
               variant="secondary"
-              className={`w-10 h-10 p-0 rounded-full ${isVideoOff ? 'bg-red-500 hover:bg-red-600' : 'bg-white/20 hover:bg-white/30'}`}
+              className={`w-10 h-10 p-0 rounded-full ${isVideoOff ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/20 hover:bg-surface-primary/30'}`}
               onClick={() => setIsVideoOff(!isVideoOff)}
             >
               {isVideoOff ? <VideoOff className="w-4 h-4" /> : <Video className="w-4 h-4" />}
@@ -70,16 +70,16 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
   }
 
   return (
-    <div className="fixed inset-0 bg-[#0A1929] z-50 flex flex-col">
+    <div className="fixed inset-0 bg-brand-secondary z-50 flex flex-col">
       {/* Header */}
-      <div className="h-16 border-b border-gray-700 flex items-center justify-between px-6">
+      <div className="h-16 border-b border-border-inverse-strong flex items-center justify-between px-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#2196F3]/10 rounded-lg">
-            <Video className="w-5 h-5 text-[#2196F3]" />
+          <div className="p-2 bg-brand-primary/10 rounded-lg">
+            <Video className="w-5 h-5 text-brand-primary" />
           </div>
           <div>
             <h2 className="text-white font-semibold">Workspace Call</h2>
-            <p className="text-sm text-gray-400">{liveParticipants.length + 1} participants</p>
+            <p className="text-sm text-text-disabled">{liveParticipants.length + 1} participants</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -87,14 +87,14 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
             <Button
               variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/10"
+              className="text-white hover:bg-surface-primary/10"
               onClick={onTogglePIP}
             >
               <Minimize2 className="w-4 h-4 mr-2" />
               Minimize
             </Button>
           )}
-          <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" onClick={onClose}>
+          <Button variant="ghost" size="sm" className="text-white hover:bg-surface-primary/10" onClick={onClose}>
             <X className="w-5 h-5" />
           </Button>
         </div>
@@ -105,18 +105,18 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
         {liveParticipants.map((participant) => (
           <div
             key={participant.name}
-            className="bg-gray-900 rounded-lg relative overflow-hidden flex items-center justify-center"
+            className="bg-background-inverse rounded-lg relative overflow-hidden flex items-center justify-center"
           >
             {participant.isVideoOff ? (
               <Avatar className="w-24 h-24">
-                <AvatarFallback className="bg-[#2196F3] text-white text-2xl">
+                <AvatarFallback className="bg-brand-primary text-white text-2xl">
                   {participant.avatar}
                 </AvatarFallback>
               </Avatar>
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
                 <Avatar className="w-24 h-24">
-                  <AvatarFallback className="bg-[#2196F3] text-white text-2xl">
+                  <AvatarFallback className="bg-brand-primary text-white text-2xl">
                     {participant.avatar}
                   </AvatarFallback>
                 </Avatar>
@@ -125,7 +125,7 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
               <div className="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full">
               <span className="text-white text-sm font-medium">{participant.name}</span>
-                {participant.isMuted && <MicOff className="w-4 h-4 text-red-400" />}
+                {participant.isMuted && <MicOff className="w-4 h-4 text-status-error" />}
               </div>
               <Button variant="ghost" size="sm" className="w-8 h-8 p-0 bg-black/50 hover:bg-black/70">
                 <MoreVertical className="w-4 h-4 text-white" />
@@ -134,60 +134,60 @@ export function VideoCall({ onClose, participants, self, isPIP = false, onToggle
           </div>
         ))}
         {/* Your video (larger) */}
-        <div className="col-span-2 bg-gray-900 rounded-lg relative overflow-hidden flex items-center justify-center">
+        <div className="col-span-2 bg-background-inverse rounded-lg relative overflow-hidden flex items-center justify-center">
           {isVideoOff ? (
             <Avatar className="w-32 h-32">
-              <AvatarFallback className="bg-[#2196F3] text-white text-4xl">{currentUser.avatar}</AvatarFallback>
+              <AvatarFallback className="bg-brand-primary text-white text-4xl">{currentUser.avatar}</AvatarFallback>
             </Avatar>
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-cyan-900 to-blue-900 flex items-center justify-center">
               <Avatar className="w-32 h-32">
-                <AvatarFallback className="bg-[#2196F3] text-white text-4xl">{currentUser.avatar}</AvatarFallback>
+                <AvatarFallback className="bg-brand-primary text-white text-4xl">{currentUser.avatar}</AvatarFallback>
               </Avatar>
             </div>
           )}
           <div className="absolute bottom-4 left-4">
             <div className="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full">
               <span className="text-white font-medium">{currentUser.name}</span>
-              {isMuted && <MicOff className="w-4 h-4 text-red-400" />}
+              {isMuted && <MicOff className="w-4 h-4 text-status-error" />}
             </div>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="h-20 border-t border-gray-700 flex items-center justify-center gap-4 px-6">
+      <div className="h-20 border-t border-border-inverse-strong flex items-center justify-center gap-4 px-6">
         <Button
           size="lg"
-          className={`rounded-full w-14 h-14 ${isMuted ? 'bg-red-500 hover:bg-red-600' : 'bg-white/10 hover:bg-white/20'}`}
+          className={`rounded-full w-14 h-14 ${isMuted ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/10 hover:bg-surface-primary/20'}`}
           onClick={() => setIsMuted(!isMuted)}
         >
           {isMuted ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
         </Button>
         <Button
           size="lg"
-          className={`rounded-full w-14 h-14 ${isVideoOff ? 'bg-red-500 hover:bg-red-600' : 'bg-white/10 hover:bg-white/20'}`}
+          className={`rounded-full w-14 h-14 ${isVideoOff ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/10 hover:bg-surface-primary/20'}`}
           onClick={() => setIsVideoOff(!isVideoOff)}
         >
           {isVideoOff ? <VideoOff className="w-6 h-6 text-white" /> : <Video className="w-6 h-6 text-white" />}
         </Button>
         <Button
           size="lg"
-          className={`rounded-full w-14 h-14 ${isScreenSharing ? 'bg-[#2196F3] hover:bg-[#1976D2]' : 'bg-white/10 hover:bg-white/20'}`}
+          className={`rounded-full w-14 h-14 ${isScreenSharing ? 'bg-brand-primary hover:bg-brand-primary-hover' : 'bg-surface-primary/10 hover:bg-surface-primary/20'}`}
           onClick={() => setIsScreenSharing(!isScreenSharing)}
         >
           <MonitorUp className="w-6 h-6 text-white" />
         </Button>
         <Button
           size="lg"
-          className="rounded-full w-14 h-14 bg-white/10 hover:bg-white/20"
+          className="rounded-full w-14 h-14 bg-surface-primary/10 hover:bg-surface-primary/20"
         >
           <Users className="w-6 h-6 text-white" />
         </Button>
         <div className="w-px h-8 bg-gray-700" />
         <Button
           size="lg"
-          className="rounded-full w-14 h-14 bg-red-500 hover:bg-red-600"
+          className="rounded-full w-14 h-14 bg-status-error hover:bg-status-error"
           onClick={onClose}
         >
           <X className="w-6 h-6 text-white" />

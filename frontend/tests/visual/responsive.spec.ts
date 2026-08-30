@@ -428,3 +428,29 @@ test("protected role routes preserve the authentication boundary", async ({ page
     await expect(page).toHaveURL(/\/signin|\/signup/);
   }
 });
+
+test("theme preview renders semantic tokens in light and dark modes", async ({ page }) => {
+  await authenticateAs(page, "founder");
+
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/workspaces/components");
+    await expect(page.getByRole("heading", { name: "Component Library" })).toBeVisible();
+    await expect(page.getByText("Semantic and role tokens")).toBeVisible();
+    await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+
+    const light = await page.evaluate(() => ({
+      background: getComputedStyle(document.documentElement).getPropertyValue("--techit-background-primary").trim(),
+      founder: getComputedStyle(document.documentElement).getPropertyValue("--techit-role-founder").trim(),
+    }));
+    expect(light.background).toBe("#f6f8fb");
+    expect(light.founder).toBe("#7c3aed");
+
+    await page.evaluate(() => {
+      document.documentElement.classList.remove("light");
+      document.documentElement.classList.add("dark");
+    });
+    const darkBackground = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--techit-background-primary").trim());
+    expect(darkBackground).toBe("#0a0a0f");
+  }
+});

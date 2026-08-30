@@ -144,11 +144,11 @@ export function FounderProfile() {
     serial: "Serial",
   };
   const stageStyles: Record<string, string> = {
-    Idea: "bg-slate-100 text-slate-700",
+    Idea: "bg-surface-secondary text-text-secondary",
     MVP: "bg-violet-50 text-violet-700",
-    Beta: "bg-amber-50 text-amber-700",
-    Launch: "bg-emerald-50 text-emerald-700",
-    Growth: "bg-emerald-50 text-emerald-700",
+    Beta: "bg-status-warning-soft text-status-warning",
+    Launch: "bg-status-success-soft text-status-success",
+    Growth: "bg-status-success-soft text-status-success",
   };
 
   const rolesQuery = encodeURIComponent(openRoles.join(","));
@@ -161,27 +161,27 @@ export function FounderProfile() {
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
 
       {/* 1. Header strip */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6 flex items-start gap-4">
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-start gap-4">
         <div className="w-16 h-16 rounded-full bg-violet-600 text-white text-xl font-semibold flex items-center justify-center shrink-0">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-slate-900">{p.name}</h1>
+            <h1 className="text-2xl font-bold text-text-primary">{p.name}</h1>
             {isVerified && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 inline-flex items-center gap-1">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-status-success-soft text-status-success inline-flex items-center gap-1">
                 <Check className="w-3 h-3" />
                 Verified
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-text-muted">
             {p.title} · {p.location} · {p.yearsBuilding} years building ·{" "}
             {founderTypeLabel[p.founderType] ?? "Founder"}
           </p>
-          <p className="text-base text-slate-700 italic mt-2">"{p.headline}"</p>
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-            <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full" />
+          <p className="text-base text-text-secondary italic mt-2">"{p.headline}"</p>
+          <p className="text-xs text-text-muted mt-2 flex items-center gap-1">
+            <span className="inline-block w-2 h-2 bg-status-success rounded-full" />
             Building · {p.currentTeamSize} cofounders · {openRoles.length} of 5 roles open
           </p>
         </div>
@@ -196,67 +196,67 @@ export function FounderProfile() {
       {/* 2. Startup hero */}
       <Link
         to="/incubation-hub"
-        className="block border border-slate-200 bg-white rounded-xl p-6 hover:border-violet-300 transition-colors"
+        className="block border border-border-default bg-surface-primary rounded-xl p-6 hover:border-violet-300 transition-colors"
       >
         <div className="flex items-start gap-4">
-                  <Building2 className="h-9 w-9 text-slate-500" aria-hidden="true" />
+                  <Building2 className="h-9 w-9 text-text-muted" aria-hidden="true" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-xl font-bold text-slate-900">{p.startupName}</h2>
+              <h2 className="text-xl font-bold text-text-primary">{p.startupName}</h2>
               <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[p.stage] ?? stageStyles.Idea}`}>
                 {p.stage ?? "Idea"}
               </span>
             </div>
-            <p className="text-sm text-slate-600 mb-1">{p.oneLiner ?? "No venture summary has been added yet."}</p>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-sm text-text-muted mb-1">{p.oneLiner ?? "No venture summary has been added yet."}</p>
+            <p className="text-xs text-text-muted mb-4">
               Founded {p.foundingYear} · {industries.join(" · ")}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm border-t border-slate-100 pt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm border-t border-border-subtle pt-4">
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                <p className="text-2xl font-bold text-text-primary tabular-nums">
                   {(p.users ?? 0).toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Active users</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Active users</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                <p className="text-2xl font-bold text-text-primary tabular-nums">
                   ${(p.revenueMonthly ?? 0).toLocaleString()}/mo
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Revenue</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Revenue</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-text-primary">
                   {launchLabel[p.launchStatus] ?? "Pre-launch"}
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Launch status</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Launch status</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                <p className="text-2xl font-bold text-text-primary tabular-nums">
                   ${(p.fundingRaised ?? 0).toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Funding</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Funding</p>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">Next milestone: {p.nextMilestone}</p>
+            <p className="text-xs text-text-muted mt-3">Next milestone: {p.nextMilestone}</p>
           </div>
         </div>
       </Link>
 
       {/* 3. Mission */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Mission</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Mission</h2>
         <div className="space-y-4">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Why I'm building this</p>
-            <p className="text-sm text-slate-700">"{p.whyBuilding}"</p>
+            <p className="text-xs text-text-muted uppercase tracking-wider">Why I'm building this</p>
+            <p className="text-sm text-text-secondary">"{p.whyBuilding}"</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">What winning looks like</p>
-            <p className="text-sm text-slate-700">"{p.winningIn3Years}"</p>
+            <p className="text-xs text-text-muted uppercase tracking-wider">What winning looks like</p>
+            <p className="text-sm text-text-secondary">"{p.winningIn3Years}"</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Unfair advantage</p>
-            <p className="text-sm text-slate-700">"{p.unfairAdvantage}"</p>
+            <p className="text-xs text-text-muted uppercase tracking-wider">Unfair advantage</p>
+            <p className="text-sm text-text-secondary">"{p.unfairAdvantage}"</p>
           </div>
         </div>
       </div>
@@ -266,29 +266,29 @@ export function FounderProfile() {
         <h2 className="text-sm font-semibold text-violet-700 uppercase tracking-wider mb-2">
           Building for Ownership
         </h2>
-        <p className="text-base text-slate-900">{ownershipLabel[p.ownershipPhilosophy]}</p>
-        <p className="text-sm text-slate-700 mt-1">
+        <p className="text-base text-text-primary">{ownershipLabel[p.ownershipPhilosophy]}</p>
+        <p className="text-sm text-text-secondary mt-1">
           {p.equityRangeMin ?? 0}%–{p.equityRangeMax ?? 0}% range · {compLabel[p.compensationOffered] ?? "Not specified"}
         </p>
       </div>
 
       {/* 5. Open roles */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">
           Open roles ({openRoles.length} of 5)
         </h2>
         {openRoles.length === 0 ? (
-          <p className="text-sm text-slate-500">No open roles right now.</p>
+          <p className="text-sm text-text-muted">No open roles right now.</p>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {openRoles.map((role) => (
-                <div key={role} className="border border-slate-200 bg-white rounded-lg p-3">
-                  <p className="text-sm font-semibold text-slate-900">{role}</p>
-                  <p className="text-xs text-slate-600 mt-1 tabular-nums">
+                <div key={role} className="border border-border-default bg-surface-primary rounded-lg p-3">
+                  <p className="text-sm font-semibold text-text-primary">{role}</p>
+                  <p className="text-xs text-text-muted mt-1 tabular-nums">
                     {p.equityRangeMin ?? 0}–{p.equityRangeMax ?? 0}% equity
                   </p>
-                  <p className="text-xs text-slate-500">{compLabel[p.compensationOffered] ?? "Not specified"}</p>
+                  <p className="text-xs text-text-muted">{compLabel[p.compensationOffered] ?? "Not specified"}</p>
                 </div>
               ))}
             </div>
@@ -303,22 +303,22 @@ export function FounderProfile() {
       </div>
 
       {/* 6. Stage journey (compact, read-only) */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Journey</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Journey</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {journey.map((stage) => {
             const cardClass =
               stage.status === "active"
                 ? "border-violet-200 bg-violet-50"
                 : stage.status === "complete"
-                ? "border-violet-200 bg-white"
-                : "border-slate-200 bg-slate-50";
+                ? "border-violet-200 bg-surface-primary"
+                : "border-border-default bg-background-primary";
             const labelClass =
               stage.status === "active"
                 ? "text-violet-700"
                 : stage.status === "complete"
-                ? "text-slate-700"
-                : "text-slate-400";
+                ? "text-text-secondary"
+                : "text-text-disabled";
             return (
               <div key={stage.id} className={`border rounded-lg p-3 ${cardClass}`}>
                 <p className={`text-xs font-semibold ${labelClass}`}>{stage.label}</p>
@@ -330,7 +330,7 @@ export function FounderProfile() {
                     />
                   </div>
                 )}
-                <p className="text-xs text-slate-500 mt-1">{stage.detail}</p>
+                <p className="text-xs text-text-muted mt-1">{stage.detail}</p>
               </div>
             );
           })}
@@ -338,25 +338,25 @@ export function FounderProfile() {
       </div>
 
       {/* 7. Recent endorsements (top 3) */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent endorsements</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Recent endorsements</h2>
         {endorsementsLoading && (
-          <p className="text-sm text-slate-500">Loading live endorsements...</p>
+          <p className="text-sm text-text-muted">Loading live endorsements...</p>
         )}
         {!endorsementsLoading && endorsementsError && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-status-error">
             Live endorsements are unavailable: {endorsementsError}
           </p>
         )}
         {!endorsementsLoading && !endorsementsError && endorsements.length === 0 && (
-          <p className="text-sm text-slate-500">No live endorsements are recorded yet.</p>
+          <p className="text-sm text-text-muted">No live endorsements are recorded yet.</p>
         )}
         {!endorsementsLoading && !endorsementsError && endorsements.length > 0 && (
           <div className="space-y-3">
             {endorsements.slice(0, 3).map((endorsement) => (
-              <div key={endorsement.id} className="border border-slate-200 bg-white rounded-lg p-4">
-                <p className="text-sm text-slate-700">"{endorsement.quote}"</p>
-                <p className="text-xs text-slate-500 mt-2">
+              <div key={endorsement.id} className="border border-border-default bg-surface-primary rounded-lg p-4">
+                <p className="text-sm text-text-secondary">"{endorsement.quote}"</p>
+                <p className="text-xs text-text-muted mt-2">
                   {endorsement.authorName} · {endorsement.authorRole}
                   {endorsement.projectName ? ` · ${endorsement.projectName}` : ""}
                   {endorsement.createdAt
@@ -373,8 +373,8 @@ export function FounderProfile() {
 
       {/* 8. Pinned work (only if present) */}
       {(p.pinnedWork ?? []).length > 0 && (
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Pinned work</h2>
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+          <h2 className="text-sm font-semibold text-text-secondary mb-4">Pinned work</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {(p.pinnedWork ?? []).slice(0, 3).map((url) => (
               <a
@@ -382,10 +382,10 @@ export function FounderProfile() {
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="border border-slate-200 bg-white rounded-lg p-3 flex items-center gap-2 hover:border-violet-300"
+                className="border border-border-default bg-surface-primary rounded-lg p-3 flex items-center gap-2 hover:border-violet-300"
               >
-                <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
-                <span className="text-sm text-slate-700 truncate">{url}</span>
+                <ExternalLink className="w-4 h-4 text-text-disabled shrink-0" />
+                <span className="text-sm text-text-secondary truncate">{url}</span>
               </a>
             ))}
           </div>
@@ -393,9 +393,9 @@ export function FounderProfile() {
       )}
 
       {/* 9. Verification */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-700">Verification</h2>
+          <h2 className="text-sm font-semibold text-text-secondary">Verification</h2>
           <Link
             to="/founder/settings#verification"
             className="text-xs text-violet-600 hover:underline"
@@ -415,13 +415,13 @@ export function FounderProfile() {
               key={b.label}
               className={`px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${
                 b.verified
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-slate-100 text-slate-500"
+                  ? "bg-status-success-soft text-status-success"
+                  : "bg-surface-secondary text-text-muted"
               }`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
-                  b.verified ? "bg-emerald-500" : "bg-slate-400"
+                  b.verified ? "bg-status-success" : "bg-slate-400"
                 }`}
               />
               {b.verified ? `${b.label} verified` : `${b.label} unverified`}
@@ -431,15 +431,15 @@ export function FounderProfile() {
       </div>
 
       {/* 10. Social links */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Links</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Links</h2>
         <div className="flex flex-wrap gap-4 text-sm">
           {p.links?.github && (
             <a
               href={`https://${p.links.github.replace(/^https?:\/\//, "")}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-slate-700 hover:text-violet-600"
+              className="flex items-center gap-1.5 text-text-secondary hover:text-violet-600"
             >
               <Github className="w-4 h-4" /> {p.links.github}
             </a>
@@ -449,13 +449,13 @@ export function FounderProfile() {
               href={`https://${p.links.linkedin.replace(/^https?:\/\//, "")}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-slate-700 hover:text-violet-600"
+              className="flex items-center gap-1.5 text-text-secondary hover:text-violet-600"
             >
               <Linkedin className="w-4 h-4" /> {p.links.linkedin}
             </a>
           )}
           {p.links?.twitter && (
-            <span className="flex items-center gap-1.5 text-slate-700">
+            <span className="flex items-center gap-1.5 text-text-secondary">
               <Twitter className="w-4 h-4" /> {p.links.twitter}
             </span>
           )}
@@ -464,7 +464,7 @@ export function FounderProfile() {
               href={`https://${p.links.personal.replace(/^https?:\/\//, "")}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-slate-700 hover:text-violet-600"
+              className="flex items-center gap-1.5 text-text-secondary hover:text-violet-600"
             >
               <Globe className="w-4 h-4" /> {p.links.personal}
             </a>

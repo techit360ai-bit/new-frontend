@@ -5,7 +5,6 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { techITTheme } from "@/config/theme.config"
 
 export type Theme = "light" | "dark" | "system"
 
@@ -40,33 +39,11 @@ function applyTheme(effective: "light" | "dark") {
   root.classList.add(effective)
 }
 
-function applyConfiguredTokens() {
-  const root = document.documentElement
-  const values: Record<string, string> = {
-    '--techit-brand-primary': techITTheme.brand.primary,
-    '--techit-brand-primary-hover': techITTheme.brand.primaryHover,
-    '--techit-brand-secondary': techITTheme.brand.secondary,
-    '--techit-brand-accent': techITTheme.brand.accent,
-    '--techit-brand-premium': techITTheme.brand.premium,
-    '--techit-status-success': techITTheme.status.success,
-    '--techit-status-warning': techITTheme.status.warning,
-    '--techit-status-error': techITTheme.status.error,
-    '--techit-status-info': techITTheme.status.info,
-    '--techit-status-pending': techITTheme.status.pending,
-    '--techit-role-explorer': techITTheme.role.explorer,
-    '--techit-role-founder': techITTheme.role.founder,
-    '--techit-role-collaborator': techITTheme.role.collaborator,
-    '--techit-role-investor': techITTheme.role.investor,
-    '--techit-role-organization': techITTheme.role.organization,
-  }
-  for (const [name, value] of Object.entries(values)) root.style.setProperty(name, value)
-}
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = getStoredTheme()
     const effective = stored === "system" ? getSystemTheme() : stored
-    if (typeof document !== "undefined") { applyTheme(effective); applyConfiguredTokens() }
+    if (typeof document !== "undefined") applyTheme(effective)
     return stored
   })
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() =>
@@ -77,7 +54,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const effective = theme === "system" ? getSystemTheme() : theme
     setResolvedTheme(effective)
     applyTheme(effective)
-    applyConfiguredTokens()
   }, [theme])
 
   useEffect(() => {

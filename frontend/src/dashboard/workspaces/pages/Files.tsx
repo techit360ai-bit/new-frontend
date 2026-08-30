@@ -54,28 +54,28 @@ export function Files() {
 
   const getFileIcon = (item: DomainFileItem) => {
     if (item.type === 'folder') {
-      return <FolderOpen className="w-5 h-5 text-[#2196F3]" />;
+      return <FolderOpen className="w-5 h-5 text-brand-primary" />;
     }
     switch (item.fileType) {
       case 'image':
-        return <Image className="w-5 h-5 text-purple-500" />;
+        return <Image className="w-5 h-5 text-status-pending" />;
       case 'code':
-        return <FileCode className="w-5 h-5 text-green-500" />;
+        return <FileCode className="w-5 h-5 text-status-success" />;
       default:
-        return <FileText className="w-5 h-5 text-gray-500" />;
+        return <FileText className="w-5 h-5 text-text-muted" />;
     }
   };
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-background-primary">
       {/* Page Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-surface-primary border-b border-border-default px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Files
             </h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-text-muted mt-1">
               Manage and organize your project files
             </p>
           </div>
@@ -88,7 +88,7 @@ export function Files() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm"
           >
             <Upload className="w-4 h-4" />
             <span className="text-sm font-medium">Upload Files</span>
@@ -98,10 +98,10 @@ export function Files() {
 
       {/* Files List */}
       <div className="p-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-surface-primary rounded-xl shadow-sm border border-border-default overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr className="text-left text-sm text-gray-600">
+            <thead className="bg-background-primary border-b border-border-default">
+              <tr className="text-left text-sm text-text-muted">
                 <th className="py-3 px-6 font-medium">Name</th>
                 <th className="py-3 px-6 font-medium">Size</th>
                 <th className="py-3 px-6 font-medium">Modified</th>
@@ -110,18 +110,18 @@ export function Files() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td className="py-6 px-6 text-sm text-gray-500" colSpan={4}>Loading live files...</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-text-muted" colSpan={4}>Loading live files...</td></tr>
               )}
               {!loading && error && (
-                <tr><td className="py-6 px-6 text-sm text-red-600" colSpan={4}>Live files could not be loaded: {error}</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-status-error" colSpan={4}>Live files could not be loaded: {error}</td></tr>
               )}
               {!loading && !error && files.length === 0 && (
-                <tr><td className="py-6 px-6 text-sm text-gray-500" colSpan={4}>No live files are recorded yet.</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-text-muted" colSpan={4}>No live files are recorded yet.</td></tr>
               )}
               {files.map((file) => (
                 <tr
                   key={file.id}
-                  className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="border-b border-border-subtle last:border-0 hover:bg-background-primary transition-colors cursor-pointer"
                 >
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
@@ -129,21 +129,21 @@ export function Files() {
                       <span className="font-medium">{file.name}</span>
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
+                  <td className="py-4 px-6 text-sm text-text-muted">
                     {file.size || '—'}
                   </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
+                  <td className="py-4 px-6 text-sm text-text-muted">
                     {file.modified}
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
                       {file.type === 'file' && (
-                        <button className="p-2 hover:bg-gray-100 rounded transition-colors">
-                          <Download className="w-4 h-4 text-gray-600" />
+                        <button className="p-2 hover:bg-surface-secondary rounded transition-colors">
+                          <Download className="w-4 h-4 text-text-muted" />
                         </button>
                       )}
-                      <button className="p-2 hover:bg-gray-100 rounded transition-colors">
-                        <MoreVertical className="w-4 h-4 text-gray-600" />
+                      <button className="p-2 hover:bg-surface-secondary rounded transition-colors">
+                        <MoreVertical className="w-4 h-4 text-text-muted" />
                       </button>
                     </div>
                   </td>
@@ -154,13 +154,13 @@ export function Files() {
         </div>
 
         {!loading && !error && files.length > 0 && (
-          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="mt-6 bg-surface-primary rounded-xl shadow-sm border border-border-default p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold">Storage Records</h3>
-              <span className="text-sm text-gray-600">{files.filter((file) => file.type === 'file').length} files recorded</span>
+              <span className="text-sm text-text-muted">{files.filter((file) => file.type === 'file').length} files recorded</span>
             </div>
             <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-[#2196F3] rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
+              <div className="h-full bg-brand-primary rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
             </div>
           </div>
         )}

@@ -60,10 +60,10 @@ export function InvestorStep2() {
         <InvestorProgressBar currentStep={2} totalSteps={5} />
 
         <div className="mb-12">
-          <h1 className="text-5xl sm:text-4xl mb-3 text-slate-900 dark:text-white font-bold tracking-tight">
+          <h1 className="text-5xl sm:text-4xl mb-3 text-text-primary dark:text-white font-bold tracking-tight">
             Investment Focus
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
+          <p className="text-lg text-text-muted dark:text-text-disabled font-medium">
             Define your investment criteria
           </p>
         </div>
@@ -71,7 +71,7 @@ export function InvestorStep2() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14">
           {/* Left: Industries */}
           <div>
-            <label className="block mb-5 text-slate-900 dark:text-white font-semibold text-lg">
+            <label className="block mb-5 text-text-primary dark:text-white font-semibold text-lg">
               Industries
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -82,7 +82,7 @@ export function InvestorStep2() {
                   className={`p-6 rounded-xl border-2 transition-all duration-200 ${
                     selectedIndustries.includes(id)
                       ? "border-teal-500 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-500/20 dark:to-teal-600/10 text-teal-700 dark:text-teal-300 shadow-[0_8px_24px_rgba(20,184,166,0.15)]"
-                      : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+                      : "border-border-strong dark:border-border-inverse-strong bg-surface-primary dark:bg-surface-inverse-muted/40 text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
                   }`}
                 >
                   <Icon className="w-8 h-8 mx-auto mb-4 opacity-90" />
@@ -96,7 +96,7 @@ export function InvestorStep2() {
           <div className="space-y-10">
             {/* Stage */}
             <div>
-              <label className="block mb-5 text-slate-900 dark:text-white font-semibold text-lg">
+              <label className="block mb-5 text-text-primary dark:text-white font-semibold text-lg">
                 Stage
               </label>
               <div className="space-y-3">
@@ -107,7 +107,7 @@ export function InvestorStep2() {
                     className={`w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer font-medium shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${
                       stage === id
                         ? "border-teal-500 bg-gradient-to-r from-teal-50 to-teal-100 dark:from-teal-500/20 dark:to-teal-600/10 text-teal-700 dark:text-teal-300 shadow-[0_6px_16px_rgba(20,184,166,0.12)]"
-                        : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)]"
+                        : "border-border-strong dark:border-border-inverse-strong bg-surface-primary dark:bg-surface-inverse-muted/40 text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)]"
                     }`}
                   >
                     <div
@@ -118,7 +118,7 @@ export function InvestorStep2() {
                       }`}
                     >
                       {stage === id && (
-                        <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                        <div className="w-2.5 h-2.5 bg-surface-primary rounded-full" />
                       )}
                     </div>
                     <label className="flex-1 cursor-pointer">{label}</label>
@@ -129,7 +129,7 @@ export function InvestorStep2() {
 
             {/* Check Size */}
             <div>
-              <label className="block mb-5 text-slate-900 dark:text-white font-semibold text-lg">
+              <label className="block mb-5 text-text-primary dark:text-white font-semibold text-lg">
                 Check Size
               </label>
               <div className="space-y-3">
@@ -140,7 +140,7 @@ export function InvestorStep2() {
                     className={`w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer font-medium shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${
                       checkSize === id
                         ? "border-teal-500 bg-gradient-to-r from-teal-50 to-teal-100 dark:from-teal-500/20 dark:to-teal-600/10 text-teal-700 dark:text-teal-300 shadow-[0_6px_16px_rgba(20,184,166,0.12)]"
-                        : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)]"
+                        : "border-border-strong dark:border-border-inverse-strong bg-surface-primary dark:bg-surface-inverse-muted/40 text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)]"
                     }`}
                   >
                     <div
@@ -151,7 +151,7 @@ export function InvestorStep2() {
                       }`}
                     >
                       {checkSize === id && (
-                        <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                        <div className="w-2.5 h-2.5 bg-surface-primary rounded-full" />
                       )}
                     </div>
                     <label className="flex-1 cursor-pointer">{label}</label>
@@ -166,7 +166,7 @@ export function InvestorStep2() {
           <Button
             onClick={handleBack}
             variant="outline"
-            className="px-8 py-6 text-base font-semibold border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
+            className="px-8 py-6 text-base font-semibold border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
           >
             Back
           </Button>

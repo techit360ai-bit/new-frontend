@@ -42,6 +42,7 @@ export interface Profile {
   avatarUrl: string | null
   bio: string | null
   role: Role
+  activeRole?: Role
   secondaryRoles: Role[]
   creditBalance: number
   credibilityScore: number
@@ -371,6 +372,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error: e instanceof Error ? e : new Error('Role activation failed') }
     }
   }, [fetchContext])
+
+  useEffect(() => {
+    const role = activeContext?.role || profile?.activeRole || profile?.role || 'explorer'
+    document.documentElement.dataset.techitRole = role
+  }, [activeContext?.role, profile?.activeRole, profile?.role])
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, changePassword, updateProfile, refreshProfile, roleAssignments, activeContext, contextLoading, refreshContext, switchContext, activateRole }}>

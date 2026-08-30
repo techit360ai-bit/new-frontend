@@ -27,8 +27,8 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
     <motion.div
       className={`relative bg-gradient-to-br from-white to-gray-50 rounded-xl p-5 border-2 transition-all cursor-pointer ${
         agent.isPremium
-          ? 'border-[#FFD700]/30 shadow-lg hover:shadow-xl'
-          : 'border-gray-200 shadow-sm hover:shadow-md'
+          ? 'border-brand-premium/30 shadow-lg hover:shadow-xl'
+          : 'border-border-default shadow-sm hover:shadow-md'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -37,7 +37,7 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
     >
       {/* Premium Shimmer Effect */}
       {agent.isPremium && (
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FFD700]/10 to-transparent rounded-xl animate-shimmer" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-premium/10 to-transparent rounded-xl animate-shimmer" />
       )}
 
       {/* Header */}
@@ -45,21 +45,21 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
             agent.isPremium
-              ? 'bg-gradient-to-br from-[#2196F3] to-purple-500'
-              : 'bg-[#2196F3]/10'
+              ? 'bg-gradient-to-br from-brand-primary to-status-pending'
+              : 'bg-brand-primary/10'
           }`}>
-            <Bot className={`w-5 h-5 ${agent.isPremium ? 'text-white' : 'text-[#2196F3]'}`} />
+            <Bot className={`w-5 h-5 ${agent.isPremium ? 'text-white' : 'text-brand-primary'}`} />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold flex items-center gap-2">
               {agent.name}
               {agent.isPremium && (
-                <Sparkles className="w-3 h-3 text-[#FFD700]" />
+                <Sparkles className="w-3 h-3 text-brand-premium" />
               )}
             </h3>
             <Badge
               variant={agent.isPremium ? 'default' : 'secondary'}
-              className={agent.isPremium ? 'bg-gradient-to-r from-[#FFD700] to-amber-400 text-black text-xs mt-1' : 'text-xs mt-1'}
+              className={agent.isPremium ? 'bg-gradient-to-r from-brand-premium to-status-warning text-black text-xs mt-1' : 'text-xs mt-1'}
             >
               {agent.isPremium ? 'Premium' : 'Basic'}
             </Badge>
@@ -69,7 +69,7 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
       </div>
 
       {/* Description */}
-      <p className={`text-sm text-gray-600 transition-all ${
+      <p className={`text-sm text-text-muted transition-all ${
         isHovered ? 'line-clamp-none' : 'line-clamp-2'
       }`}>
         {isHovered ? agent.fullDescription : agent.description}
@@ -80,7 +80,7 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors text-sm font-medium"
+          className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors text-sm font-medium"
         >
           <Settings className="w-4 h-4" />
           Configure

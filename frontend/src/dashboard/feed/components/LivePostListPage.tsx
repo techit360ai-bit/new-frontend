@@ -26,7 +26,7 @@ export function LivePostListPage({
     <div className="flex pb-14 lg:pb-0">
       <LeftSidebar />
       <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px]">
-        <div className="sticky top-14 z-40 border-b border-border-default bg-bg-surface px-6 py-4">
+        <div className="sticky top-14 z-40 border-b border-border-default bg-surface-primary px-6 py-4">
           <BackButton className="mb-3" />
           <div className="flex items-start justify-between gap-4">
             <div>

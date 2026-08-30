@@ -43,18 +43,18 @@ export function OrgStep4() {
         <OrgProgressBar currentStep={4} totalSteps={5} />
 
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2 flex items-center gap-3">
-            <Users className="w-9 h-9 text-indigo-600" />
+          <h1 className="text-4xl font-bold text-text-primary dark:text-white tracking-tight mb-2 flex items-center gap-3">
+            <Users className="w-9 h-9 text-brand-accent" />
             Team & Contacts
           </h1>
-          <p className="text-base text-slate-600 dark:text-slate-400">
+          <p className="text-base text-text-muted dark:text-text-disabled">
             Add the people who will run programmes and review applications.
           </p>
         </div>
 
         {/* Add member form */}
-        <div className="bg-white dark:bg-slate-800/60 border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-6 mb-8">
-          <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4">
+        <div className="bg-surface-primary dark:bg-surface-inverse-muted/60 border-2 border-border-default dark:border-border-inverse-strong rounded-2xl p-6 mb-8">
+          <h3 className="text-base font-bold text-text-primary dark:text-white mb-4">
             Add a team member
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
@@ -63,19 +63,19 @@ export function OrgStep4() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Full name"
-              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+              className="h-12 bg-background-primary dark:bg-background-inverse/60 border-2 border-border-default dark:border-border-inverse-strong rounded-lg px-4 text-sm text-text-primary dark:text-white outline-none focus:border-brand-accent transition-colors"
             />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="work@email.com"
-              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+              className="h-12 bg-background-primary dark:bg-background-inverse/60 border-2 border-border-default dark:border-border-inverse-strong rounded-lg px-4 text-sm text-text-primary dark:text-white outline-none focus:border-brand-accent transition-colors"
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+              className="h-12 bg-background-primary dark:bg-background-inverse/60 border-2 border-border-default dark:border-border-inverse-strong rounded-lg px-4 text-sm text-text-primary dark:text-white outline-none focus:border-brand-accent transition-colors"
             >
               <option>Programme Manager</option>
               <option>Admin</option>
@@ -88,7 +88,7 @@ export function OrgStep4() {
           <button
             onClick={addMember}
             disabled={!name.trim() || !email.trim()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-accent hover:bg-brand-accent disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add member
@@ -98,8 +98,8 @@ export function OrgStep4() {
         {/* Member list */}
         <div className="space-y-2.5">
           {members.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+            <div className="text-center py-12 border-2 border-dashed border-border-strong dark:border-border-inverse-strong rounded-xl">
+              <p className="text-sm text-text-muted dark:text-text-disabled">
                 No team members yet — you can add them later from Settings.
               </p>
             </div>
@@ -107,9 +107,9 @@ export function OrgStep4() {
             members.map((m, idx) => (
               <div
                 key={m.id}
-                className="flex items-center gap-4 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-4"
+                className="flex items-center gap-4 bg-surface-primary dark:bg-surface-inverse-muted/60 border border-border-default dark:border-border-inverse-strong rounded-xl p-4"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-accent to-violet-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {m.name
                     .split(" ")
                     .map((n) => n[0])
@@ -119,23 +119,23 @@ export function OrgStep4() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-slate-900 dark:text-white">
+                    <p className="font-semibold text-text-primary dark:text-white">
                       {m.name}
                     </p>
                     {idx === 0 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[10px] font-mono uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-warning dark:bg-status-warning/10 text-status-warning dark:text-status-warning text-[10px] font-mono uppercase tracking-wider">
                         <Crown className="w-3 h-3" />
                         Owner
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-text-muted dark:text-text-disabled">
                     {m.email} · {m.role}
                   </p>
                 </div>
                 <button
                   onClick={() => removeMember(m.id)}
-                  className="text-slate-400 hover:text-red-500 transition-colors"
+                  className="text-text-disabled hover:text-status-error transition-colors"
                   aria-label="Remove"
                 >
                   <X className="w-4 h-4" />
@@ -148,13 +148,13 @@ export function OrgStep4() {
         <div className="mt-12 flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary font-semibold hover:border-brand-accent transition-colors"
           >
             Back
           </button>
           <button
             onClick={handleNext}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-brand-accent to-violet-600 hover:from-brand-accent hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Continue
           </button>

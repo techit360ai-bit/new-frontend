@@ -71,7 +71,7 @@ export function TribePage() {
     <div className="flex pb-14 lg:pb-0">
       <LeftSidebar />
       <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px]">
-        <div className="sticky top-14 z-40 border-b border-border-default bg-bg-surface px-6 py-4">
+        <div className="sticky top-14 z-40 border-b border-border-default bg-surface-primary px-6 py-4">
           <BackButton className="mb-3" />
           <h1 className="text-xl font-semibold text-text-primary">Your Tribe</h1>
           <p className="mt-1 text-sm text-text-secondary">
@@ -115,7 +115,7 @@ function TribeMemberCard({ profile }: { profile: PublicUserProfile }) {
   };
 
   return (
-    <article className="border border-border-default bg-bg-surface p-4 sm:rounded-lg">
+    <article className="border border-border-default bg-surface-primary p-4 sm:rounded-lg">
       <div className="mb-3 flex items-start gap-3">
         <Link to={`/feed/profile/${encodeURIComponent(profile.id)}`}>
           <ProfileAvatar profile={profile} />

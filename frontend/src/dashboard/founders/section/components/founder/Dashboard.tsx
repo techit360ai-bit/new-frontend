@@ -55,17 +55,17 @@ interface Build {
 const NOW_MS = Date.now();
 
 const stageStyles: Record<string, string> = {
-  Idea:    "bg-slate-100 text-slate-700",
+  Idea:    "bg-surface-secondary text-text-secondary",
   MVP:     "bg-violet-50 text-violet-700",
-  Beta:    "bg-amber-50 text-amber-700",
-  Launch:  "bg-emerald-50 text-emerald-700",
-  Growth:  "bg-emerald-50 text-emerald-700",
+  Beta:    "bg-status-warning-soft text-status-warning",
+  Launch:  "bg-status-success-soft text-status-success",
+  Growth:  "bg-status-success-soft text-status-success",
 };
 
 const priorityStyles: Record<string, string> = {
-  overdue:    "bg-red-50 text-red-700",
-  "due-soon": "bg-amber-50 text-amber-700",
-  "this-week": "bg-slate-100 text-slate-700",
+  overdue:    "bg-status-error-soft text-status-error",
+  "due-soon": "bg-status-warning-soft text-status-warning",
+  "this-week": "bg-surface-secondary text-text-secondary",
 };
 
 function normalizedStage(stage: string | undefined): FounderStage {
@@ -92,8 +92,8 @@ function metricLabel(value: string) {
 function IntelligenceMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <p className="truncate text-lg font-semibold text-slate-900 tabular-nums">{value}</p>
-      <p className="mt-0.5 text-[11px] text-slate-500">{label}</p>
+      <p className="truncate text-lg font-semibold text-text-primary tabular-nums">{value}</p>
+      <p className="mt-0.5 text-[11px] text-text-muted">{label}</p>
     </div>
   );
 }
@@ -223,17 +223,17 @@ export function Dashboard() {
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Greeting */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Good morning, {firstName}.</h1>
-        <p className="text-sm text-slate-500 mt-0.5">{today} · Week {weeksBuilding} of building</p>
+        <h1 className="text-2xl font-bold text-text-primary">Good morning, {firstName}.</h1>
+        <p className="text-sm text-text-muted mt-0.5">{today} · Week {weeksBuilding} of building</p>
       </div>
 
       {/* Welcome Back — contextual intelligence surface */}
       <WelcomeBack />
 
       {/* Your ventures — multi-project portfolio (S7) */}
-      <div className="border border-slate-200 bg-white rounded-xl p-4">
+      <div className="border border-border-default bg-surface-primary rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-slate-700">Your ventures</h2>
+          <h2 className="text-sm font-semibold text-text-secondary">Your ventures</h2>
           <button
             type="button"
             onClick={() => navigate("/incubation-hub")}
@@ -252,17 +252,17 @@ export function Dashboard() {
                 className={`text-left rounded-lg border px-3 py-2 transition-colors ${
                   activeVentureId === v.id
                     ? "border-violet-400 bg-violet-50"
-                    : "border-slate-200 hover:bg-slate-50"
+                    : "border-border-default hover:bg-background-primary"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-900">{v.title}</span>
+                  <span className="text-sm font-semibold text-text-primary">{v.title}</span>
                   {v.isPrimary && <span className="text-[10px] uppercase tracking-wide text-violet-600">Primary</span>}
                 </div>
                 <div className="flex items-center gap-3 mt-0.5">
-                  <span className="text-xs text-slate-500 capitalize">{v.stage || "idea"}</span>
-                  <span className="text-xs text-slate-400">GSIS {Math.round(v.gsisScore || 0)}</span>
-                  <span className={`text-xs ${v.hasWorkspace ? "text-emerald-600" : "text-slate-400"}`}>
+                  <span className="text-xs text-text-muted capitalize">{v.stage || "idea"}</span>
+                  <span className="text-xs text-text-disabled">GSIS {Math.round(v.gsisScore || 0)}</span>
+                  <span className={`text-xs ${v.hasWorkspace ? "text-status-success" : "text-text-disabled"}`}>
                     {v.hasWorkspace ? "workspace" : "no workspace"}
                   </span>
                 </div>
@@ -270,44 +270,44 @@ export function Dashboard() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-slate-500">No persisted ventures yet. Analyze an idea or promote an intake to create your first project.</p>
+          <p className="text-sm text-text-muted">No persisted ventures yet. Analyze an idea or promote an intake to create your first project.</p>
         )}
       </div>
 
       {/* Startup hero */}
       {p.startupName || activeVenture ? (
-      <Link to="/incubation-hub" className="block group border border-slate-200 bg-white rounded-xl p-6 hover:border-violet-300 transition-colors">
+      <Link to="/incubation-hub" className="block group border border-border-default bg-surface-primary rounded-xl p-6 hover:border-violet-300 transition-colors">
         <div className="flex items-start gap-4">
-                          <Building2 className="h-9 w-9 text-slate-500" aria-hidden="true" />
+                          <Building2 className="h-9 w-9 text-text-muted" aria-hidden="true" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-xl font-bold text-slate-900">{activeVenture?.title ?? p.startupName}</h2>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? "bg-slate-100 text-slate-700"}`}>
+              <h2 className="text-xl font-bold text-text-primary">{activeVenture?.title ?? p.startupName}</h2>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? "bg-surface-secondary text-text-secondary"}`}>
                 {activeVenture ? normalizedStage(activeVenture.stage) : p.stage}
               </span>
             </div>
-            <p className="text-sm text-slate-600 mb-3">{activeVenture?.tagline ?? p.oneLiner}</p>
+            <p className="text-sm text-text-muted mb-3">{activeVenture?.tagline ?? p.oneLiner}</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">{p.users.toLocaleString()}</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Active users</p>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">{p.users.toLocaleString()}</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Active users</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">${p.revenueMonthly.toLocaleString()}/mo</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Revenue</p>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">${p.revenueMonthly.toLocaleString()}/mo</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Revenue</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">{p.openRoles.length} of 5</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Open roles</p>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">{p.openRoles.length} of 5</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Open roles</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">—</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Top investor fit</p>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">—</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Top investor fit</p>
               </div>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-100 text-sm">
+        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border-subtle text-sm">
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); navigate("/founder/settings#startup"); }}
@@ -328,23 +328,23 @@ export function Dashboard() {
 
       {/* GSIS v2 — focused operating intelligence in the existing dashboard card language. */}
       {scorecard ? (
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-slate-700">Startup intelligence</h2>
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{scorecard.model.version}</span>
+                <h2 className="text-sm font-semibold text-text-secondary">Startup intelligence</h2>
+                <span className="rounded bg-surface-secondary px-2 py-0.5 text-[10px] font-medium text-text-muted">{scorecard.model.version}</span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">{scorecard.stage.reason}</p>
+              <p className="text-xs text-text-muted mt-1">{scorecard.stage.reason}</p>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-violet-700 tabular-nums leading-none">
                 {displayScore(scorecard.gsis)}
               </p>
-              <p className="text-xs text-slate-400 mt-1">GSIS / 100</p>
+              <p className="text-xs text-text-disabled mt-1">GSIS / 100</p>
             </div>
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-slate-100 pt-4 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-border-subtle pt-4 sm:grid-cols-3 lg:grid-cols-6">
             <IntelligenceMetric label="Stage" value={scorecard.stage.detected_stage} />
             <IntelligenceMetric label="Stage health" value={displayScore(scorecard.stage_health)} />
             <IntelligenceMetric label="Momentum" value={`${scorecard.momentum.score > 0 ? "+" : ""}${scorecard.momentum.score}`} />
@@ -352,50 +352,50 @@ export function Dashboard() {
             <IntelligenceMetric label="Risk" value={scorecard.risk.level} />
             <IntelligenceMetric label={`${metricLabel(scorecard.readiness.next_stage)} readiness`} value={displayScore(scorecard.readiness.score)} />
           </div>
-          <div className="mt-5 grid gap-5 border-t border-slate-100 pt-5 lg:grid-cols-2">
+          <div className="mt-5 grid gap-5 border-t border-border-subtle pt-5 lg:grid-cols-2">
             <div>
-              <p className="text-[11px] font-semibold uppercase text-slate-500">Primary bottleneck</p>
-              <p className="mt-1 text-base font-semibold text-slate-900">{metricLabel(scorecard.bottleneck.category)}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="text-[11px] font-semibold uppercase text-text-muted">Primary bottleneck</p>
+              <p className="mt-1 text-base font-semibold text-text-primary">{metricLabel(scorecard.bottleneck.category)}</p>
+              <p className="mt-1 text-xs text-text-muted">
                 {scorecard.bottleneck.score == null ? "More evidence is required to quantify this constraint." : `Current component score: ${Math.round(scorecard.bottleneck.score)}/100.`}
               </p>
             </div>
             {scorecard.recommendation && (
               <div className="border-l-2 border-violet-500 pl-4">
                 <p className="text-[11px] font-semibold uppercase text-violet-700">Next best action</p>
-                <p className="mt-1 text-sm font-medium text-slate-900">{scorecard.recommendation.action}</p>
-                <p className="mt-1 text-xs text-slate-500">{scorecard.recommendation.next_milestone}</p>
+                <p className="mt-1 text-sm font-medium text-text-primary">{scorecard.recommendation.action}</p>
+                <p className="mt-1 text-xs text-text-muted">{scorecard.recommendation.next_milestone}</p>
               </div>
             )}
           </div>
-          <div className="mt-5 border-t border-slate-100 pt-4">
+          <div className="mt-5 border-t border-border-subtle pt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-medium text-slate-700">
+              <p className="text-xs font-medium text-text-secondary">
                 {metricLabel(scorecard.readiness.next_stage)} gate: {metricLabel(scorecard.readiness.status)}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-text-muted">
                 {Math.round(scorecard.data_coverage * 100)}% coverage · {Math.round(scorecard.confidence * 100)}% confidence
               </p>
             </div>
             {scorecard.readiness.blocking_requirements.length > 0 && (
-              <p className="mt-2 text-xs text-amber-700">
+              <p className="mt-2 text-xs text-status-warning">
                 Missing: {scorecard.readiness.blocking_requirements.map((gate) => metricLabel(gate.metric)).join(" · ")}
               </p>
             )}
           </div>
         </div>
       ) : intel?.gsis ? (
-        <div className="border border-slate-200 bg-white rounded-xl p-6 flex items-center justify-between">
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-slate-700">Global Startup Intelligence Score</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Legacy scorecard · v2 evidence is not available</p>
+            <h2 className="text-sm font-semibold text-text-secondary">Global Startup Intelligence Score</h2>
+            <p className="text-xs text-text-muted mt-0.5">Legacy scorecard · v2 evidence is not available</p>
           </div>
           <p className="text-3xl font-bold text-violet-700 tabular-nums">{Math.round(intel.gsis.gsis)}</p>
         </div>
       ) : null}
 
       {/* Momentum briefing (B5) + risk alerts (B4) from the AI engine */}
-      <div className="border border-slate-200 bg-white rounded-xl p-4 flex flex-wrap items-center gap-4">
+      <div className="border border-border-default bg-surface-primary rounded-xl p-4 flex flex-wrap items-center gap-4">
         <button
           type="button"
           onClick={playBriefing}
@@ -404,13 +404,13 @@ export function Dashboard() {
         >
           {briefingLoading ? "Preparing…" : "▶ Play momentum briefing"}
         </button>
-        {briefingUrl && <span className="text-xs text-slate-400">Audio ready</span>}
+        {briefingUrl && <span className="text-xs text-text-disabled">Audio ready</span>}
         {riskFlags.length > 0 && (
           <div className="flex-1 min-w-[12rem]">
-            <p className="text-xs font-semibold text-amber-700 mb-1">Engine risk alerts</p>
+            <p className="text-xs font-semibold text-status-warning mb-1">Engine risk alerts</p>
             <ul className="space-y-0.5">
               {riskFlags.slice(0, 3).map((f, i) => (
-                <li key={i} className="text-xs text-amber-700 flex items-start gap-1.5">
+                <li key={i} className="text-xs text-status-warning flex items-start gap-1.5">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                   <span>{f.message ?? f.type ?? "Risk flag"}</span>
                 </li>
@@ -421,8 +421,8 @@ export function Dashboard() {
       </div>
 
       {/* Journey strip */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Journey</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Journey</h2>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {journey.map((s) => {
             const isOpen = openStage === s.id;
@@ -432,12 +432,12 @@ export function Dashboard() {
                 type="button"
                 onClick={() => setOpenStage(isOpen ? null : s.id)}
                 className={`text-left p-3 rounded-lg border transition-colors ${
-                  s.status === "complete" ? "border-violet-200 bg-white" :
+                  s.status === "complete" ? "border-violet-200 bg-surface-primary" :
                   s.status === "active"   ? "border-violet-200 bg-violet-50" :
-                                            "border-slate-200 bg-slate-50"
+                                            "border-border-default bg-background-primary"
                 }`}
               >
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{s.label}</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-1">{s.label}</p>
                 <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
                   <div
                     className={`h-full ${
@@ -448,13 +448,13 @@ export function Dashboard() {
                     style={{ width: `${s.progress}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-700 mt-1.5 tabular-nums">{s.progress}%</p>
+                <p className="text-xs text-text-secondary mt-1.5 tabular-nums">{s.progress}%</p>
               </button>
             );
           })}
         </div>
         {openStage && (
-          <div className="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700">
+          <div className="mt-4 p-3 rounded-lg bg-background-primary border border-border-default text-sm text-text-secondary">
             {journey.find((j) => j.id === openStage)?.detail}
           </div>
         )}
@@ -462,9 +462,9 @@ export function Dashboard() {
 
       {/* Today's focus + Signals */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 border border-slate-200 bg-white rounded-xl p-6">
+        <div className="lg:col-span-2 border border-border-default bg-surface-primary rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-700">Today's focus</h2>
+            <h2 className="text-sm font-semibold text-text-secondary">Today's focus</h2>
             <Link to="/incubation-hub" className="text-xs text-violet-600 hover:underline">View all tasks →</Link>
           </div>
           {tasks.length > 0 ? (
@@ -478,51 +478,51 @@ export function Dashboard() {
                   className="w-4 h-4 accent-violet-600 cursor-pointer"
                 />
                 <Link to={t.href} className={`flex-1 min-w-0 ${t.done ? "opacity-50 line-through" : ""}`}>
-                  <p className="text-sm font-medium text-slate-900 truncate">{t.title}</p>
-                  <p className="text-xs text-slate-500">{t.detail}</p>
+                  <p className="text-sm font-medium text-text-primary truncate">{t.title}</p>
+                  <p className="text-xs text-text-muted">{t.detail}</p>
                 </Link>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${priorityStyles[t.priority]}`}>{t.priority}</span>
               </li>
             ))}
           </ul>
           ) : (
-            <p className="text-sm text-slate-500">No live focus tasks yet. Workspace tasks will appear here when they are assigned.</p>
+            <p className="text-sm text-text-muted">No live focus tasks yet. Workspace tasks will appear here when they are assigned.</p>
           )}
         </div>
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Signals</h2>
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+          <h2 className="text-sm font-semibold text-text-secondary mb-4">Signals</h2>
           {signals.length > 0 ? (
           <ul className="space-y-3">
             {signals.map((s) => (
               <li key={s.id}>
-                <Link to={s.href} className="flex items-start gap-2 text-sm text-slate-700 hover:text-violet-600 group">
-                  <CheckCircle className="w-4 h-4 mt-0.5 text-slate-400 group-hover:text-violet-600 shrink-0" />
+                <Link to={s.href} className="flex items-start gap-2 text-sm text-text-secondary hover:text-violet-600 group">
+                  <CheckCircle className="w-4 h-4 mt-0.5 text-text-disabled group-hover:text-violet-600 shrink-0" />
                   <span className="flex-1">{s.message}</span>
-                  <ArrowRight className="w-4 h-4 mt-0.5 text-slate-300 group-hover:text-violet-600 shrink-0" />
+                  <ArrowRight className="w-4 h-4 mt-0.5 text-text-on-inverse-secondary group-hover:text-violet-600 shrink-0" />
                 </Link>
               </li>
             ))}
           </ul>
           ) : (
-            <p className="text-sm text-slate-500">No live signals yet.</p>
+            <p className="text-sm text-text-muted">No live signals yet.</p>
           )}
         </div>
       </div>
 
       {/* Active builds */}
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Active builds</h2>
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">Active builds</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {builds.map((b) => (
-            <div key={b.id} className="border border-slate-200 bg-white rounded-xl p-4">
+            <div key={b.id} className="border border-border-default bg-surface-primary rounded-xl p-4">
               <div className="flex items-start gap-3 mb-3">
-                <Building2 className="h-6 w-6 text-slate-500" aria-hidden="true" />
+                <Building2 className="h-6 w-6 text-text-muted" aria-hidden="true" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">{b.name}</p>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${stageStyles[b.stage] ?? "bg-slate-100 text-slate-700"}`}>{b.stage}</span>
+                  <p className="text-sm font-semibold text-text-primary truncate">{b.name}</p>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${stageStyles[b.stage] ?? "bg-surface-secondary text-text-secondary"}`}>{b.stage}</span>
                 </div>
               </div>
-              {b.oneLiner && <p className="text-xs text-slate-600 mb-3">{b.oneLiner}</p>}
+              {b.oneLiner && <p className="text-xs text-text-muted mb-3">{b.oneLiner}</p>}
               <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden mb-3">
                 <div className="h-full bg-violet-600" style={{ width: `${b.progress}%` }} />
               </div>
@@ -538,7 +538,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={() => navigate("/incubation-hub")}
-            className="border border-dashed border-slate-300 rounded-xl p-4 text-sm text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors flex items-center justify-center gap-2"
+            className="border border-dashed border-border-strong rounded-xl p-4 text-sm text-text-muted hover:border-violet-400 hover:text-violet-600 transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Analyze a new idea
@@ -547,9 +547,9 @@ export function Dashboard() {
       </div>
 
       {/* Recent activity */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent activity</h2>
-        <p className="text-sm text-slate-500">No persisted activity yet.</p>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Recent activity</h2>
+        <p className="text-sm text-text-muted">No persisted activity yet.</p>
       </div>
 
       {/* Hackathon Momentum */}
@@ -557,14 +557,14 @@ export function Dashboard() {
         const regs = p.hackathonRegistrations;
         if (regs.length === 0) {
           return (
-            <div className="border border-slate-200 bg-white rounded-xl p-6">
+            <div className="border border-border-default bg-surface-primary rounded-xl p-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-sm font-semibold text-slate-700">Hackathon Momentum</h2>
-                    <TrendingUp className="w-4 h-4 text-slate-400" />
+                    <h2 className="text-sm font-semibold text-text-secondary">Hackathon Momentum</h2>
+                    <TrendingUp className="w-4 h-4 text-text-disabled" />
                   </div>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-text-muted">
                     No active hackathons. Join a hackathon from the Opportunity Hub to see your team's momentum
                     tracker here — 4-hour check-ins, build velocity, blockers.
                   </p>
@@ -581,10 +581,10 @@ export function Dashboard() {
           );
         }
         return (
-          <div className="border border-slate-200 bg-white rounded-xl p-6">
+          <div className="border border-border-default bg-surface-primary rounded-xl p-6">
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-semibold text-slate-700">Hackathon Momentum</h2>
-              <TrendingUp className="w-4 h-4 text-slate-400" />
+              <h2 className="text-sm font-semibold text-text-secondary">Hackathon Momentum</h2>
+              <TrendingUp className="w-4 h-4 text-text-disabled" />
             </div>
             <ul className="space-y-3">
               {regs.map((r) => {
@@ -607,25 +607,25 @@ export function Dashboard() {
                   : "Open team";
                 const ctaStage = momentum.nextAction === "submit-brief" ? "brief" : "build";
                 return (
-                  <li key={r.teamId} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3">
+                  <li key={r.teamId} className="flex items-start gap-3 border border-border-subtle rounded-lg p-3">
                     <span className="text-xl shrink-0" aria-hidden="true">{h.poster}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{h.title}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm font-semibold text-text-primary truncate">{h.title}</p>
+                      <p className="text-xs text-text-muted">
                         {r.teamName} · {memberCount} of {teamSize} members · {startsLabel}
                       </p>
-                      <p className="text-xs text-slate-600 mt-1 font-medium">{momentum.nextActionLabel}</p>
+                      <p className="text-xs text-text-muted mt-1 font-medium">{momentum.nextActionLabel}</p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className={`text-2xl font-bold leading-none ${momColor.text}`}>{momentum.score}</p>
-                      <div className="h-1.5 w-16 rounded-full bg-slate-100 mt-1 ml-auto">
+                      <div className="h-1.5 w-16 rounded-full bg-surface-secondary mt-1 ml-auto">
                         <div className={`h-1.5 rounded-full ${momColor.bar}`} style={{ width: `${momentum.score}%` }} />
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => navigate(`/incubation-hub?panel=hackathon&stage=${ctaStage}`)}
-                      className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 shrink-0 self-center"
+                      className="text-xs font-medium px-3 py-1.5 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary shrink-0 self-center"
                     >
                       {ctaLabel}
                     </button>

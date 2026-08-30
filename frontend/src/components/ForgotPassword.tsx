@@ -46,7 +46,7 @@ export default function ForgotPassword() {
     <div className="min-h-screen bg-[color:var(--background)] flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-2.5 mb-8">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-blue-400 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-brand-primary flex items-center justify-center">
             <Zap className="h-4 w-4 text-white" />
           </div>
           <span className="font-bold text-sm">TECHIT NETWORK</span>
@@ -67,7 +67,7 @@ export default function ForgotPassword() {
         </div>
 
         {message && (
-          <div className="mb-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-sm text-emerald-500">
+          <div className="mb-4 p-4 rounded-xl bg-status-success/10 border border-status-success/30 text-sm text-status-success">
             {message}
             {resetUrl && (
               <Link to={resetUrl.replace(window.location.origin, "")} className="mt-2 block font-medium underline">
@@ -77,7 +77,7 @@ export default function ForgotPassword() {
           </div>
         )}
         {error && (
-          <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-sm text-red-500">
+          <div className="mb-4 p-4 rounded-xl bg-status-error/10 border border-status-error/30 text-sm text-status-error">
             {error}
           </div>
         )}

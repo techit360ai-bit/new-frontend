@@ -14,7 +14,7 @@ export function LeftSidebar() {
     || 'User';
 
   return (
-    <aside className="sticky top-14 hidden h-[calc(100vh-56px)] w-[260px] overflow-y-auto border-r border-border-default bg-bg-surface p-5 lg:block">
+    <aside className="sticky top-14 hidden h-[calc(100vh-56px)] w-[260px] overflow-y-auto border-r border-border-default bg-surface-primary p-5 lg:block">
       <section className="mb-6">
         <p className="mb-2 text-[11px] font-medium uppercase text-text-muted">Your profile</p>
         <Link to="/feed/profile/me" className="text-[15px] font-medium text-text-primary hover:text-accent-primary">
@@ -61,7 +61,7 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 
 function MenuItem({ to, label }: { to: string; label: string }) {
   return (
-    <Link to={to} className="block rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary">
+    <Link to={to} className="block rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-surface-secondary hover:text-text-primary">
       {label}
     </Link>
   );

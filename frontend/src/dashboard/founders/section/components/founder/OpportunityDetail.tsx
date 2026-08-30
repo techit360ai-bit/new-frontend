@@ -44,14 +44,14 @@ export default function OpportunityDetail() {
   }, [opportunityId]);
 
   if (loading) {
-    return <div className="p-6 text-center text-sm text-slate-500">Loading live opportunity...</div>;
+    return <div className="p-6 text-center text-sm text-text-muted">Loading live opportunity...</div>;
   }
 
   if (error) {
     return (
       <div className="p-6">
-        <div className="max-w-2xl mx-auto text-center py-16 border border-red-200 rounded-xl bg-red-50">
-          <p className="text-sm text-red-700">Live opportunity data is unavailable: {error}</p>
+        <div className="max-w-2xl mx-auto text-center py-16 border border-status-error rounded-xl bg-status-error-soft">
+          <p className="text-sm text-status-error">Live opportunity data is unavailable: {error}</p>
         </div>
       </div>
     );
@@ -60,9 +60,9 @@ export default function OpportunityDetail() {
   if (!opp) {
     return (
       <div className="p-6">
-        <div className="max-w-2xl mx-auto text-center py-16 border border-slate-200 rounded-xl bg-white">
-          <p className="text-base text-slate-700 font-medium">Opportunity not found</p>
-          <p className="text-sm text-slate-500 mt-1">The opportunity may have been removed or never existed.</p>
+        <div className="max-w-2xl mx-auto text-center py-16 border border-border-default rounded-xl bg-surface-primary">
+          <p className="text-base text-text-secondary font-medium">Opportunity not found</p>
+          <p className="text-sm text-text-muted mt-1">The opportunity may have been removed or never existed.</p>
           <Link to="/opportunity-hub" className="inline-block mt-4 text-sm font-medium text-violet-700 hover:underline">
             ← Back to Opportunity Hub
           </Link>
@@ -76,25 +76,25 @@ export default function OpportunityDetail() {
       <div className="max-w-3xl mx-auto">
         <Link
           to="/opportunity-hub"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 mb-4"
+          className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Opportunity Hub
         </Link>
 
-        <div className="border border-slate-200 rounded-xl bg-white p-6">
+        <div className="border border-border-default rounded-xl bg-surface-primary p-6">
           <div className="flex items-start justify-between gap-3 mb-4">
             <span className="text-5xl shrink-0" aria-hidden="true">{opp.poster}</span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary bg-surface-secondary px-2 py-0.5 rounded">
               {TYPE_LABEL[opp.type]}
             </span>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900">{opp.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            <Building2 className="mr-1 inline-block h-4 w-4 text-slate-500" aria-hidden="true" />
+          <h1 className="text-2xl font-semibold text-text-primary">{opp.title}</h1>
+          <p className="text-sm text-text-muted mt-1">
+            <Building2 className="mr-1 inline-block h-4 w-4 text-text-muted" aria-hidden="true" />
             {opp.organizer.name}
           </p>
-          <p className="text-base text-slate-700 mt-4">{opp.summary}</p>
+          <p className="text-base text-text-secondary mt-4">{opp.summary}</p>
 
           {opp.type === "hackathon" && (
             <dl className="grid grid-cols-2 gap-4 mt-6">
@@ -147,14 +147,14 @@ export default function OpportunityDetail() {
 
           <div className="flex flex-wrap gap-2 mt-6">
             {opp.tags.map((t) => (
-              <span key={t} className="text-[11px] bg-slate-50 border border-slate-200 text-slate-600 px-2 py-0.5 rounded">
+              <span key={t} className="text-[11px] bg-background-primary border border-border-default text-text-muted px-2 py-0.5 rounded">
                 {t}
               </span>
             ))}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between gap-3">
-            <span className="text-xs text-slate-500">Apply by {opp.applyDeadline}</span>
+          <div className="mt-6 pt-6 border-t border-border-subtle flex items-center justify-between gap-3">
+            <span className="text-xs text-text-muted">Apply by {opp.applyDeadline}</span>
             {opp.type === "hackathon" ? (
               <button
                 type="button"
@@ -164,7 +164,7 @@ export default function OpportunityDetail() {
                 Register team →
               </button>
             ) : applied ? (
-              <span className="text-sm font-medium px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="text-sm font-medium px-4 py-2 rounded-lg bg-status-success-soft text-status-success border border-status-success">
                 <><CheckCircle className="h-4 w-4" aria-hidden="true" /> Applied</>
               </span>
             ) : (
@@ -205,8 +205,8 @@ export default function OpportunityDetail() {
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[11px] uppercase tracking-wider text-slate-500 font-medium">{label}</dt>
-      <dd className="text-sm text-slate-900 mt-0.5">{value}</dd>
+      <dt className="text-[11px] uppercase tracking-wider text-text-muted font-medium">{label}</dt>
+      <dd className="text-sm text-text-primary mt-0.5">{value}</dd>
     </div>
   );
 }

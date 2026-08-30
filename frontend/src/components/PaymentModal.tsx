@@ -99,15 +99,15 @@ export default function PaymentModal({
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={handleClose}
       />
-      <div className="relative w-full max-w-lg rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+      <div className="relative w-full max-w-lg rounded-lg border border-border-inverse-strong bg-background-inverse p-6 shadow-2xl">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-status-success">
               <Lock className="h-4 w-4" />
               Persisted payment intent
             </div>
             <h2 className="text-xl font-bold text-white">{plan.name}</h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-text-disabled">
               Display price: {displayPrice} for {plan.credits}
             </p>
           </div>
@@ -115,7 +115,7 @@ export default function PaymentModal({
             type="button"
             onClick={handleClose}
             title="Close"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-disabled hover:bg-surface-inverse-muted hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -123,16 +123,16 @@ export default function PaymentModal({
 
         {intent ? (
           <div className="space-y-5">
-            <div className="flex items-start gap-3 rounded-lg border border-emerald-700 bg-emerald-950/40 p-4">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-400" />
+            <div className="flex items-start gap-3 rounded-lg border border-status-success bg-emerald-950/40 p-4">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-success" />
               <div>
-                <p className="font-semibold text-emerald-200">Payment intent created</p>
+                <p className="font-semibold text-status-success">Payment intent created</p>
                 <p className="mt-1 text-sm text-emerald-100/70">
                   The plan is not active until the persisted payment status is completed by the billing provider.
                 </p>
               </div>
             </div>
-            <dl className="divide-y divide-slate-700 rounded-lg border border-slate-700 bg-slate-800/50 px-4">
+            <dl className="divide-y divide-slate-700 rounded-lg border border-border-inverse-strong bg-surface-inverse-muted/50 px-4">
               <IntentRow label="Intent ID" value={intent.id} />
               <IntentRow label="Status" value={intent.status || "pending"} />
               <IntentRow label="Amount" value={moneyLabel(intent.amount, intent.currency)} />
@@ -148,12 +148,12 @@ export default function PaymentModal({
           </div>
         ) : (
           <div className="space-y-5">
-            <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
+            <div className="rounded-lg border border-border-inverse-strong bg-surface-inverse-muted/50 p-4">
               <div className="flex items-center gap-3">
                 <ReceiptText className="h-6 w-6 text-cyan-400" />
                 <div>
                   <p className="text-sm font-semibold text-white">Canonical billing request</p>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-text-disabled">
                     The backend will record the intent before any payment can be completed.
                   </p>
                 </div>
@@ -161,8 +161,8 @@ export default function PaymentModal({
             </div>
 
             {!canCreateIntent && (
-              <div className="flex items-start gap-3 rounded-lg border border-amber-700 bg-amber-950/40 p-4">
-                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" />
+              <div className="flex items-start gap-3 rounded-lg border border-status-warning bg-amber-950/40 p-4">
+                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-warning" />
                 <p className="text-sm text-amber-100">
                   This plan does not include a persisted numeric amount and credit quantity, so a payment intent cannot be created.
                 </p>
@@ -170,8 +170,8 @@ export default function PaymentModal({
             )}
 
             {error && (
-              <div className="flex items-start gap-3 rounded-lg border border-red-700 bg-red-950/40 p-4">
-                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" />
+              <div className="flex items-start gap-3 rounded-lg border border-status-error bg-red-950/40 p-4">
+                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-status-error" />
                 <p className="text-sm text-red-100">{error}</p>
               </div>
             )}
@@ -180,7 +180,7 @@ export default function PaymentModal({
               type="button"
               onClick={() => void handleCreateIntent()}
               disabled={!canCreateIntent || loading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 py-3 text-sm font-semibold text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 py-3 text-sm font-semibold text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-text-disabled"
             >
               {loading ? (
                 <>
@@ -204,7 +204,7 @@ export default function PaymentModal({
 function IntentRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3 text-sm">
-      <dt className="text-slate-400">{label}</dt>
+      <dt className="text-text-disabled">{label}</dt>
       <dd className="max-w-[65%] truncate text-right font-medium text-white" title={value}>{value}</dd>
     </div>
   );

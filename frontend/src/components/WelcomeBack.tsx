@@ -25,31 +25,31 @@ const roleThemes = {
     accent: "text-violet-600",
     badge: "bg-violet-100 text-violet-700",
     button: "bg-violet-600 text-white hover:bg-violet-700",
-    decayHealthy: "text-emerald-600",
-    decayWarning: "text-amber-600",
-    decayCritical: "text-red-600",
+    decayHealthy: "text-status-success",
+    decayWarning: "text-status-warning",
+    decayCritical: "text-status-error",
   },
   collaborator: {
-    border: "border-amber-200",
-    bg: "bg-amber-50",
-    text: "text-indigo-700",
-    accent: "text-amber-600",
-    badge: "bg-indigo-100 text-indigo-700",
-    button: "bg-indigo-600 text-white hover:bg-indigo-700",
-    decayHealthy: "text-emerald-600",
-    decayWarning: "text-amber-600",
-    decayCritical: "text-red-600",
+    border: "border-status-warning",
+    bg: "bg-status-warning-soft",
+    text: "text-brand-accent",
+    accent: "text-status-warning",
+    badge: "bg-status-info-soft text-brand-accent",
+    button: "bg-brand-accent text-white hover:bg-brand-accent",
+    decayHealthy: "text-status-success",
+    decayWarning: "text-status-warning",
+    decayCritical: "text-status-error",
   },
   investor: {
-    border: "border-emerald-200",
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    accent: "text-emerald-600",
-    badge: "bg-emerald-100 text-emerald-700",
-    button: "bg-emerald-600 text-white hover:bg-emerald-700",
-    decayHealthy: "text-emerald-600",
-    decayWarning: "text-amber-600",
-    decayCritical: "text-red-600",
+    border: "border-status-success",
+    bg: "bg-status-success-soft",
+    text: "text-status-success",
+    accent: "text-status-success",
+    badge: "bg-status-success-soft text-status-success",
+    button: "bg-status-success text-white hover:bg-status-success",
+    decayHealthy: "text-status-success",
+    decayWarning: "text-status-warning",
+    decayCritical: "text-status-error",
   },
   organisation: {
     border: "border-cyan-200",
@@ -58,9 +58,9 @@ const roleThemes = {
     accent: "text-cyan-600",
     badge: "bg-cyan-100 text-cyan-700",
     button: "bg-cyan-600 text-white hover:bg-cyan-700",
-    decayHealthy: "text-emerald-600",
-    decayWarning: "text-amber-600",
-    decayCritical: "text-red-600",
+    decayHealthy: "text-status-success",
+    decayWarning: "text-status-warning",
+    decayCritical: "text-status-error",
   },
 } as const;
 
@@ -110,10 +110,10 @@ export function WelcomeBack() {
       {/* Greeting + Away Message */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">{context.greeting}</h2>
+          <h2 className="text-lg font-bold text-text-primary">{context.greeting}</h2>
           {context.awayMessage && (
-            <p className="text-sm text-slate-600 mt-1 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-slate-400" />
+            <p className="text-sm text-text-muted mt-1 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-text-disabled" />
               {context.awayMessage}
             </p>
           )}
@@ -123,21 +123,21 @@ export function WelcomeBack() {
             <p className={`text-2xl font-bold tabular-nums ${theme.text}`}>
               {Math.round(context.gsisScore)}
             </p>
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">GSIS</p>
+            <p className="text-[10px] uppercase tracking-wider text-text-muted">GSIS</p>
           </div>
         )}
       </div>
 
       {hasReturnSummary && returnSummary && (
-        <div className="rounded-lg border border-white/60 bg-white/70 p-3">
+        <div className="rounded-lg border border-white/60 bg-surface-primary/70 p-3">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-1.5">
                 <Bell className={`h-3.5 w-3.5 ${theme.accent}`} />
-                <h3 className="text-xs font-semibold uppercase text-slate-500">Return intelligence</h3>
+                <h3 className="text-xs font-semibold uppercase text-text-muted">Return intelligence</h3>
               </div>
-              <p className="mt-1 text-sm font-medium text-slate-900">{returnSummary.headline}</p>
-              <p className="mt-1 text-xs text-slate-500">{returnSummary.categories.map(item => `${item.count} ${item.name.toLowerCase()}`).join(' · ')}</p>
+              <p className="mt-1 text-sm font-medium text-text-primary">{returnSummary.headline}</p>
+              <p className="mt-1 text-xs text-text-muted">{returnSummary.categories.map(item => `${item.count} ${item.name.toLowerCase()}`).join(' · ')}</p>
             </div>
             <Link to="/feed?catchup=1" className={`inline-flex shrink-0 items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium ${theme.button}`}>
               Catch up <ArrowRight className="h-3 w-3" />
@@ -177,8 +177,8 @@ export function WelcomeBack() {
       {context.resume.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Play className="w-3.5 h-3.5 text-slate-500" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <Play className="w-3.5 h-3.5 text-text-muted" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Resume where you left off
             </h3>
           </div>
@@ -186,14 +186,14 @@ export function WelcomeBack() {
             {context.resume.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-lg border border-white/60 bg-white/70 p-3 flex items-start gap-3"
+                className="rounded-lg border border-white/60 bg-surface-primary/70 p-3 flex items-start gap-3"
               >
                 <Briefcase className={`w-4 h-4 mt-0.5 shrink-0 ${theme.accent}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">
+                  <p className="text-sm font-medium text-text-primary truncate">
                     {item.description}
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">{item.nextStep}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{item.nextStep}</p>
                 </div>
                 {item.actionUrl ? (
                   <Link
@@ -215,17 +215,17 @@ export function WelcomeBack() {
 
       {/* Do Now Section */}
       {context.doNow && (
-        <div className="rounded-lg border border-white/60 bg-white/70 p-3">
+        <div className="rounded-lg border border-white/60 bg-surface-primary/70 p-3">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Zap className={`w-3.5 h-3.5 ${theme.accent}`} />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Do now
             </h3>
           </div>
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900">{context.doNow.action}</p>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-sm font-medium text-text-primary">{context.doNow.action}</p>
+              <p className="text-xs text-text-muted mt-0.5">
                 {context.doNow.reason} · ~{context.doNow.timeEstimate}
                 {context.doNow.credits > 0 && ` · +${context.doNow.credits} credits`}
               </p>
@@ -244,8 +244,8 @@ export function WelcomeBack() {
       {context.newSinceLeft.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Bell className="w-3.5 h-3.5 text-slate-500" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <Bell className="w-3.5 h-3.5 text-text-muted" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               New since you left
             </h3>
           </div>
@@ -254,11 +254,11 @@ export function WelcomeBack() {
               <li key={idx}>
                 <Link
                   to={event.url}
-                  className="flex items-center gap-2 text-sm text-slate-700 hover:text-slate-900 group"
+                  className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary group"
                 >
-                  <TrendingUp className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0" />
+                  <TrendingUp className="w-3.5 h-3.5 text-text-disabled group-hover:text-text-muted shrink-0" />
                   <span className="flex-1 truncate">{event.description}</span>
-                  <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-slate-500 shrink-0" />
+                  <ArrowRight className="w-3 h-3 text-text-on-inverse-secondary group-hover:text-text-muted shrink-0" />
                 </Link>
               </li>
             ))}
@@ -268,15 +268,15 @@ export function WelcomeBack() {
 
       {/* This Week's Priority */}
       {context.weeklyPriority && (
-        <div className="rounded-lg border border-white/60 bg-white/70 p-3">
+        <div className="rounded-lg border border-white/60 bg-surface-primary/70 p-3">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Target className={`w-3.5 h-3.5 ${theme.accent}`} />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               This week's priority
             </h3>
           </div>
-          <p className="text-sm font-medium text-slate-900">{context.weeklyPriority.goal}</p>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-sm font-medium text-text-primary">{context.weeklyPriority.goal}</p>
+          <p className="text-xs text-text-muted mt-0.5">
             Deadline: {context.weeklyPriority.deadline} · {context.weeklyPriority.velocityContext}
           </p>
         </div>

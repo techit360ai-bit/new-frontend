@@ -33,25 +33,25 @@ function getIcon(type: WorkspaceNotificationType) {
 function getIconColor(type: WorkspaceNotificationType): string {
   switch (type) {
     case 'message':
-      return 'bg-blue-500/10 text-blue-500';
+      return 'bg-status-info/10 text-status-info';
     case 'mention':
-      return 'bg-purple-500/10 text-purple-500';
+      return 'bg-status-pending/10 text-status-pending';
     case 'pr':
-      return 'bg-green-500/10 text-green-500';
+      return 'bg-status-success/10 text-status-success';
     case 'build':
-      return 'bg-orange-500/10 text-orange-500';
+      return 'bg-status-warning/10 text-status-warning';
     case 'meeting':
       return 'bg-pink-500/10 text-pink-500';
     case 'system':
-      return 'bg-gray-500/10 text-gray-500';
+      return 'bg-status-inactive/10 text-text-muted';
   }
 }
 
 function EmptyState({ children }: { children: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-      <Bell className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-      <p className="text-sm text-gray-600">{children}</p>
+    <div className="bg-surface-primary border border-border-default rounded-lg p-8 text-center">
+      <Bell className="w-8 h-8 text-text-disabled mx-auto mb-3" />
+      <p className="text-sm text-text-muted">{children}</p>
     </div>
   );
 }
@@ -69,8 +69,8 @@ function NotificationCard({
 }) {
   return (
     <div
-      className={`bg-white border rounded-lg p-4 transition-all hover:shadow-md ${
-        !notification.read ? 'border-[#2196F3] bg-[#2196F3]/5' : 'border-gray-200'
+      className={`bg-surface-primary border rounded-lg p-4 transition-all hover:shadow-md ${
+        !notification.read ? 'border-brand-primary bg-brand-primary/5' : 'border-border-default'
       }`}
     >
       <div className="flex items-start gap-4">
@@ -81,11 +81,11 @@ function NotificationCard({
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
               <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
-              <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-              <span className="text-xs text-gray-400">{notification.timestamp}</span>
+              <p className="text-sm text-text-muted mb-2">{notification.message}</p>
+              <span className="text-xs text-text-disabled">{notification.timestamp}</span>
             </div>
             {!notification.read && !compact && (
-              <Badge className="bg-[#2196F3] text-white shrink-0">New</Badge>
+              <Badge className="bg-brand-primary text-white shrink-0">New</Badge>
             )}
           </div>
         </div>
@@ -108,7 +108,7 @@ function NotificationCard({
                 onClick={() => onDelete(notification.id)}
                 aria-label="Delete notification"
               >
-                <Trash2 className="w-4 h-4 text-red-500" />
+                <Trash2 className="w-4 h-4 text-status-error" />
               </Button>
             )}
           </div>
@@ -177,18 +177,18 @@ export function Notifications() {
   );
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+    <div className="h-full flex flex-col bg-background-primary">
+      <div className="bg-surface-primary border-b border-border-default px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#2196F3]/10 rounded-lg">
-              <Bell className="w-6 h-6 text-[#2196F3]" />
+            <div className="p-2 bg-brand-primary/10 rounded-lg">
+              <Bell className="w-6 h-6 text-brand-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 Notifications
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-muted">
                 {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
               </p>
             </div>
@@ -207,9 +207,9 @@ export function Notifications() {
       </div>
 
       <div className="flex-1 overflow-auto px-8 py-6">
-        {loading && <p className="text-sm text-gray-500 mb-4">Loading live notifications...</p>}
+        {loading && <p className="text-sm text-text-muted mb-4">Loading live notifications...</p>}
         {!loading && error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+          <div className="rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error mb-4">
             Notifications could not be loaded: {error}
           </div>
         )}

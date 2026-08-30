@@ -76,27 +76,27 @@ export function BuildLogPage() {
         {!loading && error && <FeedErrorState message={error} />}
         {!loading && !error && contributions.map((contrib) => {
           const gsisArrow = contrib.gsisChange > 0
-            ? <ArrowUp className="w-3 h-3 text-emerald-600" />
+            ? <ArrowUp className="w-3 h-3 text-status-success" />
             : contrib.gsisChange < 0
-            ? <ArrowDown className="w-3 h-3 text-red-600" />
-            : <Minus className="w-3 h-3 text-slate-400" />;
+            ? <ArrowDown className="w-3 h-3 text-status-error" />
+            : <Minus className="w-3 h-3 text-text-disabled" />;
           const gsisColor = contrib.gsisChange > 0
-            ? "text-emerald-600"
+            ? "text-status-success"
             : contrib.gsisChange < 0
-            ? "text-red-600"
-            : "text-slate-500";
+            ? "text-status-error"
+            : "text-text-muted";
           const endDateText = contrib.endDate
             ? new Date(contrib.endDate).toLocaleDateString()
             : "ongoing";
 
           return (
-            <div key={contrib.id} className="border border-border-default rounded-xl p-4 bg-white">
+            <div key={contrib.id} className="border border-border-default rounded-xl p-4 bg-surface-primary">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-text-primary">{contrib.projectName}</h3>
                     {contrib.verified && (
-                      <span className="flex items-center gap-1 text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-xs bg-status-success-soft text-status-success px-2 py-0.5 rounded-full">
                         <CheckCircle className="w-3 h-3" />
                         Verified
                       </span>
@@ -121,7 +121,7 @@ export function BuildLogPage() {
               {contrib.technologies.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {contrib.technologies.map((tech) => (
-                    <span key={tech} className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                    <span key={tech} className="text-xs bg-surface-secondary text-text-secondary px-2 py-0.5 rounded">
                       {tech}
                     </span>
                   ))}

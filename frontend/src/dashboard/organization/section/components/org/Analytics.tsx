@@ -56,9 +56,9 @@ function EmptyPanel({
   detail: string;
 }) {
   return (
-    <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 text-center">
-      <p className="font-medium text-gray-900">{title}</p>
-      <p className="mt-2 max-w-md text-sm text-gray-500">{detail}</p>
+    <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed border-border-default bg-background-primary px-6 text-center">
+      <p className="font-medium text-text-primary">{title}</p>
+      <p className="mt-2 max-w-md text-sm text-text-muted">{detail}</p>
     </div>
   );
 }
@@ -71,7 +71,7 @@ function SourceError({
   message: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    <div className="flex items-start gap-3 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
       <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
       <div>
         <p className="font-medium">{title}</p>
@@ -144,18 +144,18 @@ export function Analytics() {
   const metricStyles = [
     {
       icon: FolderKanban,
-      iconClass: "text-blue-700",
-      iconBackground: "bg-blue-50",
+      iconClass: "text-status-info",
+      iconBackground: "bg-status-info-soft",
     },
     {
       icon: Rocket,
-      iconClass: "text-emerald-700",
-      iconBackground: "bg-emerald-50",
+      iconClass: "text-status-success",
+      iconBackground: "bg-status-success-soft",
     },
     {
       icon: Gauge,
-      iconClass: "text-amber-700",
-      iconBackground: "bg-amber-50",
+      iconClass: "text-status-warning",
+      iconBackground: "bg-status-warning-soft",
     },
     {
       icon: Award,
@@ -174,8 +174,8 @@ export function Analytics() {
     <div className="mx-auto max-w-[1800px] p-6 lg:p-8">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-text-primary">Analytics Dashboard</h1>
+          <p className="mt-2 text-text-muted">
             Persisted portfolio, operations, and talent analytics.
           </p>
         </div>
@@ -183,7 +183,7 @@ export function Analytics() {
           type="button"
           onClick={() => void loadAnalytics()}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm font-medium text-text-secondary hover:bg-background-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -208,7 +208,7 @@ export function Analytics() {
       )}
 
       {loading && !dashboard && projects.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+        <div className="rounded-lg border border-border-default bg-surface-primary px-6 py-12 text-center text-sm text-text-muted">
           Loading organization analytics...
         </div>
       ) : (
@@ -219,15 +219,15 @@ export function Analytics() {
               return (
                 <div
                   key={metric.label}
-                  className="min-h-36 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+                  className="min-h-36 rounded-lg border border-border-default bg-surface-primary p-5 shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm text-gray-600">{metric.label}</p>
-                      <p className="mt-2 break-words text-3xl font-bold text-gray-900">
+                      <p className="text-sm text-text-muted">{metric.label}</p>
+                      <p className="mt-2 break-words text-3xl font-bold text-text-primary">
                         {metric.value}
                       </p>
-                      <p className="mt-2 text-xs text-gray-500">{metric.detail}</p>
+                      <p className="mt-2 text-xs text-text-muted">{metric.detail}</p>
                     </div>
                     <div className={`flex-shrink-0 rounded-lg p-3 ${metric.iconBackground}`}>
                       <Icon className={`h-6 w-6 ${metric.iconClass}`} />
@@ -239,8 +239,8 @@ export function Analytics() {
           </div>
 
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-text-primary">
                 Project Lifecycle Distribution
               </h2>
               {!projectsError && analytics.lifecycle.length > 0 ? (
@@ -259,16 +259,16 @@ export function Analytics() {
                       <Bar dataKey="count" fill="#2563eb" radius={[0, 6, 6, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                  <div className="mt-4 grid grid-cols-2 gap-4 border-t border-gray-100 pt-4">
+                  <div className="mt-4 grid grid-cols-2 gap-4 border-t border-border-subtle pt-4">
                     <div>
-                      <p className="text-sm text-gray-500">Most Common</p>
-                      <p className="mt-1 font-semibold text-gray-900">
+                      <p className="text-sm text-text-muted">Most Common</p>
+                      <p className="mt-1 font-semibold text-text-primary">
                         {analytics.mostCommonStage}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Total Projects</p>
-                      <p className="mt-1 font-semibold text-gray-900">
+                      <p className="text-sm text-text-muted">Total Projects</p>
+                      <p className="mt-1 font-semibold text-text-primary">
                         {analytics.totalProjects}
                       </p>
                     </div>
@@ -286,8 +286,8 @@ export function Analytics() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">Project Health</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-text-primary">Project Health</h2>
               {dashboard && dashboard.projectHealth.length > 0 ? (
                 <div className="grid items-center gap-5 sm:grid-cols-2">
                   <ResponsiveContainer width="100%" height={240}>
@@ -319,9 +319,9 @@ export function Analytics() {
                             className="h-3 w-3 flex-shrink-0 rounded-full"
                             style={{ backgroundColor: item.color }}
                           />
-                          <span className="truncate text-gray-700">{item.name}</span>
+                          <span className="truncate text-text-secondary">{item.name}</span>
                         </div>
-                        <span className="font-medium text-gray-900">{item.value}</span>
+                        <span className="font-medium text-text-primary">{item.value}</span>
                       </div>
                     ))}
                   </div>
@@ -338,16 +338,16 @@ export function Analytics() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
               <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">Automation Trends</h2>
-                  <p className="mt-1 text-sm text-gray-500">Persisted automated and manual operations.</p>
+                  <h2 className="text-lg font-bold text-text-primary">Automation Trends</h2>
+                  <p className="mt-1 text-sm text-text-muted">Persisted automated and manual operations.</p>
                 </div>
                 {latestAutomationRate !== null && (
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-700">{latestAutomationRate}%</p>
-                    <p className="text-xs text-gray-500">Latest automation share</p>
+                    <p className="text-2xl font-bold text-status-info">{latestAutomationRate}%</p>
+                    <p className="text-xs text-text-muted">Latest automation share</p>
                   </div>
                 )}
               </div>
@@ -387,8 +387,8 @@ export function Analytics() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">Talent Activity</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+              <h2 className="mb-6 text-lg font-bold text-text-primary">Talent Activity</h2>
               {dashboard && dashboard.talentActivity.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={dashboard.talentActivity}>
@@ -414,8 +414,8 @@ export function Analytics() {
 
           <section>
             <div className="mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Analytics Availability</h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <h2 className="text-lg font-bold text-text-primary">Analytics Availability</h2>
+              <p className="mt-1 text-sm text-text-muted">
                 These views require persisted historical or financial datasets.
               </p>
             </div>

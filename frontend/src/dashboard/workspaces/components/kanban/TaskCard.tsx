@@ -9,9 +9,9 @@ interface TaskCardProps {
 }
 
 const priorityConfig = {
-  high: { color: 'border-red-500', flag: 'text-red-500', bg: 'bg-red-50' },
-  medium: { color: 'border-[#F59E0B]', flag: 'text-[#F59E0B]', bg: 'bg-amber-50' },
-  low: { color: 'border-[#10B981]', flag: 'text-[#10B981]', bg: 'bg-green-50' },
+  high: { color: 'border-status-error', flag: 'text-status-error', bg: 'bg-status-error-soft' },
+  medium: { color: 'border-status-warning', flag: 'text-status-warning', bg: 'bg-status-warning-soft' },
+  low: { color: 'border-status-success', flag: 'text-status-success', bg: 'bg-status-success-soft' },
 };
 
 export function TaskCard({ task }: TaskCardProps) {
@@ -30,7 +30,7 @@ export function TaskCard({ task }: TaskCardProps) {
       ref={(node) => {
         drag(node);
       }}
-      className={`bg-white rounded-lg shadow-sm border-l-4 ${config.color} p-4 cursor-move hover:shadow-md transition-all ${
+      className={`bg-surface-primary rounded-lg shadow-sm border-l-4 ${config.color} p-4 cursor-move hover:shadow-md transition-all ${
         isDragging ? 'opacity-50 scale-95' : 'hover:scale-[1.02]'
       }`}
     >
@@ -62,7 +62,7 @@ export function TaskCard({ task }: TaskCardProps) {
           <Flag className={`w-4 h-4 ${config.flag} fill-current`} />
           
           {/* Due Date */}
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-xs text-text-muted">
             <Calendar className="w-3 h-3" />
             <span>{task.dueDate}</span>
           </div>

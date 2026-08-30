@@ -76,18 +76,18 @@ export function InvestorLayout() {
   };
 
   return (
-    <div className="app-shell flex h-screen overflow-hidden bg-[#0a0a0a] text-gray-100">
+    <div className="app-shell flex h-screen overflow-hidden bg-background-inverse text-text-on-inverse">
       {/* Sidebar */}
-      <aside className={`hidden lg:flex bg-[#111111] border-r border-gray-800 flex-col transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
-        <div className="p-6 border-b border-gray-800">
-          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-emerald-400">
+      <aside className={`hidden lg:flex bg-surface-inverse border-r border-border-inverse flex-col transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
+        <div className="p-6 border-b border-border-inverse">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-text-on-inverse-muted hover:bg-surface-inverse-muted hover:text-role-investor">
             {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
           </button>
           {!sidebarCollapsed && <>
           <h1 className="text-2xl font-bold text-white">
-            TECH<span className="text-emerald-400">IT</span>
+            TECH<span className="text-role-investor">IT</span>
           </h1>
-          <p className="text-xs text-gray-400 mt-1 font-mono">INVESTOR INTELLIGENCE</p>
+          <p className="text-xs text-text-on-inverse-muted mt-1 font-mono">INVESTOR INTELLIGENCE</p>
           </>}
         </div>
 
@@ -97,8 +97,8 @@ export function InvestorLayout() {
             const active = isActive(item.path);
             const baseClass = `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
               active
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+                ? 'bg-role-investor/10 text-role-investor border border-role-investor/20'
+                : 'text-text-on-inverse-muted hover:text-text-on-inverse-secondary hover:bg-surface-inverse-muted/50'
             }`;
 
             if (item.comingSoon) {
@@ -112,7 +112,7 @@ export function InvestorLayout() {
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-sm font-medium flex-1">{item.label}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 font-mono uppercase tracking-wider">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-surface-inverse-muted text-text-on-inverse-muted font-mono uppercase tracking-wider">
                     Soon
                   </span>
                 </button>
@@ -128,29 +128,29 @@ export function InvestorLayout() {
           })}
         </nav>
 
-        {!sidebarCollapsed && <div className="p-4 border-t border-gray-800 space-y-3">
+        {!sidebarCollapsed && <div className="p-4 border-t border-border-inverse space-y-3">
           <Link
             to={roleDashboardPath.investor}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs text-text-on-inverse-muted hover:text-text-on-inverse-secondary hover:bg-surface-inverse-muted/50 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to TechIT
           </Link>
           <Link
             to="/investor/profile"
-            className="block group px-4 py-3 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors"
+            className="block group px-4 py-3 bg-surface-inverse-muted/50 hover:bg-surface-inverse-muted rounded-lg transition-colors"
             title="Open investor profile"
           >
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-text-on-inverse-muted">
                   {investorProfile.investorType || 'Investor'}
                 </p>
                 <p className="text-sm font-medium text-white mt-0.5 truncate">
                   {investorProfile.location || 'Capital Partners LP'}
                 </p>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-emerald-400 transition-colors flex-shrink-0 ml-2" />
+              <ChevronRight className="w-4 h-4 text-text-on-inverse-disabled group-hover:text-role-investor transition-colors flex-shrink-0 ml-2" />
             </div>
           </Link>
         </div>}
@@ -178,9 +178,9 @@ export function InvestorLayout() {
           active: !item.external && isActive(item.path),
         }))}
         headerActions={<>
-          <Link to="/workspaces/chat" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
-          <Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link>
-          <Link to="/investor/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
+          <Link to="/workspaces/chat" className="app-touch-target inline-flex items-center justify-center rounded-lg text-text-on-inverse-muted hover:bg-surface-inverse-muted hover:text-white" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-text-on-inverse-muted hover:bg-surface-inverse-muted hover:text-white" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link>
+          <Link to="/investor/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-text-on-inverse-muted hover:bg-surface-inverse-muted hover:text-white" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
         </>}
       />
 

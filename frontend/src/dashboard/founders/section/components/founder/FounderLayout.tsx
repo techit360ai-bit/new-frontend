@@ -99,10 +99,10 @@ export function FounderLayout() {
     if (item.kind === "placeholder") {
       return (
         <span key={item.name}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-slate-400 cursor-default">
+          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-text-disabled cursor-default">
           <Icon className="w-4 h-4" />
           <span className="flex-1 font-medium">{item.name}</span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono uppercase tracking-wider">Soon</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-surface-secondary text-text-muted font-mono uppercase tracking-wider">Soon</span>
         </span>
       );
     }
@@ -111,8 +111,8 @@ export function FounderLayout() {
       <Link key={item.path} to={item.path}
         className={`app-nav-link flex items-center gap-3 px-4 transition-colors text-sm ${
           active
-            ? "bg-violet-50 text-violet-700 border-l-2 border-violet-600"
-            : "text-slate-700 hover:bg-slate-50"
+            ? "bg-role-founder-soft text-role-founder border-l-2 border-role-founder"
+            : "text-text-secondary hover:bg-background-primary"
         }`}>
         <Icon className="w-4 h-4" />
         <span className="flex-1 font-medium">{item.name}</span>
@@ -121,36 +121,36 @@ export function FounderLayout() {
   };
 
   return (
-    <div className="app-shell flex h-screen overflow-hidden bg-slate-50">
-      <aside className={`hidden lg:flex lg:flex-col bg-white border-r border-slate-200 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
-        <div className="p-5 border-b border-slate-200">
-          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-violet-600">
+    <div className="app-shell flex h-screen overflow-hidden bg-background-primary">
+      <aside className={`hidden lg:flex lg:flex-col bg-surface-primary border-r border-border-default transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
+        <div className="p-5 border-b border-border-default">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-text-muted hover:bg-surface-secondary hover:text-role-founder">
             {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
           </button>
           {!sidebarCollapsed && <>
-          <Link to="/" className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-violet-600 transition-colors mb-3">
+          <Link to="/" className="flex items-center gap-1.5 text-xs text-text-muted hover:text-role-founder transition-colors mb-3">
             <ArrowLeft className="w-3 h-3" /> Back to TechIT
           </Link>
-          <h1 className="text-xl font-bold text-violet-600 tracking-wide">TECHIT</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Founder Portal</p>
+          <h1 className="text-xl font-bold text-role-founder tracking-wide">TECHIT</h1>
+          <p className="text-xs text-text-muted mt-0.5">Founder Portal</p>
           </>}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
           {primaryNav.map(renderItem)}
-          <div className="px-4 pt-4 pb-1 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Coming soon</div>
+          <div className="px-4 pt-4 pb-1 text-[10px] uppercase tracking-wider text-text-disabled font-semibold">Coming soon</div>
           {comingSoonNav.map(renderItem)}
-          <div className="h-px bg-slate-100 my-3" />
+          <div className="h-px bg-surface-secondary my-3" />
           {utilityNav.map(renderItem)}
-          <div className="h-px bg-slate-100 my-3" />
+          <div className="h-px bg-surface-secondary my-3" />
           {accountNav.map(renderItem)}
         </nav>
 
-        <Link to="/founder/profile" className={`m-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200 flex items-center gap-3 ${sidebarCollapsed ? "justify-center" : ""}`}>
-          <div className="w-9 h-9 rounded-full bg-violet-600 text-white text-sm font-semibold flex items-center justify-center">{initials}</div>
+        <Link to="/founder/profile" className={`m-3 p-3 rounded-lg bg-background-primary hover:bg-surface-secondary transition-colors border border-border-default flex items-center gap-3 ${sidebarCollapsed ? "justify-center" : ""}`}>
+          <div className="w-9 h-9 rounded-full bg-role-founder text-white text-sm font-semibold flex items-center justify-center">{initials}</div>
           {!sidebarCollapsed && <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
-            <p className="text-xs text-slate-500 truncate">Founder · {startupLabel} · {founderProfile.stage}</p>
+            <p className="text-sm font-medium text-text-primary truncate">{displayName}</p>
+            <p className="text-xs text-text-muted truncate">Founder · {startupLabel} · {founderProfile.stage}</p>
           </div>}
         </Link>
       </aside>
@@ -179,8 +179,8 @@ export function FounderLayout() {
       />
 
       <main className="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
-        <header className="hidden min-h-14 items-center justify-between border-b border-slate-200 bg-white px-4 lg:flex lg:px-6">
-          <div className="text-sm text-slate-500">
+        <header className="hidden min-h-14 items-center justify-between border-b border-border-default bg-surface-primary px-4 lg:flex lg:px-6">
+          <div className="text-sm text-text-muted">
             {[...primaryNav, ...utilityNav, ...accountNav].find((n) => isActive(n.path))?.name ?? ""}
           </div>
           <TopBarRoleMenu />

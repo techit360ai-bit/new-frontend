@@ -43,29 +43,29 @@ export function AudioPlayer({ title, duration, onPlay, onPause }: AudioPlayerPro
   };
 
   return (
-    <Card className="overflow-hidden border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+    <Card className="overflow-hidden border-brand-accent bg-gradient-to-r from-indigo-50 to-purple-50">
       <div className="p-4">
         {/* Header row with audio/video mode toggle */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Volume2 className="size-5 text-indigo-600" />
+            <Volume2 className="size-5 text-brand-accent" />
             <div>
-              <h4 className="font-medium text-gray-900">{title}</h4>
-              <p className="text-xs text-gray-600">
+              <h4 className="font-medium text-text-primary">{title}</h4>
+              <p className="text-xs text-text-muted">
                 {mode === "audio" ? "Audio Lesson" : "Video Lesson"} • {duration}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1">
             {/* Audio / Video mode toggle */}
-            <div className="flex items-center rounded-lg bg-white/70 border border-indigo-200 p-0.5 mr-1">
+            <div className="flex items-center rounded-lg bg-surface-primary/70 border border-brand-accent p-0.5 mr-1">
               <button
                 onClick={() => setMode("audio")}
                 aria-label="Audio mode"
                 className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${
                   mode === "audio"
-                    ? "bg-indigo-600 text-white"
-                    : "text-indigo-600 hover:bg-indigo-50"
+                    ? "bg-brand-accent text-white"
+                    : "text-brand-accent hover:bg-status-info-soft"
                 }`}
               >
                 <Volume2 className="size-3.5" />
@@ -76,8 +76,8 @@ export function AudioPlayer({ title, duration, onPlay, onPause }: AudioPlayerPro
                 aria-label="Video mode (coming soon)"
                 className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${
                   mode === "video"
-                    ? "bg-indigo-600 text-white"
-                    : "text-indigo-600 hover:bg-indigo-50"
+                    ? "bg-brand-accent text-white"
+                    : "text-brand-accent hover:bg-status-info-soft"
                 }`}
               >
                 <Video className="size-3.5" />
@@ -106,12 +106,12 @@ export function AudioPlayer({ title, duration, onPlay, onPause }: AudioPlayerPro
             >
               {mode === "video" ? (
                 /* Video — future option, shown as coming-soon placeholder */
-                <div className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-indigo-200 bg-white/60 py-8 text-center">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100">
-                    <Lock className="size-5 text-indigo-500" />
+                <div className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-brand-accent bg-surface-primary/60 py-8 text-center">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-status-info-soft">
+                    <Lock className="size-5 text-brand-accent" />
                   </div>
-                  <p className="text-sm font-medium text-gray-900">Video lessons coming soon</p>
-                  <p className="text-xs text-gray-600 max-w-xs">
+                  <p className="text-sm font-medium text-text-primary">Video lessons coming soon</p>
+                  <p className="text-xs text-text-muted max-w-xs">
                     Watch this lesson as a guided video walkthrough. We're producing video
                     content now — switch to Audio to listen today.
                   </p>
@@ -127,7 +127,7 @@ export function AudioPlayer({ title, duration, onPlay, onPause }: AudioPlayerPro
                       step={1}
                       className="cursor-pointer"
                     />
-                    <div className="flex justify-between text-xs text-gray-600">
+                    <div className="flex justify-between text-xs text-text-muted">
                       <span>{formatTime(Math.floor((progress / 100) * 180))}</span>
                       <span>3:00</span>
                     </div>
@@ -139,7 +139,7 @@ export function AudioPlayer({ title, duration, onPlay, onPause }: AudioPlayerPro
                       <Button
                         size="sm"
                         onClick={handlePlayPause}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        className="bg-brand-accent hover:bg-brand-accent text-white"
                       >
                         {isPlaying ? (
                           <Pause className="size-4" />
@@ -163,7 +163,7 @@ export function AudioPlayer({ title, duration, onPlay, onPause }: AudioPlayerPro
                       </Button>
                     </div>
 
-                    <div className="text-xs text-gray-600 bg-indigo-100 px-2 py-1 rounded">
+                    <div className="text-xs text-text-muted bg-status-info-soft px-2 py-1 rounded">
                       Listen while working
                     </div>
                   </div>

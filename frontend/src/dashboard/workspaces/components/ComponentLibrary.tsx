@@ -14,14 +14,14 @@ import { Bell, Settings, Video, Flag, Calendar, Clock, Bot, Sparkles } from 'luc
 
 export function ComponentLibrary() {
   return (
-    <div className="min-h-screen bg-background-primary p-8 text-text-primary">
+    <div className="min-h-screen bg-background-primary px-4 py-8 text-text-primary sm:px-8">
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
             Component Library
           </h1>
-          <p className="text-gray-600">TechIT Platform Design System</p>
+          <p className="text-text-muted">TechIT Platform Design System</p>
         </div>
 
         {/* Color Palette */}
@@ -29,7 +29,7 @@ export function ComponentLibrary() {
           <h2 className="text-2xl font-semibold mb-6" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
             Color Palette
           </h2>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <div className="space-y-2">
               <div className="h-20 bg-brand-secondary rounded-lg" />
               <div className="text-sm font-mono">brand-secondary</div>
@@ -174,37 +174,37 @@ export function ComponentLibrary() {
             Icons
           </h2>
           <div className="bg-surface-primary p-6 rounded-xl shadow-sm border border-border-default">
-            <div className="grid grid-cols-8 gap-6">
+            <div className="grid grid-cols-4 gap-6 sm:grid-cols-8">
               <div className="flex flex-col items-center gap-2">
-                <Bell className="w-6 h-6 text-gray-700" />
+                <Bell className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Bell</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Settings className="w-6 h-6 text-gray-700" />
+                <Settings className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Settings</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Video className="w-6 h-6 text-gray-700" />
+                <Video className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Video</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Flag className="w-6 h-6 text-gray-700" />
+                <Flag className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Flag</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Calendar className="w-6 h-6 text-gray-700" />
+                <Calendar className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Calendar</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Clock className="w-6 h-6 text-gray-700" />
+                <Clock className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Clock</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Bot className="w-6 h-6 text-gray-700" />
+                <Bot className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Bot</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Sparkles className="w-6 h-6 text-gray-700" />
+                <Sparkles className="w-6 h-6 text-text-secondary" />
                 <span className="text-xs">Sparkles</span>
               </div>
             </div>
@@ -216,7 +216,7 @@ export function ComponentLibrary() {
           <h2 className="text-2xl font-semibold mb-6" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
             Cards
           </h2>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             {/* Standard Card */}
             <div className="bg-surface-primary rounded-lg shadow-sm border border-border-default p-6">
               <h3 className="font-semibold mb-2">Standard Card</h3>
@@ -299,7 +299,7 @@ export function ComponentLibrary() {
             Border Radius
           </h2>
           <div className="bg-surface-primary p-6 rounded-xl shadow-sm border border-border-default">
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               <div className="text-center">
                 <div className="h-20 bg-brand-primary rounded" />
                 <p className="text-sm mt-2">4px (Buttons)</p>

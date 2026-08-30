@@ -63,17 +63,17 @@ export function Earnings() {
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Earnings</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Cash earned across all engagements.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Earnings</h1>
+          <p className="text-sm text-text-muted mt-0.5">Cash earned across all engagements.</p>
         </div>
         <button onClick={() => { setAmount(totals.pendingUSD); setWithdrawOpen(true); }}
           disabled={totals.pendingUSD <= 0}
-          className="h-9 px-4 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-sm font-semibold disabled:bg-slate-200 disabled:text-slate-400">
+          className="h-9 px-4 bg-status-warning hover:bg-amber-400 text-text-primary rounded-lg text-sm font-semibold disabled:bg-slate-200 disabled:text-text-disabled">
           Withdraw funds
         </button>
       </div>
       {error && (
-        <div className="border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">
+        <div className="border border-status-error bg-status-error-soft text-status-error rounded-xl px-4 py-3 text-sm">
           Live earnings records could not be loaded: {error}
         </div>
       )}
@@ -86,13 +86,13 @@ export function Earnings() {
       </div>
 
       {/* Per-startup breakdown */}
-      <div className="border border-slate-200 bg-white rounded-xl">
-        <div className="px-5 py-3 border-b border-slate-100">
-          <h2 className="text-sm font-semibold text-slate-700">Per-startup breakdown</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl">
+        <div className="px-5 py-3 border-b border-border-subtle">
+          <h2 className="text-sm font-semibold text-text-secondary">Per-startup breakdown</h2>
         </div>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-100">
+            <tr className="text-xs uppercase tracking-wider text-text-muted border-b border-border-subtle">
               <th className="text-left px-5 py-3 font-semibold">Project</th>
               <th className="text-right px-5 py-3 font-semibold">Earned</th>
               <th className="text-right px-5 py-3 font-semibold">Pending</th>
@@ -103,22 +103,22 @@ export function Earnings() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {earnings.length > 0 ? earnings.map((c) => (
-              <tr key={c.projectId} className="hover:bg-slate-50">
-                <td className="px-5 py-3 text-slate-900">{c.projectName}</td>
+              <tr key={c.projectId} className="hover:bg-background-primary">
+                <td className="px-5 py-3 text-text-primary">{c.projectName}</td>
                 <td className="px-5 py-3 text-right tabular-nums">${c.earned.toLocaleString()}</td>
                 <td className="px-5 py-3 text-right tabular-nums">${c.pending.toLocaleString()}</td>
                 <td className="px-5 py-3 text-right tabular-nums">{c.revenueSharePercent}%</td>
-                <td className="px-5 py-3 text-slate-500 text-xs">{c.contributionNote}</td>
+                <td className="px-5 py-3 text-text-muted text-xs">{c.contributionNote}</td>
                 <td className="px-5 py-3 text-right">
                   <Link to={`/collaborator/equity#startup-${c.projectId}`}
-                    className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100">
+                    className="text-xs px-2.5 py-1 rounded-full bg-status-warning-soft text-status-warning hover:bg-status-warning-soft">
                     Equity →
                   </Link>
                 </td>
               </tr>
             )) : (
               <tr>
-                <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-500">
+                <td colSpan={6} className="px-5 py-8 text-center text-sm text-text-muted">
                   No cash earnings have been recorded yet.
                 </td>
               </tr>
@@ -128,10 +128,10 @@ export function Earnings() {
       </div>
 
       {/* Payout history chart */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Payout history</h2>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Payout history</h2>
         {payoutList.length === 0 ? (
-          <p className="text-sm text-slate-500">No payout history has been recorded yet.</p>
+          <p className="text-sm text-text-muted">No payout history has been recorded yet.</p>
         ) : (
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
@@ -152,10 +152,10 @@ export function Earnings() {
         {payoutList.length > 0 && <ul className="mt-6 divide-y divide-slate-100">
           {payoutList.map((p) => (
             <li key={p.id} className="py-2.5 flex items-center justify-between text-sm">
-              <span className="text-slate-700">{p.monthIso}</span>
+              <span className="text-text-secondary">{p.monthIso}</span>
               <span className="flex items-center gap-3">
-                <span className={`text-xs px-2 py-0.5 rounded-full ${p.status === "processing" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{p.status}</span>
-                <span className="font-semibold tabular-nums text-slate-900">${p.amount.toLocaleString()}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${p.status === "processing" ? "bg-status-warning-soft text-status-warning" : "bg-status-success-soft text-status-success"}`}>{p.status}</span>
+                <span className="font-semibold tabular-nums text-text-primary">${p.amount.toLocaleString()}</span>
               </span>
             </li>
           ))}
@@ -170,24 +170,24 @@ export function Earnings() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Destination</label>
-              <div className="p-3 border-2 border-amber-500 bg-amber-50 rounded-lg text-sm">
-                <p className="font-semibold text-slate-900">Wells Fargo · checking</p>
-                <p className="text-xs text-slate-600 mt-0.5">•••1234</p>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Destination</label>
+              <div className="p-3 border-2 border-status-warning bg-status-warning-soft rounded-lg text-sm">
+                <p className="font-semibold text-text-primary">Wells Fargo · checking</p>
+                <p className="text-xs text-text-muted mt-0.5">•••1234</p>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Amount</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Amount</label>
               <input type="number" min={0} max={totals.pendingUSD} value={amount}
                 onChange={(e) => setAmount(Number(e.target.value) || 0)}
-                className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm tabular-nums focus:outline-none focus:border-amber-500" />
-              <p className="text-xs text-slate-500 mt-1">Up to ${totals.pendingUSD.toLocaleString()} available</p>
+                className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm tabular-nums focus:outline-none focus:border-status-warning" />
+              <p className="text-xs text-text-muted mt-1">Up to ${totals.pendingUSD.toLocaleString()} available</p>
             </div>
           </div>
           <DialogFooter>
-            <button onClick={() => setWithdrawOpen(false)} className="px-4 py-2 text-sm rounded-lg text-slate-700 hover:bg-slate-100">Cancel</button>
+            <button onClick={() => setWithdrawOpen(false)} className="px-4 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-secondary">Cancel</button>
             <button onClick={handleWithdraw} disabled={amount <= 0 || amount > totals.pendingUSD}
-              className="px-4 py-2 text-sm rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-400">
+              className="px-4 py-2 text-sm rounded-lg bg-status-warning text-text-primary font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-text-disabled">
               Withdraw
             </button>
           </DialogFooter>
@@ -199,10 +199,10 @@ export function Earnings() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <div className="border border-slate-200 bg-white rounded-xl p-5">
-      <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">{label}</p>
-      <p className="text-2xl font-bold text-slate-900 tabular-nums mt-2">{value}</p>
-      <p className="text-xs text-slate-500 mt-1">{sub}</p>
+    <div className="border border-border-default bg-surface-primary rounded-xl p-5">
+      <p className="text-xs uppercase tracking-wider text-text-muted font-semibold">{label}</p>
+      <p className="text-2xl font-bold text-text-primary tabular-nums mt-2">{value}</p>
+      <p className="text-xs text-text-muted mt-1">{sub}</p>
     </div>
   );
 }

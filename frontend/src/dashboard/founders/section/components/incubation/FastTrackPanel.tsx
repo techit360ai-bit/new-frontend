@@ -222,16 +222,16 @@ export function FastTrackPanel() {
   // ─────────────────── STEP 1: INPUT ───────────────────
   if (step === 1) {
     return (
-      <div className="h-full overflow-auto bg-slate-50 p-6 md:p-10">
+      <div className="h-full overflow-auto bg-background-primary p-6 md:p-10">
         <div className="mx-auto max-w-2xl">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-violet-100 rounded-lg">
                 <Rocket className="w-5 h-5 text-violet-600" />
               </div>
-              <h1 className="text-2xl font-bold text-slate-900">Fast-Track Intake</h1>
+              <h1 className="text-2xl font-bold text-text-primary">Fast-Track Intake</h1>
             </div>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-text-muted">
               Already building? Plug in your codebase and business plan. Our AI agents will
               analyze everything, compute your GSIS and execution scores, and make you visible to
               investors.
@@ -241,31 +241,31 @@ export function FastTrackPanel() {
           <div className="space-y-5">
             {/* Startup Name */}
             <div>
-              <label className="block mb-2 text-sm font-semibold text-slate-700">
+              <label className="block mb-2 text-sm font-semibold text-text-secondary">
                 Startup name
               </label>
               <input
                 value={startupName}
                 onChange={(e) => setStartupName(e.target.value)}
                 placeholder="e.g. PayStack, Flutterwave"
-                className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
+                className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
               />
             </div>
 
             {/* Industry */}
             <div>
-              <label className="block mb-2 text-sm font-semibold text-slate-700">Industry</label>
+              <label className="block mb-2 text-sm font-semibold text-text-secondary">Industry</label>
               <input
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
                 placeholder="e.g. Fintech, HealthTech, EdTech, AI/ML"
-                className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
+                className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
               />
             </div>
 
             {/* Stage */}
             <div>
-              <label className="block mb-3 text-sm font-semibold text-slate-700">Stage</label>
+              <label className="block mb-3 text-sm font-semibold text-text-secondary">Stage</label>
               <div className="grid grid-cols-5 gap-2">
                 {STAGES.map((s) => (
                   <button
@@ -275,7 +275,7 @@ export function FastTrackPanel() {
                     className={`px-3 py-2.5 rounded-lg border-2 text-xs font-medium transition-all ${
                       stage === s
                         ? "border-violet-500 bg-violet-50 text-violet-700"
-                        : "border-slate-300 bg-white text-slate-700 hover:border-violet-300"
+                        : "border-border-strong bg-surface-primary text-text-secondary hover:border-violet-300"
                     }`}
                   >
                     {STAGE_LABELS[s]}
@@ -286,7 +286,7 @@ export function FastTrackPanel() {
 
             {/* One-liner */}
             <div>
-              <label className="block mb-2 text-sm font-semibold text-slate-700">
+              <label className="block mb-2 text-sm font-semibold text-text-secondary">
                 One-liner ({oneLiner.length}/140)
               </label>
               <input
@@ -294,22 +294,22 @@ export function FastTrackPanel() {
                 onChange={(e) => setOneLiner(e.target.value.slice(0, 140))}
                 placeholder="What does your startup do in one sentence?"
                 maxLength={140}
-                className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
+                className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
               />
             </div>
 
             {/* GitHub Repo */}
             <div>
-              <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700">
-                <Github className="w-4 h-4 text-slate-400" /> GitHub Repository URL
+              <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-text-secondary">
+                <Github className="w-4 h-4 text-text-disabled" /> GitHub Repository URL
               </label>
               <input
                 value={repoUrl}
                 onChange={(e) => setRepoUrl(e.target.value)}
                 placeholder="https://github.com/your-org/your-repo"
-                className="w-full h-12 bg-white border-2 border-slate-300 rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
+                className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-violet-500 transition-colors"
               />
-              <p className="mt-1.5 text-xs text-slate-500">
+              <p className="mt-1.5 text-xs text-text-muted">
                 Public repos are analyzed automatically.{" "}
                 <button
                   type="button"
@@ -322,27 +322,27 @@ export function FastTrackPanel() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="block"><span className="mb-2 block text-sm font-semibold text-slate-700">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="e.g. Budapest, Hungary or West Africa" className="h-12 w-full rounded-lg border-2 border-slate-300 bg-white px-4 text-sm outline-none focus:border-violet-500" /></label>
-              <label className="block"><span className="mb-2 block text-sm font-semibold text-slate-700">Preferred MVP timeline</span><select value={timeConstraint} onChange={(event) => setTimeConstraint(event.target.value)} className="h-12 w-full rounded-lg border-2 border-slate-300 bg-white px-4 text-sm"><option>1 day</option><option>3 days</option><option>1 week</option><option>2–6 weeks</option></select></label>
+              <label className="block"><span className="mb-2 block text-sm font-semibold text-text-secondary">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="e.g. Budapest, Hungary or West Africa" className="h-12 w-full rounded-lg border-2 border-border-strong bg-surface-primary px-4 text-sm outline-none focus:border-violet-500" /></label>
+              <label className="block"><span className="mb-2 block text-sm font-semibold text-text-secondary">Preferred MVP timeline</span><select value={timeConstraint} onChange={(event) => setTimeConstraint(event.target.value)} className="h-12 w-full rounded-lg border-2 border-border-strong bg-surface-primary px-4 text-sm"><option>1 day</option><option>3 days</option><option>1 week</option><option>2–6 weeks</option></select></label>
             </div>
 
             {/* Document Upload */}
             <div>
-              <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700">
-                <Upload className="w-4 h-4 text-slate-400" /> Business Plan / Pitch Deck
+              <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-text-secondary">
+                <Upload className="w-4 h-4 text-text-disabled" /> Business Plan / Pitch Deck
               </label>
               <div
                 onClick={() => fileRef.current?.click()}
-                className="flex items-center gap-3 w-full h-14 bg-white border-2 border-dashed border-slate-300 rounded-lg px-4 cursor-pointer hover:border-violet-400 transition-colors"
+                className="flex items-center gap-3 w-full h-14 bg-surface-primary border-2 border-dashed border-border-strong rounded-lg px-4 cursor-pointer hover:border-violet-400 transition-colors"
               >
                 {uploading ? (
                   <Loader2 className="w-5 h-5 text-violet-500 animate-spin" />
                 ) : docFile ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                  <CheckCircle2 className="w-5 h-5 text-status-success" />
                 ) : (
-                  <Plus className="w-5 h-5 text-slate-400" />
+                  <Plus className="w-5 h-5 text-text-disabled" />
                 )}
-                <span className="text-sm text-slate-600">
+                <span className="text-sm text-text-muted">
                   {uploading
                     ? "Uploading..."
                     : docFile
@@ -364,7 +364,7 @@ export function FastTrackPanel() {
             <button
               onClick={handleAnalyze}
               disabled={!canContinue}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500 disabled:bg-slate-200 disabled:text-text-disabled disabled:cursor-not-allowed transition-colors"
             >
               <Rocket className="w-4 h-4" />
               Analyze My Startup
@@ -378,35 +378,35 @@ export function FastTrackPanel() {
   // ─────────────────── STEP 2: PIPELINE EXECUTION ───────────────────
   if (step === 2) {
     return (
-      <div className="h-full overflow-auto bg-slate-50 p-6 md:p-10">
+      <div className="h-full overflow-auto bg-background-primary p-6 md:p-10">
         <div className="mx-auto max-w-lg">
           <div className="mb-8 text-center">
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Analyzing {startupName}</h2>
-            <p className="text-sm text-slate-600">
+            <h2 className="text-xl font-bold text-text-primary mb-2">Analyzing {startupName}</h2>
+            <p className="text-sm text-text-muted">
               Our AI agents are evaluating your startup across 10 dimensions...
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-3">
+          <div className="bg-surface-primary border border-border-default rounded-xl p-6 space-y-3">
             {PIPELINE_STEPS.map((label, i) => {
               const done = i < progressIndex;
               const active = i === progressIndex && pipelineRunning;
               return (
                 <div key={label} className="flex items-center gap-3">
                   {done ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-status-success shrink-0" />
                   ) : active ? (
                     <Loader2 className="w-5 h-5 text-violet-500 animate-spin shrink-0" />
                   ) : (
-                    <Circle className="w-5 h-5 text-slate-300 shrink-0" />
+                    <Circle className="w-5 h-5 text-text-on-inverse-secondary shrink-0" />
                   )}
                   <span
                     className={`text-sm ${
                       done
-                        ? "text-slate-700"
+                        ? "text-text-secondary"
                         : active
                           ? "text-violet-700 font-medium"
-                          : "text-slate-400"
+                          : "text-text-disabled"
                     }`}
                   >
                     {label}
@@ -418,7 +418,7 @@ export function FastTrackPanel() {
 
           {pipelineError && (
             <div className="mt-6 text-center">
-              <p className="text-sm text-red-600 mb-3">{pipelineError}</p>
+              <p className="text-sm text-status-error mb-3">{pipelineError}</p>
               <button
                 onClick={handleAnalyze}
                 className="px-5 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 transition-colors"
@@ -430,8 +430,8 @@ export function FastTrackPanel() {
 
           {!pipelineRunning && !pipelineError && progressIndex >= PIPELINE_STEPS.length && (
             <div className="mt-6 text-center">
-              <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
-              <p className="text-sm text-green-700 font-medium">Analysis complete!</p>
+              <CheckCircle2 className="w-8 h-8 text-status-success mx-auto mb-2" />
+              <p className="text-sm text-status-success font-medium">Analysis complete!</p>
             </div>
           )}
         </div>
@@ -444,18 +444,18 @@ export function FastTrackPanel() {
   const insights = extractInsights(blueprint);
 
   return (
-    <div className="h-full overflow-auto bg-slate-50 p-6 md:p-8">
+    <div className="h-full overflow-auto bg-background-primary p-6 md:p-8">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">{startupName}</h2>
-            <p className="text-sm text-slate-500">
+            <h2 className="text-xl font-bold text-text-primary">{startupName}</h2>
+            <p className="text-sm text-text-muted">
               {industry} &middot; {STAGE_LABELS[stage]} &middot; Fast-Track Analysis
             </p>
           </div>
           {published && (
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-status-success-soft text-status-success text-xs font-semibold">
               <Eye className="w-3.5 h-3.5" /> Live on Deal Flow
             </span>
           )}
@@ -466,7 +466,7 @@ export function FastTrackPanel() {
           <ScoreHeroCard
             label="GSIS Score"
             value={scores.gsis}
-            gradient="from-violet-500 to-indigo-600"
+            gradient="from-violet-500 to-brand-accent"
           />
           <ScoreHeroCard
             label="Unicorn Potential"
@@ -481,8 +481,8 @@ export function FastTrackPanel() {
         </div>
 
         {/* Score Circles */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-slate-700 mb-4">Key Metrics</h3>
+        <div className="bg-surface-primary border border-border-default rounded-xl p-5 mb-6">
+          <h3 className="text-sm font-semibold text-text-secondary mb-4">Key Metrics</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {scores.breakdown.slice(0, 8).map(({ label, value }) => (
               <ScoreCircle key={label} label={label} value={value} />
@@ -491,8 +491,8 @@ export function FastTrackPanel() {
         </div>
 
         {/* Evaluation Bars */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-slate-700 mb-4">Detailed Scores</h3>
+        <div className="bg-surface-primary border border-border-default rounded-xl p-5 mb-6">
+          <h3 className="text-sm font-semibold text-text-secondary mb-4">Detailed Scores</h3>
           <div className="space-y-3">
             {scores.breakdown.map(({ label, value }) => (
               <EvaluationBar key={label} label={label} value={value} />
@@ -502,13 +502,13 @@ export function FastTrackPanel() {
 
         {/* AI Insights */}
         {insights.length > 0 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">AI Insights</h3>
+          <div className="bg-surface-primary border border-border-default rounded-xl p-5 mb-6">
+            <h3 className="text-sm font-semibold text-text-secondary mb-4">AI Insights</h3>
             <div className="space-y-3">
               {insights.map(({ label, text }) => (
-                <div key={label} className="border border-slate-100 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-slate-500 uppercase mb-1">{label}</p>
-                  <p className="text-sm text-slate-700 line-clamp-4">{text}</p>
+                <div key={label} className="border border-border-subtle rounded-lg p-3">
+                  <p className="text-xs font-semibold text-text-muted uppercase mb-1">{label}</p>
+                  <p className="text-sm text-text-secondary line-clamp-4">{text}</p>
                 </div>
               ))}
             </div>
@@ -525,8 +525,8 @@ export function FastTrackPanel() {
         )}
 
         {/* Next AI Actions */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-slate-700 mb-4">Next AI Actions</h3>
+        <div className="bg-surface-primary border border-border-default rounded-xl p-5 mb-6">
+          <h3 className="text-sm font-semibold text-text-secondary mb-4">Next AI Actions</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <NextActionButton
               icon={<FileText className="w-4 h-4" />}
@@ -583,7 +583,7 @@ export function FastTrackPanel() {
           <button
             onClick={handleCreateWorkspace}
             disabled={!projectId}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 disabled:bg-slate-200 disabled:text-text-disabled disabled:cursor-not-allowed transition-colors"
           >
             <ExternalLink className="w-4 h-4" />
             {workspaceCreated ? "Open Workspace Copilot" : "Create Workspace"}
@@ -591,7 +591,7 @@ export function FastTrackPanel() {
           <button
             onClick={handlePublish}
             disabled={published || publishing || !projectId}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-status-success text-white text-sm font-medium hover:bg-status-success disabled:bg-slate-200 disabled:text-text-disabled disabled:cursor-not-allowed transition-colors"
           >
             {publishing ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -602,14 +602,14 @@ export function FastTrackPanel() {
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border-strong bg-surface-primary text-text-secondary text-sm font-medium hover:bg-background-primary transition-colors"
           >
             <Download className="w-4 h-4" />
             Export Report
           </button>
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border-strong bg-surface-primary text-text-secondary text-sm font-medium hover:bg-background-primary transition-colors"
           >
             <Plus className="w-4 h-4" />
             Start New
@@ -704,23 +704,23 @@ function ScoreCircle({ label, value }: { label: string; value: number }) {
           {Math.round(value)}
         </text>
       </svg>
-      <span className="text-[10px] text-slate-500 text-center leading-tight">{label}</span>
+      <span className="text-[10px] text-text-muted text-center leading-tight">{label}</span>
     </div>
   );
 }
 
 function EvaluationBar({ label, value }: { label: string; value: number }) {
-  const color = value >= 70 ? "bg-green-500" : value >= 40 ? "bg-amber-500" : "bg-red-500";
+  const color = value >= 70 ? "bg-status-success-soft" : value >= 40 ? "bg-status-warning" : "bg-status-error-soft";
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-slate-600 w-40 shrink-0 truncate">{label}</span>
-      <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+      <span className="text-xs text-text-muted w-40 shrink-0 truncate">{label}</span>
+      <div className="flex-1 h-2 bg-surface-secondary rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ${color}`}
           style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
         />
       </div>
-      <span className="text-xs font-semibold text-slate-700 w-8 text-right">
+      <span className="text-xs font-semibold text-text-secondary w-8 text-right">
         {Math.round(value)}
       </span>
     </div>

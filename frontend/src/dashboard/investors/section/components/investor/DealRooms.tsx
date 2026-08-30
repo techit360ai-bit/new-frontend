@@ -24,9 +24,9 @@ import {
 } from 'lucide-react';
 
 const statusConfig = {
-  active: { label: 'Active', color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', icon: CheckCircle },
-  pending: { label: 'Pending', color: 'text-amber-400', bg: 'bg-amber-500/15', border: 'border-amber-500/30', icon: Clock },
-  closed: { label: 'Closed', color: 'text-blue-400', bg: 'bg-blue-500/15', border: 'border-blue-500/30', icon: Lock },
+  active: { label: 'Active', color: 'text-status-success', bg: 'bg-status-success/15', border: 'border-status-success/30', icon: CheckCircle },
+  pending: { label: 'Pending', color: 'text-status-warning', bg: 'bg-status-warning/15', border: 'border-status-warning/30', icon: Clock },
+  closed: { label: 'Closed', color: 'text-status-info', bg: 'bg-status-info/15', border: 'border-status-info/30', icon: Lock },
 };
 
 function asString(value: unknown, fallback = '—') {
@@ -66,7 +66,7 @@ function StageProgress({ stage }: { stage: string }) {
           <div
             title={s}
             className={`h-1.5 w-6 rounded-full transition-all ${
-              i < idx ? 'bg-emerald-500' : i === idx ? 'bg-blue-400' : 'bg-gray-700'
+              i < idx ? 'bg-status-success' : i === idx ? 'bg-blue-400' : 'bg-gray-700'
             }`}
           />
         </div>
@@ -114,19 +114,19 @@ export function DealRooms() {
   const closedCount = Object.values(dealMeta).filter((d) => d.status === 'closed').length;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background-inverse">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
+      <div className="border-b border-border-inverse bg-surface-inverse px-8 py-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Deal Rooms</h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-text-on-inverse-muted mt-1">
               Encrypted, investor-founder deal spaces with document signing and messaging
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-            <Lock className="w-4 h-4 text-emerald-400" />
-            <span className="text-sm text-emerald-400 font-medium">E2E Encrypted</span>
+          <div className="flex items-center gap-2 px-3 py-2 bg-status-success/10 border border-status-success/20 rounded-lg">
+            <Lock className="w-4 h-4 text-status-success" />
+            <span className="text-sm text-status-success font-medium">E2E Encrypted</span>
           </div>
         </div>
       </div>
@@ -134,40 +134,40 @@ export function DealRooms() {
       <div className="p-8">
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Total Rooms</p>
+          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+            <p className="text-xs text-text-on-inverse-muted uppercase tracking-wider mb-2">Total Rooms</p>
             <p className="text-3xl font-bold font-mono text-white">{rooms.length}</p>
           </div>
-          <div className="bg-[#111111] border border-emerald-500/20 rounded-lg p-5">
-            <p className="text-xs text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <div className="bg-surface-inverse border border-status-success/20 rounded-lg p-5">
+            <p className="text-xs text-status-success uppercase tracking-wider mb-2 flex items-center gap-1">
               <CheckCircle className="w-3.5 h-3.5" /> Active Deals
             </p>
-            <p className="text-3xl font-bold font-mono text-emerald-400">{activeCount}</p>
+            <p className="text-3xl font-bold font-mono text-status-success">{activeCount}</p>
           </div>
-          <div className="bg-[#111111] border border-amber-500/20 rounded-lg p-5">
-            <p className="text-xs text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <div className="bg-surface-inverse border border-status-warning/20 rounded-lg p-5">
+            <p className="text-xs text-status-warning uppercase tracking-wider mb-2 flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" /> Pending
             </p>
-            <p className="text-3xl font-bold font-mono text-amber-400">{pendingCount}</p>
+            <p className="text-3xl font-bold font-mono text-status-warning">{pendingCount}</p>
           </div>
-          <div className="bg-[#111111] border border-blue-500/20 rounded-lg p-5">
-            <p className="text-xs text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <div className="bg-surface-inverse border border-status-info/20 rounded-lg p-5">
+            <p className="text-xs text-status-info uppercase tracking-wider mb-2 flex items-center gap-1">
               <Lock className="w-3.5 h-3.5" /> Closed
             </p>
-            <p className="text-3xl font-bold font-mono text-blue-400">{closedCount}</p>
+            <p className="text-3xl font-bold font-mono text-status-info">{closedCount}</p>
           </div>
         </div>
 
         {/* Filters */}
         <div className="flex items-center gap-3 mb-6">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-on-inverse-muted" />
             <input
               type="text"
               placeholder="Search deal rooms..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full pl-9 pr-4 py-2 bg-surface-inverse border border-border-inverse rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
           </div>
           {(['all', 'active', 'pending', 'closed'] as const).map((status) => {
@@ -181,34 +181,34 @@ export function DealRooms() {
                     ? cfg
                       ? `${cfg.bg} ${cfg.color} border ${cfg.border}`
                       : 'bg-gray-700 text-white border border-gray-600'
-                    : 'bg-gray-800/50 text-gray-400 border border-gray-800 hover:bg-gray-800'
+                    : 'bg-surface-inverse-muted/50 text-text-on-inverse-muted border border-border-inverse hover:bg-surface-inverse-muted'
                 }`}
               >
                 {status === 'all' ? 'All Rooms' : status}
               </button>
             );
           })}
-          <span className="text-sm text-gray-400 ml-auto">{filtered.length} rooms</span>
+          <span className="text-sm text-text-on-inverse-muted ml-auto">{filtered.length} rooms</span>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
 
         {/* Deal Room Cards */}
         {isLoading ? (
-          <div className="rounded-lg border border-gray-800 bg-[#111111] p-8 text-center text-gray-400">
+          <div className="rounded-lg border border-border-inverse bg-surface-inverse p-8 text-center text-text-on-inverse-muted">
             Loading live deal rooms...
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-lg border border-gray-800 bg-[#111111] p-8 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
-              <Shield className="h-6 w-6 text-gray-400" />
+          <div className="rounded-lg border border-border-inverse bg-surface-inverse p-8 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-inverse-muted">
+              <Shield className="h-6 w-6 text-text-on-inverse-muted" />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">No live deal rooms found</h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-text-on-inverse-muted text-sm">
               Deal rooms will appear after persisted investor-founder deal spaces are created.
             </p>
           </div>
@@ -223,18 +223,18 @@ export function DealRooms() {
             const riskLevel = asString(room.riskLevel, 'not scored');
             const riskColor =
               riskLevel === 'low'
-                ? 'text-emerald-400'
+                ? 'text-status-success'
                 : riskLevel === 'moderate'
-                ? 'text-amber-400'
+                ? 'text-status-warning'
                 : riskLevel === 'high'
-                ? 'text-red-400'
-                : 'text-gray-400';
+                ? 'text-status-error'
+                : 'text-text-on-inverse-muted';
 
             return (
               <div
                 key={id}
-                className={`bg-[#111111] border rounded-lg p-6 transition-all hover:border-gray-700 ${
-                  meta.status === 'active' ? 'border-gray-700' : 'border-gray-800'
+                className={`bg-surface-inverse border rounded-lg p-6 transition-all hover:border-border-inverse-strong ${
+                  meta.status === 'active' ? 'border-border-inverse-strong' : 'border-border-inverse'
                 }`}
               >
                 {/* Header */}
@@ -249,23 +249,23 @@ export function DealRooms() {
                         {cfg.label}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-text-on-inverse-muted">
                       {asString(room.sector, 'Uncategorized')} · {asString(room.region, 'Region unavailable')}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs font-mono text-blue-400 font-semibold">
+                      <span className="text-xs font-mono text-status-info font-semibold">
                         {meta.stage}
                       </span>
                       <StageProgress stage={meta.stage} />
                     </div>
                   </div>
-                  <div className="p-2 bg-purple-500/10 rounded-lg ml-2">
-                    <Shield className="w-5 h-5 text-purple-400" />
+                  <div className="p-2 bg-status-pending/10 rounded-lg ml-2">
+                    <Shield className="w-5 h-5 text-status-pending" />
                   </div>
                 </div>
 
                 {/* Activity row */}
-                <div className="flex items-center gap-5 text-sm text-gray-400 mb-4 pb-4 border-b border-gray-800">
+                <div className="flex items-center gap-5 text-sm text-text-on-inverse-muted mb-4 pb-4 border-b border-border-inverse">
                   <div className="flex items-center gap-1.5">
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>{meta.messages} messages</span>
@@ -286,25 +286,25 @@ export function DealRooms() {
 
                 {/* Risk & readiness quick stats */}
                 <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="bg-gray-800/50 rounded-lg p-2.5 text-center">
-                    <p className="text-xs text-gray-500 mb-1">Readiness</p>
+                  <div className="bg-surface-inverse-muted/50 rounded-lg p-2.5 text-center">
+                    <p className="text-xs text-text-on-inverse-disabled mb-1">Readiness</p>
                     <p className="font-mono font-bold text-white">{readinessScore > 0 ? readinessScore : '—'}</p>
                   </div>
-                  <div className="bg-gray-800/50 rounded-lg p-2.5 text-center">
-                    <p className="text-xs text-gray-500 mb-1">Risk</p>
+                  <div className="bg-surface-inverse-muted/50 rounded-lg p-2.5 text-center">
+                    <p className="text-xs text-text-on-inverse-disabled mb-1">Risk</p>
                     <p className={`font-mono font-bold capitalize ${riskColor}`}>
                       {riskLevel}
                     </p>
                   </div>
-                  <div className="bg-gray-800/50 rounded-lg p-2.5 text-center">
-                    <p className="text-xs text-gray-500 mb-1">Days Open</p>
+                  <div className="bg-surface-inverse-muted/50 rounded-lg p-2.5 text-center">
+                    <p className="text-xs text-text-on-inverse-disabled mb-1">Days Open</p>
                     <p className="font-mono font-bold text-white">{meta.daysOpen}d</p>
                   </div>
                 </div>
 
                 {/* Alerts for stale deals */}
                 {meta.status === 'pending' && meta.daysOpen > 2 && (
-                  <div className="flex items-center gap-2 text-xs text-amber-400 mb-3 p-2 bg-amber-500/10 rounded-lg">
+                  <div className="flex items-center gap-2 text-xs text-status-warning mb-3 p-2 bg-status-warning/10 rounded-lg">
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                     Awaiting founder response · {meta.daysOpen}d since last update
                   </div>
@@ -314,22 +314,22 @@ export function DealRooms() {
                 <div className="flex gap-2">
                   <Link
                     to={`/investor/deal-room/${id}`}
-                    className="flex-1 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 bg-status-pending/10 hover:bg-status-pending/20 text-status-pending text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2"
                   >
                     Enter Deal Room
                     <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <button className="px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-all flex items-center gap-1.5">
+                  <button className="px-3 py-2.5 bg-surface-inverse-muted hover:bg-gray-700 text-text-on-inverse-secondary text-sm font-medium rounded-lg transition-all flex items-center gap-1.5">
                     <Send className="w-3.5 h-3.5" />
                     Message
                   </button>
-                  <button className="px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-all flex items-center gap-1.5">
+                  <button className="px-3 py-2.5 bg-surface-inverse-muted hover:bg-gray-700 text-text-on-inverse-secondary text-sm font-medium rounded-lg transition-all flex items-center gap-1.5">
                     <PenLine className="w-3.5 h-3.5" />
                     Sign
                   </button>
                   <Link
                     to={`/investor/data-room/${id}`}
-                    className="px-3 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded-lg transition-all flex items-center gap-1.5"
+                    className="px-3 py-2.5 bg-status-info/10 hover:bg-status-info/20 text-status-info text-sm font-medium rounded-lg transition-all flex items-center gap-1.5"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     Docs
@@ -342,18 +342,18 @@ export function DealRooms() {
         )}
 
         {/* Security banner */}
-        <div className="mt-8 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
+        <div className="mt-8 bg-gradient-to-br from-status-pending/10 to-brand-primary/10 border border-status-pending/20 rounded-lg p-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-purple-500/20 rounded-lg">
-              <Shield className="w-5 h-5 text-purple-400" />
+            <div className="p-2 bg-status-pending/20 rounded-lg">
+              <Shield className="w-5 h-5 text-status-pending" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-purple-300 mb-2">INSTITUTIONAL-GRADE DEAL SECURITY</h4>
+              <h4 className="text-sm font-semibold text-status-pending mb-2">INSTITUTIONAL-GRADE DEAL SECURITY</h4>
               <p className="text-white mb-1">
                 All deal rooms are end-to-end encrypted with AES-256 and access logs maintained for
                 full audit trails.
               </p>
-              <p className="text-gray-300 text-sm">
+              <p className="text-text-on-inverse-secondary text-sm">
                 NDA signing, term sheet negotiation, and document execution happen entirely within the
                 secure deal room — every action timestamped and cryptographically verified.
               </p>

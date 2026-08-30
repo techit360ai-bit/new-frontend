@@ -36,24 +36,24 @@ export function CollabStep2() {
   const skillOptions = discipline ? subSkillsByDiscipline[discipline] : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-background-primary flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-2xl">
-        <div className="flex justify-end mb-4"><button onClick={handleSaveExit} className="text-sm text-slate-500 hover:text-slate-900">Save & exit</button></div>
+        <div className="flex justify-end mb-4"><button onClick={handleSaveExit} className="text-sm text-text-muted hover:text-text-primary">Save & exit</button></div>
         <CollabProgressBar currentStep={2} totalSteps={6} />
 
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">What do you build?</h1>
-          <p className="text-base text-slate-600">Pick one primary discipline, then 3–8 specific skills.</p>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">What do you build?</h1>
+          <p className="text-base text-text-muted">Pick one primary discipline, then 3–8 specific skills.</p>
         </div>
 
         <div className="mb-8">
-          <label className="block mb-3 text-sm font-semibold text-slate-700">Primary discipline</label>
+          <label className="block mb-3 text-sm font-semibold text-text-secondary">Primary discipline</label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {disciplines.map((d) => (
               <button key={d} type="button" onClick={() => { setDiscipline(d); setSubSkills([]); }}
                 className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                  discipline === d ? "border-amber-500 bg-amber-50 text-amber-700"
-                                   : "border-slate-300 bg-white text-slate-700 hover:border-amber-300"}`}>
+                  discipline === d ? "border-status-warning bg-status-warning-soft text-status-warning"
+                                   : "border-border-strong bg-surface-primary text-text-secondary hover:border-status-warning"}`}>
                 {d}
               </button>
             ))}
@@ -62,15 +62,15 @@ export function CollabStep2() {
 
         {discipline && (
           <div className="mb-8">
-            <label className="block mb-3 text-sm font-semibold text-slate-700">
-              Sub-skills <span className="text-slate-400 font-normal">({subSkills.length} of 3–8 selected)</span>
+            <label className="block mb-3 text-sm font-semibold text-text-secondary">
+              Sub-skills <span className="text-text-disabled font-normal">({subSkills.length} of 3–8 selected)</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {skillOptions.map((s) => (
                 <button key={s} type="button" onClick={() => toggleSkill(s)}
                   className={`px-3 py-1.5 rounded-full border text-sm transition-all ${
-                    subSkills.includes(s) ? "border-amber-500 bg-amber-50 text-amber-700"
-                                          : "border-slate-300 bg-white text-slate-600 hover:border-amber-300"}`}>
+                    subSkills.includes(s) ? "border-status-warning bg-status-warning-soft text-status-warning"
+                                          : "border-border-strong bg-surface-primary text-text-muted hover:border-status-warning"}`}>
                   {s}
                 </button>
               ))}
@@ -79,9 +79,9 @@ export function CollabStep2() {
         )}
 
         <div className="flex justify-between mt-10">
-          <button onClick={handleBack} className="px-6 py-3 rounded-lg text-slate-700 hover:bg-slate-100 font-semibold transition-colors">← Back</button>
+          <button onClick={handleBack} className="px-6 py-3 rounded-lg text-text-secondary hover:bg-surface-secondary font-semibold transition-colors">← Back</button>
           <button onClick={handleNext} disabled={!canContinue}
-            className="px-6 py-3 rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors">Continue →</button>
+            className="px-6 py-3 rounded-lg bg-status-warning text-text-primary font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-text-disabled disabled:cursor-not-allowed transition-colors">Continue →</button>
         </div>
       </div>
     </div>

@@ -59,17 +59,17 @@ export function Overview() {
         </p>
         <div className="flex flex-wrap gap-2">
           <Link to={`${BASE}/create-room`}>
-            <button className="rounded-lg bg-white px-4 py-2 text-sm text-blue-600 transition-colors hover:bg-blue-50 dark:text-emerald-700">
+            <button className="rounded-lg bg-surface-primary px-4 py-2 text-sm text-status-info transition-colors hover:bg-status-info-soft dark:text-status-success">
               Create Your First Room
             </button>
           </Link>
           <Link to={`${BASE}/applications`}>
-            <button className="rounded-lg bg-white/20 px-4 py-2 text-sm text-white transition-colors hover:bg-white/30">
+            <button className="rounded-lg bg-surface-primary/20 px-4 py-2 text-sm text-white transition-colors hover:bg-surface-primary/30">
               View Applications ({pendingApplications} Pending)
             </button>
           </Link>
           <Link to={`${BASE}/hub`}>
-            <button className="rounded-lg bg-white/20 px-4 py-2 text-sm text-white transition-colors hover:bg-white/30">
+            <button className="rounded-lg bg-surface-primary/20 px-4 py-2 text-sm text-white transition-colors hover:bg-surface-primary/30">
               Explore Advanced Hub
             </button>
           </Link>
@@ -97,7 +97,7 @@ export function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <DollarSign className="h-4 w-4 text-status-success dark:text-status-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">Not tracked</div>
@@ -108,7 +108,7 @@ export function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Equity Distributed</CardTitle>
-            <Award className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <Award className="h-4 w-4 text-status-pending dark:text-status-pending" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">Not tracked</div>
@@ -119,7 +119,7 @@ export function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            <TrendingUp className="h-4 w-4 text-status-warning dark:text-status-warning" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">{averageProgress}%</div>

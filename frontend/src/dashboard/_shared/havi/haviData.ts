@@ -17,8 +17,8 @@ export const personalityModes: Record<
   PersonalityMode,
   { name: string; description: string; colorClass: string }
 > = {
-  supportive: { name: "Supportive", description: "Gentle nudges and encouragement", colorClass: "bg-emerald-500" },
-  coach: { name: "Coach", description: "Balanced accountability", colorClass: "bg-blue-500" },
+  supportive: { name: "Supportive", description: "Gentle nudges and encouragement", colorClass: "bg-status-success" },
+  coach: { name: "Coach", description: "Balanced accountability", colorClass: "bg-status-info" },
   strict: { name: "Strict", description: "Deadlines enforced", colorClass: "bg-rose-500" },
   founder: { name: "Founder Mode", description: "Blunt, execution-focused", colorClass: "bg-violet-500" },
 };

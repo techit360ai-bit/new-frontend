@@ -112,7 +112,7 @@ export function FeedPage() {
                 <p className="text-xs font-semibold uppercase text-accent-primary">Catch-Up Mode</p>
                 <h1 className="mt-1 text-lg font-semibold text-text-primary">{returnSummary.headline}</h1>
               </div>
-              <button type="button" onClick={finishCatchUp} className="h-9 rounded-md border border-border-default px-3 text-xs font-semibold text-text-primary hover:bg-bg-elevated">Finish</button>
+              <button type="button" onClick={finishCatchUp} className="h-9 rounded-md border border-border-default px-3 text-xs font-semibold text-text-primary hover:bg-surface-secondary">Finish</button>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {returnSummary.items.map(item => (

@@ -94,7 +94,7 @@ export function LivePostCard({
 
   return (
     <>
-      <article className={`border-y border-border-default border-l-4 bg-bg-surface px-4 py-4 sm:rounded-lg sm:border ${kindColorClass(post.kind).split(' ')[0]}`}>
+      <article className={`border-y border-border-default border-l-4 bg-surface-primary px-4 py-4 sm:rounded-lg sm:border ${kindColorClass(post.kind).split(' ')[0]}`}>
         <div className="mb-3 flex items-start justify-between gap-3">
           <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-semibold text-white">

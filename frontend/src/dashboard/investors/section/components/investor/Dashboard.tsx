@@ -64,11 +64,11 @@ export function Dashboard() {
   const momentumNames = highMomentumStartups.slice(0, 2).map((startup) => startup.name).join(' and ');
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background-inverse">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
+      <div className="border-b border-border-inverse bg-surface-inverse px-8 py-6">
         <h1 className="text-3xl font-bold text-white">Investor Dashboard</h1>
-        <p className="text-gray-400 mt-1">Live startup execution intelligence</p>
+        <p className="text-text-on-inverse-muted mt-1">Live startup execution intelligence</p>
       </div>
 
       <div className="p-8">
@@ -81,29 +81,29 @@ export function Dashboard() {
 
         {/* Onboarding banner — appears when profile is incomplete */}
         {onboardingIncomplete && !bannerDismissed && (
-          <div className="mb-6 flex items-center gap-4 rounded-lg border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent px-5 py-4">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
+          <div className="mb-6 flex items-center gap-4 rounded-lg border border-status-success/30 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent px-5 py-4">
+            <div className="w-10 h-10 rounded-full bg-status-success/15 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-status-success" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white">
                 Complete your investor profile
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-text-on-inverse-muted mt-0.5">
                 Set your sectors, stage and check size so the dashboard prioritises
                 the deals you actually want to see.
               </p>
             </div>
             <Link
               to="/investor/onboarding/step-1"
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-bold transition-colors flex-shrink-0"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-status-success hover:bg-emerald-400 text-black text-sm font-bold transition-colors flex-shrink-0"
             >
               Start onboarding
               <ArrowRight className="w-4 h-4" />
             </Link>
             <button
               onClick={() => setBannerDismissed(true)}
-              className="p-1.5 rounded-md hover:bg-white/5 text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0"
+              className="p-1.5 rounded-md hover:bg-surface-primary/5 text-text-on-inverse-disabled hover:text-text-on-inverse-secondary transition-colors flex-shrink-0"
               aria-label="Dismiss"
             >
               <X className="w-4 h-4" />
@@ -112,7 +112,7 @@ export function Dashboard() {
         )}
 
         {error && (
-          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
@@ -123,33 +123,33 @@ export function Dashboard() {
             label="Watchlisted Startups"
             value={metrics.watchlistedStartups}
             icon={Activity}
-            color="text-blue-400"
-            bgColor="bg-blue-500/10"
-            borderColor="border-blue-500/20"
+            color="text-status-info"
+            bgColor="bg-status-info/10"
+            borderColor="border-status-info/20"
           />
           <MetricCard
             label="80+ Readiness"
             value={metrics.highReadiness}
             icon={TrendingUp}
-            color="text-emerald-400"
-            bgColor="bg-emerald-500/10"
-            borderColor="border-emerald-500/20"
+            color="text-status-success"
+            bgColor="bg-status-success/10"
+            borderColor="border-status-success/20"
           />
           <MetricCard
             label="75+ Execution Velocity"
             value={metrics.highExecution}
             icon={Zap}
-            color="text-purple-400"
-            bgColor="bg-purple-500/10"
-            borderColor="border-purple-500/20"
+            color="text-status-pending"
+            bgColor="bg-status-pending/10"
+            borderColor="border-status-pending/20"
           />
           <MetricCard
             label="Revenue Signals"
             value={metrics.revenueSignals}
             icon={DollarSign}
-            color="text-amber-400"
-            bgColor="bg-amber-500/10"
-            borderColor="border-amber-500/20"
+            color="text-status-warning"
+            bgColor="bg-status-warning/10"
+            borderColor="border-status-warning/20"
           />
           <MetricCard
             label="AI Governance Verified"
@@ -165,14 +165,14 @@ export function Dashboard() {
           {/* Center Panel - Execution Momentum */}
           <div className="lg:col-span-2 space-y-6">
             {/* Execution Momentum Graph */}
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Execution Momentum</h3>
               {isLoading ? (
-                <div className="flex h-64 items-center justify-center rounded-lg border border-gray-800 bg-gray-800/30 text-sm text-gray-400">
+                <div className="flex h-64 items-center justify-center rounded-lg border border-border-inverse bg-surface-inverse-muted/30 text-sm text-text-on-inverse-muted">
                   Loading live deal-flow signals...
                 </div>
               ) : portfolioData.length === 0 ? (
-                <div className="flex h-64 items-center justify-center rounded-lg border border-gray-800 bg-gray-800/30 text-center text-sm text-gray-400">
+                <div className="flex h-64 items-center justify-center rounded-lg border border-border-inverse bg-surface-inverse-muted/30 text-center text-sm text-text-on-inverse-muted">
                   Live execution momentum will appear after deal-flow snapshots are persisted.
                 </div>
               ) : (
@@ -209,12 +209,12 @@ export function Dashboard() {
                   </div>
                   <div className="flex gap-6 mt-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-emerald-500 rounded"></div>
-                      <span className="text-gray-400">Readiness</span>
+                      <div className="w-3 h-3 bg-status-success rounded"></div>
+                      <span className="text-text-on-inverse-muted">Readiness</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                      <span className="text-gray-400">Execution Velocity</span>
+                      <div className="w-3 h-3 bg-status-info rounded"></div>
+                      <span className="text-text-on-inverse-muted">Execution Velocity</span>
                     </div>
                   </div>
                 </>
@@ -222,30 +222,30 @@ export function Dashboard() {
             </div>
 
             {/* Risk Distribution */}
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Portfolio Risk Distribution</h3>
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   {totalStartups === 0 ? (
-                    <div className="flex h-12 items-center justify-center rounded-lg bg-gray-800/50 text-sm text-gray-400">
+                    <div className="flex h-12 items-center justify-center rounded-lg bg-surface-inverse-muted/50 text-sm text-text-on-inverse-muted">
                       No live risk distribution yet
                     </div>
                   ) : (
                     <div className="flex gap-2 h-12 rounded-lg overflow-hidden">
                     <div
-                      className="bg-emerald-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
+                      className="bg-status-success/80 flex items-center justify-center text-white font-mono text-sm font-medium"
                       style={{ width: `${percent(riskDistribution.low)}%` }}
                     >
                       {percent(riskDistribution.low)}%
                     </div>
                     <div
-                      className="bg-amber-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
+                      className="bg-status-warning/80 flex items-center justify-center text-white font-mono text-sm font-medium"
                       style={{ width: `${percent(riskDistribution.moderate)}%` }}
                     >
                       {percent(riskDistribution.moderate)}%
                     </div>
                     <div
-                      className="bg-red-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
+                      className="bg-status-error/80 flex items-center justify-center text-white font-mono text-sm font-medium"
                       style={{ width: `${percent(riskDistribution.high)}%` }}
                     >
                       {percent(riskDistribution.high)}%
@@ -254,16 +254,16 @@ export function Dashboard() {
                   )}
                   <div className="flex gap-6 mt-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-emerald-500 rounded"></div>
-                      <span className="text-gray-400">Low Risk ({riskDistribution.low})</span>
+                      <div className="w-3 h-3 bg-status-success rounded"></div>
+                      <span className="text-text-on-inverse-muted">Low Risk ({riskDistribution.low})</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-amber-500 rounded"></div>
-                      <span className="text-gray-400">Moderate ({riskDistribution.moderate})</span>
+                      <div className="w-3 h-3 bg-status-warning rounded"></div>
+                      <span className="text-text-on-inverse-muted">Moderate ({riskDistribution.moderate})</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-500 rounded"></div>
-                      <span className="text-gray-400">High ({riskDistribution.high})</span>
+                      <div className="w-3 h-3 bg-status-error rounded"></div>
+                      <span className="text-text-on-inverse-muted">High ({riskDistribution.high})</span>
                     </div>
                   </div>
                 </div>
@@ -271,28 +271,28 @@ export function Dashboard() {
             </div>
 
             {/* AI Insight Box */}
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+            <div className="bg-gradient-to-br from-brand-primary/10 to-status-pending/10 border border-status-info/20 rounded-lg p-6">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <Zap className="w-5 h-5 text-blue-400" />
+                <div className="p-2 bg-status-info/20 rounded-lg">
+                  <Zap className="w-5 h-5 text-status-info" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-blue-300 mb-2">AI INSIGHTS</h4>
+                  <h4 className="text-sm font-semibold text-status-info mb-2">AI INSIGHTS</h4>
                   {highMomentumStartups.length > 0 ? (
                     <>
                       <p className="text-white mb-2">
                         {highMomentumStartups.length} live startup{highMomentumStartups.length === 1 ? '' : 's'} show positive execution momentum.
                       </p>
-                      <p className="text-gray-300">
+                      <p className="text-text-on-inverse-secondary">
                         {momentumNames || 'The leading records'} currently have the strongest persisted velocity signals in your deal flow.
                       </p>
                     </>
                   ) : (
-                    <p className="text-gray-300">
+                    <p className="text-text-on-inverse-secondary">
                       No live momentum insight is available yet. New persisted deal-flow snapshots will populate this panel.
                     </p>
                   )}
-                  <button className="mt-3 text-blue-400 text-sm font-medium hover:text-blue-300 flex items-center gap-1">
+                  <button className="mt-3 text-status-info text-sm font-medium hover:text-status-info flex items-center gap-1">
                     View detailed analysis <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -302,14 +302,14 @@ export function Dashboard() {
 
           {/* Right Panel - High Momentum */}
           <div className="space-y-6">
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">High Momentum This Week</h3>
               {isLoading ? (
-                <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-4 text-sm text-gray-400">
+                <div className="rounded-lg border border-border-inverse bg-surface-inverse-muted/30 p-4 text-sm text-text-on-inverse-muted">
                   Loading live momentum...
                 </div>
               ) : highMomentumStartups.length === 0 ? (
-                <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-4 text-sm text-gray-400">
+                <div className="rounded-lg border border-border-inverse bg-surface-inverse-muted/30 p-4 text-sm text-text-on-inverse-muted">
                   No positive momentum signals are persisted yet.
                 </div>
               ) : (
@@ -318,43 +318,43 @@ export function Dashboard() {
                   <Link
                     key={startup.id}
                     to={`/investor/startup/${startup.id}`}
-                    className="block p-4 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg transition-all group"
+                    className="block p-4 bg-surface-inverse-muted/50 hover:bg-surface-inverse-muted border border-border-inverse-strong rounded-lg transition-all group"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
+                      <h4 className="font-semibold text-white group-hover:text-status-success transition-colors">
                         {startup.name}
                       </h4>
-                      <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded font-mono">
+                      <span className="text-xs px-2 py-1 bg-status-pending/20 text-status-pending rounded font-mono">
                         {startup.sector}
                       </span>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Velocity Spike</span>
-                        <span className="text-emerald-400 font-mono font-medium">
+                        <span className="text-text-on-inverse-muted">Velocity Spike</span>
+                        <span className="text-status-success font-mono font-medium">
                           +{Math.max(startup.velocityDelta, startup.readinessDelta)}%
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Risk Level</span>
+                        <span className="text-text-on-inverse-muted">Risk Level</span>
                         <span
                           className={`font-medium capitalize ${
                             startup.riskLevel === 'low'
-                              ? 'text-emerald-400'
+                              ? 'text-status-success'
                               : startup.riskLevel === 'moderate'
-                              ? 'text-amber-400'
-                              : 'text-red-400'
+                              ? 'text-status-warning'
+                              : 'text-status-error'
                           }`}
                         >
                           {startup.riskLevel}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Investors Watching</span>
-                        <span className="text-blue-400 font-mono">{startup.investorsWatching}</span>
+                        <span className="text-text-on-inverse-muted">Investors Watching</span>
+                        <span className="text-status-info font-mono">{startup.investorsWatching}</span>
                       </div>
                     </div>
-                    <button className="mt-3 w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded transition-all flex items-center justify-center gap-2">
+                    <button className="mt-3 w-full py-2 bg-status-success/10 hover:bg-status-success/20 text-status-success text-sm font-medium rounded transition-all flex items-center justify-center gap-2">
                       Analyze <ArrowRight className="w-4 h-4" />
                     </button>
                   </Link>
@@ -385,7 +385,7 @@ function MetricCard({ label, value, icon: Icon, color, bgColor, borderColor }: M
         <Icon className={`w-5 h-5 ${color}`} />
         <span className={`text-3xl font-bold font-mono ${color}`}>{value}</span>
       </div>
-      <p className="text-sm text-gray-400">{label}</p>
+      <p className="text-sm text-text-on-inverse-muted">{label}</p>
     </div>
   );
 }

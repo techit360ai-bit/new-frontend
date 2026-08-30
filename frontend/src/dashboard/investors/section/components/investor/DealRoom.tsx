@@ -12,10 +12,10 @@ function fmtUSD(n: number) {
 }
 
 function riskColor(riskLevel?: string) {
-  if (riskLevel === 'low') return 'text-emerald-400';
-  if (riskLevel === 'moderate') return 'text-amber-400';
-  if (riskLevel === 'high') return 'text-red-400';
-  return 'text-gray-400';
+  if (riskLevel === 'low') return 'text-status-success';
+  if (riskLevel === 'moderate') return 'text-status-warning';
+  if (riskLevel === 'high') return 'text-status-error';
+  return 'text-text-on-inverse-muted';
 }
 
 export function DealRoom() {
@@ -49,7 +49,7 @@ export function DealRoom() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-gray-400">
+      <div className="min-h-screen bg-background-inverse flex items-center justify-center text-text-on-inverse-muted">
         Loading live deal room...
       </div>
     );
@@ -57,13 +57,13 @@ export function DealRoom() {
 
   if (!startup && !detail) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-background-inverse flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Live deal room not found</h2>
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-sm text-text-on-inverse-muted mb-4">
             This project does not have a persisted deal-room record for the current investor account.
           </p>
-          <Link to="/investor/deal-intelligence" className="text-emerald-400 hover:text-emerald-300">
+          <Link to="/investor/deal-intelligence" className="text-status-success hover:text-status-success">
             Return to Deal Intelligence
           </Link>
         </div>
@@ -86,15 +86,15 @@ export function DealRoom() {
   const negotiation = detail?.negotiation ?? [];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="border-b border-gray-800 bg-[#111111] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+    <div className="min-h-screen bg-background-inverse">
+      <div className="border-b border-border-inverse bg-surface-inverse px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white sm:text-3xl">{name} - Deal Room</h1>
-            <p className="text-gray-400 mt-1">Secure negotiation and structuring environment</p>
+            <p className="text-text-on-inverse-muted mt-1">Secure negotiation and structuring environment</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-sm font-medium flex items-center gap-1">
+            <div className="px-3 py-1 bg-status-success/20 text-status-success rounded-full text-sm font-medium flex items-center gap-1">
               <Shield className="w-3 h-3" />
               Encrypted
             </div>
@@ -104,26 +104,26 @@ export function DealRoom() {
 
       <div className="p-4 sm:p-6 lg:p-8">
         {error && (
-          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-400" />
+                  <Users className="w-5 h-5 text-status-pending" />
                   Cap Table Preview
                 </h3>
               </div>
               <EmptyPanel message="No live cap-table preview is persisted for this deal room yet." />
             </div>
 
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-emerald-400" />
+                <FileText className="w-5 h-5 text-status-success" />
                 Term Sheet
               </h3>
               {ts ? (
@@ -133,7 +133,7 @@ export function DealRoom() {
                   <ReadOnlyField label="Equity %" value={equityStr} />
                   <ReadOnlyField label="Instrument Type" value={instrument} />
 
-                  <div className="pt-4 border-t border-gray-800">
+                  <div className="pt-4 border-t border-border-inverse">
                     <h4 className="text-sm font-semibold text-white mb-3">Key Terms</h4>
                     <div className="space-y-2 text-sm">
                       <TermRow label="Valuation Cap" value={capStr} />
@@ -148,13 +148,13 @@ export function DealRoom() {
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
+            <div className="bg-gradient-to-br from-status-pending/10 to-brand-primary/10 border border-status-pending/20 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-purple-400" />
+                <Calendar className="w-5 h-5 text-status-pending" />
                 Milestone-Based Capital Release
               </h3>
               {milestones.length === 0 ? (
-                <p className="text-sm text-gray-400">No live milestone release clauses are persisted yet.</p>
+                <p className="text-sm text-text-on-inverse-muted">No live milestone release clauses are persisted yet.</p>
               ) : (
                 <div className="space-y-3">
                   {milestones.map((m, i) => (
@@ -170,9 +170,9 @@ export function DealRoom() {
               )}
             </div>
 
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                <PenTool className="w-5 h-5 text-blue-400" />
+                <PenTool className="w-5 h-5 text-status-info" />
                 Document Signing
               </h3>
               {documents.length === 0 ? (
@@ -186,7 +186,7 @@ export function DealRoom() {
               )}
                 <button
                 disabled={documents.length === 0}
-                className="app-touch-target mt-4 w-full rounded-lg bg-emerald-500 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 disabled:bg-gray-800 disabled:text-gray-500"
+                className="app-touch-target mt-4 w-full rounded-lg bg-status-success py-3 font-semibold text-white transition-colors hover:bg-status-success disabled:bg-surface-inverse-muted disabled:text-text-on-inverse-disabled"
               >
                 Review & Sign Documents
               </button>
@@ -194,36 +194,36 @@ export function DealRoom() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Deal Overview</h3>
               <div className="space-y-4">
-                <SummaryItem icon={DollarSign} label="Suggested Investment" value={investmentStr} color="text-emerald-400" />
-                <SummaryItem icon={Users} label="Equity" value={equityStr} color="text-purple-400" />
-                <SummaryItem icon={FileText} label="Valuation" value={fmtUSD(valuation)} color="text-blue-400" />
+                <SummaryItem icon={DollarSign} label="Suggested Investment" value={investmentStr} color="text-status-success" />
+                <SummaryItem icon={Users} label="Equity" value={equityStr} color="text-status-pending" />
+                <SummaryItem icon={FileText} label="Valuation" value={fmtUSD(valuation)} color="text-status-info" />
               </div>
             </div>
 
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Current Performance</h3>
               {startup ? (
                 <div className="space-y-3 text-sm">
                   <MetricLine label="Market Readiness" value={startup.readinessScore} />
-                  <MetricLine label="MRR" value={fmtUSD(startup.mrr)} color="text-emerald-400" />
-                  <MetricLine label="Growth Rate" value={`+${startup.revenueGrowth}%`} color="text-emerald-400" />
+                  <MetricLine label="MRR" value={fmtUSD(startup.mrr)} color="text-status-success" />
+                  <MetricLine label="Growth Rate" value={`+${startup.revenueGrowth}%`} color="text-status-success" />
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Risk Level</span>
+                    <span className="text-text-on-inverse-muted">Risk Level</span>
                     <span className={`capitalize ${riskColor(startup.riskLevel)}`}>{startup.riskLevel}</span>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-400">No live performance snapshot is attached to this deal room yet.</p>
+                <p className="text-sm text-text-on-inverse-muted">No live performance snapshot is attached to this deal room yet.</p>
               )}
             </div>
 
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Negotiation Status</h3>
               {negotiation.length === 0 ? (
-                <p className="text-sm text-gray-400">No live negotiation steps are persisted yet.</p>
+                <p className="text-sm text-text-on-inverse-muted">No live negotiation steps are persisted yet.</p>
               ) : (
                 <div className="space-y-3">
                   {negotiation.map((n, i) => (
@@ -233,16 +233,16 @@ export function DealRoom() {
               )}
             </div>
 
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="space-y-2">
-                <Link to={`/investor/data-room/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-blue-500/10 py-2 text-center text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20">
+                <Link to={`/investor/data-room/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-status-info/10 py-2 text-center text-sm font-medium text-status-info transition-all hover:bg-status-info/20">
                   View Data Room
                 </Link>
-                <Link to={`/investor/risk-radar/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-purple-500/10 py-2 text-center text-sm font-medium text-purple-400 transition-all hover:bg-purple-500/20">
+                <Link to={`/investor/risk-radar/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-status-pending/10 py-2 text-center text-sm font-medium text-status-pending transition-all hover:bg-status-pending/20">
                   Risk Analysis
                 </Link>
-                <button className="app-touch-target w-full rounded bg-gray-800 py-2 text-sm font-medium text-gray-300 transition-all hover:bg-gray-700">
+                <button className="app-touch-target w-full rounded bg-surface-inverse-muted py-2 text-sm font-medium text-text-on-inverse-secondary transition-all hover:bg-gray-700">
                   Schedule Call
                 </button>
               </div>
@@ -256,7 +256,7 @@ export function DealRoom() {
 
 function EmptyPanel({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-6 text-center text-sm text-gray-400">
+    <div className="rounded-lg border border-border-inverse bg-surface-inverse-muted/30 p-6 text-center text-sm text-text-on-inverse-muted">
       {message}
     </div>
   );
@@ -265,8 +265,8 @@ function EmptyPanel({ message }: { message: string }) {
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <label className="text-sm text-gray-400 mb-2 block">{label}</label>
-      <div className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">{value}</div>
+      <label className="text-sm text-text-on-inverse-muted mb-2 block">{label}</label>
+      <div className="w-full px-4 py-2 bg-surface-inverse-muted border border-border-inverse-strong rounded-lg text-white">{value}</div>
     </div>
   );
 }
@@ -274,7 +274,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
 function TermRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-gray-400">{label}</span>
+      <span className="text-text-on-inverse-muted">{label}</span>
       <span className="text-white font-medium">{value}</span>
     </div>
   );
@@ -282,15 +282,15 @@ function TermRow({ label, value }: { label: string; value: string }) {
 
 function MilestoneClause({ milestone, amount, condition, status }: { milestone: string; amount: string; condition: string; status: 'completed' | 'pending' }) {
   return (
-    <div className={`p-4 rounded-lg border ${status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-gray-800/50 border-gray-700'}`}>
+    <div className={`p-4 rounded-lg border ${status === 'completed' ? 'bg-status-success/10 border-status-success/20' : 'bg-surface-inverse-muted/50 border-border-inverse-strong'}`}>
       <div className="flex justify-between items-start mb-2">
         <div>
           <h4 className="font-semibold text-white">{milestone}</h4>
-          <p className="text-sm text-gray-400 mt-1">{condition}</p>
+          <p className="text-sm text-text-on-inverse-muted mt-1">{condition}</p>
         </div>
-        <span className="font-mono font-bold text-emerald-400">{amount}</span>
+        <span className="font-mono font-bold text-status-success">{amount}</span>
       </div>
-      <div className={`mt-2 inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${status === 'completed' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-gray-700 text-gray-400'}`}>
+      <div className={`mt-2 inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${status === 'completed' ? 'bg-status-success/20 text-status-success' : 'bg-gray-700 text-text-on-inverse-muted'}`}>
         {status === 'completed' && <CheckCircle className="w-3 h-3" />}
         {status}
       </div>
@@ -300,12 +300,12 @@ function MilestoneClause({ milestone, amount, condition, status }: { milestone: 
 
 function DocumentItem({ name, status }: { name: string; status: 'ready' | 'draft' }) {
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+    <div className="flex items-center justify-between p-3 bg-surface-inverse-muted/50 rounded-lg">
       <div className="flex items-center gap-3">
-        <FileText className="w-4 h-4 text-blue-400" />
+        <FileText className="w-4 h-4 text-status-info" />
         <span className="text-sm text-white">{name}</span>
       </div>
-      <span className={`text-xs px-2 py-1 rounded ${status === 'ready' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-gray-700 text-gray-400'}`}>
+      <span className={`text-xs px-2 py-1 rounded ${status === 'ready' ? 'bg-status-success/20 text-status-success' : 'bg-gray-700 text-text-on-inverse-muted'}`}>
         {status}
       </span>
     </div>
@@ -314,10 +314,10 @@ function DocumentItem({ name, status }: { name: string; status: 'ready' | 'draft
 
 function SummaryItem({ icon: Icon, label, value, color }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; color: string }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
+    <div className="flex items-center gap-3 p-3 bg-surface-inverse-muted/50 rounded-lg">
       <Icon className={`w-5 h-5 ${color}`} />
       <div className="flex-1">
-        <p className="text-xs text-gray-400">{label}</p>
+        <p className="text-xs text-text-on-inverse-muted">{label}</p>
         <p className="font-mono font-bold text-white">{value}</p>
       </div>
     </div>
@@ -327,7 +327,7 @@ function SummaryItem({ icon: Icon, label, value, color }: { icon: React.Componen
 function MetricLine({ label, value, color = 'text-white' }: { label: string; value: string | number; color?: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-gray-400">{label}</span>
+      <span className="text-text-on-inverse-muted">{label}</span>
       <span className={`font-mono ${color}`}>{value}</span>
     </div>
   );
@@ -338,12 +338,12 @@ function StatusStep({ step, completed, active }: { step: string; completed: bool
     <div className="flex items-center gap-3">
       <div
         className={`w-6 h-6 rounded-full flex items-center justify-center ${
-          completed ? 'bg-emerald-500' : active ? 'bg-blue-500' : 'bg-gray-700'
+          completed ? 'bg-status-success' : active ? 'bg-status-info' : 'bg-gray-700'
         }`}
       >
         {completed && <CheckCircle className="w-4 h-4 text-white" />}
       </div>
-      <span className={`text-sm ${completed || active ? 'text-white' : 'text-gray-500'}`}>{step}</span>
+      <span className={`text-sm ${completed || active ? 'text-white' : 'text-text-on-inverse-disabled'}`}>{step}</span>
     </div>
   );
 }
