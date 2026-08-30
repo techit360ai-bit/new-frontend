@@ -1,0 +1,106 @@
+/* Canonical TechIT palette. Change this file (or theme.config.ts) to rebrand. */
+:root {
+  color-scheme: light;
+  --radius: 0.625rem;
+  --techit-brand-primary: #2196f3;
+  --techit-brand-primary-hover: #1976d2;
+  --techit-brand-secondary: #0a1929;
+  --techit-brand-accent: #4f6ef7;
+  --techit-brand-premium: #ffd700;
+  --techit-background-primary: #f6f8fb;
+  --techit-background-secondary: #ffffff;
+  --techit-background-tertiary: #f0f3f7;
+  --techit-surface-primary: #ffffff;
+  --techit-surface-secondary: #f0f3f7;
+  --techit-surface-elevated: #ffffff;
+  --techit-surface-overlay: #ffffff;
+  --techit-text-primary: #172033;
+  --techit-text-secondary: #475569;
+  --techit-text-muted: #64748b;
+  --techit-text-disabled: #94a3b8;
+  --techit-text-inverse: #ffffff;
+  --techit-border-default: #e4e8ef;
+  --techit-border-subtle: #eef1f5;
+  --techit-border-strong: #cbd3df;
+  --techit-action-primary: #2196f3;
+  --techit-action-primary-hover: #1976d2;
+  --techit-action-secondary: #0a1929;
+  --techit-action-danger: #ef4444;
+  --techit-status-success: #10b981;
+  --techit-status-warning: #f59e0b;
+  --techit-status-error: #ef4444;
+  --techit-status-info: #2196f3;
+  --techit-status-pending: #a855f7;
+  --techit-role-explorer: #4f6ef7;
+  --techit-role-founder: #2196f3;
+  --techit-role-collaborator: #10b981;
+  --techit-role-investor: #a855f7;
+  --techit-role-organization: #f59e0b;
+  --techit-gradient-brand: linear-gradient(135deg, #2196f3, #4f6ef7);
+  --techit-gradient-brand-subtle: linear-gradient(135deg, rgba(33, 150, 243, 0.12), rgba(79, 110, 247, 0.08));
+  --techit-shadow-elevated: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --techit-shadow-focus: 0 0 0 3px rgba(33, 150, 243, 0.24);
+}
+
+.dark {
+  color-scheme: dark;
+  --techit-background-primary: #0a0a0f;
+  --techit-background-secondary: #111118;
+  --techit-background-tertiary: #1a1a25;
+  --techit-surface-primary: #111118;
+  --techit-surface-secondary: #1a1a25;
+  --techit-surface-elevated: #22222e;
+  --techit-surface-overlay: #22222e;
+  --techit-text-primary: #f0f0f5;
+  --techit-text-secondary: #c4c4d4;
+  --techit-text-muted: #9090a8;
+  --techit-text-disabled: #5c5c78;
+  --techit-text-inverse: #0a0a0f;
+  --techit-border-default: rgba(255, 255, 255, 0.08);
+  --techit-border-subtle: rgba(255, 255, 255, 0.04);
+  --techit-border-strong: rgba(255, 255, 255, 0.18);
+  --techit-action-primary: #4f6ef7;
+  --techit-action-primary-hover: #6d86ff;
+  --techit-action-secondary: #2196f3;
+  --techit-action-danger: #ef4444;
+  --techit-status-info: #60a5fa;
+  --techit-gradient-brand: linear-gradient(135deg, #4f6ef7, #2196f3);
+  --techit-gradient-brand-subtle: linear-gradient(135deg, rgba(79, 110, 247, 0.2), rgba(33, 150, 243, 0.12));
+  --techit-shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --techit-shadow-focus: 0 0 0 3px rgba(79, 110, 247, 0.3);
+}
+
+/* Legacy aliases keep existing feature-scoped styles visually stable while
+   components migrate to semantic utilities. */
+:root, .dark {
+  --techit-app-bg: var(--techit-background-primary);
+  --techit-app-surface: var(--techit-surface-primary);
+  --techit-app-surface-raised: var(--techit-surface-elevated);
+  --techit-app-border: var(--techit-border-default);
+  --techit-app-border-strong: var(--techit-border-strong);
+  --techit-app-text: var(--techit-text-primary);
+  --techit-app-muted: var(--techit-text-muted);
+  --techit-app-subtle: var(--techit-background-tertiary);
+  --techit-app-brand: var(--techit-brand-primary);
+  --techit-app-brand-strong: var(--techit-brand-primary-hover);
+  --techit-app-brand-soft: rgba(33, 150, 243, 0.1);
+  --techit-app-success: var(--techit-status-success);
+  --techit-app-warning: var(--techit-status-warning);
+  --techit-app-danger: var(--techit-status-error);
+  --techit-app-info: var(--techit-status-info);
+  --bg-base: var(--techit-background-primary);
+  --bg-surface: var(--techit-surface-primary);
+  --bg-elevated: var(--techit-surface-secondary);
+  --bg-overlay: var(--techit-surface-overlay);
+  --text-primary: var(--techit-text-primary);
+  --text-secondary: var(--techit-text-secondary);
+  --text-muted: var(--techit-text-muted);
+  --accent-primary: var(--techit-brand-accent);
+  --score-green: var(--techit-status-success);
+  --score-amber: var(--techit-status-warning);
+  --score-red: var(--techit-status-error);
+  --score-blue: var(--techit-brand-primary);
+  --score-purple: var(--techit-status-pending);
+}
+
+.dark { --techit-app-brand-soft: rgba(79, 110, 247, 0.16); }

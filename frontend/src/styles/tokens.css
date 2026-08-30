@@ -1,0 +1,37 @@
+/* Semantic Tailwind v4 bridge. Raw hues belong in themes.css only. */
+@theme inline {
+  --color-brand-primary: var(--techit-brand-primary);
+  --color-brand-primary-hover: var(--techit-brand-primary-hover);
+  --color-brand-secondary: var(--techit-brand-secondary);
+  --color-brand-accent: var(--techit-brand-accent);
+  --color-brand-premium: var(--techit-brand-premium);
+  --color-background-primary: var(--techit-background-primary);
+  --color-background-secondary: var(--techit-background-secondary);
+  --color-background-tertiary: var(--techit-background-tertiary);
+  --color-surface-primary: var(--techit-surface-primary);
+  --color-surface-secondary: var(--techit-surface-secondary);
+  --color-surface-elevated: var(--techit-surface-elevated);
+  --color-surface-overlay: var(--techit-surface-overlay);
+  --color-text-primary: var(--techit-text-primary);
+  --color-text-secondary: var(--techit-text-secondary);
+  --color-text-muted: var(--techit-text-muted);
+  --color-text-disabled: var(--techit-text-disabled);
+  --color-text-inverse: var(--techit-text-inverse);
+  --color-border-default: var(--techit-border-default);
+  --color-border-subtle: var(--techit-border-subtle);
+  --color-border-strong: var(--techit-border-strong);
+  --color-action-primary: var(--techit-action-primary);
+  --color-action-primary-hover: var(--techit-action-primary-hover);
+  --color-action-secondary: var(--techit-action-secondary);
+  --color-action-danger: var(--techit-action-danger);
+  --color-status-success: var(--techit-status-success);
+  --color-status-warning: var(--techit-status-warning);
+  --color-status-error: var(--techit-status-error);
+  --color-status-info: var(--techit-status-info);
+  --color-status-pending: var(--techit-status-pending);
+  --color-role-explorer: var(--techit-role-explorer);
+  --color-role-founder: var(--techit-role-founder);
+  --color-role-collaborator: var(--techit-role-collaborator);
+  --color-role-investor: var(--techit-role-investor);
+  --color-role-organization: var(--techit-role-organization);
+}

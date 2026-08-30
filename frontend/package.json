@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "env:check": "node scripts/validate-env.mjs",
+    "theme:audit": "node scripts/theme-audit.mjs",
     "workflow:check": "node scripts/validate-workflows.mjs",
     "live-data:audit": "node scripts/live-data-audit.mjs",
     "release:journeys": "node scripts/validate-release-journeys.mjs",
