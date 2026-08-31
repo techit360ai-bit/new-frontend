@@ -130,7 +130,7 @@ export default function Pricing() {
             </div>
 
             <button 
-              onClick={() => window.location.href = '/auth/signup'}
+              onClick={() => window.location.href = '/signup'}
               className={`w-full py-4 rounded-2xl font-black text-lg mb-10 transition-all hover:scale-[1.03] active:scale-95 shadow-lg ${
               plan.popular 
                 ? "bg-gradient-to-r from-[#0068ff] to-[#58A6ff] text-white hover:shadow-[#0068ff]/50" 

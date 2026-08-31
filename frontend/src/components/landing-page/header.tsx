@@ -81,7 +81,7 @@ export default function Header() {
 
           <div className="hidden md:flex items-center gap-4">
             <Link
-              to="/auth/login"
+              to="/signin"
               className={`text-sm font-bold transition-colors ${
                 isScrolled ? "text-[#171330] hover:text-[#0068ff]" : "text-white hover:text-white/80"
               }`}
@@ -89,7 +89,7 @@ export default function Header() {
               {loginButton}
             </Link>
             <LandingButton
-              href="/auth/signup"
+              href="/signup"
               showRightArrow={false}
               className={isScrolled ? "bg-[#171330] text-white" : "bg-white text-[#171330]"}
             >
@@ -128,14 +128,14 @@ export default function Header() {
             </nav>
             <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
               <Link
-                to="/auth/login"
+                to="/signin"
                 className="text-lg font-bold text-center text-[#171330]"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {loginButton}
               </Link>
               <LandingButton
-                href="/auth/signup"
+                href="/signup"
                 showRightArrow={false}
                 onClick={() => setMobileMenuOpen(false)}
                 className="bg-[#0068ff] text-white justify-center w-full"

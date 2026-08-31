@@ -23,9 +23,11 @@ export default function TheProblemSolver() {
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
         >
-          <LandingButton href="/auth/signup" className="bg-[#0068ff] text-white text-xl py-4 px-8 hover:bg-[#171330] hover:scale-[1.02]">
-            {buttonText}
-          </LandingButton>
+          <div className="flex justify-center mt-12 mb-8 md:mb-16">
+            <LandingButton href="/signup" className="bg-[#0068ff] text-white text-xl py-4 px-8 hover:bg-[#171330] hover:scale-[1.02]">
+              {buttonText}
+            </LandingButton>
+          </div>
         </motion.div>
       </div>
     </div>

@@ -89,7 +89,7 @@ export default function FeatureSection({
         
         <motion.div variants={itemVariants} className="pt-4">
            <LandingButton 
-             href="/auth/signup" 
+             href="/signup" 
              className="bg-[#0068ff] text-white hover:bg-[#171330]"
            >
              Get Started

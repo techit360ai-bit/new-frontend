@@ -32,6 +32,8 @@ export default function DashboardShowcase() {
           src={hero.imageSrc} 
           alt={hero.imageAlt} 
           className="w-full h-auto object-cover bg-[#171330]"
+          loading="lazy"
+          decoding="async"
         />
       </motion.div>
     </div>

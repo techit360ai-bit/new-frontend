@@ -43,7 +43,7 @@ export default function FinalCTA() {
               className="inline-block"
             >
               <LandingButton 
-                href="/auth/signup" 
+                href="/signup" 
                 className="bg-[#20c907] hover:bg-[#1bb506] text-white py-6 px-12 text-xl md:text-2xl font-black shadow-[0_0_40px_rgba(32,201,7,0.4)] border-none rounded-[20px] transition-colors"
               >
                 {buttonText}
