@@ -72,7 +72,7 @@ export default function HowToRegister() {
 
         <FeatureSection
           imageLeft={false}
-          imageUrl="/mockup/laptop.png"
+          imageUrl="/goal-setting.avif"
           imageAlt={steps[1].imageAlt}
           title={steps[1].title}
           description={steps[1].description}
@@ -80,7 +80,7 @@ export default function HowToRegister() {
 
         <FeatureSection
           imageLeft={true}
-          imageUrl="/mockup/laptop.png"
+          imageUrl="/launch.jpg"
           imageAlt={steps[2].imageAlt}
           title={steps[2].title}
           description={steps[2].description}
