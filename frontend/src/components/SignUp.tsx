@@ -459,7 +459,7 @@ export default function Signup() {
   };
 
   const inputCls =
-    "w-full h-14 rounded-2xl border-2 border-gray-100 bg-gray-50/50 px-4 text-base font-medium text-[#171330] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:bg-white focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full h-14 rounded-2xl border-2 border-white/20 bg-white/10 px-4 text-base font-medium text-white placeholder:text-white/40 focus:outline-none focus:bg-white/20 focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <div className="min-h-screen bg-[#f8faff] flex font-bricolage">
@@ -533,23 +533,23 @@ export default function Signup() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-md z-10" />
+        <div className="absolute inset-0 backdrop-blur-sm z-10" />
 
         <div className="relative z-20 w-full h-full flex justify-center px-6 py-12 overflow-y-auto">
-          <div className="w-full max-w-md my-auto bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-8 md:p-10">
+          <div className="w-full max-w-md my-auto">
             <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-10 group">
               <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
             </Link>
 
           <div className="mb-8">
-            <h1 className="font-black text-4xl text-[#171330] tracking-tight mb-3">
+            <h1 className="font-black text-4xl text-white tracking-tight mb-3 drop-shadow-lg">
               Create Account
             </h1>
-            <p className="text-gray-500 text-base font-medium">
+            <p className="text-white/70 text-base font-medium">
               Already a member?{" "}
               <Link
                 to="/signin"
-                className="text-[#0068ff] font-bold hover:text-[#171330] transition-colors"
+                className="text-white font-bold underline hover:text-[#0068ff] transition-colors"
               >
                 Sign in
               </Link>
@@ -567,7 +567,7 @@ export default function Signup() {
                     ? "bg-[#20c907]"
                     : n === step
                       ? "bg-[#0068ff]"
-                      : "bg-gray-100",
+                      : "bg-white/30",
                 )}
               />
             ))}

@@ -113,10 +113,10 @@ export default function Login() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-md z-10" />
+        <div className="absolute inset-0 backdrop-blur-sm z-10" />
 
         <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-20">
-          <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-8 md:p-10">
+          <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2.5 mb-10">
             <Link to="/" className="flex items-center gap-2 group">
               <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
@@ -124,12 +124,12 @@ export default function Login() {
           </div>
 
           <div className="mb-10">
-            <h1 className="font-black text-4xl text-[#171330] tracking-tight mb-3">Sign In</h1>
-            <p className="text-gray-500 text-base font-medium">
+            <h1 className="font-black text-4xl text-white tracking-tight mb-3 drop-shadow-lg">Sign In</h1>
+            <p className="text-white/70 text-base font-medium">
               Don't have an account?{" "}
               <Link
                 to="/signup"
-                className="text-[#0068ff] font-bold hover:text-[#171330] transition-colors"
+                className="text-white font-bold underline hover:text-[#0068ff] transition-colors"
               >
                 Create one free
               </Link>
@@ -145,11 +145,11 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">
+              <label className="block text-xs font-bold uppercase tracking-wider text-white/80">
                 Email Address
               </label>
               <div className="relative group">
-                <Mail className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0068ff] transition-colors" />
+                <Mail className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-[#0068ff] transition-colors" />
                 <input
                   type="email"
                   value={email}
@@ -157,44 +157,40 @@ export default function Login() {
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
-                  className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-gray-50/50 pl-12 pr-4 text-base font-medium text-[#171330] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:bg-white focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all"
+                  className="w-full h-14 rounded-2xl border-2 border-white/20 bg-white/10 pl-12 pr-4 text-base font-medium text-white placeholder:text-white/40 focus:outline-none focus:bg-white/20 focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/20 transition-all"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">
+                <label className="block text-xs font-bold uppercase tracking-wider text-white/80">
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-bold text-[#0068ff] hover:text-[#171330] transition-colors"
+                  className="text-xs font-bold text-white/70 hover:text-white transition-colors"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative group">
-                <Lock className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0068ff] transition-colors" />
+                <Lock className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-[#0068ff] transition-colors" />
                 <input
                   type={showPwd ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
+                  placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-gray-50/50 pl-12 pr-12 text-base font-medium text-[#171330] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:bg-white focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all"
+                  className="w-full h-14 rounded-2xl border-2 border-white/20 bg-white/10 pl-12 pr-12 text-base font-medium text-white placeholder:text-white/40 focus:outline-none focus:bg-white/20 focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/20 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#171330] transition-colors p-1"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                 >
-                  {showPwd ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                  {showPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
