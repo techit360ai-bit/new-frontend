@@ -37,6 +37,7 @@ export function LeftSidebar() {
           <MenuItem to="/feed/build-log" label="Build Logs" />
           <MenuItem to="/feed/questions" label="Questions" />
           <MenuItem to="/feed/problems" label="Problem Signals" />
+          <MenuItem to="/feed/messages" label="Messages" />
         </div>
       </section>
 
