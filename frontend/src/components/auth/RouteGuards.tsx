@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { type Role, useAuth } from "@/contexts/AuthContext";
+import Preloader from "@/components/landing-page/Preloader";
 import {
   authenticatedRedirectPath,
   authRedirectPath,
@@ -10,11 +11,7 @@ import {
 } from "./routeGuardPaths";
 
 function AuthLoading() {
-  return (
-    <div className="min-h-screen bg-[color:var(--background)] flex items-center justify-center px-6">
-      <div className="h-10 w-10 rounded-full border-2 border-[color:var(--primary)] border-t-transparent animate-spin" />
-    </div>
-  );
+  return <Preloader />;
 }
 
 export function RequireAuth({ children }: { children: ReactNode }) {

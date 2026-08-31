@@ -166,19 +166,12 @@ setMessagingToken(() => {
   try { return getAuthToken(); } catch { return null; }
 });
 
+import Preloader from "@/components/landing-page/Preloader";
+
 function RouteMemory() { const location = useLocation(); useEffect(() => { if (!location.pathname.startsWith('/signin') && !location.pathname.startsWith('/signup')) sessionStorage.setItem('techit_last_route', `${location.pathname}${location.search}`) }, [location.pathname, location.search]); return null }
 
 function RouteLoadingState() {
-  return (
-    <div className="app-shell flex min-h-screen items-center justify-center p-6" role="status" aria-live="polite">
-      <div className="w-full max-w-md space-y-4" aria-label="Loading page">
-        <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
-        <div className="h-8 w-3/4 animate-pulse rounded-lg bg-muted" />
-        <div className="h-32 w-full animate-pulse rounded-xl bg-muted" />
-        <span className="sr-only">Loading page</span>
-      </div>
-    </div>
-  );
+  return <Preloader />;
 }
 
 const App = () => {
