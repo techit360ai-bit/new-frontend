@@ -129,7 +129,9 @@ export default function Pricing() {
               </span>
             </div>
 
-            <button className={`w-full py-4 rounded-2xl font-black text-lg mb-10 transition-all hover:scale-[1.03] active:scale-95 shadow-lg ${
+            <button 
+              onClick={() => window.location.href = '/auth/signup'}
+              className={`w-full py-4 rounded-2xl font-black text-lg mb-10 transition-all hover:scale-[1.03] active:scale-95 shadow-lg ${
               plan.popular 
                 ? "bg-gradient-to-r from-[#0068ff] to-[#58A6ff] text-white hover:shadow-[#0068ff]/50" 
                 : "bg-white text-[#171330] border-2 border-[#d6deec] hover:border-[#0068ff] hover:text-[#0068ff]"
