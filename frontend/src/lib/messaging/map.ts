@@ -40,6 +40,7 @@ export function mapConvSummary(s: WireConvSummary): UIConversation {
     subject: s.lastBody,
     unread: s.unread > 0,
     lastMessageId: s.lastMsgId,
+    lastActivityAt: s.lastTs,
     thread: [],
   };
 }

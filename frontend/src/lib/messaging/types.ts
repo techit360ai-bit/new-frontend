@@ -86,6 +86,7 @@ export interface UIConversation {
   subject: string;
   unread: boolean;
   lastMessageId?: string;
+  lastActivityAt?: string;
   participantId?: string;
   participantUsername?: string;
   participantRole?: string;

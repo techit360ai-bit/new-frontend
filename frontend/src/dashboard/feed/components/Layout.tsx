@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bell, Globe, Users, FileText, HelpCircle, Compass, Ticket } from 'lucide-react';
+import { Bell, Globe, Users, FileText, HelpCircle, Compass, MessageCircle, Ticket } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { roleSafeReturnPath } from '@/lib/roleRoutes';
 import {
@@ -99,6 +99,7 @@ function GlobalNav({ unreadCount, onNotifClick }: { unreadCount: number; onNotif
       </div>
 
       <div className="flex items-center gap-5">
+        <Link to="/feed/messages" className={`rounded-lg p-1.5 hover:bg-surface-secondary ${location.pathname.startsWith('/feed/messages') ? 'text-accent-primary' : 'text-text-secondary hover:text-text-primary'}`} aria-label="Open messages" title="Messages"><MessageCircle className="h-5 w-5" /></Link>
         <Link to="/support" className="rounded-lg p-1.5 hover:bg-surface-secondary" aria-label="Open support tickets"><Ticket className="h-5 w-5 text-text-secondary hover:text-text-primary" /></Link>
         <button type="button" onClick={onNotifClick} className="group relative rounded-lg p-1.5 hover:bg-surface-secondary" aria-label="Open notifications">
           <Bell className="h-5 w-5 text-text-secondary group-hover:text-text-primary" />

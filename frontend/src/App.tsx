@@ -150,6 +150,7 @@ const FeedNotificationsPage = lazy(() => import("@/dashboard/feed/pages/Notifica
 const PostDetailPage = lazy(() => import("@/dashboard/feed/pages/PostDetailPage").then((m) => ({ default: m.PostDetailPage })));
 const MyLogPage = lazy(() => import("@/dashboard/feed/pages/MyLogPage").then((m) => ({ default: m.MyLogPage })));
 const UserProfilePage = lazy(() => import("@/dashboard/feed/pages/UserProfilePage").then((m) => ({ default: m.UserProfilePage })));
+const MessagesInboxPage = lazy(() => import("@/dashboard/feed/pages/MessagesInboxPage").then((m) => ({ default: m.MessagesInboxPage })));
 const DirectMessagePage = lazy(() => import("@/dashboard/feed/pages/DirectMessagePage").then((m) => ({ default: m.DirectMessagePage })));
 const SupportCenter = lazy(() => import("@/dashboard/support/SupportCenter"));
 const PublicMomentPage = lazy(() => import("@/dashboard/moments/PublicMomentPage"));
@@ -385,6 +386,7 @@ const App = () => {
           <Route path="post/:postId" element={<PostDetailPage />} />
           <Route path="problem/:problemId" element={<PostDetailPage />} />
           <Route path="profile/:userId" element={<UserProfilePage />} />
+          <Route path="messages" element={<MessagesInboxPage />} />
           <Route path="messages/:userId" element={<DirectMessagePage />} />
         </Route>
 
