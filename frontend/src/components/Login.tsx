@@ -73,7 +73,7 @@ export default function Login() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#0068ff]/20 blur-[100px] rounded-full" />
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-16 group">
-            <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2.5 group-hover:bg-white/25 transition-all">
+            <div className="bg-white rounded-2xl px-4 py-2.5 shadow-lg group-hover:shadow-xl transition-all">
               <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-9 object-contain" />
             </div>
           </Link>
@@ -121,7 +121,7 @@ export default function Login() {
           <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2.5 mb-10">
             <Link to="/" className="inline-flex group">
-              <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2.5 group-hover:bg-white/25 transition-all">
+              <div className="bg-white rounded-2xl px-4 py-2.5 shadow-lg group-hover:shadow-xl transition-all">
                 <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain" />
               </div>
             </Link>
