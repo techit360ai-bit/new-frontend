@@ -626,7 +626,7 @@ export default function Signup() {
           {/* Step 2 */}
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in duration-300">
-              <p className="font-mono text-xs text-[color:var(--primary)] uppercase tracking-widest">
+              <p className="font-mono text-xs text-white uppercase tracking-widest [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                 Step 02 — Role & Email
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -635,19 +635,19 @@ export default function Signup() {
                     key={role.id}
                     onClick={() => set("role", role.id)}
                     className={cn(
-                      "p-5 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] active:scale-95",
+                      "p-4 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] active:scale-95",
                       form.role === role.id
-                        ? "border-[#0068ff] bg-[#0068ff]/5 shadow-[0_5px_15px_rgba(0,104,255,0.15)]"
-                        : "border-gray-100 bg-white hover:border-[#0068ff]/30 hover:shadow-md",
+                        ? "border-[#0068ff] bg-[#0068ff] shadow-[0_5px_20px_rgba(0,104,255,0.4)]"
+                        : "border-white/30 bg-white hover:border-[#0068ff] hover:shadow-md",
                     )}
                     disabled={loading}
                   >
-                    <div className="text-sm font-bold text-[#171330]">{role.label}</div>
-                    <div className="text-xs text-gray-500 font-medium mt-1 leading-relaxed">
+                    <div className={cn("text-sm font-bold", form.role === role.id ? "text-white" : "text-[#171330]")}>{role.label}</div>
+                    <div className={cn("text-xs font-medium mt-1 leading-relaxed", form.role === role.id ? "text-white/80" : "text-gray-500")}>
                       {role.desc}
                     </div>
                     {form.role === role.id && (
-                      <div className="mt-3 h-5 w-5 rounded-full bg-[#0068ff] flex items-center justify-center">
+                      <div className="mt-2 h-5 w-5 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
                         <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
@@ -664,7 +664,7 @@ export default function Signup() {
                   disabled={loading}
                 />
                 {form.email && !validateEmail(form.email) && (
-                  <p className="text-xs text-red-500 mt-1">
+                  <p className="text-xs text-red-300 mt-1 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
                     Enter a valid email address
                   </p>
                 )}
@@ -673,7 +673,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-14 flex-shrink-0 px-0 justify-center h-14 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-all flex items-center"
+                  className="w-14 flex-shrink-0 px-0 justify-center h-14 rounded-2xl border-2 border-white/30 bg-white hover:bg-gray-50 disabled:opacity-50 transition-all flex items-center"
                   disabled={loading}
                 >
                   <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -694,18 +694,16 @@ export default function Signup() {
           {step === 3 && (
             <div className="space-y-4 animate-in fade-in duration-300">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-[color:var(--primary)]/15 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="h-5 w-5 text-[color:var(--primary)]" />
+                <div className="h-10 w-10 rounded-xl bg-[#0068ff] flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <ShieldCheck className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-mono text-xs text-[color:var(--primary)] uppercase tracking-widest">
+                  <p className="font-mono text-xs text-white uppercase tracking-widest [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                     Step 03 — Verify Email
                   </p>
-                  <p className="text-xs text-[color:var(--muted-foreground)] mt-0.5">
+                  <p className="text-xs text-white/80 mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                     Code sent to{" "}
-                    <span className="font-medium text-[color:var(--foreground)]">
-                      {form.email}
-                    </span>
+                    <span className="font-bold text-white">{form.email}</span>
                   </p>
                 </div>
               </div>
@@ -720,14 +718,14 @@ export default function Signup() {
               />
 
               {otpError && (
-                <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-500">
+                <div className="flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/20 backdrop-blur-sm p-3 text-sm text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   {otpError}
                 </div>
               )}
 
               {otpVerified && (
-                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-500">
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/20 backdrop-blur-sm p-3 text-sm text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
                   <Check className="h-4 w-4 flex-shrink-0" />
                   Email verified successfully.
                 </div>
@@ -745,7 +743,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="flex items-center gap-1.5 text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)] transition-colors"
+                  className="flex items-center gap-1.5 text-white/80 hover:text-white transition-colors [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]"
                   disabled={loading}
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -755,7 +753,7 @@ export default function Signup() {
                   type="button"
                   disabled={cooldown > 0 || loading}
                   onClick={sendOtp}
-                  className="flex items-center gap-1.5 text-[color:var(--primary)] hover:opacity-80 disabled:text-[color:var(--muted-foreground)] disabled:cursor-not-allowed transition-colors font-medium"
+                  className="flex items-center gap-1.5 text-white font-medium hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]"
                 >
                   <RefreshCw
                     className={cn("h-3.5 w-3.5", loading && "animate-spin")}
@@ -769,7 +767,7 @@ export default function Signup() {
           {/* Step 4 */}
           {step === 4 && (
             <div className="space-y-4 animate-in fade-in duration-300">
-              <p className="font-mono text-xs text-[color:var(--primary)] uppercase tracking-widest">
+              <p className="font-mono text-xs text-white uppercase tracking-widest [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                 Step 04 — Secure Your Account
               </p>
               <div>
@@ -785,22 +783,18 @@ export default function Signup() {
                   <button
                     type="button"
                     onClick={() => setShowPwd((s) => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#171330]"
                     disabled={loading}
                   >
-                    {showPwd ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 {form.password && passwordErrors.length > 0 && (
-                  <div className="mt-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                    <p className="text-xs text-yellow-600 mb-1">
+                  <div className="mt-2 p-2 rounded-lg bg-black/30 border border-yellow-400/40 backdrop-blur-sm">
+                    <p className="text-xs text-yellow-300 mb-1 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
                       Password must contain:
                     </p>
-                    <ul className="text-xs text-yellow-600 space-y-0.5">
+                    <ul className="text-xs text-yellow-300 space-y-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
                       {passwordErrors.map((err) => (
                         <li key={err}>• {err}</li>
                       ))}
@@ -817,44 +811,35 @@ export default function Signup() {
                   className={inputCls}
                   disabled={loading}
                 />
-                {form.confirmPassword &&
-                  form.password !== form.confirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Passwords do not match
-                    </p>
-                  )}
+                {form.confirmPassword && form.password !== form.confirmPassword && (
+                  <p className="text-xs text-red-300 mt-1 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
+                    Passwords do not match
+                  </p>
+                )}
               </div>
               <label className="flex items-start gap-3 cursor-pointer">
                 <div
-                  onClick={() =>
-                    !loading && set("agreeTerms", !form.agreeTerms)
-                  }
+                  onClick={() => !loading && set("agreeTerms", !form.agreeTerms)}
                   className={cn(
-                    "mt-0.5 h-5 w-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all",
+                    "mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all",
                     form.agreeTerms
-                      ? "bg-[color:var(--primary)] border-[color:var(--primary)]"
-                      : "border-[color:var(--border)]",
+                      ? "bg-[#0068ff] border-[#0068ff]"
+                      : "border-white/60 bg-white/10",
                     !loading && "cursor-pointer",
                   )}
                 >
                   {form.agreeTerms && <Check className="h-3 w-3 text-white" />}
                 </div>
-                <span className="text-sm text-[color:var(--muted-foreground)] leading-relaxed">
+                <span className="text-sm text-white leading-relaxed [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                   I agree to the{" "}
-                  <a
-                    href="/terms-of-service.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[color:var(--primary)] hover:underline"
+                  <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer"
+                    className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors"
                   >
                     Terms of Service
                   </a>{" "}
                   and{" "}
-                  <a
-                    href="/privacy-policy.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[color:var(--primary)] hover:underline"
+                  <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer"
+                    className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors"
                   >
                     Privacy Policy
                   </a>
