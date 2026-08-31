@@ -7,7 +7,7 @@ export default function Footer() {
   const { footer: { description, productTitle, productLinks, companyTitle, companyLinks, supportTitle, location, copyright, poweredBy } } = getTranslations();
 
   return (
-    <footer className="bg-text-dark text-white pt-24 pb-12 px-6 font-bricolage">
+    <footer className="bg-[#171330] text-white pt-24 pb-12 px-6 font-bricolage">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center gap-2">
