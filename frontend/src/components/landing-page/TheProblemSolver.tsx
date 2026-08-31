@@ -5,8 +5,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 
 export default function TheProblemSolver() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
-  const { problemSolver: { title, buttonText } } = getTranslations();
+  const { problemSolver: { title, buttonText } } = getTranslations(locale.code);
 
   return (
     <div className="py-24 bg-[#d6deec] px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden">

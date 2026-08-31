@@ -4,6 +4,8 @@ import { Eye, EyeOff, ArrowRight, Mail, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "motion/react";
 import { authRoleOnboardingPath, normalizeRole, roleForPath, roleSafeReturnPath } from "@/lib/roleRoutes";
+import { useLocale } from "@/contexts/LocaleContext";
+import { getTranslations } from "@/app/lib/i18n";
 
 const LOGIN_SLIDES = [
   "/auth/login1.jpg",
@@ -23,6 +25,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const { locale } = useLocale();
+  const { login } = getTranslations(locale.code);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -78,12 +83,10 @@ export default function Login() {
             </div>
           </Link>
           <h2 className="font-black text-5xl md:text-6xl text-white leading-[1.1] tracking-tight mb-6">
-            Welcome
-            <br />
-            Back.
+            {login.title}
           </h2>
           <p className="text-white/70 text-lg leading-relaxed max-w-md font-medium">
-            Your projects, your team, your investors — all waiting for you.
+            {login.subtitle}
           </p>
         </div>
         <div className="relative z-10 space-y-4">
@@ -128,14 +131,14 @@ export default function Login() {
           </div>
 
           <div className="mb-10">
-            <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_2px_12px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.9)]">Sign In</h1>
+            <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_2px_12px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.9)]">{login.title}</h1>
             <p className="text-white text-base font-medium [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
-              Don't have an account?{" "}
+              {login.noAccount}{" "}
               <Link
                 to="/signup"
                 className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors"
               >
-                Create one free
+                {login.signupLink}
               </Link>
             </p>
           </div>
@@ -150,7 +153,7 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
-                Email Address
+                {login.emailLabel}
               </label>
               <div className="relative group">
                 <Mail className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-[#0068ff] transition-colors" />
@@ -158,7 +161,7 @@ export default function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder={login.emailPlaceholder}
                   required
                   autoComplete="email"
                   className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white pl-12 pr-4 text-base font-medium text-[#171330] placeholder:text-gray-400 focus:outline-none focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all"
@@ -169,13 +172,13 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold uppercase tracking-wider text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
-                  Password
+                  {login.passLabel}
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-xs font-bold text-white hover:text-[#0068ff] transition-colors [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]"
                 >
-                  Forgot password?
+                  {login.forgot}
                 </Link>
               </div>
               <div className="relative group">
@@ -184,7 +187,7 @@ export default function Login() {
                   type={showPwd ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={login.passPlaceholder}
                   required
                   autoComplete="current-password"
                   className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white pl-12 pr-12 text-base font-medium text-[#171330] placeholder:text-gray-400 focus:outline-none focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all"
@@ -204,7 +207,7 @@ export default function Login() {
               disabled={loading}
               className="w-full h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.3)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none mt-4"
             >
-              {loading ? "Signing In..." : "Sign In"} <ArrowRight className="h-5 w-5" />
+              {loading ? "..." : login.btn} <ArrowRight className="h-5 w-5" />
             </button>
           </form>
           </div>

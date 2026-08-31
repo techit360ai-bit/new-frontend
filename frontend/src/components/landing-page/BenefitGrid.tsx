@@ -5,8 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 
 export default function BenefitGrid() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
-  const { benefitGrid: { badge, title, description, benefits } } = getTranslations();
+  const { benefitGrid: { badge, title, description, benefits } } = getTranslations(locale.code);
 
   return (
     <div className="py-24 bg-white px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden">

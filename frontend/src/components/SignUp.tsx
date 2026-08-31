@@ -23,6 +23,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "motion/react";
+import { useLocale } from "@/contexts/LocaleContext";
+import { getTranslations } from "@/app/lib/i18n";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
@@ -201,6 +203,9 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const { locale } = useLocale();
+  const { signup } = getTranslations(locale.code);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -483,15 +488,10 @@ export default function Signup() {
             </div>
           </Link>
           <h2 className="font-black text-5xl md:text-6xl text-white leading-[1.1] tracking-tight mb-6">
-            Build.
-            <br />
-            Connect.
-            <br />
-            Ship.
+            {signup.title}
           </h2>
           <p className="text-white/70 text-lg leading-relaxed max-w-sm font-medium">
-            Join the global network where founders find co-builders, investors
-            discover deals, and experts build their legacy.
+            {signup.subtitle}
           </p>
         </div>
         <div className="relative z-10 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
@@ -547,15 +547,15 @@ export default function Signup() {
 
           <div className="mb-8">
             <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_2px_12px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.9)]">
-              Create Account
+              {signup.title}
             </h1>
             <p className="text-white text-base font-medium [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
-              Already a member?{" "}
+              {signup.haveAccount}{" "}
               <Link
                 to="/signin"
                 className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors"
               >
-                Sign in
+                {signup.loginLink}
               </Link>
             </p>
           </div>
@@ -581,14 +581,14 @@ export default function Signup() {
           {step === 1 && (
             <div className="space-y-4 animate-in fade-in duration-300">
               <p className="font-mono text-xs text-white uppercase tracking-widest [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
-                Step 01 — Your Details
+                Step 01 — {signup.step1}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <input
                     value={form.firstName}
                     onChange={(e) => set("firstName", e.target.value)}
-                    placeholder="First Name"
+                    placeholder={signup.namePlaceholder}
                     className={inputCls}
                     disabled={loading}
                   />
@@ -602,7 +602,7 @@ export default function Signup() {
                   <input
                     value={form.lastName}
                     onChange={(e) => set("lastName", e.target.value)}
-                    placeholder="Last Name"
+                    placeholder={signup.namePlaceholder}
                     className={inputCls}
                     disabled={loading}
                   />
@@ -618,7 +618,7 @@ export default function Signup() {
                 disabled={!canNext || loading}
                 className="w-full h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.3)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none mt-4"
               >
-                Continue <ArrowRight className="h-5 w-5" />
+                {signup.continueBtn} <ArrowRight className="h-5 w-5" />
               </button>
             </div>
           )}
@@ -627,7 +627,7 @@ export default function Signup() {
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in duration-300">
               <p className="font-mono text-xs text-white uppercase tracking-widest [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
-                Step 02 — Role & Email
+                Step 02 — {signup.step2}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {ROLES.map((role) => (
@@ -659,7 +659,7 @@ export default function Signup() {
                   type="email"
                   value={form.email}
                   onChange={(e) => set("email", e.target.value)}
-                  placeholder="Email Address"
+                  placeholder={signup.emailPlaceholder}
                   className={inputCls}
                   disabled={loading}
                 />
@@ -776,7 +776,7 @@ export default function Signup() {
                     type={showPwd ? "text" : "password"}
                     value={form.password}
                     onChange={(e) => set("password", e.target.value)}
-                    placeholder="Password (min. 8 chars)"
+                    placeholder={signup.passPlaceholder}
                     className={cn(inputCls, "pr-10")}
                     disabled={loading}
                   />

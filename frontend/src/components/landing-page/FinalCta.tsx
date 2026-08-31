@@ -5,8 +5,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 
 export default function FinalCTA() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
-  const { finalCta: { badge, title, description, buttonText } } = getTranslations();
+  const { finalCta: { badge, title, description, buttonText } } = getTranslations(locale.code);
 
   return (
     <div className="py-6 px-6 relative font-bricolage h-[90vh] md:h-[95vh] w-full">

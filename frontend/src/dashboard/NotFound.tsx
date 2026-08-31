@@ -3,7 +3,8 @@ import { motion } from "motion/react";
 import { Home, ArrowLeft, Compass } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { roleSafeReturnPath } from "@/lib/roleRoutes";
-
+import { useLocale } from "@/contexts/LocaleContext";
+import { getTranslations } from "@/app/lib/i18n";
 const NotFound = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,6 +16,9 @@ const NotFound = () => {
         secondaryRoles: profile?.secondaryRoles ?? null,
       })
     : "/";
+
+  const { locale } = useLocale();
+  const { notFound } = getTranslations(locale.code);
 
   const handleGoHome = () => navigate(safeHomePath);
   const handleGoBack = () => navigate(-1);
@@ -60,10 +64,10 @@ const NotFound = () => {
           className="space-y-6 max-w-2xl mx-auto z-10"
         >
           <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
-            Lost in the digital abyss
+            {notFound.title}
           </h2>
           <p className="text-lg md:text-xl text-blue-100 font-medium leading-relaxed">
-            We couldn't find the page you're looking for. It might have been moved, deleted, or never existed in the first place.
+            {notFound.subtitle}
           </p>
         </motion.div>
 
@@ -79,7 +83,7 @@ const NotFound = () => {
             className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 font-bold text-white"
           >
             <ArrowLeft className="h-5 w-5 text-white/70 group-hover:-translate-x-1 transition-transform" />
-            Go Back
+            {notFound.goBack}
           </button>
           
           <button
@@ -87,7 +91,7 @@ const NotFound = () => {
             className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-white hover:bg-blue-50 transition-all duration-300 font-bold text-[#0066ff] shadow-lg hover:shadow-xl"
           >
             <Home className="h-5 w-5 group-hover:scale-110 transition-transform" />
-            Back to Home
+            {notFound.goHome}
           </button>
         </motion.div>
 
@@ -104,17 +108,17 @@ const NotFound = () => {
                 <Compass className="text-white" size={28} />
               </div>
               <div>
-                <h3 className="text-white font-black text-xl mb-1">Looking for something?</h3>
-                <p className="text-blue-100 text-sm font-medium">Explore the TechIT Network</p>
+                <h3 className="text-white font-black text-xl mb-1">{notFound.lookingFor}</h3>
+                <p className="text-blue-100 text-sm font-medium">{notFound.explore}</p>
               </div>
             </div>
             
             <div className="flex flex-wrap justify-center gap-3 w-full md:w-auto">
               <a href="/" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-white text-sm font-bold shadow-sm">
-                Landing Page
+                {notFound.landing}
               </a>
               <a href="/support" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-white text-sm font-bold shadow-sm">
-                Support Hub
+                {notFound.support}
               </a>
             </div>
           </div>

@@ -5,40 +5,7 @@ import { Quote, Star } from "lucide-react";
 
 export default function Testimonials() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
-  const { testimonials: { badge, title } } = getTranslations();
-
-  // Expanded testimonials list for a richer UI
-  const expandedTestimonials = [
-    {
-      quote: "TechIT changed how I validate my startup ideas. What used to take months of research now happens in days.",
-      initials: "JD",
-      name: "Jane Doe",
-      role: "CEO, TechFlow",
-      color: "bg-[#0068ff]"
-    },
-    {
-      quote: "The AI companion is like having a co-founder who never sleeps. It constantly challenges my assumptions in the best way possible.",
-      initials: "JS",
-      name: "John Smith",
-      role: "Founder, InnovateX",
-      color: "bg-[#20c907]"
-    },
-    {
-      quote: "Finally, an execution platform that goes beyond task management. It actually helps me figure out what to build next.",
-      initials: "AL",
-      name: "Amanda Lee",
-      role: "Product Lead, Vertex",
-      color: "bg-[#58A6ff]"
-    },
-    {
-      quote: "As an investor, the level of insight and structure TechIT provides to early-stage founders is unprecedented.",
-      initials: "MR",
-      name: "Michael Ross",
-      role: "Partner, Vision VC",
-      color: "bg-[#0068ff]"
-    }
-  ];
+  const { testimonials: { badge, title, description, testimonials } } = getTranslations(locale.code);
 
   const headerVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
@@ -65,12 +32,12 @@ export default function Testimonials() {
           {title}
         </h1>
         <p className="text-white/60 text-lg max-w-2xl mx-auto font-medium">
-          Don't just take our word for it. Hear from the founders and investors who are already transforming their ideas into reality on TechIT.
+          {description}
         </p>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1400px] mx-auto relative z-10">
-        {expandedTestimonials.map((testimonial, i) => (
+        {testimonials.map((testimonial, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 40 }}

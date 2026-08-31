@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-export type LocaleCode = "en" | "es" | "fr" | "zh" | "pt" | "ar" | "hi";
+export type LocaleCode = "en" | "es" | "fr" | "zh" | "pt" | "ar" | "hi" | "ng";
 
 export interface LocaleOption {
   code: LocaleCode;
@@ -91,12 +91,24 @@ export const LOCALES: LocaleOption[] = [
     currencyCode: "INR",
     dir: "ltr",
   },
+  {
+    code: "ng",
+    label: "English (Nigeria)",
+    nativeLabel: "English",
+    flag: "🇳🇬",
+    currency: "Nigerian Naira",
+    currencySymbol: "₦",
+    currencyCode: "NGN",
+    dir: "ltr",
+  },
 ];
 
 // Map country codes to locales
 const COUNTRY_TO_LOCALE: Record<string, LocaleCode> = {
   // English
-  US: "en", GB: "en", AU: "en", CA: "en", NZ: "en", IE: "en", ZA: "en", NG: "en", GH: "en", KE: "en",
+  US: "en", GB: "en", AU: "en", CA: "en", NZ: "en", IE: "en", ZA: "en", GH: "en", KE: "en",
+  // Nigeria
+  NG: "ng",
   // Spanish
   ES: "es", MX: "es", AR: "es", CO: "es", CL: "es", PE: "es", VE: "es", EC: "es", BO: "es", PY: "es", UY: "es", CR: "es", GT: "es", HN: "es", SV: "es", NI: "es", PA: "es", DO: "es", CU: "es",
   // French

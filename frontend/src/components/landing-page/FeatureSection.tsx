@@ -1,4 +1,6 @@
 import { motion, type Variants } from "motion/react";
+import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 import LandingButton from "../ui/landing-btn";
 
 interface FeatureSectionProps {
@@ -7,6 +9,7 @@ interface FeatureSectionProps {
   imageAlt: string;
   title: string;
   description: string;
+  buttonText?: string;
 }
 
 export default function FeatureSection({
@@ -15,7 +18,11 @@ export default function FeatureSection({
   imageAlt,
   title,
   description,
+  buttonText,
 }: FeatureSectionProps) {
+  const { locale } = useLocale();
+  const { howToRegister: { buttonText: defaultButtonText } } = getTranslations(locale.code);
+
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -92,7 +99,7 @@ export default function FeatureSection({
              href="/signup" 
              className="bg-[#0068ff] text-white hover:bg-[#171330]"
            >
-             Get Started
+             {buttonText || defaultButtonText}
            </LandingButton>
         </motion.div>
       </div>

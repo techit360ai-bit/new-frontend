@@ -1,24 +1,13 @@
 import { motion, type Variants } from "motion/react";
 import { Zap, Shield, Rocket } from "lucide-react";
+import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function FeatureShowcase() {
-  const features = [
-    {
-      icon: Zap,
-      title: "Lightning Fast Execution",
-      description: "Go from idea to prototype in record time with AI assistance.",
-    },
-    {
-      icon: Shield,
-      title: "Enterprise Grade Security",
-      description: "Your intellectual property is protected at every step of the journey.",
-    },
-    {
-      icon: Rocket,
-      title: "Scale Without Limits",
-      description: "Infrastructure that grows with you from day one to IPO.",
-    }
-  ];
+  const { locale } = useLocale();
+  const { featureShowcase: { badge, title, description, features } } = getTranslations(locale.code);
+  
+  const iconMap = [Zap, Shield, Rocket];
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -47,13 +36,11 @@ export default function FeatureShowcase() {
             viewport={{ once: true }}
           >
             <h2 className="text-sm font-black uppercase tracking-widest text-[#171330]/80 mb-3 bg-white/30 inline-block px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/20">
-              Power Features
+              {badge}
             </h2>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight mb-6 mt-4">
-              Everything you need.<br/>Nothing you don't.
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight mb-6 mt-4" dangerouslySetInnerHTML={{ __html: title }} />
             <p className="text-lg text-[#171330]/80 font-medium leading-relaxed max-w-lg">
-              We've stripped away the complexity of building a startup and left only the essential tools you need to succeed.
+              {description}
             </p>
           </motion.div>
           
@@ -64,22 +51,25 @@ export default function FeatureShowcase() {
             viewport={{ once: true }}
             className="space-y-4 pt-4"
           >
-            {features.map((feature, i) => (
-              <motion.div 
-                key={i}
-                variants={item}
-                whileHover={{ x: 10, backgroundColor: "rgba(255,255,255,0.4)" }}
-                className="flex gap-5 p-5 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-white/20 hover:shadow-lg"
-              >
-                <div className="mt-1 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-[#171330] text-[#20c997] shadow-xl">
-                  <feature.icon size={26} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2 tracking-tight">{feature.title}</h3>
-                  <p className="text-[#171330]/80 font-medium text-base leading-snug">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
+            {features.map((feature, i) => {
+              const Icon = iconMap[i] || Zap;
+              return (
+                <motion.div 
+                  key={i}
+                  variants={item}
+                  whileHover={{ x: 10, backgroundColor: "rgba(255,255,255,0.4)" }}
+                  className="flex gap-5 p-5 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-white/20 hover:shadow-lg"
+                >
+                  <div className="mt-1 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-[#171330] text-[#20c997] shadow-xl">
+                    <Icon size={26} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2 tracking-tight">{feature.title}</h3>
+                    <p className="text-[#171330]/80 font-medium text-base leading-snug">{feature.description}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
         
@@ -111,3 +101,4 @@ export default function FeatureShowcase() {
     </div>
   );
 }
+

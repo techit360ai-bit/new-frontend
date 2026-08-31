@@ -5,10 +5,9 @@ import { QrCode, Smartphone, Bell } from "lucide-react";
 
 export default function HowItWorks() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
   const {
     howItWorks: { badge, title, description, steps },
-  } = getTranslations();
+  } = getTranslations(locale.code);
 
   const stepAssets = [
     {

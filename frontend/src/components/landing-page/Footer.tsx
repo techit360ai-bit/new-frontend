@@ -6,8 +6,7 @@ import { Twitter, Linkedin, Github } from "lucide-react";
 
 export default function Footer() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
-  const { footer: { description, productTitle, productLinks, companyTitle, companyLinks, supportTitle, location, copyright, poweredBy } } = getTranslations();
+  const { footer: { description, productTitle, productLinks, companyTitle, companyLinks, supportTitle, location, copyright, poweredBy } } = getTranslations(locale.code);
 
   return (
     <footer className="bg-[#002b80] text-white pt-24 pb-12 px-6 font-bricolage relative overflow-hidden">

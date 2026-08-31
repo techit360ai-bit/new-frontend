@@ -5,10 +5,9 @@ import { useLocale } from "@/contexts/LocaleContext";
 
 export default function HowToRegister() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
   const {
-    howToRegister: { badge, title, description, steps },
-  } = getTranslations();
+    howToRegister: { badge, title, description, steps, buttonText },
+  } = getTranslations(locale.code);
 
   const header: Variants = {
     hidden: { opacity: 0, y: 30 },
@@ -67,10 +66,11 @@ export default function HowToRegister() {
       <div className="space-y-4">
         <FeatureSection
           imageLeft={true}
-          imageUrl="/mockup/laptop.png"
+          imageUrl="/create-account.jpg"
           imageAlt={steps[0].imageAlt}
           title={steps[0].title}
           description={steps[0].description}
+          buttonText={buttonText}
         />
 
         <FeatureSection
@@ -79,6 +79,7 @@ export default function HowToRegister() {
           imageAlt={steps[1].imageAlt}
           title={steps[1].title}
           description={steps[1].description}
+          buttonText={buttonText}
         />
 
         <FeatureSection
@@ -87,6 +88,7 @@ export default function HowToRegister() {
           imageAlt={steps[2].imageAlt}
           title={steps[2].title}
           description={steps[2].description}
+          buttonText={buttonText}
         />
       </div>
     </div>

@@ -4,56 +4,9 @@ import { useLocale } from "@/contexts/LocaleContext";
 import { useState } from "react";
 import { ChevronDown, MessageCircleQuestion } from "lucide-react";
 
-const faqData = [
-  {
-    category: "General Platform Questions",
-    questions: [
-      {
-        q: "What exactly is TechIT Network?",
-        a: "TechIT Network is an AI-powered execution infrastructure designed to help you create, validate, build, and grow startups. It provides the intelligence, structure, tools, people, and guidance needed to turn a raw idea into a real company."
-      },
-      {
-        q: "How is TechIT different from a standard AI assistant?",
-        a: "TechIT is not just an AI assistant that answers questions. It proactively understands your startup's unique context, monitors your real-time progress, identifies specific execution bottlenecks, and continuously determines the exact next steps you need to take."
-      }
-    ]
-  },
-  {
-    category: "For Founders & Explorers",
-    questions: [
-      {
-        q: "Do I need a fully formed startup or team to join?",
-        a: "No, you can join as an Explorer to discover ideas, people, and opportunities without committing to a specific startup. If you decide to build, you can easily transition to a Founder role to turn your concept into a validated MVP."
-      },
-      {
-        q: "How does TechIT actually help me execute my idea?",
-        a: "The platform guides you through a structured end-to-end pipeline: Ideate, Validate, Build, Execute, Connect, and Grow. It helps you challenge assumptions, plan actionable roadmaps, and track your progress so you always know what to do next."
-      }
-    ]
-  },
-  {
-    category: "For Collaborators, Investors & Organizations",
-    questions: [
-      {
-        q: "I have skills but no startup idea. Is this for me?",
-        a: "Yes, as a Collaborator, you can discover startups and projects where your specific skills are needed, allowing you to build experience and grow alongside the companies you help create."
-      },
-      {
-        q: "What value does TechIT provide to early-stage investors?",
-        a: "Investors gain deep intelligence into emerging startups, founder execution, market signals, and growth potential, allowing them to discover opportunities before they become obvious."
-      },
-      {
-        q: "Can accelerator programs or startup organizations use the platform?",
-        a: "Yes, Organizations can use TechIT to support entrepreneurs, manage cohorts, monitor startup progress, and seamlessly connect founders with necessary resources."
-      }
-    ]
-  }
-];
-
 export default function FAQ() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
-  const { faq: { badge, title } } = getTranslations();
+  const { faq: { badge, title, description, categories } } = getTranslations(locale.code);
   const [openIndex, setOpenIndex] = useState<string | null>("0-0");
 
   return (
@@ -70,12 +23,12 @@ export default function FAQ() {
           {title}
         </h1>
         <p className="text-white/90 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-          Everything you need to know about building your startup on TechIT.
+          {description}
         </p>
       </div>
 
       <div className="max-w-4xl mx-auto space-y-12 relative z-10">
-        {faqData.map((section, sectionIdx) => (
+        {categories.map((section, sectionIdx) => (
           <div key={sectionIdx} className="space-y-6">
             <h3 className="text-2xl font-black text-white/90 tracking-tight pl-3 border-l-4 border-white/50">
               {section.category}

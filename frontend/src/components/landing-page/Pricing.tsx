@@ -2,28 +2,40 @@ import { motion, type Variants } from "motion/react";
 import { Check, Sparkles } from "lucide-react";
 import { getTranslations } from "@/app/lib/i18n";
 import { useLocale } from "@/contexts/LocaleContext";
-import { useState, useEffect } from "react";
-import { getCurrencyInfo } from "@/utils/exchangeRate";
+import { useState } from "react";
 
 export default function Pricing() {
   const { locale } = useLocale();
-  const text = getTranslations(locale.code);
   const {
     pricing: { badge, title, description, monthlyLabel, yearlyLabel, popularLabel, plans },
-  } = getTranslations();
+  } = getTranslations(locale.code);
 
   const [isYearly, setIsYearly] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState("$");
   
-  useEffect(() => {
-    getCurrencyInfo().then(info => setCurrencySymbol(info.symbol));
-  }, []);
-
   const getPrice = (index: number, yearly: boolean) => {
     if (index === 0) return 0;
-    if (index === 1) return yearly ? 190 : 19;
-    if (index === 2) return yearly ? 990 : 99;
-    return 0;
+    
+    // Base USD pricing
+    let basePrice = 0;
+    if (index === 1) basePrice = yearly ? 190 : 19;
+    if (index === 2) basePrice = yearly ? 990 : 99;
+
+    // Exchange rates (rough estimates for display)
+    const rates: Record<string, number> = {
+      USD: 1,
+      EUR: 0.92,
+      CNY: 7.23,
+      BRL: 4.95,
+      SAR: 3.75,
+      INR: 83.12,
+      NGN: 1600,
+    };
+    
+    const rate = rates[locale.currencyCode] || 1;
+    const converted = basePrice * rate;
+    
+    // Format to 0 decimal places usually, but can format nicely
+    return Math.round(converted).toLocaleString(locale.code);
   };
 
   const header: Variants = {
@@ -125,7 +137,7 @@ export default function Pricing() {
             
             <div className="mb-10 flex items-baseline">
               <span className={`text-6xl font-black tracking-tighter ${plan.popular ? "text-white" : "text-[#171330]"}`}>
-                {currencySymbol}{getPrice(i, isYearly)}
+                {locale.currencySymbol}{getPrice(i, isYearly)}
               </span>
               <span className={`font-bold ml-2 ${plan.popular ? "text-white/50" : "text-gray-400"}`}>
                 / {isYearly ? 'yr' : 'mo'}
