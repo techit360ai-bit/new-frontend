@@ -1,3 +1,6 @@
+import { useState, useEffect } from "react";
+import { AnimatePresence } from "motion/react";
+import Preloader from "./landing-page/Preloader";
 import BenefitGrid from "./landing-page/BenefitGrid";
 import FAQ from "./landing-page/FAQ";
 import FeatureShowcase from "./landing-page/FeatureShowcase";
@@ -14,9 +17,24 @@ import TheProblemSolver from "./landing-page/TheProblemSolver";
 import "../Landing.css";
 
 export default function Landing() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Show preloader for 2 seconds
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white font-bricolage text-[#171330] selection:bg-[#0068ff] selection:text-white">
-      <Header />
+    <>
+      <AnimatePresence mode="wait">
+        {isLoading && <Preloader key="preloader" />}
+      </AnimatePresence>
+      
+      <div className="min-h-screen bg-white font-bricolage text-[#171330] selection:bg-[#0068ff] selection:text-white">
+        <Header />
       <main className="flex flex-col gap-6 lg:gap-12 px-2 md:px-6 pt-[15px] pb-12 overflow-hidden max-w-[1600px] mx-auto">
         <Hero />
         <DashboardShowcase />
@@ -32,5 +50,6 @@ export default function Landing() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }
