@@ -4,10 +4,8 @@
     <meta charset="UTF-8" />
     <script>
       (function () {
-        const stored = localStorage.getItem('techit-theme');
-        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const effective = stored === 'light' ? 'light' : stored === 'dark' ? 'dark' : (systemDark ? 'dark' : 'light');
-        document.documentElement.classList.add(effective);
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('techit-theme', 'dark');
       })();
     </script>
     <link rel="icon" type="image/png" href="/TechIT-logo.png" />

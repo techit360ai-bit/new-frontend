@@ -1,27 +1,27 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 /* ── Theme CSS Variables */
 :root,
 :root.dark {
-  --bg-primary: #05050f;
-  --bg-secondary: #0a0a1f;
-  --bg-tertiary: #151530;
+  --bg-primary: #020804;
+  --bg-secondary: #041008;
+  --bg-tertiary: #082010;
   --text-primary: #ffffff;
-  --text-secondary: #b0b0d0;
-  --text-tertiary: #808090;
-  --border-color: #2a2a4a;
-  --accent-purple: #7c3aed;
-  --accent-cyan: #06b6d4;
-  --accent-green: #10b981;
+  --text-secondary: #b0d0b8;
+  --text-tertiary: #809084;
+  --border-color: #006400;
+  --accent-pink: #FE2784;
+  --accent-neon: #00FF00;
+  --accent-green: #006400;
   --shadow-color: rgba(0, 0, 0, 0.5);
-  --nav-bg: rgba(5, 5, 15, 0.8);
-  --nav-bg-default: rgba(5, 5, 15, 0.6);
-  --nav-bg-scrolled: rgba(5, 5, 15, 0.94);
+  --nav-bg: rgba(2, 8, 4, 0.8);
+  --nav-bg-default: rgba(2, 8, 4, 0.6);
+  --nav-bg-scrolled: rgba(2, 8, 4, 0.94);
   --nav-border-default: transparent;
-  --nav-border-scrolled: rgba(255, 255, 255, 0.07);
+  --nav-border-scrolled: rgba(0, 255, 0, 0.1);
   --nav-text: #ffffff;
   --nav-text-default: #ffffff;
-  --nav-text-secondary-default: #b0b0d0;
+  --nav-text-secondary-default: #b0d0b8;
 }
 
 :root.light {
@@ -96,10 +96,10 @@ body {
 @keyframes pulseGlow {
   0%,
   100% {
-    box-shadow: 0 0 18px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 0 18px rgba(254, 39, 132, 0.3);
   }
   50% {
-    box-shadow: 0 0 36px rgba(124, 58, 237, 0.6);
+    box-shadow: 0 0 36px rgba(254, 39, 132, 0.6);
   }
 }
 
@@ -147,7 +147,7 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,7 +158,7 @@ body {
   font-weight: 800;
   color: var(--text-primary);
   letter-spacing: 0.1em;
-  font-family: "Space Mono", monospace;
+  font-family: "Outfit", sans-serif;
   line-height: 1;
 }
 
@@ -166,7 +166,7 @@ body {
   font-size: 9px;
   color: var(--text-secondary);
   letter-spacing: 0.2em;
-  font-family: "Space Mono", monospace;
+  font-family: "Outfit", sans-serif;
 }
 
 .nav-links {
@@ -210,7 +210,7 @@ body {
   gap: 6px;
   padding: 9px 22px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
   color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
@@ -247,7 +247,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(124, 58, 237, 0.18) 0%,
+    rgba(254, 39, 132, 0.18) 0%,
     transparent 70%
   );
   filter: blur(60px);
@@ -263,7 +263,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(6, 182, 212, 0.14) 0%,
+    rgba(0, 255, 0, 0.14) 0%,
     transparent 70%
   );
   filter: blur(60px);
@@ -282,7 +282,7 @@ body {
   align-items: center;
   gap: 8px;
   background: var(--badge-bg, rgba(255, 255, 255, 0.06));
-  border: 1px solid var(--badge-border, rgba(124, 58, 237, 0.1));
+  border: 1px solid var(--badge-border, rgba(254, 39, 132, 0.1));
   border-radius: 100px;
   padding: 6px 18px;
   font-size: 13px;
@@ -294,7 +294,7 @@ body {
 :root,
 :root.dark {
   --badge-bg: rgba(255, 255, 255, 0.06);
-  --badge-border: rgba(124, 58, 237, 0.1);
+  --badge-border: rgba(254, 39, 132, 0.1);
   --badge-text: rgba(255, 255, 255, 0.7);
 }
 
@@ -338,7 +338,7 @@ body {
 
 /* Reusable gradient-text helpers */
 .gradient-purple-cyan {
-  background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+  background: linear-gradient(90deg, var(--accent-pink), var(--accent-neon));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -346,11 +346,11 @@ body {
 
 :root.light .gradient-purple-cyan {
   -webkit-text-fill-color: unset;
-  color: var(--accent-purple);
+  color: var(--accent-pink);
 }
 
 .gradient-cyan-teal {
-  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+  background: linear-gradient(90deg, var(--accent-neon), var(--accent-green));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -358,7 +358,7 @@ body {
 
 :root.light .gradient-cyan-teal {
   -webkit-text-fill-color: unset;
-  color: var(--accent-cyan);
+  color: var(--accent-neon);
 }
 
 .hero-subtext {
@@ -385,7 +385,7 @@ body {
   gap: 8px;
   padding: 14px 32px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
   color: var(--text-primary);
   font-weight: 700;
   font-size: 15px;
@@ -418,7 +418,7 @@ body {
 
 .btn-ghost:hover {
   border-color: var(--text-secondary);
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(254, 39, 132, 0.05);
 }
 
 /* ── Stats bar */
@@ -432,7 +432,7 @@ body {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  background: var(--stats-bg, rgba(124, 58, 237, 0.05));
+  background: var(--stats-bg, rgba(254, 39, 132, 0.05));
   border: 1px solid var(--border-color);
   border-radius: 20px;
   overflow: hidden;
@@ -440,7 +440,7 @@ body {
 
 :root,
 :root.dark {
-  --stats-bg: rgba(124, 58, 237, 0.05);
+  --stats-bg: rgba(254, 39, 132, 0.05);
 }
 
 .stat-cell {
@@ -490,7 +490,7 @@ body {
   font-size: 13px;
   letter-spacing: 0.08em;
   color: var(--marquee-text, rgba(255, 255, 255, 0.45));
-  font-family: "Space Mono", monospace;
+  font-family: "Outfit", sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -503,7 +503,7 @@ body {
 
 .marquee-dot {
   font-size: 7px;
-  color: #7c3aed;
+  color: #FE2784;
 }
 
 /* ── Shared section layout  */
@@ -520,8 +520,8 @@ body {
 .section-label {
   font-size: 11px;
   letter-spacing: 0.16em;
-  color: #7c3aed;
-  font-family: "Space Mono", monospace;
+  color: #FE2784;
+  font-family: "Outfit", sans-serif;
   margin-bottom: 14px;
 }
 
@@ -572,7 +572,7 @@ body {
 }
 
 .role-card:hover {
-  border-color: var(--accent-purple);
+  border-color: var(--accent-pink);
   transform: translateY(-4px);
   background: var(--bg-tertiary);
 }
@@ -662,7 +662,7 @@ body {
 }
 
 .feature-card:hover {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(254, 39, 132, 0.1);
 }
 
 .feature-emoji {
@@ -706,7 +706,7 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: 0.06em;
-  font-family: "Space Mono", monospace;
+  font-family: "Outfit", sans-serif;
 }
 
 .feed-posts {
@@ -739,7 +739,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -767,7 +767,7 @@ body {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.07em;
-  font-family: "Space Mono", monospace;
+  font-family: "Outfit", sans-serif;
 }
 
 .feed-post-text {
@@ -791,7 +791,7 @@ body {
 }
 
 .feed-collab-btn {
-  color: #7c3aed;
+  color: #FE2784;
   font-weight: 600;
   cursor: pointer;
   display: flex;

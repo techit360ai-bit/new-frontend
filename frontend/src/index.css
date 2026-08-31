@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -70,28 +70,28 @@
   --neon-green: #00FF00;
 
   /* TechIT Feed / Hangout color system (always dark) */
-  --bg-base: #0a0a0f;
-  --bg-surface: #111118;
-  --bg-elevated: #1a1a25;
-  --bg-overlay: #22222e;
+  --bg-base: #020804;
+  --bg-surface: rgba(4, 16, 8, 0.7);
+  --bg-elevated: rgba(8, 32, 16, 0.85);
+  --bg-overlay: rgba(2, 8, 4, 0.95);
   --text-primary: #f0f0f5;
   --text-secondary: #9090a8;
   --text-muted: #5c5c78;
-  --accent-primary: #4f6ef7;
-  --accent-glow: rgba(79, 110, 247, 0.15);
-  --score-green: #22c55e;
+  --accent-primary: #FE2784; /* Brand Pink */
+  --accent-glow: rgba(254, 39, 132, 0.15);
+  --score-green: #00FF00;
   --score-amber: #f59e0b;
   --score-red: #ef4444;
-  --score-blue: #4f6ef7;
-  --score-purple: #a855f7;
-  --post-milestone: #22c55e;
-  --post-insight: #4f6ef7;
+  --score-blue: #00FF00;
+  --score-purple: #FE2784;
+  --post-milestone: #00FF00;
+  --post-insight: #FE2784;
   --post-build-update: #f59e0b;
-  --post-question: #ec4899;
-  --post-collab-call: #a855f7;
+  --post-question: #FE2784;
+  --post-collab-call: #00FF00;
   --post-problem-signal: #ef4444;
-  --border-default: rgba(255, 255, 255, 0.06);
-  --border-active: rgba(79, 110, 247, 0.4);
+  --border-default: #006400; /* Brand Green */
+  --border-active: rgba(0, 255, 0, 0.4);
 
   /* Shared application design tokens. Feature-scoped themes may override these
      values, but role shells and primitives use the same semantic vocabulary. */
@@ -150,15 +150,15 @@
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
 
-  --techit-app-bg: #0f141c;
-  --techit-app-surface: #151c26;
-  --techit-app-surface-raised: #1b2430;
-  --techit-app-border: #293545;
-  --techit-app-border-strong: #3b4a5e;
+  --techit-app-bg: #020804;
+  --techit-app-surface: rgba(4, 16, 8, 0.7); /* Translucent frosted-glass pill */
+  --techit-app-surface-raised: rgba(8, 32, 16, 0.85);
+  --techit-app-border: #006400; /* Brand Green */
+  --techit-app-border-strong: #008000;
   --techit-app-text: #f3f6fa;
   --techit-app-muted: #9aa9bb;
-  --techit-app-subtle: #202b38;
-  --techit-app-brand: #60a5fa;
+  --techit-app-subtle: #0a2412;
+  --techit-app-brand: #00FF00; /* Neon Green */
   --techit-app-brand-strong: #93c5fd;
   --techit-app-brand-soft: #172554;
   --techit-app-success: #4ade80;
@@ -180,9 +180,10 @@
 
 .app-surface {
   background: var(--techit-app-surface);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--techit-app-border);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  border-radius: 16px; /* Pill-like */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .app-page {
@@ -272,15 +273,31 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .dark .app-shell :where(.bg-white) { background-color: var(--techit-app-surface); }
 .dark .app-shell :where(.bg-gray-50, .bg-slate-50) { background-color: var(--techit-app-bg); }
 .dark .app-shell :where(.text-gray-900, .text-slate-900) { color: var(--techit-app-text); }
-.dark .app-shell :where(.text-gray-700, .text-slate-700) { color: #cbd5e1; }
+.dark .app-shell :where(.text-gray-700, .text-slate-700) { color: #b0d0b8; }
 .dark .app-shell :where(.text-gray-600, .text-slate-600, .text-gray-500, .text-slate-500) { color: var(--techit-app-muted); }
 .dark .app-shell :where(.border-gray-200, .border-slate-200, .border-gray-100, .border-slate-100) { border-color: var(--techit-app-border); }
+.dark .app-shell :where(.bg-violet-50, .bg-blue-50) { background-color: rgba(0, 255, 0, 0.1); }
+.dark .app-shell :where(.text-violet-700, .text-violet-600, .text-blue-700, .text-blue-600) { color: #00FF00; }
+.dark .app-shell :where(.border-violet-600, .border-blue-600) { border-color: #00FF00; }
+.dark .app-shell :where(.bg-violet-600, .bg-blue-600) { background-color: #FE2784; color: #ffffff; }
+.dark .app-shell :where(.hover\:bg-violet-700:hover, .hover\:bg-blue-700:hover) { background-color: #d11f6d; }
 
 @theme inline {
   --color-brand-green: var(--brand-green);
   --color-brand-pink: var(--brand-pink);
   --color-neon-green: var(--neon-green);
   
+  /* Landing Page UI Upgrade Colors */
+  --color-primary-orange: #0068ff;
+  --color-primary-green: #20c907;
+  --color-bg-black-btn-bg: #171330;
+  --color-bg-white: #ffffff;
+  --color-text-dark: #171330;
+  --color-text-muted: #64748b; /* generic muted */
+  --color-bg-grey-subtle: #d6deec;
+  --color-bg-hero-problem-solver-bg: #d6deec;
+  
+  --font-bricolage: "Bricolage Grotesque", sans-serif;
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   
   --color-background: var(--background);
@@ -349,7 +366,7 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
 /* Typography defaults scoped to the workspaces section so they don't override the rest of the app. */
 .workspaces-scope {
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: "Outfit", system-ui, -apple-system, sans-serif;
 }
 
 .workspaces-scope h1,
@@ -358,7 +375,7 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .workspaces-scope h4,
 .workspaces-scope h5,
 .workspaces-scope h6 {
-  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
   font-weight: var(--font-weight-medium, 500);
   line-height: 1.5;
 }
@@ -415,7 +432,7 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .feed-scope {
   background-color: var(--bg-base);
   color: var(--text-primary);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-size: 14px;
   line-height: 1.5;
