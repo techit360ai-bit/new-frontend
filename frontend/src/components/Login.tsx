@@ -72,8 +72,10 @@ export default function Login() {
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#0068ff]/30 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#0068ff]/20 blur-[100px] rounded-full" />
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-2.5 mb-16 group">
-            <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-10 object-contain group-hover:scale-105 transition-transform" />
+          <Link to="/" className="inline-flex items-center gap-2.5 mb-16 group">
+            <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2.5 group-hover:bg-white/25 transition-all">
+              <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-9 object-contain" />
+            </div>
           </Link>
           <h2 className="font-black text-5xl md:text-6xl text-white leading-[1.1] tracking-tight mb-6">
             Welcome
@@ -118,8 +120,10 @@ export default function Login() {
         <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-20">
           <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2.5 mb-10">
-            <Link to="/" className="flex items-center gap-2 group">
-              <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
+            <Link to="/" className="inline-flex group">
+              <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2.5 group-hover:bg-white/25 transition-all">
+                <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain" />
+              </div>
             </Link>
           </div>
 
