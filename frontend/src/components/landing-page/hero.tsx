@@ -1,4 +1,5 @@
-import { motion, type Variants } from "motion/react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, type Variants } from "motion/react";
 import { LANG } from "@/app/types/globalLang";
 import LandingButton from "../ui/landing-btn";
 import { getTranslations } from "@/app/lib/i18n";
@@ -6,7 +7,23 @@ import { getTranslations } from "@/app/lib/i18n";
 const locale = LANG; 
 const text = getTranslations(locale);
 
+const SLIDE_IMAGES = [
+  "/hero1.jpg",
+  "/hero2.jpg",
+  "/hero3.jpg",
+  "/hero4.jpg",
+];
+
 export default function Hero() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % SLIDE_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const titleWords = text.hero.title.split(" ");
 
   const container: Variants = {
@@ -48,38 +65,43 @@ export default function Hero() {
     },
   };
 
-  const imageRevealVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      y: 60,
-      clipPath: "inset(100% 0% 0% 0% rounded 24px)",
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      clipPath: "inset(0% 0% 0% 0% rounded 0px)",
-      transition: {
-        duration: 1.4,
-        ease: [0.16, 1, 0.3, 1],
-        delay: 0.6,
-      },
-    },
-  };
-
   return (
     <motion.div
       variants={container}
       initial="hidden"
       animate="visible"
-      className="relative flex overflow-hidden flex-col items-center p-5 md:h-screen bg-[#0068ff] text-white rounded-[24px] md:rounded-[36px]"
+      className="relative flex overflow-hidden flex-col items-center justify-center p-5 min-h-[80vh] md:h-screen text-white rounded-[24px] md:rounded-[36px]"
     >
-      <div className="flex flex-col gap-y-4 items-center my-16 z-10">
-        <h1 className="mt-7 text-4xl max-w-3xl font-black text-center md:text-5xl lg:text-6xl tracking-tight flex flex-wrap justify-center gap-x-3 gap-y-1">
+      {/* Background Slideshow */}
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={currentImageIndex}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
+          className="absolute inset-0 z-0"
+        >
+          <img
+            src={SLIDE_IMAGES[currentImageIndex]}
+            alt="Hero Background"
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Dark Overlay for Readability */}
+      <div className="absolute inset-0 bg-[#171330]/60 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#171330]/90 via-transparent to-transparent z-0" />
+
+      {/* Content */}
+      <div className="flex flex-col gap-y-4 items-center z-10 text-center w-full max-w-4xl px-4 mt-16 md:mt-0">
+        <h1 className="text-4xl font-black md:text-5xl lg:text-7xl tracking-tight flex flex-wrap justify-center gap-x-3 gap-y-1">
           {titleWords.map((word, index) => (
             <motion.span
               key={index}
               variants={wordtext}
-              className="inline-block origin-bottom"
+              className="inline-block origin-bottom drop-shadow-sm"
             >
               {word}
             </motion.span>
@@ -88,7 +110,7 @@ export default function Hero() {
 
         <motion.p 
           variants={fadeUpBlur}
-          className="leading-relaxed text-center max-w-2xl text-white/85"
+          className="leading-relaxed text-center max-w-2xl text-white/90 md:text-lg drop-shadow mt-4"
         >
           {text.hero.description}
         </motion.p>
@@ -97,27 +119,16 @@ export default function Hero() {
           variants={fadeUpBlur}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
-          className="mt-2"
+          className="mt-8"
         >
           <LandingButton
             href={text.hero.buttonHref}
-            className="bg-[#171330] text-white backdrop-blur-md transition-shadow hover:shadow-xl"
+            className="bg-[#0068ff] text-white backdrop-blur-md transition-shadow hover:shadow-xl hover:bg-blue-600 border-none"
           >
             {text.hero.buttonText}
           </LandingButton>
         </motion.div>
       </div>
-
-      <motion.div 
-        variants={imageRevealVariants}
-        className="mb-0 lg:-mb-37.5 md:max-w-[50vw] will-change-transform rounded-2xl md:rounded-t-3xl overflow-hidden"
-      >
-        <img 
-          src={text.hero.imageSrc} 
-          alt={text.hero.imageAlt} 
-          className="w-full object-cover select-none"
-        />
-      </motion.div>
     </motion.div>
   );
 }
