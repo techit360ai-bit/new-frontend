@@ -20,7 +20,7 @@ const NotFound = () => {
   const handleGoBack = () => navigate(-1);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative font-bricolage overflow-hidden bg-[#d6deec] px-6 py-12">
+    <div className="min-h-screen w-full flex items-center justify-center relative font-bricolage overflow-hidden bg-[#d6deec] px-[15px] py-12">
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/40 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#0068ff]/10 rounded-full blur-[100px] pointer-events-none" />
@@ -30,11 +30,11 @@ const NotFound = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 max-w-4xl w-full bg-white rounded-[36px] shadow-2xl border border-gray-100 flex flex-col items-center text-center py-16 px-6 md:px-12 overflow-hidden"
+        className="relative z-10 max-w-4xl w-full bg-[#0066ff] rounded-[36px] shadow-2xl flex flex-col items-center text-center py-16 px-6 md:px-12 overflow-hidden"
       >
         {/* Inner Card Background Blobs */}
-        <div className="absolute top-[-20%] left-[-10%] w-[300px] h-[300px] bg-[#0068ff]/5 rounded-full blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-[#20c997]/5 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-10%] w-[300px] h-[300px] bg-white/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-[#20c997]/20 rounded-full blur-[80px] pointer-events-none" />
         
         {/* Floating 404 Animation */}
         <motion.div
@@ -44,13 +44,13 @@ const NotFound = () => {
           className="relative mb-8 z-10"
         >
           <motion.h1 
-            className="text-[120px] md:text-[200px] font-black leading-none tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-[#171330] via-[#171330]/80 to-transparent drop-shadow-sm"
+            className="text-[120px] md:text-[200px] font-black leading-none tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-white via-white/90 to-transparent drop-shadow-sm"
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           >
             404
           </motion.h1>
-          <div className="absolute inset-0 bg-linear-to-b from-transparent to-white pointer-events-none bottom-0 h-1/4" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-[#0066ff] pointer-events-none bottom-0 h-1/4" />
         </motion.div>
 
         <motion.div
@@ -59,10 +59,10 @@ const NotFound = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="space-y-6 max-w-2xl mx-auto z-10"
         >
-          <h2 className="text-3xl md:text-4xl font-black text-[#171330] tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
             Lost in the digital abyss
           </h2>
-          <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed">
+          <p className="text-lg md:text-xl text-blue-100 font-medium leading-relaxed">
             We couldn't find the page you're looking for. It might have been moved, deleted, or never existed in the first place.
           </p>
         </motion.div>
@@ -76,15 +76,15 @@ const NotFound = () => {
         >
           <button
             onClick={handleGoBack}
-            className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-all duration-300 font-bold text-[#171330]"
+            className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 font-bold text-white"
           >
-            <ArrowLeft className="h-5 w-5 text-gray-400 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-5 w-5 text-white/70 group-hover:-translate-x-1 transition-transform" />
             Go Back
           </button>
           
           <button
             onClick={handleGoHome}
-            className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-[#0068ff] hover:bg-[#0052cc] transition-all duration-300 font-bold text-white shadow-lg hover:shadow-xl"
+            className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-white hover:bg-blue-50 transition-all duration-300 font-bold text-[#0066ff] shadow-lg hover:shadow-xl"
           >
             <Home className="h-5 w-5 group-hover:scale-110 transition-transform" />
             Back to Home
@@ -98,22 +98,22 @@ const NotFound = () => {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="mt-12 w-full z-10"
         >
-          <div className="bg-gray-50 border border-gray-100 rounded-[28px] p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center justify-between shadow-sm transition-colors duration-300 hover:bg-gray-100/50">
+          <div className="bg-white/10 border border-white/20 rounded-[28px] p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center justify-between shadow-sm transition-colors duration-300 hover:bg-white/15">
             <div className="flex items-center gap-5 text-left">
-              <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shrink-0 border border-gray-100 shadow-sm">
-                <Compass className="text-[#20c997]" size={28} />
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center shrink-0 border border-white/30 shadow-sm">
+                <Compass className="text-white" size={28} />
               </div>
               <div>
-                <h3 className="text-[#171330] font-black text-xl mb-1">Looking for something?</h3>
-                <p className="text-gray-500 text-sm font-medium">Explore the TechIT Network</p>
+                <h3 className="text-white font-black text-xl mb-1">Looking for something?</h3>
+                <p className="text-blue-100 text-sm font-medium">Explore the TechIT Network</p>
               </div>
             </div>
             
             <div className="flex flex-wrap justify-center gap-3 w-full md:w-auto">
-              <a href="/" className="px-6 py-3 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 hover:border-[#0068ff] transition-all text-[#171330] text-sm font-bold shadow-sm">
+              <a href="/" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-white text-sm font-bold shadow-sm">
                 Landing Page
               </a>
-              <a href="/support" className="px-6 py-3 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 hover:border-[#0068ff] transition-all text-[#171330] text-sm font-bold shadow-sm">
+              <a href="/support" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-white text-sm font-bold shadow-sm">
                 Support Hub
               </a>
             </div>
