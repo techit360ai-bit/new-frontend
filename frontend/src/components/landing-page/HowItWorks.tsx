@@ -10,18 +10,15 @@ export default function HowItWorks() {
   const stepAssets = [
     {
       icon: QrCode,
-      image:
-        "https://media.istockphoto.com/id/1339827185/photo/close-up-on-a-woman-scanning-a-qr-code-at-a-restaurant.webp?a=1&b=1&s=612x612&w=0&k=20&c=IMIXbt2JDustzu85_wUIghb1JcE7dV4l_OzGEWqo0qw=",
+      image: "/ideate.jpg",
     },
     {
       icon: Smartphone,
-      image:
-        "https://media.istockphoto.com/id/1445890966/photo/woman-at-a-cafe-looking-at-a-digital-menu.webp?a=1&b=1&s=612x612&w=0&k=20&c=rxRAxl8bSmZC7MloLGkc0fw4kwm1I1wpVlx088JRQPY=",
+      image: "/validate.avif",
     },
     {
       icon: Bell,
-      image:
-        "https://images.unsplash.com/photo-1565895405139-e188df996e0b?w=500&auto=format&fit=crop&q=60",
+      image: "/execute.jpg",
     },
   ];
 
