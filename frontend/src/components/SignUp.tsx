@@ -22,8 +22,15 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion, AnimatePresence } from "motion/react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
+const SIGNUP_SLIDES = [
+  "/auth/signup1.avif",
+  "/auth/signup2.avif",
+  "/auth/signup3.avif",
+];
 
 type Role = "explorer" | "founder" | "collaborator" | "investor" | "organisation";
 
@@ -190,9 +197,16 @@ export default function Signup() {
   const { signUp } = useAuth();
 
   const [step, setStep] = useState(1);
-  const totalSteps = 4;
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % SIGNUP_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "info";
@@ -463,15 +477,7 @@ export default function Signup() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#0068ff]/20 blur-[100px] rounded-full" />
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-2.5 mb-16 group">
-            <div className="h-10 w-10 rounded-xl bg-[#0068ff] flex items-center justify-center shadow-[0_0_20px_rgba(0,104,255,0.4)] group-hover:scale-105 transition-transform">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <div className="font-black text-xl text-white tracking-tight leading-none">TechIT</div>
-              <div className="font-bold text-[0.6rem] text-white/50 tracking-widest uppercase mt-1">
-                Network
-              </div>
-            </div>
+            <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-10 object-contain group-hover:scale-105 transition-transform" />
           </Link>
           <h2 className="font-black text-5xl md:text-6xl text-white leading-[1.1] tracking-tight mb-6">
             Build.
@@ -505,14 +511,34 @@ export default function Signup() {
       </div>
 
       {/* Right form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white rounded-l-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.02)] relative z-20 overflow-y-auto">
-        <div className="w-full max-w-md">
-          <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8 group">
-            <div className="h-9 w-9 rounded-xl bg-[#0068ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-black text-lg text-[#171330] tracking-tight">TechIT</span>
-          </Link>
+      <div className="flex-1 relative overflow-hidden bg-white rounded-l-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.02)] z-20">
+        <div className="absolute inset-0 z-0">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <img
+                src={SIGNUP_SLIDES[currentSlide]}
+                alt="Signup Background"
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-xl z-10" />
+
+        <div className="relative z-20 w-full h-full flex justify-center px-6 py-12 overflow-y-auto">
+          <div className="w-full max-w-md my-auto">
+            <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-10 group">
+              <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
+            </Link>
 
           <div className="mb-8">
             <h1 className="font-black text-4xl text-[#171330] tracking-tight mb-3">
@@ -852,6 +878,7 @@ export default function Signup() {
           )}
         </div>
       </div>
+    </div>
 
       <style>{`
         @keyframes fadeIn {

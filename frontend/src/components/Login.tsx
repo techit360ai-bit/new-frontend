@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Eye, EyeOff, Zap, ArrowRight, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Mail, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from '@/components/ui/button'
+import { motion, AnimatePresence } from "motion/react";
 import { authRoleOnboardingPath, normalizeRole, roleForPath, roleSafeReturnPath } from "@/lib/roleRoutes";
+
+const LOGIN_SLIDES = [
+  "/auth/login1.jpg",
+  "/auth/login2.avif",
+  "/auth/login3.avif",
+];
 
 export default function Login() {
   const { signIn, profile, user, loading: authLoading } = useAuth();
@@ -16,6 +22,14 @@ export default function Login() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % LOGIN_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -59,15 +73,7 @@ export default function Login() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#0068ff]/20 blur-[100px] rounded-full" />
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-2.5 mb-16 group">
-            <div className="h-10 w-10 rounded-xl bg-[#0068ff] flex items-center justify-center shadow-[0_0_20px_rgba(0,104,255,0.4)] group-hover:scale-105 transition-transform">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <div className="font-black text-xl text-white tracking-tight leading-none">TechIT</div>
-              <div className="font-bold text-[0.6rem] text-white/50 tracking-widest uppercase mt-1">
-                Network
-              </div>
-            </div>
+            <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-10 object-contain group-hover:scale-105 transition-transform" />
           </Link>
           <h2 className="font-black text-5xl md:text-6xl text-white leading-[1.1] tracking-tight mb-6">
             Welcome
@@ -86,14 +92,33 @@ export default function Login() {
       </div>
 
       {/* Right form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white rounded-l-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.02)] relative z-20">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden bg-white rounded-l-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.02)] z-20">
+        <div className="absolute inset-0 z-0">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <img
+                src={LOGIN_SLIDES[currentSlide]}
+                alt="Login Background"
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-xl z-10" />
+
+        <div className="w-full max-w-md relative z-20">
           <div className="lg:hidden flex items-center gap-2.5 mb-10">
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="h-9 w-9 rounded-xl bg-[#0068ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                <Zap className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-black text-lg text-[#171330] tracking-tight">TechIT</span>
+              <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
             </Link>
           </div>
 
