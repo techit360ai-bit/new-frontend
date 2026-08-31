@@ -1,10 +1,13 @@
 import { motion, type Variants } from "motion/react";
 import { Check, Sparkles } from "lucide-react";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 import { useState, useEffect } from "react";
 import { getCurrencyInfo } from "@/utils/exchangeRate";
 
 export default function Pricing() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const {
     pricing: { badge, title, description, monthlyLabel, yearlyLabel, popularLabel, plans },
   } = getTranslations();

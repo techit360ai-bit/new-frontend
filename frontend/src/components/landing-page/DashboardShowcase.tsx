@@ -1,10 +1,12 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { getTranslations } from "@/app/lib/i18n";
-import { LANG } from "@/app/types/globalLang";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function DashboardShowcase() {
-  const { hero } = getTranslations(LANG);
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
+  const { hero } = text;
   const ref = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({

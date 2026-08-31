@@ -1,8 +1,11 @@
 import { motion, type Variants } from "motion/react";
 import FeatureSection from "./FeatureSection";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function HowToRegister() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const {
     howToRegister: { badge, title, description, steps },
   } = getTranslations();

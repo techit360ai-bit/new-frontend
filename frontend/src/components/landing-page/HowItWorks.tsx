@@ -1,8 +1,11 @@
 import { motion, type Variants } from "motion/react";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 import { QrCode, Smartphone, Bell } from "lucide-react";
 
 export default function HowItWorks() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const {
     howItWorks: { badge, title, description, steps },
   } = getTranslations();

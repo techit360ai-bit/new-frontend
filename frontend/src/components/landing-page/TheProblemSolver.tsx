@@ -1,8 +1,11 @@
 import { motion } from "motion/react";
 import LandingButton from "../ui/landing-btn";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function TheProblemSolver() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const { problemSolver: { title, buttonText } } = getTranslations();
 
   return (

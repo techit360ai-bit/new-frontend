@@ -1,12 +1,82 @@
-export function getTranslations(locale?: string) {
-  return {
+import type { LocaleCode } from "@/contexts/LocaleContext";
+
+type Translations = {
+  hero: {
+    title: string;
+    description: string;
+    buttonText: string;
+    buttonHref: string;
+    imageSrc: string;
+    imageAlt: string;
+  };
+  howItWorks: {
+    badge: string;
+    title: string;
+    description: string;
+    steps: { title: string; description: string }[];
+  };
+  howToRegister: {
+    badge: string;
+    title: string;
+    description: string;
+    steps: { title: string; description: string; imageAlt: string }[];
+  };
+  pricing: {
+    badge: string;
+    title: string;
+    description: string;
+    monthlyLabel: string;
+    yearlyLabel: string;
+    popularLabel: string;
+    monthSuffix: string;
+    yearSuffix: string;
+    hardwareTitle: string;
+    hardwareDescription: string;
+    standSuffix: string;
+    plans: { name: string; tagline: string; popular: boolean; cta: string; features: string[] }[];
+  };
+  testimonials: {
+    badge: string;
+    title: string;
+    testimonials: { quote: string; initials: string; name: string; role: string }[];
+  };
+  problemSolver: { title: string; buttonText: string };
+  header: {
+    logoText: string;
+    navLinks: { label: string; href: string }[];
+    loginButton: string;
+    registerButton: string;
+  };
+  footer: {
+    description: string;
+    productTitle: string;
+    productLinks: { label: string; href: string }[];
+    companyTitle: string;
+    companyLinks: { label: string; href: string }[];
+    supportTitle: string;
+    location: string;
+    copyright: string;
+    poweredBy: string;
+  };
+  finalCta: { badge: string; title: string; description: string; buttonText: string; imageAlt: string };
+  faq: { badge: string; title: string; faqs: { q: string; a: string }[] };
+  benefitGrid: {
+    badge: string;
+    title: string;
+    description: string;
+    benefits: { title: string; description: string }[];
+  };
+};
+
+const translations: Record<LocaleCode, Translations> = {
+  en: {
     hero: {
       title: "No Idea Should Be Lost.",
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
-      buttonHref: "/auth/signup",
+      buttonHref: "/signup",
       imageSrc: "/mockup/laptop.png",
-      imageAlt: "TechIT Dashboard"
+      imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
       badge: "How It Works",
@@ -15,8 +85,8 @@ export function getTranslations(locale?: string) {
       steps: [
         { title: "Ideate", description: "Capture your vision and structure your thoughts instantly." },
         { title: "Validate", description: "Challenge your assumptions with real-time market data." },
-        { title: "Execute", description: "Turn insights into action with AI-guided workflows." }
-      ]
+        { title: "Execute", description: "Turn insights into action with AI-guided workflows." },
+      ],
     },
     howToRegister: {
       badge: "Get Started",
@@ -25,84 +95,505 @@ export function getTranslations(locale?: string) {
       steps: [
         { title: "Create Account", description: "Sign up securely in seconds.", imageAlt: "Sign up" },
         { title: "Set Your Goals", description: "Tell us what you're building.", imageAlt: "Set goals" },
-        { title: "Launch", description: "Let the AI guide you to success.", imageAlt: "Launch" }
-      ]
+        { title: "Launch", description: "Let the AI guide you to success.", imageAlt: "Launch" },
+      ],
     },
     pricing: {
-      badge: "Pricing",
-      title: "Invest in Your Idea",
-      description: "Simple, transparent pricing for founders at every stage.",
-      monthlyLabel: "Monthly",
-      yearlyLabel: "Yearly",
-      popularLabel: "Most Popular",
-      monthSuffix: "/mo",
-      yearSuffix: "/yr",
-      hardwareTitle: "Enterprise Add-ons",
-      hardwareDescription: "Need dedicated infrastructure? We've got you covered.",
-      standSuffix: "one-time",
+      badge: "Pricing", title: "Invest in Your Idea", description: "Simple, transparent pricing for founders at every stage.",
+      monthlyLabel: "Monthly", yearlyLabel: "Yearly", popularLabel: "Most Popular",
+      monthSuffix: "/mo", yearSuffix: "/yr", hardwareTitle: "Enterprise Add-ons",
+      hardwareDescription: "Need dedicated infrastructure? We've got you covered.", standSuffix: "one-time",
       plans: [
         { name: "Explorer", tagline: "For the curious", popular: false, cta: "Start Free", features: ["Basic access", "Community support"] },
         { name: "Founder", tagline: "For the builders", popular: true, cta: "Get Started", features: ["Full platform access", "AI copilots", "Priority support"] },
-        { name: "Enterprise", tagline: "For scaling teams", popular: false, cta: "Contact Sales", features: ["Custom integrations", "Dedicated account manager"] }
-      ]
+        { name: "Enterprise", tagline: "For scaling teams", popular: false, cta: "Contact Sales", features: ["Custom integrations", "Dedicated account manager"] },
+      ],
     },
     testimonials: {
-      badge: "Community",
-      title: "Built by Founders, For Founders",
+      badge: "Community", title: "Built by Founders, For Founders",
       testimonials: [
         { quote: "TechIT changed how I validate my startup ideas.", initials: "JD", name: "Jane Doe", role: "CEO, TechFlow" },
-        { quote: "The AI companion is like having a co-founder.", initials: "JS", name: "John Smith", role: "Founder, InnovateX" }
-      ]
+        { quote: "The AI companion is like having a co-founder.", initials: "JS", name: "John Smith", role: "Founder, InnovateX" },
+      ],
     },
-    problemSolver: {
-      title: "Don't let lack of execution hold you back.",
-      buttonText: "Join TechIT Network"
-    },
+    problemSolver: { title: "Don't let lack of execution hold you back.", buttonText: "Join TechIT Network" },
     header: {
       logoText: "TechIT",
-      navLinks: [
-        { label: "Features", href: "#features" },
-        { label: "How it works", href: "#how-it-works" },
-        { label: "Pricing", href: "#pricing" }
-      ],
-      loginButton: "Log In",
-      registerButton: "Sign Up"
+      navLinks: [{ label: "Features", href: "#features" }, { label: "How it works", href: "#how-it-works" }, { label: "Pricing", href: "#pricing" }],
+      loginButton: "Log In", registerButton: "Sign Up",
     },
     footer: {
-      description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
-      productTitle: "Product",
-      productLinks: [{ label: "Features", href: "#" }, { label: "Pricing", href: "#" }],
-      companyTitle: "Company",
-      companyLinks: [{ label: "About", href: "#" }, { label: "Blog", href: "#" }],
-      supportTitle: "Support",
-      location: "San Francisco, CA",
-      copyright: "TechIT Network. All rights reserved.",
-      poweredBy: "Powered by Innovation"
+      description: "TechIT Network is an AI-powered execution infrastructure for startups.",
+      productTitle: "Product", productLinks: [{ label: "Features", href: "#" }, { label: "Pricing", href: "#" }],
+      companyTitle: "Company", companyLinks: [{ label: "About", href: "#" }, { label: "Blog", href: "#" }],
+      supportTitle: "Support", location: "San Francisco, CA",
+      copyright: "TechIT Network. All rights reserved.", poweredBy: "Powered by Innovation",
     },
-    finalCta: {
-      badge: "Ready?",
-      title: "Start Building Today",
-      description: "Join thousands of founders making their ideas a reality.",
-      buttonText: "Create Free Account",
-      imageAlt: "TechIT Platform"
-    },
+    finalCta: { badge: "Ready?", title: "Start Building Today", description: "Join thousands of founders making their ideas a reality.", buttonText: "Create Free Account", imageAlt: "TechIT Platform" },
     faq: {
-      badge: "FAQ",
-      title: "Got Questions?",
+      badge: "FAQ", title: "Got Questions?",
       faqs: [
         { q: "What is TechIT?", a: "TechIT is an AI execution platform for startups." },
-        { q: "Is there a free tier?", a: "Yes, you can explore the platform as an Explorer for free." }
-      ]
+        { q: "Is there a free tier?", a: "Yes, you can explore the platform as an Explorer for free." },
+      ],
     },
     benefitGrid: {
-      badge: "Benefits",
-      title: "Why Choose TechIT",
-      description: "Everything you need to succeed in one place.",
+      badge: "Benefits", title: "Why Choose TechIT", description: "Everything you need to succeed in one place.",
       benefits: [
         { title: "AI Intelligence", description: "Automate your research and validation." },
         { title: "Real-time Metrics", description: "Track your startup's health instantly." },
-        { title: "Expert Network", description: "Connect with investors and collaborators." }
-      ]
-    }
-  };
+        { title: "Expert Network", description: "Connect with investors and collaborators." },
+      ],
+    },
+  },
+
+  es: {
+    hero: {
+      title: "Ninguna Idea Debe Perderse.",
+      description: "TechIT Network es una infraestructura de ejecución impulsada por IA para crear, validar, construir y hacer crecer startups.",
+      buttonText: "Empezar a Construir",
+      buttonHref: "/signup",
+      imageSrc: "/mockup/laptop.png",
+      imageAlt: "TechIT Dashboard",
+    },
+    howItWorks: {
+      badge: "Cómo Funciona", title: "Simple y Poderoso", description: "Del concepto a la empresa en tres sencillos pasos.",
+      steps: [
+        { title: "Idear", description: "Captura tu visión y estructura tus ideas al instante." },
+        { title: "Validar", description: "Desafía tus suposiciones con datos de mercado en tiempo real." },
+        { title: "Ejecutar", description: "Convierte los insights en acción con flujos de trabajo guiados por IA." },
+      ],
+    },
+    howToRegister: {
+      badge: "Comenzar", title: "Inicia Tu Viaje", description: "Únete a la red de fundadores y constructores.",
+      steps: [
+        { title: "Crear Cuenta", description: "Regístrate de forma segura en segundos.", imageAlt: "Registro" },
+        { title: "Establece Tus Metas", description: "Cuéntanos qué estás construyendo.", imageAlt: "Metas" },
+        { title: "Lanzar", description: "Deja que la IA te guíe al éxito.", imageAlt: "Lanzar" },
+      ],
+    },
+    pricing: {
+      badge: "Precios", title: "Invierte en Tu Idea", description: "Precios simples y transparentes.",
+      monthlyLabel: "Mensual", yearlyLabel: "Anual", popularLabel: "Más Popular",
+      monthSuffix: "/mes", yearSuffix: "/año", hardwareTitle: "Complementos Enterprise",
+      hardwareDescription: "¿Necesitas infraestructura dedicada? Te tenemos cubierto.", standSuffix: "único",
+      plans: [
+        { name: "Explorador", tagline: "Para los curiosos", popular: false, cta: "Empezar Gratis", features: ["Acceso básico", "Soporte comunitario"] },
+        { name: "Fundador", tagline: "Para los constructores", popular: true, cta: "Comenzar", features: ["Acceso completo", "Copilotos IA", "Soporte prioritario"] },
+        { name: "Enterprise", tagline: "Para equipos en crecimiento", popular: false, cta: "Contactar Ventas", features: ["Integraciones personalizadas", "Gestor de cuenta dedicado"] },
+      ],
+    },
+    testimonials: {
+      badge: "Comunidad", title: "Construido por Fundadores, Para Fundadores",
+      testimonials: [
+        { quote: "TechIT cambió cómo valido mis ideas de startup.", initials: "JD", name: "Jane Doe", role: "CEO, TechFlow" },
+        { quote: "El asistente de IA es como tener un co-fundador.", initials: "JS", name: "John Smith", role: "Fundador, InnovateX" },
+      ],
+    },
+    problemSolver: { title: "No dejes que la falta de ejecución te detenga.", buttonText: "Únete a TechIT Network" },
+    header: {
+      logoText: "TechIT",
+      navLinks: [{ label: "Características", href: "#features" }, { label: "Cómo funciona", href: "#how-it-works" }, { label: "Precios", href: "#pricing" }],
+      loginButton: "Iniciar Sesión", registerButton: "Registrarse",
+    },
+    footer: {
+      description: "TechIT Network es una infraestructura de ejecución impulsada por IA para startups.",
+      productTitle: "Producto", productLinks: [{ label: "Características", href: "#" }, { label: "Precios", href: "#" }],
+      companyTitle: "Empresa", companyLinks: [{ label: "Acerca de", href: "#" }, { label: "Blog", href: "#" }],
+      supportTitle: "Soporte", location: "San Francisco, CA",
+      copyright: "TechIT Network. Todos los derechos reservados.", poweredBy: "Impulsado por la Innovación",
+    },
+    finalCta: { badge: "¿Listo?", title: "Empieza a Construir Hoy", description: "Únete a miles de fundadores haciendo realidad sus ideas.", buttonText: "Crear Cuenta Gratis", imageAlt: "Plataforma TechIT" },
+    faq: {
+      badge: "FAQ", title: "¿Tienes Preguntas?",
+      faqs: [
+        { q: "¿Qué es TechIT?", a: "TechIT es una plataforma de ejecución IA para startups." },
+        { q: "¿Hay un nivel gratuito?", a: "Sí, puedes explorar la plataforma como Explorador de forma gratuita." },
+      ],
+    },
+    benefitGrid: {
+      badge: "Beneficios", title: "Por Qué Elegir TechIT", description: "Todo lo que necesitas para tener éxito en un solo lugar.",
+      benefits: [
+        { title: "Inteligencia IA", description: "Automatiza tu investigación y validación." },
+        { title: "Métricas en Tiempo Real", description: "Rastrea la salud de tu startup al instante." },
+        { title: "Red de Expertos", description: "Conéctate con inversores y colaboradores." },
+      ],
+    },
+  },
+
+  fr: {
+    hero: {
+      title: "Aucune Idée Ne Doit Se Perdre.",
+      description: "TechIT Network est une infrastructure d'exécution alimentée par l'IA pour créer, valider, construire et développer des startups.",
+      buttonText: "Commencer à Construire",
+      buttonHref: "/signup",
+      imageSrc: "/mockup/laptop.png",
+      imageAlt: "TechIT Tableau de bord",
+    },
+    howItWorks: {
+      badge: "Comment ça Marche", title: "Simple et Puissant", description: "Du concept à l'entreprise en trois étapes simples.",
+      steps: [
+        { title: "Idéer", description: "Capturez votre vision et structurez vos idées instantanément." },
+        { title: "Valider", description: "Challengez vos hypothèses avec des données de marché en temps réel." },
+        { title: "Exécuter", description: "Transformez les insights en actions avec des workflows guidés par l'IA." },
+      ],
+    },
+    howToRegister: {
+      badge: "Commencer", title: "Débutez Votre Parcours", description: "Rejoignez le réseau de fondateurs et constructeurs.",
+      steps: [
+        { title: "Créer un Compte", description: "Inscrivez-vous en quelques secondes.", imageAlt: "S'inscrire" },
+        { title: "Définir Vos Objectifs", description: "Dites-nous ce que vous construisez.", imageAlt: "Objectifs" },
+        { title: "Lancer", description: "Laissez l'IA vous guider vers le succès.", imageAlt: "Lancer" },
+      ],
+    },
+    pricing: {
+      badge: "Tarifs", title: "Investissez dans Votre Idée", description: "Tarification simple et transparente.",
+      monthlyLabel: "Mensuel", yearlyLabel: "Annuel", popularLabel: "Le Plus Populaire",
+      monthSuffix: "/mois", yearSuffix: "/an", hardwareTitle: "Modules Enterprise",
+      hardwareDescription: "Besoin d'infrastructure dédiée ? Nous vous couvrons.", standSuffix: "unique",
+      plans: [
+        { name: "Explorateur", tagline: "Pour les curieux", popular: false, cta: "Commencer Gratuitement", features: ["Accès de base", "Support communautaire"] },
+        { name: "Fondateur", tagline: "Pour les bâtisseurs", popular: true, cta: "Commencer", features: ["Accès complet", "Copilotes IA", "Support prioritaire"] },
+        { name: "Enterprise", tagline: "Pour les équipes en croissance", popular: false, cta: "Contacter les Ventes", features: ["Intégrations personnalisées", "Gestionnaire de compte dédié"] },
+      ],
+    },
+    testimonials: {
+      badge: "Communauté", title: "Construit par des Fondateurs, Pour des Fondateurs",
+      testimonials: [
+        { quote: "TechIT a changé ma façon de valider mes idées de startup.", initials: "JD", name: "Jane Doe", role: "PDG, TechFlow" },
+        { quote: "L'assistant IA est comme avoir un co-fondateur.", initials: "JS", name: "John Smith", role: "Fondateur, InnovateX" },
+      ],
+    },
+    problemSolver: { title: "Ne laissez pas le manque d'exécution vous freiner.", buttonText: "Rejoindre TechIT Network" },
+    header: {
+      logoText: "TechIT",
+      navLinks: [{ label: "Fonctionnalités", href: "#features" }, { label: "Comment ça marche", href: "#how-it-works" }, { label: "Tarifs", href: "#pricing" }],
+      loginButton: "Se Connecter", registerButton: "S'inscrire",
+    },
+    footer: {
+      description: "TechIT Network est une infrastructure d'exécution IA pour les startups.",
+      productTitle: "Produit", productLinks: [{ label: "Fonctionnalités", href: "#" }, { label: "Tarifs", href: "#" }],
+      companyTitle: "Entreprise", companyLinks: [{ label: "À propos", href: "#" }, { label: "Blog", href: "#" }],
+      supportTitle: "Support", location: "San Francisco, CA",
+      copyright: "TechIT Network. Tous droits réservés.", poweredBy: "Propulsé par l'Innovation",
+    },
+    finalCta: { badge: "Prêt ?", title: "Commencez à Construire Aujourd'hui", description: "Rejoignez des milliers de fondateurs.", buttonText: "Créer un Compte Gratuit", imageAlt: "Plateforme TechIT" },
+    faq: {
+      badge: "FAQ", title: "Des Questions ?",
+      faqs: [
+        { q: "Qu'est-ce que TechIT ?", a: "TechIT est une plateforme d'exécution IA pour les startups." },
+        { q: "Y a-t-il un niveau gratuit ?", a: "Oui, vous pouvez explorer la plateforme en tant qu'Explorateur gratuitement." },
+      ],
+    },
+    benefitGrid: {
+      badge: "Avantages", title: "Pourquoi Choisir TechIT", description: "Tout ce dont vous avez besoin pour réussir en un seul endroit.",
+      benefits: [
+        { title: "Intelligence IA", description: "Automatisez votre recherche et validation." },
+        { title: "Métriques en Temps Réel", description: "Suivez la santé de votre startup instantanément." },
+        { title: "Réseau d'Experts", description: "Connectez-vous avec des investisseurs et collaborateurs." },
+      ],
+    },
+  },
+
+  zh: {
+    hero: {
+      title: "每一个想法都不应被遗忘。",
+      description: "TechIT Network 是一个由人工智能驱动的执行基础设施，用于创建、验证、构建和发展初创企业。",
+      buttonText: "开始构建",
+      buttonHref: "/signup",
+      imageSrc: "/mockup/laptop.png",
+      imageAlt: "TechIT 仪表板",
+    },
+    howItWorks: {
+      badge: "运作方式", title: "简单而强大", description: "三步从概念到公司。",
+      steps: [
+        { title: "构思", description: "即时捕捉您的愿景并整理思路。" },
+        { title: "验证", description: "用实时市场数据挑战您的假设。" },
+        { title: "执行", description: "通过AI引导的工作流将洞察转化为行动。" },
+      ],
+    },
+    howToRegister: {
+      badge: "开始", title: "开启您的旅程", description: "加入创始人和构建者的网络。",
+      steps: [
+        { title: "创建账户", description: "几秒内安全注册。", imageAlt: "注册" },
+        { title: "设定目标", description: "告诉我们您在构建什么。", imageAlt: "目标" },
+        { title: "启动", description: "让AI引导您走向成功。", imageAlt: "启动" },
+      ],
+    },
+    pricing: {
+      badge: "定价", title: "投资您的想法", description: "简单透明的定价。",
+      monthlyLabel: "每月", yearlyLabel: "每年", popularLabel: "最受欢迎",
+      monthSuffix: "/月", yearSuffix: "/年", hardwareTitle: "企业附加服务",
+      hardwareDescription: "需要专用基础设施？我们为您提供支持。", standSuffix: "一次性",
+      plans: [
+        { name: "探索者", tagline: "为好奇者", popular: false, cta: "免费开始", features: ["基础访问", "社区支持"] },
+        { name: "创始人", tagline: "为构建者", popular: true, cta: "立即开始", features: ["完整平台访问", "AI副驾驶", "优先支持"] },
+        { name: "企业版", tagline: "为扩展团队", popular: false, cta: "联系销售", features: ["自定义集成", "专属客户经理"] },
+      ],
+    },
+    testimonials: {
+      badge: "社区", title: "由创始人为创始人而建",
+      testimonials: [
+        { quote: "TechIT改变了我验证创业想法的方式。", initials: "JD", name: "Jane Doe", role: "CEO, TechFlow" },
+        { quote: "AI助手就像拥有一个联合创始人。", initials: "JS", name: "John Smith", role: "创始人, InnovateX" },
+      ],
+    },
+    problemSolver: { title: "不要让执行力不足阻碍您。", buttonText: "加入TechIT Network" },
+    header: {
+      logoText: "TechIT",
+      navLinks: [{ label: "功能", href: "#features" }, { label: "运作方式", href: "#how-it-works" }, { label: "定价", href: "#pricing" }],
+      loginButton: "登录", registerButton: "注册",
+    },
+    footer: {
+      description: "TechIT Network 是面向初创企业的AI执行基础设施。",
+      productTitle: "产品", productLinks: [{ label: "功能", href: "#" }, { label: "定价", href: "#" }],
+      companyTitle: "公司", companyLinks: [{ label: "关于我们", href: "#" }, { label: "博客", href: "#" }],
+      supportTitle: "支持", location: "旧金山, 加利福尼亚",
+      copyright: "TechIT Network. 版权所有。", poweredBy: "由创新驱动",
+    },
+    finalCta: { badge: "准备好了吗？", title: "今天开始构建", description: "加入数千位将想法变为现实的创始人。", buttonText: "创建免费账户", imageAlt: "TechIT平台" },
+    faq: {
+      badge: "常见问题", title: "有问题吗？",
+      faqs: [
+        { q: "什么是TechIT？", a: "TechIT是面向初创企业的AI执行平台。" },
+        { q: "有免费套餐吗？", a: "是的，您可以作为探索者免费探索该平台。" },
+      ],
+    },
+    benefitGrid: {
+      badge: "优势", title: "为什么选择TechIT", description: "您需要的一切都在一个地方。",
+      benefits: [
+        { title: "AI智能", description: "自动化您的研究和验证。" },
+        { title: "实时指标", description: "即时追踪您的创业公司健康状况。" },
+        { title: "专家网络", description: "与投资者和合作者建立联系。" },
+      ],
+    },
+  },
+
+  pt: {
+    hero: {
+      title: "Nenhuma Ideia Deve Se Perder.",
+      description: "TechIT Network é uma infraestrutura de execução alimentada por IA para criar, validar, construir e crescer startups.",
+      buttonText: "Começar a Construir",
+      buttonHref: "/signup",
+      imageSrc: "/mockup/laptop.png",
+      imageAlt: "TechIT Painel",
+    },
+    howItWorks: {
+      badge: "Como Funciona", title: "Simples e Poderoso", description: "Do conceito à empresa em três passos simples.",
+      steps: [
+        { title: "Idealizar", description: "Capture sua visão e estruture seus pensamentos instantaneamente." },
+        { title: "Validar", description: "Desafie suas suposições com dados de mercado em tempo real." },
+        { title: "Executar", description: "Transforme insights em ação com fluxos de trabalho guiados por IA." },
+      ],
+    },
+    howToRegister: {
+      badge: "Começar", title: "Inicie Sua Jornada", description: "Junte-se à rede de fundadores e construtores.",
+      steps: [
+        { title: "Criar Conta", description: "Cadastre-se com segurança em segundos.", imageAlt: "Cadastro" },
+        { title: "Defina Seus Objetivos", description: "Conte-nos o que você está construindo.", imageAlt: "Objetivos" },
+        { title: "Lançar", description: "Deixe a IA guiá-lo ao sucesso.", imageAlt: "Lançar" },
+      ],
+    },
+    pricing: {
+      badge: "Preços", title: "Invista na Sua Ideia", description: "Preços simples e transparentes.",
+      monthlyLabel: "Mensal", yearlyLabel: "Anual", popularLabel: "Mais Popular",
+      monthSuffix: "/mês", yearSuffix: "/ano", hardwareTitle: "Complementos Enterprise",
+      hardwareDescription: "Precisa de infraestrutura dedicada? Nós te cobrimos.", standSuffix: "único",
+      plans: [
+        { name: "Explorador", tagline: "Para os curiosos", popular: false, cta: "Começar Grátis", features: ["Acesso básico", "Suporte comunitário"] },
+        { name: "Fundador", tagline: "Para os construtores", popular: true, cta: "Começar", features: ["Acesso completo", "Copilotos IA", "Suporte prioritário"] },
+        { name: "Enterprise", tagline: "Para equipes em crescimento", popular: false, cta: "Contatar Vendas", features: ["Integrações personalizadas", "Gerente de conta dedicado"] },
+      ],
+    },
+    testimonials: {
+      badge: "Comunidade", title: "Construído por Fundadores, Para Fundadores",
+      testimonials: [
+        { quote: "TechIT mudou como valido minhas ideias de startup.", initials: "JD", name: "Jane Doe", role: "CEO, TechFlow" },
+        { quote: "O assistente de IA é como ter um co-fundador.", initials: "JS", name: "John Smith", role: "Fundador, InnovateX" },
+      ],
+    },
+    problemSolver: { title: "Não deixe a falta de execução te segurar.", buttonText: "Juntar-se ao TechIT Network" },
+    header: {
+      logoText: "TechIT",
+      navLinks: [{ label: "Funcionalidades", href: "#features" }, { label: "Como funciona", href: "#how-it-works" }, { label: "Preços", href: "#pricing" }],
+      loginButton: "Entrar", registerButton: "Cadastrar",
+    },
+    footer: {
+      description: "TechIT Network é uma infraestrutura de execução IA para startups.",
+      productTitle: "Produto", productLinks: [{ label: "Funcionalidades", href: "#" }, { label: "Preços", href: "#" }],
+      companyTitle: "Empresa", companyLinks: [{ label: "Sobre", href: "#" }, { label: "Blog", href: "#" }],
+      supportTitle: "Suporte", location: "São Francisco, CA",
+      copyright: "TechIT Network. Todos os direitos reservados.", poweredBy: "Impulsionado pela Inovação",
+    },
+    finalCta: { badge: "Pronto?", title: "Comece a Construir Hoje", description: "Junte-se a milhares de fundadores realizando suas ideias.", buttonText: "Criar Conta Grátis", imageAlt: "Plataforma TechIT" },
+    faq: {
+      badge: "FAQ", title: "Tem Perguntas?",
+      faqs: [
+        { q: "O que é TechIT?", a: "TechIT é uma plataforma de execução IA para startups." },
+        { q: "Há um nível gratuito?", a: "Sim, você pode explorar a plataforma como Explorador gratuitamente." },
+      ],
+    },
+    benefitGrid: {
+      badge: "Benefícios", title: "Por Que Escolher TechIT", description: "Tudo que você precisa para ter sucesso em um só lugar.",
+      benefits: [
+        { title: "Inteligência IA", description: "Automatize sua pesquisa e validação." },
+        { title: "Métricas em Tempo Real", description: "Rastreie a saúde da sua startup instantaneamente." },
+        { title: "Rede de Especialistas", description: "Conecte-se com investidores e colaboradores." },
+      ],
+    },
+  },
+
+  ar: {
+    hero: {
+      title: "لا ينبغي أن تضيع أي فكرة.",
+      description: "TechIT Network هي بنية تحتية تنفيذية مدعومة بالذكاء الاصطناعي لإنشاء الشركات الناشئة والتحقق منها وبناؤها وتنميتها.",
+      buttonText: "ابدأ البناء",
+      buttonHref: "/signup",
+      imageSrc: "/mockup/laptop.png",
+      imageAlt: "لوحة تحكم TechIT",
+    },
+    howItWorks: {
+      badge: "كيف يعمل", title: "بسيط وقوي", description: "من المفهوم إلى الشركة في ثلاث خطوات سهلة.",
+      steps: [
+        { title: "الابتكار", description: "التقط رؤيتك ونظم أفكارك فورًا." },
+        { title: "التحقق", description: "تحدى افتراضاتك ببيانات السوق الفورية." },
+        { title: "التنفيذ", description: "حوّل الرؤى إلى أفعال مع سير عمل موجه بالذكاء الاصطناعي." },
+      ],
+    },
+    howToRegister: {
+      badge: "ابدأ الآن", title: "ابدأ رحلتك", description: "انضم إلى شبكة المؤسسين والبنائين.",
+      steps: [
+        { title: "إنشاء حساب", description: "سجّل بأمان في ثوانٍ.", imageAlt: "تسجيل" },
+        { title: "حدد أهدافك", description: "أخبرنا بما تبنيه.", imageAlt: "الأهداف" },
+        { title: "الإطلاق", description: "دع الذكاء الاصطناعي يرشدك نحو النجاح.", imageAlt: "الإطلاق" },
+      ],
+    },
+    pricing: {
+      badge: "الأسعار", title: "استثمر في فكرتك", description: "أسعار بسيطة وشفافة.",
+      monthlyLabel: "شهري", yearlyLabel: "سنوي", popularLabel: "الأكثر شعبية",
+      monthSuffix: "/شهر", yearSuffix: "/سنة", hardwareTitle: "الإضافات المؤسسية",
+      hardwareDescription: "هل تحتاج بنية تحتية مخصصة؟ نحن نغطيك.", standSuffix: "مرة واحدة",
+      plans: [
+        { name: "مستكشف", tagline: "للفضوليين", popular: false, cta: "ابدأ مجانًا", features: ["وصول أساسي", "دعم المجتمع"] },
+        { name: "مؤسس", tagline: "للبنائين", popular: true, cta: "ابدأ الآن", features: ["وصول كامل للمنصة", "مساعدو الذكاء الاصطناعي", "دعم ذو أولوية"] },
+        { name: "مؤسسة", tagline: "للفرق المتنامية", popular: false, cta: "تواصل مع المبيعات", features: ["تكاملات مخصصة", "مدير حساب مخصص"] },
+      ],
+    },
+    testimonials: {
+      badge: "المجتمع", title: "مبني من قبل المؤسسين، للمؤسسين",
+      testimonials: [
+        { quote: "غيّرت TechIT طريقة التحقق من أفكاري للشركات الناشئة.", initials: "JD", name: "Jane Doe", role: "رئيسة تنفيذية، TechFlow" },
+        { quote: "مساعد الذكاء الاصطناعي يشبه امتلاك شريك مؤسس.", initials: "JS", name: "John Smith", role: "مؤسس، InnovateX" },
+      ],
+    },
+    problemSolver: { title: "لا تدع قصور التنفيذ يعيقك.", buttonText: "انضم إلى TechIT Network" },
+    header: {
+      logoText: "TechIT",
+      navLinks: [{ label: "الميزات", href: "#features" }, { label: "كيف يعمل", href: "#how-it-works" }, { label: "الأسعار", href: "#pricing" }],
+      loginButton: "تسجيل الدخول", registerButton: "إنشاء حساب",
+    },
+    footer: {
+      description: "TechIT Network هي بنية تحتية تنفيذية بالذكاء الاصطناعي للشركات الناشئة.",
+      productTitle: "المنتج", productLinks: [{ label: "الميزات", href: "#" }, { label: "الأسعار", href: "#" }],
+      companyTitle: "الشركة", companyLinks: [{ label: "من نحن", href: "#" }, { label: "المدونة", href: "#" }],
+      supportTitle: "الدعم", location: "سان فرانسيسكو، كاليفورنيا",
+      copyright: "TechIT Network. جميع الحقوق محفوظة.", poweredBy: "مدعوم بالابتكار",
+    },
+    finalCta: { badge: "مستعد؟", title: "ابدأ البناء اليوم", description: "انضم لآلاف المؤسسين الذين يجعلون أفكارهم حقيقة.", buttonText: "إنشاء حساب مجاني", imageAlt: "منصة TechIT" },
+    faq: {
+      badge: "الأسئلة الشائعة", title: "لديك أسئلة؟",
+      faqs: [
+        { q: "ما هو TechIT؟", a: "TechIT هي منصة تنفيذ بالذكاء الاصطناعي للشركات الناشئة." },
+        { q: "هل هناك مستوى مجاني؟", a: "نعم، يمكنك استكشاف المنصة كمستكشف مجانًا." },
+      ],
+    },
+    benefitGrid: {
+      badge: "المزايا", title: "لماذا تختار TechIT", description: "كل ما تحتاجه للنجاح في مكان واحد.",
+      benefits: [
+        { title: "الذكاء الاصطناعي", description: "أتمتة البحث والتحقق." },
+        { title: "مقاييس فورية", description: "تتبع صحة شركتك الناشئة فورًا." },
+        { title: "شبكة الخبراء", description: "تواصل مع المستثمرين والمتعاونين." },
+      ],
+    },
+  },
+
+  hi: {
+    hero: {
+      title: "कोई भी विचार खोना नहीं चाहिए।",
+      description: "TechIT Network स्टार्टअप बनाने, सत्यापित करने, निर्माण करने और बढ़ाने के लिए एक AI-संचालित निष्पादन अवसंरचना है।",
+      buttonText: "निर्माण शुरू करें",
+      buttonHref: "/signup",
+      imageSrc: "/mockup/laptop.png",
+      imageAlt: "TechIT डैशबोर्ड",
+    },
+    howItWorks: {
+      badge: "यह कैसे काम करता है", title: "सरल और शक्तिशाली", description: "तीन आसान चरणों में अवधारणा से कंपनी तक।",
+      steps: [
+        { title: "विचार करें", description: "अपनी दृष्टि को तुरंत कैप्चर करें और विचारों को संरचित करें।" },
+        { title: "सत्यापित करें", description: "वास्तविक समय बाज़ार डेटा के साथ अपनी धारणाओं को चुनौती दें।" },
+        { title: "क्रियान्वित करें", description: "AI-निर्देशित वर्कफ़्लो के साथ अंतर्दृष्टि को क्रिया में बदलें।" },
+      ],
+    },
+    howToRegister: {
+      badge: "शुरू करें", title: "अपनी यात्रा शुरू करें", description: "संस्थापकों और निर्माताओं के नेटवर्क से जुड़ें।",
+      steps: [
+        { title: "खाता बनाएं", description: "सेकंड में सुरक्षित रूप से साइन अप करें।", imageAlt: "साइन अप" },
+        { title: "अपने लक्ष्य निर्धारित करें", description: "हमें बताएं कि आप क्या बना रहे हैं।", imageAlt: "लक्ष्य" },
+        { title: "लॉन्च करें", description: "AI को आपको सफलता की ओर मार्गदर्शन करने दें।", imageAlt: "लॉन्च" },
+      ],
+    },
+    pricing: {
+      badge: "मूल्य निर्धारण", title: "अपने विचार में निवेश करें", description: "हर चरण के संस्थापकों के लिए सरल, पारदर्शी मूल्य निर्धारण।",
+      monthlyLabel: "मासिक", yearlyLabel: "वार्षिक", popularLabel: "सबसे लोकप्रिय",
+      monthSuffix: "/माह", yearSuffix: "/वर्ष", hardwareTitle: "एंटरप्राइज़ ऐड-ऑन",
+      hardwareDescription: "समर्पित बुनियादी ढांचे की जरूरत है? हम आपको कवर करते हैं।", standSuffix: "एकमुश्त",
+      plans: [
+        { name: "खोजकर्ता", tagline: "जिज्ञासुओं के लिए", popular: false, cta: "मुफ़्त शुरू करें", features: ["बुनियादी पहुंच", "सामुदायिक समर्थन"] },
+        { name: "संस्थापक", tagline: "निर्माताओं के लिए", popular: true, cta: "शुरू करें", features: ["पूर्ण प्लेटफ़ॉर्म पहुंच", "AI सह-पायलट", "प्राथमिकता समर्थन"] },
+        { name: "एंटरप्राइज़", tagline: "बढ़ती टीमों के लिए", popular: false, cta: "बिक्री से संपर्क करें", features: ["कस्टम एकीकरण", "समर्पित खाता प्रबंधक"] },
+      ],
+    },
+    testimonials: {
+      badge: "समुदाय", title: "संस्थापकों द्वारा, संस्थापकों के लिए निर्मित",
+      testimonials: [
+        { quote: "TechIT ने मेरे स्टार्टअप विचारों को सत्यापित करने का तरीका बदल दिया।", initials: "JD", name: "Jane Doe", role: "CEO, TechFlow" },
+        { quote: "AI साथी होना एक सह-संस्थापक होने जैसा है।", initials: "JS", name: "John Smith", role: "संस्थापक, InnovateX" },
+      ],
+    },
+    problemSolver: { title: "निष्पादन की कमी को आपको रोकने न दें।", buttonText: "TechIT Network से जुड़ें" },
+    header: {
+      logoText: "TechIT",
+      navLinks: [{ label: "विशेषताएं", href: "#features" }, { label: "यह कैसे काम करता है", href: "#how-it-works" }, { label: "मूल्य निर्धारण", href: "#pricing" }],
+      loginButton: "लॉग इन", registerButton: "साइन अप",
+    },
+    footer: {
+      description: "TechIT Network स्टार्टअप के लिए AI-संचालित निष्पादन अवसंरचना है।",
+      productTitle: "उत्पाद", productLinks: [{ label: "विशेषताएं", href: "#" }, { label: "मूल्य निर्धारण", href: "#" }],
+      companyTitle: "कंपनी", companyLinks: [{ label: "हमारे बारे में", href: "#" }, { label: "ब्लॉग", href: "#" }],
+      supportTitle: "समर्थन", location: "सैन फ्रांसिस्को, CA",
+      copyright: "TechIT Network. सर्वाधिकार सुरक्षित।", poweredBy: "नवाचार द्वारा संचालित",
+    },
+    finalCta: { badge: "तैयार हैं?", title: "आज निर्माण शुरू करें", description: "हजारों संस्थापकों से जुड़ें जो अपने विचारों को वास्तविकता बना रहे हैं।", buttonText: "मुफ़्त खाता बनाएं", imageAlt: "TechIT प्लेटफ़ॉर्म" },
+    faq: {
+      badge: "अक्सर पूछे जाने वाले प्रश्न", title: "प्रश्न हैं?",
+      faqs: [
+        { q: "TechIT क्या है?", a: "TechIT स्टार्टअप के लिए एक AI निष्पादन प्लेटफ़ॉर्म है।" },
+        { q: "क्या कोई मुफ़्त स्तर है?", a: "हाँ, आप Explorer के रूप में मुफ़्त में प्लेटफ़ॉर्म का पता लगा सकते हैं।" },
+      ],
+    },
+    benefitGrid: {
+      badge: "लाभ", title: "TechIT क्यों चुनें", description: "एक जगह सफलता के लिए जो कुछ भी चाहिए।",
+      benefits: [
+        { title: "AI बुद्धिमत्ता", description: "अपने शोध और सत्यापन को स्वचालित करें।" },
+        { title: "वास्तविक समय मेट्रिक्स", description: "अपने स्टार्टअप की सेहत तुरंत ट्रैक करें।" },
+        { title: "विशेषज्ञ नेटवर्क", description: "निवेशकों और सहयोगियों से जुड़ें।" },
+      ],
+    },
+  },
+};
+
+export function getTranslations(locale?: string): Translations {
+  return translations[(locale as LocaleCode) ?? "en"] ?? translations.en;
 }
+
+export { translations };

@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 import StackMenuWhiteLogo from "../ui/StackMenuWhiteLogo";
 import { Twitter, Linkedin, Github } from "lucide-react";
 
 export default function Footer() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const { footer: { description, productTitle, productLinks, companyTitle, companyLinks, supportTitle, location, copyright, poweredBy } } = getTranslations();
 
   return (

@@ -1,8 +1,11 @@
 import { motion } from "motion/react";
 import LandingButton from "../ui/landing-btn";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function FinalCTA() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const { finalCta: { badge, title, description, buttonText } } = getTranslations();
 
   return (

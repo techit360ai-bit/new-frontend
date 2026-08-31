@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type Variants } from "motion/react";
-import { LANG } from "@/app/types/globalLang";
-import LandingButton from "../ui/landing-btn";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
+import LandingButton from "../ui/landing-btn";
 
-const locale = LANG; 
-const text = getTranslations(locale);
 
 const SLIDE_IMAGES = [
   "/hero1.jpg",
@@ -15,6 +13,8 @@ const SLIDE_IMAGES = [
 ];
 
 export default function Hero() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {

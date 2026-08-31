@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 import { useState } from "react";
 import { ChevronDown, MessageCircleQuestion } from "lucide-react";
 
@@ -50,6 +51,8 @@ const faqData = [
 ];
 
 export default function FAQ() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const { faq: { badge, title } } = getTranslations();
   const [openIndex, setOpenIndex] = useState<string | null>("0-0");
 

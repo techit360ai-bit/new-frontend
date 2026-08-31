@@ -1,8 +1,11 @@
 import { motion } from "motion/react";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 import { CheckCircle2 } from "lucide-react";
 
 export default function BenefitGrid() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const { benefitGrid: { badge, title, description, benefits } } = getTranslations();
 
   return (

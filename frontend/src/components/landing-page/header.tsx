@@ -5,10 +5,13 @@ import StackMenuOrangeLogo from "../ui/StackMenuOrangeLogo";
 import StackMenuWhiteLogo from "../ui/StackMenuWhiteLogo";
 import LandingButton from "../ui/landing-btn";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
+import LanguageSwitcher from "../ui/LanguageSwitcher";
 import { Menu, X } from "lucide-react";
 
 export default function Header() {
-  const { header: { navLinks, loginButton, registerButton } } = getTranslations();
+  const { locale } = useLocale();
+  const { header: { navLinks, loginButton, registerButton } } = getTranslations(locale.code);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -79,7 +82,10 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
+            {/* Language / Currency switcher */}
+            <LanguageSwitcher light={!isScrolled} />
+
             <Link
               to="/signin"
               className={`text-sm font-bold transition-colors ${
@@ -127,6 +133,11 @@ export default function Header() {
               ))}
             </nav>
             <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
+              {/* Language switcher in mobile menu */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Language</span>
+                <LanguageSwitcher light={false} />
+              </div>
               <Link
                 to="/signin"
                 className="text-lg font-bold text-center text-[#171330]"

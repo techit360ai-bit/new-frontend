@@ -1,8 +1,11 @@
 import { motion, type Variants } from "motion/react";
 import { getTranslations } from "@/app/lib/i18n";
+import { useLocale } from "@/contexts/LocaleContext";
 import { Quote, Star } from "lucide-react";
 
 export default function Testimonials() {
+  const { locale } = useLocale();
+  const text = getTranslations(locale.code);
   const { testimonials: { badge, title } } = getTranslations();
 
   // Expanded testimonials list for a richer UI
