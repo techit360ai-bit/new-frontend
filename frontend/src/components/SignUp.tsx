@@ -459,7 +459,7 @@ export default function Signup() {
   };
 
   const inputCls =
-    "w-full h-14 rounded-2xl border-2 border-white/20 bg-white/10 px-4 text-base font-medium text-white placeholder:text-white/40 focus:outline-none focus:bg-white/20 focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full h-14 rounded-2xl border-2 border-gray-100 bg-white px-4 text-base font-medium text-[#171330] placeholder:text-gray-400 focus:outline-none focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <div className="min-h-screen bg-[#f8faff] flex font-bricolage">
