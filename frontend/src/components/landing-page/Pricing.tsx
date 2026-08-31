@@ -1,12 +1,12 @@
 import { motion, type Variants } from "motion/react";
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { getTranslations } from "@/app/lib/i18n";
 import { useState, useEffect } from "react";
 import { getCurrencyInfo } from "@/utils/exchangeRate";
 
 export default function Pricing() {
   const {
-    pricing: { badge, title, description, monthlyLabel, yearlyLabel, popularLabel, plans, hardwareTitle, hardwareDescription },
+    pricing: { badge, title, description, monthlyLabel, yearlyLabel, popularLabel, plans },
   } = getTranslations();
 
   const [isYearly, setIsYearly] = useState(false);
@@ -15,6 +15,13 @@ export default function Pricing() {
   useEffect(() => {
     getCurrencyInfo().then(info => setCurrencySymbol(info.symbol));
   }, []);
+
+  const getPrice = (index: number, yearly: boolean) => {
+    if (index === 0) return 0;
+    if (index === 1) return yearly ? 190 : 19;
+    if (index === 2) return yearly ? 990 : 99;
+    return 0;
+  };
 
   const header: Variants = {
     hidden: { opacity: 0, y: 30 },
@@ -44,41 +51,41 @@ export default function Pricing() {
   };
 
   return (
-    <div className="py-24 bg-[#d6deec] px-6 rounded-[36px] -mt-6 md:mt-6 z-20 relative font-bricolage overflow-hidden">
+    <div className="py-24 bg-[#d6deec] px-6 rounded-[36px] -mt-6 md:mt-6 z-20 relative font-bricolage overflow-hidden shadow-inner">
+      {/* Decorative blobs */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#0068ff]/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#20c907]/10 rounded-full blur-[100px] pointer-events-none" />
+
       <motion.div
         variants={header}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        className="max-w-4xl mx-auto text-center mb-16"
+        className="max-w-4xl mx-auto text-center mb-16 relative z-10"
       >
-        <h2 className="text-sm font-black uppercase tracking-widest text-[#0068ff] mb-3">
+        <h2 className="text-sm font-black uppercase tracking-widest text-[#0068ff] mb-4 bg-[#0068ff]/10 inline-block px-5 py-2 rounded-full border border-[#0068ff]/20">
           {badge}
         </h2>
-        <h1 className="text-4xl md:text-6xl font-black text-[#171330] tracking-tight leading-none mb-6">
+        <h1 className="text-4xl md:text-6xl font-black text-[#171330] tracking-tight leading-tight mb-6">
           {title}
         </h1>
-        <p className="text-gray-600 text-lg md:text-xl font-medium max-w-2xl mx-auto">
+        <p className="text-[#171330]/70 text-lg md:text-xl font-medium max-w-2xl mx-auto">
           {description}
         </p>
 
-        <div className="flex items-center justify-center mt-10 gap-4">
-          <span className={`font-semibold ${!isYearly ? "text-[#171330]" : "text-gray-400"}`}>
+        <div className="flex items-center justify-center mt-12 gap-2 bg-white/60 p-2 rounded-full inline-flex mx-auto backdrop-blur-md border border-white shadow-sm">
+          <span 
+            className={`font-bold px-6 py-2.5 rounded-full transition-all cursor-pointer ${!isYearly ? "bg-white shadow-md text-[#171330]" : "text-gray-500 hover:text-[#171330]"}`} 
+            onClick={() => setIsYearly(false)}
+          >
             {monthlyLabel}
           </span>
-          <button
-            onClick={() => setIsYearly(!isYearly)}
-            className="w-16 h-8 bg-gray-200 rounded-full p-1 relative transition-colors focus:outline-none"
-            aria-label="Toggle pricing"
+          <span 
+            className={`font-bold px-6 py-2.5 rounded-full transition-all cursor-pointer flex items-center gap-2 ${isYearly ? "bg-white shadow-md text-[#171330]" : "text-gray-500 hover:text-[#171330]"}`} 
+            onClick={() => setIsYearly(true)}
           >
-            <motion.div
-              className="w-6 h-6 bg-[#0068ff] rounded-full shadow-md"
-              animate={{ x: isYearly ? 32 : 0 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          </button>
-          <span className={`font-semibold ${isYearly ? "text-[#171330]" : "text-gray-400"}`}>
-            {yearlyLabel}
+            {yearlyLabel} 
+            <span className="bg-[#20c907]/10 text-[#20c907] text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border border-[#20c907]/20">Save 20%</span>
           </span>
         </div>
       </motion.div>
@@ -88,53 +95,55 @@ export default function Pricing() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto"
+        className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto relative z-10 items-center"
       >
         {plans.map((plan, i) => (
           <motion.div
             key={i}
             variants={cardVariants}
-            className={`relative flex flex-col p-8 rounded-[32px] overflow-hidden ${
+            whileHover={{ y: -15, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className={`relative flex flex-col p-10 rounded-[40px] overflow-hidden transition-all duration-300 ${
               plan.popular 
-                ? "bg-[#171330] text-white shadow-2xl scale-100 md:scale-105 z-10" 
-                : "bg-white text-[#171330] border border-gray-100 shadow-xl"
+                ? "bg-[#171330] text-white shadow-[0_30px_60px_-15px_rgba(0,104,255,0.5)] md:-my-8 py-14 border border-white/10" 
+                : "bg-white/70 backdrop-blur-xl text-[#171330] border border-white/50 shadow-2xl hover:bg-white/90"
             }`}
           >
             {plan.popular && (
-              <div className="absolute top-0 right-0 bg-[#0068ff] text-white text-xs font-bold px-4 py-1.5 rounded-bl-[16px] uppercase tracking-wider">
-                {popularLabel}
+              <div className="absolute top-6 right-6 bg-gradient-to-r from-[#0068ff] to-[#58A6ff] text-white text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-lg border border-white/20">
+                <Sparkles size={14} /> {popularLabel}
               </div>
             )}
             
-            <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-            <p className={`font-medium mb-6 ${plan.popular ? "text-gray-400" : "text-gray-500"}`}>
+            <h3 className="text-3xl font-black mb-2 tracking-tight">{plan.name}</h3>
+            <p className={`font-semibold mb-8 text-sm ${plan.popular ? "text-[#58A6ff]" : "text-gray-500"}`}>
               {plan.tagline}
             </p>
             
-            <div className="mb-8">
-              <span className="text-5xl font-black tracking-tighter">
-                {currencySymbol}{isYearly ? "X" : "Y"}
+            <div className="mb-10 flex items-baseline">
+              <span className={`text-6xl font-black tracking-tighter ${plan.popular ? "text-white" : "text-[#171330]"}`}>
+                {currencySymbol}{getPrice(i, isYearly)}
               </span>
-              <span className={`font-medium ml-2 ${plan.popular ? "text-gray-400" : "text-gray-500"}`}>
+              <span className={`font-bold ml-2 ${plan.popular ? "text-white/50" : "text-gray-400"}`}>
                 / {isYearly ? 'yr' : 'mo'}
               </span>
             </div>
 
-            <button className={`w-full py-4 rounded-2xl font-bold text-lg mb-8 transition-transform hover:scale-[1.02] active:scale-95 ${
+            <button className={`w-full py-4 rounded-2xl font-black text-lg mb-10 transition-all hover:scale-[1.03] active:scale-95 shadow-lg ${
               plan.popular 
-                ? "bg-white text-[#171330]" 
-                : "bg-[#d6deec] text-[#171330]"
+                ? "bg-gradient-to-r from-[#0068ff] to-[#58A6ff] text-white hover:shadow-[#0068ff]/50" 
+                : "bg-white text-[#171330] border-2 border-[#d6deec] hover:border-[#0068ff] hover:text-[#0068ff]"
             }`}>
               {plan.cta}
             </button>
 
-            <ul className="space-y-4 mt-auto">
+            <ul className="space-y-5 mt-auto">
               {plan.features.map((feature, j) => (
-                <li key={j} className="flex items-center gap-3">
-                  <div className={`p-1 rounded-full ${plan.popular ? "bg-white/10" : "bg-[#0068ff]/10"}`}>
-                    <Check size={16} className={plan.popular ? "text-white" : "text-[#0068ff]"} />
+                <li key={j} className="flex items-start gap-3">
+                  <div className={`p-1 rounded-full shrink-0 mt-0.5 ${plan.popular ? "bg-[#20c907]/20" : "bg-[#0068ff]/10"}`}>
+                    <Check size={16} strokeWidth={3} className={plan.popular ? "text-[#20c907]" : "text-[#0068ff]"} />
                   </div>
-                  <span className={`font-medium ${plan.popular ? "text-gray-200" : "text-gray-700"}`}>
+                  <span className={`font-semibold text-[15px] leading-snug ${plan.popular ? "text-white/90" : "text-[#171330]/80"}`}>
                     {feature}
                   </span>
                 </li>
