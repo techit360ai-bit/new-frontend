@@ -5,6 +5,7 @@ import FinalCTA from "./landing-page/FinalCta";
 import Footer from "./landing-page/Footer";
 import Header from "./landing-page/header";
 import Hero from "./landing-page/hero";
+import DashboardShowcase from "./landing-page/DashboardShowcase";
 import HowItWorks from "./landing-page/HowItWorks";
 import HowToRegister from "./landing-page/HowToRegister";
 import Pricing from "./landing-page/Pricing";
@@ -18,6 +19,7 @@ export default function Landing() {
       <Header />
       <main className="flex flex-col gap-6 lg:gap-12 px-2 md:px-6 pt-[15px] pb-12 overflow-hidden max-w-[1600px] mx-auto">
         <Hero />
+        <DashboardShowcase />
         <HowItWorks />
         <HowToRegister />
         <FeatureShowcase />
