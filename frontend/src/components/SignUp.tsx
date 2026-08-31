@@ -444,10 +444,10 @@ export default function Signup() {
   };
 
   const inputCls =
-    "w-full h-10 rounded-xl border border-[color:var(--border)] bg-[color:var(--input)] px-3 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)] transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full h-14 rounded-2xl border-2 border-gray-100 bg-gray-50/50 px-4 text-base font-medium text-[#171330] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:bg-white focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
-    <div className="min-h-screen bg-[color:var(--background)] flex">
+    <div className="min-h-screen bg-[#f8faff] flex font-bricolage">
       {/* Toast Notifications */}
       {toast && (
         <Toast
@@ -458,44 +458,45 @@ export default function Signup() {
       )}
 
       {/* Left decorative */}
-      <div className="hidden lg:flex lg:w-5/12 relative bg-gradient-to-br from-[color:var(--primary)]/15 via-blue-500/8 to-[color:var(--background)] overflow-hidden flex-col justify-between p-12">
-        <div className="orb orb-violet w-[400px] h-[400px] -top-20 -left-20 absolute" />
+      <div className="hidden lg:flex lg:w-5/12 relative bg-[#171330] overflow-hidden flex-col justify-between p-12 lg:p-16">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#0068ff]/30 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#0068ff]/20 blur-[100px] rounded-full" />
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-2.5 mb-12">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[color:var(--primary)] to-blue-400 flex items-center justify-center shadow-lg">
+          <Link to="/" className="flex items-center gap-2.5 mb-16 group">
+            <div className="h-10 w-10 rounded-xl bg-[#0068ff] flex items-center justify-center shadow-[0_0_20px_rgba(0,104,255,0.4)] group-hover:scale-105 transition-transform">
               <Zap className="h-5 w-5 text-white" />
             </div>
             <div>
-              <div className="font-bold leading-none">TECHIT</div>
-              <div className="font-mono text-[0.6rem] text-[color:var(--primary)] tracking-widest">
-                NETWORK
+              <div className="font-black text-xl text-white tracking-tight leading-none">TechIT</div>
+              <div className="font-bold text-[0.6rem] text-white/50 tracking-widest uppercase mt-1">
+                Network
               </div>
             </div>
           </Link>
-          <h2 className="font-bold text-4xl leading-tight tracking-tight mb-3">
+          <h2 className="font-black text-5xl md:text-6xl text-white leading-[1.1] tracking-tight mb-6">
             Build.
             <br />
             Connect.
             <br />
             Ship.
           </h2>
-          <p className="text-[color:var(--muted-foreground)] text-sm leading-relaxed max-w-xs">
+          <p className="text-white/70 text-lg leading-relaxed max-w-sm font-medium">
             Join the global network where founders find co-builders, investors
             discover deals, and experts build their legacy.
           </p>
         </div>
-        <div className="relative z-10 p-5 rounded-2xl bg-[color:var(--card)]/60 border border-[color:var(--border)] backdrop-blur">
-          <p className="text-sm text-[color:var(--muted-foreground)] italic leading-relaxed mb-4">
+        <div className="relative z-10 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
+          <p className="text-sm text-white/80 italic leading-relaxed mb-4">
             "Found my technical co-founder in 3 days through TechIT. The AI
             matching is unlike anything else."
           </p>
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
+            <div className="h-10 w-10 rounded-xl bg-[#0068ff] flex items-center justify-center text-white text-xs font-bold shadow-lg">
               AK
             </div>
             <div>
-              <div className="text-sm font-semibold">Amara Kone</div>
-              <div className="text-xs text-[color:var(--muted-foreground)]">
+              <div className="text-sm font-bold text-white">Amara Kone</div>
+              <div className="text-xs text-white/60 font-medium">
                 Founder · Lagos · Seed Funded
               </div>
             </div>
@@ -504,24 +505,24 @@ export default function Signup() {
       </div>
 
       {/* Right form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white rounded-l-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.02)] relative z-20 overflow-y-auto">
         <div className="w-full max-w-md">
-          <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-blue-400 flex items-center justify-center">
+          <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8 group">
+            <div className="h-9 w-9 rounded-xl bg-[#0068ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
               <Zap className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-sm">TECHIT NETWORK</span>
+            <span className="font-black text-lg text-[#171330] tracking-tight">TechIT</span>
           </Link>
 
           <div className="mb-8">
-            <h1 className="font-bold text-3xl tracking-tight">
+            <h1 className="font-black text-4xl text-[#171330] tracking-tight mb-3">
               Create Account
             </h1>
-            <p className="text-[color:var(--muted-foreground)] text-sm mt-2">
+            <p className="text-gray-500 text-base font-medium">
               Already a member?{" "}
               <Link
                 to="/signin"
-                className="text-[color:var(--primary)] font-medium hover:underline"
+                className="text-[#0068ff] font-bold hover:text-[#171330] transition-colors"
               >
                 Sign in
               </Link>
@@ -529,17 +530,17 @@ export default function Signup() {
           </div>
 
           {/* Step indicators */}
-          <div className="flex gap-2 mb-8">
+          <div className="flex gap-2 mb-10">
             {Array.from({ length: totalSteps }, (_, index) => index + 1).map((n) => (
               <div
                 key={n}
                 className={cn(
-                  "h-1 flex-1 rounded-full transition-all duration-500",
+                  "h-1.5 flex-1 rounded-full transition-all duration-500",
                   n < step
-                    ? "bg-emerald-500"
+                    ? "bg-[#20c907]"
                     : n === step
-                      ? "bg-[color:var(--primary)]"
-                      : "bg-[color:var(--muted)]",
+                      ? "bg-[#0068ff]"
+                      : "bg-gray-100",
                 )}
               />
             ))}
@@ -584,9 +585,9 @@ export default function Signup() {
               <button
                 onClick={goNext}
                 disabled={!canNext || loading}
-                className="w-full h-10 rounded-xl bg-[color:var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                className="w-full h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.3)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none mt-4"
               >
-                Continue <ArrowRight className="h-4 w-4" />
+                Continue <ArrowRight className="h-5 w-5" />
               </button>
             </div>
           )}
@@ -603,20 +604,20 @@ export default function Signup() {
                     key={role.id}
                     onClick={() => set("role", role.id)}
                     className={cn(
-                      "p-4 rounded-xl border text-left transition-all",
+                      "p-5 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] active:scale-95",
                       form.role === role.id
-                        ? "border-[color:var(--primary)] bg-[color:var(--primary)]/10"
-                        : "border-[color:var(--border)] bg-[color:var(--card)] hover:border-[color:var(--primary)]/40",
+                        ? "border-[#0068ff] bg-[#0068ff]/5 shadow-[0_5px_15px_rgba(0,104,255,0.15)]"
+                        : "border-gray-100 bg-white hover:border-[#0068ff]/30 hover:shadow-md",
                     )}
                     disabled={loading}
                   >
-                    <div className="text-sm font-semibold">{role.label}</div>
-                    <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5">
+                    <div className="text-sm font-bold text-[#171330]">{role.label}</div>
+                    <div className="text-xs text-gray-500 font-medium mt-1 leading-relaxed">
                       {role.desc}
                     </div>
                     {form.role === role.id && (
-                      <div className="mt-2 h-4 w-4 rounded-full bg-[color:var(--primary)] flex items-center justify-center">
-                        <Check className="h-2.5 w-2.5 text-white" />
+                      <div className="mt-3 h-5 w-5 rounded-full bg-[#0068ff] flex items-center justify-center">
+                        <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
                   </button>
@@ -641,18 +642,18 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-12 flex-shrink-0 px-0 justify-center h-10 rounded-xl border border-[color:var(--border)] bg-[color:var(--input)] hover:bg-[color:var(--muted)] disabled:opacity-50 transition-all"
+                  className="w-14 flex-shrink-0 px-0 justify-center h-14 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-all flex items-center"
                   disabled={loading}
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-5 w-5 text-gray-600" />
                 </button>
                 <button
                   onClick={goNext}
                   disabled={!canNext || loading}
-                  className="flex-1 h-10 rounded-xl bg-[color:var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.3)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none"
                 >
                   {loading ? "Sending..." : "Send Verification Code"}{" "}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -704,7 +705,7 @@ export default function Signup() {
               <button
                 onClick={verifyOtp}
                 disabled={otpCode.length !== 6 || loading || otpVerified}
-                className="w-full h-10 rounded-xl bg-[color:var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                className="w-full h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.3)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none mt-4"
               >
                 {loading ? "Verifying..." : otpVerified ? "Verified" : "Verify Code"}
               </button>
@@ -829,21 +830,22 @@ export default function Signup() {
                   .
                 </span>
               </label>
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setStep(3)}
-                  className="w-12 flex-shrink-0 px-0 justify-center h-10 rounded-xl border border-[color:var(--border)] bg-[color:var(--input)] hover:bg-[color:var(--muted)] disabled:opacity-50 transition-all"
+                  className="w-14 flex-shrink-0 px-0 justify-center h-14 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-all flex items-center"
                   disabled={loading}
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-5 w-5 text-gray-600" />
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={!canNext || loading}
-                  className="flex-1 h-10 rounded-xl bg-[color:var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.3)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none"
                 >
-                  {loading ? "Creating..." : "Create Account"}
+                  {loading ? "Creating Account..." : "Create Account"}{" "}
+                  <ArrowRight className="h-5 w-5" />
                 </button>
               </div>
             </div>
