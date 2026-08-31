@@ -7,10 +7,10 @@ export default function Footer() {
   const { footer: { description, productTitle, productLinks, companyTitle, companyLinks, supportTitle, location, copyright, poweredBy } } = getTranslations();
 
   return (
-    <footer className="bg-[#0066ff] text-white pt-24 pb-12 px-6 font-bricolage relative overflow-hidden">
+    <footer className="bg-[#002b80] text-white pt-24 pb-12 px-6 font-bricolage relative overflow-hidden">
       {/* Decorative blobs */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 -translate-x-1/2" />
-      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#20c907]/20 rounded-full blur-[100px] pointer-events-none translate-y-1/3 translate-x-1/3" />
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 -translate-x-1/2" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#20c907]/10 rounded-full blur-[100px] pointer-events-none translate-y-1/3 translate-x-1/3" />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16 relative z-10">
         <div className="lg:col-span-2 space-y-6">
