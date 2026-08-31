@@ -124,12 +124,12 @@ export default function Login() {
           </div>
 
           <div className="mb-10">
-            <h1 className="font-black text-4xl text-white tracking-tight mb-3 drop-shadow-lg">Sign In</h1>
-            <p className="text-white/70 text-base font-medium">
+            <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_2px_12px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.9)]">Sign In</h1>
+            <p className="text-white text-base font-medium [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
               Don't have an account?{" "}
               <Link
                 to="/signup"
-                className="text-white font-bold underline hover:text-[#0068ff] transition-colors"
+                className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors"
               >
                 Create one free
               </Link>
@@ -145,7 +145,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-white/80">
+              <label className="block text-xs font-bold uppercase tracking-wider text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                 Email Address
               </label>
               <div className="relative group">
@@ -164,12 +164,12 @@ export default function Login() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-white/80">
+                <label className="block text-xs font-bold uppercase tracking-wider text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-bold text-white/70 hover:text-white transition-colors"
+                  className="text-xs font-bold text-white hover:text-[#0068ff] transition-colors [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]"
                 >
                   Forgot password?
                 </Link>

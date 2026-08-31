@@ -542,14 +542,14 @@ export default function Signup() {
             </Link>
 
           <div className="mb-8">
-            <h1 className="font-black text-4xl text-white tracking-tight mb-3 drop-shadow-lg">
+            <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_2px_12px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.9)]">
               Create Account
             </h1>
-            <p className="text-white/70 text-base font-medium">
+            <p className="text-white text-base font-medium [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
               Already a member?{" "}
               <Link
                 to="/signin"
-                className="text-white font-bold underline hover:text-[#0068ff] transition-colors"
+                className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors"
               >
                 Sign in
               </Link>
@@ -576,7 +576,7 @@ export default function Signup() {
           {/* Step 1 */}
           {step === 1 && (
             <div className="space-y-4 animate-in fade-in duration-300">
-              <p className="font-mono text-xs text-[color:var(--primary)] uppercase tracking-widest">
+              <p className="font-mono text-xs text-white uppercase tracking-widest [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
                 Step 01 — Your Details
               </p>
               <div className="grid grid-cols-2 gap-4">
