@@ -113,9 +113,10 @@ export default function Login() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <div className="absolute inset-0 bg-white/85 backdrop-blur-xl z-10" />
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-md z-10" />
 
-        <div className="w-full max-w-md relative z-20">
+        <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-20">
+          <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-8 md:p-10">
           <div className="lg:hidden flex items-center gap-2.5 mb-10">
             <Link to="/" className="flex items-center gap-2 group">
               <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
@@ -206,6 +207,7 @@ export default function Login() {
               {loading ? "Signing In..." : "Sign In"} <ArrowRight className="h-5 w-5" />
             </button>
           </form>
+          </div>
         </div>
       </div>
     </div>

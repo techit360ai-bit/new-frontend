@@ -533,10 +533,10 @@ export default function Signup() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <div className="absolute inset-0 bg-white/85 backdrop-blur-xl z-10" />
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-md z-10" />
 
         <div className="relative z-20 w-full h-full flex justify-center px-6 py-12 overflow-y-auto">
-          <div className="w-full max-w-md my-auto">
+          <div className="w-full max-w-md my-auto bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-8 md:p-10">
             <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-10 group">
               <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
             </Link>
