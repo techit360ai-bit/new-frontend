@@ -41,14 +41,14 @@ export default function HowToRegister() {
       >
         <motion.h2 
           variants={item} 
-          className="text-sm font-black uppercase tracking-widest text-primary-orange mb-3"
+          className="text-sm font-black uppercase tracking-widest text-[#0068ff] mb-3"
         >
           {badge}
         </motion.h2>
 
         <motion.h1 
           variants={item} 
-          className="text-4xl md:text-5xl font-black text-text-dark tracking-tight leading-tight"
+          className="text-4xl md:text-5xl font-black text-[#171330] tracking-tight leading-tight"
         >
           {title}
         </motion.h1>

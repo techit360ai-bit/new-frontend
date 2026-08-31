@@ -14,7 +14,7 @@ import "../Landing.css";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-white font-bricolage text-text-dark selection:bg-primary-orange selection:text-white">
+    <div className="min-h-screen bg-white font-bricolage text-[#171330] selection:bg-[#0068ff] selection:text-white">
       <Header />
       <main className="flex flex-col gap-6 lg:gap-12 px-2 md:px-6 pt-24 md:pt-32 pb-12 overflow-hidden max-w-[1600px] mx-auto">
         <Hero />

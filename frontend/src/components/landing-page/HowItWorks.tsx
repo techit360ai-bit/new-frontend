@@ -65,7 +65,7 @@ export default function HowItWorks() {
   };
 
   return (
-    <div className="p-5 py-20 text-white bg-primary-orange rounded-t-[36px] md:rounded-[36px] -mt-7.5 md:mt-6 z-50 relative overflow-hidden">
+    <div className="p-5 py-20 text-white bg-[#0068ff] rounded-t-[36px] md:rounded-[36px] -mt-7.5 md:mt-6 z-50 relative overflow-hidden">
       <motion.div 
         initial="hidden"
         whileInView="visible"
@@ -120,12 +120,12 @@ export default function HowItWorks() {
                   whileInView={{ scale: 1, opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 + index * 0.1 }}
-                  className="flex justify-center items-center mb-6 rounded-2xl bg-bg-black-btn-bg size-14 border-4 border-white shadow-md"
+                  className="flex justify-center items-center mb-6 rounded-2xl bg-[#171330] size-14 border-4 border-white shadow-md"
                 >
                   <Icon size={24} className="text-white" />
                 </motion.div>
 
-                <h3 className="mb-3 text-2xl font-bold text-bg-black-btn-bg tracking-tight">
+                <h3 className="mb-3 text-2xl font-bold text-[#171330] tracking-tight">
                   {step.title}
                 </h3>
 

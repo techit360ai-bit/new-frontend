@@ -60,7 +60,7 @@ export default function Header() {
                 )}
               </AnimatePresence>
             </div>
-            <span className={`font-black text-xl tracking-tight transition-colors ${isScrolled ? "text-text-dark" : "text-white"}`}>
+            <span className={`font-black text-xl tracking-tight transition-colors ${isScrolled ? "text-[#171330]" : "text-white"}`}>
               TechIT
             </span>
           </Link>
@@ -71,7 +71,7 @@ export default function Header() {
                 key={i}
                 href={link.href}
                 className={`text-sm font-bold transition-colors hover:opacity-100 ${
-                  isScrolled ? "text-gray-600 hover:text-primary-orange" : "text-white/80 hover:text-white"
+                  isScrolled ? "text-gray-600 hover:text-[#0068ff]" : "text-white/80 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -83,7 +83,7 @@ export default function Header() {
             <Link
               to="/auth/login"
               className={`text-sm font-bold transition-colors ${
-                isScrolled ? "text-text-dark hover:text-primary-orange" : "text-white hover:text-white/80"
+                isScrolled ? "text-[#171330] hover:text-[#0068ff]" : "text-white hover:text-white/80"
               }`}
             >
               {loginButton}
@@ -91,14 +91,14 @@ export default function Header() {
             <LandingButton
               href="/auth/signup"
               showRightArrow={false}
-              className={isScrolled ? "bg-bg-black-btn-bg text-white" : "bg-white text-bg-black-btn-bg"}
+              className={isScrolled ? "bg-[#171330] text-white" : "bg-white text-[#171330]"}
             >
               {registerButton}
             </LandingButton>
           </div>
 
           <button
-            className={`md:hidden z-50 p-2 rounded-full ${isScrolled ? "bg-gray-100 text-text-dark" : "bg-white/10 text-white"}`}
+            className={`md:hidden z-50 p-2 rounded-full ${isScrolled ? "bg-gray-100 text-[#171330]" : "bg-white/10 text-white"}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -119,7 +119,7 @@ export default function Header() {
                 <a
                   key={i}
                   href={link.href}
-                  className="text-lg font-bold text-text-dark"
+                  className="text-lg font-bold text-[#171330]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
@@ -129,7 +129,7 @@ export default function Header() {
             <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
               <Link
                 to="/auth/login"
-                className="text-lg font-bold text-center text-text-dark"
+                className="text-lg font-bold text-center text-[#171330]"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {loginButton}
@@ -138,7 +138,7 @@ export default function Header() {
                 href="/auth/signup"
                 showRightArrow={false}
                 onClick={() => setMobileMenuOpen(false)}
-                className="bg-primary-orange text-white justify-center w-full"
+                className="bg-[#0068ff] text-white justify-center w-full"
               >
                 {registerButton}
               </LandingButton>

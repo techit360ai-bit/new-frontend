@@ -20,13 +20,13 @@ export default function Footer() {
             {description}
           </p>
           <div className="flex gap-4 pt-2">
-            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary-orange transition-colors">
+            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#0068ff] transition-colors">
               <Twitter size={20} />
             </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary-orange transition-colors">
+            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#0068ff] transition-colors">
               <Linkedin size={20} />
             </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary-orange transition-colors">
+            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#0068ff] transition-colors">
               <Github size={20} />
             </a>
           </div>

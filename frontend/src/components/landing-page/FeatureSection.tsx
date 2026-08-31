@@ -75,7 +75,7 @@ export default function FeatureSection({
       <div className="w-full md:w-1/2 space-y-6 lg:max-w-xl">
         <motion.h3 
           variants={itemVariants}
-          className="text-3xl md:text-4xl lg:text-5xl font-black text-text-dark tracking-tight leading-[1.1]"
+          className="text-3xl md:text-4xl lg:text-5xl font-black text-[#171330] tracking-tight leading-[1.1]"
         >
           {title}
         </motion.h3>
@@ -90,7 +90,7 @@ export default function FeatureSection({
         <motion.div variants={itemVariants} className="pt-4">
            <LandingButton 
              href="/auth/signup" 
-             className="bg-primary-orange text-white hover:bg-bg-black-btn-bg"
+             className="bg-[#0068ff] text-white hover:bg-[#171330]"
            >
              Get Started
            </LandingButton>

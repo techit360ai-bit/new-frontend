@@ -17,18 +17,18 @@ export default function FeatureShowcase() {
       icon: Shield,
       title: "Enterprise Grade Security",
       description: "Your intellectual property is protected at every step of the journey.",
-      color: "bg-blue-100 text-primary-orange"
+      color: "bg-blue-100 text-[#0068ff]"
     },
     {
       icon: Rocket,
       title: "Scale Without Limits",
       description: "Infrastructure that grows with you from day one to IPO.",
-      color: "bg-green-100 text-primary-green"
+      color: "bg-green-100 text-[#20c907]"
     }
   ];
 
   return (
-    <div className="py-24 bg-bg-black-btn-bg text-white px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden">
+    <div className="py-24 bg-[#171330] text-white px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
         <div className="w-full lg:w-1/2 space-y-8">
           <motion.div
@@ -36,7 +36,7 @@ export default function FeatureShowcase() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-sm font-black uppercase tracking-widest text-primary-orange mb-3">
+            <h2 className="text-sm font-black uppercase tracking-widest text-[#0068ff] mb-3">
               Power Features
             </h2>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight mb-6">
@@ -76,7 +76,7 @@ export default function FeatureShowcase() {
           className="w-full lg:w-1/2 relative"
         >
           <div className="aspect-square rounded-[32px] bg-gradient-to-tr from-primary-orange to-purple-600 p-1">
-            <div className="w-full h-full rounded-[31px] bg-bg-black-btn-bg overflow-hidden relative border border-white/10">
+            <div className="w-full h-full rounded-[31px] bg-[#171330] overflow-hidden relative border border-white/10">
               <img 
                 src="/mockup/laptop.png" 
                 alt="Dashboard showcase" 

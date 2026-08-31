@@ -44,7 +44,7 @@ export default function Pricing() {
   };
 
   return (
-    <div className="py-24 bg-bg-grey-subtle px-6 rounded-[36px] -mt-6 md:mt-6 z-20 relative font-bricolage overflow-hidden">
+    <div className="py-24 bg-[#d6deec] px-6 rounded-[36px] -mt-6 md:mt-6 z-20 relative font-bricolage overflow-hidden">
       <motion.div
         variants={header}
         initial="hidden"
@@ -52,10 +52,10 @@ export default function Pricing() {
         viewport={{ once: true, margin: "-100px" }}
         className="max-w-4xl mx-auto text-center mb-16"
       >
-        <h2 className="text-sm font-black uppercase tracking-widest text-primary-orange mb-3">
+        <h2 className="text-sm font-black uppercase tracking-widest text-[#0068ff] mb-3">
           {badge}
         </h2>
-        <h1 className="text-4xl md:text-6xl font-black text-text-dark tracking-tight leading-none mb-6">
+        <h1 className="text-4xl md:text-6xl font-black text-[#171330] tracking-tight leading-none mb-6">
           {title}
         </h1>
         <p className="text-gray-600 text-lg md:text-xl font-medium max-w-2xl mx-auto">
@@ -63,7 +63,7 @@ export default function Pricing() {
         </p>
 
         <div className="flex items-center justify-center mt-10 gap-4">
-          <span className={`font-semibold ${!isYearly ? "text-text-dark" : "text-gray-400"}`}>
+          <span className={`font-semibold ${!isYearly ? "text-[#171330]" : "text-gray-400"}`}>
             {monthlyLabel}
           </span>
           <button
@@ -72,12 +72,12 @@ export default function Pricing() {
             aria-label="Toggle pricing"
           >
             <motion.div
-              className="w-6 h-6 bg-primary-orange rounded-full shadow-md"
+              className="w-6 h-6 bg-[#0068ff] rounded-full shadow-md"
               animate={{ x: isYearly ? 32 : 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           </button>
-          <span className={`font-semibold ${isYearly ? "text-text-dark" : "text-gray-400"}`}>
+          <span className={`font-semibold ${isYearly ? "text-[#171330]" : "text-gray-400"}`}>
             {yearlyLabel}
           </span>
         </div>
@@ -96,12 +96,12 @@ export default function Pricing() {
             variants={cardVariants}
             className={`relative flex flex-col p-8 rounded-[32px] overflow-hidden ${
               plan.popular 
-                ? "bg-bg-black-btn-bg text-white shadow-2xl scale-100 md:scale-105 z-10" 
-                : "bg-white text-text-dark border border-gray-100 shadow-xl"
+                ? "bg-[#171330] text-white shadow-2xl scale-100 md:scale-105 z-10" 
+                : "bg-white text-[#171330] border border-gray-100 shadow-xl"
             }`}
           >
             {plan.popular && (
-              <div className="absolute top-0 right-0 bg-primary-orange text-white text-xs font-bold px-4 py-1.5 rounded-bl-[16px] uppercase tracking-wider">
+              <div className="absolute top-0 right-0 bg-[#0068ff] text-white text-xs font-bold px-4 py-1.5 rounded-bl-[16px] uppercase tracking-wider">
                 {popularLabel}
               </div>
             )}
@@ -122,8 +122,8 @@ export default function Pricing() {
 
             <button className={`w-full py-4 rounded-2xl font-bold text-lg mb-8 transition-transform hover:scale-[1.02] active:scale-95 ${
               plan.popular 
-                ? "bg-white text-bg-black-btn-bg" 
-                : "bg-bg-grey-subtle text-text-dark"
+                ? "bg-white text-[#171330]" 
+                : "bg-[#d6deec] text-[#171330]"
             }`}>
               {plan.cta}
             </button>
@@ -131,8 +131,8 @@ export default function Pricing() {
             <ul className="space-y-4 mt-auto">
               {plan.features.map((feature, j) => (
                 <li key={j} className="flex items-center gap-3">
-                  <div className={`p-1 rounded-full ${plan.popular ? "bg-white/10" : "bg-primary-orange/10"}`}>
-                    <Check size={16} className={plan.popular ? "text-white" : "text-primary-orange"} />
+                  <div className={`p-1 rounded-full ${plan.popular ? "bg-white/10" : "bg-[#0068ff]/10"}`}>
+                    <Check size={16} className={plan.popular ? "text-white" : "text-[#0068ff]"} />
                   </div>
                   <span className={`font-medium ${plan.popular ? "text-gray-200" : "text-gray-700"}`}>
                     {feature}

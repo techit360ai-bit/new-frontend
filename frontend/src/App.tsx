@@ -38,7 +38,6 @@ const WorkspaceInvitationPage = lazy(() => import("@/dashboard/workspaces/pages/
 const ContractSigningPage = lazy(() => import("@/dashboard/founders/section/components/founder/ContractSigningPage"));
 const Wallet = lazy(() => import("@/TechitWallet/Wallet"));
 const NotFound = lazy(() => import("@/dashboard/NotFound"));
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { CookieConsent } from "@/components/CookieConsent";
 const ExplorerHome = lazy(() => import("@/dashboard/explorer/ExplorerHome"));
 import { ContextSwitcher } from "@/components/context/ContextSwitcher";
@@ -397,7 +396,6 @@ const App = () => {
       </Routes>
       </Suspense>
       <TechitMomentPrompt />
-      <ThemeToggle />
       <div className="fixed bottom-20 left-5 z-30 lg:bottom-5"><ContextSwitcher /></div>
       <CookieConsent />
       </MessagingProvider>

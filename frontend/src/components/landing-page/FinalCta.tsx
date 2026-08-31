@@ -7,7 +7,7 @@ export default function FinalCTA() {
 
   return (
     <div className="py-24 px-6 relative font-bricolage overflow-hidden bg-white">
-      <div className="max-w-6xl mx-auto rounded-[36px] bg-primary-orange text-white p-10 md:p-20 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl">
+      <div className="max-w-6xl mx-auto rounded-[36px] bg-[#0068ff] text-white p-10 md:p-20 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl">
         <div className="w-full md:w-1/2 z-10 relative">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -23,7 +23,7 @@ export default function FinalCTA() {
             <p className="text-xl text-white/80 font-medium mb-10">
               {description}
             </p>
-            <LandingButton href="/auth/signup" className="bg-bg-black-btn-bg text-white hover:scale-105 py-4 px-8 text-lg shadow-xl">
+            <LandingButton href="/auth/signup" className="bg-[#171330] text-white hover:scale-105 py-4 px-8 text-lg shadow-xl">
               {buttonText}
             </LandingButton>
           </motion.div>
@@ -45,7 +45,7 @@ export default function FinalCTA() {
         
         {/* Background decorative elements */}
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-bg-black-btn-bg/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#171330]/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
       </div>
     </div>
   );

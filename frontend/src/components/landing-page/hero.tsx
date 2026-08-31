@@ -71,7 +71,7 @@ export default function Hero() {
       variants={container}
       initial="hidden"
       animate="visible"
-      className="relative flex overflow-hidden flex-col items-center p-5 md:h-screen bg-primary-orange text-bg-white xl:rounded-[36px]"
+      className="relative flex overflow-hidden flex-col items-center p-5 md:h-screen bg-[#0068ff] text-white xl:rounded-[36px]"
     >
       <div className="flex flex-col gap-y-4 items-center my-16 z-10">
         <h1 className="mt-7 text-4xl max-w-3xl font-black text-center md:text-5xl lg:text-6xl tracking-tight flex flex-wrap justify-center gap-x-3 gap-y-1">
@@ -101,7 +101,7 @@ export default function Hero() {
         >
           <LandingButton
             href={text.hero.buttonHref}
-            className="bg-bg-black-btn-bg text-white backdrop-blur-md transition-shadow hover:shadow-xl"
+            className="bg-[#171330] text-white backdrop-blur-md transition-shadow hover:shadow-xl"
           >
             {text.hero.buttonText}
           </LandingButton>

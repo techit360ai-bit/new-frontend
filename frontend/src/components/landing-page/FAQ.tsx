@@ -8,12 +8,12 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div className="py-24 bg-bg-grey-subtle px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden">
+    <div className="py-24 bg-[#d6deec] px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden">
       <div className="max-w-4xl mx-auto text-center mb-16">
-        <h2 className="text-sm font-black uppercase tracking-widest text-primary-orange mb-3">
+        <h2 className="text-sm font-black uppercase tracking-widest text-[#0068ff] mb-3">
           {badge}
         </h2>
-        <h1 className="text-4xl md:text-5xl font-black text-text-dark tracking-tight leading-tight">
+        <h1 className="text-4xl md:text-5xl font-black text-[#171330] tracking-tight leading-tight">
           {title}
         </h1>
       </div>
@@ -32,7 +32,7 @@ export default function FAQ() {
               onClick={() => setOpenIndex(openIndex === i ? null : i)}
               className="w-full px-6 py-6 text-left flex justify-between items-center focus:outline-none"
             >
-              <span className="font-bold text-lg text-text-dark">{faq.q}</span>
+              <span className="font-bold text-lg text-[#171330]">{faq.q}</span>
               <motion.div
                 animate={{ rotate: openIndex === i ? 180 : 0 }}
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
