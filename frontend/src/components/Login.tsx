@@ -94,7 +94,7 @@ export default function Login() {
       </div>
 
       {/* Right form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden bg-white rounded-l-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.02)] z-20">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden bg-white z-20">
         <div className="absolute inset-0 z-0">
           <AnimatePresence initial={false}>
             <motion.div
