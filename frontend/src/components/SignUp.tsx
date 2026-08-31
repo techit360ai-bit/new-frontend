@@ -533,7 +533,7 @@ export default function Signup() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <div className="absolute inset-0 backdrop-blur-sm z-10" />
+        <div className="absolute inset-0 z-10" />
 
         <div className="relative z-20 w-full h-full flex justify-center px-6 py-12 overflow-y-auto">
           <div className="w-full max-w-md my-auto">
