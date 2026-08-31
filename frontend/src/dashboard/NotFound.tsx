@@ -20,7 +20,7 @@ const NotFound = () => {
   const handleGoBack = () => navigate(-1);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative font-bricolage overflow-hidden bg-[#d6deec] px-[15px] py-12">
+    <div className="min-h-screen w-full flex items-center justify-center relative font-bricolage overflow-hidden bg-[#d6deec] py-12">
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/40 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#0068ff]/10 rounded-full blur-[100px] pointer-events-none" />
@@ -30,7 +30,7 @@ const NotFound = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 max-w-4xl w-full bg-[#0066ff] rounded-[36px] shadow-2xl flex flex-col items-center text-center py-16 px-6 md:px-12 overflow-hidden"
+        className="relative z-10 w-[calc(100%-30px)] max-w-4xl mx-auto bg-[#0066ff] rounded-[36px] shadow-2xl flex flex-col items-center text-center py-16 px-6 md:px-12 overflow-hidden"
       >
         {/* Inner Card Background Blobs */}
         <div className="absolute top-[-20%] left-[-10%] w-[300px] h-[300px] bg-white/10 rounded-full blur-[80px] pointer-events-none" />
