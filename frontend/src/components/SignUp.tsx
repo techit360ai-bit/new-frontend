@@ -197,6 +197,7 @@ export default function Signup() {
   const { signUp } = useAuth();
 
   const [step, setStep] = useState(1);
+  const totalSteps = 4;
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
