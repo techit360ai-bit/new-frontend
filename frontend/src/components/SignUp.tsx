@@ -4,10 +4,9 @@ import {
   useMemo,
   useRef,
   useState,
-  type ClipboardEvent,
-  type KeyboardEvent,
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import {
   Eye,
   EyeOff,
@@ -22,6 +21,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
@@ -118,70 +122,30 @@ function OtpInput({
   onChange: (value: string) => void;
   disabled?: boolean;
 }) {
-  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = value.padEnd(6, "").split("").slice(0, 6);
-
-  const handleChange = (index: number, rawValue: string) => {
-    const digit = rawValue.replace(/\D/g, "").slice(-1);
-    const next = digits
-      .map((current, currentIndex) =>
-        currentIndex === index ? digit : current,
-      )
-      .join("")
-      .slice(0, 6);
-
-    onChange(next);
-    if (digit && index < 5) inputsRef.current[index + 1]?.focus();
-  };
-
-  const handleKeyDown = (index: number, event: KeyboardEvent) => {
-    if (event.key === "Backspace" && !digits[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
-      onChange(
-        digits
-          .map((current, currentIndex) =>
-            currentIndex === index - 1 ? "" : current,
-          )
-          .join(""),
-      );
-    }
-  };
-
-  const handlePaste = (event: ClipboardEvent) => {
-    event.preventDefault();
-    const pasted = event.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-    onChange(pasted);
-    inputsRef.current[Math.min(pasted.length, 5)]?.focus();
-  };
-
   return (
-    <div className="flex gap-2 justify-between" onPaste={handlePaste}>
-      {Array.from({ length: 6 }, (_, index) => (
-        <input
-          key={index}
-          ref={(element) => {
-            inputsRef.current[index] = element;
-          }}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={digits[index] || ""}
-          onChange={(event) => handleChange(index, event.target.value)}
-          onKeyDown={(event) => handleKeyDown(index, event)}
-          disabled={disabled}
-          className={cn(
-            "h-14 w-12 rounded-xl border-2 bg-[color:var(--input)] text-center text-xl font-bold text-[color:var(--foreground)] transition-all",
-            "focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)] disabled:opacity-50 disabled:cursor-not-allowed",
-            digits[index]
-              ? "border-[color:var(--primary)] bg-[color:var(--primary)]/5"
-              : "border-[color:var(--border)]",
-          )}
-        />
-      ))}
-    </div>
+    <InputOTP
+      aria-label="6-digit verification code"
+      autoComplete="one-time-code"
+      containerClassName="w-full"
+      disabled={disabled}
+      inputMode="numeric"
+      maxLength={6}
+      name="verification-code"
+      onChange={(nextValue) => onChange(nextValue.replace(/\D/g, "").slice(0, 6))}
+      pasteTransformer={(pasted) => pasted.replace(/\D/g, "").slice(0, 6)}
+      pattern={REGEXP_ONLY_DIGITS}
+      value={value}
+    >
+      <InputOTPGroup className="grid w-full grid-cols-6 gap-2">
+        {Array.from({ length: 6 }, (_, index) => (
+          <InputOTPSlot
+            key={index}
+            index={index}
+            className="h-14 w-full rounded-xl border-2 border-[color:var(--border)] bg-[color:var(--input)] text-xl font-bold text-[color:var(--foreground)] first:rounded-xl first:border-l last:rounded-xl data-[active=true]:border-[color:var(--primary)] data-[active=true]:ring-[color:var(--ring)]"
+          />
+        ))}
+      </InputOTPGroup>
+    </InputOTP>
   );
 }
 
