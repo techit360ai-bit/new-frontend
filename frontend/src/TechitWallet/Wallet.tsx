@@ -9,6 +9,7 @@ import {
   fetchWalletSummary, fetchWalletTransactions,
   type BillingPlan, type CreditPackage, type WalletSummary as WalletSummaryData, type WalletTransaction,
 } from '@/lib/api/wallet';
+import { ProgressMeter } from '@/components/authorization/ProgressMeter';
 import {
   CreditPackCard, EmptyWalletState, UpgradeCard, WalletAlert, WalletCard, WalletSkeleton,
   WalletSummary, WalletTransactionDrawer, WalletTransactionTable,
@@ -59,6 +60,7 @@ export default function Wallet() {
       {!error && loading && <WalletSkeleton />}
       {!error && !loading && view === 'home' && <>
         {(summary.expirationAlerts || []).map(alert => <WalletAlert key={alert.walletId}><p>{alert.message}</p><p className="text-xs">Expires {new Date(alert.expiresAt).toLocaleDateString()}</p></WalletAlert>)}
+        <ProgressMeter />
         {summary.lowBalance && <WalletAlert><p className="font-medium">Low credit balance</p><p>You are running low on credits. Buy more credits or upgrade your plan.</p></WalletAlert>}
         {buckets.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{buckets.map(wallet => <WalletCard key={wallet.id} wallet={wallet} />)}</div> : <WalletAlert tone="info"><p className="font-medium">Detailed wallet balances are not available yet.</p><p>The current API exposes only the aggregate balance. Welcome, Monthly, Subscription, and PAYG cards will appear when the billing service returns them.</p></WalletAlert>}
         {buckets.length > 0 && <WalletSummary wallets={buckets} deductionOrder={summary.deductionOrder || []} />}
