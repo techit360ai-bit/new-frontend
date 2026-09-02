@@ -25,8 +25,13 @@ function headers(extra?: HeadersInit): HeadersInit {
 }
 
 async function parse<T>(res: Response): Promise<T> {
-  const text = await res.text();
-  const body = text ? JSON.parse(text) as { error?: string; message?: string } : null;
+  let body: { error?: string; message?: string } | null = null;
+  if (typeof (res as Response & { text?: unknown }).text === "function") {
+    const text = await res.text();
+    body = text ? JSON.parse(text) as { error?: string; message?: string } : null;
+  } else if (typeof (res as Response & { json?: unknown }).json === "function") {
+    body = await res.json() as { error?: string; message?: string };
+  }
   if (!res.ok) throw new Error(body?.message || body?.error || `messaging ${res.status}`);
   return body as T;
 }
