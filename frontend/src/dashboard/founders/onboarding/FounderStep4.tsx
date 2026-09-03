@@ -31,7 +31,7 @@ export function FounderStep4() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-8">
         <div className="flex justify-end mb-4">
           <button onClick={handleSaveExit} className="text-sm text-slate-500 hover:text-slate-900">Save &amp; exit</button>
         </div>

@@ -72,7 +72,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[#f8faff] flex font-bricolage">
-      {/* Left panel */}
+      {/* Left panel – unchanged */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-[#171330] overflow-hidden flex-col justify-between p-12 lg:p-16">
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#0068ff]/30 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#0068ff]/20 blur-[100px] rounded-full" />
@@ -96,8 +96,9 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden bg-white z-20">
+      {/* Right panel – with slideshow background + glass form card */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
+        {/* Slideshow background */}
         <div className="absolute inset-0 z-0">
           <AnimatePresence initial={false}>
             <motion.div
@@ -118,10 +119,15 @@ export default function Login() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <div className="absolute inset-0 z-10" />
 
-        <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-20">
-          <div className="w-full max-w-md">
+        {/* Glass card – with stronger shadow */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-[36px] p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)]"
+        >
+          {/* Logo – mobile only */}
           <div className="lg:hidden flex items-center gap-2.5 mb-10">
             <Link to="/" className="inline-flex group">
               <div className="bg-white rounded-2xl px-4 py-2.5 shadow-lg group-hover:shadow-xl transition-all">
@@ -131,12 +137,14 @@ export default function Login() {
           </div>
 
           <div className="mb-10">
-            <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_2px_12px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.9)]">{login.title}</h1>
-            <p className="text-white text-base font-medium [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
+            <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_4px_20px_rgba(0,0,0,0.8)]">
+              {login.title}
+            </h1>
+            <p className="text-white/90 text-base font-medium [text-shadow:0_2px_10px_rgba(0,0,0,0.7)]">
               {login.noAccount}{" "}
               <Link
                 to="/signup"
-                className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors"
+                className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors [text-shadow:0_2px_10px_rgba(0,0,0,0.7)]"
               >
                 {login.signupLink}
               </Link>
@@ -144,15 +152,15 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 text-sm font-semibold text-red-600 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+            <div className="mb-6 p-4 rounded-xl bg-red-500/20 border border-red-400/40 text-sm text-white backdrop-blur-sm flex items-center gap-3 [text-shadow:0_1px_6px_rgba(0,0,0,0.6)]">
+              <AlertCircle className="h-5 w-5 text-red-300 flex-shrink-0" />
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
+              <label className="block text-xs font-black uppercase tracking-widest text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
                 {login.emailLabel}
               </label>
               <div className="relative group">
@@ -164,19 +172,19 @@ export default function Login() {
                   placeholder={login.emailPlaceholder}
                   required
                   autoComplete="email"
-                  className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white pl-12 pr-4 text-base font-medium text-[#171330] placeholder:text-gray-400 focus:outline-none focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all"
+                  className="w-full h-14 rounded-2xl border border-white/20 bg-white/10 pl-12 pr-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0068ff] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">
+                <label className="block text-xs font-black uppercase tracking-widest text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
                   {login.passLabel}
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-bold text-white hover:text-[#0068ff] transition-colors [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]"
+                  className="text-xs font-medium text-white/80 hover:text-white transition-colors [text-shadow:0_2px_8px_rgba(0,0,0,0.7)]"
                 >
                   {login.forgot}
                 </Link>
@@ -190,7 +198,7 @@ export default function Login() {
                   placeholder={login.passPlaceholder}
                   required
                   autoComplete="current-password"
-                  className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white pl-12 pr-12 text-base font-medium text-[#171330] placeholder:text-gray-400 focus:outline-none focus:border-[#0068ff] focus:ring-4 focus:ring-[#0068ff]/10 transition-all"
+                  className="w-full h-14 rounded-2xl border border-white/20 bg-white/10 pl-12 pr-12 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0068ff] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]"
                 />
                 <button
                   type="button"
@@ -205,13 +213,13 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.3)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none mt-4"
+              className="w-full h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.4)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none mt-4 group"
             >
-              {loading ? "..." : login.btn} <ArrowRight className="h-5 w-5" />
+              {loading ? "..." : login.btn}
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

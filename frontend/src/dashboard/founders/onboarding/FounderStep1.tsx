@@ -38,7 +38,7 @@ export function FounderStep1() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-8">
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Tell us who you are</h1>
           <p className="text-base text-slate-600">Just the basics to get you in. You can complete the rest of your profile any time from your dashboard.</p>
