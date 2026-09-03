@@ -192,12 +192,12 @@ const App = () => {
           }
         />
 
-        <Route path="/founder/onboarding/step-1" element={<FounderStep1 />} />
-        <Route path="/founder/onboarding/step-2" element={<FounderStep2 />} />
-        <Route path="/founder/onboarding/step-3" element={<FounderStep3 />} />
-        <Route path="/founder/onboarding/step-4" element={<FounderStep4 />} />
-        <Route path="/founder/onboarding/step-5" element={<FounderStep5 />} />
-        <Route path="/founder/onboarding/step-6" element={<FounderStep6 />} />
+        <Route path="/founder/onboarding/step-1" element={<RequireRole allowed={["founder"]}><FounderStep1 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-2" element={<RequireRole allowed={["founder"]}><FounderStep2 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-3" element={<RequireRole allowed={["founder"]}><FounderStep3 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-4" element={<RequireRole allowed={["founder"]}><FounderStep4 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-5" element={<RequireRole allowed={["founder"]}><FounderStep5 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-6" element={<RequireRole allowed={["founder"]}><FounderStep6 /></RequireRole>} />
         <Route path="/founder/setup"   element={<Navigate to="/founder/onboarding/step-1" replace />} />
         <Route path="/founder/summary" element={<Navigate to="/founder/dashboard" replace />} />
 
