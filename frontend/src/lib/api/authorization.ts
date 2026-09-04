@@ -5,7 +5,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API}/authorization${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...(token() ? { Authorization: `Bearer ${token()}` } : {}), ...(options.headers || {}) } })
   const data = await response.json(); if (!response.ok) throw Object.assign(new Error(data.error || 'Authorization request failed'), { data }); return data
 }
-export type CapabilityDecision = { allowed: boolean; code: string; capability: string; assurance?: string; availableCredits?: number; requiredCredits?: number; policy?: { assurance?: string; mfaRequired?: boolean } }
+export type CapabilityDecision = { allowed: boolean; code: string; capability: string; assurance?: string; availableCredits?: number; funding?: string; metering?: string; policy?: { assurance?: string; mfaRequired?: boolean } }
 export const checkCapability = (capability: string, role?: string) => request<CapabilityDecision>('/capabilities/check', { method: 'POST', body: JSON.stringify({ capability, context: { role } }), headers: typeof sessionStorage !== 'undefined' && sessionStorage.getItem('techit_mfa_assertion') ? { 'x-mfa-assertion': sessionStorage.getItem('techit_mfa_assertion')! } : {} })
 export const getVerification = (role: string) => request<{ profile: Record<string, unknown> | null; evidence: Array<Record<string, unknown>>; requests: Array<Record<string, unknown>> }>(`/verification/status?role=${encodeURIComponent(role)}`)
 export const requestVerification = (role: string, requestedCapability?: string) => request<{ request: { id: string } }>('/verification/request', { method: 'POST', body: JSON.stringify({ role, requestedCapability }) })

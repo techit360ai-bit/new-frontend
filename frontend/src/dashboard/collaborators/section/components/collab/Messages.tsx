@@ -122,7 +122,8 @@ export function Messages() {
         if (!sent) {
           toast.error("Message was not sent.");
         } else {
-          appendMessage(activeId, { ...msg, id: sent.msgId || clientMsgId });
+          appendMessage(activeId, { ...msg, id: sent.msgId || clientMsgId, pending: sent.pending });
+          if (sent.pending) toast('Saved locally. Waiting for connection.');
           setDraft("");
         }
       }
@@ -175,13 +176,13 @@ export function Messages() {
         projectName: "",
         subject: cSubject.trim(),
         unread: false,
-        thread: [{ id: sent.msgId || clientMsgId, fromMe: true, authorName: "You", body: cBody.trim(), timestamp: new Date().toISOString() }],
+        thread: [{ id: sent.msgId || clientMsgId, fromMe: true, authorName: "You", body: cBody.trim(), timestamp: new Date().toISOString(), pending: sent.pending }],
       };
       setConvos((cur) => [newConvo, ...cur]);
       setActiveId(newConvo.id);
       setComposeOpen(false);
       resetCompose();
-      toast(convo.deliveryMode === "request" ? "Message request sent" : "Message sent");
+      toast(sent.pending ? "Saved locally. Waiting for connection." : convo.deliveryMode === "request" ? "Message request sent" : "Message sent");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Message was not sent.");
     } finally {
@@ -248,6 +249,7 @@ export function Messages() {
                     <div key={m.id} className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-md px-3 py-2 rounded-lg text-sm ${m.fromMe ? "bg-status-warning text-text-primary" : "bg-surface-secondary text-text-primary"}`}>
                         <MentionText body={m.body} mentions={m.mentions} />
+                        {m.pending && <p className="text-[10px] mt-1 text-amber-700">Saved locally · waiting for connection</p>}
                         <p className={`text-[10px] mt-1 ${m.fromMe ? "text-text-primary/70" : "text-text-muted"}`}>{new Date(m.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
                       </div>
                     </div>

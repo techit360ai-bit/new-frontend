@@ -15,6 +15,7 @@ import {
   listFeedNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  notificationSnapshotInfo,
   type FeedNotification,
   type FeedNotificationType,
 } from '@/lib/api/notifications';
@@ -39,11 +40,12 @@ export function NotificationsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
     listFeedNotifications()
-      .then((rows) => { if (alive) setNotifications(rows); })
+      .then(async (rows) => { if (alive) { setNotifications(rows); const snapshot = await notificationSnapshotInfo('feed'); setCachedAt(snapshot?.updatedAt ?? null); } })
       .catch((err) => {
         if (!alive) return;
         setNotifications([]);
@@ -91,7 +93,7 @@ export function NotificationsPage() {
             <Bell className="h-5 w-5 text-accent-primary" />
             Notifications
           </h1>
-          <p className="mt-1 text-xs text-text-muted">{unreadCount} unread live notifications</p>
+          <p className="mt-1 text-xs text-text-muted">{unreadCount} unread notifications{cachedAt ? ` · last synced ${new Date(cachedAt).toLocaleString()}` : ''}</p>
         </div>
         {unreadCount > 0 && (
           <button

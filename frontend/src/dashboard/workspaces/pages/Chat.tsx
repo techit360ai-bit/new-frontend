@@ -123,7 +123,9 @@ export function Chat() {
         authorName: 'You',
         body,
         timestamp,
+        pending: result.pending,
       }]));
+      if (result.pending) setError('Saved locally. Waiting for connection.');
       setDraft('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Message send failed.');

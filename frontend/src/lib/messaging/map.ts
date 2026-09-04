@@ -17,6 +17,7 @@ export function mapMessage(m: WireMessage, currentUserId: string, authorName = "
     body: m.body,
     timestamp: m.ts,
     mentions: m.mentions,
+    pending: m.pending,
   };
 }
 

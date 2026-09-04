@@ -8,9 +8,9 @@ import {
   X,
 } from "lucide-react";
 import {
-  createWalletPaymentIntent,
   type PaymentIntentResponse,
 } from "@/lib/api/wallet";
+import { createTvceCheckout } from "@/lib/api/tvce";
 
 interface Plan {
   id: string;
@@ -27,6 +27,7 @@ interface PaymentModalProps {
   onClose: () => void;
   plan: Plan;
   currency: "NGN" | "USD";
+  provider?: "stripe" | "paystack" | "flutterwave";
 }
 
 function numericCredits(value: string): number {
@@ -47,6 +48,7 @@ export default function PaymentModal({
   onClose,
   plan,
   currency,
+  provider = "stripe",
 }: PaymentModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,14 +73,17 @@ export default function PaymentModal({
     setLoading(true);
     setError(null);
     try {
-      const result = await createWalletPaymentIntent({
+      const result = await createTvceCheckout({
         amount: persistedAmount,
         currency: persistedCurrency,
         credits,
-        provider: "wallet",
-        idemKey: `plan-${plan.id}-${Date.now()}`,
+        provider,
+        planId: plan.id,
+        name: plan.name,
+        idemKey: `plan-${plan.id}-${provider}`,
       });
       setIntent(result.paymentIntent);
+      if (result.checkoutUrl) window.location.assign(result.checkoutUrl);
     } catch (createError) {
       setIntent(null);
       setError(

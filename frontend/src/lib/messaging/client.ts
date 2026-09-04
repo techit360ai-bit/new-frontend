@@ -4,6 +4,7 @@ import {
   messagingToken,
   messagingFallbackEnabled,
 } from "./config";
+import { fetchIdempotent } from '@/lib/resilience/retry';
 
 // See lib/api/client.ts for the rationale — raw fetch has no timeout, and a
 // hung Go messaging service would otherwise lock UI surfaces indefinitely.
@@ -19,25 +20,31 @@ function timeoutSignal(init?: RequestInit): AbortSignal {
 
 function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
+  try { if (typeof localStorage !== 'undefined' && localStorage.getItem('techit-data-saver') === '1') h['X-TechIT-Data-Saver'] = '1'; } catch { /* storage unavailable */ }
   const t = messagingToken();
   if (t) h.Authorization = `Bearer ${t}`;
   return { ...h, ...(extra as Record<string, string>) };
 }
 
 async function parse<T>(res: Response): Promise<T> {
-  const text = await res.text();
-  const body = text ? JSON.parse(text) as { error?: string; message?: string } : null;
+  let body: { error?: string; message?: string } | null = null;
+  if (typeof (res as Response & { text?: unknown }).text === "function") {
+    const text = await res.text();
+    body = text ? JSON.parse(text) as { error?: string; message?: string } : null;
+  } else if (typeof (res as Response & { json?: unknown }).json === "function") {
+    body = await res.json() as { error?: string; message?: string };
+  }
   if (!res.ok) throw new Error(body?.message || body?.error || `messaging ${res.status}`);
   return body as T;
 }
 
 export async function msgGet<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(messagingUrl(path), {
+  const res = await fetchIdempotent(() => fetch(messagingUrl(path), {
     method: "GET",
     ...init,
     headers: headers(init?.headers),
     signal: timeoutSignal(init),
-  });
+  }));
   return parse<T>(res);
 }
 

@@ -63,6 +63,7 @@ export function NotificationsPanel({
   error,
   onRead,
   onMarkAllRead,
+  cachedAt,
 }: {
   open: boolean;
   onClose: () => void;
@@ -71,6 +72,7 @@ export function NotificationsPanel({
   error: string | null;
   onRead: (id: string) => void;
   onMarkAllRead: () => void;
+  cachedAt?: string | null;
 }) {
   if (!open) return null;
   const unread = notifications.filter((notification) => !notification.read);
@@ -103,6 +105,7 @@ export function NotificationsPanel({
         </div>
 
         <div className="flex-1 overflow-y-auto">
+          {cachedAt && <p className="border-b border-border-default px-4 py-2 text-[11px] text-text-muted">Showing notifications from {new Date(cachedAt).toLocaleString()}.</p>}
           {loading && <p className="px-4 py-8 text-center text-sm text-text-muted">Loading live notifications...</p>}
           {!loading && error && <p className="px-4 py-8 text-center text-sm text-status-error">{error}</p>}
           {!loading && !error && unread.length > 0 && (
