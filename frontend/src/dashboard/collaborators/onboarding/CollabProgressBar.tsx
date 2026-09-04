@@ -1,15 +1,21 @@
+import { motion } from "motion/react";
+
 interface Props { currentStep: number; totalSteps: number; }
 
 export function CollabProgressBar({ currentStep, totalSteps }: Props) {
   const progress = (currentStep / totalSteps) * 100;
   return (
     <div className="w-full mb-8">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-slate-500">Step {currentStep} of {totalSteps}</span>
-        <span className="text-sm text-amber-600 font-semibold">{Math.round(progress)}% Complete</span>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Step {currentStep} of {totalSteps}</span>
+        <span className="text-[10px] font-black text-[#58a6ff]">{Math.round(progress)}% Complete</span>
       </div>
-      <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden">
-        <div className="h-full bg-amber-500 transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+      <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+        <motion.div
+          className="h-full rounded-full bg-gradient-to-r from-[#0066ff] to-[#20c937]"
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        />
       </div>
     </div>
   );
