@@ -10,6 +10,7 @@ import {
   type BillingPlan, type CreditPackage, type WalletSummary as WalletSummaryData, type WalletTransaction,
 } from '@/lib/api/wallet';
 import { ProgressMeter } from '@/components/authorization/ProgressMeter';
+import { fetchFreeUsage, type TvceFreeUsage } from '@/lib/api/tvce';
 import {
   CreditPackCard, EmptyWalletState, UpgradeCard, WalletAlert, WalletCard, WalletSkeleton,
   WalletSummary, WalletTransactionDrawer, WalletTransactionTable,
@@ -27,15 +28,16 @@ export default function Wallet() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [freeUsage, setFreeUsage] = useState<TvceFreeUsage[]>([]);
 
   const load = useCallback(async (initial = false) => {
     if (initial) setLoading(true);
     else setRefreshing(true);
     try {
-      const [wallet, history, packs, planRows] = await Promise.all([
-        fetchWalletSummary(), fetchWalletTransactions(), fetchCreditPackages(), fetchBillingPlans(),
+      const [wallet, history, packs, planRows, tvceUsage] = await Promise.all([
+        fetchWalletSummary(), fetchWalletTransactions(), fetchCreditPackages(), fetchBillingPlans(), fetchFreeUsage(),
       ]);
-      setSummary(wallet); setTransactions(history); setPackages(packs); setPlans(planRows); setError(null);
+      setSummary(wallet); setTransactions(history); setPackages(packs); setPlans(planRows); setFreeUsage(tvceUsage.usage); setError(null);
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load wallet.'); }
     finally { setLoading(false); setRefreshing(false); }
   }, []);
@@ -61,6 +63,7 @@ export default function Wallet() {
       {!error && !loading && view === 'home' && <>
         {(summary.expirationAlerts || []).map(alert => <WalletAlert key={alert.walletId}><p>{alert.message}</p><p className="text-xs">Expires {new Date(alert.expiresAt).toLocaleDateString()}</p></WalletAlert>)}
         <ProgressMeter />
+        {freeUsage.length > 0 && <Card><CardHeader><CardTitle>Included Founder access</CardTitle></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{freeUsage.map(item => <div key={item.capability} className="rounded border p-3"><p className="text-xs text-muted-foreground">{item.capability.replace(/_/g, ' ')}</p><p className="mt-1 font-semibold">{item.remaining} of {item.quota} remaining</p><p className="text-xs text-muted-foreground">Resets monthly</p></div>)}</CardContent></Card>}
         {summary.lowBalance && <WalletAlert><p className="font-medium">Low credit balance</p><p>You are running low on credits. Buy more credits or upgrade your plan.</p></WalletAlert>}
         {buckets.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{buckets.map(wallet => <WalletCard key={wallet.id} wallet={wallet} />)}</div> : <WalletAlert tone="info"><p className="font-medium">Detailed wallet balances are not available yet.</p><p>The current API exposes only the aggregate balance. Welcome, Monthly, Subscription, and PAYG cards will appear when the billing service returns them.</p></WalletAlert>}
         {buckets.length > 0 && <WalletSummary wallets={buckets} deductionOrder={summary.deductionOrder || []} />}

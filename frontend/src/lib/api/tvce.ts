@@ -31,9 +31,37 @@ export function forecastWallet() {
 
 export interface TvceProgress { meter: { ideaClarity: number; validation: number; executionReadiness: number; investorReadiness: number }; strongestOpportunity: string; generatedAt: string }
 export function fetchProgress() { return apiGet<TvceProgress>('/tvce/progress') }
+export interface TvceFreeUsage { capability: string; used: number; quota: number; remaining: number; period: string }
+export function fetchFreeUsage() { return apiGet<{ usage: TvceFreeUsage[] }>('/tvce/free-usage') }
 export function fetchFunnel(period = '30d') { return apiGet<{ stages: Array<{ stage: string; count: number }>; totalEvents: number; capabilities: string[] }>(`/tvce/analytics/funnel?period=${encodeURIComponent(period)}`) }
 export function fetchNextBestAction(role?: string) { return apiGet<{ action: string; reason: string; expectedValue: string; access: string; creditCost: number; subscriptionRecommendation: boolean }>(`/tvce/next-best-action${role ? `?role=${encodeURIComponent(role)}` : ''}`) }
 
 export function fulfillPayment(paymentId: string, input: { verified: boolean; providerReference?: string; workflowId?: string }) {
   return apiPost(`/tvce/payments/${encodeURIComponent(paymentId)}/fulfill`, input)
+}
+
+export interface TvceCheckoutRequest {
+  provider: 'stripe' | 'paystack' | 'flutterwave'
+  packageId?: string
+  planId?: string
+  amount: number
+  currency: string
+  credits?: number
+  name?: string
+  email?: string
+  successUrl?: string
+  cancelUrl?: string
+  workflowId?: string
+  idemKey?: string
+}
+
+export interface TvceCheckoutResponse {
+  ok: boolean
+  checkoutUrl?: string
+  provider?: string
+  paymentIntent: { id: string; amount: number; currency: string; credits: number; status: string; provider?: string | null; checkoutUrl?: string | null }
+}
+
+export function createTvceCheckout(input: TvceCheckoutRequest) {
+  return apiPost<TvceCheckoutResponse>('/tvce/checkout/session', input)
 }
