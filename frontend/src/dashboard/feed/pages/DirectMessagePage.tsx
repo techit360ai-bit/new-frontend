@@ -121,8 +121,9 @@ export function DirectMessagePage() {
       if (result) {
         // Replace optimistic message with confirmed one
         setMessages((prev) =>
-          prev.map((m) => (m.id === clientMsgId ? { ...m, id: result.msgId } : m)),
+          prev.map((m) => (m.id === clientMsgId ? { ...m, id: result.msgId, pending: result.pending } : m)),
         );
+        if (result.pending) setError('Saved locally. Waiting for connection.');
         if (requestStatus === 'pending') setRequestMessageSent(true);
       }
     } catch (err) {

@@ -197,7 +197,8 @@ export function Messages() {
           toast.error("Message was not sent.");
           return;
         }
-        appendMessage(activeId, { ...optimisticMessage, id: sent.msgId || clientMsgId });
+        appendMessage(activeId, { ...optimisticMessage, id: sent.msgId || clientMsgId, pending: sent.pending });
+        if (sent.pending) toast("Saved locally. Waiting for connection.");
         setDraft("");
       }
     } catch (err) {
@@ -272,6 +273,7 @@ export function Messages() {
             authorName: "You",
             body,
             timestamp: new Date().toISOString(),
+            pending: sent.pending,
           },
         ],
       };
@@ -283,7 +285,7 @@ export function Messages() {
       setComposeOpen(false);
       resetCompose();
       clearComposeRecipient();
-      toast(conversation.deliveryMode === "request" ? "Message request sent" : "Message sent");
+      toast(sent.pending ? "Saved locally. Waiting for connection." : conversation.deliveryMode === "request" ? "Message request sent" : "Message sent");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Message was not sent.");
     } finally {
@@ -388,6 +390,7 @@ export function Messages() {
                         }`}
                       >
                         <MentionText body={message.body} mentions={message.mentions} />
+                        {message.pending && <p className="text-[10px] mt-1 text-amber-200">Saved locally · waiting for connection</p>}
                         <p
                           className={`text-[10px] mt-1 ${
                             message.fromMe ? "text-violet-200" : "text-text-muted"

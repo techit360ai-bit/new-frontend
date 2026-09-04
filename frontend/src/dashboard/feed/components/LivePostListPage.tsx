@@ -19,7 +19,7 @@ export function LivePostListPage({
   emptyTitle: string;
   emptyDetail: string;
 }) {
-  const { posts, loading, error } = useFeedPosts('global');
+  const { posts, loading, error, stale, lastSyncedAt } = useFeedPosts('global');
   const filtered = posts.filter((post) => kinds.includes(post.kind));
 
   return (
@@ -43,6 +43,7 @@ export function LivePostListPage({
         </div>
 
         <div className="space-y-3 py-4 sm:px-4">
+          {stale && <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">Showing cached posts from {lastSyncedAt ? new Date(lastSyncedAt).toLocaleString() : 'your last sync'}.</div>}
           {loading && <FeedLoadingState />}
           {!loading && error && <FeedErrorState message={error} />}
           {!loading && !error && filtered.map((post) => <LivePostCard key={post.id} post={post} />)}

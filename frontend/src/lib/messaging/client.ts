@@ -19,6 +19,7 @@ function timeoutSignal(init?: RequestInit): AbortSignal {
 
 function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
+  try { if (typeof localStorage !== 'undefined' && localStorage.getItem('techit-data-saver') === '1') h['X-TechIT-Data-Saver'] = '1'; } catch { /* storage unavailable */ }
   const t = messagingToken();
   if (t) h.Authorization = `Bearer ${t}`;
   return { ...h, ...(extra as Record<string, string>) };

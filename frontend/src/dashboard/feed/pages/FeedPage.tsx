@@ -44,7 +44,7 @@ export function FeedPage() {
   const [caughtUp, setCaughtUp] = useState(false);
   const [feedSearchOpen, setFeedSearchOpen] = useState(false);
   const backendZone = activeZone === 'Following' ? 'tribe' : 'global';
-  const { posts, loading, error, reload } = useFeedPosts(backendZone, CATEGORY_IDS[activeZone]);
+  const { posts, loading, error, stale, lastSyncedAt, reload } = useFeedPosts(backendZone, CATEGORY_IDS[activeZone]);
 
   useEffect(() => {
     if (!profile) return;
@@ -136,6 +136,7 @@ export function FeedPage() {
           <>
             {returnSummary?.available && <div className="pt-4 sm:px-4"><ReturnSummaryBanner summary={returnSummary} onStart={() => setCatchUpMode(true)} /></div>}
             {caughtUp && <div className="pt-4 sm:px-4"><CaughtUpNotice /></div>}
+            {stale && <div className="mx-4 mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">Showing posts from your last sync{lastSyncedAt ? ` · ${new Date(lastSyncedAt).toLocaleString()}` : ''}.</div>}
 
             <div className="px-4 pt-4">
               <PostComposer

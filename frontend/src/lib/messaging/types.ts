@@ -29,6 +29,7 @@ export interface WireMessage {
   ts: string;
   category?: string;
   mentions?: Mention[];
+  pending?: boolean;
 }
 export interface WireConvSummary {
   id: string;
@@ -58,6 +59,7 @@ export interface WirePost {
   ts: string;
   mentions?: Mention[];
   author?: MessageIdentity | null;
+  pending?: boolean;
 }
 export interface WireComment {
   id: string;
@@ -67,6 +69,7 @@ export interface WireComment {
   ts: string;
   mentions?: Mention[];
   author?: MessageIdentity | null;
+  pending?: boolean;
 }
 
 // UI shapes the screens already use (kept identical to the existing mock types).
@@ -77,6 +80,7 @@ export interface UIMessage {
   body: string;
   timestamp: string;
   mentions?: Mention[];
+  pending?: boolean;
 }
 export interface UIConversation {
   id: string;

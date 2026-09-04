@@ -7,6 +7,7 @@ import {
   listFeedNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  notificationSnapshotInfo,
   type FeedNotification,
 } from '@/lib/api/notifications';
 import { NotificationsPanel } from './NotificationsPanel';
@@ -17,11 +18,12 @@ export function Layout({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<FeedNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
     listFeedNotifications()
-      .then((rows) => { if (alive) setNotifications(rows); })
+      .then(async (rows) => { if (alive) { setNotifications(rows); const snapshot = await notificationSnapshotInfo('feed'); setCachedAt(snapshot?.updatedAt ?? null); } })
       .catch((err) => {
         if (!alive) return;
         setNotifications([]);
@@ -63,6 +65,7 @@ export function Layout({ children }: { children: ReactNode }) {
         error={error}
         onRead={markRead}
         onMarkAllRead={markAllRead}
+        cachedAt={cachedAt}
       />
     </div>
   );

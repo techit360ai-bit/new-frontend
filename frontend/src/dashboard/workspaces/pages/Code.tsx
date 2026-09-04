@@ -58,6 +58,7 @@ export function Code() {
   const [reviewProposals, setReviewProposals] = useState<ReviewProposal[]>([]);
   const [reviewPath, setReviewPath] = useState('');
   const [reviewDecisions, setReviewDecisions] = useState<Record<string, Record<string, boolean>>>({});
+  const [queuedCount, setQueuedCount] = useState(0);
 
   const active = files.find(file => file.path === activePath) || files[0];
   const changed = files.filter(file => file.content !== file.savedContent);
@@ -83,6 +84,7 @@ export function Code() {
         getCodeSnapshot(workspaceId), getProjectAdapter(workspaceId), listQueuedChanges(workspaceId), listCodeDestinations(workspaceId),
       ]);
       setSnapshot(next); setAdapter(detected); setDestinations(availableDestinations);
+      setQueuedCount(queued.length);
       const loaded = (next.files.length ? next.files : [DEFAULT_FILE]).map(file => ({ ...file, savedContent: file.content }));
       for (const entry of queued) {
         const operation = entry.operation || 'upsert';
@@ -119,7 +121,7 @@ export function Code() {
   function updateActive(content = '') {
     if (!active) return;
     setFiles(current => current.map(file => file.path === active.path ? { ...file, content } : file));
-    void queueChange({ workspaceId, path: active.path, operation: 'upsert', content, baseVersion: active.version });
+    void queueChange({ workspaceId, path: active.path, operation: 'upsert', content, baseVersion: active.version }).then(async () => setQueuedCount((await listQueuedChanges(workspaceId)).length));
   }
 
   async function saveAll(): Promise<boolean> {
@@ -145,7 +147,7 @@ export function Code() {
         next[next.findIndex(row => row.path === file.path)] = { ...saved, savedContent: saved.content };
         await removeQueuedChange(`${workspaceId}:${file.path}`);
       }
-      setFiles(next); toast.success('Project files saved to TechIT.'); return true;
+      setFiles(next); setQueuedCount((await listQueuedChanges(workspaceId)).length); toast.success('Project files saved to TechIT.'); return true;
     } catch (error) {
       setBottomPanel('changes');
       toast.error(error instanceof Error ? error.message : 'Version conflict. Review before saving.'); return false;
@@ -417,7 +419,7 @@ export function Code() {
         <Code2 className="h-5 w-5 text-feature-code" />
         <select value={workspaceId} onChange={event => { setWorkspaceId(event.target.value); setParams({ workspace: event.target.value }); }} className="h-9 rounded border border-border-inverse-strong bg-background-inverse px-2 text-sm">{workspaces.map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select>
         <div className="flex rounded border border-border-inverse-strong bg-background-inverse p-0.5">{(['manual','assist','agent','autonomous'] as Mode[]).map(value => <button key={value} onClick={() => setMode(value)} className={`px-2 py-1 text-xs capitalize ${mode === value ? 'bg-feature-code-strong text-text-on-inverse' : 'text-text-disabled'}`}>{value}</button>)}</div>
-        <span className="text-xs text-text-disabled">{adapter?.adapter || 'detecting'} · {changed.length} changed · {navigator.onLine ? 'online' : 'offline'}</span>
+        <span className="text-xs text-text-disabled">{adapter?.adapter || 'detecting'} · {changed.length} changed · {queuedCount ? `${queuedCount} pending` : 'saved'} · {navigator.onLine ? 'online' : 'offline'}</span>
         <div className="ml-auto flex flex-wrap gap-2">
           <button onClick={createFile} className="icon-button" title="New file"><FilePlus2 className="h-4 w-4" /></button>
           <button onClick={() => void renameActive()} className="toolbar-button">Rename</button>
