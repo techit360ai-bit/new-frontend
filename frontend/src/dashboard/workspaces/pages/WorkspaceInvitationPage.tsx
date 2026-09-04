@@ -37,7 +37,8 @@ export function WorkspaceInvitationPage() {
       toast.success(`You joined ${accepted.workspaceName}.`);
       navigate(`/workspaces/copilot?ws=${encodeURIComponent(accepted.workspaceId)}&project=${encodeURIComponent(accepted.projectId || "")}`);
     } catch (acceptError) {
-      toast.error(acceptError instanceof Error ? acceptError.message : "Invitation could not be accepted.");
+      const message = acceptError instanceof Error ? acceptError.message : "Invitation could not be accepted.";
+      toast.error(message.includes("free_collaborator_workspace_limit") ? "Free Collaborator accounts can join one workspace. Upgrade or leave the current workspace to accept this invitation." : message);
     } finally {
       setBusy(null);
     }
