@@ -19,7 +19,7 @@ export function CapabilityGate({ capability, role, children }: { capability: str
     : <ValueUnlockModal decision={tvce} onClose={() => setDismissed(true)} />
   return <div className="mx-auto my-8 max-w-xl rounded-2xl border border-slate-700 bg-slate-950 p-6 text-center shadow-xl">
     <ShieldCheck className="mx-auto h-10 w-10 text-emerald-400" /><h2 className="mt-4 text-xl font-semibold text-white">Unlock this capability</h2>
-    <p className="mt-2 text-sm text-slate-300">{verification ? `This capability requires ${decision?.policy?.assurance || 'additional'} verification.` : mfa ? 'Confirm your identity with multi-factor authentication.' : funding ? 'Your current plan or credit balance does not include this capability.' : 'This capability is not available in the current role context.'}</p>
+    <p className="mt-2 text-sm text-slate-300">{verification ? `This capability requires ${decision?.policy?.assurance || 'additional'} verification.` : mfa ? 'Confirm your identity with multi-factor authentication.' : funding ? 'This capability requires a subscription or runtime usage credits.' : 'This capability is not available in the current role context.'}</p>
     <div className="mt-5 flex flex-wrap justify-center gap-3">
       {verification && <Link className="rounded-lg bg-emerald-500 px-4 py-2 font-medium text-black" to={`/verification/${role || 'investor'}?capability=${encodeURIComponent(capability)}`}>Verify profile</Link>}
       {mfa && <Link className="rounded-lg bg-emerald-500 px-4 py-2 font-medium text-black" to="/security/mfa">Set up MFA</Link>}

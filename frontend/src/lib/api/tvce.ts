@@ -7,11 +7,9 @@ export interface TvceDecision {
   capability: string
   role?: string
   availableCredits?: number
-  requiredCredits?: number
-  minimumRoleCredits?: number
   recommendedAction?: string
   recommendation?: string
-  estimatedAdditionalCredits?: number
+  usageEstimateRequired?: boolean
   value?: { title?: string; outcomes?: string[]; workflowStage?: string }
   accountEntitlement?: { active: boolean; source?: string | null; status?: string }
   subscription?: { active: boolean; plan?: string | null; status?: string }
@@ -34,7 +32,7 @@ export function fetchProgress() { return apiGet<TvceProgress>('/tvce/progress') 
 export interface TvceFreeUsage { capability: string; used: number; quota: number; remaining: number; period: string }
 export function fetchFreeUsage() { return apiGet<{ usage: TvceFreeUsage[] }>('/tvce/free-usage') }
 export function fetchFunnel(period = '30d') { return apiGet<{ stages: Array<{ stage: string; count: number }>; totalEvents: number; capabilities: string[] }>(`/tvce/analytics/funnel?period=${encodeURIComponent(period)}`) }
-export function fetchNextBestAction(role?: string) { return apiGet<{ action: string; reason: string; expectedValue: string; access: string; creditCost: number; subscriptionRecommendation: boolean }>(`/tvce/next-best-action${role ? `?role=${encodeURIComponent(role)}` : ''}`) }
+export function fetchNextBestAction(role?: string) { return apiGet<{ action: string; reason: string; expectedValue: string; access: string; metering: string; usageEstimateRequired: boolean; subscriptionRecommendation: boolean }>(`/tvce/next-best-action${role ? `?role=${encodeURIComponent(role)}` : ''}`) }
 
 export function fulfillPayment(paymentId: string, input: { verified: boolean; providerReference?: string; workflowId?: string }) {
   return apiPost(`/tvce/payments/${encodeURIComponent(paymentId)}/fulfill`, input)
