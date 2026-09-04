@@ -18,6 +18,7 @@ import { listQueuedChanges, queueChange, removeQueuedChange } from '../lib/offli
 import { restartWebContainer, runWebCommand, stopWebCommand } from '../lib/runtime/webContainer';
 import { setActiveWorkspaceId } from '../lib/api/client';
 import { applyAcceptedHunks, buildReviewHunks, sha256, threeWayMerge } from '../lib/codeReview';
+import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
 
 type OpenFile = CodeSnapshot['files'][number] & { savedContent: string };
 type Mode = 'manual' | 'assist' | 'agent' | 'autonomous';
@@ -29,6 +30,22 @@ const DEFAULT_FILE: OpenFile = {
   path: 'README.md', content: '# TechIT project\n', savedContent: '', version: 0,
   contentHash: '', language: 'markdown',
 };
+
+async function loadCodeSnapshot(workspaceId: string): Promise<CodeSnapshot> {
+  const key = `workspace:code:${workspaceId}`;
+  try {
+    const snapshot = await getCodeSnapshot(workspaceId);
+    void cacheSnapshot(key, snapshot);
+    return snapshot;
+  } catch (error) {
+    const cached = await readSnapshot<CodeSnapshot>(key);
+    if (cached) {
+      toast.info(`Showing the last synced workspace snapshot from ${new Date(cached.updatedAt).toLocaleString()}.`);
+      return cached.value;
+    }
+    throw error;
+  }
+}
 
 function editorLanguage(path: string): string {
   const ext = path.split('.').pop()?.toLowerCase();
@@ -81,7 +98,7 @@ export function Code() {
     setBusy(true);
     try {
       const [next, detected, queued, availableDestinations] = await Promise.all([
-        getCodeSnapshot(workspaceId), getProjectAdapter(workspaceId), listQueuedChanges(workspaceId), listCodeDestinations(workspaceId),
+        loadCodeSnapshot(workspaceId), getProjectAdapter(workspaceId), listQueuedChanges(workspaceId), listCodeDestinations(workspaceId),
       ]);
       setSnapshot(next); setAdapter(detected); setDestinations(availableDestinations);
       setQueuedCount(queued.length);

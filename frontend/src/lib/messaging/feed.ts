@@ -2,14 +2,16 @@ import { msgGet, msgPost, msgDelete, withFallback } from "./client";
 import { messagingUrl } from './config';
 import { enqueue } from '@/lib/resilience/queue';
 import { isNetworkFailure } from '@/lib/resilience/connectivity';
+import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
 import type { WireComment, WirePost } from "./types";
 
 export function fetchPosts(zone: "global" | "tribe" = "global"): Promise<WirePost[]> {
-  return withFallback(
-    async () => (await msgGet<{ posts?: WirePost[] }>(`/posts?zone=${zone}`)).posts ?? [],
-    [],
-    "posts",
-  );
+  const key = `feed:posts:${zone}`;
+  return msgGet<{ posts?: WirePost[] }>(`/posts?zone=${zone}`).then(result => { const posts = result.posts ?? []; void cacheSnapshot(key, posts); return posts; }).catch(async error => {
+    const cached = await readSnapshot<WirePost[]>(key);
+    if (cached) return cached.value;
+    return withFallback(() => Promise.reject(error), [], 'posts');
+  });
 }
 
 export interface FeedPageResponse { posts: WirePost[]; category?: string; nextCursor?: string; hasMore?: boolean }
@@ -47,11 +49,12 @@ export function unlikePost(postId: string): Promise<{ likeCount: number } | null
   return withFallback(() => msgDelete<{ likeCount: number }>(`/posts/${postId}/like`), () => null, "unlike post");
 }
 export function fetchComments(postId: string): Promise<WireComment[]> {
-  return withFallback(
-    async () => (await msgGet<{ comments?: WireComment[] }>(`/posts/${postId}/comments`)).comments ?? [],
-    [],
-    "post comments",
-  );
+  const key = `feed:comments:${postId}`;
+  return msgGet<{ comments?: WireComment[] }>(`/posts/${postId}/comments`).then(result => { const comments = result.comments ?? []; void cacheSnapshot(key, comments); return comments; }).catch(async error => {
+    const cached = await readSnapshot<WireComment[]>(key);
+    if (cached) return cached.value;
+    return withFallback(() => Promise.reject(error), [], 'post comments');
+  });
 }
 export async function createComment(postId: string, body: string): Promise<WireComment | null> {
   const payload = { body };

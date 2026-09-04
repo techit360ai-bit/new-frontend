@@ -4,6 +4,7 @@
 // can't add packages in some environments), just native fetch + a fallback helper.
 
 import { apiUrl, apiFallbackEnabled } from "./config";
+import { fetchIdempotent } from '@/lib/resilience/retry';
 
 const env =
   typeof import.meta !== "undefined"
@@ -72,7 +73,7 @@ async function parse<T>(res: Response): Promise<T> {
 
 async function requestWithRefresh<T>(path: string, init: RequestInit, method: string, body?: unknown): Promise<T> {
   const run = () => fetch(apiUrl(path), { method, ...init, headers: headers(init.headers), body: body === undefined ? init.body : JSON.stringify(body), credentials: 'include', signal: timeoutSignal(init) })
-  let response = await run()
+  let response = method === 'GET' ? await fetchIdempotent(run) : await run()
   if (response.status === 401 && getAuthToken() && path !== '/auth/refresh' && path !== 'auth/refresh') {
     const token = await refreshAccessToken()
     if (token) response = await run()

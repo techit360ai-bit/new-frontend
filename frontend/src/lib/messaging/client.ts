@@ -4,6 +4,7 @@ import {
   messagingToken,
   messagingFallbackEnabled,
 } from "./config";
+import { fetchIdempotent } from '@/lib/resilience/retry';
 
 // See lib/api/client.ts for the rationale — raw fetch has no timeout, and a
 // hung Go messaging service would otherwise lock UI surfaces indefinitely.
@@ -38,12 +39,12 @@ async function parse<T>(res: Response): Promise<T> {
 }
 
 export async function msgGet<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(messagingUrl(path), {
+  const res = await fetchIdempotent(() => fetch(messagingUrl(path), {
     method: "GET",
     ...init,
     headers: headers(init?.headers),
     signal: timeoutSignal(init),
-  });
+  }));
   return parse<T>(res);
 }
 
