@@ -136,8 +136,24 @@ export function FounderLayout() {
       {/* Overlay Div covering the entire layout area */}
       <div className="flex w-full h-full bg-white rounded-xl border border-black/[0.06] p-[5px] relative overflow-hidden shadow-sm">
         
-        {/* Subtle background glow */}
-        <div className="absolute -top-1/2 -left-1/4 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0066ff]/5 via-transparent to-transparent opacity-60 pointer-events-none blur-[100px]" />
+        {/* Animated Background Orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <motion.div 
+            animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4], x: [0, 60, 0], y: [0, 40, 0] }}
+            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-1/4 -left-1/4 w-[60%] h-[60%] rounded-full bg-[#0066ff]/[0.04] blur-[120px]"
+          />
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3], x: [0, -50, 0], y: [0, 60, 0] }}
+            transition={{ duration: 30, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+            className="absolute -bottom-1/4 -right-1/4 w-[70%] h-[70%] rounded-full bg-[#58a6ff]/[0.04] blur-[120px]"
+          />
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3], x: [0, 40, 0], y: [0, -40, 0] }}
+            transition={{ duration: 28, repeat: Infinity, ease: "easeInOut", delay: 10 }}
+            className="absolute top-1/4 left-1/3 w-[50%] h-[50%] rounded-full bg-[#20c937]/[0.03] blur-[120px]"
+          />
+        </div>
 
         {/* ======================================================== */}
         {/* PREMIUM WHITE SIDENAV */}
@@ -344,7 +360,7 @@ export function FounderLayout() {
                 <PanelLeftOpen className="w-[18px] h-[18px] relative z-10" />
               </button>
 
-              <h2 className="text-base font-bold text-[#171330] hidden lg:block shrink-0 mr-2">
+              <h2 className="text-base font-bold text-[#0066ff] hidden lg:block shrink-0 mr-2">
                 {activeLabel}
               </h2>
 
