@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import StackMenuOrangeLogo from "../ui/StackMenuOrangeLogo";
-import StackMenuWhiteLogo from "../ui/StackMenuWhiteLogo";
+import TechITLogo from "../ui/TechITLogo";
 import LandingButton from "../ui/landing-btn";
 import { getTranslations } from "@/app/lib/i18n";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -48,7 +47,7 @@ export default function Header() {
                     exit={{ opacity: 0 }}
                     className="absolute inset-0"
                   >
-                    <StackMenuOrangeLogo />
+                    <TechITLogo />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -58,7 +57,7 @@ export default function Header() {
                     exit={{ opacity: 0 }}
                     className="absolute inset-0"
                   >
-                    <StackMenuWhiteLogo />
+                    <TechITLogo />
                   </motion.div>
                 )}
               </AnimatePresence>

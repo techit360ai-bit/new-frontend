@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import StackMenuOrangeLogo from "../ui/StackMenuOrangeLogo";
+import TechITLogo from "../ui/TechITLogo";
 
 export default function Preloader() {
   return (
@@ -43,7 +43,7 @@ export default function Preloader() {
           className="relative z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center"
         >
           <div className="w-full h-full scale-[1.6] md:scale-[1.8] flex items-center justify-center">
-            <StackMenuOrangeLogo />
+            <TechITLogo />
           </div>
         </motion.div>
       </div>

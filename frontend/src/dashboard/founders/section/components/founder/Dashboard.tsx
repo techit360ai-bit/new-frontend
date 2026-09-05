@@ -1,8 +1,8 @@
-// frontend/src/dashboard/founders/section/components/founder/Dashboard.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowRight, CheckCircle, TrendingUp, Plus, Building2 } from "lucide-react";
+import { motion } from "motion/react";
+import { AlertTriangle, ArrowRight, CheckCircle, TrendingUp, Plus, Building2, Sparkles, Activity, Briefcase, Zap, Globe, Target, Calendar, Rocket } from "lucide-react";
 import { useFounderProfile, type FounderStage } from "@/contexts/UserContext";
 import {
   computeGsisV2,
@@ -18,54 +18,19 @@ import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
 import { WelcomeBack } from "@/components/WelcomeBack";
 
-interface Signal {
-  id: string;
-  message: string;
-  href: string;
-}
+interface Signal { id: string; message: string; href: string; }
+interface FounderTask { id: string; title: string; detail: string; priority: "overdue" | "due-soon" | "this-week"; href: string; done: boolean; }
+interface JourneyStage { id: string; label: string; status: "complete" | "active" | "upcoming"; progress: number; detail: string; }
+interface Build { id: string; name: string; logoEmoji: string; stage: FounderStage; oneLiner: string; progress: number; isPrimary: boolean; }
 
-interface FounderTask {
-  id: string;
-  title: string;
-  detail: string;
-  priority: "overdue" | "due-soon" | "this-week";
-  href: string;
-  done: boolean;
-}
-
-interface JourneyStage {
-  id: string;
-  label: string;
-  status: "complete" | "active" | "upcoming";
-  progress: number;
-  detail: string;
-}
-
-interface Build {
-  id: string;
-  name: string;
-  logoEmoji: string;
-  stage: FounderStage;
-  oneLiner: string;
-  progress: number;
-  isPrimary: boolean;
-}
-
-// Captured at module load — stable reference, satisfies react-hooks/purity
 const NOW_MS = Date.now();
 
 const stageStyles: Record<string, string> = {
-  Idea:    "bg-slate-100 text-slate-700",
-  MVP:     "bg-violet-50 text-violet-700",
-  Beta:    "bg-amber-50 text-amber-700",
-  Launch:  "bg-emerald-50 text-emerald-700",
-  Growth:  "bg-emerald-50 text-emerald-700",
-};
-
-const priorityStyles: Record<string, string> = {
-  overdue:    "bg-red-50 text-red-700",
-  "due-soon": "bg-amber-50 text-amber-700",
-  "this-week": "bg-slate-100 text-slate-700",
+  Idea:    "bg-white/10 text-white border-white/20",
+  MVP:     "bg-[#0066ff]/20 text-[#58a6ff] border-[#0066ff]/30",
+  Beta:    "bg-[#0066ff]/20 text-[#58a6ff] border-[#0066ff]/30",
+  Launch:  "bg-[#20c937]/20 text-[#20c937] border-[#20c937]/30",
+  Growth:  "bg-[#20c937]/20 text-[#20c937] border-[#20c937]/30",
 };
 
 function normalizedStage(stage: string | undefined): FounderStage {
@@ -77,10 +42,6 @@ function normalizedStage(stage: string | undefined): FounderStage {
   return "Idea";
 }
 
-const EMPTY_SIGNALS: Signal[] = [];
-const EMPTY_TASKS: FounderTask[] = [];
-const EMPTY_JOURNEY: JourneyStage[] = [];
-
 function displayScore(value: number | null | undefined) {
   return value == null ? "Unknown" : Math.round(value).toString();
 }
@@ -89,11 +50,14 @@ function metricLabel(value: string) {
   return value.toLowerCase().replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
 }
 
-function IntelligenceMetric({ label, value }: { label: string; value: string }) {
+function IntelligenceMetric({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
   return (
-    <div className="min-w-0">
-      <p className="truncate text-lg font-semibold text-slate-900 tabular-nums">{value}</p>
-      <p className="mt-0.5 text-[11px] text-slate-500">{label}</p>
+    <div className="min-w-0 bg-white/5 rounded-xl p-4 border border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:bg-white/10 transition-colors">
+      <div className="flex items-center gap-2 mb-1.5">
+        <Icon className="w-4 h-4 text-slate-400" />
+        <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">{label}</p>
+      </div>
+      <p className="truncate text-2xl font-black text-white tabular-nums tracking-tight">{value}</p>
     </div>
   );
 }
@@ -101,12 +65,7 @@ function IntelligenceMetric({ label, value }: { label: string; value: string }) 
 export function Dashboard() {
   const navigate = useNavigate();
   const { founderProfile: p } = useFounderProfile();
-  const [tasks, setTasks]     = useState<FounderTask[]>(EMPTY_TASKS);
-  const [signals] = useState<Signal[]>(EMPTY_SIGNALS);
-  const [journey] = useState<JourneyStage[]>(EMPTY_JOURNEY);
-  const [openStage, setOpenStage] = useState<string | null>(null);
 
-  // GSIS master score + alerts from ai-router (surfaced for the first time).
   const [intel, setIntel] = useState<DashboardIntelligence | null>(null);
   useEffect(() => {
     let alive = true;
@@ -114,7 +73,6 @@ export function Dashboard() {
     return () => { alive = false; };
   }, []);
 
-  // B4 — anomaly risk flags from the engine over this founder's execution signals.
   const [riskFlags, setRiskFlags] = useState<RiskFlag[]>([]);
   useEffect(() => {
     let alive = true;
@@ -123,21 +81,8 @@ export function Dashboard() {
     return () => { alive = false; };
   }, []);
 
-  // B5 — momentum audio briefing (TTS) on demand.
-  const [briefingUrl, setBriefingUrl] = useState<string | null>(null);
-  const [briefingLoading, setBriefingLoading] = useState(false);
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
-  const playBriefing = async () => {
-    setBriefingLoading(true);
-    const b = await fetchAudioBriefing(`Momentum briefing for ${firstName}: keep your build moving.`);
-    setBriefingLoading(false);
-    if (b?.audio_url) {
-      setBriefingUrl(b.audio_url);
-      try { void new Audio(b.audio_url).play(); } catch { /* autoplay may be blocked */ }
-    } else {
-      toast("Audio briefing unavailable right now.");
-    }
-  };
+  const firstName = (p.name || "Founder").split(" ")[0];
 
   useEffect(() => {
     let alive = true;
@@ -145,13 +90,10 @@ export function Dashboard() {
       .then((rows) => {
         if (alive) setHackathons(rows.filter((row): row is Hackathon => row.type === "hackathon"));
       })
-      .catch(() => {
-        if (alive) setHackathons([]);
-      });
+      .catch(() => { if (alive) setHackathons([]); });
     return () => { alive = false; };
   }, []);
 
-  // S7 — founder venture portfolio (multiple separate startups), from context.
   const ventures = p.founderProjects;
   const builds: Build[] = useMemo(
     () => ventures.map((v) => ({
@@ -165,10 +107,12 @@ export function Dashboard() {
     })),
     [ventures, p.logoEmoji],
   );
+  
   const [activeVentureId, setActiveVentureId] = useState<string | null>(null);
   useEffect(() => {
     setActiveVentureId((cur) => cur ?? (ventures.find((v) => v.isPrimary) ?? ventures[0])?.id ?? null);
   }, [ventures]);
+  
   const activeVenture = ventures.find((v) => v.id === activeVentureId) ?? ventures[0] ?? null;
 
   const [scorecard, setScorecard] = useState<GsisV2Scorecard | null>(null);
@@ -207,442 +151,320 @@ export function Dashboard() {
     return () => { alive = false; };
   }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users]);
 
-  const firstName = (p.name || "Founder").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   const weeksBuilding = useMemo(
     () => Math.max(1, Math.floor((NOW_MS - new Date(`${p.foundingYear}-01-01`).getTime()) / (7 * 86_400_000))),
     [p.foundingYear],
   );
 
-  const toggleTask = (id: string) => {
-    setTasks((cur) => cur.map((t) => t.id === id ? { ...t, done: !t.done } : t));
-    toast("Marked complete");
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariant = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Good morning, {firstName}.</h1>
-        <p className="text-sm text-slate-500 mt-0.5">{today} · Week {weeksBuilding} of building</p>
+    <div className="p-6 lg:p-10 max-w-[1400px] mx-auto font-bricolage">
+      
+      {/* Greeting Header */}
+      <div className="flex flex-col gap-1 mb-8 z-10 relative">
+        <h1 className="text-3xl md:text-4xl font-black text-[#171330] tracking-tight">Good morning, {firstName}.</h1>
+        <p className="text-sm font-semibold text-[#171330]/70 uppercase tracking-widest">{today} &middot; Week {weeksBuilding} of building</p>
       </div>
 
-      {/* Welcome Back — contextual intelligence surface */}
-      <WelcomeBack />
+      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-6">
+        
+        <motion.div variants={itemVariant} className="relative z-10">
+          <WelcomeBack />
+        </motion.div>
 
-      {/* Your ventures — multi-project portfolio (S7) */}
-      <div className="border border-slate-200 bg-white rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-slate-700">Your ventures</h2>
-          <button
-            type="button"
-            onClick={() => navigate("/incubation-hub")}
-            className="text-xs text-violet-600 hover:underline"
-          >
-            + Analyze a new idea
-          </button>
-        </div>
-        {ventures.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {ventures.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                onClick={() => setActiveVentureId(v.id)}
-                className={`text-left rounded-lg border px-3 py-2 transition-colors ${
-                  activeVentureId === v.id
-                    ? "border-violet-400 bg-violet-50"
-                    : "border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-900">{v.title}</span>
-                  {v.isPrimary && <span className="text-[10px] uppercase tracking-wide text-violet-600">Primary</span>}
-                </div>
-                <div className="flex items-center gap-3 mt-0.5">
-                  <span className="text-xs text-slate-500 capitalize">{v.stage || "idea"}</span>
-                  <span className="text-xs text-slate-400">GSIS {Math.round(v.gsisScore || 0)}</span>
-                  <span className={`text-xs ${v.hasWorkspace ? "text-emerald-600" : "text-slate-400"}`}>
-                    {v.hasWorkspace ? "workspace" : "no workspace"}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-slate-500">No persisted ventures yet. Analyze an idea or promote an intake to create your first project.</p>
-        )}
-      </div>
-
-      {/* Startup hero */}
-      {p.startupName || activeVenture ? (
-      <Link to="/incubation-hub" className="block group border border-slate-200 bg-white rounded-xl p-6 hover:border-violet-300 transition-colors">
-        <div className="flex items-start gap-4">
-                          <Building2 className="h-9 w-9 text-slate-500" aria-hidden="true" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-xl font-bold text-slate-900">{activeVenture?.title ?? p.startupName}</h2>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? "bg-slate-100 text-slate-700"}`}>
-                {activeVenture ? normalizedStage(activeVenture.stage) : p.stage}
-              </span>
+        {/* Your ventures - Multi-project portfolio */}
+        <motion.div variants={itemVariant} className="border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.15)] bg-[#171330]/80 backdrop-blur-2xl rounded-[32px] p-6 md:p-8 relative overflow-hidden text-white">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#0066ff]/20 via-[#20c937]/10 to-transparent blur-3xl -z-10" />
+          
+          <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-[#58a6ff]" />
+              <h2 className="text-sm font-black uppercase tracking-widest">Your ventures</h2>
             </div>
-            <p className="text-sm text-slate-600 mb-3">{activeVenture?.tagline ?? p.oneLiner}</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">{p.users.toLocaleString()}</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Active users</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">${p.revenueMonthly.toLocaleString()}/mo</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Revenue</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">{p.openRoles.length} of 5</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Open roles</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">—</p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Top investor fit</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-100 text-sm">
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); navigate("/founder/settings#startup"); }}
-            className="text-violet-600 hover:underline"
-          >
-            Edit startup details →
-          </button>
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); navigate("/founder/profile"); }}
-            className="text-violet-600 hover:underline"
-          >
-            View public profile →
-          </button>
-        </div>
-      </Link>
-      ) : null}
-
-      {/* GSIS v2 — focused operating intelligence in the existing dashboard card language. */}
-      {scorecard ? (
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-slate-700">Startup intelligence</h2>
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{scorecard.model.version}</span>
-              </div>
-              <p className="text-xs text-slate-500 mt-1">{scorecard.stage.reason}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-3xl font-bold text-violet-700 tabular-nums leading-none">
-                {displayScore(scorecard.gsis)}
-              </p>
-              <p className="text-xs text-slate-400 mt-1">GSIS / 100</p>
-            </div>
-          </div>
-          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-slate-100 pt-4 sm:grid-cols-3 lg:grid-cols-6">
-            <IntelligenceMetric label="Stage" value={scorecard.stage.detected_stage} />
-            <IntelligenceMetric label="Stage health" value={displayScore(scorecard.stage_health)} />
-            <IntelligenceMetric label="Momentum" value={`${scorecard.momentum.score > 0 ? "+" : ""}${scorecard.momentum.score}`} />
-            <IntelligenceMetric label="PMF" value={scorecard.pmf.score == null ? "N/A" : displayScore(scorecard.pmf.score)} />
-            <IntelligenceMetric label="Risk" value={scorecard.risk.level} />
-            <IntelligenceMetric label={`${metricLabel(scorecard.readiness.next_stage)} readiness`} value={displayScore(scorecard.readiness.score)} />
-          </div>
-          <div className="mt-5 grid gap-5 border-t border-slate-100 pt-5 lg:grid-cols-2">
-            <div>
-              <p className="text-[11px] font-semibold uppercase text-slate-500">Primary bottleneck</p>
-              <p className="mt-1 text-base font-semibold text-slate-900">{metricLabel(scorecard.bottleneck.category)}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {scorecard.bottleneck.score == null ? "More evidence is required to quantify this constraint." : `Current component score: ${Math.round(scorecard.bottleneck.score)}/100.`}
-              </p>
-            </div>
-            {scorecard.recommendation && (
-              <div className="border-l-2 border-violet-500 pl-4">
-                <p className="text-[11px] font-semibold uppercase text-violet-700">Next best action</p>
-                <p className="mt-1 text-sm font-medium text-slate-900">{scorecard.recommendation.action}</p>
-                <p className="mt-1 text-xs text-slate-500">{scorecard.recommendation.next_milestone}</p>
-              </div>
-            )}
-          </div>
-          <div className="mt-5 border-t border-slate-100 pt-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-medium text-slate-700">
-                {metricLabel(scorecard.readiness.next_stage)} gate: {metricLabel(scorecard.readiness.status)}
-              </p>
-              <p className="text-xs text-slate-500">
-                {Math.round(scorecard.data_coverage * 100)}% coverage · {Math.round(scorecard.confidence * 100)}% confidence
-              </p>
-            </div>
-            {scorecard.readiness.blocking_requirements.length > 0 && (
-              <p className="mt-2 text-xs text-amber-700">
-                Missing: {scorecard.readiness.blocking_requirements.map((gate) => metricLabel(gate.metric)).join(" · ")}
-              </p>
-            )}
-          </div>
-        </div>
-      ) : intel?.gsis ? (
-        <div className="border border-slate-200 bg-white rounded-xl p-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-700">Global Startup Intelligence Score</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Legacy scorecard · v2 evidence is not available</p>
-          </div>
-          <p className="text-3xl font-bold text-violet-700 tabular-nums">{Math.round(intel.gsis.gsis)}</p>
-        </div>
-      ) : null}
-
-      {/* Momentum briefing (B5) + risk alerts (B4) from the AI engine */}
-      <div className="border border-slate-200 bg-white rounded-xl p-4 flex flex-wrap items-center gap-4">
-        <button
-          type="button"
-          onClick={playBriefing}
-          disabled={briefingLoading}
-          className="text-sm px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 disabled:bg-slate-300"
-        >
-          {briefingLoading ? "Preparing…" : "▶ Play momentum briefing"}
-        </button>
-        {briefingUrl && <span className="text-xs text-slate-400">Audio ready</span>}
-        {riskFlags.length > 0 && (
-          <div className="flex-1 min-w-[12rem]">
-            <p className="text-xs font-semibold text-amber-700 mb-1">Engine risk alerts</p>
-            <ul className="space-y-0.5">
-              {riskFlags.slice(0, 3).map((f, i) => (
-                <li key={i} className="text-xs text-amber-700 flex items-start gap-1.5">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span>{f.message ?? f.type ?? "Risk flag"}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      {/* Journey strip */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Journey</h2>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          {journey.map((s) => {
-            const isOpen = openStage === s.id;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setOpenStage(isOpen ? null : s.id)}
-                className={`text-left p-3 rounded-lg border transition-colors ${
-                  s.status === "complete" ? "border-violet-200 bg-white" :
-                  s.status === "active"   ? "border-violet-200 bg-violet-50" :
-                                            "border-slate-200 bg-slate-50"
-                }`}
-              >
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{s.label}</p>
-                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${
-                      s.status === "complete" ? "bg-violet-200" :
-                      s.status === "active"   ? "bg-violet-600" :
-                                                "bg-slate-200"
-                    }`}
-                    style={{ width: `${s.progress}%` }}
-                  />
-                </div>
-                <p className="text-xs text-slate-700 mt-1.5 tabular-nums">{s.progress}%</p>
-              </button>
-            );
-          })}
-        </div>
-        {openStage && (
-          <div className="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700">
-            {journey.find((j) => j.id === openStage)?.detail}
-          </div>
-        )}
-      </div>
-
-      {/* Today's focus + Signals */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 border border-slate-200 bg-white rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-700">Today's focus</h2>
-            <Link to="/incubation-hub" className="text-xs text-violet-600 hover:underline">View all tasks →</Link>
-          </div>
-          {tasks.length > 0 ? (
-          <ul className="space-y-3">
-            {tasks.map((t) => (
-              <li key={t.id} className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={t.done}
-                  onChange={() => toggleTask(t.id)}
-                  className="w-4 h-4 accent-violet-600 cursor-pointer"
-                />
-                <Link to={t.href} className={`flex-1 min-w-0 ${t.done ? "opacity-50 line-through" : ""}`}>
-                  <p className="text-sm font-medium text-slate-900 truncate">{t.title}</p>
-                  <p className="text-xs text-slate-500">{t.detail}</p>
-                </Link>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${priorityStyles[t.priority]}`}>{t.priority}</span>
-              </li>
-            ))}
-          </ul>
-          ) : (
-            <p className="text-sm text-slate-500">No live focus tasks yet. Workspace tasks will appear here when they are assigned.</p>
-          )}
-        </div>
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Signals</h2>
-          {signals.length > 0 ? (
-          <ul className="space-y-3">
-            {signals.map((s) => (
-              <li key={s.id}>
-                <Link to={s.href} className="flex items-start gap-2 text-sm text-slate-700 hover:text-violet-600 group">
-                  <CheckCircle className="w-4 h-4 mt-0.5 text-slate-400 group-hover:text-violet-600 shrink-0" />
-                  <span className="flex-1">{s.message}</span>
-                  <ArrowRight className="w-4 h-4 mt-0.5 text-slate-300 group-hover:text-violet-600 shrink-0" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-          ) : (
-            <p className="text-sm text-slate-500">No live signals yet.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Active builds */}
-      <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Active builds</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {builds.map((b) => (
-            <div key={b.id} className="border border-slate-200 bg-white rounded-xl p-4">
-              <div className="flex items-start gap-3 mb-3">
-                <Building2 className="h-6 w-6 text-slate-500" aria-hidden="true" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">{b.name}</p>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${stageStyles[b.stage] ?? "bg-slate-100 text-slate-700"}`}>{b.stage}</span>
-                </div>
-              </div>
-              {b.oneLiner && <p className="text-xs text-slate-600 mb-3">{b.oneLiner}</p>}
-              <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden mb-3">
-                <div className="h-full bg-violet-600" style={{ width: `${b.progress}%` }} />
-              </div>
-              <button
-                type="button"
-                onClick={() => navigate(`/workspaces/build?startup=${b.id}`)}
-                className="text-xs text-violet-600 hover:underline"
-              >
-                Open workspace →
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => navigate("/incubation-hub")}
-            className="border border-dashed border-slate-300 rounded-xl p-4 text-sm text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors flex items-center justify-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Analyze a new idea
-          </button>
-        </div>
-      </div>
-
-      {/* Recent activity */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent activity</h2>
-        <p className="text-sm text-slate-500">No persisted activity yet.</p>
-      </div>
-
-      {/* Hackathon Momentum */}
-      {(() => {
-        const regs = p.hackathonRegistrations;
-        if (regs.length === 0) {
-          return (
-            <div className="border border-slate-200 bg-white rounded-xl p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-sm font-semibold text-slate-700">Hackathon Momentum</h2>
-                    <TrendingUp className="w-4 h-4 text-slate-400" />
-                  </div>
-                  <p className="text-sm text-slate-600">
-                    No active hackathons. Join a hackathon from the Opportunity Hub to see your team's momentum
-                    tracker here — 4-hour check-ins, build velocity, blockers.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate("/opportunity-hub")}
-                  className="text-xs font-medium text-violet-700 px-3 py-1.5 rounded-lg border border-violet-200 hover:bg-violet-50 flex items-center gap-2 shrink-0"
-                >
-                  Browse opportunities →
-                </button>
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div className="border border-slate-200 bg-white rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-semibold text-slate-700">Hackathon Momentum</h2>
-              <TrendingUp className="w-4 h-4 text-slate-400" />
-            </div>
-            <ul className="space-y-3">
-              {regs.map((r) => {
-                const h = hackathons.find((o) => o.id === r.hackathonId);
-                if (!h) return null;
-                const memberCount = r.members.length + 1;
-                const teamSize = r.teamSize;
-                const startMs = new Date(h.startDate).getTime() - Date.now();
-                const days = Math.max(0, Math.ceil(startMs / (1000 * 60 * 60 * 24)));
-                const startsLabel = Number.isNaN(startMs)
-                  ? "Start date unavailable"
-                  : days <= 7
-                    ? `Starts in ${days} days`
-                    : `Starts ${h.startDate}`;
-                const momentum = computeMomentum(r, Date.now());
-                const momColor = momentumColor(momentum.score);
-                const ctaLabel =
-                  momentum.nextAction === "submit-brief" ? "Submit brief →"
-                  : momentum.nextAction === "log-check-in" ? "Log check-in →"
-                  : "Open team";
-                const ctaStage = momentum.nextAction === "submit-brief" ? "brief" : "build";
-                return (
-                  <li key={r.teamId} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3">
-                    <span className="text-xl shrink-0" aria-hidden="true">{h.poster}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{h.title}</p>
-                      <p className="text-xs text-slate-500">
-                        {r.teamName} · {memberCount} of {teamSize} members · {startsLabel}
-                      </p>
-                      <p className="text-xs text-slate-600 mt-1 font-medium">{momentum.nextActionLabel}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className={`text-2xl font-bold leading-none ${momColor.text}`}>{momentum.score}</p>
-                      <div className="h-1.5 w-16 rounded-full bg-slate-100 mt-1 ml-auto">
-                        <div className={`h-1.5 rounded-full ${momColor.bar}`} style={{ width: `${momentum.score}%` }} />
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/incubation-hub?panel=hackathon&stage=${ctaStage}`)}
-                      className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 shrink-0 self-center"
-                    >
-                      {ctaLabel}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
             <button
               type="button"
-              onClick={() => navigate("/opportunity-hub")}
-              className="mt-4 text-xs font-medium text-violet-700 hover:underline"
+              onClick={() => navigate("/incubation-hub")}
+              className="text-xs font-bold text-[#58a6ff] hover:text-white transition-colors flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/10"
             >
-              Browse more opportunities →
+              <Plus className="w-3.5 h-3.5" /> Analyze a new idea
             </button>
           </div>
-        );
-      })()}
+          
+          {ventures.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {ventures.map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setActiveVentureId(v.id)}
+                  className={`text-left rounded-2xl border p-5 transition-all duration-300 group ${
+                    activeVentureId === v.id
+                      ? "border-[#0066ff]/50 bg-[#0066ff]/20 shadow-[0_4px_25px_rgba(0,102,255,0.25)]"
+                      : "border-white/10 bg-white/5 hover:border-[#58a6ff]/40 hover:bg-white/10"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#0066ff]/20 group-hover:border-[#0066ff]/40 transition-colors">
+                       <Building2 className={`h-5 w-5 ${activeVentureId === v.id ? 'text-white' : 'text-slate-300 group-hover:text-white'} transition-colors`} aria-hidden="true" />
+                    </div>
+                    {v.isPrimary && <span className="text-[9px] uppercase font-bold tracking-widest text-white bg-[#0066ff] px-2 py-1 rounded-lg">Primary</span>}
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="text-lg font-black text-white tracking-tight truncate mb-1">{v.title}</p>
+                    {v.tagline && <p className="text-xs font-medium text-slate-400 line-clamp-2">{v.tagline}</p>}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border-t border-white/10 pt-3">
+                    <span className={`px-2 py-0.5 rounded-md border ${stageStyles[normalizedStage(v.stage)] ?? stageStyles.Idea}`}>{v.stage || "idea"}</span>
+                    <span className="text-slate-400">GSIS {Math.round(v.gsisScore || 0)}</span>
+                    <span className={`flex items-center gap-1 ${v.hasWorkspace ? "text-[#20c937]" : "text-slate-500"}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${v.hasWorkspace ? "bg-[#20c937] shadow-[0_0_8px_#20c937]" : "bg-slate-500"}`} />
+                      {v.hasWorkspace ? "Ready" : "Setup"}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white/5 rounded-2xl p-8 text-center border border-white/10 border-dashed">
+              <Building2 className="w-8 h-8 text-white/30 mx-auto mb-3" />
+              <p className="text-sm font-medium text-slate-400">No persisted ventures yet. Analyze an idea or promote an intake to create your first project.</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Startup hero */}
+        {(p.startupName || activeVenture) && (
+        <motion.div variants={itemVariant}>
+          <Link to="/incubation-hub" className="block group border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.15)] bg-[#171330]/80 backdrop-blur-2xl rounded-[32px] p-6 md:p-10 hover:border-[#0066ff]/50 hover:shadow-[0_20px_50px_rgba(0,102,255,0.2)] transition-all duration-300 relative overflow-hidden text-white">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0066ff]/10 to-[#58a6ff]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            
+            <div className="flex items-start gap-6 relative z-10">
+              <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center shrink-0 border border-white/10 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                 <Rocket className="h-7 w-7 text-white" aria-hidden="true" />
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">{activeVenture?.title ?? p.startupName}</h2>
+                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-widest border ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? stageStyles.Idea}`}>
+                    {activeVenture ? normalizedStage(activeVenture.stage) : p.stage}
+                  </span>
+                </div>
+                
+                <p className="text-sm md:text-base font-medium text-slate-300 mb-8 max-w-2xl">{activeVenture?.tagline ?? p.oneLiner}</p>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-sm bg-white/5 rounded-2xl p-5 border border-white/10">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"><Globe className="w-3 h-3" /> Active users</div>
+                    <p className="text-3xl md:text-4xl font-black text-white tabular-nums tracking-tight">{p.users.toLocaleString()}</p>
+                  </div>
+                  <div className="flex flex-col gap-1 border-l border-white/10 pl-4 md:pl-6">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"><Activity className="w-3 h-3" /> Revenue</div>
+                    <p className="text-3xl md:text-4xl font-black text-white tabular-nums tracking-tight">${p.revenueMonthly.toLocaleString()}<span className="text-sm md:text-base text-slate-500 font-bold ml-1">/mo</span></p>
+                  </div>
+                  <div className="flex flex-col gap-1 border-l border-white/10 pl-4 md:pl-6">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"><Target className="w-3 h-3" /> Open roles</div>
+                    <p className="text-3xl md:text-4xl font-black text-white tabular-nums tracking-tight">{p.openRoles.length} <span className="text-sm md:text-base text-slate-500 font-bold ml-1">of 5</span></p>
+                  </div>
+                  <div className="flex flex-col gap-1 border-l border-white/10 pl-4 md:pl-6">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"><Sparkles className="w-3 h-3" /> Investor fit</div>
+                    <p className="text-3xl md:text-4xl font-black text-slate-500 tabular-nums tracking-tight">?"</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-6 mt-8 pt-6 border-t border-white/10 text-sm relative z-10">
+              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/settings#startup"); }} className="text-[#58a6ff] font-bold hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
+                Edit details <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/profile"); }} className="text-[#58a6ff] font-bold hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
+                Public profile <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </Link>
+        </motion.div>
+        )}
+
+        {/* GSIS v2 Dashboard Card */}
+        {scorecard && (
+          <motion.div variants={itemVariant} className="border border-[#0066ff]/20 shadow-[0_20px_60px_rgba(0,102,255,0.15)] bg-[#171330]/90 backdrop-blur-2xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-white">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#0066ff]/30 via-transparent to-transparent opacity-80 pointer-events-none" />
+            
+            <div className="flex flex-wrap items-start justify-between gap-6 relative z-10">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#0066ff]/20 border border-[#0066ff]/30 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-[#58a6ff]" />
+                  </div>
+                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-white">Startup Intelligence</h2>
+                  <span className="rounded-lg bg-white/10 border border-white/20 px-2 py-1 text-[10px] font-black tracking-widest text-slate-300 uppercase">{scorecard.model.version}</span>
+                </div>
+                <p className="text-sm font-semibold text-slate-300 max-w-lg leading-relaxed mt-4">{scorecard.stage.reason}</p>
+              </div>
+              
+              <div className="text-right bg-black/20 rounded-2xl p-5 border border-white/10">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Global Startup Intelligence Score</p>
+                <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#0066ff] to-[#58a6ff] tabular-nums tracking-tighter leading-none [text-shadow:0_0_30px_rgba(0,102,255,0.3)]">
+                  {displayScore(scorecard.gsis)}<span className="text-2xl text-slate-500 font-bold ml-1">/100</span>
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 relative z-10">
+              <IntelligenceMetric label="Stage" value={scorecard.stage.detected_stage} icon={Target} />
+              <IntelligenceMetric label="Stage health" value={displayScore(scorecard.stage_health)} icon={Activity} />
+              <IntelligenceMetric label="Momentum" value={`${scorecard.momentum.score > 0 ? "+" : ""}${scorecard.momentum.score}`} icon={TrendingUp} />
+              <IntelligenceMetric label="PMF" value={scorecard.pmf.score == null ? "N/A" : displayScore(scorecard.pmf.score)} icon={Sparkles} />
+              <IntelligenceMetric label="Risk" value={scorecard.risk.level} icon={AlertTriangle} />
+              <IntelligenceMetric label={`${metricLabel(scorecard.readiness.next_stage)}`} value={displayScore(scorecard.readiness.score)} icon={Zap} />
+            </div>
+            
+            <div className="mt-8 grid gap-6 lg:grid-cols-2 relative z-10">
+              <div className="bg-red-500/10 rounded-2xl p-6 border border-red-500/20 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><AlertTriangle className="w-24 h-24 text-red-500" /></div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2 flex items-center gap-1.5 relative z-10"><AlertTriangle className="w-3.5 h-3.5" /> Primary bottleneck</p>
+                <p className="text-xl font-black text-white capitalize relative z-10">{metricLabel(scorecard.bottleneck.category)}</p>
+                <p className="mt-3 text-sm font-medium text-red-200/70 relative z-10">
+                  {scorecard.bottleneck.score == null ? "More evidence is required to quantify this constraint." : `Current component score: ${Math.round(scorecard.bottleneck.score)}/100.`}
+                </p>
+              </div>
+              
+              {scorecard.recommendation && (
+                <div className="bg-gradient-to-br from-[#0066ff]/20 to-[#58a6ff]/10 rounded-2xl p-6 border border-[#0066ff]/30 shadow-[0_10px_30px_rgba(0,102,255,0.1)] relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><TrendingUp className="w-24 h-24 text-[#58a6ff]" /></div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[#58a6ff] mb-2 flex items-center gap-1.5 relative z-10"><TrendingUp className="w-3.5 h-3.5" /> Next best action</p>
+                  <p className="text-xl font-black text-white relative z-10">{scorecard.recommendation.action}</p>
+                  <p className="mt-3 text-sm font-medium text-[#58a6ff]/80 relative z-10">{scorecard.recommendation.next_milestone}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-8 border-t border-white/10 pt-6 relative z-10 bg-black/20 -mx-6 md:-mx-10 -mb-6 md:-mb-10 p-6 md:p-10 rounded-b-[32px]">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] ${scorecard.readiness.status === 'READY' ? 'bg-[#20c937] text-[#20c937]' : 'bg-amber-400 text-amber-400 animate-pulse'}`} />
+                  <p className="text-sm font-bold text-white">
+                    <span className="capitalize">{metricLabel(scorecard.readiness.next_stage)}</span> gate: <span className={scorecard.readiness.status === 'READY' ? 'text-[#20c937]' : 'text-amber-400'}>{metricLabel(scorecard.readiness.status)}</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 bg-white/5 rounded-xl px-4 py-2 border border-white/10">
+                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-slate-400" /> {Math.round(scorecard.data_coverage * 100)}% coverage
+                  </p>
+                  <div className="w-px h-3 bg-white/20" />
+                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-slate-400" /> {Math.round(scorecard.confidence * 100)}% confidence
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Hackathon Momentum */}
+        {(() => {
+          const regs = p.hackathonRegistrations;
+          if (regs.length === 0) {
+            return (
+              <motion.div variants={itemVariant} className="border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.15)] bg-[#171330]/80 backdrop-blur-2xl rounded-[32px] p-6 md:p-10 text-white">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-white" />
+                      </div>
+                      <h2 className="text-base font-black uppercase tracking-widest text-white">Hackathon Momentum</h2>
+                    </div>
+                    <p className="text-sm font-medium text-slate-400 max-w-2xl leading-relaxed">
+                      No active hackathons. Join a hackathon from the Opportunity Hub to see your team's momentum tracker here &mdash; 4-hour check-ins, build velocity, and blockers.
+                    </p>
+                  </div>
+                  <button type="button" onClick={() => navigate("/opportunity-hub")} className="text-[10px] uppercase tracking-widest font-black text-[#171330] bg-white px-6 py-4 rounded-xl hover:bg-slate-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] shrink-0">
+                    Browse opportunities &rarr;
+                  </button>
+                </div>
+              </motion.div>
+            );
+          }
+          return (
+            <motion.div variants={itemVariant} className="border border-[#20c937]/20 shadow-[0_20px_60px_rgba(32,201,55,0.1)] bg-[#171330]/90 backdrop-blur-2xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-white">
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#20c937]/20 via-transparent to-transparent opacity-60 pointer-events-none" />
+              
+              <div className="flex items-center gap-3 mb-8 relative z-10 border-b border-white/10 pb-6">
+                <div className="w-12 h-12 rounded-xl bg-[#20c937]/20 border border-[#20c937]/30 flex items-center justify-center shadow-[0_0_15px_rgba(32,201,55,0.3)]">
+                  <Zap className="w-6 h-6 text-[#20c937]" />
+                </div>
+                <div>
+                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-white">Hackathon Momentum</h2>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Live tracking and velocity</p>
+                </div>
+              </div>
+              
+              <ul className="space-y-4 relative z-10">
+                {regs.map((r) => {
+                  const h = hackathons.find((o) => o.id === r.hackathonId);
+                  if (!h) return null;
+                  const memberCount = r.members.length + 1;
+                  const teamSize = r.teamSize;
+                  const startMs = new Date(h.startDate).getTime() - Date.now();
+                  const days = Math.max(0, Math.ceil(startMs / (1000 * 60 * 60 * 24)));
+                  const startsLabel = Number.isNaN(startMs) ? "Start date unavailable" : days <= 7 ? `Starts in ${days} days` : `Starts ${h.startDate}`;
+                  const momentum = computeMomentum(r, Date.now());
+                  const momColor = momentumColor(momentum.score);
+                  const ctaLabel = momentum.nextAction === "submit-brief" ? "Submit brief" : momentum.nextAction === "log-check-in" ? "Log check-in" : "Open team";
+                  const ctaStage = momentum.nextAction === "submit-brief" ? "brief" : "build";
+                  
+                  return (
+                    <li key={r.teamId} className="flex flex-col lg:flex-row lg:items-center gap-6 border border-white/10 bg-black/40 rounded-2xl p-5 md:p-6 hover:border-[#20c937]/40 hover:bg-black/60 transition-all duration-300 group">
+                      <div className="text-4xl shrink-0 bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center shadow-inner border border-white/10 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">{h.poster}</div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xl font-black text-white truncate mb-2">{h.title}</p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-[10px] font-black uppercase tracking-widest bg-white/10 px-2 py-1 rounded-md text-white">{r.teamName}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5"><Building2 className="w-3 h-3" /> {memberCount}/{teamSize} members</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {startsLabel}</span>
+                        </div>
+                        <p className="text-xs font-bold text-[#20c937] mt-3 uppercase tracking-widest">{momentum.nextActionLabel}</p>
+                      </div>
+                      
+                      <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 border-t border-white/10 lg:border-0 pt-5 lg:pt-0 lg:w-48 shrink-0">
+                        <div className="text-right flex-1 lg:flex-none">
+                          <p className={`text-4xl font-black tabular-nums tracking-tighter ${momColor.text}`}>{momentum.score}</p>
+                          <div className="h-1.5 w-full lg:w-24 rounded-full bg-white/10 mt-2">
+                            <div className={`h-1.5 rounded-full ${momColor.bar} shadow-[0_0_10px_currentColor]`} style={{ width: `${momentum.score}%` }} />
+                          </div>
+                        </div>
+                        <button type="button" onClick={() => navigate(`/incubation-hub?panel=hackathon&stage=${ctaStage}`)} className="text-[10px] uppercase font-black tracking-widest px-5 py-3 rounded-xl border border-white/20 text-white hover:bg-white hover:text-[#171330] transition-all shrink-0 shadow-lg whitespace-nowrap">
+                          {ctaLabel} &rarr;
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </motion.div>
+          );
+        })()}
+
+      </motion.div>
+      <div className="h-12" />
     </div>
   );
 }

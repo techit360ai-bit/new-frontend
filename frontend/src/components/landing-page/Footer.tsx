@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { getTranslations } from "@/app/lib/i18n";
 import { useLocale } from "@/contexts/LocaleContext";
-import StackMenuWhiteLogo from "../ui/StackMenuWhiteLogo";
+import TechITLogo from "../ui/TechITLogo";
 import { Twitter, Linkedin, Github } from "lucide-react";
 
 export default function Footer() {
@@ -18,7 +18,7 @@ export default function Footer() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm">
-              <StackMenuWhiteLogo />
+              <TechITLogo />
             </div>
             <span className="font-black text-2xl tracking-tight">TechIT</span>
           </div>
