@@ -492,19 +492,17 @@ export function FounderLayout() {
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               className="fixed top-0 left-0 bottom-0 w-[280px] bg-white border-r border-black/[0.06] z-[100] flex flex-col"
             >
-              <div className="flex items-center justify-between p-5 border-b border-black/[0.06]">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm">
-                    <TechITLogo />
+                <div className="flex items-center justify-between p-4 border-b border-black/[0.06] bg-gradient-to-r from-transparent to-[#0066ff]/[0.02]">
+                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-sm shrink-0 border border-[#0066ff]/10">
+                      <TechITLogo />
+                    </div>
+                    <span className="text-[#0066ff] font-medium text-sm tracking-tight whitespace-nowrap truncate">TechIT Network</span>
                   </div>
+                  <button onClick={() => setMobileMenuOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#0066ff]/5 to-[#58a6ff]/10 backdrop-blur-md border border-[#0066ff]/10 shadow-[0_2px_10px_rgba(0,102,255,0.05)] text-[#0066ff] hover:from-[#0066ff]/10 hover:to-[#58a6ff]/20 hover:border-[#0066ff]/20 hover:shadow-[0_4px_15px_rgba(0,102,255,0.15)] transition-all duration-300 shrink-0">
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                  <span className="text-[#0066ff] font-black">TechIT Network</span>
-                </div>
-                <button onClick={() => setMobileMenuOpen(false)} className="text-[#171330]/40 hover:text-[#171330]">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 {NAV_GROUPS.map((group) => (
