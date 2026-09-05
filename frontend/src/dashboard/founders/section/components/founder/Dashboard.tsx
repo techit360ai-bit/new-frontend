@@ -171,9 +171,56 @@ export function Dashboard() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 max-w-[1400px] mx-auto font-bricolage space-y-6">
+    <div className="p-4 md:p-6 lg:p-10 max-w-[1400px] mx-auto font-bricolage space-y-6 relative">
       
-      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-6">
+      {/* Ambient Animated Ripple Effect Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-0">
+        {/* Primary Central Ripple */}
+        <div className="absolute top-[22%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-[1100px] h-[1100px]">
+          {[0, 1, 2, 3].map((i) => (
+            <motion.div
+              key={`ripple-main-${i}`}
+              className="absolute rounded-full border border-[#0066ff]/20 dark:border-[#58a6ff]/25 shadow-[0_0_20px_rgba(0,102,255,0.06)] dark:shadow-[0_0_25px_rgba(88,166,255,0.15)]"
+              animate={{
+                width: ["160px", "1100px"],
+                height: ["160px", "1100px"],
+                opacity: [0.55, 0.25, 0],
+                scale: [0.9, 1.25],
+              }}
+              transition={{
+                duration: 9,
+                repeat: Infinity,
+                ease: [0.22, 1, 0.36, 1],
+                delay: i * 2.25,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Secondary Accent Ripple (Bottom Right) */}
+        <div className="absolute top-[65%] right-[-100px] flex items-center justify-center w-[750px] h-[750px]">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={`ripple-sub-${i}`}
+              className="absolute rounded-full border border-[#20c937]/15 dark:border-[#20c937]/20 shadow-[0_0_15px_rgba(32,201,55,0.08)]"
+              animate={{
+                width: ["120px", "750px"],
+                height: ["120px", "750px"],
+                opacity: [0.45, 0.15, 0],
+                scale: [0.9, 1.2],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: [0.22, 1, 0.36, 1],
+                delay: i * 2.6,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-6 relative z-10">
         
         {/* ======================================================== */}
         {/* NEW GROUPED HEADER & VENTURES COMPONENT */}
