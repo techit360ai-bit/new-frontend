@@ -131,13 +131,13 @@ export function FounderLayout() {
   }), [founderProfile]);
 
   return (
-    <div className="flex h-screen w-full bg-[#171330] p-[5px] overflow-hidden font-bricolage">
+    <div className="flex h-screen w-full bg-[#f5f8ff] p-[5px] overflow-hidden font-bricolage">
       
-      {/* Blurred Overlay Div covering the entire layout area */}
-      <div className="flex w-full h-full bg-white/5 backdrop-blur-3xl rounded-md border border-white/10 p-[5px] relative overflow-hidden shadow-[0_0_40px_rgba(0,102,255,0.1)]">
+      {/* Overlay Div covering the entire layout area */}
+      <div className="flex w-full h-full bg-white rounded-xl border border-black/[0.06] p-[5px] relative overflow-hidden shadow-sm">
         
-        {/* Subtle background glow behind the glass */}
-        <div className="absolute -top-1/2 -left-1/4 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0066ff]/20 via-transparent to-transparent opacity-60 pointer-events-none blur-[100px]" />
+        {/* Subtle background glow */}
+        <div className="absolute -top-1/2 -left-1/4 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0066ff]/5 via-transparent to-transparent opacity-60 pointer-events-none blur-[100px]" />
 
         {/* ======================================================== */}
         {/* PREMIUM WHITE SIDENAV */}
@@ -338,9 +338,10 @@ export function FounderLayout() {
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 rounded-lg bg-[#f5f8ff] text-[#171330] hover:bg-[#eef3ff] transition-colors shrink-0"
+                className="lg:hidden relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-[#0066ff]/5 to-[#58a6ff]/10 backdrop-blur-md border border-[#0066ff]/10 shadow-[0_4px_16px_rgba(0,102,255,0.08)] text-[#0066ff] hover:from-[#0066ff]/10 hover:to-[#58a6ff]/20 hover:border-[#0066ff]/20 hover:shadow-[0_4px_20px_rgba(0,102,255,0.15)] transition-all duration-300 shrink-0 overflow-hidden group"
               >
-                <PanelLeftOpen className="w-[18px] h-[18px]" />
+                <div className="absolute inset-0 bg-white/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <PanelLeftOpen className="w-[18px] h-[18px] relative z-10" />
               </button>
 
               <h2 className="text-base font-bold text-[#171330] hidden lg:block shrink-0 mr-2">
@@ -362,7 +363,6 @@ export function FounderLayout() {
             </div>
             
             <div className="flex items-center gap-2 shrink-0">
-              <TopBarRoleMenu />
 
               {/* Light / dark switcher */}
               <button
@@ -412,86 +412,33 @@ export function FounderLayout() {
               </div>
 
               {/* Profile dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => { setProfileMenuOpen((v) => !v); setNotifOpen(false); }}
-                  className="flex items-center gap-2 pl-1 pr-2 h-9 rounded-lg hover:bg-[#f5f8ff] border border-transparent hover:border-black/[0.05] transition-colors"
-                >
-                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white text-[11px] font-black flex items-center justify-center shrink-0">
-                    {initials}
-                  </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-[#171330]/40 hidden sm:block transition-transform ${profileMenuOpen ? "rotate-180" : ""}`} />
-                </button>
-                <AnimatePresence>
-                  {profileMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute right-0 mt-2 w-60 rounded-xl border border-black/[0.06] bg-white shadow-[0_20px_50px_-10px_rgba(23,19,48,0.25)] p-1.5 z-30"
-                    >
-                      <div className="flex items-center gap-2.5 px-3 py-2.5 mb-1">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white text-xs font-black flex items-center justify-center shrink-0">
-                          {initials}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-[#171330] truncate">{displayName}</p>
-                          <p className="text-[11px] text-[#171330]/45 truncate">{startupLabel}</p>
-                        </div>
-                      </div>
-                      <div className="h-px bg-black/[0.05] mb-1" />
-                      <Link
-                        to="/founder/profile"
-                        onClick={() => setProfileMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-[#171330]/75 hover:bg-[#f5f8ff] hover:text-[#0066ff] transition-colors"
-                      >
-                        <UserCircle className="w-4 h-4" /> View profile
-                      </Link>
-                      <Link
-                        to="/founder/settings"
-                        onClick={() => setProfileMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-[#171330]/75 hover:bg-[#f5f8ff] hover:text-[#0066ff] transition-colors"
-                      >
-                        <SettingsIcon className="w-4 h-4" /> Settings
-                      </Link>
-                      <div className="h-px bg-black/[0.05] my-1" />
-                      <button
-                        onClick={() => { setProfileMenuOpen(false); signOut(); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" /> Log out
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <TopBarRoleMenu />
             </div>
           </header>
 
-          <div className="app-role-content flex-1 relative flex flex-col bg-[#171330] overflow-hidden rounded-b-md">
+          <div className="app-role-content flex-1 relative flex flex-col bg-white overflow-hidden rounded-b-md">
             
             {/* 1) Animated Background (Peeks through the 3px gap) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
               <motion.div 
                 animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6], x: [0, 40, 0], y: [0, 30, 0] }}
                 transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#0066ff]/40 blur-[80px]"
+                className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#0066ff]/20 blur-[80px]"
               />
               <motion.div 
                 animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.9, 0.5], x: [0, -50, 0], y: [0, -60, 0] }}
                 transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-[#58a6ff]/40 blur-[80px]"
+                className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-[#58a6ff]/20 blur-[80px]"
               />
               <motion.div 
                 animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5], x: [0, 30, 0], y: [0, -40, 0] }}
                 transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-                className="absolute top-[30%] right-[10%] w-[50%] h-[50%] rounded-full bg-[#20c937]/30 blur-[80px]"
+                className="absolute top-[30%] right-[10%] w-[50%] h-[50%] rounded-full bg-[#20c937]/15 blur-[80px]"
               />
             </div>
 
             {/* 2) Inner Overlay Div (creates the 3px border on lg) */}
-            <div className="relative z-10 flex-1 flex flex-col lg:m-[3px] rounded-b-md lg:rounded-[10px] overflow-hidden bg-[#f5f8ff] shadow-inner">
+            <div className="relative z-10 flex-1 flex flex-col lg:m-[3px] rounded-b-md lg:rounded-[10px] overflow-hidden bg-white shadow-sm border border-black/[0.04]">
               <div className="flex-1 overflow-y-auto custom-scrollbar w-full h-full relative">
                 
                 {/* Subtle orbs for the light mode inner background */}
