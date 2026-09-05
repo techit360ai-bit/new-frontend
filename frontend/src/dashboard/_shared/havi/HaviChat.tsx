@@ -1,4 +1,4 @@
-import { Bot, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { useState } from "react";
 import type { HaviRole } from "./haviData";
 import { converseWithHavi } from "@/lib/api/tourGuide";
@@ -29,7 +29,7 @@ export function HaviChat({ role, route, profile }: { role: HaviRole; route?: str
   return (
     <div className="flex min-h-[420px] flex-col rounded-xl border border-[#0066ff]/20 bg-[#0066ff]/5 p-4">
       <div className="mb-3 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0066ff]/10"><Bot className="h-5 w-5 text-[#0066ff]" /></div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0066ff]/10"><img src="/bot-icon.png" alt="Bot Icon" className="h-6 w-6 object-contain drop-shadow-sm" /></div>
         <div><h3 className="font-semibold text-[#171330]">Ask Havi</h3><p className="text-xs text-[#171330]/70">Answers use your current TechIT context.</p></div>
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto rounded-lg bg-white p-3">

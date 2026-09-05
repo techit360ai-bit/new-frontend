@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Sparkles, BrainCircuit } from "lucide-react";
+
 import { motion, type PanInfo } from "motion/react";
 
 export type HaviStatus = "idle" | "active" | "alert" | "celebration";
@@ -70,11 +70,11 @@ export function HaviWidget({
       >
         <div className="absolute inset-0 bg-gradient-to-br from-[#0066ff]/5 to-[#58a6ff]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         
-        {status === "celebration" ? (
-          <Sparkles className={`h-6 w-6 ${s.icon} drop-shadow-sm`} />
-        ) : (
-          <BrainCircuit className={`h-6 w-6 ${s.icon} drop-shadow-sm`} />
-        )}
+        <img 
+          src="/bot-icon.png" 
+          alt="Havi" 
+          className="h-8 w-8 object-contain drop-shadow-sm transition-transform group-hover:scale-105" 
+        />
         
         <span
           className={`absolute -right-1 -top-1 h-3.5 w-3.5 ${s.dot} rounded-full border-2 border-white shadow-sm`}
