@@ -180,11 +180,11 @@ export function Dashboard() {
         {/* ======================================================== */}
         <motion.div 
           variants={itemVariant} 
-          className="rounded-[32px] bg-gradient-to-br from-[#58a6ff] to-[#58a6ff] p-6 md:p-8 relative overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,102,255,0.4)]"
+          className="rounded-[32px] bg-gradient-to-br from-[#58a6ff] to-[#58a6ff] dark:from-[#0d1f4d] dark:via-[#091536] dark:to-[#050c20] p-6 md:p-8 relative overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,102,255,0.4)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_35px_rgba(0,102,255,0.15)] dark:border dark:border-[#0066ff]/25"
         >
           {/* Subtle noise/glass overlay */}
-          <div className="absolute inset-0 bg-white/10 mix-blend-overlay pointer-events-none" />
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent blur-3xl -z-0" />
+          <div className="absolute inset-0 bg-white/10 dark:bg-white/[0.03] mix-blend-overlay pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 dark:from-[#0066ff]/25 via-transparent to-transparent blur-3xl -z-0" />
           
           <div className="relative z-10 flex flex-col gap-8">
             
@@ -200,8 +200,8 @@ export function Dashboard() {
             </div>
 
             {/* Your ventures - Multi-project portfolio (Glassmorphism #0066ff) */}
-            <div className="mt-4 bg-[#0066ff]/15 backdrop-blur-2xl border border-[#0066ff]/30 rounded-[28px] p-6 md:p-8 shadow-[0_15px_40px_rgba(0,102,255,0.2)]">
-              <div className="flex items-center justify-between mb-6 border-b border-[#0066ff]/20 pb-4">
+            <div className="mt-4 bg-[#0066ff]/15 dark:bg-black/35 backdrop-blur-2xl border border-[#0066ff]/30 dark:border-white/10 rounded-[28px] p-6 md:p-8 shadow-[0_15px_40px_rgba(0,102,255,0.2)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+              <div className="flex items-center justify-between mb-6 border-b border-[#0066ff]/20 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-5 h-5 text-white shadow-sm" />
                   <h2 className="text-sm font-black uppercase tracking-widest text-white drop-shadow-sm">Your ventures</h2>
@@ -209,7 +209,7 @@ export function Dashboard() {
                 <button
                   type="button"
                   onClick={() => navigate("/incubation-hub")}
-                  className="text-xs font-bold text-white hover:text-white transition-colors flex items-center gap-1 bg-[#0066ff]/30 border border-[#0066ff]/40 hover:bg-[#0066ff]/50 px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,102,255,0.2)] backdrop-blur-md"
+                  className="text-xs font-bold text-white hover:text-white transition-colors flex items-center gap-1 bg-[#0066ff]/30 dark:bg-[#0066ff]/25 border border-[#0066ff]/40 dark:border-[#58a6ff]/30 hover:bg-[#0066ff]/50 px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,102,255,0.2)] backdrop-blur-md"
                 >
                   <Plus className="w-3.5 h-3.5" /> Analyze a new idea
                 </button>
@@ -224,13 +224,13 @@ export function Dashboard() {
                       onClick={() => setActiveVentureId(v.id)}
                       className={`text-left rounded-2xl border p-5 transition-all duration-300 group backdrop-blur-md shadow-[0_4px_20px_rgba(0,102,255,0.1)] ${
                         activeVentureId === v.id
-                          ? "border-[#0066ff]/60 bg-[#0066ff]/40 text-white"
-                          : "border-[#0066ff]/30 bg-[#0066ff]/10 hover:border-[#0066ff]/50 hover:bg-[#0066ff]/30 text-white/90"
+                          ? "border-[#0066ff]/60 bg-[#0066ff]/40 dark:bg-[#0066ff]/30 dark:border-[#58a6ff]/50 text-white shadow-[0_0_20px_rgba(0,102,255,0.25)]"
+                          : "border-[#0066ff]/30 dark:border-white/10 bg-[#0066ff]/10 dark:bg-white/[0.04] hover:border-[#0066ff]/50 hover:dark:border-[#58a6ff]/30 hover:bg-[#0066ff]/30 hover:dark:bg-white/[0.08] text-white/90"
                       }`}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                          activeVentureId === v.id ? "bg-white text-[#0066ff] shadow-md" : "bg-[#0066ff]/30 border border-[#0066ff]/40 text-white group-hover:bg-[#0066ff]/50"
+                          activeVentureId === v.id ? "bg-white text-[#0066ff] shadow-md" : "bg-[#0066ff]/30 dark:bg-white/10 border border-[#0066ff]/40 dark:border-white/10 text-white group-hover:bg-[#0066ff]/50"
                         }`}>
                            <Building2 className="h-5 w-5" aria-hidden="true" />
                         </div>
@@ -242,9 +242,9 @@ export function Dashboard() {
                         {v.tagline && <p className="text-xs font-medium text-white/80 line-clamp-2">{v.tagline}</p>}
                       </div>
 
-                      <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border-t border-[#0066ff]/30 pt-3">
+                      <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border-t border-[#0066ff]/30 dark:border-white/10 pt-3">
                         <span className={`px-2 py-0.5 rounded-md border ${
-                          activeVentureId === v.id ? "bg-[#0066ff]/50 text-white border-[#0066ff]/40" : "bg-[#0066ff]/20 text-white/90 border-[#0066ff]/30"
+                          activeVentureId === v.id ? "bg-[#0066ff]/50 text-white border-[#0066ff]/40" : "bg-[#0066ff]/20 dark:bg-white/10 text-white/90 border-[#0066ff]/30 dark:border-white/10"
                         }`}>{v.stage || "idea"}</span>
                         <span className="text-white/90">GSIS {Math.round(v.gsisScore || 0)}</span>
                         <span className={`flex items-center gap-1 ${v.hasWorkspace ? "text-white" : "text-white/60"}`}>
@@ -256,7 +256,7 @@ export function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center p-8 bg-[#0066ff]/10 backdrop-blur-md rounded-2xl border border-[#0066ff]/20">
+                <div className="text-center p-8 bg-[#0066ff]/10 dark:bg-white/[0.04] backdrop-blur-md rounded-2xl border border-[#0066ff]/20 dark:border-white/10">
                   <p className="text-white/90 font-medium mb-4">You haven't added any ventures yet.</p>
                   <button onClick={() => navigate("/incubation-hub")} className="px-5 py-2.5 bg-[#0066ff] text-white font-bold rounded-xl hover:bg-[#0052cc] transition-all shadow-[0_4px_15px_rgba(0,102,255,0.4)]">
                     Start your first venture
