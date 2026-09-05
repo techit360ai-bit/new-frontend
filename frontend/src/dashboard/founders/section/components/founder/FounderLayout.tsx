@@ -7,6 +7,7 @@ import {
   ShieldCheck, Plug, Ticket, ChevronDown, PanelLeftClose, PanelLeftOpen,
   ArrowLeft, LogOut, ChevronRight, Menu, X, Search, Bell, Sun, Moon, Sparkles
 } from "lucide-react";
+import TechITLogo from "@/components/ui/TechITLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { useFounderProfile } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -148,12 +149,13 @@ export function FounderLayout() {
           } hidden lg:flex`}
         >
           {/* Header / TechIT Network Logo */}
-          <div className="flex items-center justify-between p-4 mb-1">
+          <div className={`flex items-center p-4 mb-2 ${sidebarCollapsed ? "flex-col justify-center gap-4" : "justify-between"}`}>
             {!sidebarCollapsed && (
               <Link to="/" className="flex items-center gap-2.5 group">
-                <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[#0066ff] to-[#58a6ff] flex items-center justify-center shrink-0 shadow-[0_4px_12px_rgba(0,102,255,0.35)]">
-                  <span className="text-white font-black text-sm">T</span>
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#20c937] shadow-[0_0_8px_#20c937] border-2 border-white" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-sm border border-black/[0.06]">
+                    <TechITLogo />
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[#171330] font-black tracking-tight leading-none text-[15px] group-hover:text-[#0066ff] transition-colors">TechIT Network</span>
@@ -162,20 +164,22 @@ export function FounderLayout() {
               </Link>
             )}
             {sidebarCollapsed && (
-              <Link to="/" className="mx-auto flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#0066ff] to-[#58a6ff] relative shadow-[0_4px_12px_rgba(0,102,255,0.35)]">
-                <span className="text-white font-black text-sm">T</span>
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#20c937] shadow-[0_0_8px_#20c937] border-2 border-white" />
+              <Link to="/" className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-[#0066ff] to-[#58a6ff] relative shadow-[0_4px_12px_rgba(0,102,255,0.35)] shrink-0">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-sm border border-black/[0.06]">
+                    <TechITLogo />
+                  </div>
               </Link>
             )}
-          </div>
 
-          {/* Collapse Toggle */}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="mx-4 mb-5 p-2 rounded-lg bg-[#f5f8ff] border border-black/[0.06] text-[#171330]/40 hover:bg-[#0066ff]/10 hover:text-[#0066ff] hover:border-[#0066ff]/20 transition-colors flex justify-center items-center"
-          >
-            {sidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-          </button>
+            {/* Collapse Toggle */}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="w-9 h-9 shrink-0 rounded-lg bg-[#f5f8ff] border border-black/[0.06] text-[#171330]/40 hover:bg-[#0066ff]/10 hover:text-[#0066ff] hover:border-[#0066ff]/20 transition-colors flex justify-center items-center"
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? <PanelLeftOpen className="w-[18px] h-[18px]" /> : <PanelLeftClose className="w-[18px] h-[18px]" />}
+            </button>
+          </div>
 
           {/* Sidenav Grouped Links */}
           <nav className="flex-1 overflow-y-auto px-3 pb-4 custom-scrollbar space-y-5">
@@ -217,34 +221,35 @@ export function FounderLayout() {
                             key={item.label}
                             to={item.path ?? "#"}
                             title={sidebarCollapsed ? item.label : undefined}
-                            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group/nav ${
+                            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group/nav ${
                               active
-                                ? "text-white shadow-[0_8px_20px_-4px_rgba(0,102,255,0.45)]"
-                                : "text-[#171330]/55 hover:bg-[#f5f8ff] hover:text-[#171330]"
+                                ? "text-[#0066ff]"
+                                : "text-[#171330]/55 hover:bg-black/[0.03] hover:text-[#171330]"
                             } ${sidebarCollapsed ? "justify-center" : ""}`}
                           >
                             {/* Premium sliding active background */}
                             {active && (
                               <motion.div
                                 layoutId="activeNavBg"
-                                className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#3d8bff]"
+                                className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#0066ff]/[0.08] to-transparent border border-[#0066ff]/20"
                                 transition={{ type: "spring", stiffness: 350, damping: 32 }}
                               />
                             )}
                             {active && !sidebarCollapsed && (
                               <motion.div
-                                layoutId="activeNavGlow"
-                                className="absolute -inset-px rounded-xl ring-1 ring-white/30 pointer-events-none"
+                                layoutId="activeNavIndicator"
+                                className="absolute left-[-4px] top-2 bottom-2 w-[3px] rounded-r-full bg-[#0066ff] shadow-[0_0_10px_rgba(0,102,255,0.4)]"
+                                transition={{ type: "spring", stiffness: 350, damping: 32 }}
                               />
                             )}
-                            <item.icon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-colors ${active ? "text-white" : "text-[#171330]/40 group-hover/nav:text-[#0066ff]"}`} />
+                            <item.icon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-colors ${active ? "text-[#0066ff]" : "text-[#171330]/40 group-hover/nav:text-[#0066ff]"}`} />
                             {!sidebarCollapsed && (
-                              <span className={`relative z-10 font-semibold text-sm truncate ${active ? "text-white" : ""}`}>
+                              <span className={`relative z-10 font-bold text-sm truncate ${active ? "text-[#0066ff]" : ""}`}>
                                 {item.label}
                               </span>
                             )}
                             {active && !sidebarCollapsed && (
-                              <span className="relative z-10 ml-auto w-1.5 h-1.5 rounded-full bg-white/80" />
+                              <span className="relative z-10 ml-auto w-1.5 h-1.5 rounded-full bg-[#0066ff]" />
                             )}
                           </Link>
                         );
@@ -335,7 +340,7 @@ export function FounderLayout() {
                 onClick={() => setMobileMenuOpen(true)}
                 className="lg:hidden p-2 rounded-lg bg-[#f5f8ff] text-[#171330] hover:bg-[#eef3ff] transition-colors shrink-0"
               >
-                <Menu className="w-5 h-5" />
+                <PanelLeftOpen className="w-[18px] h-[18px]" />
               </button>
 
               <h2 className="text-base font-bold text-[#171330] hidden lg:block shrink-0 mr-2">
@@ -526,10 +531,12 @@ export function FounderLayout() {
             >
               <div className="flex items-center justify-between p-5 border-b border-black/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#0066ff] to-[#58a6ff] flex items-center justify-center">
-                    <span className="text-white font-black text-xs">T</span>
+                  <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm">
+                    <TechITLogo />
                   </div>
-                  <span className="text-[#171330] font-black">TechIT Network</span>
+                </div>
+                  <span className="text-[#0066ff] font-black">TechIT Network</span>
                 </div>
                 <button onClick={() => setMobileMenuOpen(false)} className="text-[#171330]/40 hover:text-[#171330]">
                   <X className="w-5 h-5" />
@@ -550,9 +557,9 @@ export function FounderLayout() {
                             key={item.label}
                             to={item.path ?? "#"}
                             onClick={() => setMobileMenuOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold ${
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all ${
                               active
-                                ? "bg-gradient-to-r from-[#0066ff] to-[#3d8bff] text-white shadow-[0_8px_20px_-4px_rgba(0,102,255,0.45)]"
+                                ? "bg-gradient-to-r from-[#0066ff]/[0.08] to-transparent border border-[#0066ff]/20 text-[#0066ff]"
                                 : "text-[#171330]/60 hover:bg-[#f5f8ff] hover:text-[#171330]"
                             }`}
                           >
