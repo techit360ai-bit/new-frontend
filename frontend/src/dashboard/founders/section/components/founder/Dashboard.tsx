@@ -26,11 +26,11 @@ interface Build { id: string; name: string; logoEmoji: string; stage: FounderSta
 const NOW_MS = Date.now();
 
 const stageStyles: Record<string, string> = {
-  Idea:    "bg-slate-100 text-slate-600 border-slate-200",
-  MVP:     "bg-[#0066ff]/10 text-[#0066ff] border-[#0066ff]/20",
-  Beta:    "bg-[#0066ff]/10 text-[#0066ff] border-[#0066ff]/20",
-  Launch:  "bg-[#20c937]/10 text-[#20c937] border-[#20c937]/20",
-  Growth:  "bg-[#20c937]/10 text-[#20c937] border-[#20c937]/20",
+  Idea:    "bg-slate-100 text-slate-600 border-slate-200 dark:bg-white/10 dark:text-white dark:border-white/20",
+  MVP:     "bg-[#0066ff]/10 text-[#0066ff] border-[#0066ff]/20 dark:bg-[#0066ff]/20 dark:text-[#58a6ff] dark:border-[#0066ff]/30",
+  Beta:    "bg-[#0066ff]/10 text-[#0066ff] border-[#0066ff]/20 dark:bg-[#0066ff]/20 dark:text-[#58a6ff] dark:border-[#0066ff]/30",
+  Launch:  "bg-[#20c937]/10 text-[#20c937] border-[#20c937]/20 dark:bg-[#20c937]/20 dark:text-[#20c937] dark:border-[#20c937]/30",
+  Growth:  "bg-[#20c937]/10 text-[#20c937] border-[#20c937]/20 dark:bg-[#20c937]/20 dark:text-[#20c937] dark:border-[#20c937]/30",
 };
 
 function normalizedStage(stage: string | undefined): FounderStage {
@@ -52,12 +52,12 @@ function metricLabel(value: string) {
 
 function IntelligenceMetric({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
   return (
-    <div className="min-w-0 bg-[#0066ff]/[0.04] rounded-xl p-4 border border-[#0066ff]/10 shadow-sm hover:bg-[#0066ff]/10 transition-colors">
+    <div className="min-w-0 bg-[#0066ff]/[0.04] dark:bg-white/[0.04] rounded-xl p-4 border border-[#0066ff]/10 dark:border-white/10 shadow-sm hover:bg-[#0066ff]/10 dark:hover:bg-white/[0.08] transition-colors">
       <div className="flex items-center gap-2 mb-1.5">
-        <Icon className="w-4 h-4 text-[#171330]/50" />
-        <p className="text-[10px] font-bold tracking-widest uppercase text-[#171330]/50">{label}</p>
+        <Icon className="w-4 h-4 text-[#171330]/50 dark:text-[#58a6ff]" />
+        <p className="text-[10px] font-bold tracking-widest uppercase text-[#171330]/50 dark:text-white/50">{label}</p>
       </div>
-      <p className="truncate text-2xl font-black text-[#171330] tabular-nums tracking-tight">{value}</p>
+      <p className="truncate text-2xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">{value}</p>
     </div>
   );
 }
@@ -270,50 +270,50 @@ export function Dashboard() {
         {/* Startup hero */}
         {(p.startupName || activeVenture) && (
         <motion.div variants={itemVariant}>
-          <Link to="/incubation-hub" className="block group border border-[#0066ff]/15 shadow-[0_15px_40px_rgba(0,102,255,0.08)] bg-[#0066ff]/[0.02] backdrop-blur-3xl rounded-[32px] p-6 md:p-10 hover:border-[#0066ff]/30 hover:shadow-[0_20px_50px_rgba(0,102,255,0.15)] transition-all duration-300 relative overflow-hidden text-[#171330]">
+          <Link to="/incubation-hub" className="block group border border-[#0066ff]/15 dark:border-white/10 shadow-[0_15px_40px_rgba(0,102,255,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] bg-[#0066ff]/[0.02] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 hover:border-[#0066ff]/30 hover:dark:border-[#0066ff]/40 hover:shadow-[0_20px_50px_rgba(0,102,255,0.15)] transition-all duration-300 relative overflow-hidden text-[#171330] dark:text-white">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0066ff]/10 to-[#58a6ff]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             
             <div className="flex items-start gap-6 relative z-10">
-              <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-[#0066ff]/10 to-[#58a6ff]/5 flex items-center justify-center shrink-0 border border-[#0066ff]/20 shadow-sm group-hover:scale-110 transition-transform duration-500">
-                 <Rocket className="h-7 w-7 text-[#0066ff]" aria-hidden="true" />
+              <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-[#0066ff]/10 to-[#58a6ff]/5 dark:from-[#0066ff]/20 dark:to-[#58a6ff]/10 flex items-center justify-center shrink-0 border border-[#0066ff]/20 dark:border-[#0066ff]/30 shadow-sm group-hover:scale-110 transition-transform duration-500">
+                 <Rocket className="h-7 w-7 text-[#0066ff] dark:text-[#58a6ff]" aria-hidden="true" />
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <h2 className="text-2xl md:text-3xl font-black text-[#171330] tracking-tight">{activeVenture?.title ?? p.startupName}</h2>
+                  <h2 className="text-2xl md:text-3xl font-black text-[#171330] dark:text-white tracking-tight">{activeVenture?.title ?? p.startupName}</h2>
                   <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-widest border ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? stageStyles.Idea}`}>
                     {activeVenture ? normalizedStage(activeVenture.stage) : p.stage}
                   </span>
                 </div>
                 
-                <p className="text-sm md:text-base font-medium text-[#171330]/70 mb-8 max-w-2xl">{activeVenture?.tagline ?? p.oneLiner}</p>
+                <p className="text-sm md:text-base font-medium text-[#171330]/70 dark:text-white/70 mb-8 max-w-2xl">{activeVenture?.tagline ?? p.oneLiner}</p>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-sm bg-[#0066ff]/[0.04] rounded-2xl p-5 border border-[#0066ff]/10">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-sm bg-[#0066ff]/[0.04] dark:bg-white/[0.03] rounded-2xl p-5 border border-[#0066ff]/10 dark:border-white/10">
                   <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 uppercase tracking-widest"><Globe className="w-3 h-3" /> Active users</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330] tabular-nums tracking-tight">{p.users.toLocaleString()}</p>
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Globe className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Active users</div>
+                    <p className="text-3xl md:text-4xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">{p.users.toLocaleString()}</p>
                   </div>
-                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 pl-4 md:pl-6">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 uppercase tracking-widest"><Activity className="w-3 h-3" /> Revenue</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330] tabular-nums tracking-tight">${p.revenueMonthly.toLocaleString()}<span className="text-sm md:text-base text-[#171330]/40 font-bold ml-1">/mo</span></p>
+                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 dark:border-white/10 pl-4 md:pl-6">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Activity className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Revenue</div>
+                    <p className="text-3xl md:text-4xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">${p.revenueMonthly.toLocaleString()}<span className="text-sm md:text-base text-[#171330]/40 dark:text-white/40 font-bold ml-1">/mo</span></p>
                   </div>
-                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 pl-4 md:pl-6">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 uppercase tracking-widest"><Target className="w-3 h-3" /> Open roles</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330] tabular-nums tracking-tight">{p.openRoles.length} <span className="text-sm md:text-base text-[#171330]/40 font-bold ml-1">of 5</span></p>
+                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 dark:border-white/10 pl-4 md:pl-6">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Target className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Open roles</div>
+                    <p className="text-3xl md:text-4xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">{p.openRoles.length} <span className="text-sm md:text-base text-[#171330]/40 dark:text-white/40 font-bold ml-1">of 5</span></p>
                   </div>
-                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 pl-4 md:pl-6">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 uppercase tracking-widest"><Sparkles className="w-3 h-3" /> Investor fit</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330]/40 tabular-nums tracking-tight">?"</p>
+                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 dark:border-white/10 pl-4 md:pl-6">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Sparkles className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Investor fit</div>
+                    <p className="text-3xl md:text-4xl font-black text-[#171330]/40 dark:text-white/40 tabular-nums tracking-tight">—</p>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-6 mt-8 pt-6 border-t border-[#0066ff]/10 text-sm relative z-10">
-              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/settings#startup"); }} className="text-[#0066ff] font-bold hover:text-[#0052cc] transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
+            <div className="flex items-center gap-6 mt-8 pt-6 border-t border-[#0066ff]/10 dark:border-white/10 text-sm relative z-10">
+              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/settings#startup"); }} className="text-[#0066ff] dark:text-[#58a6ff] font-bold hover:text-[#0052cc] dark:hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
                 Edit details <ArrowRight className="w-3.5 h-3.5" />
               </button>
-              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/profile"); }} className="text-[#0066ff] font-bold hover:text-[#0052cc] transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
+              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/profile"); }} className="text-[#0066ff] dark:text-[#58a6ff] font-bold hover:text-[#0052cc] dark:hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
                 Public profile <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -323,25 +323,25 @@ export function Dashboard() {
 
         {/* GSIS v2 Dashboard Card */}
         {scorecard && (
-          <motion.div variants={itemVariant} className="border border-[#0066ff]/15 shadow-[0_20px_60px_rgba(0,102,255,0.08)] bg-[#0066ff]/[0.03] backdrop-blur-3xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-[#171330]">
+          <motion.div variants={itemVariant} className="border border-[#0066ff]/15 dark:border-white/10 shadow-[0_20px_60px_rgba(0,102,255,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] bg-[#0066ff]/[0.03] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-[#171330] dark:text-white">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#0066ff]/10 via-transparent to-transparent opacity-80 pointer-events-none" />
             
             <div className="flex flex-wrap items-start justify-between gap-6 relative z-10">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#0066ff]/10 border border-[#0066ff]/20 flex items-center justify-center">
-                    <Activity className="w-5 h-5 text-[#0066ff]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 border border-[#0066ff]/20 dark:border-[#0066ff]/30 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />
                   </div>
-                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-[#171330]">Startup Intelligence</h2>
-                  <span className="rounded-lg bg-[#0066ff]/5 border border-[#0066ff]/20 px-2 py-1 text-[10px] font-black tracking-widest text-[#171330]/60 uppercase">{scorecard.model.version}</span>
+                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-[#171330] dark:text-white">Startup Intelligence</h2>
+                  <span className="rounded-lg bg-[#0066ff]/5 dark:bg-white/5 border border-[#0066ff]/20 dark:border-white/10 px-2 py-1 text-[10px] font-black tracking-widest text-[#171330]/60 dark:text-white/60 uppercase">{scorecard.model.version}</span>
                 </div>
-                <p className="text-sm font-semibold text-[#171330]/70 max-w-lg leading-relaxed mt-4">{scorecard.stage.reason}</p>
+                <p className="text-sm font-semibold text-[#171330]/70 dark:text-white/70 max-w-lg leading-relaxed mt-4">{scorecard.stage.reason}</p>
               </div>
               
-              <div className="text-right bg-[#0066ff]/5 rounded-2xl p-5 border border-[#0066ff]/10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#171330]/50 mb-1">Global Startup Intelligence Score</p>
+              <div className="text-right bg-[#0066ff]/5 dark:bg-white/[0.04] rounded-2xl p-5 border border-[#0066ff]/10 dark:border-white/10">
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#171330]/50 dark:text-white/50 mb-1">Global Startup Intelligence Score</p>
                 <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#0066ff] to-[#58a6ff] tabular-nums tracking-tighter leading-none [text-shadow:0_0_30px_rgba(0,102,255,0.2)]">
-                  {displayScore(scorecard.gsis)}<span className="text-2xl text-[#171330]/30 font-bold ml-1">/100</span>
+                  {displayScore(scorecard.gsis)}<span className="text-2xl text-[#171330]/30 dark:text-white/30 font-bold ml-1">/100</span>
                 </p>
               </div>
             </div>
@@ -366,30 +366,30 @@ export function Dashboard() {
               </div>
               
               {scorecard.recommendation && (
-                <div className="bg-gradient-to-br from-[#0066ff]/10 to-[#58a6ff]/5 rounded-2xl p-6 border border-[#0066ff]/20 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><TrendingUp className="w-24 h-24 text-[#0066ff]" /></div>
+                <div className="bg-gradient-to-br from-[#0066ff]/10 to-[#58a6ff]/5 dark:from-[#0066ff]/20 dark:to-[#58a6ff]/10 rounded-2xl p-6 border border-[#0066ff]/20 dark:border-[#0066ff]/30 shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><TrendingUp className="w-24 h-24 text-[#0066ff] dark:text-[#58a6ff]" /></div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#58a6ff] mb-2 flex items-center gap-1.5 relative z-10"><TrendingUp className="w-3.5 h-3.5" /> Next best action</p>
-                  <p className="text-xl font-black text-[#171330] relative z-10">{scorecard.recommendation.action}</p>
-                  <p className="mt-3 text-sm font-medium text-[#0066ff] relative z-10">{scorecard.recommendation.next_milestone}</p>
+                  <p className="text-xl font-black text-[#171330] dark:text-white relative z-10">{scorecard.recommendation.action}</p>
+                  <p className="mt-3 text-sm font-medium text-[#0066ff] dark:text-[#58a6ff] relative z-10">{scorecard.recommendation.next_milestone}</p>
                 </div>
               )}
             </div>
             
-            <div className="mt-8 border-t border-[#0066ff]/10 pt-6 relative z-10 bg-[#0066ff]/[0.05] -mx-6 md:-mx-10 -mb-6 md:-mb-10 p-6 md:p-10 rounded-b-[32px]">
+            <div className="mt-8 border-t border-[#0066ff]/10 dark:border-white/10 pt-6 relative z-10 bg-[#0066ff]/[0.05] dark:bg-white/[0.02] -mx-6 md:-mx-10 -mb-6 md:-mb-10 p-6 md:p-10 rounded-b-[32px]">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] ${scorecard.readiness.status === 'READY' ? 'bg-[#20c937] text-[#20c937]' : 'bg-amber-400 text-amber-400 animate-pulse'}`} />
-                  <p className="text-sm font-bold text-[#171330]">
+                  <p className="text-sm font-bold text-[#171330] dark:text-white">
                     <span className="capitalize">{metricLabel(scorecard.readiness.next_stage)}</span> gate: <span className={scorecard.readiness.status === 'READY' ? 'text-[#20c937]' : 'text-amber-500'}>{metricLabel(scorecard.readiness.status)}</span>
                   </p>
                 </div>
-                <div className="flex items-center gap-4 bg-[#0066ff]/[0.04] rounded-xl px-4 py-2 border border-[#0066ff]/10 shadow-sm">
-                  <p className="text-[10px] font-bold text-[#171330]/60 uppercase tracking-widest flex items-center gap-1.5">
-                    <Target className="w-3.5 h-3.5 text-[#0066ff]" /> {Math.round(scorecard.data_coverage * 100)}% coverage
+                <div className="flex items-center gap-4 bg-[#0066ff]/[0.04] dark:bg-white/[0.04] rounded-xl px-4 py-2 border border-[#0066ff]/10 dark:border-white/10 shadow-sm">
+                  <p className="text-[10px] font-bold text-[#171330]/60 dark:text-white/60 uppercase tracking-widest flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-[#0066ff] dark:text-[#58a6ff]" /> {Math.round(scorecard.data_coverage * 100)}% coverage
                   </p>
-                  <div className="w-px h-3 bg-[#0066ff]/20" />
-                  <p className="text-[10px] font-bold text-[#171330]/60 uppercase tracking-widest flex items-center gap-1.5">
-                    <CheckCircle className="w-3.5 h-3.5 text-[#0066ff]" /> {Math.round(scorecard.confidence * 100)}% confidence
+                  <div className="w-px h-3 bg-[#0066ff]/20 dark:bg-white/10" />
+                  <p className="text-[10px] font-bold text-[#171330]/60 dark:text-white/60 uppercase tracking-widest flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-[#0066ff] dark:text-[#58a6ff]" /> {Math.round(scorecard.confidence * 100)}% confidence
                   </p>
                 </div>
               </div>
@@ -402,16 +402,16 @@ export function Dashboard() {
           const regs = p.hackathonRegistrations;
           if (regs.length === 0) {
             return (
-              <motion.div variants={itemVariant} className="border border-[#0066ff]/15 shadow-[0_15px_40px_rgba(0,102,255,0.08)] bg-[#0066ff]/[0.03] backdrop-blur-3xl rounded-[32px] p-6 md:p-10 text-[#171330]">
+              <motion.div variants={itemVariant} className="border border-[#0066ff]/15 dark:border-white/10 shadow-[0_15px_40px_rgba(0,102,255,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] bg-[#0066ff]/[0.03] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 text-[#171330] dark:text-white">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#0066ff]/10 border border-[#0066ff]/20 flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-[#0066ff]" />
+                      <div className="w-10 h-10 rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 border border-[#0066ff]/20 dark:border-[#0066ff]/30 flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />
                       </div>
-                      <h2 className="text-base font-black uppercase tracking-widest text-[#171330]">Hackathon Momentum</h2>
+                      <h2 className="text-base font-black uppercase tracking-widest text-[#171330] dark:text-white">Hackathon Momentum</h2>
                     </div>
-                    <p className="text-sm font-medium text-[#171330]/70 max-w-2xl leading-relaxed">
+                    <p className="text-sm font-medium text-[#171330]/70 dark:text-white/70 max-w-2xl leading-relaxed">
                       No active hackathons. Join a hackathon from the Opportunity Hub to see your team's momentum tracker here &mdash; 4-hour check-ins, build velocity, and blockers.
                     </p>
                   </div>
@@ -423,16 +423,16 @@ export function Dashboard() {
             );
           }
           return (
-            <motion.div variants={itemVariant} className="border border-[#20c937]/30 shadow-[0_20px_60px_rgba(32,201,55,0.15)] bg-[#20c937]/[0.05] backdrop-blur-3xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-[#171330]">
+            <motion.div variants={itemVariant} className="border border-[#20c937]/30 dark:border-white/10 shadow-[0_20px_60px_rgba(32,201,55,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] bg-[#20c937]/[0.05] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-[#171330] dark:text-white">
               <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#20c937]/20 via-transparent to-transparent opacity-60 pointer-events-none" />
               
-              <div className="flex items-center gap-3 mb-8 relative z-10 border-b border-[#20c937]/20 pb-6">
+              <div className="flex items-center gap-3 mb-8 relative z-10 border-b border-[#20c937]/20 dark:border-white/10 pb-6">
                 <div className="w-12 h-12 rounded-xl bg-[#20c937]/20 border border-[#20c937]/30 flex items-center justify-center shadow-sm">
                   <Zap className="w-6 h-6 text-[#20c937]" />
                 </div>
                 <div>
-                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-[#171330]">Hackathon Momentum</h2>
-                  <p className="text-xs font-bold text-[#171330]/60 uppercase tracking-widest mt-1">Live tracking and velocity</p>
+                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-[#171330] dark:text-white">Hackathon Momentum</h2>
+                  <p className="text-xs font-bold text-[#171330]/60 dark:text-white/60 uppercase tracking-widest mt-1">Live tracking and velocity</p>
                 </div>
               </div>
               
@@ -451,23 +451,23 @@ export function Dashboard() {
                   const ctaStage = momentum.nextAction === "submit-brief" ? "brief" : "build";
                   
                   return (
-                    <li key={r.teamId} className="flex flex-col lg:flex-row lg:items-center gap-6 border border-[#20c937]/20 bg-[#20c937]/[0.05] rounded-2xl p-5 md:p-6 hover:border-[#20c937]/40 hover:bg-[#20c937]/10 transition-all duration-300 group shadow-sm">
-                      <div className="text-4xl shrink-0 bg-white/60 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm border border-[#20c937]/20 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">{h.poster}</div>
+                    <li key={r.teamId} className="flex flex-col lg:flex-row lg:items-center gap-6 border border-[#20c937]/20 dark:border-white/10 bg-[#20c937]/[0.05] dark:bg-white/[0.03] rounded-2xl p-5 md:p-6 hover:border-[#20c937]/40 hover:bg-[#20c937]/10 hover:dark:bg-white/[0.06] transition-all duration-300 group shadow-sm">
+                      <div className="text-4xl shrink-0 bg-white/60 dark:bg-white/10 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm border border-[#20c937]/20 dark:border-white/10 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">{h.poster}</div>
                       
                       <div className="flex-1 min-w-0">
-                        <p className="text-xl font-black text-[#171330] truncate mb-2">{h.title}</p>
+                        <p className="text-xl font-black text-[#171330] dark:text-white truncate mb-2">{h.title}</p>
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className="text-[10px] font-black uppercase tracking-widest bg-[#20c937]/20 px-2 py-1 rounded-md text-[#171330]">{r.teamName}</span>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#171330]/60 flex items-center gap-1.5"><Building2 className="w-3 h-3" /> {memberCount}/{teamSize} members</span>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#171330]/60 flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {startsLabel}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest bg-[#20c937]/20 dark:bg-white/10 px-2 py-1 rounded-md text-[#171330] dark:text-white">{r.teamName}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#171330]/60 dark:text-white/60 flex items-center gap-1.5"><Building2 className="w-3 h-3" /> {memberCount}/{teamSize} members</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#171330]/60 dark:text-white/60 flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {startsLabel}</span>
                         </div>
                         <p className="text-xs font-bold text-[#20c937] mt-3 uppercase tracking-widest">{momentum.nextActionLabel}</p>
                       </div>
                       
-                      <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 border-t border-[#20c937]/20 lg:border-0 pt-5 lg:pt-0 lg:w-48 shrink-0">
+                      <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 border-t border-[#20c937]/20 dark:border-white/10 lg:border-0 pt-5 lg:pt-0 lg:w-48 shrink-0">
                         <div className="text-right flex-1 lg:flex-none">
                           <p className={`text-4xl font-black tabular-nums tracking-tighter ${momColor.text}`}>{momentum.score}</p>
-                          <div className="h-1.5 w-full lg:w-24 rounded-full bg-[#20c937]/20 mt-2">
+                          <div className="h-1.5 w-full lg:w-24 rounded-full bg-[#20c937]/20 dark:bg-white/10 mt-2">
                             <div className={`h-1.5 rounded-full ${momColor.bar} shadow-[0_0_10px_currentColor]`} style={{ width: `${momentum.score}%` }} />
                           </div>
                         </div>
