@@ -10,6 +10,7 @@ function wait(ms: number): Promise<void> {
 export async function fetchIdempotent(run: () => Promise<Response>): Promise<Response> {
   const started = Date.now();
   let lastError: unknown;
+  let lastResponse: Response | null = null;
   for (let attempt = 0; attempt <= delays.length; attempt += 1) {
     try {
       const response = await run();
@@ -17,6 +18,7 @@ export async function fetchIdempotent(run: () => Promise<Response>): Promise<Res
         observeRequest({ ok: response.ok, latencyMs: Date.now() - started });
         return response;
       }
+      lastResponse = response;
       lastError = new Error(`Temporary service failure (${response.status})`);
     } catch (error) {
       if (!isNetworkFailure(error) || attempt === delays.length) {
@@ -28,5 +30,6 @@ export async function fetchIdempotent(run: () => Promise<Response>): Promise<Res
     if (attempt < delays.length) await wait(delays[attempt]);
   }
   observeRequest({ ok: false, latencyMs: Date.now() - started });
+  if (lastResponse) return lastResponse;
   throw lastError instanceof Error ? lastError : new Error('Request failed');
 }

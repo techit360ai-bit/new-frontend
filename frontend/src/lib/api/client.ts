@@ -48,6 +48,8 @@ let authTokenGetter: (() => string | null) | null = null;
 let accessToken: string | null = null;
 let refreshPromise: Promise<string | null> | null = null;
 const inFlightGets = new Map<string, Promise<unknown>>();
+const etags = new Map<string, string>();
+const etagBodies = new Map<string, unknown>();
 function sessionValue(key: string) { try { return typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null } catch { return null } }
 function setSessionValue(key: string, value: string | null) { try { if (typeof sessionStorage !== 'undefined') { if (value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key) } } catch {} }
 export function setAuthTokenGetter(fn: () => string | null) {
@@ -78,13 +80,31 @@ async function parse<T>(res: Response): Promise<T> {
 }
 
 async function requestWithRefresh<T>(path: string, init: RequestInit, method: string, body?: unknown): Promise<T> {
-  const run = () => fetch(apiUrl(path), { method, ...init, headers: headers(init.headers), body: body === undefined ? init.body : JSON.stringify(body), credentials: 'include', signal: timeoutSignal(init) })
+  const url = apiUrl(path);
+  const run = () => {
+    const requestHeaders = headers(init.headers) as Record<string, string>;
+    if (method === 'GET' && etags.has(url)) requestHeaders['If-None-Match'] = etags.get(url)!;
+    return fetch(url, { method, ...init, headers: requestHeaders, body: body === undefined ? init.body : JSON.stringify(body), credentials: 'include', signal: timeoutSignal(init) });
+  }
   let response = method === 'GET' ? await fetchIdempotent(run) : await run()
   if (response.status === 401 && getAuthToken() && path !== '/auth/refresh' && path !== 'auth/refresh') {
     const token = await refreshAccessToken()
     if (token) response = await run()
   }
-  return parse<T>(response)
+  if (method === 'GET' && response.status === 304 && etagBodies.has(url)) return etagBodies.get(url) as T;
+  const parsed = await parse<T>(response);
+  if (method === 'GET') {
+    const etag = response.headers.get('ETag');
+    if (etag) {
+      etags.set(url, etag);
+      etagBodies.set(url, parsed);
+    }
+  }
+  return parsed;
+}
+
+export function isCapacityError(error: unknown): error is ApiError {
+  return error instanceof ApiError && (error.status === 429 || error.status === 503);
 }
 
 export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
