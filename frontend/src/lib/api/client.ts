@@ -30,11 +30,16 @@ function timeoutSignal(init?: RequestInit): AbortSignal {
 export class ApiError extends Error {
   status: number;
   body: unknown;
+  retryAfterSeconds?: number;
   constructor(status: number, message: string, body?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.body = body;
+    const retry = typeof body === "object" && body !== null && "retryAfterSeconds" in body
+      ? Number((body as { retryAfterSeconds?: unknown }).retryAfterSeconds)
+      : NaN;
+    if (Number.isFinite(retry) && retry > 0) this.retryAfterSeconds = retry;
   }
 }
 
@@ -42,6 +47,7 @@ export class ApiError extends Error {
 let authTokenGetter: (() => string | null) | null = null;
 let accessToken: string | null = null;
 let refreshPromise: Promise<string | null> | null = null;
+const inFlightGets = new Map<string, Promise<unknown>>();
 function sessionValue(key: string) { try { return typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null } catch { return null } }
 function setSessionValue(key: string, value: string | null) { try { if (typeof sessionStorage !== 'undefined') { if (value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key) } } catch {} }
 export function setAuthTokenGetter(fn: () => string | null) {
@@ -82,7 +88,15 @@ async function requestWithRefresh<T>(path: string, init: RequestInit, method: st
 }
 
 export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
-  return requestWithRefresh<T>(path, init || {}, 'GET')
+  const token = getAuthToken() || "anonymous";
+  const key = `${token}:${path}:${JSON.stringify(init?.headers || {})}`;
+  const existing = inFlightGets.get(key);
+  if (existing) return existing as Promise<T>;
+  const request = requestWithRefresh<T>(path, init || {}, 'GET').finally(() => {
+    if (inFlightGets.get(key) === request) inFlightGets.delete(key);
+  });
+  inFlightGets.set(key, request);
+  return request;
 }
 
 export async function apiPost<T>(
