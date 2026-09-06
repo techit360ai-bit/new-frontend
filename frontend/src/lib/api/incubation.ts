@@ -389,12 +389,32 @@ export interface FastTrackPayload {
   model_id?: string;
 }
 
+export interface IncubationJobResponse {
+  job_id: string;
+  status: string;
+  idempotent?: boolean;
+}
+
+export interface IncubationJobStatus extends IncubationJobResponse {
+  result?: PipelineBlueprint;
+  error?: string;
+  progress?: { stage?: string; step?: string };
+}
+
 /** POST /api/v1/incubation/fast-track/run — enriched pipeline for existing startups. */
-export function runFastTrack(payload: FastTrackPayload): Promise<PipelineBlueprint | null> {
+export function runFastTrack(payload: FastTrackPayload, init?: RequestInit): Promise<(PipelineBlueprint & { job_id?: never }) | IncubationJobResponse | null> {
   return withFallback(
-    () => apiPost<PipelineBlueprint>("/incubation/fast-track/run", payload),
+    () => apiPost<PipelineBlueprint | IncubationJobResponse>("/incubation/fast-track/run", payload, init),
     () => null,
     "fast-track pipeline",
+  );
+}
+
+export function getIncubationJobStatus(jobId: string): Promise<IncubationJobStatus | null> {
+  return withFallback(
+    () => apiGet<IncubationJobStatus>(`/incubation/jobs/${encodeURIComponent(jobId)}`),
+    () => null,
+    "incubation job status",
   );
 }
 

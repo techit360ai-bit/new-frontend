@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import {
   runFastTrack,
+  getIncubationJobStatus,
   uploadIncubationDocument,
   publishToInvestors,
   generateBusinessPlan,
@@ -116,11 +117,6 @@ export function FastTrackPanel() {
     setPipelineError(null);
     setProgressIndex(0);
 
-    // Simulate progress steps while waiting for the actual pipeline
-    const interval = setInterval(() => {
-      setProgressIndex((prev) => Math.min(prev + 1, PIPELINE_STEPS.length - 1));
-    }, 3000);
-
     const payload: FastTrackPayload = {
       startup_name: startupName.trim(),
       industry: industry.trim(),
@@ -133,8 +129,22 @@ export function FastTrackPanel() {
       founder_constraints: { preferred_mvp_timeline: timeConstraint },
     };
 
-    const result = await runFastTrack(payload);
-    clearInterval(interval);
+    const asyncMode = import.meta.env.VITE_AI_ASYNC_JOBS === "true";
+    const submitted = await runFastTrack(payload, asyncMode ? { headers: { "X-TechIT-Async": "true", "Idempotency-Key": crypto.randomUUID() } } : undefined);
+    let result: PipelineBlueprint | null = submitted && !("job_id" in submitted)
+      ? submitted
+      : null;
+    if (submitted && "job_id" in submitted && submitted.job_id) {
+      const pollLimit = Number(import.meta.env.VITE_AI_JOB_POLL_LIMIT || "180") || 180;
+      for (let attempt = 0; attempt < pollLimit; attempt += 1) {
+        const status = await getIncubationJobStatus(submitted.job_id);
+        if (!status) break;
+        if (status.status === "completed" && status.result) { result = status.result; break; }
+        if (["failed", "revoked"].includes(status.status)) { setPipelineError(status.error || "Pipeline failed. Please retry."); result = null; break; }
+        setProgressIndex(status.status === "queued" ? 0 : status.status === "progress" ? 1 : 2);
+        await new Promise((resolve) => window.setTimeout(resolve, 2000));
+      }
+    }
 
     if (result) {
       setProgressIndex(PIPELINE_STEPS.length);
