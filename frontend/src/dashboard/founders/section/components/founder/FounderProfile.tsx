@@ -144,11 +144,11 @@ export function FounderProfile() {
     serial: "Serial",
   };
   const stageStyles: Record<string, string> = {
-    Idea: "bg-slate-100 text-slate-700",
-    MVP: "bg-violet-50 text-violet-700",
-    Beta: "bg-amber-50 text-amber-700",
-    Launch: "bg-emerald-50 text-emerald-700",
-    Growth: "bg-emerald-50 text-emerald-700",
+    Idea: "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300",
+    MVP: "bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]",
+    Beta: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    Launch: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    Growth: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   };
 
   const rolesQuery = encodeURIComponent(openRoles.join(","));
@@ -158,36 +158,36 @@ export function FounderProfile() {
   const journey = useMemo(() => buildJourney(p), [p]);
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
 
       {/* 1. Header strip */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6 flex items-start gap-4">
-        <div className="w-16 h-16 rounded-full bg-violet-600 text-white text-xl font-semibold flex items-center justify-center shrink-0">
+      <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col sm:flex-row items-start gap-5">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white text-xl font-bold flex items-center justify-center shrink-0 shadow-[0_4px_15px_rgba(0,102,255,0.25)]">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-slate-900">{p.name}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{p.name}</h1>
             {isVerified && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 inline-flex items-center gap-1">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
                 <Check className="w-3 h-3" />
                 Verified
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
             {p.title} · {p.location} · {p.yearsBuilding} years building ·{" "}
             {founderTypeLabel[p.founderType] ?? "Founder"}
           </p>
-          <p className="text-base text-slate-700 italic mt-2">"{p.headline}"</p>
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-            <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full" />
+          <p className="text-base text-slate-700 dark:text-slate-300 italic mt-2.5">"{p.headline}"</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2.5 flex items-center gap-1.5 font-medium">
+            <span className="inline-block w-2 h-2 bg-[#20c937] rounded-full" />
             Building · {p.currentTeamSize} cofounders · {openRoles.length} of 5 roles open
           </p>
         </div>
         <Link
           to="/founder/settings#identity"
-          className="text-sm text-violet-600 hover:underline shrink-0"
+          className="text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline shrink-0"
         >
           Edit profile →
         </Link>
@@ -196,105 +196,107 @@ export function FounderProfile() {
       {/* 2. Startup hero */}
       <Link
         to="/incubation-hub"
-        className="block border border-slate-200 bg-white rounded-xl p-6 hover:border-violet-300 transition-colors"
+        className="block border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 hover:border-[#0066ff]/30 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all group"
       >
         <div className="flex items-start gap-4">
-                  <Building2 className="h-9 w-9 text-slate-500" aria-hidden="true" />
+          <div className="p-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.06] text-slate-500 dark:text-slate-400">
+            <Building2 className="h-7 w-7" aria-hidden="true" />
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-xl font-bold text-slate-900">{p.startupName}</h2>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[p.stage] ?? stageStyles.Idea}`}>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors">{p.startupName}</h2>
+              <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${stageStyles[p.stage] ?? stageStyles.Idea}`}>
                 {p.stage ?? "Idea"}
               </span>
             </div>
-            <p className="text-sm text-slate-600 mb-1">{p.oneLiner ?? "No venture summary has been added yet."}</p>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-1">{p.oneLiner ?? "No venture summary has been added yet."}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
               Founded {p.foundingYear} · {industries.join(" · ")}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm border-t border-slate-100 pt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm border-t border-black/[0.06] dark:border-white/10 pt-4">
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
                   {(p.users ?? 0).toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Active users</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Active users</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
                   ${(p.revenueMonthly ?? 0).toLocaleString()}/mo
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Revenue</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Revenue</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-black text-slate-900 dark:text-white">
                   {launchLabel[p.launchStatus] ?? "Pre-launch"}
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Launch status</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Launch status</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
                   ${(p.fundingRaised ?? 0).toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Funding</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Funding</p>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">Next milestone: {p.nextMilestone}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 font-medium">Next milestone: {p.nextMilestone}</p>
           </div>
         </div>
       </Link>
 
       {/* 3. Mission */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Mission</h2>
+      <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Mission</h2>
         <div className="space-y-4">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Why I'm building this</p>
-            <p className="text-sm text-slate-700">"{p.whyBuilding}"</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Why I'm building this</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">"{p.whyBuilding}"</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">What winning looks like</p>
-            <p className="text-sm text-slate-700">"{p.winningIn3Years}"</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">What winning looks like</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">"{p.winningIn3Years}"</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Unfair advantage</p>
-            <p className="text-sm text-slate-700">"{p.unfairAdvantage}"</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Unfair advantage</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">"{p.unfairAdvantage}"</p>
           </div>
         </div>
       </div>
 
       {/* 4. Compensation philosophy */}
-      <div className="border border-violet-200 bg-violet-50 rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-violet-700 uppercase tracking-wider mb-2">
+      <div className="border border-[#0066ff]/20 bg-[#0066ff]/5 dark:bg-[#0066ff]/10 rounded-2xl p-6">
+        <h2 className="text-sm font-bold text-[#0066ff] dark:text-[#58a6ff] uppercase tracking-wider mb-2">
           Building for Ownership
         </h2>
-        <p className="text-base text-slate-900">{ownershipLabel[p.ownershipPhilosophy]}</p>
-        <p className="text-sm text-slate-700 mt-1">
+        <p className="text-base font-bold text-slate-900 dark:text-white">{ownershipLabel[p.ownershipPhilosophy]}</p>
+        <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">
           {p.equityRangeMin ?? 0}%–{p.equityRangeMax ?? 0}% range · {compLabel[p.compensationOffered] ?? "Not specified"}
         </p>
       </div>
 
       {/* 5. Open roles */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">
+      <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">
           Open roles ({openRoles.length} of 5)
         </h2>
         {openRoles.length === 0 ? (
-          <p className="text-sm text-slate-500">No open roles right now.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">No open roles right now.</p>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {openRoles.map((role) => (
-                <div key={role} className="border border-slate-200 bg-white rounded-lg p-3">
-                  <p className="text-sm font-semibold text-slate-900">{role}</p>
-                  <p className="text-xs text-slate-600 mt-1 tabular-nums">
+                <div key={role} className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-3.5">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">{role}</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 tabular-nums font-semibold">
                     {p.equityRangeMin ?? 0}–{p.equityRangeMax ?? 0}% equity
                   </p>
-                  <p className="text-xs text-slate-500">{compLabel[p.compensationOffered] ?? "Not specified"}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{compLabel[p.compensationOffered] ?? "Not specified"}</p>
                 </div>
               ))}
             </div>
             <Link
               to={matchresultsHref}
-              className="text-sm text-violet-600 hover:underline mt-3 inline-block"
+              className="text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline mt-4 inline-block"
             >
               See all collaborators matching these roles →
             </Link>
@@ -303,34 +305,34 @@ export function FounderProfile() {
       </div>
 
       {/* 6. Stage journey (compact, read-only) */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Journey</h2>
+      <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Journey</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {journey.map((stage) => {
             const cardClass =
               stage.status === "active"
-                ? "border-violet-200 bg-violet-50"
+                ? "border-[#0066ff]/30 bg-[#0066ff]/10"
                 : stage.status === "complete"
-                ? "border-violet-200 bg-white"
-                : "border-slate-200 bg-slate-50";
+                ? "border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10"
+                : "border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]";
             const labelClass =
               stage.status === "active"
-                ? "text-violet-700"
+                ? "text-[#0066ff] dark:text-[#58a6ff]"
                 : stage.status === "complete"
-                ? "text-slate-700"
-                : "text-slate-400";
+                ? "text-emerald-700 dark:text-emerald-400"
+                : "text-slate-500 dark:text-slate-400";
             return (
-              <div key={stage.id} className={`border rounded-lg p-3 ${cardClass}`}>
-                <p className={`text-xs font-semibold ${labelClass}`}>{stage.label}</p>
+              <div key={stage.id} className={`border rounded-xl p-3.5 ${cardClass}`}>
+                <p className={`text-xs font-bold ${labelClass}`}>{stage.label}</p>
                 {stage.status !== "upcoming" && (
-                  <div className="mt-2 h-1 rounded-full bg-slate-200 overflow-hidden">
+                  <div className="mt-2 h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.06] overflow-hidden">
                     <div
-                      className="h-full bg-violet-500 rounded-full"
+                      className={`h-full rounded-full ${stage.status === "complete" ? "bg-emerald-500" : "bg-[#0066ff]"}`}
                       style={{ width: `${stage.progress}%` }}
                     />
                   </div>
                 )}
-                <p className="text-xs text-slate-500 mt-1">{stage.detail}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">{stage.detail}</p>
               </div>
             );
           })}
@@ -338,25 +340,25 @@ export function FounderProfile() {
       </div>
 
       {/* 7. Recent endorsements (top 3) */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent endorsements</h2>
+      <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Recent endorsements</h2>
         {endorsementsLoading && (
-          <p className="text-sm text-slate-500">Loading live endorsements...</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Loading live endorsements...</p>
         )}
         {!endorsementsLoading && endorsementsError && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-rose-600 dark:text-rose-400">
             Live endorsements are unavailable: {endorsementsError}
           </p>
         )}
         {!endorsementsLoading && !endorsementsError && endorsements.length === 0 && (
-          <p className="text-sm text-slate-500">No live endorsements are recorded yet.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">No live endorsements are recorded yet.</p>
         )}
         {!endorsementsLoading && !endorsementsError && endorsements.length > 0 && (
           <div className="space-y-3">
             {endorsements.slice(0, 3).map((endorsement) => (
-              <div key={endorsement.id} className="border border-slate-200 bg-white rounded-lg p-4">
-                <p className="text-sm text-slate-700">"{endorsement.quote}"</p>
-                <p className="text-xs text-slate-500 mt-2">
+              <div key={endorsement.id} className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-4">
+                <p className="text-sm text-slate-700 dark:text-slate-300">"{endorsement.quote}"</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">
                   {endorsement.authorName} · {endorsement.authorRole}
                   {endorsement.projectName ? ` · ${endorsement.projectName}` : ""}
                   {endorsement.createdAt
@@ -373,8 +375,8 @@ export function FounderProfile() {
 
       {/* 8. Pinned work (only if present) */}
       {(p.pinnedWork ?? []).length > 0 && (
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Pinned work</h2>
+        <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Pinned work</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {(p.pinnedWork ?? []).slice(0, 3).map((url) => (
               <a
@@ -382,10 +384,10 @@ export function FounderProfile() {
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="border border-slate-200 bg-white rounded-lg p-3 flex items-center gap-2 hover:border-violet-300"
+                className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-3.5 flex items-center gap-2 hover:border-[#0066ff]/30 transition-colors"
               >
                 <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
-                <span className="text-sm text-slate-700 truncate">{url}</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300 truncate font-medium">{url}</span>
               </a>
             ))}
           </div>
@@ -393,12 +395,12 @@ export function FounderProfile() {
       )}
 
       {/* 9. Verification */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
+      <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-700">Verification</h2>
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Verification</h2>
           <Link
             to="/founder/settings#verification"
-            className="text-xs text-violet-600 hover:underline"
+            className="text-xs font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline"
           >
             Complete verification →
           </Link>
@@ -413,10 +415,10 @@ export function FounderProfile() {
           ].map((b) => (
             <span
               key={b.label}
-              className={`px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-full font-semibold inline-flex items-center gap-1.5 ${
                 b.verified
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-slate-100 text-slate-500"
+                  ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400"
+                  : "bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 text-slate-500 dark:text-slate-400"
               }`}
             >
               <span
@@ -431,15 +433,15 @@ export function FounderProfile() {
       </div>
 
       {/* 10. Social links */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Links</h2>
-        <div className="flex flex-wrap gap-4 text-sm">
+      <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Links</h2>
+        <div className="flex flex-wrap gap-4 text-sm font-medium">
           {p.links?.github && (
             <a
               href={`https://${p.links.github.replace(/^https?:\/\//, "")}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-slate-700 hover:text-violet-600"
+              className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors"
             >
               <Github className="w-4 h-4" /> {p.links.github}
             </a>
@@ -449,13 +451,13 @@ export function FounderProfile() {
               href={`https://${p.links.linkedin.replace(/^https?:\/\//, "")}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-slate-700 hover:text-violet-600"
+              className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors"
             >
               <Linkedin className="w-4 h-4" /> {p.links.linkedin}
             </a>
           )}
           {p.links?.twitter && (
-            <span className="flex items-center gap-1.5 text-slate-700">
+            <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
               <Twitter className="w-4 h-4" /> {p.links.twitter}
             </span>
           )}
@@ -464,7 +466,7 @@ export function FounderProfile() {
               href={`https://${p.links.personal.replace(/^https?:\/\//, "")}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-slate-700 hover:text-violet-600"
+              className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors"
             >
               <Globe className="w-4 h-4" /> {p.links.personal}
             </a>
