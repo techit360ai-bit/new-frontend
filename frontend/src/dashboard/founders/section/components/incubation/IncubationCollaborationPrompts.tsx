@@ -172,56 +172,60 @@ export function CollaboratorInviteDialog({
       : [...current, role]);
   };
 
-  const inputClass = "mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-violet-500";
+  const inputClass = "mt-1 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-colors";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto bg-white dark:bg-[#121212] border border-black/[0.08] dark:border-white/10 text-slate-800 dark:text-slate-200">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-violet-600" /> Find the right collaborators</DialogTitle>
-          <DialogDescription>Your validated inputs create the factual project brief below. Compensation remains a proposal until both sides agree.</DialogDescription>
+          <DialogTitle className="flex items-center gap-2 font-bold text-[#171330] dark:text-white">
+            <Users className="h-5 w-5 text-[#0066ff] dark:text-[#58a6ff]" /> Find the right collaborators
+          </DialogTitle>
+          <DialogDescription className="text-slate-500 dark:text-slate-400">
+            Your validated inputs create the factual project brief below. Compensation remains a proposal until both sides agree.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="sm:col-span-2 text-xs font-semibold text-slate-700">
+          <label className="sm:col-span-2 text-xs font-bold text-slate-700 dark:text-slate-300">
             Project summary
             <textarea value={summary} onChange={(event) => setSummary(event.target.value.slice(0, 500))} rows={3} className={inputClass} />
           </label>
-          <label className="text-xs font-semibold text-slate-700">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Collaborator role
             <input value={requestedRole} onChange={(event) => setRequestedRole(event.target.value)} placeholder="Backend Engineer" className={inputClass} />
           </label>
-          <label className="text-xs font-semibold text-slate-700">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Required skills, comma separated
             <input value={skills} onChange={(event) => setSkills(event.target.value)} placeholder="Node.js, Postgres, APIs" className={inputClass} />
           </label>
-          <label className="sm:col-span-2 text-xs font-semibold text-slate-700">
+          <label className="sm:col-span-2 text-xs font-bold text-slate-700 dark:text-slate-300">
             Work scope
             <textarea value={scope} onChange={(event) => setScope(event.target.value.slice(0, 1000))} rows={3} placeholder="What should this collaborator own and deliver?" className={inputClass} />
           </label>
-          <label className="text-xs font-semibold text-slate-700">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Expected hours per week
             <input type="number" min={1} max={80} value={desiredWeeklyHours} onChange={(event) => setDesiredWeeklyHours(Number(event.target.value))} className={inputClass} />
           </label>
-          <label className="text-xs font-semibold text-slate-700">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Preferred start
             <select value={earliestStart} onChange={(event) => setEarliestStart(event.target.value as CollaborationInviteDraft["earliestStart"])} className={inputClass}>
-              <option value="this-week">This week</option>
-              <option value="2-weeks">Within 2 weeks</option>
-              <option value="1-month">Within 1 month</option>
+              <option value="this-week" className="dark:bg-[#1a1a1a]">This week</option>
+              <option value="2-weeks" className="dark:bg-[#1a1a1a]">Within 2 weeks</option>
+              <option value="1-month" className="dark:bg-[#1a1a1a]">Within 1 month</option>
             </select>
           </label>
-          <label className="text-xs font-semibold text-slate-700">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Working style
             <select value={commitmentStyle} onChange={(event) => setCommitmentStyle(event.target.value as CollaborationInviteDraft["commitmentStyle"])} className={inputClass}>
-              <option value="deep">Deep focus on one project</option>
-              <option value="parallel">A few parallel projects</option>
-              <option value="many">Flexible across many projects</option>
+              <option value="deep" className="dark:bg-[#1a1a1a]">Deep focus on one project</option>
+              <option value="parallel" className="dark:bg-[#1a1a1a]">A few parallel projects</option>
+              <option value="many" className="dark:bg-[#1a1a1a]">Flexible across many projects</option>
             </select>
           </label>
           <div />
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold text-slate-700">Ownership offer</p>
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Ownership offer</p>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
               {([
                 ["equity-heavy", "Equity heavy", "Ownership-first"],
@@ -232,45 +236,49 @@ export function CollaboratorInviteDialog({
                   key={value}
                   type="button"
                   onClick={() => setCompensationMode(value)}
-                  className={`border px-3 py-2 text-left ${compensationMode === value ? "border-violet-500 bg-violet-50 text-violet-900" : "border-slate-200 bg-white text-slate-600"}`}
+                  className={`rounded-xl border px-3 py-2 text-left transition-all ${
+                    compensationMode === value
+                      ? "border-[#0066ff] bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] font-bold"
+                      : "border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.04] text-slate-600 dark:text-slate-400"
+                  }`}
                 >
-                  <span className="block text-xs font-semibold">{label}</span>
-                  <span className="block text-[11px]">{description}</span>
+                  <span className="block text-xs font-bold">{label}</span>
+                  <span className="block text-[11px] opacity-80">{description}</span>
                 </button>
               ))}
             </div>
           </div>
           {compensationMode !== "cash-only" && (
-            <label className="text-xs font-semibold text-slate-700">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
               Proposed ownership (%)
               <input type="number" min={0} max={30} step={0.5} value={equityProposal} onChange={(event) => setEquityProposal(Number(event.target.value))} className={inputClass} />
             </label>
           )}
           {compensationMode !== "equity-heavy" && (
-            <label className="text-xs font-semibold text-slate-600">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
               Optional cash support per month (USD)
               <input type="number" min={0} max={1_000_000} step={50} value={cashReward} onChange={(event) => setCashReward(Number(event.target.value))} className={inputClass} />
             </label>
           )}
-          <div className="sm:col-span-2 rounded-md border border-indigo-200 bg-indigo-50 p-3">
-            <label className="flex items-start gap-2 text-sm font-semibold text-indigo-950">
-              <input type="checkbox" checked={broadcast} onChange={(event) => setBroadcast(event.target.checked)} className="mt-0.5" />
+          <div className="sm:col-span-2 rounded-xl border border-[#0066ff]/20 bg-[#0066ff]/5 dark:bg-[#0066ff]/10 p-3">
+            <label className="flex items-start gap-2 text-sm font-bold text-[#171330] dark:text-white">
+              <input type="checkbox" checked={broadcast} onChange={(event) => setBroadcast(event.target.checked)} className="mt-0.5 accent-[#0066ff]" />
               Broadcast this collaboration call in Opportunity Hubs
             </label>
             {broadcast && (
-              <div className="mt-3 flex flex-wrap gap-4 text-xs text-indigo-900">
-                <label className="flex items-center gap-2"><input type="checkbox" checked={audienceRoles.includes("collaborator")} onChange={() => toggleAudience("collaborator")} /> Collaborators</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={audienceRoles.includes("founder")} onChange={() => toggleAudience("founder")} /> Founders</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={audienceRoles.includes("explorer")} onChange={() => toggleAudience("explorer")} /> Future explorers</label>
+              <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={audienceRoles.includes("collaborator")} onChange={() => toggleAudience("collaborator")} className="accent-[#0066ff]" /> Collaborators</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={audienceRoles.includes("founder")} onChange={() => toggleAudience("founder")} className="accent-[#0066ff]" /> Founders</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={audienceRoles.includes("explorer")} onChange={() => toggleAudience("explorer")} className="accent-[#0066ff]" /> Future explorers</label>
               </div>
             )}
           </div>
         </div>
 
-        <p className="text-xs text-slate-500">Ownership is the primary offer. All figures are non-binding proposals subject to scope, milestones, vesting and mutual agreement.</p>
-        <DialogFooter>
-          <button type="button" onClick={() => onOpenChange(false)} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Not now</button>
-          <button type="button" disabled={submitting} onClick={() => void continueToMatches()} className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50">{submitting ? "Publishing..." : "Match real profiles"}</button>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Ownership is the primary offer. All figures are non-binding proposals subject to scope, milestones, vesting and mutual agreement.</p>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <button type="button" onClick={() => onOpenChange(false)} className="rounded-xl border border-black/[0.08] dark:border-white/10 px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">Not now</button>
+          <button type="button" disabled={submitting} onClick={() => void continueToMatches()} className="rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-4 py-2 text-sm font-bold text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:shadow-none">{submitting ? "Publishing..." : "Match real profiles"}</button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -303,20 +311,24 @@ export function ValidationStoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg bg-white dark:bg-[#121212] border border-black/[0.08] dark:border-white/10 text-slate-800 dark:text-slate-200">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Share2 className="h-5 w-5 text-emerald-600" /> Share your build story</DialogTitle>
-          <DialogDescription>A short progress update can strengthen your public credibility and invite relevant builders.</DialogDescription>
+          <DialogTitle className="flex items-center gap-2 font-bold text-[#171330] dark:text-white">
+            <Share2 className="h-5 w-5 text-[#20c937]" /> Share your build story
+          </DialogTitle>
+          <DialogDescription className="text-slate-500 dark:text-slate-400">
+            A short progress update can strengthen your public credibility and invite relevant builders.
+          </DialogDescription>
         </DialogHeader>
-        <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">{message}</div>
+        <div className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-4 text-sm leading-6 text-slate-700 dark:text-slate-300">{message}</div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <button type="button" onClick={() => void copy()} className="flex items-center justify-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold"><Copy className="h-4 w-4" /> Copy</button>
-          <button type="button" onClick={() => openShare(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`)} className="flex items-center justify-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white"><Share2 className="h-4 w-4" /> Share on X</button>
-          <button type="button" onClick={() => openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(referralUrl(projectId))}`)} className="flex items-center justify-center gap-2 rounded-md bg-[#0A66C2] px-3 py-2 text-sm font-semibold text-white"><Linkedin className="h-4 w-4" /> LinkedIn</button>
+          <button type="button" onClick={() => void copy()} className="flex items-center justify-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 px-3 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"><Copy className="h-4 w-4" /> Copy</button>
+          <button type="button" onClick={() => openShare(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`)} className="flex items-center justify-center gap-2 rounded-xl bg-black dark:bg-white/10 hover:bg-black/80 dark:hover:bg-white/20 px-3 py-2 text-sm font-bold text-white transition-colors"><Share2 className="h-4 w-4" /> Share on X</button>
+          <button type="button" onClick={() => openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(referralUrl(projectId))}`)} className="flex items-center justify-center gap-2 rounded-xl bg-[#0A66C2] hover:bg-[#095196] px-3 py-2 text-sm font-bold text-white transition-colors"><Linkedin className="h-4 w-4" /> LinkedIn</button>
         </div>
-        <DialogFooter>
-          <button type="button" onClick={() => onOpenChange(false)} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Maybe later</button>
-          <button type="button" onClick={() => void nativeShare()} className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Share story</button>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <button type="button" onClick={() => onOpenChange(false)} className="rounded-xl border border-black/[0.08] dark:border-white/10 px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">Maybe later</button>
+          <button type="button" onClick={() => void nativeShare()} className="rounded-xl bg-[#20c937] hover:bg-[#1ca62e] px-4 py-2 text-sm font-bold text-white shadow-[0_4px_15px_rgba(32,201,55,0.25)] transition-all">Share story</button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

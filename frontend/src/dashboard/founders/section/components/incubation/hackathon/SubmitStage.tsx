@@ -73,20 +73,20 @@ export function SubmitStage({ registration }: Props) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-5">
-        <h2 className="text-base font-semibold text-slate-900">Submit &amp; pitch</h2>
-        <p className="text-sm text-slate-600 mt-1">
+    <div className="max-w-2xl mx-auto border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 sm:p-8 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Submit &amp; pitch</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
           Share your demo, deck, and video, plus a short summary. Submission locks after it is persisted.
         </p>
       </div>
 
       {registration.workspaceId ? (
-        <Link to={`/team-workspace/${registration.teamId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 hover:text-violet-800 mb-4">
+        <Link to={`/team-workspace/${registration.teamId}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline mb-5">
           Open team workspace →
         </Link>
       ) : (
-        <p className="text-xs text-slate-400 mb-4">Create your team workspace in the Build stage.</p>
+        <p className="text-xs text-slate-400 mb-5">Create your team workspace in the Build stage.</p>
       )}
 
       <div className="space-y-5">
@@ -95,52 +95,52 @@ export function SubmitStage({ registration }: Props) {
           const invalid = val.trim().length > 0 && !isHttpUrl(val);
           return (
             <div key={f.key}>
-              <label className="block text-sm font-medium text-slate-800">{f.label}</label>
-              <p className="text-xs text-slate-500 mb-1.5">{f.helper}</p>
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">{f.label}</label>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">{f.helper}</p>
               <input
                 type="url"
                 value={val}
                 onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
                 placeholder="https://"
-                className={`w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                className={`w-full text-sm border rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-all ${
                   invalid
                     ? "border-amber-400 focus:ring-amber-200"
-                    : "border-slate-300 focus:ring-violet-200 focus:border-violet-400"
+                    : "border-black/[0.08] dark:border-white/10 focus:ring-[#0066ff]/20 focus:border-[#0066ff]"
                 }`}
               />
               {invalid && (
-                <p className="text-xs text-amber-600 mt-1">Enter a valid http(s) URL.</p>
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Enter a valid http(s) URL.</p>
               )}
             </div>
           );
         })}
 
         <div>
-          <label className="block text-sm font-medium text-slate-800">Summary</label>
-          <p className="text-xs text-slate-500 mb-1.5">What you built and why it matters — at least {MIN_SUMMARY} characters.</p>
+          <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">Summary</label>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">What you built and why it matters — at least {MIN_SUMMARY} characters.</p>
           <textarea
             rows={4}
             value={values.summary}
             onChange={(e) => setValues((p) => ({ ...p, summary: e.target.value }))}
-            className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
+            className="w-full text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white resize-y focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] transition-all"
           />
-          <div className="flex justify-end mt-1">
-            <span className={`text-xs ${summaryValid ? "text-slate-400" : "text-amber-600"}`}>
+          <div className="flex justify-end mt-1.5">
+            <span className={`text-xs ${summaryValid ? "text-slate-400" : "text-amber-600 dark:text-amber-400 font-medium"}`}>
               {values.summary.trim().length}/{MIN_SUMMARY} min
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-end mt-6 pt-5 border-t border-black/[0.06] dark:border-white/10">
         <button
           type="button"
           disabled={!canSubmit || submitting}
           onClick={() => void handleSubmit()}
-          className={`text-sm font-medium px-4 py-2 rounded-lg ${
+          className={`text-sm font-bold px-5 py-2.5 rounded-xl transition-all ${
             canSubmit
-              ? "bg-violet-600 text-white hover:bg-violet-700"
-              : "bg-slate-100 text-slate-400 cursor-not-allowed"
+              ? "bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)]"
+              : "bg-slate-100 dark:bg-white/[0.05] text-slate-400 cursor-not-allowed"
           }`}
         >
           {submitting ? "Submitting..." : "Submit pitch"}

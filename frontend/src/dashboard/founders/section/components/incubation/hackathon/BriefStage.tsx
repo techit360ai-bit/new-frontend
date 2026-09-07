@@ -69,35 +69,35 @@ export function BriefStage({ registration }: Props) {
     const color = score ? momentumColor(score.overall) : null;
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
           <div className="flex items-center gap-2 mb-4">
             <Lock className="w-4 h-4 text-slate-400" />
-            <h2 className="text-base font-semibold text-slate-900">Idea brief — submitted</h2>
-            <span className="ml-auto text-xs text-slate-500">Locked</span>
+            <h2 className="text-base font-bold text-[#171330] dark:text-white">Idea brief — submitted</h2>
+            <span className="ml-auto text-xs text-slate-500 dark:text-slate-400 font-medium">Locked</span>
           </div>
           <dl className="space-y-3">
             {FIELDS.map((f) => (
               <div key={f.key}>
-                <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">{f.label}</dt>
-                <dd className="text-sm text-slate-800 mt-0.5 whitespace-pre-wrap">{brief[f.key]}</dd>
+                <dt className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{f.label}</dt>
+                <dd className="text-sm text-slate-800 dark:text-slate-200 mt-0.5 whitespace-pre-wrap">{brief[f.key]}</dd>
               </div>
             ))}
           </dl>
         </div>
 
         {score && color ? (
-          <div className="border border-slate-200 bg-white rounded-xl p-6 space-y-5">
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 space-y-5 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">Persisted assessment</h3>
-              <span className={`text-2xl font-bold ${color.text}`}>{score.overall}</span>
+              <h3 className="text-base font-bold text-[#171330] dark:text-white">Persisted assessment</h3>
+              <span className={`text-2xl font-black ${color.text}`}>{score.overall}</span>
             </div>
             {SUB_SCORES.map((s) => (
               <div key={s.key} className="space-y-2">
                 <ScoreBar score={score[s.key]} label={s.label} />
                 <ul className="space-y-1 pl-1">
                   {score.critiques[s.key].map((c, i) => (
-                    <li key={i} className="text-xs text-slate-600 flex gap-1.5">
-                      <span className="text-slate-300">•</span>
+                    <li key={i} className="text-xs text-slate-600 dark:text-slate-400 flex gap-1.5">
+                      <span className="text-slate-300 dark:text-slate-600">•</span>
                       <span>{c}</span>
                     </li>
                   ))}
@@ -106,9 +106,9 @@ export function BriefStage({ registration }: Props) {
             ))}
           </div>
         ) : (
-          <div className="border border-amber-200 bg-amber-50 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-amber-900">Assessment pending</h3>
-            <p className="mt-1 text-sm text-amber-800">
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
+            <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300">Assessment pending</h3>
+            <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
               Your brief is persisted. Scores will appear after the judging service records them.
             </p>
           </div>
@@ -118,7 +118,7 @@ export function BriefStage({ registration }: Props) {
           <button
             type="button"
             onClick={goToBuild}
-            className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
+            className="inline-flex items-center gap-1.5 text-sm font-bold px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
           >
             Continue to Build <ArrowRight className="w-4 h-4" />
           </button>
@@ -167,8 +167,8 @@ export function BriefStage({ registration }: Props) {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-5">
-        <h2 className="text-base font-semibold text-slate-900">Submit your idea brief</h2>
-        <p className="text-sm text-slate-600 mt-1">
+        <h2 className="text-base font-bold text-[#171330] dark:text-white">Submit your idea brief</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
           Seven fields, each at least {MIN_CHARS} characters. The brief locks on submit — make it count.
         </p>
       </div>
@@ -179,16 +179,16 @@ export function BriefStage({ registration }: Props) {
           const ok = val.trim().length >= MIN_CHARS;
           return (
             <div key={f.key}>
-              <label className="block text-sm font-medium text-slate-800">{f.label}</label>
-              <p className="text-xs text-slate-500 mb-1.5">{f.helper}</p>
+              <label className="block text-sm font-bold text-slate-800 dark:text-slate-200">{f.label}</label>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">{f.helper}</p>
               <textarea
                 rows={3}
                 value={val}
                 onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
-                className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400"
+                className="w-full text-sm border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white rounded-xl px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] transition-colors"
               />
               <div className="flex justify-end mt-1">
-                <span className={`text-xs ${ok ? "text-slate-400" : "text-amber-600"}`}>
+                <span className={`text-xs ${ok ? "text-slate-400" : "text-amber-500 font-semibold"}`}>
                   {val.trim().length}/{MIN_CHARS} min
                 </span>
               </div>
@@ -202,10 +202,10 @@ export function BriefStage({ registration }: Props) {
           type="button"
           disabled={!allValid || submitting}
           onClick={() => void handleSubmit()}
-          className={`text-sm font-medium px-4 py-2 rounded-lg ${
+          className={`text-sm font-bold px-5 py-2.5 rounded-xl transition-all ${
             allValid
-              ? "bg-violet-600 text-white hover:bg-violet-700"
-              : "bg-slate-100 text-slate-400 cursor-not-allowed"
+              ? "bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)]"
+              : "bg-black/[0.04] dark:bg-white/[0.04] text-slate-400 cursor-not-allowed"
           }`}
         >
           {submitting ? "Submitting..." : "Submit brief"}

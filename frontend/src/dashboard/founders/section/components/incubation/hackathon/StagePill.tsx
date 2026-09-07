@@ -17,10 +17,10 @@ export function StagePill({
 }) {
   const styles =
     state === "active"
-      ? "border-violet-500 bg-violet-50 text-violet-700"
+      ? "border-[#0066ff] bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] font-bold shadow-sm"
       : state === "completed"
-      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-      : "border-slate-200 bg-white text-slate-500";
+      ? "border-[#20c937]/40 bg-[#20c937]/10 text-[#20c937] font-semibold"
+      : "border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 font-medium";
 
   const Tag = onClick ? "button" : "div";
   return (
@@ -29,14 +29,18 @@ export function StagePill({
       onClick={onClick}
       className={`flex items-center gap-2 border rounded-full ${
         compact ? "px-3 py-1 text-xs" : "px-4 py-2 text-sm"
-      } font-medium transition ${styles} ${onClick ? "hover:brightness-95 cursor-pointer" : ""}`}
+      } transition-all ${styles} ${onClick ? "hover:brightness-95 cursor-pointer" : ""}`}
       aria-current={state === "active" ? "step" : undefined}
     >
       <span
         className={`flex items-center justify-center rounded-full ${
           compact ? "w-4 h-4 text-[10px]" : "w-5 h-5 text-xs"
         } font-semibold ${
-          state === "completed" ? "bg-emerald-500 text-white" : state === "active" ? "bg-violet-500 text-white" : "bg-slate-100 text-slate-500"
+          state === "completed"
+            ? "bg-[#20c937] text-white"
+            : state === "active"
+            ? "bg-[#0066ff] text-white"
+            : "bg-black/[0.06] dark:bg-white/10 text-slate-500 dark:text-slate-400"
         }`}
       >
         {state === "completed" ? <Check className="w-3 h-3" /> : index}

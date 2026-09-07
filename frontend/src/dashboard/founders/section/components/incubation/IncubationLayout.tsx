@@ -31,8 +31,8 @@ export default function IncubationLayout() {
   );
 
   return (
-    <div className="app-incubation-layout flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-col md:h-full md:flex-row">
-      <aside className="flex w-full shrink-0 flex-row items-stretch gap-2 overflow-x-auto border-b border-slate-200 bg-white p-2 md:w-16 md:flex-col md:overflow-visible md:border-b-0 md:border-r md:py-4">
+    <div className="app-incubation-layout flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-col md:h-full md:flex-row font-bricolage bg-transparent">
+      <aside className="flex w-full shrink-0 flex-row items-stretch gap-2 overflow-x-auto border-b border-black/[0.06] dark:border-white/[0.08] bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl p-2 md:w-20 md:flex-col md:overflow-visible md:border-b-0 md:border-r md:py-4 transition-colors duration-300">
         <SidebarPill
           label="Main"
           icon={<Brain className="w-5 h-5" />}
@@ -87,18 +87,20 @@ function SidebarPill({
     <button
       type="button"
       onClick={onClick}
-      className={`relative mx-0 flex min-w-[72px] flex-1 flex-col items-center gap-1 rounded-lg py-2 text-[10px] font-medium uppercase tracking-wider transition md:mx-2 md:min-w-0 md:flex-none md:py-3 ${
+      className={`relative mx-0 flex min-w-[72px] flex-1 flex-col items-center gap-1.5 rounded-xl py-2.5 text-[10px] font-bold uppercase tracking-wider transition-all duration-300 md:mx-2 md:min-w-0 md:flex-none md:py-3.5 group ${
         active
-          ? "border-l-2 border-violet-500 bg-violet-50 text-violet-700"
-          : "text-slate-600 hover:bg-slate-50"
+          ? "bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/25 dark:border-[#0066ff]/40 shadow-[0_0_15px_rgba(0,102,255,0.15)]"
+          : "text-[#171330]/50 dark:text-white/50 hover:bg-[#0066ff]/5 dark:hover:bg-white/[0.05] hover:text-[#0066ff] dark:hover:text-white border border-transparent"
       }`}
       aria-pressed={active}
       aria-label={label}
     >
-      {icon}
-      <span>{label}</span>
+      <div className={`transition-transform duration-300 group-hover:scale-110 ${active ? "text-[#0066ff] dark:text-[#58a6ff]" : ""}`}>
+        {icon}
+      </div>
+      <span className="font-black text-[10px] tracking-wider">{label}</span>
       {badge !== undefined && (
-        <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold flex items-center justify-center">
+        <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#20c937] text-white text-[10px] font-black flex items-center justify-center shadow-sm">
           {badge}
         </span>
       )}

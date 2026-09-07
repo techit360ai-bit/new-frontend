@@ -59,43 +59,43 @@ export function PromoteToStartupModal({ registration, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} aria-hidden="true" />
-      <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl p-6" role="dialog" aria-label="Promote to startup">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-slate-900">Promote to startup</h2>
-          <button type="button" onClick={onClose} className="p-1 rounded hover:bg-slate-100" aria-label="Close">
-            <X className="w-5 h-5 text-slate-500" />
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div className="relative w-full max-w-md bg-white dark:bg-[#121212] border border-black/[0.08] dark:border-white/10 rounded-2xl shadow-2xl p-6" role="dialog" aria-label="Promote to startup">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Promote to startup</h2>
+          <button type="button" onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors" aria-label="Close">
+            <X className="w-5 h-5" />
           </button>
         </div>
-        <p className="text-sm text-slate-600 mb-4">Create a venture from this hackathon project. It joins your portfolio and reuses your team workspace.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-5">Create a venture from this hackathon project. It joins your portfolio and reuses your team workspace.</p>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">Title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400" />
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Title</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] transition-all" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">Tagline</label>
-            <input value={tagline} onChange={(e) => setTagline(e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400" />
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Tagline</label>
+            <input value={tagline} onChange={(e) => setTagline(e.target.value)} className="w-full text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] transition-all" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">Industry</label>
-              <input value={industry} onChange={(e) => setIndustry(e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400" />
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Industry</label>
+              <input value={industry} onChange={(e) => setIndustry(e.target.value)} className="w-full text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] transition-all" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider mb-1.5">Stage</label>
-              <select value={stage} onChange={(e) => setStage(e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Stage</label>
+              <select value={stage} onChange={(e) => setStage(e.target.value)} className="w-full text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] transition-all">
                 {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 mt-6">
-          <button type="button" onClick={onClose} className="text-sm font-medium px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2.5 mt-6 pt-4 border-t border-black/[0.06] dark:border-white/10">
+          <button type="button" onClick={onClose} className="text-sm font-semibold px-4 py-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors">Cancel</button>
           <button type="button" disabled={!canCreate || creating} onClick={() => { void handleConfirm(); }}
-            className={`text-sm font-medium px-4 py-2 rounded-lg ${canCreate ? "bg-violet-600 text-white hover:bg-violet-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}>
+            className={`text-sm font-bold px-4 py-2.5 rounded-xl transition-all ${canCreate ? "bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)]" : "bg-slate-100 dark:bg-white/[0.05] text-slate-400 cursor-not-allowed"}`}>
             {creating ? "Creating..." : "Create startup"}
           </button>
         </div>
