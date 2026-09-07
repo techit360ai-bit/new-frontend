@@ -295,8 +295,8 @@ export function Settings() {
 
   // RENDER
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Settings</h1>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-6">Settings</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">
         {/* Sub-nav */}
@@ -313,9 +313,9 @@ export function Settings() {
                     refs[s.id].current?.scrollIntoView({ behavior: "smooth", block: "start" });
                     history.replaceState(null, "", `#${s.id}`);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+                  className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                 >
-                  <Icon className="w-4 h-4 text-slate-500" />
+                  <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                   {s.label}
                 </a>
               );
@@ -326,11 +326,28 @@ export function Settings() {
         {/* Sections */}
         <div className="space-y-8">
           {/* IDENTITY */}
-          <section ref={refs.identity} id="identity" className="border border-slate-200 bg-white rounded-xl p-6 scroll-mt-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-1">Account & Identity</h2>
-            <p className="text-sm text-slate-500 mb-6">Edit your name, role, and contact details.</p>
+          <section ref={refs.identity} id="identity" className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] scroll-mt-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Account & Identity</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Edit your name, role, and contact details.</p>
             <div className="space-y-4">
-              <Row label="Profile picture"><div className="space-y-2"><div className="flex items-center gap-3">{iAvatar ? <img src={iAvatar} alt="Profile" className="h-12 w-12 rounded-full object-cover" /> : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-sm text-slate-500">{iName.slice(0, 1).toUpperCase()}</div>}<label className="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">Upload picture<input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => void uploadAvatar(event.target.files?.[0])} /></label></div><p className="text-xs text-slate-500">Stored in private object storage and scanned before activation.</p></div></Row>
+              <Row label="Profile picture">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    {iAvatar ? (
+                      <img src={iAvatar} alt="Profile" className="h-12 w-12 rounded-full object-cover border border-black/[0.08] dark:border-white/10" />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white text-sm font-bold shadow-[0_4px_12px_rgba(0,102,255,0.25)]">
+                        {iName.slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                    <label className="cursor-pointer rounded-xl border border-black/[0.08] dark:border-white/10 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
+                      Upload picture
+                      <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => void uploadAvatar(event.target.files?.[0])} />
+                    </label>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Stored in private object storage and scanned before activation.</p>
+                </div>
+              </Row>
               <Row label="Name"><Input value={iName} onChange={setIName} /></Row>
               <Row label="Professional title"><Input value={iTitle} onChange={setITitle} /></Row>
               <Row label="Location"><Input value={iLocation} onChange={setILocation} /></Row>
@@ -339,7 +356,7 @@ export function Settings() {
                 <div className="grid grid-cols-3 gap-2">
                   {FOUNDER_TYPES.map((t) => (
                     <button key={t.v} type="button" onClick={() => setIType(t.v)}
-                      className={`px-3 py-2 rounded-lg border text-sm ${iType === t.v ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
+                      className={`px-3 py-2 rounded-xl border text-sm font-semibold transition-all ${iType === t.v ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]" : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"}`}>
                       {t.label}
                     </button>
                   ))}
@@ -350,7 +367,7 @@ export function Settings() {
                 <input
                   value={iEmail}
                   readOnly
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-slate-50 text-slate-500"
+                  className="w-full px-3.5 py-2.5 text-sm border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 outline-none"
                 />
               </Row>
               <Row label="GitHub"><Input value={iGithub} onChange={setIGithub} /></Row>
@@ -363,34 +380,34 @@ export function Settings() {
                   <Input value={iPw1} onChange={setIPw1} type="password" placeholder="New password" />
                   <Input value={iPw2} onChange={setIPw2} type="password" placeholder="Confirm new password" />
                   <button type="button" onClick={() => void updatePassword()} disabled={!iCurrentPw || !iPw1 || iPw1 !== iPw2 || saving === "password"}
-                    className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">
+                    className="text-xs font-semibold px-3.5 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-50 transition-colors">
                     {saving === "password" ? "Updating..." : "Update password"}
                   </button>
                 </div>
               </Row>
             </div>
-            <div className="mt-6 flex justify-end">
-              <button type="button" disabled={saving === "identity"} onClick={() => void saveIdentity()} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 text-white font-semibold rounded-lg">
+            <div className="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/10 flex justify-end">
+              <button type="button" disabled={saving === "identity"} onClick={() => void saveIdentity()} className="px-5 py-2.5 text-sm bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] disabled:opacity-40 text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">
                 {saving === "identity" ? "Saving..." : "Save"}
               </button>
             </div>
           </section>
 
           {/* STARTUP */}
-          <section ref={refs.startup} id="startup" className="border border-slate-200 bg-white rounded-xl p-6 scroll-mt-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-1">Startup & Roles</h2>
-            <p className="text-sm text-slate-500 mb-6">Everything about what you're building and who you're hiring.</p>
+          <section ref={refs.startup} id="startup" className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] scroll-mt-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Startup & Roles</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Everything about what you're building and who you're hiring.</p>
 
             <div className="space-y-6">
               <div className="space-y-4">
-                <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Startup details</p>
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Startup details</p>
                 <Row label="Startup name"><Input value={sName} onChange={setSName} /></Row>
                 <Row label="One-liner"><Input value={sOneLiner} onChange={setSOneLiner} /></Row>
                 <Row label="Stage">
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     {STAGES.map((st) => (
                       <button key={st} type="button" onClick={() => setSStage(st)}
-                        className={`px-3 py-2 rounded-lg border text-sm ${sStage === st ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
+                        className={`px-3 py-2 rounded-xl border text-sm font-semibold transition-all ${sStage === st ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]" : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"}`}>
                         {st}
                       </button>
                     ))}
@@ -400,7 +417,7 @@ export function Settings() {
                   <div className="flex flex-wrap gap-2">
                     {INDUSTRIES.map((ind) => (
                       <button key={ind} type="button" onClick={() => toggleIndustry(ind)}
-                        className={`px-3 py-1.5 rounded-full border text-xs ${sIndustries.includes(ind) ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
+                        className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all ${sIndustries.includes(ind) ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]" : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"}`}>
                         {ind}
                       </button>
                     ))}
@@ -411,26 +428,26 @@ export function Settings() {
                 <Row label="Logo symbol"><Input value={sLogoEmoji} onChange={setSLogoEmoji} /></Row>
               </div>
 
-              <hr className="border-slate-100" />
+              <hr className="border-black/[0.06] dark:border-white/10" />
 
               <div className="space-y-4">
-                <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Team & roles</p>
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Team & roles</p>
                 <Row label="Current team size"><Input value={String(sTeamSize)} onChange={(v) => setSTeamSize(Number(v) || 0)} type="number" /></Row>
                 <Row label={`Open roles (${sRoles.length} of 5)`}>
                   <div className="flex flex-wrap gap-2">
                     {ALL_ROLES.map((r) => (
                       <button key={r} type="button" onClick={() => toggleRole(r)}
-                        className={`px-3 py-1.5 rounded-full border text-xs ${sRoles.includes(r) ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
+                        className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all ${sRoles.includes(r) ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]" : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"}`}>
                         {r}
                       </button>
                     ))}
                   </div>
                 </Row>
                 <Row label="Compensation offered">
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {COMP_OPTIONS.map((c) => (
                       <button key={c.v} type="button" onClick={() => setSComp(c.v)}
-                        className={`px-3 py-2 rounded-lg border text-sm ${sComp === c.v ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
+                        className={`px-3 py-2 rounded-xl border text-sm font-semibold transition-all ${sComp === c.v ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]" : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"}`}>
                         {c.label}
                       </button>
                     ))}
@@ -439,22 +456,22 @@ export function Settings() {
                 <Row label="Equity range">
                   <div className="flex items-center gap-2">
                     <Input value={String(sEqMin)} onChange={(v) => setSEqMin(Number(v) || 0)} type="number" />
-                    <span className="text-slate-500">to</span>
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">to</span>
                     <Input value={String(sEqMax)} onChange={(v) => setSEqMax(Number(v) || 0)} type="number" />
-                    <span className="text-sm text-slate-500">%</span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">%</span>
                   </div>
                 </Row>
               </div>
 
-              <hr className="border-slate-100" />
+              <hr className="border-black/[0.06] dark:border-white/10" />
 
               <div className="space-y-4">
-                <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Traction</p>
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Traction</p>
                 <Row label="Launch status">
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {LAUNCH_OPTIONS.map((l) => (
                       <button key={l.v} type="button" onClick={() => setSLaunch(l.v)}
-                        className={`px-3 py-2 rounded-lg border text-sm ${sLaunch === l.v ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
+                        className={`px-3 py-2 rounded-xl border text-sm font-semibold transition-all ${sLaunch === l.v ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]" : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"}`}>
                         {l.label}
                       </button>
                     ))}
@@ -467,10 +484,10 @@ export function Settings() {
                 <Row label="Next milestone"><Input value={sMilestone} onChange={setSMilestone} /></Row>
               </div>
 
-              <hr className="border-slate-100" />
+              <hr className="border-black/[0.06] dark:border-white/10" />
 
               <div className="space-y-4">
-                <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Mission</p>
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Mission</p>
                 <Row label="Why building"><Textarea value={sWhy} onChange={setSWhy} /></Row>
                 <Row label="Winning in 3 years"><Textarea value={sWinning} onChange={setSWinning} /></Row>
                 <Row label="Unfair advantage"><Textarea value={sAdvantage} onChange={setSAdvantage} /></Row>
@@ -478,7 +495,7 @@ export function Settings() {
                   <div className="space-y-2">
                     {PHILOSOPHY_OPTIONS.map((opt) => (
                       <button key={opt.v} type="button" onClick={() => setSPhilosophy(opt.v)}
-                        className={`block w-full text-left px-3 py-2 rounded-lg border text-sm ${sPhilosophy === opt.v ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>
+                        className={`block w-full text-left px-3.5 py-2.5 rounded-xl border text-sm font-semibold transition-all ${sPhilosophy === opt.v ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]" : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"}`}>
                         {opt.label}
                       </button>
                     ))}
@@ -486,16 +503,17 @@ export function Settings() {
                 </Row>
               </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <button type="button" disabled={saving === "startup"} onClick={() => void saveStartup()} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 text-white font-semibold rounded-lg">
+            <div className="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/10 flex justify-end">
+              <button type="button" disabled={saving === "startup"} onClick={() => void saveStartup()} className="px-5 py-2.5 text-sm bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] disabled:opacity-40 text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">
                 {saving === "startup" ? "Saving..." : "Save"}
               </button>
             </div>
           </section>
+
           {/* VERIFICATION */}
-          <section ref={refs.verification} id="verification" className="border border-slate-200 bg-white rounded-xl p-6 scroll-mt-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-1">Verification</h2>
-            <p className="text-sm text-slate-500 mb-6">Verified founders see more matches and can receive prize money / equity grants.</p>
+          <section ref={refs.verification} id="verification" className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] scroll-mt-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Verification</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Verified founders see more matches and can receive prize money / equity grants.</p>
 
             <div className="space-y-4">
               {(["twitter", "linkedin", "personalSite"] as const).map((key) => {
@@ -506,35 +524,35 @@ export function Settings() {
                     ? ver.linkedin.url
                     : ver.personalSite.url;
                 return (
-                  <div key={key} className="border border-slate-200 rounded-lg p-4 flex items-center justify-between gap-3">
+                  <div key={key} className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-4 flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900">{labelFor(key)}</p>
-                      <p className="text-xs text-slate-500 truncate">{address || "No profile linked"}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">{labelFor(key)}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{address || "No profile linked"}</p>
                     </div>
                     {value.verified ? (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                      <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">
                         <Check className="w-3 h-3" /> Verified
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-500">Provider verification unavailable</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Provider verification unavailable</span>
                     )}
                   </div>
                 );
               })}
 
-              <div className="border border-slate-200 rounded-lg p-4 flex items-center gap-3">
-                <Github className="w-5 h-5 text-slate-700" />
+              <div className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-4 flex items-center gap-3">
+                <Github className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">GitHub</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">GitHub</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {ver.github.username || "GitHub OAuth verification is not configured."}
                   </p>
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-lg p-4">
-                <p className="text-sm font-semibold text-slate-900">Identity verification</p>
-                <p className="text-xs text-slate-500 mt-1">
+              <div className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-4">
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Identity verification</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Document verification is not configured. No identity document is collected by this screen.
                 </p>
               </div>
@@ -542,9 +560,9 @@ export function Settings() {
           </section>
 
           {/* NOTIFICATIONS */}
-          <section ref={refs.notifications} id="notifications" className="border border-slate-200 bg-white rounded-xl p-6 scroll-mt-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-1">Notifications</h2>
-            <p className="text-sm text-slate-500 mb-6">When and how we tell you about things.</p>
+          <section ref={refs.notifications} id="notifications" className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] scroll-mt-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Notifications</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">When and how we tell you about things.</p>
             <div className="space-y-4">
               {([
                 { k: "applications",  label: "Collaborator applications", desc: "Someone applied to one of your open roles." },
@@ -552,66 +570,66 @@ export function Settings() {
                 { k: "workspace",     label: "Workspace activity",        desc: "PRs, deploys, daily standup summaries." },
                 { k: "opportunities", label: "Hackathons & opportunities", desc: "New programs from organizations matching your stage." },
               ] as const).map((g) => (
-                <div key={g.k} className="border border-slate-200 rounded-lg p-3 flex items-start gap-3">
+                <div key={g.k} className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900">{g.label}</p>
-                    <p className="text-xs text-slate-500">{g.desc}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{g.label}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{g.desc}</p>
                   </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <label className="flex items-center gap-1.5 text-slate-700">
-                      <input type="checkbox" checked={nPrefs[g.k].email} onChange={(e) => toggleNotif(g.k, "email", e.target.checked)} className="accent-violet-600" />
+                  <div className="flex items-center gap-4 text-xs font-semibold">
+                    <label className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 cursor-pointer">
+                      <input type="checkbox" checked={nPrefs[g.k].email} onChange={(e) => toggleNotif(g.k, "email", e.target.checked)} className="rounded text-[#0066ff] focus:ring-[#0066ff]" />
                       Email
                     </label>
-                    <label className="flex items-center gap-1.5 text-slate-700">
-                      <input type="checkbox" checked={nPrefs[g.k].inApp} onChange={(e) => toggleNotif(g.k, "inApp", e.target.checked)} className="accent-violet-600" />
+                    <label className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 cursor-pointer">
+                      <input type="checkbox" checked={nPrefs[g.k].inApp} onChange={(e) => toggleNotif(g.k, "inApp", e.target.checked)} className="rounded text-[#0066ff] focus:ring-[#0066ff]" />
                       In-app
                     </label>
                   </div>
                 </div>
               ))}
 
-              <div className="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
+              <div className="border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-4 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">Quiet hours</p>
-                  <p className="text-xs text-slate-500">When to suppress notifications.</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">Quiet hours</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">When to suppress notifications.</p>
                 </div>
                 <select value={nPrefs.quietHours} onChange={(e) => setNPrefs((cur) => ({ ...cur, quietHours: e.target.value as typeof cur.quietHours }))}
-                  className="text-sm border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+                  className="text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus:outline-none focus:border-[#0066ff] transition-all">
                   <option value="off">Off</option>
                   <option value="10pm-8am">10pm – 8am</option>
                   <option value="weekends">Weekends</option>
                 </select>
               </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <button type="button" disabled={saving === "notifications"} onClick={() => void saveNotifications()} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-500 disabled:bg-slate-300 text-white font-semibold rounded-lg">
+            <div className="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/10 flex justify-end">
+              <button type="button" disabled={saving === "notifications"} onClick={() => void saveNotifications()} className="px-5 py-2.5 text-sm bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] disabled:opacity-40 text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">
                 {saving === "notifications" ? "Saving..." : "Save"}
               </button>
             </div>
           </section>
 
           {/* ROLES */}
-          <section ref={refs.roles} id="roles" className="border border-slate-200 bg-white rounded-xl p-6 scroll-mt-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-1">Roles & Switching</h2>
-            <p className="text-sm text-slate-500 mb-6">Activate other roles or switch between the ones you have.</p>
+          <section ref={refs.roles} id="roles" className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] scroll-mt-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Roles & Switching</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Activate other roles or switch between the ones you have.</p>
 
             <div className="space-y-3">
               {(["founder", "collaborator", "investor", "org"] as Role[]).map((role) => {
                 const active = activeRoles.has(role);
                 const isCurrent = role === currentRole;
                 return (
-                  <div key={role} className={`flex items-center justify-between gap-4 border rounded-lg p-4 ${isCurrent ? "border-violet-300 bg-violet-50/50" : "border-slate-200 bg-white"}`}>
+                  <div key={role} className={`flex items-center justify-between gap-4 border rounded-xl p-4 transition-all ${isCurrent ? "border-[#0066ff]/30 bg-[#0066ff]/10" : "border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]"}`}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-slate-900">{roleLabel[role]}</p>
-                        {isCurrent && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-600 text-white">Current</span>}
-                        {!isCurrent && active && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">Active</span>}
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">{roleLabel[role]}</p>
+                        {isCurrent && <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#0066ff] text-white">Current</span>}
+                        {!isCurrent && active && <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Active</span>}
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">{roleBlurb[role]}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{roleBlurb[role]}</p>
                     </div>
                     {!isCurrent && (
                       <button type="button" onClick={() => handleRoleAction(role)}
-                        className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 shrink-0">
+                        className="text-xs font-semibold px-3.5 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] shrink-0 transition-colors">
                         {active ? "Switch to" : "Activate"}
                       </button>
                     )}
@@ -620,9 +638,9 @@ export function Settings() {
               })}
             </div>
 
-            <div className="mt-6 pt-6 border-t border-slate-100">
+            <div className="mt-6 pt-6 border-t border-black/[0.06] dark:border-white/10">
               <button type="button" onClick={() => { void signOut(); }}
-                className="text-sm text-red-600 hover:text-red-700 inline-flex items-center gap-1.5">
+                className="text-sm font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 inline-flex items-center gap-1.5 transition-colors">
                 <LogOut className="w-4 h-4" /> Sign out
               </button>
             </div>
@@ -643,7 +661,7 @@ function labelFor(key: "twitter" | "linkedin" | "personalSite"): string {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3 items-start">
-      <label className="text-sm text-slate-700 font-medium md:pt-2">{label}</label>
+      <label className="text-sm text-slate-700 dark:text-slate-300 font-semibold md:pt-2.5">{label}</label>
       <div>{children}</div>
     </div>
   );
@@ -653,7 +671,7 @@ function Input({ value, onChange, type = "text", placeholder }: { value: string;
   return (
     <input type={type} value={value} placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 tabular-nums"
+      className="w-full px-3.5 py-2.5 text-sm border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] tabular-nums transition-all"
     />
   );
 }
@@ -661,6 +679,6 @@ function Input({ value, onChange, type = "text", placeholder }: { value: string;
 function Textarea({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <textarea rows={3} value={value} onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500" />
+      className="w-full px-3.5 py-2.5 text-sm border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] transition-all" />
   );
 }
