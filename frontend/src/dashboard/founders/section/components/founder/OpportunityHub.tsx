@@ -80,10 +80,10 @@ export default function OpportunityHub() {
   }, [opportunities, statusFilter]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Opportunity Hub</h1>
-        <p className="text-sm text-slate-600 mt-1">Programs, hackathons, funding, events and ownership-focused collaboration calls.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Opportunity Hub</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5">Programs, hackathons, funding, events and ownership-focused collaboration calls.</p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -93,21 +93,21 @@ export default function OpportunityHub() {
               key={t}
               type="button"
               onClick={() => setTypeFilter(t)}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full border transition ${
+              className={`text-xs font-semibold px-3.5 py-1.5 rounded-xl border transition-all ${
                 typeFilter === t
-                  ? "bg-violet-600 text-white border-violet-600"
-                  : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                  ? "bg-[#0066ff] text-white border-[#0066ff] shadow-[0_4px_12px_rgba(0,102,255,0.25)]"
+                  : "bg-white/80 dark:bg-[#1a1a1a] text-slate-700 dark:text-slate-300 border-black/[0.08] dark:border-white/10 hover:border-[#0066ff]/40 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
               }`}
             >
               {TYPE_LABELS[t]} ({counts[t]})
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2.5 ml-auto w-full sm:w-auto mt-2 sm:mt-0">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="text-xs px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700"
+            className="text-xs px-3 py-2 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-700 dark:text-slate-300 focus:outline-none focus:border-[#0066ff] transition-all"
             aria-label="Status filter"
           >
             <option value="all">All status</option>
@@ -115,14 +115,14 @@ export default function OpportunityHub() {
             <option value="closing-soon">Closing soon</option>
             <option value="closed">Closed</option>
           </select>
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="relative flex-1 sm:w-56">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search"
-              className="text-xs pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 bg-white"
+              placeholder="Search opportunities"
+              className="w-full text-xs pl-9 pr-3.5 py-2 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all"
               aria-label="Search opportunities"
             />
           </div>
@@ -130,16 +130,16 @@ export default function OpportunityHub() {
       </div>
 
       {loading ? (
-        <div className="border border-dashed border-slate-300 rounded-xl p-10 text-center">
-          <p className="text-sm text-slate-500">Loading live opportunities...</p>
+        <div className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-12 text-center shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Loading live opportunities...</p>
         </div>
       ) : error ? (
-        <div className="border border-red-200 bg-red-50 rounded-xl p-10 text-center">
-          <p className="text-sm text-red-700">Live opportunities are unavailable: {error}</p>
+        <div className="border border-rose-500/20 bg-rose-500/10 rounded-2xl p-8 text-center">
+          <p className="text-sm font-medium text-rose-700 dark:text-rose-300">Live opportunities are unavailable: {error}</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="border border-dashed border-slate-300 rounded-xl p-10 text-center">
-          <p className="text-sm text-slate-600">
+        <div className="border border-dashed border-black/[0.1] dark:border-white/10 rounded-2xl p-12 text-center bg-white/40 dark:bg-white/[0.02]">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             {opportunities.length === 0
               ? "Organizations haven't published any opportunities yet."
               : `No ${typeFilter === "all" ? "" : TYPE_LABELS[typeFilter].toLowerCase() + " "}opportunities match. Try a different filter.`}
