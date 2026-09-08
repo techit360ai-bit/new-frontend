@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Video, Mic, MicOff, VideoOff, X, Maximize2 } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, X, Maximize2, Radio } from 'lucide-react';
 import { Avatar, AvatarFallback } from './avatar';
 import { motion } from 'motion/react';
 
@@ -18,41 +18,50 @@ export function VideoCallPIP() {
     <motion.div
       drag
       dragMomentum={false}
-      className="fixed bottom-20 right-8 w-[320px] bg-[#0A1929] rounded-xl shadow-2xl overflow-hidden z-40 cursor-move"
+      className="fixed bottom-20 right-8 w-[340px] bg-[#121212]/95 backdrop-blur-2xl rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.6)] border border-[#0066ff]/40 overflow-hidden z-40 cursor-move"
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
+      {/* Top Border Accent */}
+      <div className="h-1 w-full bg-gradient-to-r from-[#0066ff] via-[#58a6ff] to-[#20c937]" />
+
       {/* Video Content */}
-      <div className="relative aspect-video bg-gray-900">
+      <div className="relative aspect-video bg-[#0a0d14]">
         {isVideoOff ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Avatar className="w-20 h-20">
-              <AvatarFallback className="bg-[#2196F3] text-white text-2xl">
+            <Avatar className="w-16 h-16 ring-2 ring-[#0066ff]/40">
+              <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white text-xl font-bold">
                 SC
               </AvatarFallback>
             </Avatar>
           </div>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-50" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0066ff]/20 via-[#121212] to-[#58a6ff]/20 flex items-center justify-center">
+            <Avatar className="w-16 h-16 ring-4 ring-[#0066ff]/30 animate-pulse">
+              <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white text-xl font-bold">
+                SC
+              </AvatarFallback>
+            </Avatar>
+          </div>
         )}
         
         {/* Participant Info */}
-        <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-          <span className="text-white text-sm font-medium">Sarah Chen</span>
+        <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
+          <span className="text-white text-xs font-semibold">Sarah Chen</span>
         </div>
 
         {/* Status Indicator */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-red-500 px-2 py-1 rounded-full">
-          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-          <span className="text-white text-xs font-medium">Live</span>
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-[#20c937]/20 border border-[#20c937]/40 px-2 py-0.5 rounded-full">
+          <Radio className="w-2.5 h-2.5 text-[#20c937] animate-pulse" />
+          <span className="text-[#20c937] text-[10px] font-bold">Live Sync</span>
         </div>
 
         {/* Your video (small overlay) */}
-        <div className="absolute bottom-3 right-3 w-20 h-14 bg-gray-800 rounded-lg border-2 border-white/20 overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-green-900 to-blue-900 flex items-center justify-center">
-            <Avatar className="w-8 h-8">
-              <AvatarFallback className="bg-green-500 text-white text-xs">
+        <div className="absolute bottom-2.5 right-2.5 w-20 h-14 bg-[#121212] rounded-xl border border-white/20 overflow-hidden shadow-lg">
+          <div className="w-full h-full bg-gradient-to-br from-[#0066ff]/30 to-[#121212] flex items-center justify-center">
+            <Avatar className="w-7 h-7">
+              <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white text-[10px] font-bold">
                 You
               </AvatarFallback>
             </Avatar>
@@ -61,47 +70,45 @@ export function VideoCallPIP() {
       </div>
 
       {/* Controls */}
-      <div className="bg-[#0A1929] p-3 flex items-center justify-between border-t border-white/10">
-        <div className="flex items-center gap-2">
+      <div className="bg-[#121212] p-2.5 flex items-center justify-between border-t border-white/10">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setIsMuted(!isMuted)}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-xl transition-all ${
               isMuted ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
             }`}
             title={isMuted ? 'Unmute' : 'Mute'}
           >
-            {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
           </button>
           <button
             onClick={() => setIsVideoOff(!isVideoOff)}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-xl transition-all ${
               isVideoOff ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
             }`}
             title={isVideoOff ? 'Turn on video' : 'Turn off video'}
           >
-            {isVideoOff ? <VideoOff className="w-4 h-4" /> : <Video className="w-4 h-4" />}
+            {isVideoOff ? <VideoOff className="w-3.5 h-3.5" /> : <Video className="w-3.5 h-3.5" />}
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
-            className="p-2 bg-white/10 text-white hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 bg-white/10 text-white hover:bg-white/20 rounded-xl transition-all"
             title="Maximize"
           >
-            <Maximize2 className="w-4 h-4" />
+            <Maximize2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setIsVisible(false)}
-            className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors"
+            className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all"
             title="End call"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
-
-      {/* Drag indicator */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#2196F3] to-purple-500" />
     </motion.div>
   );
 }
+
