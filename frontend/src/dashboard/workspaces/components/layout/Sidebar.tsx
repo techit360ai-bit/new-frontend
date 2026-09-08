@@ -53,7 +53,7 @@ export function Sidebar() {
     <aside 
       className={`${
         isCollapsed ? 'w-[72px]' : 'w-[250px]'
-      } sticky top-0 md:sticky md:top-[60px] self-start bg-white/90 dark:bg-[#121212]/95 backdrop-blur-xl text-slate-800 dark:text-white flex flex-col transition-all duration-300 max-md:w-full max-md:h-auto max-md:flex-row max-md:overflow-x-auto md:h-[calc(100vh-60px)] border-r border-black/[0.08] dark:border-white/10 shadow-sm z-20 shrink-0`}
+      } bg-white/90 dark:bg-[#121212]/95 backdrop-blur-xl text-slate-800 dark:text-white flex flex-col transition-all duration-300 max-md:w-full max-md:h-auto max-md:flex-row max-md:overflow-x-auto md:h-[calc(100vh-60px)] border-r border-black/[0.08] dark:border-white/10 shadow-sm z-20 shrink-0`}
     >
       {/* Header Branding & Collapse Toggle */}
       <div className="p-4 flex items-center justify-between border-b border-black/[0.04] dark:border-white/5 max-md:hidden">
