@@ -257,11 +257,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ── signUp ────────────────────────────────────────────────────
   const signUp = async (data: SignUpData): Promise<{ error: Error | null }> => {
     try {
+      const referralId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('referralId') : null
       const res = await fetch(`${API}/auth/signup`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'X-TechIT-Client': 'web' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(referralId ? { ...data, referralId } : data),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Signup failed')
