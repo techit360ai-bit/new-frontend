@@ -133,56 +133,56 @@ export function Chat() {
   };
 
   return (
-    <div className="h-full bg-white flex">
-      <div className="w-[240px] border-r border-gray-200 bg-gray-50">
-        <div className="p-4 border-b border-gray-200">
+    <div className="h-full bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors flex">
+      <div className="w-[240px] border-r border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-[#0a1526] flex flex-col">
+        <div className="p-4 border-b border-black/[0.06] dark:border-white/10">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search channels..."
-              className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-[#2196F3] focus:ring-1 focus:ring-[#2196F3] outline-none"
+              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-[#1a1a1a] border border-black/[0.08] dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#0066ff] outline-none transition-all"
             />
           </div>
         </div>
         <ScrollArea className="h-[calc(100vh-180px)]">
           <div className="p-2">
-            <div className="text-xs font-semibold text-gray-500 mb-2 px-2">CHANNELS</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-2">CHANNELS</div>
             {filteredChannels.map((channel) => (
               <button
                 key={channel.id}
                 onClick={() => setSelectedChannelId(channel.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg mb-1 transition-colors ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl mb-1 transition-all ${
                   selectedChannelId === channel.id
-                    ? 'bg-[#2196F3] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-[#0066ff]/20 text-[#58a6ff] font-semibold border-l-2 border-[#0066ff]'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5'
                 }`}
               >
                 <span className="text-sm font-medium"># {channel.name}</span>
               </button>
             ))}
             {!loadingChannels && filteredChannels.length === 0 && (
-              <p className="px-2 py-3 text-xs text-gray-500">No live channels found.</p>
+              <p className="px-2 py-3 text-xs text-slate-400">No live channels found.</p>
             )}
           </div>
         </ScrollArea>
       </div>
 
-      <div className="flex-1 flex flex-col">
-        <div className="h-[60px] border-b border-gray-200 px-6 flex items-center justify-between">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#121212]">
+        <div className="h-[60px] border-b border-black/[0.06] dark:border-white/10 px-6 flex items-center justify-between bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl">
           <div>
-            <h2 className="font-semibold">{selectedChannel ? `# ${selectedChannel.name}` : 'No channel selected'}</h2>
-            <p className="text-xs text-gray-500">
+            <h2 className="font-bold text-slate-900 dark:text-white">{selectedChannel ? `# ${selectedChannel.name}` : 'No channel selected'}</h2>
+            <p className="text-xs text-slate-400">
               {selectedChannel ? `${liveMessages.length} persisted message${liveMessages.length === 1 ? '' : 's'}` : 'Connect messaging channels to start chatting'}
             </p>
           </div>
-          <div className="flex items-center gap-2"><Link to="/support" className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button className="p-2 hover:bg-gray-100 rounded-lg" aria-label="Channel actions"><MoreVertical className="w-5 h-5 text-gray-600" /></button></div>
+          <div className="flex items-center gap-2"><Link to="/support" className="inline-flex items-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 transition-colors" aria-label="Open support tickets"><Ticket className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />Support</Link><button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl text-slate-500 dark:text-slate-400" aria-label="Channel actions"><MoreVertical className="w-5 h-5" /></button></div>
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mx-6 mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
             {error}
           </div>
         )}
@@ -190,34 +190,34 @@ export function Chat() {
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-4">
             {loadingChannels || loadingMessages ? (
-              <p className="text-sm text-gray-500">Loading live channel messages...</p>
+              <p className="text-sm text-slate-400">Loading live channel messages...</p>
             ) : liveMessages.length > 0 ? (
               liveMessages.map((msg) => (
                 <div key={msg.id} className="flex gap-3">
-                  <Avatar className="w-10 h-10 flex-shrink-0">
-                    <AvatarFallback className={`${msg.fromMe ? 'bg-[#2196F3]' : 'bg-slate-500'} text-white`}>
+                  <Avatar className="w-10 h-10 flex-shrink-0 border border-white dark:border-[#121212]">
+                    <AvatarFallback className={`${msg.fromMe ? 'bg-gradient-to-r from-[#0066ff] to-[#58a6ff]' : 'bg-slate-600'} text-white font-bold`}>
                       {messageInitials(msg.authorName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-baseline gap-2 mb-1">
-                      <span className="font-semibold">{msg.authorName}</span>
-                      <span className="text-xs text-gray-500">{formatTime(msg.timestamp)}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{msg.authorName}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">{formatTime(msg.timestamp)}</span>
                     </div>
-                    <p className="text-gray-700">{msg.body}</p>
+                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">{msg.body}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-500">No persisted messages in this channel yet.</p>
+              <p className="text-sm text-slate-400">No persisted messages in this channel yet.</p>
             )}
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200 focus-within:border-[#2196F3] focus-within:ring-1 focus-within:ring-[#2196F3]">
-            <button className="p-2 hover:bg-gray-200 rounded transition-colors" aria-label="Attach file" disabled={!selectedChannel}>
-              <Paperclip className="w-4 h-4 text-gray-600" />
+        <div className="p-4 border-t border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl">
+          <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#1a1a1a] rounded-xl p-2 border border-black/[0.08] dark:border-white/10 focus-within:border-[#0066ff] focus-within:ring-2 focus-within:ring-[#0066ff]/20 transition-all">
+            <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-lg transition-colors text-slate-500 dark:text-slate-400" aria-label="Attach file" disabled={!selectedChannel}>
+              <Paperclip className="w-4 h-4" />
             </button>
             <input
               type="text"
@@ -226,15 +226,15 @@ export function Chat() {
               onChange={(event) => setDraft(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void handleChannelSend(); } }}
               placeholder={selectedChannel ? `Message #${selectedChannel.name.toLowerCase()}` : 'Select a channel'}
-              className="flex-1 bg-transparent outline-none disabled:cursor-not-allowed"
+              className="flex-1 bg-transparent text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none disabled:cursor-not-allowed"
             />
-            <button className="p-2 hover:bg-gray-200 rounded transition-colors" aria-label="Emoji" disabled={!selectedChannel}>
-              <Smile className="w-4 h-4 text-gray-600" />
+            <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-lg transition-colors text-slate-500 dark:text-slate-400" aria-label="Emoji" disabled={!selectedChannel}>
+              <Smile className="w-4 h-4" />
             </button>
             <button
               onClick={() => { void handleChannelSend(); }}
               disabled={!selectedChannel || sending || !draft.trim()}
-              className="p-2 bg-[#2196F3] text-white rounded hover:bg-[#2196F3]/90 transition-colors disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="p-2.5 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Send message"
             >
               <Send className="w-4 h-4" />

@@ -54,28 +54,28 @@ export function Files() {
 
   const getFileIcon = (item: DomainFileItem) => {
     if (item.type === 'folder') {
-      return <FolderOpen className="w-5 h-5 text-[#2196F3]" />;
+      return <FolderOpen className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />;
     }
     switch (item.fileType) {
       case 'image':
         return <Image className="w-5 h-5 text-purple-500" />;
       case 'code':
-        return <FileCode className="w-5 h-5 text-green-500" />;
+        return <FileCode className="w-5 h-5 text-[#20c937]" />;
       default:
-        return <FileText className="w-5 h-5 text-gray-500" />;
+        return <FileText className="w-5 h-5 text-slate-400" />;
     }
   };
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
       {/* Page Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Files
             </h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Manage and organize your project files
             </p>
           </div>
@@ -88,62 +88,62 @@ export function Files() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl text-sm shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
           >
             <Upload className="w-4 h-4" />
-            <span className="text-sm font-medium">Upload Files</span>
+            <span>Upload Files</span>
           </button>
         </div>
       </div>
 
       {/* Files List */}
       <div className="p-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr className="text-left text-sm text-gray-600">
-                <th className="py-3 px-6 font-medium">Name</th>
-                <th className="py-3 px-6 font-medium">Size</th>
-                <th className="py-3 px-6 font-medium">Modified</th>
-                <th className="py-3 px-6 font-medium"></th>
+            <thead className="bg-black/[0.02] dark:bg-white/5 border-b border-black/[0.06] dark:border-white/10">
+              <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
+                <th className="py-3.5 px-6 font-semibold">Name</th>
+                <th className="py-3.5 px-6 font-semibold">Size</th>
+                <th className="py-3.5 px-6 font-semibold">Modified</th>
+                <th className="py-3.5 px-6 font-semibold"></th>
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td className="py-6 px-6 text-sm text-gray-500" colSpan={4}>Loading live files...</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-slate-500 dark:text-slate-400" colSpan={4}>Loading live files...</td></tr>
               )}
               {!loading && error && (
-                <tr><td className="py-6 px-6 text-sm text-red-600" colSpan={4}>Live files could not be loaded: {error}</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-red-600 dark:text-red-400" colSpan={4}>Live files could not be loaded: {error}</td></tr>
               )}
               {!loading && !error && files.length === 0 && (
-                <tr><td className="py-6 px-6 text-sm text-gray-500" colSpan={4}>No live files are recorded yet.</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-slate-500 dark:text-slate-400" colSpan={4}>No live files are recorded yet.</td></tr>
               )}
               {files.map((file) => (
                 <tr
                   key={file.id}
-                  className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="border-b border-black/[0.04] dark:border-white/5 last:border-0 hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
                 >
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
                       {getFileIcon(file)}
-                      <span className="font-medium">{file.name}</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{file.name}</span>
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
+                  <td className="py-4 px-6 text-sm text-slate-500 dark:text-slate-400">
                     {file.size || '—'}
                   </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
+                  <td className="py-4 px-6 text-sm text-slate-500 dark:text-slate-400">
                     {file.modified}
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
                       {file.type === 'file' && (
-                        <button className="p-2 hover:bg-gray-100 rounded transition-colors">
-                          <Download className="w-4 h-4 text-gray-600" />
+                        <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-lg transition-colors text-slate-500 dark:text-slate-400">
+                          <Download className="w-4 h-4" />
                         </button>
                       )}
-                      <button className="p-2 hover:bg-gray-100 rounded transition-colors">
-                        <MoreVertical className="w-4 h-4 text-gray-600" />
+                      <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-lg transition-colors text-slate-500 dark:text-slate-400">
+                        <MoreVertical className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -154,13 +154,13 @@ export function Files() {
         </div>
 
         {!loading && !error && files.length > 0 && (
-          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="mt-6 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">Storage Records</h3>
-              <span className="text-sm text-gray-600">{files.filter((file) => file.type === 'file').length} files recorded</span>
+              <h3 className="font-semibold text-slate-900 dark:text-white">Storage Records</h3>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{files.filter((file) => file.type === 'file').length} files recorded</span>
             </div>
-            <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-[#2196F3] rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
+            <div className="h-3 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[#0066ff] to-[#58a6ff] rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
             </div>
           </div>
         )}

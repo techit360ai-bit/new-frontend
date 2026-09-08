@@ -45,13 +45,13 @@ export function Connectors() {
   const drawerActivity = selected ? activity.filter((a) => a.connectorId === selected.id) : [];
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#2196F3]/10 rounded-lg"><Plug className="w-6 h-6 text-[#2196F3]" /></div>
+          <div className="p-2.5 bg-[#0066ff]/10 dark:bg-[#0066ff]/20 rounded-xl border border-[#0066ff]/20"><Plug className="w-6 h-6 text-[#0066ff] dark:text-[#58a6ff]" /></div>
           <div>
-            <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Connectors</h1>
-            <p className="text-sm text-gray-500">{connectors.length} integrations • capabilities exposed to agents over MCP</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Connectors</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{connectors.length} integrations • capabilities exposed to agents over MCP</p>
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@ export function Connectors() {
             <ConnectorCard key={c.id} connector={c} onOpen={handleOpen} onToggle={handleToggle} />
           ))}
           {connectors.length === 0 && (
-            <div className="md:col-span-2 lg:col-span-3 rounded-lg border border-dashed border-gray-300 bg-white px-4 py-8 text-sm text-gray-500">
+            <div className="md:col-span-2 lg:col-span-3 rounded-2xl border border-dashed border-black/[0.1] dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-md px-4 py-8 text-sm text-slate-500 dark:text-slate-400">
               {error ? `Live workspace connectors could not be loaded: ${error}` : 'No workspace connectors are recorded yet.'}
             </div>
           )}

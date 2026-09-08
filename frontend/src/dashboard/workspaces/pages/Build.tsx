@@ -96,28 +96,28 @@ export function Build() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
       {/* Page Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Build
             </h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Live workspace tasks
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(`/workspaces/code${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"><Code2 className="w-4 h-4" /><span className="text-sm font-medium">Open Code</span></button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button onClick={() => navigate(`/workspaces/code${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 transition-all font-medium text-sm"><Code2 className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" /><span>Open Code</span></button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 transition-all font-medium text-sm">
               <Github className="w-4 h-4" />
-              <span className="text-sm font-medium">GitHub</span>
-              <Badge className="bg-[#10B981] text-white text-xs">Live</Badge>
+              <span>GitHub</span>
+              <Badge className="bg-[#20c937] text-white text-xs font-semibold">Live</Badge>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors shadow-sm">
+            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl font-bold text-sm shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">
               <Plus className="w-4 h-4" />
-              <span className="text-sm font-medium">New Task</span>
+              <span>New Task</span>
             </button>
           </div>
         </div>
@@ -126,12 +126,12 @@ export function Build() {
       {/* Kanban Board */}
       <div className="flex-1 overflow-auto p-6">
         {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
             Live workspace tasks could not be loaded: {error}
           </div>
         )}
         {totalTasks === 0 && !error && (
-          <div className="mb-4 rounded-lg border border-dashed border-gray-300 bg-white px-4 py-6 text-sm text-gray-500">
+          <div className="mb-4 rounded-2xl border border-dashed border-black/[0.1] dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-md px-4 py-6 text-sm text-slate-500 dark:text-slate-400">
             No workspace tasks are recorded yet.
           </div>
         )}
@@ -140,32 +140,32 @@ export function Build() {
             title="Backlog"
             tasks={tasks.backlog}
             onDrop={handleDrop('backlog')}
-            color="bg-gray-400"
+            color="bg-slate-400"
           />
           <KanbanColumn
             title="In Progress"
             tasks={tasks.inProgress}
             onDrop={handleDrop('inProgress')}
-            color="bg-[#2196F3]"
+            color="bg-[#0066ff]"
           />
           <KanbanColumn
             title="Review"
             tasks={tasks.review}
             onDrop={handleDrop('review')}
-            color="bg-[#F59E0B]"
+            color="bg-amber-500"
           />
           <KanbanColumn
             title="Done"
             tasks={tasks.done}
             onDrop={handleDrop('done')}
-            color="bg-[#10B981]"
+            color="bg-[#20c937]"
           />
         </div>
       </div>
 
       {/* Floating Action Button */}
       <button
-        className="fixed bottom-8 right-8 w-14 h-14 bg-[#2196F3] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center group"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white rounded-full shadow-[0_8px_25px_rgba(0,102,255,0.35)] hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center group"
         title="Add New Task"
       >
         <Plus className="w-6 h-6" />

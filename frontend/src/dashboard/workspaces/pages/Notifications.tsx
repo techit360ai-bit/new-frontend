@@ -49,9 +49,9 @@ function getIconColor(type: WorkspaceNotificationType): string {
 
 function EmptyState({ children }: { children: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-      <Bell className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-      <p className="text-sm text-gray-600">{children}</p>
+    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-8 text-center text-slate-900 dark:text-white">
+      <Bell className="w-8 h-8 text-slate-400 mx-auto mb-3" />
+      <p className="text-sm text-slate-500 dark:text-slate-400">{children}</p>
     </div>
   );
 }
@@ -69,23 +69,23 @@ function NotificationCard({
 }) {
   return (
     <div
-      className={`bg-white border rounded-lg p-4 transition-all hover:shadow-md ${
-        !notification.read ? 'border-[#2196F3] bg-[#2196F3]/5' : 'border-gray-200'
+      className={`bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border rounded-2xl p-4 transition-all hover:shadow-md text-slate-900 dark:text-white ${
+        !notification.read ? 'border-[#0066ff]/40 bg-[#0066ff]/5 dark:bg-[#0066ff]/10' : 'border-black/[0.06] dark:border-white/10'
       }`}
     >
       <div className="flex items-start gap-4">
-        <div className={`p-2 rounded-lg ${getIconColor(notification.type)}`}>
+        <div className={`p-2.5 rounded-xl ${getIconColor(notification.type)}`}>
           {getIcon(notification.type)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
-              <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-              <span className="text-xs text-gray-400">{notification.timestamp}</span>
+              <h3 className="font-semibold text-sm mb-1 text-slate-900 dark:text-white">{notification.title}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">{notification.message}</p>
+              <span className="text-xs text-slate-400 dark:text-slate-500">{notification.timestamp}</span>
             </div>
             {!notification.read && !compact && (
-              <Badge className="bg-[#2196F3] text-white shrink-0">New</Badge>
+              <Badge className="bg-[#0066ff] text-white shrink-0 font-semibold">New</Badge>
             )}
           </div>
         </div>
@@ -95,16 +95,18 @@ function NotificationCard({
               <Button
                 variant="ghost"
                 size="sm"
+                className="rounded-lg hover:bg-black/[0.05] dark:hover:bg-white/10 text-slate-600 dark:text-slate-300"
                 onClick={() => onRead(notification.id)}
                 aria-label="Mark notification read"
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-4 h-4 text-[#20c937]" />
               </Button>
             )}
             {onDelete && (
               <Button
                 variant="ghost"
                 size="sm"
+                className="rounded-lg hover:bg-black/[0.05] dark:hover:bg-white/10"
                 onClick={() => onDelete(notification.id)}
                 aria-label="Delete notification"
               >
@@ -177,29 +179,29 @@ export function Notifications() {
   );
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#2196F3]/10 rounded-lg">
-              <Bell className="w-6 h-6 text-[#2196F3]" />
+            <div className="p-2.5 bg-[#0066ff]/10 dark:bg-[#0066ff]/20 rounded-xl border border-[#0066ff]/20">
+              <Bell className="w-6 h-6 text-[#0066ff] dark:text-[#58a6ff]" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 Notifications
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={markEveryNotificationRead} disabled={loading || notifications.length === 0}>
-              <Check className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={markEveryNotificationRead} disabled={loading || notifications.length === 0} className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">
+              <Check className="w-4 h-4 mr-2 text-[#20c937]" />
               Mark all as read
             </Button>
-            <Button variant="outline" size="sm" onClick={() => toast('Notification filters require persisted preferences.')}>
-              <Filter className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={() => toast('Notification filters require persisted preferences.')} className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">
+              <Filter className="w-4 h-4 mr-2 text-[#0066ff] dark:text-[#58a6ff]" />
               Filter
             </Button>
           </div>
@@ -207,19 +209,19 @@ export function Notifications() {
       </div>
 
       <div className="flex-1 overflow-auto px-8 py-6">
-        {loading && <p className="text-sm text-gray-500 mb-4">Loading live notifications...</p>}
+        {loading && <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Loading live notifications...</p>}
         {!loading && error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400 mb-4">
             Notifications could not be loaded: {error}
           </div>
         )}
 
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="unread">Unread ({unreadCount})</TabsTrigger>
-            <TabsTrigger value="mentions">Mentions</TabsTrigger>
-            <TabsTrigger value="prs">Pull Requests</TabsTrigger>
+          <TabsList className="mb-6 bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
+            <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">All</TabsTrigger>
+            <TabsTrigger value="unread" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Unread ({unreadCount})</TabsTrigger>
+            <TabsTrigger value="mentions" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Mentions</TabsTrigger>
+            <TabsTrigger value="prs" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Pull Requests</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="space-y-3">

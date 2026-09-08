@@ -96,13 +96,13 @@ export function HeaderWithCallsAndRole() {
 
   return (
     <>
-      <header className="h-[60px] border-b border-gray-200 bg-white flex items-center justify-between px-6">
+      <header className="h-[60px] border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl flex items-center justify-between px-6 transition-colors">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               {activeWorkspace?.name ?? 'Workspace'}
             </h1>
-            <Badge className="bg-[#10B981] text-white hover:bg-[#10B981]/90">
+            <Badge className="bg-[#20c937] text-white font-medium hover:bg-[#20c937]/90">
               {activeWorkspace?.status ?? 'No live workspace'}
             </Badge>
           </div>
@@ -111,15 +111,15 @@ export function HeaderWithCallsAndRole() {
         <div className="flex-1 max-w-xs mx-8">
           <DropdownMenu>
             <DropdownMenuTrigger className="w-full">
-              <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200">
+              <div className="flex items-center justify-between px-4 py-2 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
                 <span className="text-sm font-medium">Current Workspace</span>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[280px]">
+            <DropdownMenuContent className="w-[280px] bg-white dark:bg-[#1a1a1a] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
               {workspaces.length > 0 ? (
                 workspaces.map((workspace) => (
-                  <DropdownMenuItem key={workspace.id} onClick={() => { const query = new URLSearchParams(location.search); query.set('workspace', workspace.id); setActiveWorkspaceId(workspace.id); navigate(`${location.pathname}?${query.toString()}`); }}>
+                  <DropdownMenuItem key={workspace.id} className="focus:bg-[#0066ff]/10 dark:focus:bg-[#0066ff]/20 cursor-pointer" onClick={() => { const query = new URLSearchParams(location.search); query.set('workspace', workspace.id); setActiveWorkspaceId(workspace.id); navigate(`${location.pathname}?${query.toString()}`); }}>
                     {workspace.name}{workspace.id === activeWorkspace?.id ? ' (Current)' : ''}
                   </DropdownMenuItem>
                 ))
@@ -132,71 +132,71 @@ export function HeaderWithCallsAndRole() {
 
         <div className="flex items-center gap-4">
           <div className="flex -space-x-2">
-            {teamMembers.map((member, idx) => (
+            {teamMembers.map((member) => (
               <Avatar
                 key={member.name}
-                className="w-8 h-8 border-2 border-white hover:z-10 transition-all hover:scale-110 cursor-pointer"
+                className="w-8 h-8 border-2 border-white dark:border-[#121212] hover:z-10 transition-all hover:scale-110 cursor-pointer"
               >
-                <AvatarFallback className={`${member.color} text-white text-xs`}>
+                <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
                   {member.avatar}
                 </AvatarFallback>
               </Avatar>
             ))}
           </div>
           {teamMembers.length === 0 && (
-            <span className="text-xs text-gray-500">No live contributors</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">No live contributors</span>
           )}
 
-          <div className="h-6 w-px bg-gray-200" />
+          <div className="h-6 w-px bg-black/[0.08] dark:bg-white/10" />
 
           <button
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl transition-colors text-slate-600 dark:text-slate-300"
             onClick={() => {
               setShowVideoCall(true);
               setIsVideoPIP(false);
             }}
           >
-            <Video className="w-5 h-5 text-gray-600" />
+            <Video className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
           <button
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl transition-colors text-slate-600 dark:text-slate-300"
             onClick={() => setShowAudioCall(true)}
           >
-            <Phone className="w-5 h-5 text-gray-600" />
+            <Phone className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
           <button
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
+            className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl transition-colors relative text-slate-600 dark:text-slate-300"
             onClick={() => navigate('/workspaces/notifications')}
           >
-            <Bell className="w-5 h-5 text-gray-600" />
+            <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
             {unreadNotifications > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#F59E0B] rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#0066ff] rounded-full" />
             )}
           </button>
           <button
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl transition-colors text-slate-600 dark:text-slate-300"
             onClick={() => navigate('/workspaces/settings')}
           >
-            <Settings className="w-5 h-5 text-gray-600" />
+            <Settings className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
 
-          <div className="h-6 w-px bg-gray-200" />
+          <div className="h-6 w-px bg-black/[0.08] dark:bg-white/10" />
 
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
+              <div className="flex items-center gap-2 cursor-pointer hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl px-2 py-1 transition-colors">
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-[#2196F3] text-white">
+                  <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white font-bold">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>{userName}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs text-gray-500 font-normal">
+            <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-[#1a1a1a] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
+              <DropdownMenuLabel className="font-semibold">{userName}</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-black/[0.06] dark:bg-white/10" />
+              <DropdownMenuLabel className="text-xs text-slate-500 dark:text-slate-400 font-normal">
                 Switch Role
               </DropdownMenuLabel>
               {roles.map(role => {
@@ -205,18 +205,18 @@ export function HeaderWithCallsAndRole() {
                 <DropdownMenuItem
                   key={role.id}
                   onClick={() => handleRoleChange(role.id)}
-                  className={currentRole === role.id ? 'bg-[#2196F3]/10 text-[#2196F3]' : ''}
+                  className={currentRole === role.id ? 'bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] font-semibold cursor-pointer' : 'cursor-pointer'}
                 >
                   <RoleIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                   {role.name}
                   {currentRole === role.id && (
-                    <Badge className="ml-auto bg-[#2196F3] text-white text-xs">Active</Badge>
+                    <Badge className="ml-auto bg-[#0066ff] text-white text-xs">Active</Badge>
                   )}
                 </DropdownMenuItem>
               );})}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/workspaces/settings')}>Settings</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { void signOut(); }}>Sign Out</DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-black/[0.06] dark:bg-white/10" />
+              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/workspaces/settings')}>Settings</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer text-red-600 dark:text-red-400" onClick={() => { void signOut(); }}>Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
