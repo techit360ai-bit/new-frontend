@@ -140,13 +140,14 @@ interface AuthContextType {
 // ── Storage helpers ───────────────────────────────────────────
 const TOKEN_KEY = 'techit_access_token'
 const USER_KEY  = 'techit_user'
+const COOKIE_AUTH = import.meta.env.PROD || import.meta.env.VITE_COOKIE_AUTH === 'true'
 
 const getStored = () => ({
   token: getAuthToken(),
   user: (() => { try { const u = localStorage.getItem(USER_KEY); return u ? JSON.parse(u) : null } catch { return null } })(),
 })
 try { localStorage.removeItem('techit_token') } catch {}
-const saveToken = (t: string | null) => { setAccessToken(t); if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY) }
+const saveToken = (t: string | null) => { setAccessToken(COOKIE_AUTH ? null : t); if (!COOKIE_AUTH && t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY) }
 const saveUser  = (u: User | null)   => u ? localStorage.setItem(USER_KEY, JSON.stringify(u)) : localStorage.removeItem(USER_KEY)
 
 // Forward the stored JWT to the ai-router API client so every dashboard request
@@ -164,6 +165,7 @@ async function apiFetch(path: string, opts: RequestInit = {}) {
   const { token } = getStored() 
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
+  try { const csrf = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf=')); if (csrf) headers['X-CSRF-Token'] = decodeURIComponent(csrf.slice('techit_csrf='.length)) } catch {}
   const request = async (token: string | null) => fetch(`${API}${path}`, { ...opts, credentials: 'include', headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(opts.headers as Record<string, string> || {}) } })
   let res = await request(getAuthToken())
   if (res.status === 401 && path !== '/auth/refresh') { const token = await refreshAccessToken(); if (token) res = await request(token) }

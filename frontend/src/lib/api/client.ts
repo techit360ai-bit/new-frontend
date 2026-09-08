@@ -51,6 +51,7 @@ const inFlightGets = new Map<string, Promise<unknown>>();
 const etags = new Map<string, string>();
 const etagBodies = new Map<string, unknown>();
 function sessionValue(key: string) { try { return typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null } catch { return null } }
+function csrfToken() { try { const part = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf=')); return part ? decodeURIComponent(part.slice('techit_csrf='.length)) : null } catch { return null } }
 function setSessionValue(key: string, value: string | null) { try { if (typeof sessionStorage !== 'undefined') { if (value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key) } } catch {} }
 export function setAuthTokenGetter(fn: () => string | null) {
   authTokenGetter = fn;
@@ -67,6 +68,8 @@ function headers(extra?: HeadersInit): HeadersInit {
   try { if (typeof localStorage !== 'undefined' && localStorage.getItem('techit-data-saver') === '1') h['X-TechIT-Data-Saver'] = '1'; } catch { /* storage unavailable */ }
   const token = getAuthToken();
   if (token) h.Authorization = `Bearer ${token}`;
+  const csrf = csrfToken();
+  if (csrf) h['X-CSRF-Token'] = csrf;
   return { ...h, ...(extra as Record<string, string>) };
 }
 
