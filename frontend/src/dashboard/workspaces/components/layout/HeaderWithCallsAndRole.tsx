@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Settings, Video, Phone, ChevronDown, Code2, Palette, ClipboardList, Shield } from 'lucide-react';
+import { Bell, Settings, Video, Phone, ChevronDown, Code2, Palette, ClipboardList, Shield, Layers, FolderGit2, Check, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -110,22 +110,97 @@ export function HeaderWithCallsAndRole() {
 
         <div className="flex-1 max-w-xs mx-8">
           <DropdownMenu>
-            <DropdownMenuTrigger className="w-full">
-              <div className="flex items-center justify-between px-4 py-2 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
-                <span className="text-sm font-medium">Current Workspace</span>
-                <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <DropdownMenuTrigger className="w-full focus:outline-none">
+              <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all border border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white shadow-sm group">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-1 rounded-lg bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] shrink-0">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <div className="flex flex-col items-start min-w-0 text-left">
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500">Workspace</span>
+                    <span className="text-xs font-semibold truncate max-w-[140px]">
+                      {activeWorkspace?.name ?? 'Main Workspace'}
+                    </span>
+                  </div>
+                </div>
+                <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-transform duration-200 shrink-0 ml-2" />
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[280px] bg-white dark:bg-[#1a1a1a] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
-              {workspaces.length > 0 ? (
-                workspaces.map((workspace) => (
-                  <DropdownMenuItem key={workspace.id} className="focus:bg-[#0066ff]/10 dark:focus:bg-[#0066ff]/20 cursor-pointer" onClick={() => { const query = new URLSearchParams(location.search); query.set('workspace', workspace.id); setActiveWorkspaceId(workspace.id); navigate(`${location.pathname}?${query.toString()}`); }}>
-                    {workspace.name}{workspace.id === activeWorkspace?.id ? ' (Current)' : ''}
+            
+            <DropdownMenuContent align="start" className="w-[300px] p-2 bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl border border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white shadow-2xl rounded-2xl z-50">
+              <DropdownMenuLabel className="px-2 py-1.5 flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Workspaces ({workspaces.length > 0 ? workspaces.length : 1})
+                </span>
+                <Badge className="bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20 text-[10px] px-2">
+                  Active Sync
+                </Badge>
+              </DropdownMenuLabel>
+              
+              <DropdownMenuSeparator className="bg-black/[0.06] dark:bg-white/10 my-1" />
+              
+              <div className="space-y-1 max-h-60 overflow-y-auto custom-scrollbar">
+                {workspaces.length > 0 ? (
+                  workspaces.map((workspace) => {
+                    const isSelected = workspace.id === activeWorkspace?.id;
+                    return (
+                      <DropdownMenuItem
+                        key={workspace.id}
+                        onClick={() => {
+                          const query = new URLSearchParams(location.search);
+                          query.set('workspace', workspace.id);
+                          setActiveWorkspaceId(workspace.id);
+                          navigate(`${location.pathname}?${query.toString()}`);
+                        }}
+                        className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
+                          isSelected
+                            ? 'bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] font-semibold border border-[#0066ff]/20'
+                            : 'hover:bg-black/[0.04] dark:hover:bg-white/5 text-slate-700 dark:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff]' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}>
+                            <FolderGit2 className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold truncate">{workspace.name}</div>
+                            <div className="text-[10px] text-slate-400 truncate">{workspace.status ?? 'Active'}</div>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-[#0066ff] text-white flex items-center justify-center shrink-0">
+                            <Check className="w-3 h-3" />
+                          </div>
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })
+                ) : (
+                  <DropdownMenuItem
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] font-semibold border border-[#0066ff]/20"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff]">
+                        <Layers className="w-4 h-4" />
+                      </div>
+                      <div className="text-xs font-semibold">Default Workspace</div>
+                    </div>
+                    <div className="w-5 h-5 rounded-full bg-[#0066ff] text-white flex items-center justify-center shrink-0">
+                      <Check className="w-3 h-3" />
+                    </div>
                   </DropdownMenuItem>
-                ))
-              ) : (
-                <DropdownMenuItem>No persisted workspaces</DropdownMenuItem>
-              )}
+                )}
+              </div>
+
+              <DropdownMenuSeparator className="bg-black/[0.06] dark:bg-white/10 my-1" />
+
+              <DropdownMenuItem
+                onClick={() => navigate('/workspaces/settings')}
+                className="flex items-center gap-2 p-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/5 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 text-[#0066ff]" />
+                <span>Manage Workspace Settings</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
