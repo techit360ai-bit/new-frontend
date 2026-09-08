@@ -96,7 +96,7 @@ export function HeaderWithCallsAndRole() {
 
   return (
     <>
-      <header className="h-[60px] border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl flex items-center justify-between px-6 transition-colors">
+      <header className="sticky top-0 z-30 h-[60px] border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl flex items-center justify-between px-6 transition-colors">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
