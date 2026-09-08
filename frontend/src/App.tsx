@@ -123,14 +123,19 @@ const Signup = lazy(() => import("@/components/SignUp"));
 const Login = lazy(() => import("@/components/Login"));
 const ForgotPassword = lazy(() => import("@/components/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/components/ResetPassword"));
-import { RedirectAuthenticated, RequireAuth, RequireRole as RealRequireRole } from "@/components/auth/RouteGuards";
+import { RedirectAuthenticated, RequireAuth as RealRequireAuth, RequireRole as RealRequireRole } from "@/components/auth/RouteGuards";
 
-// Bypass auth for founder UI testing
+// Bypass auth for UI testing across Workspaces, Feed, Trust Center, Wallet, Plugins, and Support
 const RequireRole = ({ allowed, children }: { allowed: any[]; children: React.ReactNode }) => {
-  if (allowed.includes("founder")) {
-    return <>{children}</>;
-  }
-  return <RealRequireRole allowed={allowed}>{children}</RealRequireRole>;
+  return <>{children}</>;
+};
+
+const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  return <>{children}</>;
+};
+
+const RequirePluginsAccess = ({ children }: { children: React.ReactNode }) => {
+  return <>{children}</>;
 };
 
 const WorkspacesLayout = lazy(() => import("@/dashboard/workspaces/components/layout/MainLayout").then((m) => ({ default: m.MainLayout })));
@@ -168,7 +173,7 @@ const DemoList = lazy(() => import("@/dashboard/demos/DemoList").then((m) => ({ 
 const DemoCreate = lazy(() => import("@/dashboard/demos/DemoCreate").then((m) => ({ default: m.DemoCreate })));
 const DemoRoom = lazy(() => import("@/dashboard/demos/DemoRoom").then((m) => ({ default: m.DemoRoom })));
 const PluginsDashboard = lazy(() => import("@/dashboard/plugins/PluginsDashboard"));
-import { RequirePluginsAccess } from "@/components/RequirePluginsAccess";
+import { RequirePluginsAccess as RealRequirePluginsAccess } from "@/components/RequirePluginsAccess";
 import { getAuthToken } from "@/lib/api/client";
 
 setMessagingToken(() => {
