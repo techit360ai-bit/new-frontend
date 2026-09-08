@@ -412,45 +412,301 @@ export function Code() {
 
   const conflict = conflicts[0];
   return (
-    <div className="flex h-full min-h-[calc(100vh-60px)] flex-col bg-slate-950 text-slate-100">
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-3 py-2">
-        <Code2 className="h-5 w-5 text-[#58a6ff]" />
-        <select value={workspaceId} onChange={event => { setWorkspaceId(event.target.value); setParams({ workspace: event.target.value }); }} className="h-9 rounded-xl border border-slate-700 bg-slate-950 px-2 text-sm text-slate-200 outline-none focus:border-[#0066ff]">{workspaces.map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select>
-        <div className="flex rounded-xl border border-slate-700 bg-slate-950 p-0.5">{(['manual','assist','agent','autonomous'] as Mode[]).map(value => <button key={value} onClick={() => setMode(value)} className={`px-2.5 py-1 text-xs font-semibold capitalize rounded-lg transition-all ${mode === value ? 'bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{value}</button>)}</div>
-        <span className="text-xs text-slate-400 font-medium">{adapter?.adapter || 'detecting'} · {changed.length} changed · <span className={navigator.onLine ? 'text-[#20c937]' : 'text-amber-400'}>{navigator.onLine ? 'online' : 'offline'}</span></span>
-        <div className="ml-auto flex flex-wrap gap-2">
-          <button onClick={createFile} className="icon-button" title="New file"><FilePlus2 className="h-4 w-4" /></button>
-          <button onClick={() => void renameActive()} className="toolbar-button">Rename</button>
-          <button onClick={() => void removeActive()} className="icon-button text-red-400 hover:text-red-300" title="Delete"><Trash2 className="h-4 w-4" /></button>
-          <button onClick={() => void saveAll()} disabled={busy || !changed.length} className="icon-button text-[#20c937]" title="Save"><Save className="h-4 w-4" /></button>
-          <button onClick={() => void run('dev')} className="toolbar-button text-[#58a6ff] hover:text-white"><Play className="h-4 w-4 text-[#20c937]" />Run</button>
-          <button onClick={() => { stopWebCommand(); setTerminal(value => `${value}\nProcess stopped by user.`); }} className="icon-button text-red-400" title="Stop runtime"><Square className="h-4 w-4" /></button>
-          <button onClick={() => void run('test')} className="toolbar-button"><TestTube2 className="h-4 w-4 text-[#58a6ff]" />Test</button>
-          <button onClick={() => void run('build')} className="toolbar-button">Build</button>
-          <select value={destinationId} onChange={event => { const selected = destinations.find(row => row.id === event.target.value); setDestinationId(event.target.value); if (selected?.repository && selected.provider !== 'local') { const provider = selected.provider; setRemote(value => ({ ...value, provider, repo: selected.repository!, headSha: '' })); } }} className="h-9 max-w-44 rounded-xl border border-slate-700 bg-slate-950 px-2 text-xs text-slate-200 outline-none" title="Synchronization destination"><option value="">Destination</option>{destinations.map(row => <option key={row.id} value={row.id}>{row.provider}: {row.repository || 'VS Code'}</option>)}</select>
-          <button onClick={() => { const repo = window.prompt('Connected repository', remote.repo); if (repo) setRemote(value => ({ ...value, repo })); }} className="icon-button" title="Configure repository"><Github className="h-4 w-4" /></button>
-          <button onClick={() => void pull()} className="toolbar-button"><RefreshCw className="h-4 w-4 text-[#58a6ff]" />Pull</button>
-          <button onClick={() => void push()} className="toolbar-button"><UploadCloud className="h-4 w-4 text-[#20c937]" />Push</button>
-          <button onClick={() => void deployPreview()} className="toolbar-button text-purple-300">Deploy</button>
-          <button onClick={() => void openVSCode()} className="toolbar-button">VS Code</button>
+    <div className="flex h-full min-h-[calc(100vh-60px)] flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-slate-100 transition-colors">
+      {/* Top Glassmorphic IDE Toolbar */}
+      <div className="flex flex-wrap items-center gap-2.5 border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-4 py-2.5 z-10 shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] rounded-xl border border-[#0066ff]/20">
+            <Code2 className="h-4 w-4" />
+          </div>
+          <select
+            value={workspaceId}
+            onChange={event => { setWorkspaceId(event.target.value); setParams({ workspace: event.target.value }); }}
+            className="h-8 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 px-2.5 text-xs font-semibold text-slate-800 dark:text-white outline-none focus:border-[#0066ff] transition-all cursor-pointer"
+          >
+            {workspaces.map(row => <option key={row.id} value={row.id} className="dark:bg-[#1a1a1a]">{row.name}</option>)}
+          </select>
+        </div>
+
+        {/* Mode Selector */}
+        <div className="flex rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-100 dark:bg-white/5 p-1">
+          {(['manual','assist','agent','autonomous'] as Mode[]).map(value => (
+            <button
+              key={value}
+              onClick={() => setMode(value)}
+              className={`px-2.5 py-1 text-xs font-semibold capitalize rounded-lg transition-all ${
+                mode === value
+                  ? 'bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white shadow-sm font-bold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+
+        {/* Adapter & Connectivity Status */}
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 px-2 py-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-black/[0.04] dark:border-white/5">
+          <span>{adapter?.adapter || 'Detecting'}</span>
+          <span>•</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-200">{changed.length} Edits</span>
+          <span>•</span>
+          <span className={`inline-flex items-center gap-1 font-bold ${navigator.onLine ? 'text-[#20c937]' : 'text-amber-400'}`}>
+            <span className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-[#20c937] animate-pulse' : 'bg-amber-400'}`} />
+            {navigator.onLine ? 'Online' : 'Offline'}
+          </span>
+        </div>
+
+        {/* Action Controls */}
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+          <button onClick={createFile} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1 transition-all" title="New file">
+            <FilePlus2 className="h-3.5 w-3.5 text-[#0066ff]" /> New
+          </button>
+          <button onClick={() => void renameActive()} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-medium transition-all">
+            Rename
+          </button>
+          <button onClick={() => void removeActive()} className="h-8 px-2.5 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1 transition-all" title="Delete">
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+          <button onClick={() => void saveAll()} disabled={busy || !changed.length} className="h-8 px-3 rounded-xl bg-[#20c937] hover:bg-[#20c937]/90 disabled:opacity-40 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all" title="Save All">
+            <Save className="h-3.5 w-3.5" /> Save
+          </button>
+          <button onClick={() => void run('dev')} className="h-8 px-3 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
+            <Play className="h-3.5 w-3.5 fill-current text-white" /> Run
+          </button>
+          <button onClick={() => { stopWebCommand(); setTerminal(value => `${value}\nProcess stopped by user.`); }} className="h-8 px-2 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-all" title="Stop runtime">
+            <Square className="h-3.5 w-3.5" />
+          </button>
+          <button onClick={() => void run('test')} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-all">
+            <TestTube2 className="h-3.5 w-3.5 text-[#58a6ff]" /> Test
+          </button>
+          <button onClick={() => void run('build')} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all">
+            Build
+          </button>
+          
+          <select
+            value={destinationId}
+            onChange={event => { const selected = destinations.find(row => row.id === event.target.value); setDestinationId(event.target.value); if (selected?.repository && selected.provider !== 'local') { const provider = selected.provider; setRemote(value => ({ ...value, provider, repo: selected.repository!, headSha: '' })); } }}
+            className="h-8 max-w-40 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 px-2 text-xs font-medium text-slate-700 dark:text-slate-200 outline-none"
+            title="Synchronization destination"
+          >
+            <option value="">Destination</option>
+            {destinations.map(row => <option key={row.id} value={row.id} className="dark:bg-[#1a1a1a]">{row.provider}: {row.repository || 'VS Code'}</option>)}
+          </select>
+
+          <button onClick={() => { const repo = window.prompt('Connected repository', remote.repo); if (repo) setRemote(value => ({ ...value, repo })); }} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1 transition-all" title="Configure repository">
+            <Github className="h-3.5 w-3.5" />
+          </button>
+          <button onClick={() => void pull()} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-all">
+            <RefreshCw className="h-3.5 w-3.5 text-[#0066ff]" /> Pull
+          </button>
+          <button onClick={() => void push()} className="h-8 px-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all">
+            <UploadCloud className="h-3.5 w-3.5" /> Push
+          </button>
+          <button onClick={() => void deployPreview()} className="h-8 px-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-semibold transition-all">
+            Deploy
+          </button>
+          <button onClick={() => void openVSCode()} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all">
+            VS Code
+          </button>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[220px_minmax(0,1fr)_300px] max-lg:grid-cols-[180px_minmax(0,1fr)] max-md:block">
-        <aside className="overflow-auto border-r border-slate-800 bg-slate-900/90 p-2 max-md:flex max-md:max-h-28 max-md:border-b"><div className="mb-2 px-2 text-xs font-bold uppercase tracking-wider text-slate-400">Files</div>{files.map(file => <button key={file.path} onClick={() => setActivePath(file.path)} className={`block w-full truncate rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors ${active?.path === file.path ? 'bg-[#0066ff]/20 text-[#58a6ff] font-semibold border-l-2 border-[#0066ff]' : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'}`}>{file.content !== file.savedContent ? '● ' : ''}{file.path}</button>)}</aside>
-        <main className="min-h-0 bg-[#1e1e1e]">{active ? <Editor height="100%" path={active.path} language={active.language} value={active.content} onChange={updateActive} theme="vs-dark" options={{ minimap: { enabled: true }, fontSize: 13, automaticLayout: true, wordWrap: 'on', tabSize: 2, formatOnPaste: true }} /> : <div className="p-8 text-slate-400">Create or pull a file to begin.</div>}</main>
-        <aside className="border-l border-slate-800 bg-slate-900/90 p-3 max-lg:hidden"><div className="mb-3 flex items-center gap-2"><Bot className="h-4 w-4 text-[#58a6ff]" /><span className="font-semibold text-slate-200">TechIT Coding Intelligence</span></div><textarea value={task} onChange={event => setTask(event.target.value)} rows={5} className="w-full rounded-xl border border-slate-700 bg-slate-950 p-2.5 text-sm text-slate-100 outline-none focus:border-[#0066ff]" placeholder="Describe what should be built and why..." /><button onClick={() => void askAI(false)} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-3 py-2 text-sm font-bold text-white shadow-sm transition-all"><Send className="h-4 w-4" />Prepare build plan</button>{mode !== 'manual' && <button onClick={() => void askAI(true)} className="mt-2 w-full rounded-xl border border-[#0066ff] text-[#58a6ff] hover:bg-[#0066ff]/10 px-3 py-2 text-sm font-semibold transition-colors">Generate reviewable changes</button>}<pre className="mt-3 max-h-[48vh] overflow-auto whitespace-pre-wrap text-xs text-slate-300 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">{plan || 'AI uses existing Workspace context and cannot push or deploy without approval.'}</pre></aside>
+      {/* Main Workspace IDE Grid Layout */}
+      <div className="grid min-h-0 flex-1 grid-cols-[230px_minmax(0,1fr)_320px] max-lg:grid-cols-[200px_minmax(0,1fr)] max-md:block">
+        {/* Left File Explorer Panel */}
+        <aside className="overflow-y-auto custom-scrollbar border-r border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#121212]/80 backdrop-blur-xl p-3 max-md:flex max-md:max-h-28 max-md:border-b">
+          <div className="mb-3 px-2 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <span>Project Files</span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-500">{files.length}</span>
+          </div>
+          <div className="space-y-1">
+            {files.map(file => {
+              const isSelected = active?.path === file.path;
+              const isUnsaved = file.content !== file.savedContent;
+              return (
+                <button
+                  key={file.path}
+                  onClick={() => setActivePath(file.path)}
+                  className={`flex items-center justify-between w-full truncate rounded-xl px-3 py-2 text-left text-xs transition-all ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-[#0066ff]/15 via-[#0066ff]/10 to-transparent text-[#0066ff] dark:text-[#58a6ff] font-semibold border-l-4 border-[#0066ff]'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white font-medium'
+                  }`}
+                >
+                  <span className="truncate flex-1">{file.path}</span>
+                  {isUnsaved && (
+                    <span className="w-2 h-2 rounded-full bg-[#0066ff] shrink-0 ml-1.5" title="Unsaved changes" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* Center Code Editor Stage */}
+        <main className="min-h-0 bg-[#1e1e1e] relative">
+          {active ? (
+            <Editor
+              height="100%"
+              path={active.path}
+              language={active.language}
+              value={active.content}
+              onChange={updateActive}
+              theme="vs-dark"
+              options={{ minimap: { enabled: true }, fontSize: 13, automaticLayout: true, wordWrap: 'on', tabSize: 2, formatOnPaste: true }}
+            />
+          ) : (
+            <div className="p-8 text-slate-400 flex flex-col items-center justify-center h-full">
+              <Code2 className="w-12 h-12 text-[#0066ff] mb-3 opacity-50" />
+              <p className="text-sm font-medium">Create or pull a file to start editing code.</p>
+            </div>
+          )}
+        </main>
+
+        {/* Right AI Assistant Sidebar */}
+        <aside className="border-l border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#121212]/80 backdrop-blur-xl p-4 max-lg:hidden flex flex-col">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded-lg bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+                <Bot className="h-4 w-4" />
+              </div>
+              <span className="font-bold text-sm text-slate-900 dark:text-white">AI Coding Agent</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wide text-[#20c937] bg-[#20c937]/10 px-2 py-0.5 rounded-full border border-[#20c937]/20">
+              Active
+            </span>
+          </div>
+
+          <textarea
+            value={task}
+            onChange={event => setTask(event.target.value)}
+            rows={5}
+            className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 p-3 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-[#0066ff] placeholder-slate-400 transition-all resize-none mb-3"
+            placeholder="Describe what should be built or refactored..."
+          />
+
+          <button
+            onClick={() => void askAI(false)}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-3 py-2.5 text-xs font-bold text-white shadow-md transition-all mb-2"
+          >
+            <Send className="h-3.5 w-3.5" />
+            Prepare Build Plan
+          </button>
+
+          {mode !== 'manual' && (
+            <button
+              onClick={() => void askAI(true)}
+              className="w-full rounded-xl border border-[#0066ff]/40 text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/10 px-3 py-2 text-xs font-semibold transition-all mb-3"
+            >
+              Generate Reviewable Changes
+            </button>
+          )}
+
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
+              Plan Output & Context
+            </div>
+            <pre className="flex-1 overflow-y-auto custom-scrollbar whitespace-pre-wrap text-[11px] text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-black/40 p-3 rounded-xl border border-black/[0.06] dark:border-white/10 leading-relaxed font-mono">
+              {plan || 'AI uses existing Workspace context. All changes require explicit approval.'}
+            </pre>
+          </div>
+        </aside>
       </div>
 
-      <div className="h-[260px] border-t border-slate-800 bg-slate-950">
-        <div className="flex h-9 items-center gap-1 border-b border-slate-800 px-2">{(['terminal','problems','changes','ai','preview'] as BottomPanel[]).map(value => <button key={value} onClick={() => setBottomPanel(value)} className={`px-3 py-1 text-xs capitalize ${bottomPanel === value ? 'text-cyan-300' : 'text-slate-500'}`}>{value}{value === 'problems' && problems.length ? ` (${problems.length})` : ''}</button>)}<button onClick={() => void restartRuntime()} className="ml-auto icon-button" title="Restart runtime"><RefreshCw className="h-3 w-3" /></button></div>
-        {bottomPanel === 'terminal' && <pre className="h-[220px] overflow-auto p-3 text-xs text-green-300"><SquareTerminal className="mr-2 inline h-4 w-4" />{terminal || 'Runtime initializes only when Run, Test, or Build is selected.'}</pre>}
-        {bottomPanel === 'problems' && <pre className="h-[220px] overflow-auto p-3 text-xs text-amber-300">{problems.join('\n') || 'No parsed problems.'}</pre>}
-        {bottomPanel === 'changes' && <div className="h-[220px]">{conflict ? <div className="grid h-full grid-cols-[1fr_210px]"><DiffEditor height="100%" original={conflict.base} modified={conflict.merged} language={editorLanguage(conflict.path)} theme="vs-dark" /><div className="space-y-2 overflow-auto border-l border-slate-800 p-3 text-xs"><p className="font-medium">Three-way conflict: {conflict.path}</p><button onClick={() => void resolveConflict(conflict, 'local')} className="toolbar-button w-full">Keep Local</button><button onClick={() => void resolveConflict(conflict, 'remote')} className="toolbar-button w-full">Keep Remote</button><button onClick={() => void resolveConflict(conflict, 'merge')} className="toolbar-button w-full">Use Diff3 Result</button><button onClick={() => setConflicts([])} className="toolbar-button w-full">Cancel Pull</button></div></div> : reviewProposal ? <div className="grid h-full grid-cols-[1fr_280px]"><DiffEditor height="100%" original={reviewProposal.baseline} modified={reviewContent} language={editorLanguage(reviewProposal.path)} theme="vs-dark" /><div className="overflow-auto border-l border-slate-800 p-2 text-xs"><select value={reviewProposal.path} onChange={event => setReviewPath(event.target.value)} className="mb-2 h-8 w-full border border-slate-700 bg-slate-950 px-2">{reviewProposals.map(row => <option key={row.path} value={row.path}>{row.path}</option>)}</select>{reviewProposal.hunks.map((hunk, index) => <div key={hunk.id} className="mb-2 border border-slate-800 p-2"><p className="mb-1 text-slate-400">Hunk {index + 1} · lines {hunk.oldStart + 1}-{Math.max(hunk.oldStart + 1, hunk.oldEnd)}</p><div className="flex gap-1"><button onClick={() => setReviewDecisions(current => ({ ...current, [reviewProposal.path]: { ...(current[reviewProposal.path] || {}), [hunk.id]: true } }))} className={`toolbar-button flex-1 ${reviewDecisions[reviewProposal.path]?.[hunk.id] === true ? 'border-emerald-500 text-emerald-300' : ''}`}>Accept</button><button onClick={() => setReviewDecisions(current => ({ ...current, [reviewProposal.path]: { ...(current[reviewProposal.path] || {}), [hunk.id]: false } }))} className={`toolbar-button flex-1 ${reviewDecisions[reviewProposal.path]?.[hunk.id] === false ? 'border-rose-500 text-rose-300' : ''}`}>Reject</button></div></div>)}<button onClick={() => void completeExecutionReview()} className="toolbar-button w-full" disabled={!executionRun?.steps.some(row => row.stage === 'security' && row.status === 'completed')}>Apply Reviewed Hunks</button></div></div> : changed[0] ? <DiffEditor height="100%" original={changed[0].savedContent} modified={changed[0].content} language={changed[0].language} theme="vs-dark" /> : <div className="p-4 text-sm text-slate-500">No changes.</div>}</div>}
-        {bottomPanel === 'ai' && <pre className="h-[220px] overflow-auto p-3 text-xs">{plan}</pre>}
-        {bottomPanel === 'preview' && (previewUrl ? <iframe title="Live preview" src={previewUrl} className="h-full w-full bg-white" sandbox="allow-scripts allow-forms allow-modals allow-same-origin" /> : <div className="p-4 text-sm text-slate-500">Start a supported development server to open preview.</div>)}
+      {/* Bottom Panel Console & Preview Tabs */}
+      <div className="h-[260px] border-t border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl z-10 shrink-0">
+        <div className="flex h-10 items-center justify-between border-b border-black/[0.06] dark:border-white/10 px-3">
+          <div className="flex items-center gap-1">
+            {(['terminal','problems','changes','ai','preview'] as BottomPanel[]).map(value => (
+              <button
+                key={value}
+                onClick={() => setBottomPanel(value)}
+                className={`px-3 py-1.5 text-xs font-semibold capitalize rounded-lg transition-all ${
+                  bottomPanel === value
+                    ? 'bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/30 font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {value}
+                {value === 'problems' && problems.length ? (
+                  <span className="ml-1 text-[10px] bg-amber-500/20 text-amber-500 px-1.5 py-0.2 rounded-full border border-amber-500/30">
+                    {problems.length}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+
+          <button onClick={() => void restartRuntime()} className="p-1.5 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all" title="Restart runtime">
+            <RefreshCw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div className="h-[220px] overflow-hidden">
+          {bottomPanel === 'terminal' && (
+            <pre className="h-[220px] overflow-y-auto p-4 text-xs font-mono text-emerald-500 dark:text-emerald-400 bg-slate-950 leading-relaxed custom-scrollbar">
+              <SquareTerminal className="mr-2 inline h-4 w-4 text-[#0066ff]" />
+              {terminal || 'Runtime initializes when Run, Test, or Build is selected.'}
+            </pre>
+          )}
+          {bottomPanel === 'problems' && (
+            <pre className="h-[220px] overflow-y-auto p-4 text-xs font-mono text-amber-500 dark:text-amber-400 bg-slate-950 leading-relaxed custom-scrollbar">
+              {problems.join('\n') || 'No parsed errors or warnings.'}
+            </pre>
+          )}
+          {bottomPanel === 'changes' && (
+            <div className="h-[220px]">
+              {conflict ? (
+                <div className="grid h-full grid-cols-[1fr_220px]">
+                  <DiffEditor height="100%" original={conflict.base} modified={conflict.merged} language={editorLanguage(conflict.path)} theme="vs-dark" />
+                  <div className="space-y-2 overflow-y-auto border-l border-black/[0.06] dark:border-white/10 p-3 text-xs bg-slate-900 text-white">
+                    <p className="font-semibold text-amber-400">Three-way conflict: {conflict.path}</p>
+                    <button onClick={() => void resolveConflict(conflict, 'local')} className="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium">Keep Local</button>
+                    <button onClick={() => void resolveConflict(conflict, 'remote')} className="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium">Keep Remote</button>
+                    <button onClick={() => void resolveConflict(conflict, 'merge')} className="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium">Use Diff3 Result</button>
+                    <button onClick={() => setConflicts([])} className="w-full py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-medium">Cancel Pull</button>
+                  </div>
+                </div>
+              ) : reviewProposal ? (
+                <div className="grid h-full grid-cols-[1fr_290px]">
+                  <DiffEditor height="100%" original={reviewProposal.baseline} modified={reviewContent} language={editorLanguage(reviewProposal.path)} theme="vs-dark" />
+                  <div className="overflow-y-auto border-l border-black/[0.06] dark:border-white/10 p-3 text-xs bg-slate-900 text-white space-y-2">
+                    <select value={reviewProposal.path} onChange={event => setReviewPath(event.target.value)} className="w-full h-8 rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs">
+                      {reviewProposals.map(row => <option key={row.path} value={row.path}>{row.path}</option>)}
+                    </select>
+                    {reviewProposal.hunks.map((hunk, index) => (
+                      <div key={hunk.id} className="border border-slate-800 p-2 rounded-lg bg-slate-950">
+                        <p className="mb-1.5 text-slate-400 text-[11px]">Hunk {index + 1} · lines {hunk.oldStart + 1}-{Math.max(hunk.oldStart + 1, hunk.oldEnd)}</p>
+                        <div className="flex gap-2">
+                          <button onClick={() => setReviewDecisions(current => ({ ...current, [reviewProposal.path]: { ...(current[reviewProposal.path] || {}), [hunk.id]: true } }))} className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${reviewDecisions[reviewProposal.path]?.[hunk.id] === true ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-300'}`}>Accept</button>
+                          <button onClick={() => setReviewDecisions(current => ({ ...current, [reviewProposal.path]: { ...(current[reviewProposal.path] || {}), [hunk.id]: false } }))} className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${reviewDecisions[reviewProposal.path]?.[hunk.id] === false ? 'bg-rose-500 text-white' : 'bg-slate-800 text-slate-300'}`}>Reject</button>
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={() => void completeExecutionReview()} className="w-full py-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white font-bold text-xs" disabled={!executionRun?.steps.some(row => row.stage === 'security' && row.status === 'completed')}>Apply Reviewed Hunks</button>
+                  </div>
+                </div>
+              ) : changed[0] ? (
+                <DiffEditor height="100%" original={changed[0].savedContent} modified={changed[0].content} language={changed[0].language} theme="vs-dark" />
+              ) : (
+                <div className="p-6 text-xs font-medium text-slate-500">No pending changes or conflicts.</div>
+              )}
+            </div>
+          )}
+          {bottomPanel === 'ai' && (
+            <pre className="h-[220px] overflow-y-auto p-4 text-xs font-mono text-slate-300 bg-slate-950 custom-scrollbar">{plan}</pre>
+          )}
+          {bottomPanel === 'preview' && (
+            previewUrl ? (
+              <iframe title="Live preview" src={previewUrl} className="h-full w-full bg-white" sandbox="allow-scripts allow-forms allow-modals allow-same-origin" />
+            ) : (
+              <div className="p-6 text-xs font-medium text-slate-500">Start a development server to view live preview.</div>
+            )
+          )}
+        </div>
       </div>
-      <style>{`.icon-button{display:inline-flex;height:36px;width:36px;align-items:center;justify-content:center;border-radius:6px;border:1px solid #334155;background:#0f172a}.toolbar-button{display:inline-flex;height:36px;align-items:center;justify-content:center;gap:6px;border-radius:6px;border:1px solid #334155;background:#0f172a;padding:0 10px;font-size:12px}.icon-button:disabled,.toolbar-button:disabled{opacity:.4}`}</style>
     </div>
   );
 }
+
