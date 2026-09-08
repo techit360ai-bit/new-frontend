@@ -69,29 +69,29 @@
   --brand-pink: #FE2784;
   --neon-green: #00FF00;
 
-  /* TechIT Feed / Hangout color system (always dark) */
-  --bg-base: #020804;
-  --bg-surface: rgba(4, 16, 8, 0.7);
-  --bg-elevated: rgba(8, 32, 16, 0.85);
-  --bg-overlay: rgba(2, 8, 4, 0.95);
-  --text-primary: #f0f0f5;
-  --text-secondary: #9090a8;
-  --text-muted: #5c5c78;
-  --accent-primary: #FE2784; /* Brand Pink */
-  --accent-glow: rgba(254, 39, 132, 0.15);
-  --score-green: #00FF00;
+  /* TechIT Feed / Hangout color system */
+  --bg-base: #f8fafc;
+  --bg-surface: rgba(255, 255, 255, 0.9);
+  --bg-elevated: #f1f5f9;
+  --bg-overlay: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-primary: #0066ff;
+  --accent-glow: rgba(0, 102, 255, 0.15);
+  --score-green: #20c937;
   --score-amber: #f59e0b;
   --score-red: #ef4444;
-  --score-blue: #00FF00;
-  --score-purple: #FE2784;
-  --post-milestone: #00FF00;
-  --post-insight: #FE2784;
+  --score-blue: #0066ff;
+  --score-purple: #58a6ff;
+  --post-milestone: #20c937;
+  --post-insight: #0066ff;
   --post-build-update: #f59e0b;
-  --post-question: #FE2784;
-  --post-collab-call: #00FF00;
+  --post-question: #58a6ff;
+  --post-collab-call: #20c937;
   --post-problem-signal: #ef4444;
-  --border-default: #006400; /* Brand Green */
-  --border-active: rgba(0, 255, 0, 0.4);
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(0, 102, 255, 0.4);
 
   /* Shared application design tokens. Feature-scoped themes may override these
      values, but role shells and primitives use the same semantic vocabulary. */
@@ -103,10 +103,10 @@
   --techit-app-text: #172033;
   --techit-app-muted: #64748b;
   --techit-app-subtle: #f0f3f7;
-  --techit-app-brand: #2563eb;
-  --techit-app-brand-strong: #1d4ed8;
+  --techit-app-brand: #0066ff;
+  --techit-app-brand-strong: #0052cc;
   --techit-app-brand-soft: #eff6ff;
-  --techit-app-success: #15803d;
+  --techit-app-success: #20c937;
   --techit-app-success-soft: #f0fdf4;
   --techit-app-warning: #b45309;
   --techit-app-warning-soft: #fffbeb;
@@ -150,25 +150,48 @@
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
 
-  --techit-app-bg: #020804;
-  --techit-app-surface: rgba(4, 16, 8, 0.7); /* Translucent frosted-glass pill */
-  --techit-app-surface-raised: rgba(8, 32, 16, 0.85);
-  --techit-app-border: #006400; /* Brand Green */
-  --techit-app-border-strong: #008000;
-  --techit-app-text: #f3f6fa;
-  --techit-app-muted: #9aa9bb;
-  --techit-app-subtle: #0a2412;
-  --techit-app-brand: #00FF00; /* Neon Green */
-  --techit-app-brand-strong: #93c5fd;
-  --techit-app-brand-soft: #172554;
-  --techit-app-success: #4ade80;
-  --techit-app-success-soft: #052e16;
+  --bg-base: #121212;
+  --bg-surface: rgba(18, 18, 18, 0.9);
+  --bg-elevated: rgba(30, 30, 30, 0.95);
+  --bg-overlay: rgba(18, 18, 18, 0.95);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-primary: #0066ff;
+  --accent-glow: rgba(0, 102, 255, 0.2);
+  --score-green: #20c937;
+  --score-amber: #f59e0b;
+  --score-red: #ef4444;
+  --score-blue: #58a6ff;
+  --score-purple: #58a6ff;
+  --post-milestone: #20c937;
+  --post-insight: #58a6ff;
+  --post-build-update: #f59e0b;
+  --post-question: #58a6ff;
+  --post-collab-call: #20c937;
+  --post-problem-signal: #ef4444;
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-active: rgba(88, 166, 255, 0.4);
+
+  --techit-app-bg: #121212;
+  --techit-app-surface: rgba(18, 18, 18, 0.9);
+  --techit-app-surface-raised: rgba(26, 26, 26, 0.95);
+  --techit-app-border: rgba(255, 255, 255, 0.1);
+  --techit-app-border-strong: rgba(255, 255, 255, 0.2);
+  --techit-app-text: #f8fafc;
+  --techit-app-muted: #94a3b8;
+  --techit-app-subtle: rgba(255, 255, 255, 0.05);
+  --techit-app-brand: #0066ff;
+  --techit-app-brand-strong: #58a6ff;
+  --techit-app-brand-soft: rgba(0, 102, 255, 0.15);
+  --techit-app-success: #20c937;
+  --techit-app-success-soft: rgba(32, 201, 55, 0.15);
   --techit-app-warning: #fbbf24;
-  --techit-app-warning-soft: #451a03;
+  --techit-app-warning-soft: rgba(251, 191, 36, 0.15);
   --techit-app-danger: #f87171;
-  --techit-app-danger-soft: #450a0a;
-  --techit-app-info: #38bdf8;
-  --techit-app-info-soft: #082f49;
+  --techit-app-danger-soft: rgba(248, 113, 113, 0.15);
+  --techit-app-info: #58a6ff;
+  --techit-app-info-soft: rgba(88, 166, 255, 0.15);
 }
 
 /* Shared shell primitives. These classes provide a stable visual baseline for
