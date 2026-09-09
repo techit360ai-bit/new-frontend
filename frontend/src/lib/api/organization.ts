@@ -1,4 +1,5 @@
 import { domainGet, domainPatch, domainPost } from "@/lib/domainApi";
+import { apiGet, apiPost } from "@/lib/api/client";
 
 export type OrganizationLiveSection = "marketplace" | "talent" | "settings" | "integrations" | "programs" | "ai-operations" | "market-readiness" | "community";
 export type OrganizationLiveRecord = { id: string; title?: string; name?: string; description?: string; status?: string; category?: string; ownerId?: string; createdAt?: string; updatedAt?: string; [key: string]: unknown };
@@ -173,6 +174,18 @@ export function normalizeOrganizationDashboard(payload: unknown): OrganizationDa
 export async function fetchOrganizationDashboard(): Promise<OrganizationDashboardData> {
   const payload = await domainGet<unknown>("/organization/dashboard");
   return normalizeOrganizationDashboard(payload);
+}
+
+export interface OrganizationSponsorshipPackage { id: string; name: string; description: string; packageType: string; amount: number | string | null; currency: string | null; benefits: string[]; status: string }
+export async function fetchOrganizationSponsorshipPackages(organizationId?: string): Promise<OrganizationSponsorshipPackage[]> {
+  const suffix = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : "";
+  const payload = asRecord(await apiGet<unknown>(`/organization-intelligence/sponsors/packages${suffix}`));
+  return asRows(payload.packages) as OrganizationSponsorshipPackage[];
+}
+
+export async function createOrganizationSponsorshipPackage(input: Record<string, unknown>): Promise<OrganizationSponsorshipPackage> {
+  const payload = asRecord(await apiPost<unknown>("/organization-intelligence/sponsors/packages", input));
+  return payload.package as OrganizationSponsorshipPackage;
 }
 
 export function normalizeOrganizationProject(value: unknown): OrganizationProject | null {

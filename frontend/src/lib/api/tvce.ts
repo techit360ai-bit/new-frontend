@@ -13,10 +13,21 @@ export interface TvceDecision {
   value?: { title?: string; outcomes?: string[]; workflowStage?: string }
   accountEntitlement?: { active: boolean; source?: string | null; status?: string }
   subscription?: { active: boolean; plan?: string | null; status?: string }
+  organizationEntitlement?: { plan?: string; source?: string; status?: string; expiresAt?: string | null; limits?: Record<string, number> | null }
+  organizationDecision?: { allowed?: boolean; code?: string; capacity?: { used?: number; limit?: number | null; remaining?: number | null } }
 }
 
 export function evaluatePaywall(input: Record<string, unknown>) {
   return apiPost<TvceDecision>('/tvce/paywall/evaluate', input)
+}
+
+export interface OrganizationTvceEntitlements {
+  organizationId: string | null
+  entitlements: TvceDecision[]
+}
+
+export function fetchOrganizationEntitlements(organizationId: string) {
+  return apiGet<OrganizationTvceEntitlements>(`/tvce/entitlements?organizationId=${encodeURIComponent(organizationId)}`)
 }
 
 export function saveWorkflow(input: Record<string, unknown>) {
