@@ -1,7 +1,7 @@
 // frontend/src/dashboard/collaborators/section/components/collab/Equity.tsx
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { TrendingUp, X } from "lucide-react";
+import { TrendingUp, X, PieChart, ShieldCheck, FileText, ArrowUpRight, Award, Lock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { EMPTY_EQUITY, fetchCollaboratorEquity, type EquityHolding } from "@/lib/api/equity";
 
@@ -41,86 +41,162 @@ export function Equity() {
       return row;
     });
   })();
-  const seriesColors = ["#f59e0b", "#10b981", "#6366f1"]; // amber, emerald, indigo
+  const seriesColors = ["#0066ff", "#20c937", "#a855f7", "#f59e0b"];
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-baseline justify-between">
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
+      <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Equity</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Ownership you've earned across {holdings.length} startups.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Equity & Grants</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Ownership grants and vesting schedules across {holdings.length} startups.</p>
         </div>
-        <a href="#equity-philosophy" className="text-sm text-amber-600 hover:underline">Equity philosophy →</a>
+        <a
+          href="#equity-philosophy"
+          className="text-xs font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline flex items-center gap-1"
+        >
+          <span>Equity Philosophy</span>
+          <ArrowUpRight className="w-3.5 h-3.5" />
+        </a>
       </div>
+
       {error && (
-        <div className="border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">
+        <div className="border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-2xl px-5 py-3.5 text-sm backdrop-blur-md">
           Live equity records could not be loaded: {error}
         </div>
       )}
 
       {/* Hero stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat label="Total value"          value={`$${(totals.totalValueUSD / 1000).toFixed(1)}K`} />
-        <Stat label="Blended equity"        value={`${totals.blendedEquityPercent}%`} />
-        <Stat label="Vested this quarter"   value={`$${(totals.vestedThisQuarterUSD / 1000).toFixed(1)}K`} />
-        <Stat label="Next vest" value={totals.nextVest?.date ?? "—"} sub={totals.nextVest ? `+${totals.nextVest.deltaPercent}% ${totals.nextVest.startup}` : undefined} />
+        <Stat label="Total Value" value={`$${(totals.totalValueUSD / 1000).toFixed(1)}K`} />
+        <Stat label="Blended Equity" value={`${totals.blendedEquityPercent}%`} />
+        <Stat label="Vested This Quarter" value={`$${(totals.vestedThisQuarterUSD / 1000).toFixed(1)}K`} />
+        <Stat
+          label="Next Vest"
+          value={totals.nextVest?.date ?? "—"}
+          sub={totals.nextVest ? `+${totals.nextVest.deltaPercent}% ${totals.nextVest.startup}` : undefined}
+        />
       </div>
 
       {/* Vesting timeline */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Vesting timeline</h2>
-        {timeline.length === 0 ? (
-          <p className="text-sm text-slate-500">No vesting schedule has been recorded yet.</p>
-        ) : (
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={(m) => String(m).slice(2)} />
-              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={(v) => `${v}%`} />
-              <Tooltip />
-              <Legend />
-              {timeline.map((s, i) => (
-                <Line key={s.projectId} type="monotone" dataKey={s.projectName} stroke={seriesColors[i % seriesColors.length]} strokeWidth={2} dot={false} />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">Vesting Timeline (%)</h2>
         </div>
+
+        {timeline.length === 0 ? (
+          <p className="text-xs text-slate-500 dark:text-slate-400 py-4 italic">No vesting schedule has been recorded yet.</p>
+        ) : (
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#888888" }} stroke="#88888820" tickFormatter={(m) => String(m).slice(2)} />
+                <YAxis tick={{ fontSize: 11, fill: "#888888" }} stroke="#88888820" tickFormatter={(v) => `${v}%`} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "rgba(18, 18, 18, 0.9)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    color: "#fff",
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
+                {timeline.map((s, i) => (
+                  <Line
+                    key={s.projectId}
+                    type="monotone"
+                    dataKey={s.projectName}
+                    stroke={seriesColors[i % seriesColors.length]}
+                    strokeWidth={2.5}
+                    dot={false}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
 
       {/* Per-startup cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {holdings.length > 0 ? holdings.map((h) => (
-          <div key={h.projectId} id={`startup-${h.projectId}`} className="border border-slate-200 bg-white rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">{h.projectLogo || ""}</span>
-              <h3 className="font-semibold text-slate-900">{h.projectName}</h3>
+          <div
+            key={h.projectId}
+            id={`startup-${h.projectId}`}
+            className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center gap-2.5 mb-4">
+                <span className="text-2xl">{h.projectLogo || "🚀"}</span>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">{h.projectName}</h3>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Granted {h.grantDate ?? "—"}</span>
+                </div>
+              </div>
+
+              <div className="flex items-baseline gap-3 mb-3 p-3.5 rounded-xl bg-slate-50/60 dark:bg-white/[0.03] border border-black/[0.03] dark:border-white/[0.04]">
+                <div>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">{h.equityPercent}%</p>
+                  <p className="text-[10px] text-slate-500 uppercase font-semibold">Total Grant</p>
+                </div>
+                <div className="border-l border-slate-200 dark:border-white/10 pl-3">
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">${(h.valueUSD / 1000).toFixed(1)}K</p>
+                  <p className="text-[10px] text-slate-500 uppercase font-semibold">Est. Valuation</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Vested Percentage</span>
+                  <span className="font-bold text-[#20c937]">{h.vestedPercent}%</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-[#0066ff] to-[#58a6ff] rounded-full" style={{ width: `${h.vestedPercent}%` }} />
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
+                  Schedule: {h.vestingSchedule?.years ?? 0}y with {h.vestingSchedule?.cliffMonths ?? 0}m cliff
+                </p>
+              </div>
+
+              {h.nextVest && (
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 mb-4 flex items-center gap-1.5 font-medium">
+                  <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                  <span>Next vest {h.nextVest.date} · +{h.nextVest.deltaPercent}%</span>
+                </div>
+              )}
             </div>
-            <div className="flex items-baseline gap-3 mb-2">
-              <p className="text-2xl font-bold text-slate-900 tabular-nums">{h.equityPercent}%</p>
-              <p className="text-sm text-slate-600 tabular-nums">${(h.valueUSD / 1000).toFixed(1)}K</p>
-            </div>
-            <p className="text-xs text-slate-500 mb-3">Vested {h.vestedPercent}% · {h.vestingSchedule?.years ?? 0}y/{h.vestingSchedule?.cliffMonths ?? 0}m cliff</p>
-            <p className="text-xs text-slate-500 mb-4">Granted {h.grantDate ?? "—"}</p>
-            {h.nextVest && (
-              <p className="text-xs text-amber-600 mb-4 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Next vest {h.nextVest.date} · +{h.nextVest.deltaPercent}%</p>
-            )}
-            <div className="flex gap-2">
-              <button onClick={() => setCapHolding(h)} className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">View cap table</button>
-              <button onClick={() => toast("No grant document is attached to this record yet.")} className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">Grant document →</button>
+
+            <div className="flex gap-2 pt-2 border-t border-black/[0.06] dark:border-white/10">
+              <button
+                onClick={() => setCapHolding(h)}
+                className="flex-1 text-xs font-semibold px-3 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors"
+              >
+                Cap Table
+              </button>
+              <button
+                onClick={() => toast("No grant document is attached to this record yet.")}
+                className="flex-1 text-xs font-semibold px-3 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-center gap-1"
+              >
+                <span>Grant Doc</span>
+                <ArrowUpRight className="w-3 h-3" />
+              </button>
             </div>
           </div>
         )) : (
-          <div className="border border-dashed border-slate-300 rounded-xl p-6 text-sm text-slate-500 lg:col-span-3">
+          <div className="border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-8 text-center text-xs text-slate-500 dark:text-slate-400 lg:col-span-3 bg-white/40 dark:bg-[#121212]/40">
             No equity grants are recorded yet.
           </div>
         )}
       </div>
 
       {/* Philosophy explainer */}
-      <details id="equity-philosophy" className="border border-slate-200 bg-white rounded-xl p-6">
-        <summary className="cursor-pointer text-sm font-semibold text-slate-700">How equity works on TechIT</summary>
-        <ul className="mt-3 space-y-2 text-sm text-slate-600 list-disc list-inside">
+      <details id="equity-philosophy" className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm group">
+        <summary className="cursor-pointer text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center justify-between">
+          <span>How Equity Works on TechIT</span>
+          <span className="text-[#0066ff] group-open:rotate-180 transition-transform">▼</span>
+        </summary>
+        <ul className="mt-4 space-y-2.5 text-xs text-slate-600 dark:text-slate-300 list-disc list-inside">
           <li>Every grant follows your chosen vesting schedule. We track it on your behalf and surface upcoming events here.</li>
           <li>Dilution protection: equity already vested cannot be diluted without your consent. Future grants are protected up to a threshold defined at signing.</li>
           <li>TechIT acts as the cap-table custodian. You get a copy of every grant document; we keep the canonical ledger so founders and collaborators have a single source of truth.</li>
@@ -129,21 +205,30 @@ export function Equity() {
 
       {/* Cap table dialog */}
       {capHolding && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setCapHolding(null)}>
-          <div className="bg-white rounded-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setCapHolding(null)}>
+          <div className="bg-white dark:bg-[#121212] border border-black/[0.08] dark:border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-900">{capHolding.projectName} · Cap table</h3>
-              <button onClick={() => setCapHolding(null)} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">{capHolding.projectName} · Cap Table</h3>
+              <button onClick={() => setCapHolding(null)} className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-2 text-xs">
               {(capHolding.capTable ?? []).map((row) => (
-                <li key={row.label} className={`flex justify-between text-sm p-2 rounded ${row.highlighted ? "bg-amber-50" : ""}`}>
-                  <span className={row.highlighted ? "font-semibold text-amber-700" : "text-slate-700"}>{row.label}</span>
-                  <span className="tabular-nums">{row.percent}%</span>
+                <li
+                  key={row.label}
+                  className={`flex justify-between p-2.5 rounded-xl border ${
+                    row.highlighted
+                      ? "bg-[#0066ff]/10 border-[#0066ff]/30 text-[#0066ff] dark:text-[#58a6ff] font-bold"
+                      : "border-black/[0.04] dark:border-white/[0.06] text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  <span>{row.label}</span>
+                  <span className="tabular-nums font-bold">{row.percent}%</span>
                 </li>
               ))}
               {(capHolding.capTable ?? []).length === 0 && (
-                <li className="text-sm text-slate-500">No cap table rows are attached to this grant yet.</li>
+                <li className="text-xs text-slate-500 dark:text-slate-400 italic py-2">No cap table rows are attached to this grant yet.</li>
               )}
             </ul>
           </div>
@@ -155,10 +240,10 @@ export function Equity() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="border border-slate-200 bg-white rounded-xl p-5">
-      <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">{label}</p>
-      <p className="text-2xl font-bold text-slate-900 tabular-nums mt-2">{value}</p>
-      {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
+    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm">
+      <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">{label}</p>
+      <p className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tabular-nums mt-1">{value}</p>
+      {sub && <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">{sub}</p>}
     </div>
   );
 }
