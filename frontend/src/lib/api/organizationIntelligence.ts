@@ -15,6 +15,7 @@ export interface OrganizationIntelligenceOverview {
   risks: { total: number; critical: number; high: number; medium: number; low: number };
   actions: { total: number; critical: number; high: number };
   generatedAt: string;
+  commercial?: { plan: string; source: string; status: string; expiresAt: string | null; budgets: Array<{ id: string; balance: number; reservedBalance: number; remaining: number; status: string }>; usageCredits: number; sponsorPackages: number; sponsorApplications: number; startupCandidates: number; conversion?: { completedCandidates: number } };
 }
 
 export interface OrganizationPulse {
@@ -100,6 +101,7 @@ export async function fetchOrganizationIntelligenceOverview(): Promise<Organizat
       high: number(actionSummary.high),
     },
     generatedAt: text(root.generatedAt),
+    commercial: (() => { const value = record(root.commercial); return { plan: text(value.plan) || 'community_host', source: text(value.source), status: text(value.status) || 'active', expiresAt: text(value.expiresAt) || null, budgets: rows(value.budgets).map((budget) => ({ id: text(budget.id), balance: number(budget.balance), reservedBalance: number(budget.reservedBalance), remaining: number(budget.remaining), status: text(budget.status) })), usageCredits: number(value.usageCredits), sponsorPackages: number(value.sponsorPackages), sponsorApplications: number(value.sponsorApplications), startupCandidates: number(value.startupCandidates), conversion: { completedCandidates: number(record(value.conversion).completedCandidates) } }; })(),
   };
 }
 

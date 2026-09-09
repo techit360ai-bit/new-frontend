@@ -180,7 +180,7 @@ export interface OrganizationSponsorshipPackage { id: string; name: string; desc
 export async function fetchOrganizationSponsorshipPackages(organizationId?: string): Promise<OrganizationSponsorshipPackage[]> {
   const suffix = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : "";
   const payload = asRecord(await apiGet<unknown>(`/organization-intelligence/sponsors/packages${suffix}`));
-  return asRows(payload.packages) as OrganizationSponsorshipPackage[];
+  return asRows(payload.packages) as unknown as OrganizationSponsorshipPackage[];
 }
 
 export async function createOrganizationSponsorshipPackage(input: Record<string, unknown>): Promise<OrganizationSponsorshipPackage> {
