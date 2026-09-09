@@ -32,6 +32,7 @@ import {
 } from "@/lib/api/organization";
 import { WelcomeBack } from "@/components/WelcomeBack";
 import { OrganizationIntelligencePanel } from "./OrganizationIntelligencePanel";
+import { OrganizationLicensingPanel } from "./OrganizationLicensingPanel";
 
 interface MetricCard {
   key: keyof OrganizationDashboardData["metrics"];
@@ -151,6 +152,8 @@ export function Dashboard() {
       </div>
 
       <OrganizationIntelligencePanel />
+
+      <OrganizationLicensingPanel />
 
       {error && (
         <div className="mb-6 flex items-start gap-3 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
