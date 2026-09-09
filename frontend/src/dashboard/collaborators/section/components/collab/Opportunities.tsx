@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Sparkles, Building, ArrowUpRight, CheckCircle2, ShieldAlert, Users, Zap, Briefcase } from "lucide-react";
 import {
   applyToOpportunity,
   fetchCollaboratorOpportunities,
@@ -13,12 +13,12 @@ import {
 
 type Filter = "all" | CollaboratorOpportunity["type"];
 const filters: { value: Filter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "project", label: "Project" },
+  { value: "all", label: "All Opportunities" },
+  { value: "project", label: "Projects" },
   { value: "advisory", label: "Advisory" },
-  { value: "gig", label: "Gig" },
+  { value: "gig", label: "Gigs" },
   { value: "testing", label: "Testing" },
-  { value: "collaboration", label: "Collaboration calls" },
+  { value: "collaboration", label: "Collaboration Calls" },
 ];
 
 export function Opportunities() {
@@ -118,72 +118,141 @@ export function Opportunities() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Opportunities</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Matched against your stack, equity preference, and availability.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Startup Opportunities</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            Matched against your technical stack, equity preference, and availability.
+          </p>
         </div>
-        <button onClick={handleRefresh} disabled={loading || refreshing}
-          className="h-9 px-3 text-sm text-slate-700 hover:bg-slate-100 rounded-lg flex items-center gap-1.5">
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh matches
+        <button
+          onClick={handleRefresh}
+          disabled={loading || refreshing}
+          className="h-10 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-[#181818] border border-black/[0.08] dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 text-[#0066ff] ${refreshing ? "animate-spin" : ""}`} />
+          <span>Refresh Matches</span>
         </button>
       </div>
 
       <div className="flex gap-2 flex-wrap">
         {filters.map((f) => (
-          <button key={f.value} onClick={() => setFilter(f.value)}
-            className={`px-3 py-1.5 rounded-full border text-sm ${
+          <button
+            key={f.value}
+            onClick={() => setFilter(f.value)}
+            className={`px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
               filter === f.value
-                ? "border-amber-500 bg-amber-50 text-amber-700"
-                : "border-slate-300 bg-white text-slate-700 hover:border-amber-300"}`}>
+                ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] shadow-sm"
+                : "border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 text-slate-600 dark:text-slate-400 hover:border-black/20 dark:hover:border-white/20"
+            }`}
+          >
             {f.label}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {loading && <p className="text-sm text-slate-500 col-span-3">Loading live opportunities...</p>}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {loading && (
+          <div className="col-span-3 text-center py-12 text-xs text-slate-500 dark:text-slate-400">
+            <div className="w-5 h-5 border-2 border-[#0066ff] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            Loading live opportunities...
+          </div>
+        )}
+
         {!loading && error && (
-          <div className="col-span-3 border border-red-200 bg-red-50 rounded-xl p-5">
-            <p className="text-sm font-semibold text-red-700">Live opportunities are unavailable.</p>
-            <p className="text-sm text-red-600 mt-1">{error}</p>
-            <button onClick={() => void loadOpportunities(true)}
-              className="mt-3 text-xs px-3 py-1.5 border border-red-300 rounded-lg text-red-700 hover:bg-red-100">
+          <div className="col-span-3 border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 rounded-2xl p-6 text-center">
+            <p className="text-sm font-bold text-red-700 dark:text-red-400">Live opportunities are unavailable.</p>
+            <p className="text-xs text-red-600 dark:text-red-300 mt-1">{error}</p>
+            <button
+              onClick={() => void loadOpportunities(true)}
+              className="mt-3 text-xs px-3.5 py-1.5 border border-red-500/30 rounded-xl text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 font-semibold"
+            >
               Try again
             </button>
           </div>
         )}
+
         {!loading && !error && visible.length === 0 && (
-          <p className="text-sm text-slate-500 col-span-3">No live opportunities in this category yet.</p>
+          <div className="col-span-3 border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-10 text-center text-xs text-slate-500 dark:text-slate-400 bg-white/40 dark:bg-[#121212]/40">
+            <Briefcase className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
+            No live opportunities in this category currently match your filter.
+          </div>
         )}
+
         {!loading && !error && visible.map((o) => {
           const applied = o.status === "applied";
           return (
-            <div key={o.id} className={`border rounded-xl p-5 ${applied ? "bg-emerald-50/40 border-emerald-200" : "bg-white border-slate-200"}`}>
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">{o.type}</p>
-                  <h3 className="font-semibold text-slate-900 mt-1">{o.title}</h3>
-                  <p className="text-sm text-slate-600">{o.company}</p>
+            <div
+              key={o.id}
+              className={`bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border rounded-2xl p-6 shadow-sm flex flex-col justify-between transition-all ${
+                applied
+                  ? "border-[#20c937]/30 bg-emerald-500/[0.03]"
+                  : "border-black/[0.06] dark:border-white/10 hover:border-[#0066ff]/40"
+              }`}
+            >
+              <div>
+                <div className="flex items-start justify-between mb-3 gap-2">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+                      {o.type}
+                    </span>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base mt-2">{o.title}</h3>
+                    <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 mt-0.5">
+                      <Building className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{o.company}</span>
+                    </p>
+                  </div>
+                  {o.matchScore > 0 && (
+                    <span className="text-xs font-black text-[#20c937] bg-[#20c937]/10 px-2.5 py-1 rounded-full border border-[#20c937]/20 tabular-nums shrink-0">
+                      {o.matchScore}% Fit
+                    </span>
+                  )}
                 </div>
-                {o.matchScore > 0 && <span className="text-sm font-semibold text-amber-700 tabular-nums">{o.matchScore}% profile fit</span>}
+
+                <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-white/[0.03] border border-black/[0.03] dark:border-white/[0.04] mb-3.5">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{compLabel(o)}</p>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {o.skills.map((s) => (
+                    <span key={s} className="text-[11px] font-medium px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-1 mb-5 border-t border-black/[0.04] dark:border-white/[0.06] pt-3">
+                  <p>Commitment: <span className="font-semibold text-slate-700 dark:text-slate-300">{o.timeCommitment}</span></p>
+                  <p>Team: <span className="font-semibold text-slate-700 dark:text-slate-300">{o.teamQuality}</span> · Risk: <span className="font-semibold text-slate-700 dark:text-slate-300">{o.riskLevel}</span></p>
+                </div>
               </div>
-              <p className="text-sm text-slate-700 mb-3">{compLabel(o)}</p>
-              <div className="flex flex-wrap gap-1 mb-3">
-                {o.skills.map((s) => (
-                  <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{s}</span>
-                ))}
-              </div>
-              <p className="text-xs text-slate-500 mb-4">{o.timeCommitment} · Team {o.teamQuality} · Risk {o.riskLevel}</p>
 
               {applied ? (
-                <div className="text-xs text-emerald-700 font-semibold py-2">Application sent</div>
+                <div className="text-xs text-[#20c937] font-bold py-2 px-3 rounded-xl bg-[#20c937]/10 border border-[#20c937]/20 flex items-center justify-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Application Submitted</span>
+                </div>
               ) : (
-                <div className="flex gap-2">
-                  <button onClick={() => setDetail(o)} className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">View details</button>
-                  <button onClick={() => void handleInterest(o.id)} className="flex-1 text-xs px-3 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded-lg hover:bg-amber-400">Express interest</button>
-                  <button onClick={() => void handlePass(o.id)} className="text-xs px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg">Pass</button>
+                <div className="flex gap-2 pt-2 border-t border-black/[0.06] dark:border-white/10">
+                  <button
+                    onClick={() => setDetail(o)}
+                    className="flex-1 text-xs font-semibold px-3 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => void handleInterest(o.id)}
+                    className="flex-1 text-xs font-bold px-3 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                  >
+                    Express Interest
+                  </button>
+                  <button
+                    onClick={() => void handlePass(o.id)}
+                    className="text-xs font-semibold px-2.5 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
+                  >
+                    Pass
+                  </button>
                 </div>
               )}
             </div>
@@ -192,37 +261,58 @@ export function Opportunities() {
       </div>
 
       <Sheet open={detail !== null} onOpenChange={(o) => !o && setDetail(null)}>
-        <SheetContent className="sm:max-w-lg">
+        <SheetContent className="sm:max-w-lg bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border-l border-black/[0.08] dark:border-white/10 p-6 overflow-y-auto">
           {detail && (
             <>
               <SheetHeader>
-                <SheetTitle>{detail.title}</SheetTitle>
-                <SheetDescription>{detail.company} · {detail.type}</SheetDescription>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+                    {detail.type}
+                  </span>
+                </div>
+                <SheetTitle className="text-xl font-black text-slate-900 dark:text-white">{detail.title}</SheetTitle>
+                <SheetDescription className="text-xs font-semibold text-slate-600 dark:text-slate-300">{detail.company}</SheetDescription>
               </SheetHeader>
-              <div className="mt-6 space-y-5">
+
+              <div className="mt-6 space-y-5 text-xs">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">About</p>
-                  <p className="text-sm text-slate-700">{detail.description}</p>
+                  <p className="uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">Overview</p>
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-white/[0.03] p-3.5 rounded-xl border border-black/[0.03] dark:border-white/[0.04]">
+                    {detail.description}
+                  </p>
                 </div>
+
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Compensation</p>
-                  <p className="text-sm text-slate-700">{compLabel(detail)}</p>
+                  <p className="uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">Proposed Compensation</p>
+                  <p className="text-slate-900 dark:text-white font-bold p-3 rounded-xl bg-[#0066ff]/10 border border-[#0066ff]/20">
+                    {compLabel(detail)}
+                  </p>
                 </div>
+
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Timeline</p>
-                  <p className="text-sm text-slate-700">{detail.timeline}</p>
+                  <p className="uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">Timeline & Milestones</p>
+                  <p className="text-slate-700 dark:text-slate-300 p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.03] dark:border-white/[0.04]">
+                    {detail.timeline}
+                  </p>
                 </div>
+
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Team</p>
-                  <ul className="space-y-1">
+                  <p className="uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">Founding Team</p>
+                  <ul className="space-y-1.5">
                     {detail.teamBios.map((b) => (
-                      <li key={b.name} className="text-sm text-slate-700">{b.name} <span className="text-slate-500">· {b.role}</span></li>
+                      <li key={b.name} className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-between">
+                        <span className="font-bold text-slate-900 dark:text-white">{b.name}</span>
+                        <span className="text-slate-500 dark:text-slate-400">{b.role}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
-                <button onClick={() => { void handleInterest(detail.id); setDetail(null); }}
-                  className="w-full h-10 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg">
-                  Express interest
+
+                <button
+                  onClick={() => { void handleInterest(detail.id); setDetail(null); }}
+                  className="w-full h-11 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all text-xs"
+                >
+                  Express Interest in Role
                 </button>
               </div>
             </>
