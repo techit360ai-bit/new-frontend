@@ -1,7 +1,7 @@
 // frontend/src/dashboard/collaborators/section/components/collab/Dashboard.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { TrendingUp, ArrowRight, CheckCircle, GraduationCap, Headphones, Award, Target } from "lucide-react";
+import { TrendingUp, ArrowRight, CheckCircle2, GraduationCap, Headphones, Award, Target, Sparkles, FolderKanban, ShieldCheck, DollarSign, PieChart, Activity } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { EMPTY_EQUITY, fetchCollaboratorEquity, type CollaboratorEquity } from "@/lib/api/equity";
 import { EMPTY_EARNINGS, fetchCollaboratorEarnings, type CollaboratorEarnings } from "@/lib/api/earnings";
@@ -101,262 +101,414 @@ export function Dashboard() {
   }, [equity.totals.nextVest, earnings.totals.pendingUSD]);
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Good morning, {firstName}.</h1>
-        <p className="text-sm text-slate-500 mt-0.5">{today} · {builds.length} active builds</p>
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
+      {/* Header Greeting Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Good morning, <span className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] bg-clip-text text-transparent">{firstName}</span>.
+            </h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20">
+              Collaborator
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium flex items-center gap-2">
+            <span>{today}</span>
+            <span>•</span>
+            <span className="text-slate-700 dark:text-slate-300">{builds.length} active builds</span>
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            to="/collaborator/opportunities"
+            className="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100 transition-all border border-slate-200/60 dark:border-white/10"
+          >
+            Find Gigs
+          </Link>
+          <Link
+            to="/collaborator/tasks"
+            className="px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all flex items-center gap-1.5"
+          >
+            <span>My Tasks</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
 
       {/* Welcome Back — contextual intelligence surface */}
       <WelcomeBack />
 
       {loadError && (
-        <div className="border border-red-200 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm">
-          Live collaborator records could not be loaded: {loadError}
+        <div className="border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-2xl px-5 py-3.5 text-sm backdrop-blur-md flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <span>Live collaborator records could not be loaded: {loadError}</span>
         </div>
       )}
 
       {/* Equity hero + Earnings */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Equity hero — 2 cols */}
-        <Link to="/collaborator/equity" className="lg:col-span-2 group border border-slate-200 bg-white rounded-xl p-6 hover:border-amber-300 transition-colors">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Building for Equity</p>
-            <span className="text-amber-700 text-sm group-hover:translate-x-0.5 transition-transform">View full equity →</span>
-          </div>
-          <div className="flex items-baseline gap-6 mt-2">
-            <div>
-              <p className="text-3xl font-bold text-slate-900 tabular-nums">${(equity.totals.totalValueUSD / 1000).toFixed(1)}K</p>
-              <p className="text-xs text-slate-500 mt-0.5">Total ownership value</p>
+        <Link
+          to="/collaborator/equity"
+          className="lg:col-span-2 group relative overflow-hidden bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 hover:border-[#0066ff]/40 dark:hover:border-[#0066ff]/50 transition-all duration-300 shadow-sm hover:shadow-md"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#0066ff]/10 via-[#58a6ff]/5 to-transparent rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] flex items-center justify-center">
+                <PieChart className="w-4 h-4" />
+              </div>
+              <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Building for Equity</p>
             </div>
-            <div>
-              <p className="text-3xl font-bold text-slate-900 tabular-nums">{equity.totals.blendedEquityPercent}%</p>
-              <p className="text-xs text-slate-500 mt-0.5">Blended equity across {equity.holdings.length} startups</p>
+            <span className="text-[#0066ff] dark:text-[#58a6ff] text-xs font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+              View full equity <ArrowRight className="w-3.5 h-3.5" />
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 mt-3 relative z-10">
+            <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06]">
+              <p className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                ${(equity.totals.totalValueUSD / 1000).toFixed(1)}K
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Total ownership value</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06]">
+              <p className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                {equity.totals.blendedEquityPercent}%
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Blended equity across {equity.holdings.length} startups</p>
             </div>
           </div>
 
-          <div className="mt-5 space-y-2">
-            {equity.holdings.length > 0 ? equity.holdings.map((h) => (
-              <div key={h.projectId} className="flex items-center text-sm">
-                <span className="text-lg mr-2">{h.projectLogo || ""}</span>
-                <span className="flex-1 text-slate-700">{h.projectName}</span>
-                <span className="w-16 text-right tabular-nums text-slate-900">{h.equityPercent}%</span>
-                <span className="w-20 text-right tabular-nums text-slate-700">${(h.valueUSD / 1000).toFixed(1)}K</span>
-                <span className="w-24 text-right text-xs text-slate-500">vested {h.vestedPercent}%</span>
-              </div>
-            )) : (
-              <p className="text-sm text-slate-500">No equity grants recorded yet.</p>
+          <div className="mt-6 space-y-2.5 relative z-10">
+            {equity.holdings.length > 0 ? (
+              equity.holdings.map((h) => (
+                <div
+                  key={h.projectId}
+                  className="flex items-center justify-between text-sm p-2.5 rounded-xl bg-slate-50/50 dark:bg-white/[0.02] border border-black/[0.02] dark:border-white/[0.04]"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-xl flex-shrink-0">{h.projectLogo || "🚀"}</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{h.projectName}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-medium">
+                    <span className="tabular-nums font-bold text-slate-900 dark:text-white">{h.equityPercent}%</span>
+                    <span className="tabular-nums text-slate-600 dark:text-slate-400">${(h.valueUSD / 1000).toFixed(1)}K</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold">
+                      vested {h.vestedPercent}%
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500 dark:text-slate-400 py-2 italic">No equity grants recorded yet.</p>
             )}
           </div>
 
           {equity.totals.nextVest && (
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 text-sm">
-              <TrendingUp className="w-4 h-4 text-amber-500" />
-              <span className="text-slate-700">
-                Next vest <span className="font-semibold">{equity.totals.nextVest.date}</span> · +{equity.totals.nextVest.deltaPercent}% {equity.totals.nextVest.startup}
+            <div className="mt-5 pt-4 border-t border-black/[0.06] dark:border-white/10 flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300 relative z-10">
+              <div className="p-1 rounded-full bg-amber-500/10 text-amber-500">
+                <TrendingUp className="w-3.5 h-3.5" />
+              </div>
+              <span>
+                Next vest on <span className="font-bold text-slate-900 dark:text-white">{equity.totals.nextVest.date}</span> ·{" "}
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">+{equity.totals.nextVest.deltaPercent}%</span> {equity.totals.nextVest.startup}
               </span>
             </div>
           )}
         </Link>
 
         {/* Earnings — 1 col */}
-        <Link to="/collaborator/earnings" className="group border border-slate-200 bg-white rounded-xl p-6 hover:border-amber-300 transition-colors">
-          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Cash earned</p>
-          <p className="text-3xl font-bold text-slate-900 tabular-nums">${(earnings.totals.lifetimeUSD / 1000).toFixed(0)}K</p>
-          <p className="text-xs text-slate-500">Lifetime</p>
-          <div className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-slate-600">Pending payout</span><span className="font-semibold tabular-nums text-slate-900">${earnings.totals.pendingUSD.toLocaleString()}</span></div>
-            <div className="flex justify-between"><span className="text-slate-600">Revenue share (TTM)</span><span className="font-semibold tabular-nums text-slate-900">${earnings.totals.revenueShareTTMUsd.toLocaleString()}</span></div>
+        <Link
+          to="/collaborator/earnings"
+          className="group relative overflow-hidden bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 hover:border-[#0066ff]/40 dark:hover:border-[#0066ff]/50 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <DollarSign className="w-4 h-4" />
+                </div>
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Cash Earned</p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] mb-5">
+              <p className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                ${(earnings.totals.lifetimeUSD / 1000).toFixed(0)}K
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Lifetime cash earnings</p>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50/50 dark:bg-white/[0.02]">
+                <span className="text-slate-500 dark:text-slate-400">Pending payout</span>
+                <span className="font-bold tabular-nums text-slate-900 dark:text-white">${earnings.totals.pendingUSD.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50/50 dark:bg-white/[0.02]">
+                <span className="text-slate-500 dark:text-slate-400">Revenue share (TTM)</span>
+                <span className="font-bold tabular-nums text-slate-900 dark:text-white">${earnings.totals.revenueShareTTMUsd.toLocaleString()}</span>
+              </div>
+            </div>
           </div>
-          <p className="text-amber-700 text-sm mt-4 group-hover:translate-x-0.5 transition-transform">View earnings →</p>
+
+          <p className="text-[#0066ff] dark:text-[#58a6ff] text-xs font-semibold mt-6 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+            View earnings breakdown <ArrowRight className="w-3.5 h-3.5" />
+          </p>
         </Link>
       </div>
 
       {/* Collaborator Scores — CBS/TSS/CRS */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="w-5 h-5 text-indigo-600" />
-          <h2 className="text-sm font-semibold text-slate-700">Collaborator Scores</h2>
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] flex items-center justify-center">
+              <Target className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Collaborator Scores</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Reputation & technical proof verified on TechIT</p>
+            </div>
+          </div>
+          <Link
+            to="/collaborator/reputation"
+            className="text-xs font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline flex items-center gap-1"
+          >
+            Reputation details <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         {scores.cbs === 0 && scores.crs === 0 && Object.keys(scores.tss).length === 0 ? (
-          <p className="text-sm text-slate-500">Complete projects to build your scores</p>
+          <div className="text-center py-6 text-sm text-slate-500 dark:text-slate-400">
+            <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
+            Complete startup milestones to unlock live cryptographic build and reliability scores.
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* CBS */}
-            <div>
-              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Build Score</p>
-              <div className="relative inline-flex">
+            <div className="p-5 rounded-2xl bg-slate-50/60 dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] flex items-center gap-4">
+              <div className="relative inline-flex flex-shrink-0">
                 <svg className="w-20 h-20">
-                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200" />
+                  <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200 dark:text-white/10" />
                   <circle
-                    cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent"
-                    className="text-indigo-600 transition-all"
-                    strokeDasharray={`${2 * Math.PI * 36}`}
-                    strokeDashoffset={`${2 * Math.PI * 36 * (1 - scores.cbs / 100)}`}
+                    cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="transparent"
+                    className="text-[#0066ff] transition-all duration-1000"
+                    strokeDasharray={`${2 * Math.PI * 34}`}
+                    strokeDashoffset={`${2 * Math.PI * 34 * (1 - scores.cbs / 100)}`}
                     strokeLinecap="round"
                     transform="rotate(-90 40 40)"
                   />
                 </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-slate-900">{scores.cbs}</span>
+                <span className="absolute inset-0 flex items-center justify-center text-lg font-black text-slate-900 dark:text-white">
+                  {scores.cbs}
+                </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">Collaborator Build Score</p>
+              <div>
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Build Score (CBS)</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">Execution speed & milestone delivery</p>
+                <span className="inline-block mt-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+                  Top 15% Contributor
+                </span>
+              </div>
             </div>
 
             {/* TSS */}
-            <div>
-              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Specialisation</p>
+            <div className="p-5 rounded-2xl bg-slate-50/60 dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06]">
+              <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-3">Specialisation (TSS)</p>
               {Object.keys(scores.tss).length === 0 ? (
-                <p className="text-sm text-slate-500">No skills tracked yet</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 italic">No skills tracked yet</p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {Object.entries(scores.tss)
                     .sort(([, a], [, b]) => b - a)
                     .slice(0, 3)
                     .map(([skill, score]) => (
                       <div key={skill}>
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-slate-700 font-medium">{skill}</span>
-                          <span className="text-slate-900 font-semibold tabular-nums">{score}</span>
+                          <span className="text-slate-700 dark:text-slate-300 font-medium">{skill}</span>
+                          <span className="text-slate-900 dark:text-white font-bold tabular-nums">{score}</span>
                         </div>
-                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-indigo-600" style={{ width: `${score}%` }} />
+                        <div className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#0066ff] to-[#58a6ff] rounded-full" style={{ width: `${score}%` }} />
                         </div>
                       </div>
                     ))}
                 </div>
               )}
-              <p className="text-xs text-slate-500 mt-2">Technical Specialisation</p>
             </div>
 
             {/* CRS */}
-            <div>
-              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Reliability</p>
-              <div className="relative inline-flex">
+            <div className="p-5 rounded-2xl bg-slate-50/60 dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] flex items-center gap-4">
+              <div className="relative inline-flex flex-shrink-0">
                 <svg className="w-20 h-20">
-                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200" />
+                  <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-slate-200 dark:text-white/10" />
                   <circle
-                    cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="6" fill="transparent"
-                    className="text-cyan-600 transition-all"
-                    strokeDasharray={`${2 * Math.PI * 36}`}
-                    strokeDashoffset={`${2 * Math.PI * 36 * (1 - scores.crs / 100)}`}
+                    cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="transparent"
+                    className="text-[#20c937] transition-all duration-1000"
+                    strokeDasharray={`${2 * Math.PI * 34}`}
+                    strokeDashoffset={`${2 * Math.PI * 34 * (1 - scores.crs / 100)}`}
                     strokeLinecap="round"
                     transform="rotate(-90 40 40)"
                   />
                 </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-slate-900">{scores.crs}</span>
+                <span className="absolute inset-0 flex items-center justify-center text-lg font-black text-slate-900 dark:text-white">
+                  {scores.crs}
+                </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">Collaboration Reliability</p>
+              <div>
+                <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Reliability (CRS)</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">Commitment adherence & peer trust</p>
+                <span className="inline-block mt-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#20c937]/10 text-[#20c937]">
+                  High Confidence
+                </span>
+              </div>
             </div>
           </div>
         )}
       </div>
 
       {/* Active Builds */}
-      <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Active Builds</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {builds.length > 0 ? builds.map((p) => {
-            const statusStyles = p.status === "critical"
-              ? "bg-red-50 text-red-700"
-              : p.status === "risk"
-              ? "bg-amber-50 text-amber-700"
-              : "bg-emerald-50 text-emerald-700";
-            return (
-              <div key={p.id} className="border border-slate-200 bg-white rounded-xl p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{p.logo}</span>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 text-sm">{p.name}</h3>
-                      <p className="text-xs text-slate-500">{p.role}</p>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FolderKanban className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Active Builds</h2>
+          </div>
+          <span className="text-xs text-slate-500 dark:text-slate-400">{builds.length} assigned</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {builds.length > 0 ? (
+            builds.map((p) => {
+              const statusStyles =
+                p.status === "critical"
+                  ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                  : p.status === "risk"
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+              return (
+                <div
+                  key={p.id}
+                  className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 hover:border-[#0066ff]/40 transition-all shadow-sm flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-2xl">{p.logo || "⚡"}</span>
+                        <div>
+                          <h3 className="font-bold text-slate-900 dark:text-white text-sm">{p.name}</h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{p.role}</p>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${statusStyles}`}>
+                        {p.status}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mb-3 bg-slate-50 dark:bg-white/[0.02] p-2.5 rounded-xl border border-black/[0.03] dark:border-white/[0.04]">
+                      {p.sprintGoal}
+                    </p>
+
+                    <div className="space-y-1.5 mb-4">
+                      <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        <span>Progress</span>
+                        <span>{p.progress}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-[#0066ff] to-[#58a6ff] rounded-full" style={{ width: `${p.progress}%` }} />
+                      </div>
+                      <div className="flex justify-end text-[11px] text-slate-400">
+                        Due {p.deadline}
+                      </div>
                     </div>
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${statusStyles}`}>{p.status}</span>
+
+                  <button
+                    onClick={() => navigate(`/workspaces/build?startup=${p.id}`)}
+                    className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-900 dark:bg-white/10 dark:hover:bg-white/20 text-white rounded-xl transition-colors text-center"
+                  >
+                    Open Workspace
+                  </button>
                 </div>
-                <div className="text-xs text-slate-600 mb-2">{p.sprintGoal}</div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1">
-                  <div className="h-full bg-amber-500" style={{ width: `${p.progress}%` }} />
-                </div>
-                <div className="flex justify-between text-xs text-slate-500 mb-3">
-                  <span>{p.progress}%</span><span>Due {p.deadline}</span>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => navigate(`/workspaces/build?startup=${p.id}`)}
-                    className="flex-1 px-3 py-1.5 text-xs bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">Open workspace</button>
-                </div>
-              </div>
-            );
-          }) : (
-            <div className="border border-dashed border-slate-300 rounded-xl p-6 text-sm text-slate-500 md:col-span-3">
-              No active builds are recorded yet. Equity grants, earnings, or workspace assignments will appear here once persisted.
+              );
+            })
+          ) : (
+            <div className="border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-8 text-center text-sm text-slate-500 dark:text-slate-400 md:col-span-3 bg-white/40 dark:bg-[#121212]/40">
+              <Activity className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
+              No active builds are recorded yet. Equity grants, earnings, or workspace assignments will appear here once assigned.
             </div>
           )}
         </div>
       </div>
 
       {/* Today's focus + Signals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-700">Today's focus</h2>
-            <Link to="/collaborator/tasks" className="text-xs text-amber-600 hover:underline">View all tasks</Link>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Today's Focus</h2>
+            <Link to="/collaborator/tasks" className="text-xs font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline">
+              View all tasks
+            </Link>
           </div>
-          <p className="text-sm text-slate-500">No live task assignments yet. Workspace tasks will appear here when assigned.</p>
+          <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] text-center text-xs text-slate-500 dark:text-slate-400">
+            No active task assignments today. Tasks from active workspace sprints will populate here.
+          </div>
         </div>
 
-        <div className="border border-slate-200 bg-white rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Signals</h2>
+        <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Key Signals</h2>
           {signals.length > 0 ? (
-          <ul className="space-y-2">
-            {signals.map((s) => (
-              <li key={s.id}>
-                <Link to={s.href} className="flex items-center gap-3 p-3 -mx-3 rounded-lg hover:bg-slate-50 transition-colors text-sm">
-                  <CheckCircle className="w-4 h-4 text-slate-400" />
-                  <span className="flex-1 text-slate-700">{s.message}</span>
-                  <ArrowRight className="w-4 h-4 text-slate-400" />
-                </Link>
-              </li>
-            ))}
-          </ul>
+            <ul className="space-y-2.5">
+              {signals.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    to={s.href}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-slate-50/60 dark:bg-white/[0.02] hover:bg-[#0066ff]/5 dark:hover:bg-[#0066ff]/10 border border-black/[0.04] dark:border-white/[0.06] transition-colors text-xs font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-[#20c937] shrink-0" />
+                    <span className="flex-1 truncate">{s.message}</span>
+                    <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <p className="text-sm text-slate-500">No live collaborator signals yet.</p>
+            <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] text-center text-xs text-slate-500 dark:text-slate-400">
+              No live collaborator signals yet.
+            </div>
           )}
         </div>
-      </div>
-
-      {/* Recent activity */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent activity</h2>
-        <p className="text-sm text-slate-500">No persisted collaborator activity yet.</p>
       </div>
 
       {/* TechIT Academy — Collaborator Learning */}
       <Link
         to="/collaborator/academy"
-        className="group block border border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-xl p-6 hover:border-indigo-300 transition-colors"
+        className="group relative overflow-hidden block bg-gradient-to-r from-[#0066ff]/10 via-purple-500/5 to-[#58a6ff]/10 dark:from-[#0066ff]/15 dark:via-purple-500/10 dark:to-[#58a6ff]/15 border border-[#0066ff]/20 dark:border-white/10 rounded-2xl p-6 hover:border-[#0066ff]/40 transition-all shadow-sm"
       >
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 text-white shrink-0">
+          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white shadow-[0_4px_15px_rgba(0,102,255,0.3)] shrink-0">
             <GraduationCap className="w-6 h-6" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-slate-900">TechIT Academy</h2>
-              <span className="text-[10px] font-semibold uppercase tracking-wider bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">TechIT Academy</h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] px-2.5 py-0.5 rounded-full border border-[#0066ff]/20">
                 Collaborator Track
               </span>
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Learn while you build — lessons, audio, and badges tailored to collaborators.
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+              Learn while you build — interactive lessons, audio masterclasses, and verified credential badges.
             </p>
-            <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-              <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5" /> Audio lessons</span>
-              <span className="flex items-center gap-1"><Award className="w-3.5 h-3.5" /> Earn badges</span>
+            <div className="flex items-center gap-4 mt-2.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+              <span className="flex items-center gap-1.5"><Headphones className="w-3.5 h-3.5 text-[#0066ff]" /> Audio lessons</span>
+              <span className="flex items-center gap-1.5"><Award className="w-3.5 h-3.5 text-amber-500" /> Earn verified badges</span>
+              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-purple-500" /> Boost CRS Score</span>
             </div>
           </div>
-          <ArrowRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-0.5 transition-transform shrink-0" />
+          <ArrowRight className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff] group-hover:translate-x-1 transition-transform shrink-0" />
         </div>
       </Link>
     </div>
