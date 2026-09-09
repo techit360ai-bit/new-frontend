@@ -1,7 +1,7 @@
 // frontend/src/dashboard/collaborators/section/components/collab/CollabProfile.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Globe, Twitter, ExternalLink } from "lucide-react";
+import { Github, Linkedin, Globe, Twitter, ExternalLink, ShieldCheck, Sparkles, CheckCircle2, User, Trophy, Layers } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import {
   EMPTY_EQUITY,
@@ -92,85 +92,109 @@ export function CollabProfile() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header strip */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6 flex items-start gap-5">
-        <div className="w-16 h-16 rounded-full bg-amber-500 text-slate-900 font-semibold flex items-center justify-center text-xl shrink-0">{initials}</div>
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-8 shadow-sm flex flex-col sm:flex-row items-start gap-6">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white font-black flex items-center justify-center text-2xl shrink-0 shadow-[0_4px_15px_rgba(0,102,255,0.3)]">
+          {initials}
+        </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900">{p.name}</h1>
-          <p className="text-sm text-slate-600">{p.title} · {p.location} · {p.yearsExperience}y experience</p>
-          <p className="text-sm text-slate-700 mt-2 italic">"{p.headline}"</p>
-          <p className="text-xs text-slate-500 mt-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>
-            Available · {p.weeklyHours} hrs/week · {commitmentLabel[p.commitmentStyle]}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white">{p.name}</h1>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20">
+                  Collaborator
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
+                {p.title} · {p.location} · {p.yearsExperience}y experience
+              </p>
+            </div>
+            <Link
+              to="/collaborator/settings#identity"
+              className="px-3.5 py-1.5 text-xs font-semibold border border-black/[0.08] dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors self-start"
+            >
+              Edit Profile
+            </Link>
+          </div>
+
+          <p className="text-xs text-slate-700 dark:text-slate-300 mt-3 italic bg-slate-50 dark:bg-white/[0.02] p-3 rounded-xl border border-black/[0.03] dark:border-white/[0.04]">
+            "{p.headline}"
+          </p>
+
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#20c937] animate-pulse"></span>
+            <span>Available · {p.weeklyHours} hrs/week · {commitmentLabel[p.commitmentStyle]}</span>
           </p>
         </div>
-        <Link to="/collaborator/settings#identity"
-          className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50">Edit profile</Link>
       </div>
 
       {/* Reputation strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Stat label="Reputation" value={String(summary?.compositeScore ?? 0)} />
-        <Stat label="Execution"  value={String(execution)} />
-        <Stat label="Completed"  value={String(completedTasks)} />
+        <Stat label="Execution Velocity" value={String(execution)} />
+        <Stat label="Completed Tasks" value={String(completedTasks)} />
         <Stat label="Endorsements" value="0" />
       </div>
 
-      {loading && <p className="text-sm text-slate-500">Loading live profile data...</p>}
+      {loading && <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-4">Loading live profile data...</p>}
       {!loading && error && (
-        <div className="border border-red-200 bg-red-50 rounded-xl p-4">
-          <p className="text-sm font-semibold text-red-700">Live profile data is unavailable.</p>
-          <p className="text-sm text-red-600 mt-1">{error}</p>
+        <div className="border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-2xl px-5 py-3.5 text-sm backdrop-blur-md">
+          Live profile data is unavailable: {error}
         </div>
       )}
 
       {/* Discipline & skills */}
-      <div className="border border-slate-200 bg-white rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">{p.discipline || "Discipline not set"}</h2>
-        <div className="flex flex-wrap gap-1.5 mb-4">
+      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white mb-3">{p.discipline || "Discipline not set"}</h2>
+        <div className="flex flex-wrap gap-1.5 mb-5">
           {p.subSkills.map((s) => (
-            <span key={s} className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700">{s}</span>
+            <span key={s} className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20">
+              {s}
+            </span>
           ))}
         </div>
-        <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Stack</p>
+        <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-2.5">Tech Stack & Frameworks</p>
         <div className="flex flex-wrap gap-1.5">
           {p.techStack.map((t) => (
-            <span key={t} className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">{t}</span>
+            <span key={t} className="text-xs font-medium px-3 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300">
+              {t}
+            </span>
           ))}
         </div>
       </div>
 
       {/* Compensation philosophy */}
-      <div className="border border-amber-200 bg-amber-50/30 rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-amber-800 mb-1">Building for Equity</h2>
-        <p className="text-sm text-slate-700">
-          {p.equityPreference}% equity / {100 - p.equityPreference}% cash ·
-          Min cash ${p.minCashFloor.toLocaleString()}/mo ·
-          {" "}{p.vestingComfort === "standard" ? "Standard" : p.vestingComfort === "1y-cliff-4y" ? "1y cliff / 4y" : "Custom"} vesting
+      <div className="bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 dark:from-[#0066ff]/15 dark:to-[#58a6ff]/15 border border-[#0066ff]/20 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5">Building for Equity Philosophy</h2>
+        <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+          {p.equityPreference}% equity / {100 - p.equityPreference}% cash · Min cash floor ${p.minCashFloor.toLocaleString()}/mo ·
+          {" "}{p.vestingComfort === "standard" ? "Standard" : p.vestingComfort === "1y-cliff-4y" ? "1y cliff / 4y" : "Custom"} vesting structure
         </p>
       </div>
 
       {/* Active builds */}
-      <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Active builds</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="space-y-3">
+        <h2 className="text-sm font-bold text-slate-900 dark:text-white">Active Builds & Contributions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {builds.map((build) => (
-            <div key={build.id} className="border border-slate-200 bg-white rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900">{build.name}</p>
-                  <p className="text-xs text-slate-500">{build.shipped} tasks shipped · impact {build.impactAvg}</p>
-                </div>
-              </div>
+            <div
+              key={build.id}
+              className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm"
+            >
+              <p className="text-sm font-bold text-slate-900 dark:text-white">{build.name}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{build.shipped} tasks shipped · Impact {build.impactAvg}</p>
               {build.equityPercent > 0 && (
-                <p className="text-xs text-amber-700 mt-2">{build.equityPercent}% equity · ${(build.valueUSD / 1000).toFixed(1)}K</p>
+                <p className="text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] mt-2.5">
+                  {build.equityPercent}% equity · ${(build.valueUSD / 1000).toFixed(1)}K
+                </p>
               )}
             </div>
           ))}
           {!loading && !error && builds.length === 0 && (
-            <div className="border border-dashed border-slate-300 bg-white rounded-xl p-4 text-sm text-slate-500 md:col-span-3">
-              No live active builds are recorded yet.
+            <div className="border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-6 text-xs text-slate-500 dark:text-slate-400 md:col-span-3 text-center bg-white/40 dark:bg-[#121212]/40">
+              No live active builds recorded yet.
             </div>
           )}
         </div>
@@ -178,64 +202,82 @@ export function CollabProfile() {
 
       {/* Pinned work */}
       {p.pinnedWork.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 mb-3">Pinned work</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="space-y-3">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">Pinned Work & Deliverables</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {p.pinnedWork.map((url, i) => (
-              <a key={i} href={url} target="_blank" rel="noreferrer"
-                className="border border-slate-200 bg-white rounded-xl p-4 text-sm text-slate-700 hover:border-amber-300 flex items-center gap-2">
-                <ExternalLink className="w-4 h-4 text-slate-400" />
-                <span className="truncate">{url}</span>
+              <a
+                key={i}
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 text-xs text-slate-700 dark:text-slate-300 hover:border-[#0066ff]/40 flex items-center gap-2 transition-all shadow-sm"
+              >
+                <ExternalLink className="w-4 h-4 text-[#0066ff] shrink-0" />
+                <span className="truncate font-semibold">{url}</span>
               </a>
             ))}
           </div>
         </div>
       )}
 
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-slate-700">Recent endorsements</h2>
-          <Link to="/collaborator/reputation" className="text-xs text-amber-600 hover:underline">View reputation</Link>
-        </div>
-        <div className="border border-dashed border-slate-300 bg-white rounded-xl p-4 text-sm text-slate-500">
-          No live endorsements are recorded yet.
-        </div>
-      </div>
-
       {/* Badges earned */}
-      <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Live achievements earned</h2>
-        <div className="flex flex-wrap gap-2">
+      <div className="space-y-3">
+        <h2 className="text-sm font-bold text-slate-900 dark:text-white">Live Achievements & Badges</h2>
+        <div className="flex flex-wrap gap-2.5">
           {earnedAchievements.map((b) => (
-            <span key={b.id} className="border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm flex items-center gap-2">
-              <span>{b.icon}</span>
-              <span className="text-slate-900">{b.title}</span>
+            <span
+              key={b.id}
+              className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-2 shadow-sm text-slate-900 dark:text-white"
+            >
+              <span className="text-lg">{b.icon}</span>
+              <span>{b.title}</span>
             </span>
           ))}
           {!loading && !error && earnedAchievements.length === 0 && (
-            <span className="text-sm text-slate-500">No live achievements earned yet.</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 italic">No live achievements earned yet.</span>
           )}
         </div>
       </div>
 
       {/* Links */}
-      <div className="flex flex-wrap gap-3 text-sm">
-        {p.links.github    && <a href={`https://${p.links.github}`}    target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 hover:text-amber-600"><Github   className="w-4 h-4" /> {p.links.github}</a>}
-        {p.links.linkedin  && <a href={`https://${p.links.linkedin}`}  target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 hover:text-amber-600"><Linkedin className="w-4 h-4" /> {p.links.linkedin}</a>}
-        {p.links.portfolio && <a href={`https://${p.links.portfolio}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 hover:text-amber-600"><Globe    className="w-4 h-4" /> {p.links.portfolio}</a>}
-        {p.links.twitter   && <span className="flex items-center gap-1.5 text-slate-700"><Twitter  className="w-4 h-4" /> {p.links.twitter}</span>}
+      <div className="flex flex-wrap gap-4 text-xs font-semibold pt-2">
+        {p.links.github && (
+          <a href={`https://${p.links.github}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#0066ff]">
+            <Github className="w-4 h-4" /> <span>{p.links.github}</span>
+          </a>
+        )}
+        {p.links.linkedin && (
+          <a href={`https://${p.links.linkedin}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#0066ff]">
+            <Linkedin className="w-4 h-4" /> <span>{p.links.linkedin}</span>
+          </a>
+        )}
+        {p.links.portfolio && (
+          <a href={`https://${p.links.portfolio}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#0066ff]">
+            <Globe className="w-4 h-4" /> <span>{p.links.portfolio}</span>
+          </a>
+        )}
+        {p.links.twitter && (
+          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+            <Twitter className="w-4 h-4" /> <span>{p.links.twitter}</span>
+          </span>
+        )}
       </div>
 
-      <p className="text-xs text-slate-400 text-center pt-4">${earnings.totals.lifetimeUSD.toLocaleString()} cash lifetime · See <Link to="/collaborator/equity" className="underline hover:text-amber-600">Equity</Link> and <Link to="/collaborator/earnings" className="underline hover:text-amber-600">Earnings</Link></p>
+      <p className="text-[11px] text-slate-400 text-center pt-4">
+        ${earnings.totals.lifetimeUSD.toLocaleString()} cash lifetime · See{" "}
+        <Link to="/collaborator/equity" className="underline text-[#0066ff] dark:text-[#58a6ff]">Equity</Link> and{" "}
+        <Link to="/collaborator/earnings" className="underline text-[#0066ff] dark:text-[#58a6ff]">Earnings</Link>
+      </p>
     </div>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-slate-200 bg-white rounded-xl p-4 text-center">
-      <p className="text-2xl font-bold text-slate-900 tabular-nums">{value}</p>
-      <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">{label}</p>
+    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 text-center shadow-sm">
+      <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums">{value}</p>
+      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider font-bold">{label}</p>
     </div>
   );
 }
