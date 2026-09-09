@@ -9,6 +9,8 @@ import {
   declineMessageRequest,
   restSendDM,
   markConvRead,
+  editDM,
+  deleteDM,
 } from '@/lib/messaging/conversations';
 import type { MessageIdentity, WireMessage, WireConvSummary } from '@/lib/messaging/types';
 import { MentionTextarea } from '@/components/messaging/MentionTextarea';
@@ -30,6 +32,8 @@ export function DirectMessagePage() {
   const [requestStatus, setRequestStatus] = useState<'active' | 'pending' | 'declined'>('active');
   const [initiatedBy, setInitiatedBy] = useState('');
   const [requestMessageSent, setRequestMessageSent] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -144,6 +148,17 @@ export function DirectMessagePage() {
     catch (err) { setError(err instanceof Error ? err.message : 'Message request could not be updated.'); }
   };
 
+  const saveEdit = async (message: WireMessage) => {
+    if (!conversationId || !editBody.trim()) return;
+    try { const updated = await editDM(conversationId, message.id, editBody.trim(), message.editVersion || 0); setMessages(prev => prev.map(item => item.id === message.id ? { ...item, body: updated.body, editedAt: updated.editedAt, editVersion: updated.editVersion } : item)); setEditingId(null); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Message could not be edited.'); }
+  };
+  const removeMessage = async (message: WireMessage) => {
+    if (!conversationId) return;
+    try { const updated = await deleteDM(conversationId, message.id, message.editVersion || 0); setMessages(prev => prev.map(item => item.id === message.id ? { ...item, body: 'This message was deleted', deletedAt: updated.deletedAt, editVersion: updated.editVersion } : item)); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Message could not be deleted.'); }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -207,7 +222,7 @@ export function DirectMessagePage() {
           </div>
         )}
         {messages.map((msg) => {
-          const isMe = msg.senderId === 'me';
+          const isMe = msg.senderId === 'me' || msg.senderId === user?.id;
           return (
             <div
               key={msg.id}
@@ -220,14 +235,15 @@ export function DirectMessagePage() {
                     : 'bg-surface-secondary text-text-primary rounded-bl-md'
                 }`}
               >
-                <MentionText body={msg.body} mentions={msg.mentions} className="text-sm whitespace-pre-wrap break-words" />
+                {editingId === msg.id ? <div className="space-y-2"><textarea value={editBody} onChange={event => setEditBody(event.target.value)} className="w-full rounded border border-white/40 bg-transparent p-2 text-sm text-inherit" rows={2} /><div className="flex gap-2 text-[11px]"><button type="button" onClick={() => void saveEdit(msg)} className="underline">Save</button><button type="button" onClick={() => setEditingId(null)} className="underline">Cancel</button></div></div> : <MentionText body={msg.body} mentions={msg.mentions} className="text-sm whitespace-pre-wrap break-words" />}
                 <p
                   className={`text-[10px] mt-1 ${
                     isMe ? 'text-white/70' : 'text-text-muted'
                   }`}
                 >
-                  {formatTime(msg.ts)}
+                  {formatTime(msg.ts)} {msg.editedAt && !msg.deletedAt ? '· Edited' : ''}
                 </p>
+                {isMe && !msg.deletedAt && editingId !== msg.id && <div className="mt-1 flex gap-2 text-[10px] opacity-80"><button type="button" onClick={() => { setEditingId(msg.id); setEditBody(msg.body); }} className="underline">Edit</button><button type="button" onClick={() => void removeMessage(msg)} className="underline">Delete</button></div>}
               </div>
             </div>
           );

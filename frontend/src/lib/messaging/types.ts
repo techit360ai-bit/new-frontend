@@ -30,6 +30,9 @@ export interface WireMessage {
   category?: string;
   mentions?: Mention[];
   pending?: boolean;
+  editedAt?: string;
+  deletedAt?: string;
+  editVersion?: number;
 }
 export interface WireConvSummary {
   id: string;

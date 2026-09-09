@@ -19,6 +19,7 @@ import { restartWebContainer, runWebCommand, stopWebCommand } from '../lib/runti
 import { setActiveWorkspaceId } from '../lib/api/client';
 import { applyAcceptedHunks, buildReviewHunks, sha256, threeWayMerge } from '../lib/codeReview';
 import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
+import { listModelConnections } from '../lib/api/capabilities';
 
 type OpenFile = CodeSnapshot['files'][number] & { savedContent: string };
 type Mode = 'manual' | 'assist' | 'agent' | 'autonomous';
@@ -76,6 +77,7 @@ export function Code() {
   const [reviewPath, setReviewPath] = useState('');
   const [reviewDecisions, setReviewDecisions] = useState<Record<string, Record<string, boolean>>>({});
   const [queuedCount, setQueuedCount] = useState(0);
+  const [modelConnections, setModelConnections] = useState<Array<{ id: string; provider: string; displayName: string; maskedIdentifier?: string; status: string }>>([]);
 
   const active = files.find(file => file.path === activePath) || files[0];
   const changed = files.filter(file => file.content !== file.savedContent);
@@ -128,6 +130,7 @@ export function Code() {
   // reload is intentionally scoped to the selected Workspace; destination selection is restored inside it.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setActiveWorkspaceId(workspaceId || null); void reload(); }, [workspaceId]);
+  useEffect(() => { void listModelConnections().then(result => setModelConnections(result.connections || [])).catch(() => setModelConnections([])); }, []);
   useEffect(() => {
     const flush = () => { if (navigator.onLine) void saveAll(); };
     window.addEventListener('online', flush); return () => window.removeEventListener('online', flush);
@@ -458,7 +461,7 @@ export function Code() {
       <div className="grid min-h-0 flex-1 grid-cols-[220px_minmax(0,1fr)_300px] max-lg:grid-cols-[180px_minmax(0,1fr)] max-md:block">
         <aside className="overflow-auto border-r border-border-inverse bg-background-inverse p-2 max-md:flex max-md:max-h-28 max-md:border-b"><div className="mb-2 px-2 text-xs font-semibold uppercase text-text-muted">Files</div>{files.map(file => <button key={file.path} onClick={() => setActivePath(file.path)} className={`block w-full truncate rounded px-2 py-1.5 text-left text-xs ${active?.path === file.path ? 'bg-feature-code/15 text-feature-code' : 'text-text-on-inverse-secondary hover:bg-surface-inverse-muted'}`}>{file.content !== file.savedContent ? '● ' : ''}{file.path}</button>)}</aside>
         <main className="min-h-0 bg-editor-background">{active ? <Editor height="100%" path={active.path} language={active.language} value={active.content} onChange={updateActive} theme="vs-dark" options={{ minimap: { enabled: true }, fontSize: 13, automaticLayout: true, wordWrap: 'on', tabSize: 2, formatOnPaste: true }} /> : <div className="p-8 text-text-disabled">Create or pull a file to begin.</div>}</main>
-        <aside className="border-l border-border-inverse bg-background-inverse p-3 max-lg:hidden"><div className="mb-3 flex items-center gap-2"><Bot className="h-4 w-4 text-brand-accent" /><span className="font-medium">TechIT Coding Intelligence</span></div><textarea value={task} onChange={event => setTask(event.target.value)} rows={5} className="w-full rounded border border-border-inverse-strong bg-background-inverse p-2 text-sm" placeholder="Describe what should be built and why..." /><button onClick={() => void askAI(false)} className="mt-2 flex w-full items-center justify-center gap-2 rounded bg-brand-accent px-3 py-2 text-sm"><Send className="h-4 w-4" />Prepare build plan</button>{mode !== 'manual' && <button onClick={() => void askAI(true)} className="mt-2 w-full rounded border border-brand-accent px-3 py-2 text-sm">Generate reviewable changes</button>}<pre className="mt-3 max-h-[48vh] overflow-auto whitespace-pre-wrap text-xs text-text-on-inverse-secondary">{plan || 'AI uses existing Workspace context and cannot push or deploy without approval.'}</pre></aside>
+        <aside className="border-l border-border-inverse bg-background-inverse p-3 max-lg:hidden"><div className="mb-3 flex items-center gap-2"><Bot className="h-4 w-4 text-brand-accent" /><span className="font-medium">Coding Intelligence</span></div><select className="mb-2 w-full rounded border border-border-inverse-strong bg-background-inverse p-2 text-xs" defaultValue="platform"><option value="platform">TechIT model · subscription/credits</option>{modelConnections.map(connection => <option key={connection.id} value={connection.id}>{connection.displayName} · personal key</option>)}</select><textarea value={task} onChange={event => setTask(event.target.value)} rows={5} className="w-full rounded border border-border-inverse-strong bg-background-inverse p-2 text-sm" placeholder="Describe what should be built and why..." /><button onClick={() => void askAI(false)} className="mt-2 flex w-full items-center justify-center gap-2 rounded bg-brand-accent px-3 py-2 text-sm"><Send className="h-4 w-4" />Prepare build plan</button>{mode !== 'manual' && <button onClick={() => void askAI(true)} className="mt-2 w-full rounded border border-brand-accent px-3 py-2 text-sm">Generate reviewable changes</button>}<pre className="mt-3 max-h-[48vh] overflow-auto whitespace-pre-wrap text-xs text-text-on-inverse-secondary">{plan || 'AI uses existing Workspace context and cannot push or deploy without approval.'}</pre></aside>
       </div>
 
       <div className="h-[260px] border-t border-border-inverse bg-background-inverse">
