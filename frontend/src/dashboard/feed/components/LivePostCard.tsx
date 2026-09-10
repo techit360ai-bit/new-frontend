@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Ban, Bookmark, EyeOff, Flag, Flame, MessageCircle, Share2, Tag, VolumeX, type LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { likePost, unlikePost } from '@/lib/messaging/feed';
+import { deletePost, editPost, likePost, unlikePost } from '@/lib/messaging/feed';
 import { KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
 import type { WirePost } from '@/lib/messaging/types';
 import { ShareModal } from './ShareModal';
 import { blockUser, muteUser, postFeedback, savePost, unsavePost } from '@/lib/messaging/discovery';
 import { IdentityBadges } from '@/components/messaging/IdentityBadges';
 import { MentionText } from '@/components/messaging/MentionText';
+import { useAuth } from '@/contexts/AuthContext';
 
 function formatTimestamp(value: string): string {
   const date = new Date(value);
@@ -45,9 +46,13 @@ export function LivePostCard({
   const [shareOpen, setShareOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const meta = kindMeta(post.kind);
+  const [currentPost, setCurrentPost] = useState(post);
+  const [editing, setEditing] = useState(false);
+  const [editBody, setEditBody] = useState(post.body);
+  const { user } = useAuth();
+  const meta = kindMeta(currentPost.kind);
   const KindIcon = meta.icon;
-  const author = authorName || post.author?.displayName || post.authorId;
+  const author = authorName || currentPost.author?.displayName || currentPost.authorId;
 
   const toggleLike = async () => {
     if (liking) return;
@@ -90,40 +95,44 @@ export function LivePostCard({
     toast.success('Report submitted for review.');
   };
 
+  const saveEdit = async () => { if (!editBody.trim()) return; try { const updated = await editPost(currentPost.id, editBody.trim(), currentPost.editVersion || 0); setCurrentPost((value) => ({ ...value, ...updated })); setEditing(false); } catch (err) { toast.error(err instanceof Error ? err.message : 'Post could not be edited.'); } };
+  const removePost = async () => { try { await deletePost(currentPost.id, currentPost.editVersion || 0); setHidden(true); } catch (err) { toast.error(err instanceof Error ? err.message : 'Post could not be deleted.'); } };
+
   if (hidden) return null;
 
   return (
     <>
-      <article className={`border-y border-border-default border-l-4 bg-surface-primary px-4 py-4 sm:rounded-lg sm:border ${kindColorClass(post.kind).split(' ')[0]}`}>
+      <article className={`border-y border-border-default border-l-4 bg-surface-primary px-4 py-4 sm:rounded-lg sm:border ${kindColorClass(currentPost.kind).split(' ')[0]}`}>
         <div className="mb-3 flex items-start justify-between gap-3">
-          <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3">
+          <Link to={`/feed/profile/${encodeURIComponent(currentPost.authorId)}`} className="flex min-w-0 items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-semibold text-white">
               {initials(author)}
             </div>
             <div className="min-w-0">
-              <p className="flex items-center gap-1.5 truncate text-sm font-medium text-text-primary">{author}<IdentityBadges verified={post.author?.verified} subscriber={post.author?.subscriber} credibilityScore={post.author?.credibilityScore} compact /></p>
-              <p className="text-xs capitalize text-text-secondary">{post.author?.username ? `@${post.author.username} · ` : ''}{post.authorRole}</p>
+              <p className="flex items-center gap-1.5 truncate text-sm font-medium text-text-primary">{author}<IdentityBadges verified={currentPost.author?.verified} subscriber={currentPost.author?.subscriber} credibilityScore={currentPost.author?.credibilityScore} compact /></p>
+              <p className="text-xs capitalize text-text-secondary">{currentPost.author?.username ? `@${currentPost.author.username} · ` : ''}{currentPost.authorRole}</p>
             </div>
           </Link>
-          <time className="shrink-0 text-xs text-text-muted" dateTime={post.ts}>
-            {formatTimestamp(post.ts)}
+          <time className="shrink-0 text-xs text-text-muted" dateTime={currentPost.ts}>
+            {formatTimestamp(currentPost.ts)} {currentPost.editedAt ? '· Edited' : ''}
           </time>
         </div>
 
         <Link to={`/feed/post/${encodeURIComponent(post.id)}`} className="block">
-          <p className={`mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
+          <p className={`mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase ${kindColorClass(currentPost.kind).split(' ')[1]}`}>
             <KindIcon className="h-3.5 w-3.5" aria-hidden="true" />{meta.label}
           </p>
-          <MentionText body={post.body} mentions={post.mentions} className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary" />
+          {editing ? <div className="space-y-2"><textarea value={editBody} onChange={(event) => setEditBody(event.target.value)} className="w-full rounded border border-border-default bg-surface-secondary p-2 text-sm" rows={3} /><div className="flex gap-2"><button type="button" onClick={() => void saveEdit()} className="text-xs text-accent-primary">Save</button><button type="button" onClick={() => setEditing(false)} className="text-xs text-text-muted">Cancel</button></div></div> : <MentionText body={currentPost.body} mentions={currentPost.mentions} className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary" />}
         </Link>
 
-        {(post.audience ?? []).length > 0 && !(post.audience ?? []).includes('all') && (
+        {(currentPost.audience ?? []).length > 0 && !(currentPost.audience ?? []).includes('all') && (
           <p className="mt-3 text-xs text-text-muted">
-            Visible to {(post.audience ?? []).join(', ')}
+            Visible to {(currentPost.audience ?? []).join(', ')}
           </p>
         )}
 
         <div className="mt-4 flex items-center gap-5 border-t border-border-default pt-3">
+          {user?.id === currentPost.authorId && !editing && <><button type="button" onClick={() => { setEditBody(currentPost.body); setEditing(true); }} className="text-xs text-text-secondary hover:text-accent-primary">Edit</button><button type="button" onClick={() => void removePost()} className="text-xs text-text-secondary hover:text-score-red">Delete</button></>}
           <button
             type="button"
             onClick={() => { void toggleLike(); }}

@@ -3,7 +3,7 @@ import { MoreVertical, Paperclip, Search, Send, Smile, Ticket } from 'lucide-rea
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { fetchChannelHistory, fetchChannels, markChannelRead, restSendChannel } from '@/lib/messaging/channels';
+import { deleteChannelMessage, editChannelMessage, fetchChannelHistory, fetchChannels, markChannelRead, restSendChannel } from '@/lib/messaging/channels';
 import { initials as messageInitials, mapMessage } from '@/lib/messaging/map';
 import type { UIMessage, WireChannel } from '@/lib/messaging/types';
 import { useMessaging } from '@/contexts/MessagingProvider';
@@ -35,6 +35,8 @@ export function Chat() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState('');
   const { store } = useMessaging();
   const { user } = useAuth();
 
@@ -134,6 +136,9 @@ export function Chat() {
     }
   };
 
+  const saveEdit = async (message: UIMessage) => { if (!selectedChannelId || !editDraft.trim()) return; try { const updated = await editChannelMessage(selectedChannelId, message.id, editDraft.trim(), message.editVersion || 0); setLiveMessages((current) => current.map((item) => item.id === message.id ? { ...item, body: updated.body, editedAt: updated.editedAt, editVersion: updated.editVersion } : item)); setEditingId(null); } catch (err) { setError(err instanceof Error ? err.message : 'Message could not be edited.'); } };
+  const removeMessage = async (message: UIMessage) => { if (!selectedChannelId) return; try { const updated = await deleteChannelMessage(selectedChannelId, message.id, message.editVersion || 0); setLiveMessages((current) => current.map((item) => item.id === message.id ? { ...item, body: 'This message was deleted', deletedAt: updated.deletedAt, editVersion: updated.editVersion } : item)); } catch (err) { setError(err instanceof Error ? err.message : 'Message could not be deleted.'); } };
+
   return (
     <div className="h-full bg-surface-primary flex">
       <div className="w-[240px] border-r border-border-default bg-background-primary">
@@ -206,7 +211,8 @@ export function Chat() {
                       <span className="font-semibold">{msg.authorName}</span>
                       <span className="text-xs text-text-muted">{formatTime(msg.timestamp)}</span>
                     </div>
-                    <p className="text-text-secondary">{msg.body}</p>
+                    {editingId === msg.id ? <div className="space-y-2"><textarea value={editDraft} onChange={(event) => setEditDraft(event.target.value)} className="w-full rounded border border-border-default bg-surface-secondary p-2 text-sm" rows={2} /><div className="flex gap-2 text-xs"><button type="button" onClick={() => void saveEdit(msg)} className="text-brand-primary">Save</button><button type="button" onClick={() => setEditingId(null)} className="text-text-muted">Cancel</button></div></div> : <p className="text-text-secondary">{msg.body} {msg.editedAt && !msg.deletedAt ? <span className="text-xs text-text-muted">· Edited</span> : null}</p>}
+                    {msg.fromMe && !msg.deletedAt && editingId !== msg.id && <div className="mt-1 flex gap-3 text-xs"><button type="button" onClick={() => { setEditingId(msg.id); setEditDraft(msg.body); }} className="text-text-muted hover:text-brand-primary">Edit</button><button type="button" onClick={() => void removeMessage(msg)} className="text-text-muted hover:text-status-error">Delete</button></div>}
                   </div>
                 </div>
               ))

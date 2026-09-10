@@ -5,6 +5,10 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   createComment,
+  deleteComment,
+  deletePost,
+  editComment,
+  editPost,
   fetchComments,
   fetchPost,
   likePost,
@@ -57,6 +61,10 @@ export function PostDetailPage() {
   const [likeCount, setLikeCount] = useState<number | null>(null);
   const [liking, setLiking] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(false);
+  const [postDraft, setPostDraft] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [commentDraft, setCommentDraft] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -131,6 +139,9 @@ export function PostDetailPage() {
     }
   };
 
+  const savePostEdit = async () => { if (!post || !postDraft.trim()) return; try { const updated = await editPost(post.id, postDraft.trim(), post.editVersion || 0); setPost((current) => current ? { ...current, ...updated } : current); setEditingPost(false); } catch (err) { toast.error(err instanceof Error ? err.message : 'Post could not be edited.'); } };
+  const removePost = async () => { if (!post) return; try { await deletePost(post.id, post.editVersion || 0); setPost(null); } catch (err) { toast.error(err instanceof Error ? err.message : 'Post could not be deleted.'); } };
+
   if (loading) return <FeedLoadingState label="Loading live post..." />;
   if (error) return <FeedErrorState message={error} />;
   if (!post) {
@@ -177,7 +188,9 @@ export function PostDetailPage() {
         <p className={`mb-3 flex items-center gap-1.5 text-xs font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
           <KindIcon className="h-4 w-4" aria-hidden="true" />{meta.label}
         </p>
-        <MentionText body={post.body} mentions={post.mentions} className="whitespace-pre-wrap text-base leading-relaxed text-text-primary" />
+        {editingPost ? <div className="space-y-2"><textarea value={postDraft} onChange={(event) => setPostDraft(event.target.value)} className="w-full rounded border border-border-default bg-surface-secondary p-2 text-sm" rows={4} /><div className="flex gap-2"><button type="button" onClick={() => void savePostEdit()} className="text-xs text-accent-primary">Save</button><button type="button" onClick={() => setEditingPost(false)} className="text-xs text-text-muted">Cancel</button></div></div> : <MentionText body={post.body} mentions={post.mentions} className="whitespace-pre-wrap text-base leading-relaxed text-text-primary" />}
+
+        {profile?.id === post.authorId && !editingPost && <div className="mt-3 flex gap-3 text-xs"><button type="button" onClick={() => { setPostDraft(post.body); setEditingPost(true); }} className="text-accent-primary">Edit</button><button type="button" onClick={() => void removePost()} className="text-score-red">Delete</button></div>}
 
         <div className="mt-6 flex items-center gap-6 border-t border-border-default pt-4">
           <button
@@ -233,7 +246,7 @@ export function PostDetailPage() {
 
         <div className="space-y-4">
           {comments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} profile={profiles[comment.authorId]} />
+            <CommentItem key={comment.id} comment={comment} profile={profiles[comment.authorId]} currentUserId={profile?.id} editingId={editingCommentId} draft={commentDraft} onEdit={(value) => { setEditingCommentId(value.id); setCommentDraft(value.body); }} onCancel={() => setEditingCommentId(null)} onDraft={setCommentDraft} onSave={async () => { if (!editingCommentId || !commentDraft.trim()) return; try { const updated = await editComment(postId, editingCommentId, commentDraft.trim(), comment.editVersion || 0); setComments((current) => current.map((item) => item.id === updated.id ? { ...item, ...updated } : item)); setEditingCommentId(null); } catch (err) { toast.error(err instanceof Error ? err.message : 'Comment could not be edited.'); } }} onDelete={async () => { try { const updated = await deleteComment(postId, comment.id, comment.editVersion || 0); setComments((current) => current.map((item) => item.id === updated.id ? { ...item, body: 'This comment was deleted', deletedAt: updated.deletedAt, editVersion: updated.editVersion } : item)); } catch (err) { toast.error(err instanceof Error ? err.message : 'Comment could not be deleted.'); } }} />
           ))}
           {comments.length === 0 && (
             <p className="py-6 text-center text-sm text-text-muted">No persisted comments yet.</p>
@@ -256,9 +269,25 @@ export function PostDetailPage() {
 function CommentItem({
   comment,
   profile,
+  currentUserId,
+  editingId,
+  draft,
+  onEdit,
+  onCancel,
+  onDraft,
+  onSave,
+  onDelete,
 }: {
   comment: WireComment;
   profile?: PublicUserProfile;
+  currentUserId?: string;
+  editingId?: string | null;
+  draft: string;
+  onEdit: (comment: WireComment) => void;
+  onCancel: () => void;
+  onDraft: (value: string) => void;
+  onSave: () => void;
+  onDelete: () => void;
 }) {
   const name = profile?.name || comment.author?.displayName || comment.authorId;
   return (
@@ -281,7 +310,8 @@ function CommentItem({
         {profile && (
           <p className="text-xs text-text-secondary">{profile.category} · {profile.stage}</p>
         )}
-        <MentionText body={comment.body} mentions={comment.mentions} className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-primary" />
+        {editingId === comment.id ? <div className="mt-2 space-y-2"><textarea value={draft} onChange={(event) => onDraft(event.target.value)} className="w-full rounded border border-border-default bg-surface-secondary p-2 text-sm" rows={2} /><div className="flex gap-2 text-xs"><button type="button" onClick={onSave} className="text-accent-primary">Save</button><button type="button" onClick={onCancel} className="text-text-muted">Cancel</button></div></div> : <MentionText body={comment.body} mentions={comment.mentions} className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-primary" />}
+        {currentUserId === comment.authorId && !comment.deletedAt && editingId !== comment.id && <div className="mt-2 flex gap-3 text-xs"><button type="button" onClick={() => onEdit(comment)} className="text-accent-primary">Edit</button><button type="button" onClick={onDelete} className="text-score-red">Delete</button></div>}
       </div>
     </div>
   );

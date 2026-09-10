@@ -1,4 +1,4 @@
-import { msgGet, msgPost, withFallback } from "./client";
+import { msgGet, msgPatch, msgPost, msgDelete, withFallback } from "./client";
 import { messagingUrl } from './config';
 import { enqueue } from '@/lib/resilience/queue';
 import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
@@ -38,3 +38,5 @@ export function markChannelRead(channelId: string, msgId: string): Promise<unkno
     "mark channel read",
   );
 }
+export function editChannelMessage(channelId: string, messageId: string, body: string, expectedVersion = 0): Promise<WireMessage> { return msgPatch<WireMessage>(`/channels/${encodeURIComponent(channelId)}/messages/${encodeURIComponent(messageId)}`, { body, expectedVersion }); }
+export function deleteChannelMessage(channelId: string, messageId: string, expectedVersion = 0): Promise<WireMessage> { return msgDelete<WireMessage>(`/channels/${encodeURIComponent(channelId)}/messages/${encodeURIComponent(messageId)}`, { body: JSON.stringify({ expectedVersion }), headers: { 'Content-Type': 'application/json' } }); }

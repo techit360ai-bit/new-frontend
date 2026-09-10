@@ -1,4 +1,4 @@
-import { msgGet, msgPost, msgDelete, withFallback } from "./client";
+import { msgGet, msgPost, msgPatch, msgDelete, withFallback } from "./client";
 import { messagingUrl } from './config';
 import { enqueue } from '@/lib/resilience/queue';
 import { isNetworkFailure } from '@/lib/resilience/connectivity';
@@ -66,3 +66,7 @@ export async function createComment(postId: string, body: string): Promise<WireC
     return { id, postId, authorId: '', body, ts: new Date().toISOString(), pending: true };
   }
 }
+export function editPost(postId: string, body: string, expectedVersion = 0): Promise<WirePost> { return msgPatch<WirePost>(`/posts/${encodeURIComponent(postId)}`, { body, expectedVersion }); }
+export function deletePost(postId: string, expectedVersion = 0): Promise<{ id: string; deletedAt?: string; editVersion?: number }> { return msgDelete(`/posts/${encodeURIComponent(postId)}`, { body: JSON.stringify({ expectedVersion }), headers: { 'Content-Type': 'application/json' } }); }
+export function editComment(postId: string, commentId: string, body: string, expectedVersion = 0): Promise<WireComment> { return msgPatch<WireComment>(`/posts/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}`, { body, expectedVersion }); }
+export function deleteComment(postId: string, commentId: string, expectedVersion = 0): Promise<{ id: string; deletedAt?: string; editVersion?: number }> { return msgDelete(`/posts/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}`, { body: JSON.stringify({ expectedVersion }), headers: { 'Content-Type': 'application/json' } }); }
