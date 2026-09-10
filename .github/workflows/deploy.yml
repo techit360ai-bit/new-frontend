@@ -23,13 +23,15 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
 
-      - name: Build
-        run: cd frontend && npx vite build
+      - name: Vite production build
+        run: cd frontend && npm run build
         env:
-          VITE_API_BASE_URL: https://api.techitnetwork.com
-          VITE_MESSAGING_BASE_URL: https://messaging.techitnetwork.com
-          VITE_MESSAGING_WS_URL: wss://messaging.techitnetwork.com/ws
-          VITE_API_URL: https://backend.techitnetwork.com/api
+          VITE_API_URL: https://techit-backend.onrender.com/api
+          VITE_API_BASE_URL: https://techit-api-u1ek.onrender.com
+          VITE_TECHIT_API: https://techit-backend.onrender.com/api/mcp
+          VITE_MESSAGING_BASE_URL: https://techit-messaging.onrender.com
+          VITE_MESSAGING_WS_URL: wss://techit-messaging.onrender.com/ws
+          VITE_API_STRICT: "1"
 
       - name: Deploy to S3
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

@@ -50,7 +50,6 @@
     "@radix-ui/react-toggle": "^1.1.2",
     "@radix-ui/react-toggle-group": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
-    "@tailwindcss/vite": "^4.1.18",
     "@types/canvas-confetti": "^1.9.0",
     "@webcontainer/api": "^1.6.4",
     "canvas-confetti": "^1.9.4",
@@ -88,6 +87,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.62.1",
+    "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^26.2.0",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.5",
@@ -102,5 +102,10 @@
     "typescript-eslint": "^8.46.4",
     "vite": "^5.4.21",
     "vitest": "^2.1.8"
+  },
+  "overrides": {
+    "monaco-editor": {
+      "dompurify": "3.4.15"
+    }
   }
 }
