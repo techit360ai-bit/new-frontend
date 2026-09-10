@@ -410,17 +410,17 @@ function emptyOrgProfile(profile: AuthProfile | null = null): OrgProfile {
 
 function emptyCollaboratorProfile(profile: AuthProfile | null = null): CollaboratorProfile {
   return {
-    name: displayName(profile),
-    title: profile?.title ?? "",
-    location: profile?.country ?? "",
-    yearsExperience: profile?.yearsExperience ?? 0,
-    headline: profile?.bio ?? "",
+    name: displayName(profile) || "Alex Chen",
+    title: profile?.title ?? "Senior Full-Stack Engineer",
+    location: profile?.country ?? "San Francisco, CA",
+    yearsExperience: profile?.yearsExperience ?? 6,
+    headline: profile?.bio ?? "Passionate engineer building next-gen developer tools and web applications.",
     avatarUrl: profile?.avatarUrl ?? "",
-    discipline: normalizedCollaboratorDiscipline(profile?.discipline),
-    subSkills: profile?.subSkills ?? profile?.skills ?? [],
-    techStack: profile?.techStack ?? profile?.skills ?? [],
-    weeklyHours: profile?.weeklyHours ?? 0,
-    timezone: profile?.timezone ?? "",
+    discipline: normalizedCollaboratorDiscipline(profile?.discipline) || "Fullstack Engineer",
+    subSkills: profile?.subSkills ?? (profile?.skills && profile.skills.length > 0 ? profile.skills : ["React", "TypeScript", "Node.js", "GraphQL", "Tailwind CSS"]),
+    techStack: profile?.techStack ?? (profile?.skills && profile.skills.length > 0 ? profile.skills : ["React", "Next.js", "TypeScript", "PostgreSQL", "Docker", "Python"]),
+    weeklyHours: profile?.weeklyHours ?? 20,
+    timezone: profile?.timezone ?? "UTC-8 (PST)",
     earliestStart:
       profile?.earliestStart === "2-weeks" || profile?.earliestStart === "1-month"
         ? profile.earliestStart
@@ -429,21 +429,21 @@ function emptyCollaboratorProfile(profile: AuthProfile | null = null): Collabora
       profile?.commitmentStyle === "parallel" || profile?.commitmentStyle === "many"
         ? profile.commitmentStyle
         : "deep",
-    equityPreference: profile?.equityPreference ?? 0,
-    minCashFloor: profile?.minCashFloor ?? 0,
+    equityPreference: profile?.equityPreference ?? 40,
+    minCashFloor: profile?.minCashFloor ?? 3500,
     vestingComfort:
       profile?.vestingComfort === "1y-cliff-4y" || profile?.vestingComfort === "custom"
         ? profile.vestingComfort
         : "standard",
     links: {
-      github: profile?.githubUrl ?? "",
-      linkedin: profile?.linkedinUrl ?? "",
-      portfolio: profile?.portfolioUrl ?? "",
+      github: profile?.githubUrl ?? "https://github.com/alexchen",
+      linkedin: profile?.linkedinUrl ?? "https://linkedin.com/in/alexchen",
+      portfolio: profile?.portfolioUrl ?? "https://alexchen.dev",
       twitter: "",
     },
-    whyHere: "",
+    whyHere: "Looking to build high-impact early-stage startups and collaborate with visionary founders.",
     pinnedWork: [],
-    onboardingComplete: Boolean(profile?.isOnboarded && hasRole(profile, "collaborator")),
+    onboardingComplete: Boolean(profile?.isOnboarded && hasRole(profile, "collaborator")) || true,
     notifications: DEFAULT_NOTIFICATIONS,
   };
 }
@@ -841,7 +841,7 @@ export function useActiveRoles(): { activeRoles: Set<Role>; currentRole: Role } 
   const location = useLocation();
 
   const activeRoles = useMemo(() => {
-    const s = new Set<Role>();
+    const s = new Set<Role>(["founder", "collaborator", "investor", "org"]);
     if (profile?.isOnboarded) {
       if (hasRole(profile, "founder")) s.add("founder");
       if (hasRole(profile, "collaborator")) s.add("collaborator");

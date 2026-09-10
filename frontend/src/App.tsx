@@ -238,8 +238,8 @@ const App = () => {
           <Route path="settings" element={<CollabSettings />} />
         </Route>
 
-        {/* Legacy redirects — Landing.tsx still navigates to /collaborator/setup */}
-        <Route path="/collaborator/setup"   element={<Navigate to="/collaborator/onboarding/step-1" replace />} />
+        {/* Legacy redirects — bypass setup straight to dashboard */}
+        <Route path="/collaborator/setup"   element={<Navigate to="/collaborator/dashboard" replace />} />
         <Route path="/collaborator/summary" element={<Navigate to="/collaborator/dashboard" replace />} />
 
         <Route path="/investor/onboarding/step-1" element={<RequireRole allowed={["investor"]}><InvestorStep1 /></RequireRole>} />
