@@ -5,6 +5,7 @@ import { Plus, Github, Code2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { listTasks } from '../lib/api/tasks';
+import { chooseBuildPath, getBuildContext, type BuildContext } from '../lib/api/capabilities';
 import type { AgentTask } from '../lib/types';
 
 type ColumnType = 'backlog' | 'inProgress' | 'review' | 'done';
@@ -41,6 +42,9 @@ export function Build() {
   const location = useLocation();
   const [tasks, setTasks] = useState<Record<ColumnType, Task[]>>(EMPTY_COLUMNS);
   const [error, setError] = useState<string | null>(null);
+  const [buildContext, setBuildContext] = useState<BuildContext | null>(null);
+  const [choosing, setChoosing] = useState(false);
+  const workspaceId = new URLSearchParams(location.search).get('workspace') || undefined;
 
   useEffect(() => {
     let alive = true;
@@ -61,6 +65,15 @@ export function Build() {
       });
     return () => { alive = false; };
   }, []);
+
+  useEffect(() => { void getBuildContext(workspaceId).then(setBuildContext).catch(() => setBuildContext(null)); }, [workspaceId]);
+
+  async function selectPath(path: 'prototype' | 'mvp') {
+    setChoosing(true);
+    try { const result = await chooseBuildPath(path); if (result) setBuildContext(await getBuildContext(workspaceId)); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Build path could not be selected.'); }
+    finally { setChoosing(false); }
+  }
 
   const totalTasks = useMemo(
     () => Object.values(tasks).reduce((sum, column) => sum + column.length, 0),
@@ -125,6 +138,18 @@ export function Build() {
 
       {/* Kanban Board */}
       <div className="flex-1 overflow-auto p-6">
+        {!buildContext?.buildProfile?.buildPath && (
+          <div className="mb-6 rounded-lg border border-border-default bg-surface-primary p-5">
+            <div className="flex items-center justify-between gap-4 mb-4"><div><h2 className="text-lg font-semibold">Choose a build path</h2><p className="text-sm text-text-muted">Use the same editor, files, and live preview for either path.</p></div>{buildContext?.costEstimate && <span className="text-xs text-text-muted">Estimate updates after selection</span>}</div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <button disabled={choosing} onClick={() => void selectPath('prototype')} className="text-left rounded-lg border border-border-strong p-4 hover:border-brand-primary hover:bg-background-primary disabled:opacity-60"><div className="font-medium">Prototype</div><div className="text-sm text-text-muted mt-1">Narrow hypothesis, scaffold, preview, and feedback.</div><div className="text-xs text-text-muted mt-3">Typical estimate: 35 credits, 15 runtime minutes</div></button>
+              <button disabled={choosing} onClick={() => void selectPath('mvp')} className="text-left rounded-lg border border-brand-primary p-4 hover:bg-background-primary disabled:opacity-60"><div className="font-medium">Build MVP</div><div className="text-sm text-text-muted mt-1">Bounded product scope with tests, security, and deployment evidence.</div><div className="text-xs text-text-muted mt-3">Typical estimate: 120 credits, 45 runtime minutes</div></button>
+            </div>
+          </div>
+        )}
+        {buildContext?.buildProfile?.buildPath && (
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-sm"><Badge className="bg-brand-primary text-white">{buildContext.buildProfile.buildPath === 'mvp' ? 'Build MVP' : 'Prototype'}</Badge>{buildContext.costEstimate && <span className="text-text-muted">{buildContext.costEstimate.creditsToConsume ?? 0} credits projected, {buildContext.costEstimate.runtimeMinutes ?? 0} runtime minutes</span>}</div>
+        )}
         {error && (
           <div className="mb-4 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
             Live workspace tasks could not be loaded: {error}

@@ -8,6 +8,7 @@ import { computeMomentum } from "@/dashboard/_shared/hackathon/momentum";
 import { logHackathonCheckIn } from "@/lib/api/hackathon";
 import { useGenerateTeamWorkspace } from "./useGenerateTeamWorkspace";
 import { PromoteToStartupModal } from "./PromoteToStartupModal";
+import { AttachExistingProjectCard } from "./AttachExistingProjectCard";
 
 interface Props {
   registration: HackathonRegistration;
@@ -84,6 +85,7 @@ export function BuildStage({ registration }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto">
+      <AttachExistingProjectCard registration={registration} />
       {showReminder && lastCheckIn && (
         <div className="flex items-center gap-2 bg-status-warning-soft border border-status-warning rounded-lg px-4 py-3 mb-5">
           <Clock className="w-4 h-4 text-status-warning shrink-0" />

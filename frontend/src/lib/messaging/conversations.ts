@@ -1,4 +1,4 @@
-import { msgGet, msgPost, withFallback } from "./client";
+import { msgGet, msgPost, msgPatch, msgDelete, withFallback } from "./client";
 import { messagingUrl } from './config';
 import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
 import { enqueue } from '@/lib/resilience/queue';
@@ -39,4 +39,10 @@ export async function restSendDM(convId: string, clientMsgId: string, body: stri
 }
 export function markConvRead(convId: string, msgId: string): Promise<unknown> {
   return withFallback(() => msgPost(`/conversations/${convId}/read`, { msgId }), () => null, "mark read");
+}
+export function editDM(convId: string, messageId: string, body: string, expectedVersion = 0): Promise<{ id: string; body: string; editedAt?: string; editVersion?: number }> {
+  return msgPatch(`/conversations/${encodeURIComponent(convId)}/messages/${encodeURIComponent(messageId)}`, { body, expectedVersion });
+}
+export function deleteDM(convId: string, messageId: string, expectedVersion = 0): Promise<{ id: string; deletedAt?: string; editVersion?: number }> {
+  return msgDelete(`/conversations/${encodeURIComponent(convId)}/messages/${encodeURIComponent(messageId)}`, { body: JSON.stringify({ expectedVersion }), headers: { 'Content-Type': 'application/json' } });
 }

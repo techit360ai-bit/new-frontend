@@ -69,6 +69,28 @@ export interface InviteDetails {
   invitedRole?: string;
 }
 
+export interface AttachedProjectEntry {
+  id: string;
+  hackathonId: string;
+  teamId: string;
+  projectId: string;
+  workspaceId: string;
+  entryMode: "attached";
+  visibility: "private";
+  judgeAccess?: Record<string, unknown>;
+  consent: boolean;
+  status: string;
+  createdAt: string;
+}
+
+export function attachExistingProject(hackathonId: string, teamId: string, input: { projectId: string; workspaceId: string; consent: boolean; judgeAccess?: Record<string, unknown> }): Promise<{ ok: boolean; entry?: AttachedProjectEntry; error?: string }> {
+  return domainPost<{ ok: boolean; entry?: AttachedProjectEntry; error?: string }>(`/hackathons/${encodeURIComponent(hackathonId)}/teams/${encodeURIComponent(teamId)}/project-entry`, { ...input });
+}
+
+export function fetchAttachedProject(hackathonId: string, teamId: string): Promise<AttachedProjectEntry | null> {
+  return domainGet<{ entry: AttachedProjectEntry }>(`/hackathons/${encodeURIComponent(hackathonId)}/teams/${encodeURIComponent(teamId)}/project-entry`).then((result) => result.entry).catch(() => null);
+}
+
 export interface HackathonInvitation {
   id: string;
   hackathonId: string;
