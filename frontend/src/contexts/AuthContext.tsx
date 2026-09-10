@@ -2,7 +2,8 @@ import {
   createContext, useContext, useEffect, useRef,
   useState, useCallback, type ReactNode,
 } from 'react'
-import { getAuthToken, refreshAccessToken, setAccessToken, setAuthTokenGetter } from '../lib/api/client'
+import { getAuthToken, refreshAccessToken, setAuthTokenGetter } from '../lib/api/client'
+import { persistAccessToken } from '../lib/authStorage'
 
 // ── Types ─────────────────────────────────────────────────────
 export type Role = 'explorer' | 'founder' | 'collaborator' | 'investor' | 'organisation'
@@ -140,14 +141,16 @@ interface AuthContextType {
 // ── Storage helpers ───────────────────────────────────────────
 const TOKEN_KEY = 'techit_access_token'
 const USER_KEY  = 'techit_user'
-const COOKIE_AUTH = import.meta.env.PROD || import.meta.env.VITE_COOKIE_AUTH === 'true'
-
 const getStored = () => ({
   token: getAuthToken(),
   user: (() => { try { const u = localStorage.getItem(USER_KEY); return u ? JSON.parse(u) : null } catch { return null } })(),
 })
 try { localStorage.removeItem('techit_token') } catch {}
-const saveToken = (t: string | null) => { setAccessToken(COOKIE_AUTH ? null : t); if (!COOKIE_AUTH && t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY) }
+// Keep the access token available to the API client even when browser cookies
+// are enabled. The frontend and API may be different origins, so the API's
+// CSRF cookie is not readable by this app and cookie-only mutations cannot be
+// completed reliably from onboarding.
+const saveToken = persistAccessToken
 const saveUser  = (u: User | null)   => u ? localStorage.setItem(USER_KEY, JSON.stringify(u)) : localStorage.removeItem(USER_KEY)
 
 // Forward the stored JWT to the ai-router API client so every dashboard request
