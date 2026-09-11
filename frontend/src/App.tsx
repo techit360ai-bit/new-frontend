@@ -37,6 +37,7 @@ const InviteAcceptPage = lazy(() => import("@/dashboard/founders/section/compone
 const WorkspaceInvitationPage = lazy(() => import("@/dashboard/workspaces/pages/WorkspaceInvitationPage").then((m) => ({ default: m.WorkspaceInvitationPage })));
 const ContractSigningPage = lazy(() => import("@/dashboard/founders/section/components/founder/ContractSigningPage"));
 const Wallet = lazy(() => import("@/TechitWallet/Wallet"));
+const AdminAiSpend = lazy(() => import("@/dashboard/admin/AdminAiSpend"));
 const NotFound = lazy(() => import("@/dashboard/NotFound"));
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -305,6 +306,8 @@ const App = () => {
           <Route path="/contracts/sign"  element={<ContractSigningPage />} />
         </Route>
         <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+        <Route path="/admin/ai-spend" element={<RequireAuth><AdminAiSpend /></RequireAuth>} />
+        <Route path="/admin" element={<Navigate to="/admin/ai-spend" replace />} />
         <Route path="/explore" element={<RequireAuth><ExplorerHome /></RequireAuth>} />
         <Route path="/explorer" element={<Navigate to="/explore" replace />} />
         <Route path="/verification/:role" element={<RequireAuth><VerificationCenter /></RequireAuth>} />
