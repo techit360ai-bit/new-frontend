@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, UserPlus } from 'lucide-react';
+import { MessageCircle, UserPlus, Users, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { gsisColorClass } from '@/lib/messaging/postKinds';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +28,7 @@ export function TribePage() {
   const [profiles, setProfiles] = useState<PublicUserProfile[]>([]);
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [profilesError, setProfilesError] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
 
   const authorIds = useMemo(
     () => [...new Set(posts.map((post) => post.authorId).filter((id) => id && id !== user?.id))],
@@ -63,6 +64,17 @@ export function TribePage() {
     return () => { alive = false; };
   }, [authorIds]);
 
+  const filteredProfiles = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return profiles;
+    return profiles.filter((p) => (
+      p.name.toLowerCase().includes(q) ||
+      p.role.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.skills.some((s) => s.toLowerCase().includes(q))
+    ));
+  }, [profiles, query]);
+
   const loading = postsLoading || profilesLoading;
   const error = postsError || profilesError;
 
@@ -70,25 +82,44 @@ export function TribePage() {
     <div className="flex pb-14 lg:pb-0">
       <LeftSidebar />
       <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px] font-bricolage">
-        <div className="sticky top-14 z-40 border-b border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-6 py-4">
-          <BackButton className="mb-2" />
-          <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Your Tribe</h1>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            Members represented in your persisted tribe feed.
-          </p>
+        <div className="sticky top-16 z-30 border-b border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-6 py-4 space-y-3">
+          <BackButton className="mb-1" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 className="flex items-center gap-2.5 text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                <Users className="h-6 w-6 text-[#0066ff] dark:text-[#58a6ff]" />
+                Your Tribe
+              </h1>
+              <p className="mt-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                {profiles.length} connected members in your network
+              </p>
+            </div>
+            {profiles.length > 0 && (
+              <div className="relative w-full sm:w-56">
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-white/40" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Filter tribe members..."
+                  className="h-8 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#0066ff] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#58a6ff] dark:focus:bg-white/10"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {loading && <FeedLoadingState label="Loading live tribe members..." />}
         {!loading && error && <FeedErrorState message={error} />}
-        {!loading && !error && profiles.length === 0 && (
+        {!loading && !error && filteredProfiles.length === 0 && (
           <FeedEmptyState
-            title="No live tribe members yet"
-            detail="Profiles appear here after other members publish posts targeted to your role or tribe."
+            title={query ? "No matching tribe members" : "No live tribe members yet"}
+            detail={query ? `No members match "${query}". Try searching by name, role, or skills.` : "Profiles appear here after other members publish posts targeted to your role or tribe."}
           />
         )}
-        {!loading && profiles.length > 0 && (
+        {!loading && filteredProfiles.length > 0 && (
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-            {profiles.map((profile) => <TribeMemberCard key={profile.id} profile={profile} />)}
+            {filteredProfiles.map((profile) => <TribeMemberCard key={profile.id} profile={profile} />)}
           </div>
         )}
       </main>

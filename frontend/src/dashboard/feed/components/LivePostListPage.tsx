@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { HelpCircle, AlertTriangle, Plus } from 'lucide-react';
 import { LeftSidebar } from './LeftSidebar';
 import { RightPanel } from './RightPanel';
 import { BackButton } from './BackButton';
@@ -21,28 +22,37 @@ export function LivePostListPage({
 }) {
   const { posts, loading, error } = useFeedPosts('global');
   const filtered = posts.filter((post) => kinds.includes(post.kind));
+  const isQuestion = kinds.includes('question');
 
   return (
     <div className="flex pb-14 lg:pb-0">
       <LeftSidebar />
-      <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px]">
-        <div className="sticky top-14 z-40 border-b border-border-default bg-bg-surface px-6 py-4">
-          <BackButton className="mb-3" />
-          <div className="flex items-start justify-between gap-4">
+      <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px] font-bricolage">
+        <div className="sticky top-16 z-30 border-b border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-6 py-4">
+          <BackButton className="mb-2" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-semibold text-text-primary">{title}</h1>
-              <p className="mt-1 text-sm text-text-secondary">{description}</p>
+              <h1 className="flex items-center gap-2.5 text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                {isQuestion ? (
+                  <HelpCircle className="h-6 w-6 text-[#0066ff] dark:text-[#58a6ff]" />
+                ) : (
+                  <AlertTriangle className="h-6 w-6 text-amber-500" />
+                )}
+                {title}
+              </h1>
+              <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">{description}</p>
             </div>
             <Link
               to="/feed"
-              className="shrink-0 text-sm font-medium text-accent-primary hover:underline"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-4 py-2 text-xs font-bold text-white shadow-md transition-all shrink-0 self-start sm:self-auto"
             >
-              Create post
+              <Plus className="h-4 w-4" />
+              <span>Create {isQuestion ? 'Question' : 'Signal'}</span>
             </Link>
           </div>
         </div>
 
-        <div className="space-y-3 py-4 sm:px-4">
+        <div className="space-y-4 p-4">
           {loading && <FeedLoadingState />}
           {!loading && error && <FeedErrorState message={error} />}
           {!loading && !error && filtered.map((post) => <LivePostCard key={post.id} post={post} />)}
