@@ -84,8 +84,8 @@ export function Hackathons() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="flex items-center gap-3 text-3xl font-bold text-gray-900">
-            <span className="rounded-lg bg-indigo-100 p-2">
-              <Trophy className="h-7 w-7 text-indigo-600" />
+            <span className="rounded-lg bg-[#20C997]/10 p-2">
+              <Trophy className="h-7 w-7 text-[#20C997]" />
             </span>
             Hackathons
           </h1>
@@ -105,7 +105,7 @@ export function Hackathons() {
           </button>
           <Link
             to="/org/hackathons/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#20C997] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1ab386]"
           >
             <Plus className="h-4 w-4" />
             Create hackathon
@@ -130,7 +130,7 @@ export function Hackathons() {
       ) : error ? null : (
         <>
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <SummaryCard icon={Trophy} label="Events" value={hackathons.length} accent="text-indigo-700 bg-indigo-50" />
+            <SummaryCard icon={Trophy} label="Events" value={hackathons.length} accent="text-[#20C997] bg-[#20C997]/10" />
             <SummaryCard icon={Users} label="Registrants" value={totals.registrants} accent="text-[#20C997] bg-[#20C997]/10" />
             <SummaryCard icon={Sparkles} label="Registered teams" value={totals.teams} accent="text-emerald-700 bg-emerald-50" />
             <SummaryCard icon={Calendar} label="Live now" value={totals.live} accent="text-amber-700 bg-amber-50" />
@@ -149,7 +149,7 @@ export function Hackathons() {
                   <Link
                     key={hackathon.id}
                     to={`/org/hackathons/${hackathon.id}`}
-                    className="block rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-indigo-300 hover:shadow-md"
+                    className="block rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-[#20C997]/50 hover:shadow-md"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
                       <div className="min-w-0 flex-1">
