@@ -8,7 +8,7 @@ const METRIC_STYLE: Record<string, { icon: React.ComponentType<{ className?: str
   founderRating:       { icon: Star,        color: 'text-amber-400' },
   followThrough:       { icon: Zap,         color: 'text-purple-400' },
   valueAdd:            { icon: Heart,       color: 'text-pink-400' },
-  portfolioEngagement: { icon: TrendingUp,  color: 'text-blue-400' },
+  portfolioEngagement: { icon: TrendingUp,  color: 'text-[#20C997]' },
 };
 
 export function Reputation() {
@@ -70,27 +70,27 @@ export function Reputation() {
           {/* Left: Score Overview */}
           <div className="lg:col-span-2 space-y-6">
             {/* Main Score Card */}
-            <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-8">
+            <div className="bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-2">Your Reputation Score</h2>
                   <p className="text-gray-300">Based on founder feedback and engagement metrics</p>
                 </div>
-                <div className="p-4 bg-emerald-500/20 rounded-full">
-                  <Award className="w-8 h-8 text-emerald-400" />
+                <div className="p-4 bg-[#20C997]/20 rounded-full">
+                  <Award className="w-8 h-8 text-[#20C997]" />
                 </div>
               </div>
               
               <div className="flex items-baseline gap-4 mb-4">
-                <span className="text-6xl font-bold font-mono text-emerald-400">{investorScore}</span>
+                <span className="text-6xl font-bold font-mono text-[#20C997]">{investorScore}</span>
                 <span className="text-2xl text-gray-400">/100</span>
               </div>
               
               <div className="flex items-center gap-3 mb-4">
-                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-sm font-semibold">
+                <span className="px-3 py-1 bg-[#20C997]/20 text-[#20C997] rounded-full text-sm font-semibold">
                   {scoreLevel} Tier
                 </span>
-                <div className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center gap-1 text-[#20C997]">
                   <TrendingUp className="w-4 h-4" />
                   <span className="text-sm font-medium">
                     {rep.monthChange >= 0 ? `+${rep.monthChange}` : rep.monthChange} this month
@@ -100,7 +100,7 @@ export function Reputation() {
               
               <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-blue-500"
+                  className="h-full bg-gradient-to-r from-[#20C997] to-emerald-400"
                   style={{ width: `${investorScore}%` }}
                 ></div>
               </div>
@@ -245,13 +245,13 @@ export function Reputation() {
         </div>
 
         {/* Info Banner */}
-        <div className="mt-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+        <div className="mt-6 bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Shield className="w-5 h-5 text-blue-400" />
+            <div className="p-2 bg-[#20C997]/20 rounded-lg">
+              <Shield className="w-5 h-5 text-[#20C997]" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-blue-300 mb-2">BALANCED POWER DYNAMICS</h4>
+              <h4 className="text-sm font-semibold text-[#20C997] mb-2">BALANCED POWER DYNAMICS</h4>
               <p className="text-white mb-2">
                 TechIT scores both founders AND investors. This creates mutual accountability.
               </p>
