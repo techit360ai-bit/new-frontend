@@ -1,6 +1,6 @@
 import { apiPost, withFallback } from "./client";
 
-export type TourGuideRole = "founder" | "collaborator";
+export type TourGuideRole = "founder" | "collaborator" | "explorer";
 
 export interface TourGuideTaskSnapshot {
   id: string;

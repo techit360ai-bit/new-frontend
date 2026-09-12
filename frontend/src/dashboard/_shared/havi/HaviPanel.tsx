@@ -40,6 +40,7 @@ interface HaviPanelProps {
 const ACADEMY_PATH: Record<HaviRole, string> = {
   founder: "/incubation-hub?panel=learn",
   collaborator: "/collaborator/academy",
+  explorer: "/explorer",
 };
 
 export function HaviPanel(props: HaviPanelProps) {
