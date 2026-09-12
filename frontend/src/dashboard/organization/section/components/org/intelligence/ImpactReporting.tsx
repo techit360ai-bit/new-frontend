@@ -9,7 +9,7 @@ const TEMPLATES = [
   { value: "program-end", label: "Program-end" },
 ];
 
-const PIE_COLORS = ["#4f46e5", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const PIE_COLORS = ["#20C997", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 function EmptyPanel({ children }: { children: string }) {
   return (
@@ -44,7 +44,7 @@ export function ImpactReporting() {
 
   const cards = report
     ? [
-        { label: "Startups", value: report.metrics.startups, icon: Briefcase, tone: "text-indigo-600", bg: "bg-indigo-50" },
+        { label: "Startups", value: report.metrics.startups, icon: Briefcase, tone: "text-[#20C997]", bg: "bg-[#20C997]/10" },
         { label: "Products Launched", value: report.metrics.productsLaunched, icon: Rocket, tone: "text-emerald-600", bg: "bg-emerald-50" },
         { label: "Total MRR", value: `$${report.metrics.totalMrr.toLocaleString()}`, icon: DollarSign, tone: "text-amber-600", bg: "bg-amber-50" },
         { label: "Jobs Supported", value: report.metrics.jobs, icon: TrendingUp, tone: "text-rose-600", bg: "bg-rose-50" },
@@ -119,7 +119,7 @@ export function ImpactReporting() {
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Bar dataKey="value" fill="#4f46e5" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="value" fill="#20C997" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
