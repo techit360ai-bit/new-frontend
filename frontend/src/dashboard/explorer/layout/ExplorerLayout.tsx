@@ -113,7 +113,9 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
           }`}
         >
           {/* Sidebar Header / Brand */}
-          <div className="flex h-16 items-center justify-between px-4 border-b border-black/[0.06] dark:border-white/10">
+          <div className={`flex items-center border-b border-black/[0.06] dark:border-white/10 transition-all duration-300 ${
+            sidebarCollapsed ? "flex-col justify-center py-3 gap-2 px-2" : "h-16 justify-between px-4"
+          }`}>
             <Link to="/explore" className="flex items-center gap-3 overflow-hidden group">
               <div className={`flex h-9 w-9 items-center justify-center rounded-xl p-1.5 backdrop-blur-md border transition-all shrink-0 ${
                 isDark
@@ -133,7 +135,7 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
             <button
               type="button"
               onClick={() => setSidebarCollapsed((v) => !v)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 dark:text-white/40 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 dark:text-white/40 transition-colors shrink-0"
               title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
@@ -141,10 +143,10 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
           </div>
 
           {/* Nav Links */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-4">
-            {NAV_GROUPS.map((group) => (
+          <div className="flex-1 overflow-y-auto p-3 space-y-4 custom-scrollbar">
+            {NAV_GROUPS.map((group, groupIdx) => (
               <div key={group.label} className="space-y-1">
-                {!sidebarCollapsed && (
+                {!sidebarCollapsed ? (
                   <button
                     type="button"
                     onClick={() => toggleGroup(group.label)}
@@ -153,7 +155,11 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
                     <span>{group.label}</span>
                     <ChevronDown className={`h-3 w-3 transition-transform ${expandedGroups[group.label] ? "" : "-rotate-90"}`} />
                   </button>
-                )}
+                ) : groupIdx > 0 ? (
+                  <div className="py-1 flex justify-center">
+                    <div className="w-5 h-[1px] bg-slate-200 dark:bg-white/10" />
+                  </div>
+                ) : null}
 
                 {(sidebarCollapsed || expandedGroups[group.label]) &&
                   group.items.map((item) => {
@@ -165,6 +171,8 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
                         key={item.path}
                         to={item.path}
                         className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all group ${
+                          sidebarCollapsed ? "justify-center px-0" : ""
+                        } ${
                           active
                             ? "bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 text-[#0066ff] dark:text-[#58a6ff] font-bold"
                             : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
@@ -172,7 +180,7 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
                         title={sidebarCollapsed ? item.label : undefined}
                       >
                         {/* Active Indicator Bar */}
-                        {active && (
+                        {active && !sidebarCollapsed && (
                           <motion.div
                             layoutId="activeSideBarBar"
                             className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-[#0066ff] dark:bg-[#58a6ff]"
@@ -190,8 +198,8 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
           </div>
 
           {/* Sidebar Footer Card */}
-          {!sidebarCollapsed && (
-            <div className="p-3 border-t border-black/[0.06] dark:border-white/10">
+          <div className="p-3 border-t border-black/[0.06] dark:border-white/10">
+            {!sidebarCollapsed ? (
               <div className="rounded-xl border border-black/[0.06] bg-slate-100/70 p-3 dark:border-white/10 dark:bg-white/[0.04]">
                 <p className="text-[11px] font-bold text-slate-900 dark:text-white">Ready to Build?</p>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Activate Founder or Collaborator mode to post projects or accept gigs.</p>
@@ -203,8 +211,17 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
                   Explore Modes
                 </button>
               </div>
-            </div>
-          )}
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate("/explore/settings")}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.06] bg-slate-100/70 text-slate-600 hover:bg-[#0066ff]/10 hover:text-[#0066ff] dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-white/10 transition-colors mx-auto"
+                title="Explore Modes & Settings"
+              >
+                <Sparkles className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+              </button>
+            )}
+          </div>
         </aside>
 
         {/* Content Area */}
