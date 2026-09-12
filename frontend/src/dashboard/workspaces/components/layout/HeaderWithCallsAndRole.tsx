@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
 import { BackButton } from '@/dashboard/feed/components/BackButton';
 import { VideoCall } from '../calls/VideoCall';
 import { AudioCall } from '../calls/AudioCall';
