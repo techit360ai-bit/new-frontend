@@ -212,7 +212,7 @@ export function DataRoom() {
                     const Icon = sectionIcon(section);
                     return (
                       <div key={section} className="flex items-center gap-3 rounded-lg bg-gray-800/50 p-4">
-                        <Icon className="h-5 w-5 text-blue-400" />
+                        <Icon className="h-5 w-5 text-[#20C997]" />
                         <span className="text-sm font-medium text-white">{section}</span>
                       </div>
                     );
