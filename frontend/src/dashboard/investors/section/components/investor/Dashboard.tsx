@@ -123,9 +123,9 @@ export function Dashboard() {
             label="Watchlisted Startups"
             value={metrics.watchlistedStartups}
             icon={Activity}
-            color="text-blue-400"
-            bgColor="bg-blue-500/10"
-            borderColor="border-blue-500/20"
+            color="text-[#20C997]"
+            bgColor="bg-[#20C997]/10"
+            borderColor="border-[#20C997]/20"
           />
           <MetricCard
             label="80+ Readiness"
@@ -200,7 +200,7 @@ export function Dashboard() {
                         <Line
                           type="monotone"
                           dataKey="execution"
-                          stroke="#3b82f6"
+                          stroke="#20C997"
                           strokeWidth={2}
                           name="Execution Velocity"
                         />
@@ -213,7 +213,7 @@ export function Dashboard() {
                       <span className="text-gray-400">Readiness</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                      <div className="w-3 h-3 bg-[#20C997] rounded"></div>
                       <span className="text-gray-400">Execution Velocity</span>
                     </div>
                   </div>
@@ -271,13 +271,13 @@ export function Dashboard() {
             </div>
 
             {/* AI Insight Box */}
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+            <div className="bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <Zap className="w-5 h-5 text-blue-400" />
+                <div className="p-2 bg-[#20C997]/20 rounded-lg">
+                  <Zap className="w-5 h-5 text-[#20C997]" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-blue-300 mb-2">AI INSIGHTS</h4>
+                  <h4 className="text-sm font-semibold text-[#20C997] mb-2">AI INSIGHTS</h4>
                   {highMomentumStartups.length > 0 ? (
                     <>
                       <p className="text-white mb-2">
@@ -292,7 +292,7 @@ export function Dashboard() {
                       No live momentum insight is available yet. New persisted deal-flow snapshots will populate this panel.
                     </p>
                   )}
-                  <button className="mt-3 text-blue-400 text-sm font-medium hover:text-blue-300 flex items-center gap-1">
+                  <button className="mt-3 text-[#20C997] text-sm font-medium hover:text-emerald-300 flex items-center gap-1">
                     View detailed analysis <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -351,7 +351,7 @@ export function Dashboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Investors Watching</span>
-                        <span className="text-blue-400 font-mono">{startup.investorsWatching}</span>
+                        <span className="text-[#20C997] font-mono">{startup.investorsWatching}</span>
                       </div>
                     </div>
                     <button className="mt-3 w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded transition-all flex items-center justify-center gap-2">
