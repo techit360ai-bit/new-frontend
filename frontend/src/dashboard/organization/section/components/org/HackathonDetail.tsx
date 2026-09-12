@@ -57,7 +57,7 @@ const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
 ];
 
 const statusStyles: Record<OrganizerHackathon["hackathonStatus"], string> = {
-  upcoming: "bg-blue-50 text-blue-700",
+  upcoming: "bg-[#20C997]/10 text-[#20C997]",
   live: "bg-emerald-50 text-emerald-700",
   judging: "bg-amber-50 text-amber-700",
   completed: "bg-gray-100 text-gray-700",
@@ -146,7 +146,7 @@ export function HackathonDetail() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <Link
           to="/org/hackathons"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#20C997]"
         >
           <ArrowLeft className="h-4 w-4" />
           All hackathons
@@ -191,7 +191,7 @@ export function HackathonDetail() {
                   onClick={() => setTab(item.id)}
                   className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold ${
                     active
-                      ? "border-indigo-600 text-indigo-600"
+                      ? "border-[#20C997] text-[#20C997]"
                       : "border-transparent text-gray-500 hover:text-gray-900"
                   }`}
                 >
@@ -232,8 +232,8 @@ function EventHeader({
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-3">
-            <span className="rounded-lg bg-indigo-100 p-2">
-              <Trophy className="h-6 w-6 text-indigo-600" />
+            <span className="rounded-lg bg-[#20C997]/10 p-2">
+              <Trophy className="h-6 w-6 text-[#20C997]" />
             </span>
             <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
             <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[event.hackathonStatus]}`}>
@@ -305,7 +305,7 @@ function OverviewTab({ event }: { event: OrganizerHackathon }) {
         {event.judgingDimensions.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {event.judgingDimensions.map((dimension) => (
-              <span key={dimension} className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700">
+              <span key={dimension} className="rounded-full bg-[#20C997]/10 px-3 py-1.5 text-xs font-medium text-[#20C997]">
                 {titleLabel(dimension)}
               </span>
             ))}
@@ -478,7 +478,7 @@ function JudgingTab({
                   <tr key={team.teamId} className="border-b border-gray-100 last:border-0">
                     <td className="px-3 py-3 font-bold text-gray-900">{index + 1}</td>
                     <td className="px-3 py-3 font-semibold text-gray-900">{team.name || "Untitled team"}</td>
-                    <td className="px-3 py-3 font-bold tabular-nums text-indigo-700">{team.composite}</td>
+                    <td className="px-3 py-3 font-bold tabular-nums text-[#20C997]">{team.composite}</td>
                     <td className="px-3 py-3 text-gray-700">{titleLabel(team.crsBand)}</td>
                   </tr>
                 ))}
@@ -530,7 +530,7 @@ function ReportTab({
                   <p className="truncate text-sm font-semibold text-gray-900">{index + 1}. {team.name || "Untitled team"}</p>
                   <p className="text-xs text-gray-500">{titleLabel(team.crsBand)}</p>
                 </div>
-                <span className="text-lg font-bold tabular-nums text-indigo-700">{team.composite}</span>
+                <span className="text-lg font-bold tabular-nums text-[#20C997]">{team.composite}</span>
               </div>
             ))}
           </div>
@@ -575,7 +575,7 @@ function Card({
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5">
       <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-gray-900">
-        <Icon className="h-5 w-5 text-indigo-600" />
+        <Icon className="h-5 w-5 text-[#20C997]" />
         {title}
       </h2>
       {children}
@@ -664,7 +664,7 @@ function Legend({ color, label }: { color: string; label: string }) {
 
 function PipelineMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border-l-2 border-indigo-200 pl-4">
+    <div className="border-l-2 border-[#20C997]/30 pl-4">
       <p className="text-xs font-medium uppercase text-gray-500">{label}</p>
       <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">{value}</p>
     </div>
