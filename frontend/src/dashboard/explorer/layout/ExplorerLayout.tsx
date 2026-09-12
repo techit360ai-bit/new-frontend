@@ -114,8 +114,12 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
         >
           {/* Sidebar Header / Brand */}
           <div className="flex h-16 items-center justify-between px-4 border-b border-black/[0.06] dark:border-white/10">
-            <Link to="/explore" className="flex items-center gap-3 overflow-hidden">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white shadow-md shrink-0">
+            <Link to="/explore" className="flex items-center gap-3 overflow-hidden group">
+              <div className={`flex h-9 w-9 items-center justify-center rounded-xl p-1.5 backdrop-blur-md border transition-all shrink-0 ${
+                isDark
+                  ? "bg-white/[0.05] border-white/10 shadow-[0_0_12px_rgba(0,102,255,0.15)] group-hover:border-[#58a6ff]/40"
+                  : "bg-white/80 border-black/[0.08] shadow-sm group-hover:border-[#0066ff]/40"
+              }`}>
                 <TechITLogo />
               </div>
               {!sidebarCollapsed && (

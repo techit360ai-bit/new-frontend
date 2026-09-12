@@ -307,15 +307,15 @@ const App = () => {
           <Route path="/contracts/sign"  element={<ContractSigningPage />} />
         </Route>
         <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
-        <Route path="/explore" element={<RequireAuth><ExplorerHome /></RequireAuth>} />
-        <Route path="/explore/discover" element={<RequireAuth><ExplorerDiscover /></RequireAuth>} />
-        <Route path="/explore/startups" element={<RequireAuth><ExplorerStartups /></RequireAuth>} />
-        <Route path="/explore/projects" element={<RequireAuth><ExplorerProjects /></RequireAuth>} />
-        <Route path="/explore/opportunities" element={<RequireAuth><ExplorerOpportunities /></RequireAuth>} />
-        <Route path="/explore/events" element={<RequireAuth><ExplorerEvents /></RequireAuth>} />
-        <Route path="/explore/ai-guide" element={<RequireAuth><ExplorerAIGuide /></RequireAuth>} />
-        <Route path="/explore/profile" element={<RequireAuth><ExplorerProfile /></RequireAuth>} />
-        <Route path="/explore/settings" element={<RequireAuth><ExplorerSettings /></RequireAuth>} />
+        <Route path="/explore" element={<ExplorerHome />} />
+        <Route path="/explore/discover" element={<ExplorerDiscover />} />
+        <Route path="/explore/startups" element={<ExplorerStartups />} />
+        <Route path="/explore/projects" element={<ExplorerProjects />} />
+        <Route path="/explore/opportunities" element={<ExplorerOpportunities />} />
+        <Route path="/explore/events" element={<ExplorerEvents />} />
+        <Route path="/explore/ai-guide" element={<ExplorerAIGuide />} />
+        <Route path="/explore/profile" element={<ExplorerProfile />} />
+        <Route path="/explore/settings" element={<ExplorerSettings />} />
         <Route path="/explorer" element={<Navigate to="/explore" replace />} />
         <Route path="/verification/:role" element={<RequireAuth><VerificationCenter /></RequireAuth>} />
         <Route path="/security/mfa" element={<RequireAuth><MfaSetup /></RequireAuth>} />
