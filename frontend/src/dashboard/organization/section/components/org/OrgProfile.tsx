@@ -341,7 +341,7 @@ function Section({
         </div>
         <Link
           to={editPath}
-          className="text-[11px] font-mono uppercase tracking-wider text-gray-400 hover:text-indigo-600 flex items-center gap-1 transition-colors"
+          className="text-[11px] font-mono uppercase tracking-wider text-gray-400 hover:text-[#20C997] flex items-center gap-1 transition-colors"
         >
           <Pencil className="w-3 h-3" />
           Edit
