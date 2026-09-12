@@ -17,6 +17,7 @@ import {
   fetchCollaboratorSummary,
   type CollaboratorLiveSummary,
 } from "@/lib/api/collaboratorSummary";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
 
 export function CollabProfile() {
   const { collaboratorProfile: p } = useCollaboratorProfile();
@@ -93,6 +94,7 @@ export function CollabProfile() {
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+      <RoleAdditionPanel />
       {/* Header strip */}
       <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-start gap-5">
         <div className="w-16 h-16 rounded-full bg-status-warning text-text-primary font-semibold flex items-center justify-center text-xl shrink-0">{initials}</div>
