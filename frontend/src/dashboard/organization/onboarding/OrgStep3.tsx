@@ -62,7 +62,7 @@ export function OrgStep3() {
   const handleBack = () => navigate("/org/onboarding/step-2");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#20C997]/10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-3xl">
         <OrgProgressBar currentStep={3} totalSteps={5} />
 
@@ -80,7 +80,7 @@ export function OrgStep3() {
           {/* Programmes */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Target className="w-4 h-4 text-indigo-500" />
+              <Target className="w-4 h-4 text-[#20C997]" />
               <h3 className="text-slate-900 dark:text-white font-semibold">
                 What you run
               </h3>
@@ -95,12 +95,12 @@ export function OrgStep3() {
                     onClick={() => toggle(programmes, setProgrammes, p.id)}
                     className={`text-left p-4 rounded-xl border-2 transition-all ${
                       active
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10"
-                        : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 hover:border-indigo-300"
+                        ? "border-[#20C997] bg-[#20C997]/10 dark:bg-[#20C997]/20"
+                        : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 hover:border-[#20C997]/40"
                     }`}
                   >
                     <div className="flex items-center gap-3 mb-1">
-                      <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                      <Icon className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
                       <p className="font-bold text-slate-900 dark:text-white">
                         {p.id}
                       </p>
@@ -128,8 +128,8 @@ export function OrgStep3() {
                     onClick={() => toggle(sectors, setSectors, s)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                       active
-                        ? "bg-indigo-600 text-white shadow-md"
-                        : "bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400"
+                        ? "bg-[#20C997] text-black font-bold shadow-md"
+                        : "bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-[#20C997]/40"
                     }`}
                   >
                     {s}
@@ -142,7 +142,7 @@ export function OrgStep3() {
           {/* Geographies */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <MapPin className="w-4 h-4 text-indigo-500" />
+              <MapPin className="w-4 h-4 text-[#20C997]" />
               <h3 className="text-slate-900 dark:text-white font-semibold">
                 Where you operate
               </h3>
@@ -156,8 +156,8 @@ export function OrgStep3() {
                     onClick={() => toggle(geographies, setGeographies, g)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                       active
-                        ? "bg-violet-600 text-white shadow-md"
-                        : "bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-violet-400"
+                        ? "bg-[#20C997] text-black font-bold shadow-md"
+                        : "bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-[#20C997]/40"
                     }`}
                   >
                     {g}
@@ -171,14 +171,14 @@ export function OrgStep3() {
         <div className="mt-12 flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-[#20C997] transition-colors"
           >
             Back
           </button>
           <button
             onClick={handleNext}
             disabled={programmes.length === 0 || sectors.length === 0}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-600 hover:from-[#1ba87e] hover:to-emerald-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Continue
           </button>
