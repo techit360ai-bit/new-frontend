@@ -29,30 +29,32 @@ function formatDate(value?: string | null) {
 }
 
 function severityClass(value: string) {
-  if (value === "critical") return "border-rose-200 bg-rose-50 text-rose-700";
-  if (value === "high") return "border-orange-200 bg-orange-50 text-orange-700";
-  if (value === "low") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  return "border-amber-200 bg-amber-50 text-amber-700";
+  if (value === "critical") return "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400";
+  if (value === "high") return "border-orange-500/30 bg-orange-500/10 text-orange-600 dark:text-orange-400";
+  if (value === "low") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+  return "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400";
 }
 
 function HealthPanel({ health }: { health: OrganizationHealth }) {
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm transition-all hover:border-[#20C997]/30">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Organization health</p>
-          <p className="mt-1 text-3xl font-bold text-gray-900">{health.score === null ? "—" : `${health.score}/100`}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Organization Health</p>
+          <p className="mt-1 text-3xl font-black font-mono text-slate-900 dark:text-white">{health.score === null ? "—" : `${health.score}/100`}</p>
         </div>
-        <HeartPulse className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
+        <div className="w-10 h-10 rounded-xl bg-[#20C997]/10 flex items-center justify-center border border-[#20C997]/20">
+          <HeartPulse className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
+        </div>
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3">
         {Object.entries(health.dimensions).map(([key, value]) => (
           <div key={key}>
-            <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
-              <span>{DIMENSION_LABELS[key] || key}</span>
-              <span className="font-semibold text-gray-800">{value === null ? "—" : value}</span>
+            <div className="flex items-center justify-between gap-2 text-xs font-semibold">
+              <span className="text-slate-600 dark:text-slate-400">{DIMENSION_LABELS[key] || key}</span>
+              <span className="font-bold text-slate-900 dark:text-white">{value === null ? "—" : value}</span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-gray-100">
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
               <div className="h-full rounded-full bg-[#20C997]" style={{ width: `${value === null ? 0 : value}%` }} />
             </div>
           </div>
@@ -71,27 +73,29 @@ function PulsePanel({ pulse }: { pulse: OrganizationPulse }) {
     ["Activities", pulse.changes.activities],
   ];
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm transition-all hover:border-[#20C997]/30">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Organization pulse</p>
-          <h2 className="mt-1 text-lg font-bold text-gray-900">What changed in the last 7 days</h2>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Organization Pulse</p>
+          <h2 className="mt-1 text-base font-bold text-slate-900 dark:text-white">What changed in the last 7 days</h2>
         </div>
-        <Activity className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
+        <div className="w-10 h-10 rounded-xl bg-[#20C997]/10 flex items-center justify-center border border-[#20C997]/20">
+          <Activity className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
+        </div>
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
         {changes.map(([label, value]) => (
-          <div key={label} className="rounded-md bg-gray-50 px-3 py-3">
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
-            <p className="mt-1 text-xs leading-4 text-gray-500">{label}</p>
+          <div key={label} className="rounded-xl border border-black/[0.05] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] p-3 text-center">
+            <p className="text-xl font-black font-mono text-slate-900 dark:text-white">{value}</p>
+            <p className="mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 leading-tight">{label}</p>
           </div>
         ))}
       </div>
       {pulse.activity.length > 0 && (
-        <div className="mt-5 space-y-3 border-t border-gray-100 pt-4">
+        <div className="mt-5 space-y-3 border-t border-black/[0.05] dark:border-white/10 pt-4">
           {pulse.activity.slice(0, 3).map((item) => (
-            <div key={item.id} className="flex items-start gap-2 text-sm text-gray-700">
-              <Activity className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#20C997]" aria-hidden="true" />
+            <div key={item.id} className="flex items-start gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+              <Activity className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#20C997]" aria-hidden="true" />
               <span>{item.message}</span>
             </div>
           ))}
@@ -103,25 +107,27 @@ function PulsePanel({ pulse }: { pulse: OrganizationPulse }) {
 
 function RiskPanel({ risks }: { risks: OrganizationRisk[] }) {
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
+    <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+      <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-600" aria-hidden="true" />
-          <h2 className="text-lg font-bold text-gray-900">Risks</h2>
+          <AlertTriangle className="h-5 w-5 text-amber-500 dark:text-amber-400" aria-hidden="true" />
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Risks</h2>
         </div>
-        <span className="text-sm text-gray-500">{risks.length} open</span>
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{risks.length} open</span>
       </div>
       {risks.length === 0 ? (
-        <div className="mt-5 rounded-md border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">No open organization risks.</div>
+        <div className="rounded-xl border border-dashed border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] px-4 py-6 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+          No open organization risks.
+        </div>
       ) : (
-        <div className="mt-4 space-y-3">
+        <div className="space-y-3">
           {risks.slice(0, 5).map((risk) => (
-            <div key={risk.id} className="rounded-md border border-gray-100 p-3">
+            <div key={risk.id} className="rounded-xl border border-black/[0.05] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-3">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-semibold text-gray-900">{risk.title}</p>
-                <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase ${severityClass(risk.severity)}`}>{risk.severity}</span>
+                <p className="text-xs font-bold text-slate-900 dark:text-white">{risk.title}</p>
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${severityClass(risk.severity)}`}>{risk.severity}</span>
               </div>
-              {risk.reason && <p className="mt-1 text-xs leading-5 text-gray-600">{risk.reason}</p>}
+              {risk.reason && <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{risk.reason}</p>}
             </div>
           ))}
         </div>
@@ -132,26 +138,28 @@ function RiskPanel({ risks }: { risks: OrganizationRisk[] }) {
 
 function ActionPanel({ actions }: { actions: OrganizationAction[] }) {
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
+    <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+      <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           <ClipboardList className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
-          <h2 className="text-lg font-bold text-gray-900">Actions</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Actions</h2>
         </div>
-        <span className="text-sm text-gray-500">{actions.length} active</span>
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{actions.length} active</span>
       </div>
       {actions.length === 0 ? (
-        <div className="mt-5 rounded-md border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">No active organization actions.</div>
+        <div className="rounded-xl border border-dashed border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] px-4 py-6 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+          No active organization actions.
+        </div>
       ) : (
-        <div className="mt-4 space-y-3">
+        <div className="space-y-3">
           {actions.slice(0, 5).map((action) => (
-            <div key={action.id} className="flex items-start gap-3 rounded-md border border-gray-100 p-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
+            <div key={action.id} className="flex items-start gap-3 rounded-xl border border-black/[0.05] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-3">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400 dark:text-slate-500" aria-hidden="true" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-gray-900">{action.title}</p>
-                <p className="mt-1 text-xs text-gray-500">{action.status.replaceAll("_", " ")} · {formatDate(action.dueDate)}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white">{action.title}</p>
+                <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">{action.status.replaceAll("_", " ")} · {formatDate(action.dueDate)}</p>
               </div>
-              <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase ${severityClass(action.priority === "normal" ? "medium" : action.priority)}`}>{action.priority}</span>
+              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${severityClass(action.priority === "normal" ? "medium" : action.priority)}`}>{action.priority}</span>
             </div>
           ))}
         </div>
@@ -162,18 +170,29 @@ function ActionPanel({ actions }: { actions: OrganizationAction[] }) {
 
 function KpiPanel({ kpis }: { kpis: OrganizationKpi[] }) {
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Target className="h-5 w-5 text-emerald-600" aria-hidden="true" />
-        <h2 className="text-lg font-bold text-gray-900">Defined KPIs</h2>
+    <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+      <div className="flex items-center gap-2 mb-4">
+        <Target className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">Defined KPIs</h2>
       </div>
       {kpis.length === 0 ? (
-        <div className="mt-5 rounded-md border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">No organization KPIs have been defined.</div>
+        <div className="rounded-xl border border-dashed border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] px-4 py-6 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+          No organization KPIs have been defined.
+        </div>
       ) : (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           {kpis.slice(0, 4).map((kpi) => {
             const latest = kpi.values[0]?.value;
-            return <div key={kpi.id} className="rounded-md border border-gray-100 p-3"><div className="flex items-center justify-between gap-2"><p className="truncate text-sm font-semibold text-gray-900">{kpi.name}</p><span className="text-xs text-gray-500">{kpi.unit || "value"}</span></div><p className="mt-2 text-2xl font-bold text-gray-900">{latest === undefined ? "—" : latest}</p><p className="mt-1 text-xs text-gray-500">Target: {kpi.target === null || kpi.target === undefined ? "not set" : kpi.target}</p></div>;
+            return (
+              <div key={kpi.id} className="rounded-xl border border-black/[0.05] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-xs font-bold text-slate-900 dark:text-white">{kpi.name}</p>
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{kpi.unit || "value"}</span>
+                </div>
+                <p className="mt-2 text-2xl font-black font-mono text-slate-900 dark:text-white">{latest === undefined ? "—" : latest}</p>
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Target: {kpi.target === null || kpi.target === undefined ? "not set" : kpi.target}</p>
+              </div>
+            );
           })}
         </div>
       )}
@@ -215,9 +234,45 @@ export function OrganizationIntelligencePanel() {
 
   useEffect(() => { void load(); }, [load]);
 
-  if (loading && !overview) return <div className="mb-8 rounded-lg border border-gray-200 bg-white px-5 py-8 text-center text-sm text-gray-500">Loading organization intelligence...</div>;
-  if (error && !overview) return <div className="mb-8 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">Live organization intelligence is unavailable. Existing organization data remains available above.</div>;
+  if (loading && !overview) return (
+    <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-5 py-8 text-center text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+      Loading organization intelligence...
+    </div>
+  );
+  if (error && !overview) return (
+    <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4 text-xs font-medium text-amber-600 dark:text-amber-400">
+      Live organization intelligence is unavailable. Existing organization data remains available above.
+    </div>
+  );
   if (!overview || !pulse) return null;
 
-  return <div className="mb-8 space-y-5"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Intelligence layer</p><p className="mt-1 text-sm text-gray-600">Backend-calculated signals for this organization.</p></div><button type="button" onClick={() => void load()} disabled={loading} aria-label="Refresh organization intelligence" title="Refresh organization intelligence" className="rounded-lg border border-gray-300 bg-white p-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button></div><div className="grid gap-5 lg:grid-cols-2"><HealthPanel health={overview} /><PulsePanel pulse={pulse} /></div><div className="grid gap-5 lg:grid-cols-2"><RiskPanel risks={risks} /><ActionPanel actions={actions} /></div><KpiPanel kpis={kpis} /></div>;
+  return (
+    <div className="mb-6 space-y-6">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#20C997]">Intelligence Layer</p>
+          <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">Backend-calculated signals for this organization.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void load()}
+          disabled={loading}
+          aria-label="Refresh organization intelligence"
+          title="Refresh organization intelligence"
+          className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-2 text-slate-600 dark:text-slate-400 hover:text-[#20C997] hover:border-[#20C997]/30 disabled:opacity-50 transition-all shadow-sm"
+        >
+          <RefreshCw className={`h-4 w-4 text-[#20C997] ${loading ? "animate-spin" : ""}`} />
+        </button>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <HealthPanel health={overview} />
+        <PulsePanel pulse={pulse} />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RiskPanel risks={risks} />
+        <ActionPanel actions={actions} />
+      </div>
+      <KpiPanel kpis={kpis} />
+    </div>
+  );
 }

@@ -13,7 +13,7 @@ const PIE_COLORS = ["#20C997", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5
 
 function EmptyPanel({ children }: { children: string }) {
   return (
-    <div className="flex min-h-[160px] items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 text-center text-sm text-gray-500">
+    <div className="flex min-h-[160px] items-center justify-center rounded-xl border border-dashed border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] px-6 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
       {children}
     </div>
   );
@@ -44,22 +44,22 @@ export function ImpactReporting() {
 
   const cards = report
     ? [
-        { label: "Startups", value: report.metrics.startups, icon: Briefcase, tone: "text-[#20C997]", bg: "bg-[#20C997]/10" },
-        { label: "Products Launched", value: report.metrics.productsLaunched, icon: Rocket, tone: "text-emerald-600", bg: "bg-emerald-50" },
-        { label: "Total MRR", value: `$${report.metrics.totalMrr.toLocaleString()}`, icon: DollarSign, tone: "text-amber-600", bg: "bg-amber-50" },
-        { label: "Jobs Supported", value: report.metrics.jobs, icon: TrendingUp, tone: "text-rose-600", bg: "bg-rose-50" },
+        { label: "Startups", value: report.metrics.startups, icon: Briefcase, tone: "text-[#20C997]", bg: "bg-[#20C997]/10 border border-[#20C997]/20" },
+        { label: "Products Launched", value: report.metrics.productsLaunched, icon: Rocket, tone: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10 border border-emerald-500/20" },
+        { label: "Total MRR", value: `$${report.metrics.totalMrr.toLocaleString()}`, icon: DollarSign, tone: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10 border border-amber-500/20" },
+        { label: "Jobs Supported", value: report.metrics.jobs, icon: TrendingUp, tone: "text-rose-600 dark:text-rose-400", bg: "bg-rose-500/10 border border-rose-500/20" },
       ]
     : [];
 
   const hasData = report && report.metrics.startups > 0;
 
   return (
-    <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-6 transition-colors">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <select
           value={template}
           onChange={(event) => setTemplate(event.target.value)}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+          className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111111] px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-[#20C997] focus:ring-1 focus:ring-[#20C997]"
         >
           {TEMPLATES.map((t) => (
             <option key={t.value} value={t.value}>
@@ -71,36 +71,36 @@ export function ImpactReporting() {
           type="button"
           onClick={() => window.print()}
           disabled={!hasData}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#20C997] hover:border-[#20C997]/30 transition-all disabled:opacity-50 shadow-sm"
         >
-          <Download className="h-4 w-4" /> Export
+          <Download className="h-4 w-4 text-[#20C997]" /> Export
         </button>
       </div>
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+        <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-bold text-red-600 dark:text-red-400">
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
       {loading && !report ? (
-        <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-500">
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-6 py-16 text-center text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
           Loading impact report...
         </div>
       ) : hasData ? (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {cards.map((card) => {
               const Icon = card.icon;
               return (
-                <div key={card.label} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                <div key={card.label} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 shadow-sm transition-all hover:border-[#20C997]/30">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">{card.label}</p>
-                      <p className={`mt-2 text-3xl font-bold ${card.tone}`}>{card.value}</p>
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{card.label}</p>
+                      <p className={`mt-2 text-3xl font-black font-mono ${card.tone}`}>{card.value}</p>
                     </div>
-                    <div className={`rounded-lg p-3 ${card.bg}`}>
+                    <div className={`rounded-xl p-3 ${card.bg}`}>
                       <Icon className={`h-6 w-6 ${card.tone}`} />
                     </div>
                   </div>
@@ -110,15 +110,22 @@ export function ImpactReporting() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold text-gray-900">Stage progression</h2>
+            <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+              <h2 className="mb-4 text-base font-bold text-slate-900 dark:text-white">Stage progression</h2>
               {report!.stageProgression.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={report!.stageProgression}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                    <Tooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(120,120,120,0.15)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#888" }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#888" }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#111111",
+                        borderColor: "rgba(255,255,255,0.1)",
+                        borderRadius: "12px",
+                        color: "#fff",
+                      }}
+                    />
                     <Bar dataKey="value" fill="#20C997" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -127,8 +134,8 @@ export function ImpactReporting() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold text-gray-900">Industry breakdown</h2>
+            <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+              <h2 className="mb-4 text-base font-bold text-slate-900 dark:text-white">Industry breakdown</h2>
               {report!.industryBreakdown.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
@@ -137,7 +144,14 @@ export function ImpactReporting() {
                         <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#111111",
+                        borderColor: "rgba(255,255,255,0.1)",
+                        borderRadius: "12px",
+                        color: "#fff",
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -146,7 +160,7 @@ export function ImpactReporting() {
             </section>
           </div>
 
-          <p className="mt-6 text-xs text-gray-400">
+          <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
             Metrics are aggregated from your portfolio&apos;s current records. Users-acquired and
             milestone metrics will appear once those fields are tracked.
           </p>
