@@ -13,7 +13,7 @@ const FOUNDER_TYPES: { v: FounderExperience; label: string }[] = [
 
 export function FounderStep1() {
   const navigate = useNavigate();
-  const { updateProfile } = useAuth();
+  const { updateProfile, activateRole } = useAuth();
   const { founderProfile, updateFounderProfile } = useFounderProfile();
   const [name, setName]         = useState(founderProfile.name);
   const [title, setTitle]       = useState(founderProfile.title);
@@ -29,8 +29,10 @@ export function FounderStep1() {
   const handleFinish = async () => {
     persist();
     setFinishing(true);
+    const activated = await activateRole("founder", { name, title, location, yearsBuilding: years, founderType: type, headline });
+    if (activated.error) { setFinishing(false); return; }
     // Onboarded now; the rest of the profile is completed later (banner prompts them).
-    const { error } = await updateProfile({ isOnboarded: true });
+    const { error } = await updateProfile({ isOnboarded: true, title, country: location, yearsBuilding: years, founderType: type, bio: headline });
     if (error) { setFinishing(false); return; }
     localStorage.setItem("techit_profile_completion_pending", "founder");
     navigate(roleDashboardPath.founder, { replace: true });

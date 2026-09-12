@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrgProfile } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { createEvidenceUpload, finalizeEvidenceUpload, getVerification, requestVerification, submitEvidence } from "@/lib/api/authorization";
 import { OrgProgressBar } from "./OrgProgressBar";
 import {
   ShieldCheck,
@@ -14,27 +16,55 @@ import {
 export function OrgStep2() {
   const navigate = useNavigate();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
+  const { activateRole } = useAuth();
   const [docs, setDocs] = useState<string[]>(orgProfile.verificationDocs);
   const [emailDomain, setEmailDomain] = useState(orgProfile.businessEmailDomain);
+  const [requestId, setRequestId] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const addDoc = (name: string) =>
     setDocs((prev) => (prev.includes(name) ? prev : [...prev, name]));
   const removeDoc = (name: string) =>
     setDocs((prev) => prev.filter((d) => d !== name));
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    Array.from(files).forEach((f) => addDoc(f.name));
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || !files.length || busy) return;
+    setBusy(true); setError(""); setMessage("Preparing a private verification request…");
+    try {
+      let activeRequestId = requestId;
+      if (!activeRequestId) {
+        const existing = await getVerification("organization");
+        activeRequestId = String(existing.requests.find((row) => ["pending", "in_review"].includes(String(row.status)))?.id || "");
+      }
+      if (!activeRequestId) activeRequestId = (await requestVerification("organization", "organization.profile.manage")).request.id;
+      setRequestId(activeRequestId);
+      for (const file of Array.from(files)) {
+        const signed = await createEvidenceUpload(activeRequestId, { contentType: file.type, sizeBytes: file.size });
+        const uploaded = await fetch(signed.uploadUrl, { method: "PUT", headers: signed.requiredHeaders, body: file });
+        if (!uploaded.ok) throw new Error("Secure document upload failed.");
+        await finalizeEvidenceUpload(signed.object.id);
+        await submitEvidence(activeRequestId, { method: "official_document", metadata: { objectId: signed.object.id, fileName: file.name } });
+        addDoc(file.name);
+      }
+      setMessage("Evidence uploaded securely and queued for review.");
+      updateOrgProfile({ verificationDocs: [...docs, ...Array.from(files).map((file) => file.name)], verificationStatus: "pending", businessEmailDomain: emailDomain });
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Verification upload failed."); }
+    finally { setBusy(false); }
   };
 
-  const handleNext = () => {
-    const status =
-      docs.length > 0 && emailDomain.trim() ? "pending" : "unverified";
+  const handleNext = async () => {
+    setBusy(true); setError("");
+    const status = docs.length > 0 ? "pending" : "unverified";
     updateOrgProfile({
       verificationDocs: docs,
       businessEmailDomain: emailDomain,
       verificationStatus: status,
     });
+    const activated = await activateRole("organisation", { verificationDocs: docs, businessEmailDomain: emailDomain, verificationStatus: status });
+    setBusy(false);
+    if (activated.error) { setError(activated.error.message); return; }
     navigate("/org/onboarding/step-3");
   };
 
@@ -74,16 +104,17 @@ export function OrgStep2() {
                 id="org-docs-input"
                 type="file"
                 multiple
-                onChange={(e) => handleFiles(e.target.files)}
+                onChange={(e) => void handleFiles(e.target.files)}
                 className="sr-only"
-                accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                accept=".pdf,.png,.jpg,.jpeg,.txt"
+                disabled={busy}
               />
               <Upload className="w-8 h-8 text-brand-accent mx-auto mb-2" />
               <p className="text-sm font-semibold text-text-primary dark:text-white">
                 Click to upload documents
               </p>
               <p className="text-xs text-text-muted dark:text-text-disabled mt-1">
-                PDF, PNG, JPG or DOC up to 10MB each
+                PDF, PNG, JPG or TXT up to 25MB each
               </p>
             </label>
 
@@ -137,6 +168,9 @@ export function OrgStep2() {
             </div>
           </div>
 
+          {message && <p role="status" className="text-sm text-status-success">{message}</p>}
+          {error && <p role="alert" className="text-sm text-status-error">{error}</p>}
+
           {/* Note */}
           <div className="bg-status-info-soft dark:bg-indigo-950/40 border border-brand-accent dark:border-indigo-800/50 rounded-xl p-4 flex items-start gap-3">
             <Info className="w-5 h-5 text-brand-accent dark:text-brand-accent flex-shrink-0 mt-0.5" />
@@ -161,7 +195,8 @@ export function OrgStep2() {
             Back
           </button>
           <button
-            onClick={handleNext}
+            onClick={() => void handleNext()}
+            disabled={busy}
             className="px-10 py-4 rounded-xl bg-gradient-to-r from-brand-accent to-violet-600 hover:from-brand-accent hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Continue
