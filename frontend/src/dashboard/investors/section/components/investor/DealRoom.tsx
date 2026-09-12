@@ -148,9 +148,9 @@ export function DealRoom() {
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
+            <div className="bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-purple-400" />
+                <Calendar className="w-5 h-5 text-emerald-400" />
                 Milestone-Based Capital Release
               </h3>
               {milestones.length === 0 ? (
@@ -172,7 +172,7 @@ export function DealRoom() {
 
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                <PenTool className="w-5 h-5 text-blue-400" />
+                <PenTool className="w-5 h-5 text-[#20C997]" />
                 Document Signing
               </h3>
               {documents.length === 0 ? (
@@ -199,7 +199,7 @@ export function DealRoom() {
               <div className="space-y-4">
                 <SummaryItem icon={DollarSign} label="Suggested Investment" value={investmentStr} color="text-emerald-400" />
                 <SummaryItem icon={Users} label="Equity" value={equityStr} color="text-purple-400" />
-                <SummaryItem icon={FileText} label="Valuation" value={fmtUSD(valuation)} color="text-blue-400" />
+                <SummaryItem icon={FileText} label="Valuation" value={fmtUSD(valuation)} color="text-[#20C997]" />
               </div>
             </div>
 
@@ -236,7 +236,7 @@ export function DealRoom() {
             <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="space-y-2">
-                <Link to={`/investor/data-room/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-blue-500/10 py-2 text-center text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20">
+                <Link to={`/investor/data-room/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-[#20C997]/10 py-2 text-center text-sm font-medium text-[#20C997] transition-all hover:bg-[#20C997]/20">
                   View Data Room
                 </Link>
                 <Link to={`/investor/risk-radar/${projectId}`} className="app-touch-target flex w-full items-center justify-center rounded bg-purple-500/10 py-2 text-center text-sm font-medium text-purple-400 transition-all hover:bg-purple-500/20">
@@ -302,7 +302,7 @@ function DocumentItem({ name, status }: { name: string; status: 'ready' | 'draft
   return (
     <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
       <div className="flex items-center gap-3">
-        <FileText className="w-4 h-4 text-blue-400" />
+        <FileText className="w-4 h-4 text-[#20C997]" />
         <span className="text-sm text-white">{name}</span>
       </div>
       <span className={`text-xs px-2 py-1 rounded ${status === 'ready' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-gray-700 text-gray-400'}`}>
@@ -338,7 +338,7 @@ function StatusStep({ step, completed, active }: { step: string; completed: bool
     <div className="flex items-center gap-3">
       <div
         className={`w-6 h-6 rounded-full flex items-center justify-center ${
-          completed ? 'bg-emerald-500' : active ? 'bg-blue-500' : 'bg-gray-700'
+          completed ? 'bg-emerald-500' : active ? 'bg-[#20C997]' : 'bg-gray-700'
         }`}
       >
         {completed && <CheckCircle className="w-4 h-4 text-white" />}
