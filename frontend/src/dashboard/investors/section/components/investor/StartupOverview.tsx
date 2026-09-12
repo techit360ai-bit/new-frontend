@@ -95,7 +95,7 @@ export function StartupOverview() {
         <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
           <div className="flex items-start justify-between gap-6 flex-wrap">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#20C997] to-teal-600 flex items-center justify-center text-white text-xl font-bold">
                 {startup.name.charAt(0)}
               </div>
               <div>
@@ -115,12 +115,12 @@ export function StartupOverview() {
                 {startup.riskLevel} risk
               </span>
               {startup.investorsWatching > 0 && (
-                <span className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700">
+                <span className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-[#20C997]/30 bg-[#20C997]/10 text-[#20C997]">
                   <span className="flex -space-x-1.5">
                     {Array.from({ length: Math.min(startup.investorsWatching, 4) }).map((_, i) => (
                       <span
                         key={i}
-                        className="inline-block w-5 h-5 rounded-full border-2 border-blue-50 bg-gradient-to-br from-blue-400 to-indigo-500"
+                        className="inline-block w-5 h-5 rounded-full border-2 border-emerald-50 bg-gradient-to-br from-[#20C997] to-teal-500"
                       />
                     ))}
                   </span>
@@ -422,7 +422,7 @@ function MetricCard({
 function Badge({ label, color }: { label: string; color: string }) {
   const colors: Record<string, string> = {
     green: "bg-green-50 text-green-700 border-green-200",
-    blue: "bg-blue-50 text-blue-700 border-blue-200",
+    blue: "bg-[#20C997]/10 text-[#20C997] border-[#20C997]/30",
     purple: "bg-purple-50 text-purple-700 border-purple-200",
     amber: "bg-amber-50 text-amber-700 border-amber-200",
   };
@@ -449,7 +449,7 @@ function ExploreCard({
   const iconColors: Record<string, string> = {
     red: "bg-red-50 text-red-600",
     green: "bg-emerald-50 text-emerald-600",
-    blue: "bg-blue-50 text-blue-600",
+    blue: "bg-[#20C997]/10 text-[#20C997]",
     purple: "bg-purple-50 text-purple-600",
   };
   return (
@@ -460,7 +460,7 @@ function ExploreCard({
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${iconColors[color]}`}>
         <Icon className="w-5 h-5" />
       </div>
-      <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{title}</h4>
+      <h4 className="font-semibold text-gray-900 group-hover:text-[#20C997] transition-colors">{title}</h4>
       <p className="text-xs text-gray-500 mt-1 leading-relaxed">{desc}</p>
     </Link>
   );
