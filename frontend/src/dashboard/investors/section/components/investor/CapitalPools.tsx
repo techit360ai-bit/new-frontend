@@ -83,7 +83,7 @@ export function CapitalPools() {
         )}
 
         {/* How It Works */}
-        <div className="mt-8 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
+        <div className="mt-8 bg-gradient-to-br from-emerald-500/10 to-[#20C997]/10 border border-[#20C997]/20 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-white mb-4">
             How Milestone-Based Capital Deployment Works
           </h3>
@@ -124,8 +124,8 @@ function PoolCard({ pool }: PoolCardProps) {
             {pool.startups} startups · {pool.milestonesHit} milestones completed
           </p>
         </div>
-        <div className="p-2 bg-purple-500/20 rounded-lg">
-          <Wallet className="w-5 h-5 text-purple-400" />
+        <div className="p-2 bg-[#20C997]/20 rounded-lg">
+          <Wallet className="w-5 h-5 text-[#20C997]" />
         </div>
       </div>
 
@@ -139,7 +139,7 @@ function PoolCard({ pool }: PoolCardProps) {
         </div>
         <div>
           <p className="text-sm text-gray-400 mb-1">ROI Simulation</p>
-          <p className="text-2xl font-bold font-mono text-emerald-400">{pool.roiSimulation}x</p>
+          <p className="text-2xl font-bold font-mono text-[#20C997]">{pool.roiSimulation}x</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ function PoolCard({ pool }: PoolCardProps) {
         </div>
         <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
+            className="h-full bg-gradient-to-r from-[#20C997] to-emerald-400"
             style={{ width: `${deployedPercentage}%` }}
           ></div>
         </div>
