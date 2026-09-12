@@ -18,7 +18,7 @@ const investmentStages = [
 const outcomes = ["Active", "Exited", "Failed", "Acquired"] as const;
 
 const outcomeColors: Record<string, string> = {
-  Active: "bg-blue-500",
+  Active: "bg-[#20C997]",
   Exited: "bg-teal-500",
   Failed: "bg-red-500",
   Acquired: "bg-violet-500",
