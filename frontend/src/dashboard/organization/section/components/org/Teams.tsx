@@ -43,7 +43,7 @@ function statusTone(value: string): string {
     return "border-emerald-200 bg-emerald-50 text-emerald-700";
   }
   if (status.includes("track") || status.includes("active")) {
-    return "border-blue-200 bg-blue-50 text-blue-700";
+    return "border-[#20C997]/30 bg-[#20C997]/10 text-[#20C997]";
   }
   return "border-gray-200 bg-gray-50 text-gray-700";
 }
@@ -100,14 +100,14 @@ export function Teams() {
       value: teamData.teams.length,
       detail: "Distinct persisted team names",
       icon: Users,
-      tone: "bg-indigo-50 text-indigo-700",
+      tone: "bg-[#20C997]/10 text-[#20C997]",
     },
     {
       label: "Assigned Projects",
       value: teamData.assignedProjects,
       detail: `${projects.length} total projects`,
       icon: FolderKanban,
-      tone: "bg-blue-50 text-blue-700",
+      tone: "bg-[#20C997]/10 text-[#20C997]",
     },
     {
       label: "Recorded Project Seats",
@@ -148,7 +148,7 @@ export function Teams() {
           <button
             type="button"
             onClick={() => navigate("/org/projects")}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#20C997] px-4 text-sm font-semibold text-white hover:bg-[#1ab386]"
           >
             Manage Assignments
             <ArrowRight className="h-4 w-4" />
@@ -188,7 +188,7 @@ export function Teams() {
           <button
             type="button"
             onClick={() => navigate("/org/projects")}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#20C997] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1ab386]"
           >
             Open Projects
             <ArrowRight className="h-4 w-4" />
@@ -222,14 +222,14 @@ export function Teams() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search teams or industries"
-                className="h-10 w-full rounded-lg border border-gray-300 pl-9 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="h-10 w-full rounded-lg border border-gray-300 pl-9 pr-4 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
               />
             </div>
             <select
               value={sort}
               onChange={(event) => setSort(event.target.value as TeamSort)}
               aria-label="Sort teams"
-              className="h-10 min-w-48 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="h-10 min-w-48 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
             >
               <option value="projects">Most projects</option>
               <option value="progress">Highest progress</option>
@@ -275,7 +275,7 @@ export function Teams() {
                             : "No persisted industry labels"}
                         </p>
                       </div>
-                      <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                      <span className="rounded-lg bg-[#20C997]/10 px-2.5 py-1 text-xs font-semibold text-[#20C997]">
                         {team.projectCount} project{team.projectCount === 1 ? "" : "s"}
                       </span>
                     </div>
@@ -293,7 +293,7 @@ export function Teams() {
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-gray-100">
                         <div
-                          className="h-full rounded-full bg-indigo-600"
+                          className="h-full rounded-full bg-[#20C997]"
                           style={{ width: `${team.averageProgress}%` }}
                         />
                       </div>
@@ -306,7 +306,7 @@ export function Teams() {
                       <button
                         type="button"
                         onClick={() => navigate("/org/projects")}
-                        className="flex-shrink-0 text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+                        className="flex-shrink-0 text-sm font-semibold text-[#20C997] hover:text-[#1ab386]"
                       >
                         View projects
                       </button>
@@ -339,7 +339,7 @@ export function Teams() {
                       <button
                         type="button"
                         onClick={() => navigate("/org/projects")}
-                        className="flex-shrink-0 text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+                        className="flex-shrink-0 text-sm font-semibold text-[#20C997] hover:text-[#1ab386]"
                       >
                         Assign
                       </button>
@@ -361,7 +361,7 @@ export function Teams() {
                   <h2 className="text-lg font-bold text-gray-900">Recent Project Updates</h2>
                   <p className="mt-1 text-sm text-gray-500">Latest persisted team-linked project records</p>
                 </div>
-                <Clock className="h-5 w-5 text-blue-600" />
+                <Clock className="h-5 w-5 text-[#20C997]" />
               </div>
               {teamData.activity.length > 0 ? (
                 <div className="divide-y divide-gray-100">
