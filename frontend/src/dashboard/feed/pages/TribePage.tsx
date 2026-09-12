@@ -69,11 +69,11 @@ export function TribePage() {
   return (
     <div className="flex pb-14 lg:pb-0">
       <LeftSidebar />
-      <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px]">
-        <div className="sticky top-14 z-40 border-b border-border-default bg-bg-surface px-6 py-4">
-          <BackButton className="mb-3" />
-          <h1 className="text-xl font-semibold text-text-primary">Your Tribe</h1>
-          <p className="mt-1 text-sm text-text-secondary">
+      <main className="min-w-0 flex-1 lg:mx-auto lg:max-w-[720px] font-bricolage">
+        <div className="sticky top-14 z-40 border-b border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-6 py-4">
+          <BackButton className="mb-2" />
+          <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Your Tribe</h1>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
             Members represented in your persisted tribe feed.
           </p>
         </div>
@@ -87,7 +87,7 @@ export function TribePage() {
           />
         )}
         {!loading && profiles.length > 0 && (
-          <div className="grid grid-cols-1 gap-4 px-4 py-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
             {profiles.map((profile) => <TribeMemberCard key={profile.id} profile={profile} />)}
           </div>
         )}
@@ -114,55 +114,59 @@ function TribeMemberCard({ profile }: { profile: PublicUserProfile }) {
   };
 
   return (
-    <article className="border border-border-default bg-bg-surface p-4 sm:rounded-lg">
-      <div className="mb-3 flex items-start gap-3">
-        <Link to={`/feed/profile/${encodeURIComponent(profile.id)}`}>
-          <ProfileAvatar profile={profile} />
-        </Link>
-        <div className="min-w-0 flex-1">
+    <article className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm transition-all hover:border-black/20 dark:hover:border-white/20 flex flex-col justify-between">
+      <div>
+        <div className="mb-3 flex items-start gap-3">
           <Link to={`/feed/profile/${encodeURIComponent(profile.id)}`}>
-            <h2 className="truncate text-sm font-medium text-text-primary hover:text-accent-primary">
-              {profile.name}
-            </h2>
+            <ProfileAvatar profile={profile} />
           </Link>
-          <p className="text-xs text-text-secondary">
-            {profile.role} · {profile.category} · {profile.stage}
-          </p>
-          <p className="text-xs text-text-muted">{profile.location}</p>
+          <div className="min-w-0 flex-1">
+            <Link to={`/feed/profile/${encodeURIComponent(profile.id)}`}>
+              <h2 className="truncate text-sm font-bold text-slate-900 dark:text-white hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors">
+                {profile.name}
+              </h2>
+            </Link>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {profile.role} · {profile.category} · {profile.stage}
+            </p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{profile.location}</p>
+          </div>
+          <div className="text-right shrink-0">
+            <p className={`font-mono text-sm font-black ${gsisColorClass(profile.gsis)}`}>{profile.gsis}</p>
+            <p className="text-[9px] font-mono tracking-wider uppercase text-slate-400 dark:text-slate-500">GSIS</p>
+          </div>
         </div>
-        <div className="text-right">
-          <p className={`font-mono text-sm font-semibold ${gsisColorClass(profile.gsis)}`}>{profile.gsis}</p>
-          <p className="text-[10px] uppercase text-text-muted">GSIS</p>
+
+        {profile.bio && <p className="mb-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">{profile.bio}</p>}
+
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {profile.skills.slice(0, 4).map((skill) => (
+            <span key={skill} className="text-[11px] font-semibold text-[#0066ff] dark:text-[#58a6ff] bg-[#0066ff]/5 dark:bg-[#58a6ff]/10 px-2 py-0.5 rounded-lg">
+              #{skill.replace(/\s+/g, '').toLowerCase()}
+            </span>
+          ))}
+          {profile.skills.length === 0 && (
+            <span className="text-xs text-slate-400 dark:text-slate-500">No persisted skills listed.</span>
+          )}
         </div>
       </div>
 
-      {profile.bio && <p className="mb-3 text-xs leading-relaxed text-text-secondary">{profile.bio}</p>}
-
-      <div className="mb-3 flex flex-wrap gap-2">
-        {profile.skills.slice(0, 4).map((skill) => (
-          <span key={skill} className="text-xs text-text-muted">#{skill.replace(/\s+/g, '').toLowerCase()}</span>
-        ))}
-        {profile.skills.length === 0 && (
-          <span className="text-xs text-text-muted">No persisted skills listed.</span>
-        )}
-      </div>
-
-      <div className="flex items-center gap-2 border-t border-border-default pt-3">
+      <div className="flex items-center gap-2 border-t border-black/[0.06] dark:border-white/10 pt-3 mt-2">
         <button
           type="button"
           onClick={() => { void connect(); }}
           disabled={connecting || connected}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-3 py-2 text-xs font-bold text-white shadow-md disabled:opacity-60 transition-all"
         >
-          <UserPlus className="h-4 w-4" />
+          <UserPlus className="h-3.5 w-3.5" />
           {connected ? 'Requested' : connecting ? 'Saving...' : 'Connect'}
         </button>
         <Link
           to={`/feed/messages/${encodeURIComponent(profile.id)}`}
           aria-label={`Message ${profile.name}`}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border-default text-text-secondary hover:border-accent-primary hover:text-accent-primary"
+          className="flex h-8 w-8 items-center justify-center rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors shrink-0"
         >
-          <MessageCircle className="h-4 w-4" />
+          <MessageCircle className="h-3.5 w-3.5" />
         </Link>
       </div>
     </article>
