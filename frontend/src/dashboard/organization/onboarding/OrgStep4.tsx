@@ -38,13 +38,13 @@ export function OrgStep4() {
   const handleBack = () => navigate("/org/onboarding/step-3");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#20C997]/10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-3xl">
         <OrgProgressBar currentStep={4} totalSteps={5} />
 
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2 flex items-center gap-3">
-            <Users className="w-9 h-9 text-indigo-600" />
+            <Users className="w-9 h-9 text-[#20C997]" />
             Team & Contacts
           </h1>
           <p className="text-base text-slate-600 dark:text-slate-400">
@@ -63,19 +63,19 @@ export function OrgStep4() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Full name"
-              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
             />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="work@email.com"
-              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+              className="h-12 bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
             >
               <option>Programme Manager</option>
               <option>Admin</option>
@@ -88,7 +88,7 @@ export function OrgStep4() {
           <button
             onClick={addMember}
             disabled={!name.trim() || !email.trim()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#20C997] hover:bg-[#1ba87e] disabled:bg-slate-300 disabled:cursor-not-allowed text-black text-sm font-semibold transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add member
@@ -109,7 +109,7 @@ export function OrgStep4() {
                 key={m.id}
                 className="flex items-center gap-4 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-4"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#20C997] to-emerald-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {m.name
                     .split(" ")
                     .map((n) => n[0])
@@ -148,13 +148,13 @@ export function OrgStep4() {
         <div className="mt-12 flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-[#20C997] transition-colors"
           >
             Back
           </button>
           <button
             onClick={handleNext}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-600 hover:from-[#1ba87e] hover:to-emerald-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Continue
           </button>
