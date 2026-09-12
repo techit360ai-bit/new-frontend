@@ -14,8 +14,8 @@ export function OrgIntelligenceLayout() {
   return (
     <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
       <div className="mb-6 flex items-center gap-3">
-        <div className="rounded-lg bg-indigo-50 p-2.5">
-          <Gauge className="h-6 w-6 text-indigo-600" />
+        <div className="rounded-lg bg-[#20C997]/10 p-2.5">
+          <Gauge className="h-6 w-6 text-[#20C997]" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Intelligence</h1>
@@ -33,7 +33,7 @@ export function OrgIntelligenceLayout() {
             className={({ isActive }) =>
               `-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "border-indigo-600 text-indigo-600"
+                  ? "border-[#20C997] text-[#20C997]"
                   : "border-transparent text-gray-600 hover:text-gray-900"
               }`
             }
