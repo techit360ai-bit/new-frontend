@@ -94,8 +94,8 @@ export function OrgLayout() {
         onClick={() => setMobileMenuOpen(false)}
         className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
           active
-            ? "bg-indigo-50 text-indigo-600"
-            : "text-gray-700 hover:bg-gray-50"
+            ? "bg-[#20C997]/10 text-[#20C997] font-semibold border border-[#20C997]/20"
+            : "text-gray-700 hover:bg-gray-100 hover:text-[#20C997]"
         }`}
       >
         <Icon className="w-5 h-5" />
@@ -109,18 +109,18 @@ export function OrgLayout() {
       {/* Sidebar - Desktop */}
       <aside className={`hidden lg:flex lg:flex-col bg-white border-r border-gray-200 transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
         <div className="p-6 border-b border-gray-200">
-          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-indigo-600">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-[#20C997]">
             {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
           </button>
           {!sidebarCollapsed && <>
           <Link
             to={roleDashboardPath.org}
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors mb-3"
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#20C997] transition-colors mb-3"
           >
             <ArrowLeft className="w-3 h-3" />
             Back to TechIT
           </Link>
-          <h1 className="text-2xl font-bold text-indigo-600">TECHIT</h1>
+          <h1 className="text-2xl font-bold text-slate-900">TECH<span className="text-[#20C997]">IT</span></h1>
           <p className="text-sm text-gray-600 mt-1">Organization Portal</p>
           </>}
         </div>
@@ -130,10 +130,10 @@ export function OrgLayout() {
           <Link
             to="/org/profile"
             onClick={() => setMobileMenuOpen(false)}
-        className={`app-nav-link flex items-center gap-3 px-4 transition-colors ${
+        className={`app-nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
               location.pathname === "/org/profile"
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-gray-700 hover:bg-gray-50"
+                ? "bg-[#20C997]/10 text-[#20C997] font-semibold border border-[#20C997]/20"
+                : "text-gray-700 hover:bg-gray-100 hover:text-[#20C997]"
             }`}
           >
             <UserCircle className="w-5 h-5" />
@@ -144,16 +144,16 @@ export function OrgLayout() {
         {!sidebarCollapsed && <div className="p-4 border-t border-gray-200">
           <Link
             to="/org/billing"
-            className="block bg-indigo-50 hover:bg-indigo-100 rounded-lg p-4 group transition-colors"
+            className="block bg-[#20C997]/10 hover:bg-[#20C997]/20 border border-[#20C997]/20 rounded-lg p-4 group transition-colors"
           >
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-xs font-medium text-indigo-900 truncate">
+                <p className="text-xs font-bold text-gray-900 truncate">
                   {orgProfile.orgName}
                 </p>
-                <p className="text-xs text-indigo-700 mt-1">{planLabel}</p>
+                <p className="text-xs text-[#20C997] font-medium mt-1">{planLabel}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 transition-colors flex-shrink-0 ml-2" />
+              <ChevronRight className="w-4 h-4 text-[#20C997] group-hover:translate-x-0.5 transition-transform flex-shrink-0 ml-2" />
             </div>
           </Link>
         </div>}
