@@ -187,7 +187,7 @@ export function InvestorTrustDashboard() {
       <div className="border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-8 py-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#0066ff]/20 bg-[#0066ff]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#0066ff] dark:text-[#58a6ff]">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#20C997]/20 bg-[#20C997]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#20C997]">
               <ShieldCheck className="h-3.5 w-3.5" />
               Trust Engine
             </div>
@@ -198,7 +198,7 @@ export function InvestorTrustDashboard() {
           </div>
           <div className="hidden rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-xl px-4 py-3 text-right lg:block shadow-sm">
             <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Privacy Contract</p>
-            <p className="mt-1 text-sm font-semibold text-[#20c937]">Investor-safe metadata only</p>
+            <p className="mt-1 text-sm font-semibold text-[#20C997]">Investor-safe metadata only</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">No raw payloads, code, customers, tokens, or documents</p>
           </div>
         </div>
@@ -217,7 +217,7 @@ export function InvestorTrustDashboard() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Name, sector, country..."
-                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] py-2.5 pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#0066ff] focus:outline-none"
+                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] py-2.5 pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#20C997] focus:outline-none"
               />
             </div>
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
@@ -225,8 +225,8 @@ export function InvestorTrustDashboard() {
             </p>
           </div>
 
-          <div className="mb-5 rounded-2xl border border-[#0066ff]/20 bg-[#0066ff]/10 p-3.5">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#0066ff] dark:text-[#58a6ff]">
+          <div className="mb-5 rounded-2xl border border-[#20C997]/20 bg-[#20C997]/10 p-3.5">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#20C997]">
               <Bookmark className="h-3.5 w-3.5" />
               Watchlist Auto-Included
             </div>
@@ -247,7 +247,7 @@ export function InvestorTrustDashboard() {
                 onClick={() => selectStartup(startup.startupId)}
                 className={`w-full rounded-2xl border p-3.5 text-left transition-all ${
                   selectedId === startup.startupId
-                    ? 'border-[#0066ff]/40 bg-[#0066ff]/10 dark:bg-[#0066ff]/20'
+                    ? 'border-[#20C997]/40 bg-[#20C997]/10 dark:bg-[#20C997]/20'
                     : 'border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                 }`}
               >
@@ -266,7 +266,7 @@ export function InvestorTrustDashboard() {
                   <span className="font-mono text-slate-500 dark:text-slate-400">{startup.confidence}%</span>
                 </div>
                 {startup.watchlistIncluded && (
-                  <div className="mt-2 inline-flex items-center gap-1 rounded-md bg-[#0066ff]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0066ff] dark:text-[#58a6ff]">
+                  <div className="mt-2 inline-flex items-center gap-1 rounded-md bg-[#20C997]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#20C997]">
                     <Bookmark className="h-3 w-3" />
                     Watchlist
                   </div>
@@ -322,7 +322,7 @@ export function InvestorTrustDashboard() {
                     <textarea
                       value={notes.note}
                       onChange={(event) => updateNote({ note: event.target.value })}
-                      className="min-h-24 w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] p-3 text-sm text-slate-900 dark:text-white focus:border-[#0066ff] focus:outline-none"
+                      className="min-h-24 w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] p-3 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -330,7 +330,7 @@ export function InvestorTrustDashboard() {
                     <select
                       value={notes.internalRating}
                       onChange={(event) => updateNote({ internalRating: event.target.value as InvestorTrustNote['internalRating'] })}
-                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#0066ff] focus:outline-none"
+                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
                     >
                       <option value="none">None</option>
                       <option value="watch">Watch</option>
@@ -343,7 +343,7 @@ export function InvestorTrustDashboard() {
                     <input
                       value={notes.followUpReminder}
                       onChange={(event) => updateNote({ followUpReminder: event.target.value })}
-                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#0066ff] focus:outline-none"
+                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -354,7 +354,7 @@ export function InvestorTrustDashboard() {
                           type="checkbox"
                           checked={item.done}
                           onChange={() => toggleChecklist(index)}
-                          className="h-4 w-4 accent-[#0066ff]"
+                          className="h-4 w-4 accent-[#20C997]"
                         />
                         <span className={item.done ? 'text-slate-400 dark:text-slate-500 line-through' : ''}>{item.item}</span>
                       </label>
@@ -362,7 +362,7 @@ export function InvestorTrustDashboard() {
                   </div>
                   <button
                     onClick={saveNotes}
-                    className="w-full rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-4 py-2.5 text-sm font-bold text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                    className="w-full rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-400 hover:from-[#1bb285] hover:to-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-[0_4px_15px_rgba(32,201,151,0.25)] transition-all"
                   >
                     {saved ? 'Notes Saved' : 'Save Private Notes'}
                   </button>
@@ -423,10 +423,10 @@ function Hero({ dashboard, selectedSummary }: { dashboard: InvestorTrustDashboar
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-[#20c937]/20 bg-[#20c937]/10 p-4 lg:min-w-56">
-          <p className="text-xs uppercase tracking-wider font-semibold text-[#20c937]">Overall Trust Status</p>
+        <div className="rounded-2xl border border-[#20C997]/20 bg-[#20C997]/10 p-4 lg:min-w-56">
+          <p className="text-xs uppercase tracking-wider font-semibold text-[#20C997]">Overall Trust Status</p>
           <p className="mt-1 text-3xl font-bold font-mono text-slate-900 dark:text-white">{startup.confidence}%</p>
-          <p className="text-sm text-[#20c937] font-semibold">{startup.overallStatus}</p>
+          <p className="text-sm text-[#20C997] font-semibold">{startup.overallStatus}</p>
         </div>
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
@@ -434,7 +434,7 @@ function Hero({ dashboard, selectedSummary }: { dashboard: InvestorTrustDashboar
           <a
             key={badge.badgeType}
             href={`#verification`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#20c937]/20 bg-[#20c937]/10 px-3 py-1.5 text-xs font-semibold text-[#20c937] hover:bg-[#20c937]/20 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#20C997]/20 bg-[#20C997]/10 px-3 py-1.5 text-xs font-semibold text-[#20C997] hover:bg-[#20C997]/20 transition-colors"
             title={`${badge.source} · ${badge.confidence}% confidence`}
           >
             <BadgeCheck className="h-3.5 w-3.5" />
@@ -520,24 +520,24 @@ function ProductDevelopment({ dashboard }: { dashboard: InvestorTrustDashboard }
           <Metric label="Latest Deployment" value={development.latestDeployment} />
           <Metric label="Consistency" value={development.developmentConsistency} />
         </div>
-        <div className="h-64 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-4">
+        <div className="h-64 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-[#121212]/50 p-4">
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-            <LineChartIcon className="h-4 w-4 text-[#20c937]" />
+            <LineChartIcon className="h-4 w-4 text-[#20C997]" />
             Activity Trend
           </div>
           <ResponsiveContainer width="100%" height="88%">
             <AreaChart data={development.activityTrend}>
               <defs>
                 <linearGradient id="activity" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#20c937" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#20c937" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#20C997" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#20C997" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis dataKey="label" stroke="#94a3b8" fontSize={12} />
               <YAxis stroke="#94a3b8" fontSize={12} />
               <Tooltip contentStyle={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff' }} />
-              <Area type="monotone" dataKey="activity" stroke="#20c937" fill="url(#activity)" strokeWidth={2} />
+              <Area type="monotone" dataKey="activity" stroke="#20C997" fill="url(#activity)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -593,7 +593,7 @@ function TeamTimeline({ dashboard }: { dashboard: InvestorTrustDashboard }) {
           {dashboard.timeline.map((event, index) => (
             <div key={event.id} className="relative flex gap-3">
               {index < dashboard.timeline.length - 1 && <div className="absolute left-2 top-6 h-full w-px bg-black/[0.06] dark:bg-white/10" />}
-              <CheckCircle className="relative z-10 mt-0.5 h-4 w-4 flex-shrink-0 text-[#20c937]" />
+              <CheckCircle className="relative z-10 mt-0.5 h-4 w-4 flex-shrink-0 text-[#20C997]" />
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">{event.title}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{event.when} · {event.source} · {event.confidence}% confidence</p>
@@ -710,7 +710,7 @@ function Panel({ id, title, icon: Icon, children }: { id: string; title: string;
   return (
     <section id={id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-5 sm:p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
-        <Icon className="h-5 w-5 text-[#0066ff] dark:text-[#58a6ff]" />
+        <Icon className="h-5 w-5 text-[#20C997]" />
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>
       </div>
       {children}
@@ -720,10 +720,10 @@ function Panel({ id, title, icon: Icon, children }: { id: string; title: string;
 
 function SummaryCard({ label, value, icon: Icon, color }: { label: string; value: string; icon: ComponentType<{ className?: string }>; color: string }) {
   const colorMap: Record<string, string> = {
-    emerald: 'border-[#20c937]/20 bg-[#20c937]/10 text-[#20c937]',
-    blue: 'border-[#0066ff]/20 bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]',
+    emerald: 'border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]',
+    blue: 'border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]',
     cyan: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
-    purple: 'border-[#58a6ff]/20 bg-[#58a6ff]/10 text-[#0066ff] dark:text-[#58a6ff]',
+    purple: 'border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]',
   };
   return (
     <div className={`rounded-2xl border p-4 ${colorMap[color] ?? colorMap.emerald}`}>
@@ -745,12 +745,12 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 
 function BooleanCard({ label, ok, icon: Icon }: { label: string; ok: boolean; icon: ComponentType<{ className?: string }> }) {
   return (
-    <div className={`rounded-xl border p-3.5 ${ok ? 'border-[#20c937]/20 bg-[#20c937]/10' : 'border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]'}`}>
+    <div className={`rounded-xl border p-3.5 ${ok ? 'border-[#20C997]/20 bg-[#20C997]/10' : 'border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]'}`}>
       <div className="flex items-center gap-2">
-        <Icon className={`h-4 w-4 ${ok ? 'text-[#20c937]' : 'text-slate-400'}`} />
+        <Icon className={`h-4 w-4 ${ok ? 'text-[#20C997]' : 'text-slate-400'}`} />
         <p className="text-sm font-semibold text-slate-900 dark:text-white">{label}</p>
       </div>
-      <p className={`mt-1 text-xs font-medium ${ok ? 'text-[#20c937]' : 'text-slate-500 dark:text-slate-400'}`}>{ok ? 'Verified' : 'Not verified'}</p>
+      <p className={`mt-1 text-xs font-medium ${ok ? 'text-[#20C997]' : 'text-slate-500 dark:text-slate-400'}`}>{ok ? 'Verified' : 'Not verified'}</p>
     </div>
   );
 }
@@ -759,7 +759,7 @@ function BooleanRow({ label, ok }: { label: string; ok: boolean }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-3 text-sm">
       <span className="text-slate-600 dark:text-slate-400">{label}</span>
-      {ok ? <CheckCircle className="h-4 w-4 text-[#20c937]" /> : <XCircle className="h-4 w-4 text-slate-400" />}
+      {ok ? <CheckCircle className="h-4 w-4 text-[#20C997]" /> : <XCircle className="h-4 w-4 text-slate-400" />}
     </div>
   );
 }
@@ -790,7 +790,7 @@ function StatusBadge({ status, label }: { status: TrustVerificationState | 'appr
 }
 
 function StatusPill({ icon: Icon, label, color }: { icon: ComponentType<{ className?: string }>; label: string; color: 'blue' | 'emerald' }) {
-  const classes = color === 'blue' ? 'border-[#0066ff]/20 bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]' : 'border-[#20c937]/20 bg-[#20c937]/10 text-[#20c937]';
+  const classes = color === 'blue' ? 'border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]' : 'border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]';
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${classes}`}>
       <Icon className="h-3.5 w-3.5" />
@@ -821,14 +821,14 @@ function PrivacyRow({ label, ok, invertLabel }: { label: string; ok: boolean; in
   return (
     <div className="flex items-center justify-between rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-2.5">
       <span className="text-slate-600 dark:text-slate-400">{label}</span>
-      <span className={ok ? 'text-[#20c937] font-semibold' : 'text-red-500 font-semibold'}>{invertLabel ? (ok ? 'No' : 'Yes') : (ok ? 'Yes' : 'No')}</span>
+      <span className={ok ? 'text-[#20C997] font-semibold' : 'text-red-500 font-semibold'}>{invertLabel ? (ok ? 'No' : 'Yes') : (ok ? 'Yes' : 'No')}</span>
     </div>
   );
 }
 
 function LinkButton({ to, label }: { to: string; label: string }) {
   return (
-    <Link to={to} className="flex items-center justify-between rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-3.5 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-[#0066ff] hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-all">
+    <Link to={to} className="flex items-center justify-between rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-3.5 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-[#20C997] hover:text-[#20C997] transition-all">
       {label}
       <ChevronRight className="h-4 w-4 text-slate-400" />
     </Link>
@@ -841,7 +841,7 @@ function healthLabel(health: string) {
 }
 
 function healthText(health: string) {
-  if (health === 'excellent') return 'text-[#20c937] font-semibold';
-  if (health === 'good') return 'text-[#0066ff] dark:text-[#58a6ff] font-semibold';
+  if (health === 'excellent') return 'text-[#20C997] font-semibold';
+  if (health === 'good') return 'text-[#20C997] font-semibold';
   return 'text-amber-500 font-semibold';
 }
