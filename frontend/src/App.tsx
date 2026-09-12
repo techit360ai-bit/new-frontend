@@ -235,8 +235,8 @@ const App = () => {
           <Route path="settings" element={<CollabSettings />} />
         </Route>
 
-        {/* Legacy redirects — bypass setup straight to dashboard */}
-        <Route path="/collaborator/setup"   element={<Navigate to="/collaborator/dashboard" replace />} />
+        {/* Legacy redirects */}
+        <Route path="/collaborator/setup"   element={<Navigate to="/collaborator/onboarding/step-1" replace />} />
         <Route path="/collaborator/summary" element={<Navigate to="/collaborator/dashboard" replace />} />
 
         <Route path="/investor/onboarding/step-1" element={<RequireRole allowed={["investor"]}><InvestorStep1 /></RequireRole>} />
