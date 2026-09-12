@@ -287,7 +287,7 @@ export function AllocationEngine() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
+                <div className="bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-purple-500/20 rounded-lg">
                       <TrendingUp className="w-5 h-5 text-purple-400" />
