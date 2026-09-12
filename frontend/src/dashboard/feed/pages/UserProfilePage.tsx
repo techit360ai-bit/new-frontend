@@ -84,44 +84,48 @@ export function UserProfilePage() {
     : null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 pb-20 lg:pb-6">
-      {!profile.isOwnProfile && <BackButton label="Back" className="mb-6" />}
+    <div className="mx-auto max-w-4xl px-4 py-6 pb-20 lg:pb-6 space-y-6 font-bricolage">
+      {!profile.isOwnProfile && <BackButton label="Back" className="mb-2" />}
 
-      <section className="mb-6 border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
+      {/* Main Profile Glass Card */}
+      <section className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm space-y-6">
         <div className="flex flex-col gap-6 md:flex-row">
           <ProfileAvatar profile={profile} />
           <div className="min-w-0 flex-1">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
-                <h1 className="text-2xl font-semibold text-text-primary">{profile.name}</h1>
-                <p className="mt-1 text-text-secondary">
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{profile.name}</h1>
+                <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
                   {profile.role} · {profile.category} · {profile.stage}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-3 text-sm text-text-muted">
-                  <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{profile.location}</span>
-                  <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />Joined {formatDate(profile.joinedDate)}</span>
+                <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-400" />{profile.location}</span>
+                  <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-400" />Joined {formatDate(profile.joinedDate)}</span>
                   {website && (
-                    <a href={website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-accent-primary hover:underline">
-                      <ExternalLink className="h-4 w-4" />Website
+                    <a href={website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[#0066ff] dark:text-[#58a6ff] font-bold hover:underline">
+                      <ExternalLink className="h-3.5 w-3.5" />Website
                     </a>
                   )}
                 </div>
               </div>
               <div className="shrink-0 text-left md:text-right">
-                <p className="font-mono text-3xl font-bold text-accent-primary">{profile.gsis}</p>
-                <p className="text-xs text-text-muted">GSIS</p>
+                <p className="font-mono text-3xl font-black text-[#0066ff] dark:text-[#58a6ff]">{profile.gsis}</p>
+                <p className="text-[10px] font-mono tracking-wider uppercase text-slate-400 dark:text-slate-500">GSIS Score</p>
               </div>
             </div>
 
             {profile.bio ? (
-              <p className="mt-4 text-sm leading-relaxed text-text-primary">{profile.bio}</p>
+              <p className="mt-4 text-xs leading-relaxed text-slate-700 dark:text-slate-300">{profile.bio}</p>
             ) : (
-              <p className="mt-4 text-sm text-text-muted">No persisted bio has been added.</p>
+              <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">No persisted bio has been added.</p>
             )}
 
             <div className="mt-5 flex flex-wrap gap-3">
               {profile.isOwnProfile ? (
-                <Link to={settingsPath(profile.role)} className="rounded-lg border border-border-default px-5 py-2.5 text-sm font-medium text-text-primary hover:border-accent-primary">
+                <Link
+                  to={settingsPath(profile.role)}
+                  className="rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/10 px-5 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors shadow-sm"
+                >
                   Edit profile
                 </Link>
               ) : (
@@ -130,16 +134,17 @@ export function UserProfilePage() {
                     type="button"
                     onClick={() => { void connect(); }}
                     disabled={connecting || connected}
-                    className="flex items-center gap-2 rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-5 py-2.5 text-xs font-bold text-white shadow-md disabled:opacity-60 transition-all"
                   >
                     <UserPlus className="h-4 w-4" />
                     {connected ? 'Requested' : connecting ? 'Saving...' : 'Connect'}
                   </button>
                   <Link
                     to={`/feed/messages/${encodeURIComponent(profile.id)}`}
-                    className="flex items-center gap-2 rounded-lg border border-border-default px-5 py-2.5 text-sm text-text-primary hover:border-accent-primary"
+                    className="flex items-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/10 px-5 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors shadow-sm"
                   >
-                    <MessageCircle className="h-4 w-4" />Message
+                    <MessageCircle className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+                    Message
                   </Link>
                 </>
               )}
@@ -147,7 +152,8 @@ export function UserProfilePage() {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border-default pt-6 md:grid-cols-5">
+        {/* Metrics Bar */}
+        <div className="grid grid-cols-2 gap-3 border-t border-black/[0.06] dark:border-white/10 pt-6 sm:grid-cols-5">
           <Metric label="Stage progress" value={`${profile.stats.stageProgress}%`} />
           <Metric label="Posts" value={profile.stats.posts} />
           <Metric label="Answers" value={profile.stats.answers} />
@@ -156,40 +162,44 @@ export function UserProfilePage() {
         </div>
       </section>
 
+      {/* Grid for Activity and Info */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6 lg:col-span-2">
-          <h2 className="mb-4 text-lg font-semibold text-text-primary">Recent activity</h2>
+        <section className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm lg:col-span-2 space-y-4">
+          <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Recent activity</h2>
           {profile.recentActivity.length > 0 ? (
             <div className="space-y-3">
               {profile.recentActivity.map((activity) => (
-                <div key={activity.id} className="border-b border-border-default pb-3 last:border-b-0">
-                  <p className="text-sm font-medium text-text-primary">{activity.title}</p>
-                  <p className="mt-1 text-xs text-text-muted">{activity.type} · {activity.date}</p>
+                <div key={activity.id} className="border-b border-black/[0.06] dark:border-white/10 pb-3 last:border-b-0">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{activity.title}</p>
+                  <p className="mt-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">{activity.type} · {activity.date}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-text-muted">No persisted profile activity yet.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">No persisted profile activity yet.</p>
           )}
         </section>
 
         <div className="space-y-6">
-          <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
-            <h2 className="mb-4 text-base font-semibold text-text-primary">Skills & interests</h2>
+          <section className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm space-y-4">
+            <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Skills & interests</h2>
             <div className="flex flex-wrap gap-2">
               {profile.skills.map((skill) => (
-                <span key={skill} className="rounded-lg border border-border-default bg-bg-elevated px-3 py-1.5 text-xs text-text-secondary">
+                <span
+                  key={skill}
+                  className="rounded-xl border border-black/[0.04] dark:border-white/5 bg-slate-100 dark:bg-white/[0.06] px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
                   {skill}
                 </span>
               ))}
-              {profile.skills.length === 0 && <p className="text-sm text-text-muted">No persisted skills listed.</p>}
+              {profile.skills.length === 0 && <p className="text-xs text-slate-400 dark:text-slate-500">No persisted skills listed.</p>}
             </div>
           </section>
 
           {profile.email && (
-            <section className="border-y border-border-default bg-bg-surface py-6 sm:rounded-lg sm:border sm:p-6">
-              <h2 className="mb-4 text-base font-semibold text-text-primary">Contact</h2>
-              <a href={`mailto:${profile.email}`} className="flex items-center gap-3 text-sm text-accent-primary hover:underline">
+            <section className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm space-y-4">
+              <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Contact</h2>
+              <a href={`mailto:${profile.email}`} className="flex items-center gap-3 text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] hover:underline">
                 <Mail className="h-4 w-4" />{profile.email}
               </a>
             </section>
@@ -202,9 +212,9 @@ export function UserProfilePage() {
 
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div>
-      <p className="text-xs uppercase text-text-muted">{label}</p>
-      <p className="mt-1 font-mono text-lg font-semibold text-text-primary">{value}</p>
+    <div className="rounded-xl bg-slate-50 dark:bg-white/[0.04] p-3 text-center border border-black/[0.04] dark:border-white/5">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
+      <p className="mt-1 font-mono text-base font-black text-slate-900 dark:text-white">{value}</p>
     </div>
   );
 }

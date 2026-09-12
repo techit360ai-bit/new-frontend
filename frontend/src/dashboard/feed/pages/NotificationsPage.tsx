@@ -83,44 +83,58 @@ export function NotificationsPage() {
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 pb-20 lg:pb-6">
-      <BackButton className="mb-6" />
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="mx-auto max-w-3xl px-4 py-6 pb-20 lg:pb-6 space-y-6 font-bricolage">
+      <BackButton className="mb-2" />
+      
+      {/* Header Glass Card */}
+      <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-text-primary">
-            <Bell className="h-5 w-5 text-accent-primary" />
+          <h1 className="flex items-center gap-2.5 text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <Bell className="h-6 w-6 text-[#0066ff] dark:text-[#58a6ff]" />
             Notifications
           </h1>
-          <p className="mt-1 text-xs text-text-muted">{unreadCount} unread live notifications</p>
+          <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            {unreadCount} unread live notifications
+          </p>
         </div>
         {unreadCount > 0 && (
           <button
             type="button"
             onClick={markAllRead}
-            className="flex items-center gap-1.5 rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:border-accent-primary hover:text-accent-primary"
+            className="flex items-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/10 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors shadow-sm self-start sm:self-auto"
           >
-            <CheckCheck className="h-3.5 w-3.5" />Mark all read
+            <CheckCheck className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+            Mark all read
           </button>
         )}
       </div>
 
-      <div className="mb-5 flex items-center gap-2 overflow-x-auto pb-1">
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {filterTabs.map((tab) => {
           const count = notifications.filter((notification) => (
             !notification.read && (tab.id === 'all' || notification.type === tab.id)
           )).length;
+          const isActive = activeFilter === tab.id;
           return (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveFilter(tab.id)}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs ${
-                activeFilter === tab.id
-                  ? 'border-accent-primary bg-accent-primary/15 text-accent-primary'
-                  : 'border-border-default bg-bg-elevated text-text-secondary'
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                isActive
+                  ? 'bg-[#0066ff] text-white shadow-md shadow-[#0066ff]/25'
+                  : 'bg-slate-100 text-slate-600 dark:bg-white/[0.06] dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
               }`}
             >
-              {tab.label}{count > 0 ? ` ${count}` : ''}
+              <span>{tab.label}</span>
+              {count > 0 && (
+                <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-extrabold ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-[#0066ff]/10 text-[#0066ff] dark:bg-[#58a6ff]/20 dark:text-[#58a6ff]'
+                }`}>
+                  {count}
+                </span>
+              )}
             </button>
           );
         })}
@@ -129,12 +143,18 @@ export function NotificationsPage() {
       {loading && <FeedLoadingState label="Loading live notifications..." />}
       {!loading && error && <FeedErrorState message={error} />}
       {!loading && !error && (
-        <div className="overflow-hidden border-y border-border-default bg-bg-surface sm:rounded-lg sm:border">
-          <VirtualizedList items={filtered} className="h-[min(70dvh,680px)]" itemContent={(_, notification) => <NotificationRow key={notification.id} notification={notification} onRead={markRead} />} />
+        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-sm overflow-hidden">
+          <VirtualizedList
+            items={filtered}
+            className="h-[min(70dvh,680px)]"
+            itemContent={(_, notification) => (
+              <NotificationRow key={notification.id} notification={notification} onRead={markRead} />
+            )}
+          />
           {filtered.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-2 py-16">
-              <Bell className="h-7 w-7 text-text-muted" />
-              <p className="text-sm text-text-secondary">No live notifications in this category.</p>
+            <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+              <Bell className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">No live notifications in this category.</p>
             </div>
           )}
         </div>
@@ -155,23 +175,27 @@ function NotificationRow({
     <Link
       to={notification.linkTo}
       onClick={() => onRead(notification.id)}
-      className="flex items-start gap-3 border-b border-border-default px-4 py-4 last:border-b-0 hover:bg-bg-elevated"
-      style={{ backgroundColor: !notification.read ? 'rgba(79,110,247,0.03)' : undefined }}
+      className="flex items-start gap-3 border-b border-black/[0.06] dark:border-white/10 px-5 py-4 last:border-b-0 hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors"
+      style={{ backgroundColor: !notification.read ? 'rgba(0,102,255,0.04)' : undefined }}
     >
       <div className="relative shrink-0">
         <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${notification.avatar}`} />
-        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-bg-surface bg-accent-primary/15 text-accent-primary">
+        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white dark:border-[#121212] bg-[#0066ff] text-white">
           {config.icon}
         </div>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm leading-snug text-text-primary">
-          <span className="font-medium">{notification.author}</span>{' '}
-          <span className="text-text-secondary">{notification.content}</span>
+        <p className="text-xs leading-relaxed text-slate-900 dark:text-white">
+          <span className="font-bold">{notification.author}</span>{' '}
+          <span className="text-slate-600 dark:text-slate-300 font-normal">{notification.content}</span>
         </p>
-        <p className="mt-1 text-[11px] text-text-muted">{notification.timeAgo} · {config.label}</p>
+        <p className="mt-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">
+          {notification.timeAgo} · {config.label}
+        </p>
       </div>
-      {!notification.read && <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-accent-primary" />}
+      {!notification.read && (
+        <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-[#0066ff] dark:bg-[#58a6ff] shadow-sm shadow-[#0066ff]/50" />
+      )}
     </Link>
   );
 }
