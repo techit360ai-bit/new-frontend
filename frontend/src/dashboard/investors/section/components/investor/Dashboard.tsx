@@ -64,304 +64,297 @@ export function Dashboard() {
   const momentumNames = highMomentumStartups.slice(0, 2).map((startup) => startup.name).join(' and ');
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Header */}
-      <div className="border-b border-gray-800 bg-[#111111] px-8 py-6">
-        <h1 className="text-3xl font-bold text-white">Investor Dashboard</h1>
-        <p className="text-gray-400 mt-1">Live startup execution intelligence</p>
+    <div className="space-y-6 pb-12 transition-colors">
+      {/* Welcome Back — contextual intelligence surface */}
+      <div className="mb-6">
+        <WelcomeBack />
       </div>
 
-      <div className="p-8">
-        {/* Welcome Back — contextual intelligence surface */}
-        <div className="mb-6">
-          <WelcomeBack />
-        </div>
+      <InvestorIntelligencePanel />
 
-        <InvestorIntelligencePanel />
-
-        {/* Onboarding banner — appears when profile is incomplete */}
-        {onboardingIncomplete && !bannerDismissed && (
-          <div className="mb-6 flex items-center gap-4 rounded-lg border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent px-5 py-4">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white">
-                Complete your investor profile
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Set your sectors, stage and check size so the dashboard prioritises
-                the deals you actually want to see.
-              </p>
-            </div>
-            <Link
-              to="/investor/onboarding/step-1"
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-bold transition-colors flex-shrink-0"
-            >
-              Start onboarding
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <button
-              onClick={() => setBannerDismissed(true)}
-              className="p-1.5 rounded-md hover:bg-white/5 text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0"
-              aria-label="Dismiss"
-            >
-              <X className="w-4 h-4" />
-            </button>
+      {/* Onboarding banner — appears when profile is incomplete */}
+      {onboardingIncomplete && !bannerDismissed && (
+        <div className="flex items-center gap-4 rounded-2xl border border-[#20C997]/30 bg-gradient-to-r from-[#20C997]/15 via-emerald-500/5 to-transparent px-5 py-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-[#20C997]/20 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-[#20C997]" />
           </div>
-        )}
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-            {error}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-slate-900 dark:text-white">
+              Complete your investor profile
+            </p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+              Set your sectors, stage and check size so the dashboard prioritises
+              the deals you actually want to see.
+            </p>
           </div>
-        )}
-
-        {/* Top Metrics Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          <MetricCard
-            label="Watchlisted Startups"
-            value={metrics.watchlistedStartups}
-            icon={Activity}
-            color="text-[#20C997]"
-            bgColor="bg-[#20C997]/10"
-            borderColor="border-[#20C997]/20"
-          />
-          <MetricCard
-            label="80+ Readiness"
-            value={metrics.highReadiness}
-            icon={TrendingUp}
-            color="text-emerald-400"
-            bgColor="bg-emerald-500/10"
-            borderColor="border-emerald-500/20"
-          />
-          <MetricCard
-            label="75+ Execution Velocity"
-            value={metrics.highExecution}
-            icon={Zap}
-            color="text-purple-400"
-            bgColor="bg-purple-500/10"
-            borderColor="border-purple-500/20"
-          />
-          <MetricCard
-            label="Revenue Signals"
-            value={metrics.revenueSignals}
-            icon={DollarSign}
-            color="text-amber-400"
-            bgColor="bg-amber-500/10"
-            borderColor="border-amber-500/20"
-          />
-          <MetricCard
-            label="AI Governance Verified"
-            value={metrics.aiGovernanceVerified}
-            icon={Shield}
-            color="text-cyan-400"
-            bgColor="bg-cyan-500/10"
-            borderColor="border-cyan-500/20"
-          />
+          <Link
+            to="/investor/onboarding/step-1"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1bb587] text-slate-950 text-sm font-bold shadow-md shadow-[#20C997]/20 transition-all flex-shrink-0"
+          >
+            Start onboarding
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <button
+            onClick={() => setBannerDismissed(true)}
+            className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex-shrink-0"
+            aria-label="Dismiss"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
+      )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Center Panel - Execution Momentum */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Execution Momentum Graph */}
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Execution Momentum</h3>
-              {isLoading ? (
-                <div className="flex h-64 items-center justify-center rounded-lg border border-gray-800 bg-gray-800/30 text-sm text-gray-400">
-                  Loading live deal-flow signals...
-                </div>
-              ) : portfolioData.length === 0 ? (
-                <div className="flex h-64 items-center justify-center rounded-lg border border-gray-800 bg-gray-800/30 text-center text-sm text-gray-400">
-                  Live execution momentum will appear after deal-flow snapshots are persisted.
-                </div>
-              ) : (
-                <>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={portfolioData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                        <XAxis dataKey="rank" stroke="#666" />
-                        <YAxis stroke="#666" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: '#1a1a1a',
-                            border: '1px solid #333',
-                            borderRadius: '8px',
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="readiness"
-                          stroke="#10b981"
-                          strokeWidth={2}
-                          name="Readiness"
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="execution"
-                          stroke="#20C997"
-                          strokeWidth={2}
-                          name="Execution Velocity"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="flex gap-6 mt-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-emerald-500 rounded"></div>
-                      <span className="text-gray-400">Readiness</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-[#20C997] rounded"></div>
-                      <span className="text-gray-400">Execution Velocity</span>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
-            {/* Risk Distribution */}
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Portfolio Risk Distribution</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  {totalStartups === 0 ? (
-                    <div className="flex h-12 items-center justify-center rounded-lg bg-gray-800/50 text-sm text-gray-400">
-                      No live risk distribution yet
-                    </div>
-                  ) : (
-                    <div className="flex gap-2 h-12 rounded-lg overflow-hidden">
+      {/* Top Metrics Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+        <MetricCard
+          label="Watchlisted Startups"
+          value={metrics.watchlistedStartups}
+          icon={Activity}
+          color="text-[#20C997]"
+          bgColor="bg-white dark:bg-[#121212]"
+          borderColor="border-black/[0.06] dark:border-white/10"
+        />
+        <MetricCard
+          label="80+ Readiness"
+          value={metrics.highReadiness}
+          icon={TrendingUp}
+          color="text-emerald-500 dark:text-emerald-400"
+          bgColor="bg-white dark:bg-[#121212]"
+          borderColor="border-black/[0.06] dark:border-white/10"
+        />
+        <MetricCard
+          label="75+ Execution Velocity"
+          value={metrics.highExecution}
+          icon={Zap}
+          color="text-purple-600 dark:text-purple-400"
+          bgColor="bg-white dark:bg-[#121212]"
+          borderColor="border-black/[0.06] dark:border-white/10"
+        />
+        <MetricCard
+          label="Revenue Signals"
+          value={metrics.revenueSignals}
+          icon={DollarSign}
+          color="text-amber-500 dark:text-amber-400"
+          bgColor="bg-white dark:bg-[#121212]"
+          borderColor="border-black/[0.06] dark:border-white/10"
+        />
+        <MetricCard
+          label="AI Governance Verified"
+          value={metrics.aiGovernanceVerified}
+          icon={Shield}
+          color="text-teal-600 dark:text-teal-400"
+          bgColor="bg-white dark:bg-[#121212]"
+          borderColor="border-black/[0.06] dark:border-white/10"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Center Panel - Execution Momentum */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Execution Momentum Graph */}
+          <div className="bg-white dark:bg-[#121212] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Execution Momentum</h3>
+            {isLoading ? (
+              <div className="flex h-64 items-center justify-center rounded-xl border border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-sm text-slate-500 dark:text-slate-400">
+                Loading live deal-flow signals...
+              </div>
+            ) : portfolioData.length === 0 ? (
+              <div className="flex h-64 items-center justify-center rounded-xl border border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-center text-sm text-slate-500 dark:text-slate-400">
+                Live execution momentum will appear after deal-flow snapshots are persisted.
+              </div>
+            ) : (
+              <>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={portfolioData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(150,150,150,0.15)" />
+                      <XAxis dataKey="rank" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(18, 18, 18, 0.95)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '12px',
+                          color: '#fff',
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="readiness"
+                        stroke="#10b981"
+                        strokeWidth={2.5}
+                        name="Readiness"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="execution"
+                        stroke="#20C997"
+                        strokeWidth={2.5}
+                        name="Execution Velocity"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex gap-6 mt-4 text-sm font-medium">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Readiness</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-[#20C997] rounded"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Execution Velocity</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Risk Distribution */}
+          <div className="bg-white dark:bg-[#121212] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Portfolio Risk Distribution</h3>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                {totalStartups === 0 ? (
+                  <div className="flex h-12 items-center justify-center rounded-xl bg-slate-50 dark:bg-white/[0.03] text-sm text-slate-500 dark:text-slate-400">
+                    No live risk distribution yet
+                  </div>
+                ) : (
+                  <div className="flex gap-2 h-12 rounded-xl overflow-hidden shadow-inner p-1 bg-slate-100 dark:bg-white/[0.04]">
                     <div
-                      className="bg-emerald-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
+                      className="bg-emerald-500 flex items-center justify-center text-white font-mono text-xs font-bold rounded-lg"
                       style={{ width: `${percent(riskDistribution.low)}%` }}
                     >
                       {percent(riskDistribution.low)}%
                     </div>
                     <div
-                      className="bg-amber-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
+                      className="bg-amber-500 flex items-center justify-center text-white font-mono text-xs font-bold rounded-lg"
                       style={{ width: `${percent(riskDistribution.moderate)}%` }}
                     >
                       {percent(riskDistribution.moderate)}%
                     </div>
                     <div
-                      className="bg-red-500/80 flex items-center justify-center text-white font-mono text-sm font-medium"
+                      className="bg-red-500 flex items-center justify-center text-white font-mono text-xs font-bold rounded-lg"
                       style={{ width: `${percent(riskDistribution.high)}%` }}
                     >
                       {percent(riskDistribution.high)}%
                     </div>
-                    </div>
-                  )}
-                  <div className="flex gap-6 mt-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-emerald-500 rounded"></div>
-                      <span className="text-gray-400">Low Risk ({riskDistribution.low})</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-amber-500 rounded"></div>
-                      <span className="text-gray-400">Moderate ({riskDistribution.moderate})</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-500 rounded"></div>
-                      <span className="text-gray-400">High ({riskDistribution.high})</span>
-                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* AI Insight Box */}
-            <div className="bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-[#20C997]/20 rounded-lg">
-                  <Zap className="w-5 h-5 text-[#20C997]" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-[#20C997] mb-2">AI INSIGHTS</h4>
-                  {highMomentumStartups.length > 0 ? (
-                    <>
-                      <p className="text-white mb-2">
-                        {highMomentumStartups.length} live startup{highMomentumStartups.length === 1 ? '' : 's'} show positive execution momentum.
-                      </p>
-                      <p className="text-gray-300">
-                        {momentumNames || 'The leading records'} currently have the strongest persisted velocity signals in your deal flow.
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-gray-300">
-                      No live momentum insight is available yet. New persisted deal-flow snapshots will populate this panel.
-                    </p>
-                  )}
-                  <button className="mt-3 text-[#20C997] text-sm font-medium hover:text-emerald-300 flex items-center gap-1">
-                    View detailed analysis <ArrowRight className="w-4 h-4" />
-                  </button>
+                )}
+                <div className="flex gap-6 mt-4 text-sm font-medium">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Low Risk ({riskDistribution.low})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-amber-500 rounded"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Moderate ({riskDistribution.moderate})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-red-500 rounded"></div>
+                    <span className="text-slate-600 dark:text-slate-400">High ({riskDistribution.high})</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Panel - High Momentum */}
-          <div className="space-y-6">
-            <div className="bg-[#111111] border border-gray-800 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">High Momentum This Week</h3>
-              {isLoading ? (
-                <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-4 text-sm text-gray-400">
-                  Loading live momentum...
-                </div>
-              ) : highMomentumStartups.length === 0 ? (
-                <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-4 text-sm text-gray-400">
-                  No positive momentum signals are persisted yet.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {highMomentumStartups.map((startup) => (
-                  <Link
-                    key={startup.id}
-                    to={`/investor/startup/${startup.id}`}
-                    className="block p-4 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg transition-all group"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
-                        {startup.name}
-                      </h4>
-                      <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded font-mono">
-                        {startup.sector}
+          {/* AI Insight Box */}
+          <div className="bg-gradient-to-br from-[#20C997]/15 via-emerald-500/5 to-transparent border border-[#20C997]/30 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 bg-[#20C997]/20 rounded-xl text-[#20C997]">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-xs font-black uppercase tracking-widest text-[#20C997] mb-1">AI INSIGHTS</h4>
+                {highMomentumStartups.length > 0 ? (
+                  <>
+                    <p className="text-slate-900 dark:text-white font-semibold text-base mb-1">
+                      {highMomentumStartups.length} live startup{highMomentumStartups.length === 1 ? '' : 's'} show positive execution momentum.
+                    </p>
+                    <p className="text-slate-600 dark:text-slate-300 text-sm">
+                      {momentumNames || 'The leading records'} currently have the strongest persisted velocity signals in your deal flow.
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-300 text-sm">
+                    No live momentum insight is available yet. New persisted deal-flow snapshots will populate this panel.
+                  </p>
+                )}
+                <button className="mt-3 text-[#20C997] text-sm font-bold hover:underline flex items-center gap-1.5">
+                  View detailed analysis <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - High Momentum */}
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-[#121212] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">High Momentum This Week</h3>
+            {isLoading ? (
+              <div className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] p-4 text-sm text-slate-500 dark:text-slate-400">
+                Loading live momentum...
+              </div>
+            ) : highMomentumStartups.length === 0 ? (
+              <div className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] p-4 text-sm text-slate-500 dark:text-slate-400">
+                No positive momentum signals are persisted yet.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {highMomentumStartups.map((startup) => (
+                <Link
+                  key={startup.id}
+                  to={`/investor/startup/${startup.id}`}
+                  className="block p-4 bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.03] dark:hover:bg-white/[0.07] border border-black/[0.05] dark:border-white/10 rounded-xl transition-all group shadow-sm"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">
+                      {startup.name}
+                    </h4>
+                    <span className="text-[11px] font-bold px-2 py-0.5 bg-purple-500/10 text-purple-600 dark:text-purple-300 border border-purple-500/20 rounded-md font-mono">
+                      {startup.sector}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-xs font-medium">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Velocity Spike</span>
+                      <span className="text-[#20C997] font-mono font-bold">
+                        +{Math.max(startup.velocityDelta, startup.readinessDelta)}%
                       </span>
                     </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Velocity Spike</span>
-                        <span className="text-emerald-400 font-mono font-medium">
-                          +{Math.max(startup.velocityDelta, startup.readinessDelta)}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Risk Level</span>
-                        <span
-                          className={`font-medium capitalize ${
-                            startup.riskLevel === 'low'
-                              ? 'text-emerald-400'
-                              : startup.riskLevel === 'moderate'
-                              ? 'text-amber-400'
-                              : 'text-red-400'
-                          }`}
-                        >
-                          {startup.riskLevel}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Investors Watching</span>
-                        <span className="text-[#20C997] font-mono">{startup.investorsWatching}</span>
-                      </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Risk Level</span>
+                      <span
+                        className={`font-bold capitalize ${
+                          startup.riskLevel === 'low'
+                            ? 'text-emerald-500 dark:text-emerald-400'
+                            : startup.riskLevel === 'moderate'
+                            ? 'text-amber-500 dark:text-amber-400'
+                            : 'text-red-500 dark:text-red-400'
+                        }`}
+                      >
+                        {startup.riskLevel}
+                      </span>
                     </div>
-                    <button className="mt-3 w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded transition-all flex items-center justify-center gap-2">
-                      Analyze <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Investors Watching</span>
+                      <span className="text-[#20C997] font-mono font-bold">{startup.investorsWatching}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 w-full py-2 bg-[#20C997]/10 group-hover:bg-[#20C997]/20 text-[#20C997] text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5">
+                    Analyze <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -380,12 +373,12 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, icon: Icon, color, bgColor, borderColor }: MetricCardProps) {
   return (
-    <div className={`${bgColor} border ${borderColor} rounded-lg p-4`}>
+    <div className={`${bgColor} border ${borderColor} rounded-2xl p-4 shadow-sm transition-all hover:border-[#20C997]/30`}>
       <div className="flex items-start justify-between mb-2">
         <Icon className={`w-5 h-5 ${color}`} />
-        <span className={`text-3xl font-bold font-mono ${color}`}>{value}</span>
+        <span className={`text-2xl font-black font-mono ${color}`}>{value}</span>
       </div>
-      <p className="text-sm text-gray-400">{label}</p>
+      <p className="text-xs font-bold text-slate-600 dark:text-slate-400">{label}</p>
     </div>
   );
 }
