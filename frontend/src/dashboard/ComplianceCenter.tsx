@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { createDataRequest, eraseMyData, exportMyData, fetchResidency, saveResidency } from '@/lib/api/compliance';
 import { ShieldCheck, Download, FileText, Globe, Trash2 } from 'lucide-react';
+import { BackButton } from '@/dashboard/feed/components/BackButton';
 
 export default function ComplianceCenter() {
   const [region, setRegion] = useState('eu');
@@ -25,7 +26,8 @@ export default function ComplianceCenter() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8 font-bricolage">
+      <BackButton className="mb-2" />
       <div className="flex items-center gap-3">
         <div className="p-2.5 rounded-2xl bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
           <ShieldCheck className="h-6 w-6" />

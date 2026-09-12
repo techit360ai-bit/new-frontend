@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, RefreshCw, ShoppingCart, Sparkles, WalletCards } from 'lucide-react';
 import { toast } from 'sonner';
+import { BackButton } from '@/dashboard/feed/components/BackButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +57,7 @@ export default function Wallet() {
       <header className="sticky top-0 z-30 border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
+            <BackButton fallback="/dashboard" />
             <div className="p-2 rounded-xl bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
               <WalletCards className="h-5 w-5" />
             </div>

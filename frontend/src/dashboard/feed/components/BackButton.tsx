@@ -1,32 +1,36 @@
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useRouteTracker } from '@/contexts/RouteTrackerContext';
 
 /**
- * Returns to an explicit in-app fallback instead of browser history so shared
- * feed pages cannot jump across role dashboards.
+ * Route-tracking BackButton that navigates back to the user's actual previous route
+ * tracked across the session, with an optional fallback.
  */
 export function BackButton({
   label = 'Back',
   fallback = '/feed',
   className = '',
+  children,
 }: {
   label?: string;
   fallback?: string;
   className?: string;
+  children?: React.ReactNode;
 }) {
-  const navigate = useNavigate();
-
-  const handleBack = () => {
-    navigate(fallback);
-  };
+  const { goBack, previousRoute } = useRouteTracker();
 
   return (
     <button
-      onClick={handleBack}
-      className={`inline-flex items-center gap-2 text-text-secondary hover:text-text-primary text-sm transition-colors ${className}`}
+      type="button"
+      onClick={() => goBack(fallback)}
+      className={`inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors shadow-sm ${className}`}
+      title={previousRoute ? `Back to ${previousRoute}` : label}
     >
-      <ArrowLeft className="w-4 h-4" />
-      {label}
+      {children || (
+        <>
+          <ArrowLeft className="w-4 h-4" />
+          <span>{label}</span>
+        </>
+      )}
     </button>
   );
 }

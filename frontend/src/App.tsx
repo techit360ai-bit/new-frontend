@@ -189,6 +189,7 @@ setMessagingToken(() => {
 });
 
 import Preloader from "@/components/landing-page/Preloader";
+import { RouteTrackerProvider } from "@/contexts/RouteTrackerContext";
 
 function RouteMemory() { const location = useLocation(); useEffect(() => { if (!location.pathname.startsWith('/signin') && !location.pathname.startsWith('/signup')) sessionStorage.setItem('techit_last_route', `${location.pathname}${location.search}`) }, [location.pathname, location.search]); return null }
 
@@ -201,6 +202,7 @@ const App = () => {
     <AuthProvider>
     <UserProvider>
       <MessagingProvider>
+      <RouteTrackerProvider>
       <RouteMemory />
       <Suspense fallback={<RouteLoadingState />}>
       <Routes>
@@ -421,6 +423,7 @@ const App = () => {
       <TechitMomentPrompt />
       <div className="fixed bottom-20 left-5 z-30 lg:bottom-5"><ContextSwitcher /></div>
       <CookieConsent />
+      </RouteTrackerProvider>
       </MessagingProvider>
     </UserProvider>
     </AuthProvider>

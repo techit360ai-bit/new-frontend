@@ -17,7 +17,7 @@ import {
   RefreshCw,
   Wifi,
   WifiOff,
-  ArrowLeft,
+import { BackButton } from "@/dashboard/feed/components/BackButton";
   CircleCheck,
   CircleX,
   Clock,
@@ -163,12 +163,7 @@ export default function PluginsDashboard() {
         />
         <div className="relative max-w-7xl mx-auto px-6 pt-6 pb-24">
           <div className="flex items-center justify-between gap-4">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white transition-colors rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-            >
-              <ArrowLeft className="w-4 h-4" /> Home
-            </Link>
+            <BackButton label="Back" fallback="/feed" className="text-white/90 dark:text-white/90 bg-white/15 dark:bg-white/15 hover:bg-white/25 dark:hover:bg-white/25 border-none shadow-none text-xs font-bold" />
             <div className="flex items-center gap-2">
               <StatusBadge online={online} workspace={workspace} />
               <button

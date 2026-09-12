@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Clock3, LifeBuoy, Plus, Send, TicketCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Clock3, LifeBuoy, Plus, Send, TicketCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { BackButton } from '@/dashboard/feed/components/BackButton';
 import { createSupportCase, getSupportCase, listSupportCases, reopenSupportCase, replyToSupportCase, submitSupportFeedback, type SupportCase } from '@/lib/api/support';
 import { useAuth } from '@/contexts/AuthContext';
 import { authRoleDashboardPath } from '@/lib/roleRoutes';
@@ -62,9 +62,7 @@ export default function SupportCenter() {
       <header className="sticky top-0 z-20 border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl">
         <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-3">
-            <Link to={backPath} aria-label="Back to dashboard" className="app-touch-target inline-flex items-center justify-center rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
+            <BackButton fallback={backPath} />
             <div>
               <p className="text-sm font-bold text-slate-900 dark:text-white">Customer Care</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">Cases, updates, and responses</p>

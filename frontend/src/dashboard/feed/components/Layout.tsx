@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/notifications";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { useMobileChromeVisibility } from "@/components/mobile/useMobileChromeVisibility";
+import { BackButton } from "./BackButton";
 import TechITLogo from "@/components/ui/TechITLogo";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 
@@ -129,7 +130,8 @@ function GlobalNav({
 
   return (
     <nav className={`sticky top-0 z-40 flex h-16 items-center justify-between border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 px-4 sm:px-8 backdrop-blur-xl transition-all duration-200 ${chromeVisible ? "" : "-translate-y-full pointer-events-none"}`}>
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-3 sm:gap-6">
+        <BackButton fallback={dashboardPath} />
         <Link to="/feed" className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-transparent">
             <TechITLogo />
