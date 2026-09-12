@@ -346,6 +346,7 @@ export function Watchlist() {
               );
             })}
           </div>
+        </div>
 
         {/* Founder Notification Loop */}
         <div className="mt-6 bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
