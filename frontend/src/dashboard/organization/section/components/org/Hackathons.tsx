@@ -20,9 +20,9 @@ type HackathonStatus = OrganizerHackathon["hackathonStatus"];
 
 const statusStyles: Record<HackathonStatus, { bg: string; text: string; dot: string; label: string }> = {
   upcoming: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    dot: "bg-blue-500",
+    bg: "bg-[#20C997]/10",
+    text: "text-[#20C997]",
+    dot: "bg-[#20C997]",
     label: "Upcoming",
   },
   live: {
@@ -131,7 +131,7 @@ export function Hackathons() {
         <>
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard icon={Trophy} label="Events" value={hackathons.length} accent="text-indigo-700 bg-indigo-50" />
-            <SummaryCard icon={Users} label="Registrants" value={totals.registrants} accent="text-blue-700 bg-blue-50" />
+            <SummaryCard icon={Users} label="Registrants" value={totals.registrants} accent="text-[#20C997] bg-[#20C997]/10" />
             <SummaryCard icon={Sparkles} label="Registered teams" value={totals.teams} accent="text-emerald-700 bg-emerald-50" />
             <SummaryCard icon={Calendar} label="Live now" value={totals.live} accent="text-amber-700 bg-amber-50" />
           </div>
