@@ -38,7 +38,7 @@ const plans: {
       "Talent pool search",
     ],
     icon: Rocket,
-    accent: "border-indigo-500",
+    accent: "border-[#20C997]",
   },
   {
     id: "enterprise",
@@ -53,7 +53,7 @@ const plans: {
       "White-label option",
     ],
     icon: Building2,
-    accent: "border-violet-500",
+    accent: "border-[#20C997]",
   },
 ];
 
@@ -82,7 +82,7 @@ export function OrgStep5() {
   const handleBack = () => navigate("/org/onboarding/step-4");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#20C997]/10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-5xl">
         <OrgProgressBar currentStep={5} totalSteps={5} />
 
@@ -105,18 +105,18 @@ export function OrgStep5() {
                 onClick={() => setPlan(p.id)}
                 className={`text-left p-6 rounded-2xl border-2 transition-all ${
                   active
-                    ? `${p.accent} bg-white dark:bg-slate-800/60 shadow-xl ring-2 ring-indigo-500/20`
-                    : "border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/40 hover:border-indigo-300"
+                    ? `${p.accent} bg-white dark:bg-slate-800/60 shadow-xl ring-2 ring-[#20C997]/20`
+                    : "border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/40 hover:border-[#20C997]/40"
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${active ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700/50 text-slate-500"}`}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${active ? "bg-[#20C997]/15 text-[#20C997]" : "bg-slate-100 dark:bg-slate-700/50 text-slate-500"}`}
                   >
                     <Icon className="w-5 h-5" />
                   </div>
                   {active && (
-                    <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                    <CheckCircle2 className="w-5 h-5 text-[#20C997]" />
                   )}
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
@@ -135,7 +135,7 @@ export function OrgStep5() {
                       className="flex items-start gap-2 text-slate-700 dark:text-slate-300"
                     >
                       <CheckCircle2
-                        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${active ? "text-indigo-600" : "text-slate-400"}`}
+                        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${active ? "text-[#20C997]" : "text-slate-400"}`}
                       />
                       <span>{f}</span>
                     </li>
@@ -149,14 +149,14 @@ export function OrgStep5() {
         <div className="flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-[#20C997] transition-colors"
           >
             Back
           </button>
           <button
             onClick={() => void handleComplete()}
             disabled={finishing}
-            className="px-12 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-12 py-4 rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-600 hover:from-[#1ba87e] hover:to-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             {finishing ? "Completing..." : "Complete setup"}
           </button>
