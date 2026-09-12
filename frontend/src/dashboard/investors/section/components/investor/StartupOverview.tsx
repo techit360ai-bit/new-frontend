@@ -62,7 +62,7 @@ export function StartupOverview() {
         <Building2 className="w-12 h-12 text-gray-300 mb-4" />
         <h2 className="text-lg font-semibold text-gray-700">Startup not found</h2>
         <p className="text-sm text-gray-500 mt-1">This startup may not be in the current deal flow.</p>
-        <Link to="/investor/deal-intelligence" className="mt-4 text-sm text-blue-600 hover:underline">
+        <Link to="/investor/deal-intelligence" className="mt-4 text-sm text-[#20C997] hover:underline">
           ← Back to Deal Flow
         </Link>
       </div>
@@ -289,7 +289,7 @@ export function StartupOverview() {
                       m.status === "completed"
                         ? "bg-green-50 text-green-700"
                         : m.status === "in-progress"
-                          ? "bg-blue-50 text-blue-700"
+                          ? "bg-[#20C997]/10 text-[#20C997]"
                           : "bg-gray-50 text-gray-500"
                     }`}
                   >
