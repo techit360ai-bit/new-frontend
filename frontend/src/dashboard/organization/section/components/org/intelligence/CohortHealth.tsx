@@ -74,7 +74,7 @@ export function CohortHealth() {
         { label: "Healthy", value: data.summary.green, tone: "text-emerald-600" },
         { label: "At risk", value: data.summary.amber, tone: "text-amber-600" },
         { label: "Critical", value: data.summary.red, tone: "text-rose-600" },
-        { label: "Avg GSIS", value: data.summary.avgGsis, tone: "text-indigo-600" },
+        { label: "Avg GSIS", value: data.summary.avgGsis, tone: "text-[#20C997]" },
       ]
     : [];
 
@@ -198,7 +198,7 @@ export function CohortHealth() {
 
               <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <h2 className="mb-1 flex items-center gap-2 text-lg font-bold text-gray-900">
-                  <Sparkles className="h-5 w-5 text-indigo-600" /> Interventions
+                  <Sparkles className="h-5 w-5 text-[#20C997]" /> Interventions
                 </h2>
                 {interventions && !interventions.aiAvailable && (
                   <p className="mb-3 text-xs text-gray-500">
