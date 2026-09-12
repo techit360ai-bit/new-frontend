@@ -507,10 +507,13 @@ export function CollabLayout() {
         </main>
       </div>
 
-      <Havi context={haviContext} isDark={isDark} />
-      <Toaster richColors position="bottom-right" />
+      <Havi
+        role="collaborator"
+        userName={collaboratorProfile.name?.split(" ")[0] || "Collaborator"}
+        route={location.pathname}
         profileContext={haviContext}
       />
+      <Toaster richColors position="bottom-right" />
     </div>
   );
 }

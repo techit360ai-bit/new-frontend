@@ -220,7 +220,11 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
       </div>
 
       {/* Embedded Havi Side Popup */}
-      <Havi isOpen={haviOpen} onClose={() => setHaviOpen(false)} />
+      <Havi
+        role="explorer"
+        userName="Explorer"
+        route={location.pathname}
+      />
     </div>
   );
 }
