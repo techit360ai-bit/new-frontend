@@ -43,7 +43,7 @@ function HealthPanel({ health }: { health: OrganizationHealth }) {
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Organization health</p>
           <p className="mt-1 text-3xl font-bold text-gray-900">{health.score === null ? "—" : `${health.score}/100`}</p>
         </div>
-        <HeartPulse className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+        <HeartPulse className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
       </div>
       <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3">
         {Object.entries(health.dimensions).map(([key, value]) => (
@@ -53,7 +53,7 @@ function HealthPanel({ health }: { health: OrganizationHealth }) {
               <span className="font-semibold text-gray-800">{value === null ? "—" : value}</span>
             </div>
             <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-gray-100">
-              <div className="h-full rounded-full bg-indigo-500" style={{ width: `${value === null ? 0 : value}%` }} />
+              <div className="h-full rounded-full bg-[#20C997]" style={{ width: `${value === null ? 0 : value}%` }} />
             </div>
           </div>
         ))}
@@ -77,7 +77,7 @@ function PulsePanel({ pulse }: { pulse: OrganizationPulse }) {
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Organization pulse</p>
           <h2 className="mt-1 text-lg font-bold text-gray-900">What changed in the last 7 days</h2>
         </div>
-        <Activity className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+        <Activity className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
       </div>
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
         {changes.map(([label, value]) => (
@@ -91,7 +91,7 @@ function PulsePanel({ pulse }: { pulse: OrganizationPulse }) {
         <div className="mt-5 space-y-3 border-t border-gray-100 pt-4">
           {pulse.activity.slice(0, 3).map((item) => (
             <div key={item.id} className="flex items-start gap-2 text-sm text-gray-700">
-              <Activity className="mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-500" aria-hidden="true" />
+              <Activity className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#20C997]" aria-hidden="true" />
               <span>{item.message}</span>
             </div>
           ))}
@@ -135,7 +135,7 @@ function ActionPanel({ actions }: { actions: OrganizationAction[] }) {
     <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <ClipboardList className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+          <ClipboardList className="h-5 w-5 text-[#20C997]" aria-hidden="true" />
           <h2 className="text-lg font-bold text-gray-900">Actions</h2>
         </div>
         <span className="text-sm text-gray-500">{actions.length} active</span>
