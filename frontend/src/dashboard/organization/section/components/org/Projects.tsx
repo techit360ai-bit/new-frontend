@@ -89,7 +89,7 @@ function statusStyle(status: string): string {
     return "border-orange-200 bg-orange-50 text-orange-700";
   }
   if (value.includes("complete") || value.includes("done")) {
-    return "border-blue-200 bg-blue-50 text-blue-700";
+    return "border-[#20C997]/30 bg-[#20C997]/10 text-[#20C997]";
   }
   if (value.includes("track") || value.includes("active")) {
     return "border-emerald-200 bg-emerald-50 text-emerald-700";
@@ -242,7 +242,7 @@ export function Projects() {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#20C997] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#1ab386]"
         >
           <Plus className="h-5 w-5" />
           Create Project
@@ -278,7 +278,7 @@ export function Projects() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search persisted projects"
-              className="h-10 w-full rounded-lg border border-gray-300 pl-10 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="h-10 w-full rounded-lg border border-gray-300 pl-10 pr-4 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
             />
           </div>
           <div className="relative min-w-52">
@@ -286,7 +286,7 @@ export function Projects() {
             <select
               value={stageFilter}
               onChange={(event) => setStageFilter(event.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-gray-300 bg-white pl-9 pr-4 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="h-10 w-full appearance-none rounded-lg border border-gray-300 bg-white pl-9 pr-4 text-sm text-gray-700 outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
             >
               <option value="all">All stages</option>
               {PIPELINE_STAGES.map((stage) => (
@@ -301,9 +301,9 @@ export function Projects() {
         <h2 className="mb-4 text-lg font-bold text-gray-900">Project Pipeline</h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {PIPELINE_STAGES.map((stage) => (
-            <div key={stage.value} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3">
-              <p className="text-sm font-semibold text-indigo-900">{stage.label}</p>
-              <p className="mt-1 text-xs text-indigo-700">
+            <div key={stage.value} className="rounded-lg border border-[#20C997]/20 bg-[#20C997]/10 px-4 py-3">
+              <p className="text-sm font-semibold text-gray-900">{stage.label}</p>
+              <p className="mt-1 text-xs text-[#20C997]">
                 {projects.filter((project) => normalizedStage(project.stage) === stage.value).length}
                 {" "}projects
               </p>
@@ -347,7 +347,7 @@ export function Projects() {
             <button
               type="button"
               onClick={openCreate}
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#20C997] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1ab386]"
             >
               <Plus className="h-4 w-4" />
               Create Project
@@ -406,7 +406,7 @@ export function Projects() {
                       <p className="mb-1 text-xs text-gray-500">Progress</p>
                       <div className="flex items-center gap-2">
                         <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
-                          <div className="h-full rounded-full bg-indigo-500" style={{ width: `${project.progress}%` }} />
+                          <div className="h-full rounded-full bg-[#20C997]" style={{ width: `${project.progress}%` }} />
                         </div>
                         <span className="text-sm font-medium text-gray-900">{project.progress}%</span>
                       </div>
@@ -438,7 +438,7 @@ export function Projects() {
                     type="button"
                     disabled={!project.hasWorkspace}
                     onClick={() => navigate("/workspaces")}
-                    className="flex-1 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                    className="flex-1 rounded-lg bg-[#20C997]/10 px-4 py-2 text-sm font-medium text-[#20C997] hover:bg-[#20C997]/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
                   >
                     Workspace
                   </button>
@@ -470,7 +470,7 @@ export function Projects() {
                 id="project-title"
                 value={form.title}
                 onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
                 autoFocus
               />
             </div>
@@ -483,7 +483,7 @@ export function Projects() {
                 value={form.tagline}
                 onChange={(event) => setForm((current) => ({ ...current, tagline: event.target.value }))}
                 rows={3}
-                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
               />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -492,7 +492,7 @@ export function Projects() {
                   id="project-industry"
                   value={form.industry}
                   onChange={(event) => setForm((current) => ({ ...current, industry: event.target.value }))}
-                  className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
                 />
               </FormField>
               <FormField label="Assigned team" id="project-team">
@@ -500,7 +500,7 @@ export function Projects() {
                   id="project-team"
                   value={form.teamName}
                   onChange={(event) => setForm((current) => ({ ...current, teamName: event.target.value }))}
-                  className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
                 />
               </FormField>
               <FormField label="Stage" id="project-stage">
@@ -508,7 +508,7 @@ export function Projects() {
                   id="project-stage"
                   value={form.stage}
                   onChange={(event) => setForm((current) => ({ ...current, stage: event.target.value }))}
-                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
                 >
                   {PIPELINE_STAGES.map((stage) => (
                     <option key={stage.value} value={stage.value}>{stage.label}</option>
@@ -520,7 +520,7 @@ export function Projects() {
                   id="project-status"
                   value={form.status}
                   onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
-                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20"
                 >
                   {STATUS_OPTIONS.map((status) => (
                     <option key={status.value} value={status.value}>{status.label}</option>
@@ -538,7 +538,7 @@ export function Projects() {
                   step="1"
                   value={form.progress}
                   onChange={(event) => setForm((current) => ({ ...current, progress: event.target.value }))}
-                  className="flex-1 accent-indigo-600"
+                  className="flex-1 accent-[#20C997]"
                 />
                 <span className="w-12 text-right text-sm font-semibold text-gray-900">{form.progress}%</span>
               </div>
@@ -561,7 +561,7 @@ export function Projects() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+                className="rounded-lg bg-[#20C997] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1ab386] disabled:cursor-not-allowed disabled:bg-[#20C997]/40"
               >
                 {saving ? "Saving..." : editingProject ? "Save Changes" : "Create Project"}
               </button>
@@ -585,7 +585,7 @@ function MetricCard({
   tone: "blue" | "orange" | "green" | "red";
 }) {
   const tones = {
-    blue: "bg-blue-50 text-blue-600",
+    blue: "bg-[#20C997]/10 text-[#20C997]",
     orange: "bg-orange-50 text-orange-600",
     green: "bg-emerald-50 text-emerald-600",
     red: "bg-red-50 text-red-600",
