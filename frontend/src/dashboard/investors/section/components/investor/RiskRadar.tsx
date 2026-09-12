@@ -211,7 +211,7 @@ export function RiskRadar() {
                     <div>
                       <p className="text-white font-medium">{milestone.title}</p>
                       <p className="text-sm text-gray-400">{milestone.date || 'Date unavailable'}</p>
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-mono bg-blue-500/20 text-blue-300">
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-mono bg-[#20C997]/20 text-[#20C997]">
                         {milestone.type}
                       </span>
                     </div>
@@ -231,7 +231,7 @@ export function RiskRadar() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+            <div className="bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">AI Risk Commentary</h3>
               <div className="space-y-4">
                 {startup.riskMetrics.execution >= 85 && (
@@ -262,10 +262,10 @@ export function RiskRadar() {
                   </span>
                 </p>
                 <p className="text-gray-300">
-                  Rank score: <span className="text-blue-400 font-semibold">{startup.rankScore.toFixed(0)}</span>
+                  Rank score: <span className="text-[#20C997] font-semibold">{startup.rankScore.toFixed(0)}</span>
                 </p>
                 <p className="text-gray-300">
-                  Investors watching: <span className="text-blue-400 font-semibold">{startup.investorsWatching}</span>
+                  Investors watching: <span className="text-[#20C997] font-semibold">{startup.investorsWatching}</span>
                 </p>
                 <p className="text-gray-300">
                   Pivot frequency: <span className="text-purple-400 font-semibold">{startup.pivotFrequency}</span>
