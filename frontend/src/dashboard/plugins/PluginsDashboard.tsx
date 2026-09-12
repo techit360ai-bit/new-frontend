@@ -17,7 +17,6 @@ import {
   RefreshCw,
   Wifi,
   WifiOff,
-import { BackButton } from "@/dashboard/feed/components/BackButton";
   CircleCheck,
   CircleX,
   Clock,
@@ -27,6 +26,7 @@ import { BackButton } from "@/dashboard/feed/components/BackButton";
   Bot,
   User,
 } from "lucide-react";
+import { BackButton } from "@/dashboard/feed/components/BackButton";
 import {
   techitApi,
   type ApprovalRequest,
