@@ -221,7 +221,7 @@ export function AllocationEngine() {
                   <h3 className="text-lg font-semibold text-white mb-4">Expected Portfolio Performance</h3>
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <MetricCard label="Expected IRR Range" value={`${expectedIRR.min.toFixed(0)}-${expectedIRR.max.toFixed(0)}%`} color="text-emerald-400" />
-                    <MetricCard label="Survival Likelihood" value={`${survivalLikelihood.toFixed(0)}%`} color="text-blue-400" />
+                    <MetricCard label="Survival Likelihood" value={`${survivalLikelihood.toFixed(0)}%`} color="text-[#20C997]" />
                     <MetricCard label="Exit Probability" value={`${exitProbability.min.toFixed(0)}-${exitProbability.max.toFixed(0)}%`} color="text-purple-400" />
                   </div>
 
@@ -233,7 +233,7 @@ export function AllocationEngine() {
                         <YAxis stroke="#666" />
                         <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }} />
                         <Line type="monotone" dataKey="best" stroke="#10b981" strokeWidth={2} name="Best Case" />
-                        <Line type="monotone" dataKey="portfolio" stroke="#3b82f6" strokeWidth={3} name="Expected" />
+                        <Line type="monotone" dataKey="portfolio" stroke="#20C997" strokeWidth={3} name="Expected" />
                         <Line type="monotone" dataKey="worst" stroke="#ef4444" strokeWidth={2} name="Worst Case" />
                       </LineChart>
                     </ResponsiveContainer>
