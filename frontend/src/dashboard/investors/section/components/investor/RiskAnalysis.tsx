@@ -329,7 +329,7 @@ export function RiskAnalysis() {
                   </div>
 
                   <div className="mt-5 pt-5 border-t border-gray-800 grid grid-cols-2 gap-3 text-sm">
-                    <DetailMetric icon={Activity} label="Readiness" value={selectedStartup.readinessScore} color="text-blue-400" />
+                    <DetailMetric icon={Activity} label="Readiness" value={selectedStartup.readinessScore} color="text-[#20C997]" />
                     <DetailMetric icon={TrendingUp} label="Velocity" value={selectedStartup.executionVelocity} color="text-emerald-400" />
                   </div>
                 </div>
@@ -377,7 +377,7 @@ function SortButton({ active, onClick, icon: Icon, children }: SortButtonProps) 
       onClick={onClick}
       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
         active
-          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+          ? 'bg-[#20C997]/20 text-[#20C997] border border-[#20C997]/30'
           : 'bg-gray-800/50 text-gray-400 border border-gray-800 hover:bg-gray-800'
       }`}
     >
