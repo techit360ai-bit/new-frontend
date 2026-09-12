@@ -47,7 +47,7 @@ export function OrgStep1() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#20C997]/10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-3xl">
 
         <div className="mb-10">
@@ -66,7 +66,7 @@ export function OrgStep1() {
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
               placeholder="e.g. Lagos Innovation Hub"
-              className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+              className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
             />
           </Field>
 
@@ -81,8 +81,8 @@ export function OrgStep1() {
                   onClick={() => setOrgType(t)}
                   className={`px-4 py-3 rounded-xl border-2 transition-all text-sm font-semibold ${
                     orgType === t
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300"
-                      : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-indigo-300"
+                      ? "border-[#20C997] bg-[#20C997]/10 dark:bg-[#20C997]/20 text-[#20C997]"
+                      : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-[#20C997]/40"
                   }`}
                 >
                   {t}
@@ -98,7 +98,7 @@ export function OrgStep1() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="City, country"
-                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
               />
             </Field>
             <Field label="Website" icon={Globe}>
@@ -107,7 +107,7 @@ export function OrgStep1() {
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 placeholder="https://"
-                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
               />
             </Field>
           </div>
@@ -119,7 +119,7 @@ export function OrgStep1() {
                 value={registrationNumber}
                 onChange={(e) => setRegistrationNumber(e.target.value)}
                 placeholder="Government-issued ID"
-                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
               />
             </Field>
             <Field label="Founding year" icon={Calendar}>
@@ -132,7 +132,7 @@ export function OrgStep1() {
                 min={1900}
                 max={new Date().getFullYear()}
                 placeholder="e.g. 2018"
-                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors"
+                className="w-full h-14 bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 text-base text-slate-900 dark:text-white outline-none focus:border-[#20C997] transition-colors"
               />
             </Field>
           </div>
@@ -142,7 +142,7 @@ export function OrgStep1() {
           <button
             onClick={handleNext}
             disabled={!orgName.trim() || !orgType || !location.trim() || finishing}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-600 hover:from-[#1ba87e] hover:to-emerald-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             {finishing ? "Setting up…" : "Finish & go to dashboard"}
           </button>
@@ -164,7 +164,7 @@ function Field({
   return (
     <div>
       <label className="flex items-center gap-2 mb-3 text-slate-900 dark:text-white font-semibold">
-        <Icon className="w-4 h-4 text-indigo-500" />
+        <Icon className="w-4 h-4 text-[#20C997]" />
         {label}
       </label>
       {children}
