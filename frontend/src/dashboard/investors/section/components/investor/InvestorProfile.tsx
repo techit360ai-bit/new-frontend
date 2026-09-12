@@ -212,7 +212,7 @@ export function InvestorProfile() {
                         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         : co.outcome === "Failed"
                           ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                          : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                          : "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20"
                     }`}
                   >
                     {co.outcome}
@@ -233,7 +233,7 @@ export function InvestorProfile() {
           complete={stepStatus.step4}
         >
           {investorProfile.riskAppetite ? (
-            <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-4">
+            <div className="bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-4">
               <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-mono mb-1.5">
                 Preferred stage
               </div>
