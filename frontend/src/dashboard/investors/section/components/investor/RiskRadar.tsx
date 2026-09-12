@@ -120,7 +120,7 @@ export function RiskRadar() {
             <button
               onClick={handleWatch}
               disabled={startup.watchlisted}
-              className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 disabled:hover:bg-blue-500/10 text-blue-400 disabled:text-blue-300 font-medium rounded-lg transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-[#20C997]/10 hover:bg-[#20C997]/20 disabled:hover:bg-[#20C997]/10 text-[#20C997] disabled:opacity-60 font-medium rounded-lg transition-all flex items-center gap-2"
             >
               <Eye className="w-4 h-4" />
               {startup.watchlisted ? 'Watching' : 'Add to Watchlist'}
@@ -329,9 +329,9 @@ function InsightCard({ type, text }: InsightCardProps) {
     },
     neutral: {
       icon: TrendingUp,
-      iconColor: 'text-blue-400',
-      bgColor: 'bg-blue-500/10',
-      borderColor: 'border-blue-500/20',
+      iconColor: 'text-[#20C997]',
+      bgColor: 'bg-[#20C997]/10',
+      borderColor: 'border-[#20C997]/20',
     },
   };
 
