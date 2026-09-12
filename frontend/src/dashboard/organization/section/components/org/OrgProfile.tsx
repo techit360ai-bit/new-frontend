@@ -58,7 +58,7 @@ export function OrgProfile() {
           </div>
           <Link
             to="/org/onboarding/step-1"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-semibold transition-colors flex-shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#20C997]/10 hover:bg-[#20C997]/20 text-[#20C997] text-sm font-semibold transition-colors flex-shrink-0"
           >
             <Pencil className="w-4 h-4" />
             Re-run onboarding
@@ -183,12 +183,12 @@ export function OrgProfile() {
           <Chips
             label="Programmes"
             values={orgProfile.programmes}
-            color="bg-indigo-50 text-indigo-700 border-indigo-100"
+            color="bg-[#20C997]/10 text-[#20C997] border-[#20C997]/20"
           />
           <Chips
             label="Sectors"
             values={orgProfile.sectors}
-            color="bg-violet-50 text-violet-700 border-violet-100"
+            color="bg-[#20C997]/10 text-[#20C997] border-[#20C997]/20"
           />
           <Chips
             label="Geographies"
@@ -211,7 +211,7 @@ export function OrgProfile() {
                   key={m.id}
                   className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#20C997] text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
                     {m.name
                       .split(" ")
                       .map((n) => n[0])
@@ -242,8 +242,8 @@ export function OrgProfile() {
           editPath="/org/onboarding/step-5"
           complete={stepStatus.step5}
         >
-          <div className="rounded-lg bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-100 p-4">
-            <p className="text-[10px] uppercase tracking-wider text-indigo-600 font-mono mb-1.5">
+          <div className="rounded-lg bg-[#20C997]/10 border border-[#20C997]/20 p-4">
+            <p className="text-[10px] uppercase tracking-wider text-[#20C997] font-mono mb-1.5">
               Current plan
             </p>
             <p className="text-2xl font-bold text-gray-900 capitalize">
@@ -251,7 +251,7 @@ export function OrgProfile() {
             </p>
             <Link
               to="/org/billing"
-              className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold mt-2 inline-flex items-center gap-1"
+              className="text-xs text-[#20C997] hover:text-[#1ab386] font-semibold mt-2 inline-flex items-center gap-1"
             >
               Manage billing
               <ArrowRight className="w-3 h-3" />
@@ -274,7 +274,7 @@ export function OrgProfile() {
           </div>
           <Link
             to="/org/dashboard"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex-shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#20C997] hover:bg-[#1ab386] text-white text-sm font-semibold transition-colors flex-shrink-0"
           >
             Open dashboard
             <ArrowRight className="w-4 h-4" />
