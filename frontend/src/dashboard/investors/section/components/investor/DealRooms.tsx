@@ -26,7 +26,7 @@ import {
 const statusConfig = {
   active: { label: 'Active', color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', icon: CheckCircle },
   pending: { label: 'Pending', color: 'text-amber-400', bg: 'bg-amber-500/15', border: 'border-amber-500/30', icon: Clock },
-  closed: { label: 'Closed', color: 'text-blue-400', bg: 'bg-blue-500/15', border: 'border-blue-500/30', icon: Lock },
+  closed: { label: 'Closed', color: 'text-[#20C997]', bg: 'bg-[#20C997]/15', border: 'border-[#20C997]/30', icon: Lock },
 };
 
 function asString(value: unknown, fallback = '—') {
@@ -66,7 +66,7 @@ function StageProgress({ stage }: { stage: string }) {
           <div
             title={s}
             className={`h-1.5 w-6 rounded-full transition-all ${
-              i < idx ? 'bg-emerald-500' : i === idx ? 'bg-blue-400' : 'bg-gray-700'
+              i < idx ? 'bg-emerald-500' : i === idx ? 'bg-[#20C997]' : 'bg-gray-700'
             }`}
           />
         </div>
@@ -150,11 +150,11 @@ export function DealRooms() {
             </p>
             <p className="text-3xl font-bold font-mono text-amber-400">{pendingCount}</p>
           </div>
-          <div className="bg-[#111111] border border-blue-500/20 rounded-lg p-5">
-            <p className="text-xs text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <div className="bg-[#111111] border border-[#20C997]/20 rounded-lg p-5">
+            <p className="text-xs text-[#20C997] uppercase tracking-wider mb-2 flex items-center gap-1">
               <Lock className="w-3.5 h-3.5" /> Closed
             </p>
-            <p className="text-3xl font-bold font-mono text-blue-400">{closedCount}</p>
+            <p className="text-3xl font-bold font-mono text-[#20C997]">{closedCount}</p>
           </div>
         </div>
 
@@ -253,7 +253,7 @@ export function DealRooms() {
                       {asString(room.sector, 'Uncategorized')} · {asString(room.region, 'Region unavailable')}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs font-mono text-blue-400 font-semibold">
+                      <span className="text-xs font-mono text-[#20C997] font-semibold">
                         {meta.stage}
                       </span>
                       <StageProgress stage={meta.stage} />
@@ -329,7 +329,7 @@ export function DealRooms() {
                   </button>
                   <Link
                     to={`/investor/data-room/${id}`}
-                    className="px-3 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium rounded-lg transition-all flex items-center gap-1.5"
+                    className="px-3 py-2.5 bg-[#20C997]/10 hover:bg-[#20C997]/20 text-[#20C997] text-sm font-medium rounded-lg transition-all flex items-center gap-1.5"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     Docs
