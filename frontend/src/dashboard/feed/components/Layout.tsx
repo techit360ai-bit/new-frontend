@@ -131,7 +131,7 @@ function GlobalNav({
     <nav className={`sticky top-0 z-40 flex h-16 items-center justify-between border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 px-4 sm:px-8 backdrop-blur-xl transition-all duration-200 ${chromeVisible ? "" : "-translate-y-full pointer-events-none"}`}>
       <div className="flex items-center gap-8">
         <Link to="/feed" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white shadow-md">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-transparent">
             <TechITLogo />
           </div>
           <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
