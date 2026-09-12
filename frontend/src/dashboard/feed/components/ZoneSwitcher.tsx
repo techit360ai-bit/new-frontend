@@ -1,13 +1,28 @@
 export function ZoneSwitcher({ active, onChange }: { active: string; onChange: (zone: string) => void }) {
-  const zones = ['For You', 'Following', 'Startups', 'Funding', 'Hackathons', 'Organizations', 'Learning', 'AI Recommendations'];
+  const zones = ["For You", "Following", "Startups", "Funding", "Hackathons", "Organizations", "Learning", "AI Recommendations"];
+
   return (
-    <div className="sticky top-14 bg-bg-surface border-b border-border-default h-12 flex items-center gap-6 px-6 overflow-x-auto z-40">
-      {zones.map((zone) => (
-        <button key={zone} onClick={() => onChange(zone)} className={`relative h-full text-sm font-medium transition-colors whitespace-nowrap ${active === zone ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}>
-          {zone}
-          {active === zone && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-primary"></div>}
-        </button>
-      ))}
+    <div className="sticky top-16 z-30 flex h-12 items-center gap-2 overflow-x-auto border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 px-4 sm:px-6 backdrop-blur-xl font-bricolage scrollbar-none">
+      {zones.map((zone) => {
+        const isActive = active === zone;
+        return (
+          <button
+            key={zone}
+            type="button"
+            onClick={() => onChange(zone)}
+            className={`relative flex h-full items-center px-3 text-xs font-bold transition-all whitespace-nowrap ${
+              isActive
+                ? "text-[#0066ff] dark:text-[#58a6ff]"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+          >
+            <span>{zone}</span>
+            {isActive && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#0066ff] dark:bg-[#58a6ff]" />
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
