@@ -239,15 +239,15 @@ const App = () => {
         <Route path="/collaborator/setup"   element={<Navigate to="/collaborator/onboarding/step-1" replace />} />
         <Route path="/collaborator/summary" element={<Navigate to="/collaborator/dashboard" replace />} />
 
-        <Route path="/investor/onboarding/step-1" element={<RequireRole allowed={["investor"]}><InvestorStep1 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-2" element={<RequireRole allowed={["investor"]}><InvestorStep2 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-3" element={<RequireRole allowed={["investor"]}><InvestorStep3 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-4" element={<RequireRole allowed={["investor"]}><InvestorStep4 /></RequireRole>} />
-        <Route path="/investor/onboarding/step-5" element={<RequireRole allowed={["investor"]}><InvestorStep5 /></RequireRole>} />
+        <Route path="/investor/onboarding/step-1" element={<InvestorStep1 />} />
+        <Route path="/investor/onboarding/step-2" element={<InvestorStep2 />} />
+        <Route path="/investor/onboarding/step-3" element={<InvestorStep3 />} />
+        <Route path="/investor/onboarding/step-4" element={<InvestorStep4 />} />
+        <Route path="/investor/onboarding/step-5" element={<InvestorStep5 />} />
         <Route path="/investor/setup" element={<Navigate to="/investor/onboarding/step-1" replace />} />
 
         {/* Investor section */}
-        <Route path="/investor" element={<RequireRole allowed={["investor"]}><InvestorLayout /></RequireRole>}>
+        <Route path="/investor" element={<InvestorLayout />}>
           <Route index element={<InvestorDashboard />} />
           <Route path="dashboard" element={<InvestorDashboard />} />
           <Route path="deal-intelligence" element={<InvestorDealIntelligence />} />
@@ -259,10 +259,10 @@ const App = () => {
           <Route path="trust" element={<InvestorTrustDashboard />} />
           <Route path="trust/:startupId" element={<InvestorTrustDashboard />} />
           <Route path="capital-pools" element={<InvestorCapitalPools />} />
-          <Route path="heatmap" element={<CapabilityGate capability="investor.intelligence.view" role="investor"><InvestorHeatmap /></CapabilityGate>} />
-          <Route path="data-rooms" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDataRooms /></CapabilityGate>} />
+          <Route path="heatmap" element={<InvestorHeatmap />} />
+          <Route path="data-rooms" element={<InvestorDataRooms />} />
           <Route path="data-room/:startupId" element={<InvestorDataRoom />} />
-          <Route path="deal-rooms" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDealRooms /></CapabilityGate>} />
+          <Route path="deal-rooms" element={<InvestorDealRooms />} />
           <Route path="deal-room/:startupId" element={<InvestorDealRoom />} />
           <Route path="reputation" element={<InvestorReputation />} />
           <Route path="profile" element={<InvestorProfile />} />
@@ -271,8 +271,8 @@ const App = () => {
           <Route path="intelligence/startups/:startupId" element={<InvestorIntelligenceDetail />} />
         </Route>
 
-        {/* Mentorship Hub (own focused layout, gated by role) */}
-        <Route path="/investor/mentorship" element={<RequireRole allowed={["investor"]}><MentorshipGate /></RequireRole>}>
+        {/* Mentorship Hub (own focused layout) */}
+        <Route path="/investor/mentorship" element={<MentorshipGate />}>
           <Route index element={<MentorshipOverview />} />
           <Route path="room/:roomId" element={<MentorshipRoom />} />
           <Route path="applications" element={<MentorshipApplications />} />
@@ -344,16 +344,16 @@ const App = () => {
         <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />
 
         {/* Organization onboarding (flat, outside layout) */}
-        <Route path="/org/onboarding/step-1" element={<RequireRole allowed={["organisation"]}><OrgStep1 /></RequireRole>} />
-        <Route path="/org/onboarding/step-2" element={<RequireRole allowed={["organisation"]}><OrgStep2 /></RequireRole>} />
-        <Route path="/org/onboarding/step-3" element={<RequireRole allowed={["organisation"]}><OrgStep3 /></RequireRole>} />
-        <Route path="/org/onboarding/step-4" element={<RequireRole allowed={["organisation"]}><OrgStep4 /></RequireRole>} />
-        <Route path="/org/onboarding/step-5" element={<RequireRole allowed={["organisation"]}><OrgStep5 /></RequireRole>} />
+        <Route path="/org/onboarding/step-1" element={<OrgStep1 />} />
+        <Route path="/org/onboarding/step-2" element={<OrgStep2 />} />
+        <Route path="/org/onboarding/step-3" element={<OrgStep3 />} />
+        <Route path="/org/onboarding/step-4" element={<OrgStep4 />} />
+        <Route path="/org/onboarding/step-5" element={<OrgStep5 />} />
         <Route path="/org/setup" element={<Navigate to="/org/onboarding/step-1" replace />} />
         <Route path="/organisation/setup" element={<Navigate to="/org/setup" replace />} />
 
         {/* Organization section */}
-        <Route path="/org" element={<RequireRole allowed={["organisation"]}><OrgLayout /></RequireRole>}>
+        <Route path="/org" element={<OrgLayout />}>
           <Route index element={<OrgDashboard />} />
           <Route path="dashboard" element={<OrgDashboard />} />
           <Route path="intelligence" element={<OrgIntelligenceLayout />}>
@@ -371,10 +371,10 @@ const App = () => {
           <Route path="hackathons" element={<OrgHackathons />} />
           <Route path="hackathons/new" element={<OrgHackathonCreate />} />
           <Route path="hackathons/:id" element={<OrgHackathonDetail />} />
-          <Route path="talent" element={<CapabilityGate capability="organization.recruit" role="organization"><OrgTalentPool /></CapabilityGate>} />
+          <Route path="talent" element={<OrgTalentPool />} />
           <Route path="ai-ops" element={<OrgAIOps />} />
-          <Route path="analytics" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgAnalytics /></CapabilityGate>} />
-          <Route path="marketplace" element={<CapabilityGate capability="organization.opportunity.create" role="organization"><OrgMarketplace /></CapabilityGate>} />
+          <Route path="analytics" element={<OrgAnalytics />} />
+          <Route path="marketplace" element={<OrgMarketplace />} />
           <Route path="market-ready" element={<OrgMarketReady />} />
           <Route path="hangout" element={<OrgHangout />} />
           <Route path="integrations" element={<OrgIntegrations />} />
