@@ -106,7 +106,7 @@ export function DataRooms() {
           </div>
           <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Total Documents</p>
-            <p className="text-3xl font-bold font-mono text-blue-400">{totals.totalDocs}</p>
+            <p className="text-3xl font-bold font-mono text-[#20C997]">{totals.totalDocs}</p>
           </div>
           <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Compliance Verified</p>
@@ -209,8 +209,8 @@ export function DataRooms() {
                     {room.sector ?? 'Uncategorized'}
                   </p>
                 </div>
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <Database className="w-5 h-5 text-blue-400" />
+                <div className="p-2 bg-[#20C997]/10 rounded-lg">
+                  <Database className="w-5 h-5 text-[#20C997]" />
                 </div>
               </div>
 
@@ -260,7 +260,7 @@ export function DataRooms() {
               <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
                 <Link
                   to={`/investor/data-room/${room.projectId}`}
-                  className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-blue-500/10 py-2.5 text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20"
+                  className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-[#20C997]/10 py-2.5 text-sm font-medium text-[#20C997] transition-all hover:bg-[#20C997]/20"
                 >
                   Open Data Room
                   <ArrowRight className="w-4 h-4" />
