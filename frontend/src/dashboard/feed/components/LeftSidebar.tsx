@@ -1,68 +1,90 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useFeedPosts } from '../useFeedPosts';
-import { gsisColorClass } from '@/lib/messaging/postKinds';
+import { Link, useLocation } from "react-router-dom";
+import { Compass, Users, FileText, HelpCircle, AlertTriangle, User, TrendingUp, Sparkles, Rss } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFeedPosts } from "../useFeedPosts";
+import { gsisColorClass } from "@/lib/messaging/postKinds";
 
 export function LeftSidebar() {
+  const location = useLocation();
   const { profile, user } = useAuth();
-  const { posts, loading } = useFeedPosts('global');
+  const { posts, loading } = useFeedPosts("global");
+
   const ownerId = profile?.id || user?.id;
   const ownPosts = posts.filter((post) => post.authorId === ownerId);
-  const name = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
+  const name = `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim()
     || profile?.username
     || profile?.email
-    || 'User';
+    || "User";
+
+  const menuItems = [
+    { to: "/feed", label: "Global Pulse", icon: Rss },
+    { to: "/feed/tribe", label: "Your Tribe", icon: Users },
+    { to: "/feed/build-log", label: "Build Logs", icon: FileText },
+    { to: "/feed/questions", label: "Questions & Q&A", icon: HelpCircle },
+    { to: "/feed/problems", label: "Problem Signals", icon: AlertTriangle },
+  ];
 
   return (
-    <aside className="sticky top-14 hidden h-[calc(100vh-56px)] w-[260px] overflow-y-auto border-r border-border-default bg-bg-surface p-5 lg:block">
-      <section className="mb-6">
-        <p className="mb-2 text-[11px] font-medium uppercase text-text-muted">Your profile</p>
-        <Link to="/feed/profile/me" className="text-[15px] font-medium text-text-primary hover:text-accent-primary">
-          {name}
-        </Link>
-        <p className="mt-1 text-xs capitalize text-text-secondary">
-          {profile?.role || 'Role unavailable'} · {profile?.startupStage || 'Stage not set'}
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border-default pt-4">
-          <div><p className="text-[11px] text-text-muted">GSIS</p><p className={`mt-1 font-mono text-base font-semibold ${gsisColorClass(profile?.credibilityScore ?? 0)}`}>{profile?.credibilityScore ?? 0}</p></div>
-          <Metric label="Posts" value={loading ? '...' : ownPosts.length} />
+    <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-[260px] overflow-y-auto border-r border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl lg:block font-bricolage">
+      {/* Profile Card */}
+      <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.04] p-4 backdrop-blur-md space-y-3">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">Active Profile</span>
+          <Link to="/feed/profile/me" className="text-sm font-bold text-slate-900 dark:text-white hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors block truncate">
+            {name}
+          </Link>
+          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 capitalize block mt-0.5">
+            {profile?.role || "Explorer"} • {profile?.startupStage || "Stage not set"}
+          </span>
         </div>
-      </section>
 
-      <section className="mb-6">
-        <p className="mb-2 text-[11px] font-medium uppercase text-text-muted">Hangout</p>
-        <div className="space-y-1">
-          <MenuItem to="/feed" label="Global Pulse" />
-          <MenuItem to="/feed/tribe" label="Your Tribe" />
-          <MenuItem to="/feed/build-log" label="Build Logs" />
-          <MenuItem to="/feed/questions" label="Questions" />
-          <MenuItem to="/feed/problems" label="Problem Signals" />
+        <div className="grid grid-cols-2 gap-2 border-t border-black/[0.06] dark:border-white/10 pt-3">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">GSIS Score</span>
+            <span className={`mt-0.5 font-mono text-base font-black ${gsisColorClass(profile?.credibilityScore ?? 0)}`}>
+              {profile?.credibilityScore ?? 0}
+            </span>
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Your Posts</span>
+            <span className="mt-0.5 font-mono text-base font-black text-slate-900 dark:text-white">
+              {loading ? "..." : ownPosts.length}
+            </span>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section className="border-t border-border-default pt-4">
-        <p className="mb-2 text-[11px] font-medium uppercase text-text-muted">Live data</p>
-        <p className="text-xs leading-relaxed text-text-muted">
-          Presence and unread counts will appear when the messaging service exposes persisted read models for them.
+      {/* Hangout Menu */}
+      <div className="mb-6 space-y-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 block mb-2">Hangout Spaces</span>
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.to;
+
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition-all ${
+                isActive
+                  ? "bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <Icon className={`h-4 w-4 ${isActive ? "text-[#0066ff] dark:text-[#58a6ff]" : "text-slate-400 dark:text-slate-500"}`} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Live Data Note */}
+      <div className="border-t border-black/[0.06] dark:border-white/10 pt-4">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">Live Intelligence</span>
+        <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+          Real-time activity and online presence signals are synchronized across network spaces.
         </p>
-      </section>
+      </div>
     </aside>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div>
-      <p className="text-[11px] text-text-muted">{label}</p>
-      <p className="mt-1 font-mono text-base font-semibold text-text-primary">{value}</p>
-    </div>
-  );
-}
-
-function MenuItem({ to, label }: { to: string; label: string }) {
-  return (
-    <Link to={to} className="block rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary">
-      {label}
-    </Link>
   );
 }

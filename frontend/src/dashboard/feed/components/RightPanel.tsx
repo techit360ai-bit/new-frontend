@@ -1,81 +1,120 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useFeedPosts } from '../useFeedPosts';
-import { gsisColorClass } from '@/lib/messaging/postKinds';
+import { Link } from "react-router-dom";
+import { TrendingUp, Users, AlertCircle, Sparkles, Activity } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFeedPosts } from "../useFeedPosts";
+import { gsisColorClass } from "@/lib/messaging/postKinds";
 
 export function RightPanel() {
   const { profile, user } = useAuth();
-  const { posts, loading, error } = useFeedPosts('global');
+  const { posts, loading, error } = useFeedPosts("global");
+
   const ownerId = profile?.id || user?.id;
   const ownPosts = posts.filter((post) => post.authorId === ownerId);
-  const contributors = [...new Map(
-    posts
-      .filter((post) => post.authorId !== ownerId)
-      .map((post) => [post.authorId, post]),
-  ).values()].slice(0, 4);
-  const problems = posts.filter((post) => post.kind === 'problem').slice(0, 3);
+
+  const contributors = [
+    ...new Map(
+      posts
+        .filter((post) => post.authorId !== ownerId)
+        .map((post) => [post.authorId, post])
+    ).values(),
+  ].slice(0, 4);
+
+  const problems = posts.filter((post) => post.kind === "problem").slice(0, 3);
 
   return (
-    <aside className="sticky top-14 hidden h-[calc(100vh-56px)] w-[320px] overflow-y-auto p-5 xl:block">
-      <section className="border border-border-default bg-bg-surface p-5 sm:rounded-lg">
-        <p className="text-[11px] font-medium uppercase text-text-muted">Your live activity</p>
-        <div className="mt-4 flex items-end justify-between">
+    <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-[320px] overflow-y-auto p-5 xl:block font-bricolage space-y-4">
+      {/* Live Activity Card */}
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Live Activity Overview</span>
+          <Activity className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+        </div>
+
+        <div className="mt-3 flex items-end justify-between">
           <div>
-            <p className="text-sm font-medium text-text-primary">
-              {profile?.startupStage || 'Stage not set'}
+            <p className="text-xs font-bold text-slate-900 dark:text-white">
+              {profile?.startupStage || "Stage not set"}
             </p>
-            <p className="text-xs capitalize text-text-secondary">{profile?.role || 'Role unavailable'}</p>
+            <p className="text-[11px] capitalize text-slate-500 dark:text-slate-400">{profile?.role || "Role unavailable"}</p>
           </div>
           <div className="text-right">
-            <p className={`font-mono text-3xl font-bold ${gsisColorClass(profile?.credibilityScore ?? 0)}`}>{profile?.credibilityScore ?? 0}</p>
-            <p className="text-[10px] uppercase text-text-muted">GSIS</p>
+            <p className={`font-mono text-2xl font-black ${gsisColorClass(profile?.credibilityScore ?? 0)}`}>
+              {profile?.credibilityScore ?? 0}
+            </p>
+            <p className="text-[9px] font-bold uppercase text-slate-400 dark:text-slate-500">GSIS Rank</p>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border-default pt-4">
-          <Metric label="Posts" value={loading ? '...' : ownPosts.length} />
-          <Metric label="Questions" value={loading ? '...' : ownPosts.filter((post) => post.kind === 'question').length} />
+
+        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-black/[0.06] dark:border-white/10 pt-3">
+          <div>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Total Posts</span>
+            <span className="font-mono text-sm font-black text-slate-900 dark:text-white">{loading ? "..." : ownPosts.length}</span>
+          </div>
+          <div>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Questions</span>
+            <span className="font-mono text-sm font-black text-slate-900 dark:text-white">
+              {loading ? "..." : ownPosts.filter((post) => post.kind === "question").length}
+            </span>
+          </div>
         </div>
-        {error && <p className="mt-4 text-xs text-red-300">{error}</p>}
+
+        {error && <p className="mt-3 text-xs text-rose-500">{error}</p>}
       </section>
 
-      <section className="mt-4 border border-border-default bg-bg-surface p-5 sm:rounded-lg">
-        <p className="mb-3 text-[11px] font-medium uppercase text-text-muted">Recent contributors</p>
-        <div className="space-y-3">
+      {/* Recent Contributors */}
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Users className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Active Contributors</span>
+        </div>
+
+        <div className="space-y-2.5">
           {contributors.map((post) => (
-            <Link key={post.authorId} to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="block">
-              <p className="truncate text-xs font-medium text-text-primary">{post.authorId}</p>
-              <p className="text-[11px] capitalize text-text-secondary">{post.authorRole}</p>
+            <Link
+              key={post.authorId}
+              to={`/feed/profile/${encodeURIComponent(post.authorId)}`}
+              className="group flex items-center justify-between rounded-xl border border-transparent p-2 transition-all hover:border-black/[0.06] dark:hover:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
+            >
+              <div>
+                <p className="truncate text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff]">
+                  {post.authorId}
+                </p>
+                <p className="text-[10px] capitalize text-slate-400 dark:text-slate-500">{post.authorRole}</p>
+              </div>
+              <span className="text-[10px] font-semibold text-[#0066ff] dark:text-[#58a6ff]">View</span>
             </Link>
           ))}
+
           {!loading && contributors.length === 0 && (
-            <p className="text-xs text-text-muted">No other persisted contributors yet.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">No active contributors found yet.</p>
           )}
         </div>
       </section>
 
-      <section className="mt-4 border border-border-default bg-bg-surface p-5 sm:rounded-lg">
-        <p className="mb-3 text-[11px] font-medium uppercase text-text-muted">Problem signals</p>
+      {/* Problem Signals */}
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertCircle className="h-4 w-4 text-amber-500" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Problem Signals</span>
+        </div>
+
         <div className="space-y-3">
           {problems.map((post) => (
-            <Link key={post.id} to={`/feed/problem/${encodeURIComponent(post.id)}`} className="block border-b border-border-default pb-3 last:border-b-0">
-              <p className="line-clamp-2 text-xs leading-relaxed text-text-primary">{post.body}</p>
-              <p className="mt-1 text-[11px] text-text-muted">{post.authorId}</p>
+            <Link
+              key={post.id}
+              to={`/feed/problem/${encodeURIComponent(post.id)}`}
+              className="block rounded-xl border border-black/[0.04] dark:border-white/5 p-3 transition-colors hover:border-amber-500/30 hover:bg-amber-500/5"
+            >
+              <p className="line-clamp-2 text-xs font-medium text-slate-800 dark:text-slate-200 leading-relaxed">{post.body}</p>
+              <span className="mt-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 block">{post.authorId}</span>
             </Link>
           ))}
+
           {!loading && problems.length === 0 && (
-            <p className="text-xs text-text-muted">No persisted problem signals yet.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">No problem signals active.</p>
           )}
         </div>
       </section>
     </aside>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div>
-      <p className="text-[11px] text-text-muted">{label}</p>
-      <p className="mt-1 font-mono text-base font-semibold text-text-primary">{value}</p>
-    </div>
   );
 }
