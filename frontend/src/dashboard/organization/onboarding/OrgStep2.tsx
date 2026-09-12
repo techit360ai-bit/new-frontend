@@ -41,13 +41,13 @@ export function OrgStep2() {
   const handleBack = () => navigate("/org/onboarding/step-1");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#20C997]/10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-3xl">
         <OrgProgressBar currentStep={2} totalSteps={5} />
 
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2 flex items-center gap-3">
-            <ShieldCheck className="w-9 h-9 text-indigo-600" />
+            <ShieldCheck className="w-9 h-9 text-[#20C997]" />
             Verification
           </h1>
           <p className="text-base text-slate-600 dark:text-slate-400">
@@ -68,7 +68,7 @@ export function OrgStep2() {
             </p>
             <label
               htmlFor="org-docs-input"
-              className="block w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/5 transition-colors"
+              className="block w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-[#20C997] hover:bg-[#20C997]/5 dark:hover:bg-[#20C997]/10 transition-colors"
             >
               <input
                 id="org-docs-input"
@@ -78,7 +78,7 @@ export function OrgStep2() {
                 className="sr-only"
                 accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
               />
-              <Upload className="w-8 h-8 text-indigo-500 mx-auto mb-2" />
+              <Upload className="w-8 h-8 text-[#20C997] mx-auto mb-2" />
               <p className="text-sm font-semibold text-slate-900 dark:text-white">
                 Click to upload documents
               </p>
@@ -94,7 +94,7 @@ export function OrgStep2() {
                     key={d}
                     className="flex items-center gap-3 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2.5"
                   >
-                    <FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                    <FileText className="w-4 h-4 text-[#20C997] flex-shrink-0" />
                     <span className="text-sm text-slate-700 dark:text-slate-300 flex-1 truncate">
                       {d}
                     </span>
@@ -114,14 +114,14 @@ export function OrgStep2() {
           {/* Business email domain */}
           <div>
             <label className="flex items-center gap-2 mb-3 text-slate-900 dark:text-white font-semibold">
-              <Mail className="w-4 h-4 text-indigo-500" />
+              <Mail className="w-4 h-4 text-[#20C997]" />
               Business email domain
             </label>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
               We'll send a verification email and check that your admin contacts
               use this domain.
             </p>
-            <div className="flex items-center bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 h-14 focus-within:border-indigo-500 transition-colors">
+            <div className="flex items-center bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 h-14 focus-within:border-[#20C997] transition-colors">
               <span className="text-slate-500 dark:text-slate-400 text-base">
                 @
               </span>
@@ -138,13 +138,13 @@ export function OrgStep2() {
           </div>
 
           {/* Note */}
-          <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-xl p-4 flex items-start gap-3">
-            <Info className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-indigo-900 dark:text-indigo-200">
+          <div className="bg-[#20C997]/10 dark:bg-[#20C997]/20 border border-[#20C997]/30 rounded-xl p-4 flex items-start gap-3">
+            <Info className="w-5 h-5 text-[#20C997] flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-slate-900 dark:text-slate-100">
               <p className="font-semibold mb-1">
                 Verification takes 1–3 business days
               </p>
-              <p className="text-indigo-700 dark:text-indigo-300">
+              <p className="text-slate-600 dark:text-slate-300">
                 You can still finish onboarding and explore the dashboard.
                 Posting Opportunities to the public Board requires a verified
                 badge.
@@ -156,13 +156,13 @@ export function OrgStep2() {
         <div className="mt-12 flex justify-between gap-4">
           <button
             onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-indigo-400 transition-colors"
+            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-[#20C997] transition-colors"
           >
             Back
           </button>
           <button
             onClick={handleNext}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-600 hover:from-[#1ba87e] hover:to-emerald-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Continue
           </button>
