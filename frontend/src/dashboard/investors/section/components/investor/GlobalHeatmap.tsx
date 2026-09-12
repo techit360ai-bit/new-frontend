@@ -5,9 +5,9 @@ import { EMPTY_HEATMAP, fetchHeatmap, type RegionSignal, type SectorSignal } fro
 const REGION_COLORS: Record<string, string> = {
   'North America': 'text-emerald-400',
   'Latin America': 'text-lime-400',
-  Europe: 'text-blue-400',
+  Europe: 'text-[#20C997]',
   Asia: 'text-purple-400',
-  'South Asia': 'text-indigo-400',
+  'South Asia': 'text-teal-300',
   'South-East Asia': 'text-fuchsia-400',
   'Middle East': 'text-amber-400',
   Africa: 'text-orange-400',
@@ -134,7 +134,7 @@ export function GlobalHeatmap() {
                   </div>
                   <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-emerald-500 to-blue-500"
+                      className="h-full bg-gradient-to-r from-[#20C997] to-emerald-400"
                       style={{ width: `${region.avgReadiness}%` }}
                     ></div>
                   </div>
