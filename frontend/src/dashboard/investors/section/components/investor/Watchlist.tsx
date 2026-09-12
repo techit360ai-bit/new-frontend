@@ -77,7 +77,7 @@ export function Watchlist() {
             <h1 className="text-2xl font-bold text-white sm:text-3xl">Watchlist & Signals</h1>
             <p className="text-gray-400 mt-1">Track execution velocity and get real-time alerts</p>
           </div>
-          <button className="app-touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500/10 px-4 py-2 font-medium text-blue-400 transition-all hover:bg-blue-500/20 sm:w-auto">
+          <button className="app-touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#20C997]/10 px-4 py-2 font-medium text-[#20C997] transition-all hover:bg-[#20C997]/20 sm:w-auto">
             <Bell className="w-4 h-4" />
             Manage Alerts
           </button>
@@ -230,12 +230,12 @@ export function Watchlist() {
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
                       <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 md:hidden">Watching</span>
-                      <p className="font-mono text-blue-400">{startup.investorsWatching}</p>
+                      <p className="font-mono text-[#20C997]">{startup.investorsWatching}</p>
                     </div>
 
                     <div className="col-span-1 flex items-end justify-end gap-2 md:items-center">
                       <button
-                        className="app-touch-target inline-flex items-center justify-center rounded text-blue-400 transition-colors hover:bg-blue-500/10"
+                        className="app-touch-target inline-flex items-center justify-center rounded text-[#20C997] transition-colors hover:bg-[#20C997]/10"
                         onClick={(e) => e.stopPropagation()}
                         aria-label={`Manage alerts for ${startup.name}`}
                       >
@@ -266,10 +266,10 @@ export function Watchlist() {
                           {/* What's being built */}
                           <div className="bg-[#111111] border border-gray-800 rounded-lg p-5">
                             <div className="flex items-center gap-2 mb-3">
-                              <div className="p-1.5 bg-blue-500/15 rounded">
-                                <Briefcase className="w-4 h-4 text-blue-400" />
+                              <div className="p-1.5 bg-[#20C997]/15 rounded">
+                                <Briefcase className="w-4 h-4 text-[#20C997]" />
                               </div>
-                              <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
+                              <span className="text-xs font-semibold text-[#20C997] uppercase tracking-wider">
                                 What's Being Built
                               </span>
                             </div>
@@ -326,7 +326,7 @@ export function Watchlist() {
                           </Link>
                           <Link
                             to={`/investor/data-room/${startup.id}`}
-                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20"
+                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-[#20C997]/10 px-4 py-2 text-sm font-medium text-[#20C997] transition-all hover:bg-[#20C997]/20"
                           >
                             Data Room
                             <ArrowRight className="w-4 h-4" />
@@ -346,38 +346,16 @@ export function Watchlist() {
               );
             })}
           </div>
-        </div>
-
-        {/* Alert Settings */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <AlertCard
-            title="Velocity Spike Alert"
-            description="Get notified when execution velocity increases >20%"
-            enabled={alertStates.velocity}
-            onToggle={() => toggleAlert('velocity')}
-          />
-          <AlertCard
-            title="Risk Shift Alert"
-            description="Alert when risk level changes significantly"
-            enabled={alertStates.risk}
-            onToggle={() => toggleAlert('risk')}
-          />
-          <AlertCard
-            title="Milestone Alert"
-            description="Notification for major milestone completions"
-            enabled={alertStates.milestone}
-            onToggle={() => toggleAlert('milestone')}
-          />
-        </div>
+        )}
 
         {/* Founder Notification Loop */}
-        <div className="mt-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+        <div className="mt-6 bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Eye className="w-5 h-5 text-blue-400" />
+            <div className="p-2 bg-[#20C997]/20 rounded-lg">
+              <Eye className="w-5 h-5 text-[#20C997]" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-blue-300 mb-2">WATCHLIST LOOP ACTIVE</h4>
+              <h4 className="text-sm font-semibold text-[#20C997] mb-2">WATCHLIST LOOP ACTIVE</h4>
               <p className="text-white">
                 Founders see: &ldquo;{watchedStartups.length} verified investors are watching your project.&rdquo;
               </p>
