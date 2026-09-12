@@ -118,7 +118,7 @@ export function DemoDayPipeline() {
                       </span>
                     )}
                     {entry.published && (
-                      <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                      <span className="rounded-full bg-[#20C997]/10 px-2 py-0.5 text-xs font-medium text-[#20C997]">
                         In deal flow
                       </span>
                     )}
@@ -139,7 +139,7 @@ export function DemoDayPipeline() {
                     type="button"
                     onClick={() => void handlePublish(entry)}
                     disabled={entry.published || publishing === entry.id}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#20C997] px-3 py-2 text-sm font-medium text-white hover:bg-[#1ab386] disabled:opacity-50"
                   >
                     <Send className="h-4 w-4" />
                     {entry.published ? "Published" : publishing === entry.id ? "Pushing..." : "Push to Deal Flow"}
