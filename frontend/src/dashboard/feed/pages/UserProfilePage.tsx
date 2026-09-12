@@ -186,6 +186,14 @@ export function UserProfilePage() {
             </div>
           </section>
 
+          {profile.trust && (
+            <section className="border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6">
+              <h2 className="mb-2 text-base font-semibold text-text-primary">External verification</h2>
+              <p className="text-sm text-text-secondary">{profile.trust.tier} · {Math.round(profile.trust.trust_score)}/100</p>
+              {profile.verifiedSkills?.length ? <div className="mt-3 flex flex-wrap gap-2">{profile.verifiedSkills.slice(0, 12).map((item) => <span key={`${item.skill}-${item.source}`} className="rounded-lg border border-status-success bg-status-success-soft px-2 py-1 text-xs text-status-success">{item.skill}</span>)}</div> : <p className="mt-2 text-xs text-text-muted">No externally verified skills yet.</p>}
+            </section>
+          )}
+
           {profile.email && (
             <section className="border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6">
               <h2 className="mb-4 text-base font-semibold text-text-primary">Contact</h2>

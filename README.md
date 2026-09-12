@@ -20,15 +20,13 @@ npm run dev
 The app expects these Vite env vars when it is not using local defaults:
 
 ```bash
-VITE_API_URL=https://<backend>/api
-VITE_API_BASE_URL=https://<ai-router>
-VITE_TECHIT_API=https://<backend>/api/mcp
-VITE_MESSAGING_BASE_URL=https://<messaging>
-VITE_MESSAGING_WS_URL=wss://<messaging>/ws
+VITE_API_URL=https://backend.techitnetwork.com/api
+VITE_API_BASE_URL=https://api.techitnetwork.com
+VITE_TECHIT_API=https://backend.techitnetwork.com/api/mcp
+VITE_MESSAGING_BASE_URL=https://messaging.techitnetwork.com
+VITE_MESSAGING_WS_URL=wss://messaging.techitnetwork.com/ws
 ```
 
 ## CI and Deployment
 
-The frontend GitHub Actions workflow lives in `.github/workflows/frontend.yml` in this repo. It installs `frontend/`, runs `npm run build`, and triggers the frontend Render deploy hook from `main`.
-
-The stale frontend deploy workflow that used to live in `BACKEND` is intentionally disabled; backend workflows remain in `BACKEND`.
+The frontend GitHub Actions workflow lives in `.github/workflows/frontend.yml` in this repo and runs the quality gates. Production deployment is handled by `.github/workflows/deploy.yml`, which publishes the build to the AWS S3 bucket and invalidates CloudFront.

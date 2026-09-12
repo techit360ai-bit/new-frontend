@@ -43,11 +43,14 @@ import {
 } from 'recharts';
 import {
   fetchInvestorTrustDashboard,
+  fetchInvestorTrustAccessRequest,
   fetchInvestorTrustStartups,
+  requestInvestorTrustAccess,
   saveInvestorTrustNotes,
   type ApprovedMilestone,
   type EvidenceExplorerItem,
   type InvestorTrustDashboard,
+  type InvestorTrustAccessRequest,
   type InvestorTrustNote,
   type InvestorTrustStartupSummary,
   type TrustVerificationState,
@@ -92,6 +95,8 @@ export function InvestorTrustDashboard() {
   const [dashboard, setDashboard] = useState<InvestorTrustDashboard | null>(null);
   const [notes, setNotes] = useState<InvestorTrustNote | null>(null);
   const [saved, setSaved] = useState(false);
+  const [accessRequest, setAccessRequest] = useState<InvestorTrustAccessRequest | null>(null);
+  const [accessBusy, setAccessBusy] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -129,6 +134,7 @@ export function InvestorTrustDashboard() {
       setDashboard(null);
       setNotes(null);
     });
+    fetchInvestorTrustAccessRequest(selectedId).then((data) => { if (alive) setAccessRequest(data.request); }).catch(() => { if (alive) setAccessRequest(null); });
     return () => { alive = false; };
   }, [selectedId]);
 
@@ -180,6 +186,19 @@ export function InvestorTrustDashboard() {
     const result = await saveInvestorTrustNotes(selectedId, notes);
     setNotes(result.investorNotes);
     setSaved(true);
+  };
+
+  const requestAccess = async () => {
+    if (!selectedId || accessBusy) return;
+    const purpose = window.prompt("Briefly describe why you need additional approved Trust evidence.", "Investment due diligence");
+    if (purpose === null) return;
+    setAccessBusy(true);
+    try {
+      const result = await requestInvestorTrustAccess(selectedId, purpose);
+      setAccessRequest(result.request);
+    } finally {
+      setAccessBusy(false);
+    }
   };
 
   return (
@@ -382,6 +401,9 @@ export function InvestorTrustDashboard() {
 
               <Panel id="quick-links" title="Related Investor Tools" icon={ExternalLink}>
                 <div className="space-y-2">
+                  <button type="button" disabled={accessBusy || accessRequest?.status === 'pending' || accessRequest?.status === 'approved'} onClick={() => void requestAccess()} className="w-full rounded-lg border border-status-success/30 bg-status-success/10 px-3 py-2 text-left text-sm font-semibold text-status-success disabled:cursor-not-allowed disabled:opacity-60">
+                    {accessBusy ? 'Submitting request...' : accessRequest?.status === 'pending' ? 'Access request pending' : accessRequest?.status === 'approved' ? 'Additional access approved' : accessRequest?.status === 'rejected' ? 'Request access again' : 'Request additional Trust access'}
+                  </button>
                   <LinkButton to={`/investor/risk-radar/${dashboard.startup.startupId}`} label="Risk Radar" />
                   <LinkButton to={`/investor/data-room/${dashboard.startup.startupId}`} label="Data Room" />
                   <LinkButton to={`/investor/deal-room/${dashboard.startup.startupId}`} label="Deal Room" />
