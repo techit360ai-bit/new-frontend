@@ -366,11 +366,20 @@ function normalizedFounderExperience(value: string | null | undefined): FounderE
 }
 
 function normalizedCollaboratorDiscipline(value: string | null | undefined): CollaboratorDiscipline | "" {
+  const str = String(value ?? "").toLowerCase();
+  if (str.includes("eng") || str.includes("dev") || str.includes("fullstack") || str.includes("code") || str.includes("software")) return "Engineering";
+  if (str.includes("design") || str.includes("ui") || str.includes("ux")) return "Design";
+  if (str.includes("product") || str.includes("pm")) return "Product";
+  if (str.includes("data") || str.includes("ml") || str.includes("ai")) return "Data & ML";
+  if (str.includes("devops") || str.includes("cloud") || str.includes("infra")) return "DevOps";
+  if (str.includes("sec")) return "Security";
+  if (str.includes("market") || str.includes("growth")) return "Marketing";
+  if (str.includes("research")) return "Research";
   return [
     "Engineering", "Design", "Product", "Data & ML",
     "DevOps", "Security", "Marketing", "Research",
   ].includes(String(value))
-    ? value as CollaboratorDiscipline
+    ? (value as CollaboratorDiscipline)
     : "";
 }
 
@@ -416,7 +425,7 @@ function emptyCollaboratorProfile(profile: AuthProfile | null = null): Collabora
     yearsExperience: profile?.yearsExperience ?? 6,
     headline: profile?.bio ?? "Passionate engineer building next-gen developer tools and web applications.",
     avatarUrl: profile?.avatarUrl ?? "",
-    discipline: normalizedCollaboratorDiscipline(profile?.discipline) || "Fullstack Engineer",
+    discipline: normalizedCollaboratorDiscipline(profile?.discipline) || "Engineering",
     subSkills: profile?.subSkills ?? (profile?.skills && profile.skills.length > 0 ? profile.skills : ["React", "TypeScript", "Node.js", "GraphQL", "Tailwind CSS"]),
     techStack: profile?.techStack ?? (profile?.skills && profile.skills.length > 0 ? profile.skills : ["React", "Next.js", "TypeScript", "PostgreSQL", "Docker", "Python"]),
     weeklyHours: profile?.weeklyHours ?? 20,

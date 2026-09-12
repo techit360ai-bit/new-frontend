@@ -51,6 +51,14 @@ const roleBlurb: Record<Role, string> = {
   org: "Run programs, hackathons, talent pools.",
 };
 
+const DEFAULT_NOTIFICATIONS: NotificationPrefs = {
+  opportunities: { email: true, inApp: true },
+  deadlines:     { email: true, inApp: true },
+  payments:      { email: true, inApp: true },
+  equityEvents:  { email: true, inApp: true },
+  quietHours:    "off",
+};
+
 export function Settings() {
   const navigate = useNavigate();
   const { collaboratorProfile, updateCollaboratorProfile } = useCollaboratorProfile();
@@ -59,30 +67,37 @@ export function Settings() {
   const [saving, setSaving] = useState<string | null>(null);
 
   // Identity form state
-  const [iName,      setIName]      = useState(collaboratorProfile.name);
-  const [iTitle,     setITitle]     = useState(collaboratorProfile.title);
-  const [iLocation,  setILocation]  = useState(collaboratorProfile.location);
-  const [iYears,     setIYears]     = useState(collaboratorProfile.yearsExperience);
-  const [iHeadline,  setIHeadline]  = useState(collaboratorProfile.headline);
-  const [iAvatar,    setIAvatar]    = useState(collaboratorProfile.avatarUrl);
+  const [iName,      setIName]      = useState(collaboratorProfile?.name || "");
+  const [iTitle,     setITitle]     = useState(collaboratorProfile?.title || "");
+  const [iLocation,  setILocation]  = useState(collaboratorProfile?.location || "");
+  const [iYears,     setIYears]     = useState(collaboratorProfile?.yearsExperience ?? 0);
+  const [iHeadline,  setIHeadline]  = useState(collaboratorProfile?.headline || "");
+  const [iAvatar,    setIAvatar]    = useState(collaboratorProfile?.avatarUrl || "");
   const iEmail                       = profile?.email ?? "";
   const [iCurrentPw, setICurrentPw] = useState("");
   const [iPw1, setIPw1]             = useState("");
   const [iPw2, setIPw2]             = useState("");
 
   // Skills form state
-  const [sDisc,      setSDisc]      = useState<CollaboratorDiscipline | "">(collaboratorProfile.discipline);
-  const [sSub,       setSSub]       = useState<string[]>(collaboratorProfile.subSkills);
-  const [sStack,     setSStack]     = useState<string[]>(collaboratorProfile.techStack);
+  const [sDisc,      setSDisc]      = useState<CollaboratorDiscipline | "">(
+    (disciplines.includes(collaboratorProfile?.discipline as CollaboratorDiscipline)
+      ? collaboratorProfile.discipline
+      : "Engineering") as CollaboratorDiscipline
+  );
+  const [sSub,       setSSub]       = useState<string[]>(collaboratorProfile?.subSkills || []);
+  const [sStack,     setSStack]     = useState<string[]>(collaboratorProfile?.techStack || []);
   const [sStackDraft, setSStackDraft] = useState("");
-  const [sHours,     setSHours]     = useState(collaboratorProfile.weeklyHours);
-  const [sCommit,    setSCommit]    = useState<typeof collaboratorProfile.commitmentStyle>(collaboratorProfile.commitmentStyle);
-  const [sPref,      setSPref]      = useState(collaboratorProfile.equityPreference);
-  const [sFloor,     setSFloor]     = useState(collaboratorProfile.minCashFloor);
-  const [sVesting,   setSVesting]   = useState<typeof collaboratorProfile.vestingComfort>(collaboratorProfile.vestingComfort);
+  const [sHours,     setSHours]     = useState(collaboratorProfile?.weeklyHours ?? 20);
+  const [sCommit,    setSCommit]    = useState<typeof collaboratorProfile.commitmentStyle>(collaboratorProfile?.commitmentStyle || "deep");
+  const [sPref,      setSPref]      = useState(collaboratorProfile?.equityPreference ?? 40);
+  const [sFloor,     setSFloor]     = useState(collaboratorProfile?.minCashFloor ?? 0);
+  const [sVesting,   setSVesting]   = useState<typeof collaboratorProfile.vestingComfort>(collaboratorProfile?.vestingComfort || "standard");
 
   // Notifications form state
-  const [nPrefs, setNPrefs] = useState(collaboratorProfile.notifications);
+  const [nPrefs, setNPrefs] = useState<NotificationPrefs>(() => ({
+    ...DEFAULT_NOTIFICATIONS,
+    ...(collaboratorProfile?.notifications || {}),
+  }));
 
   // Anchor scroll on mount
   const identityRef      = useRef<HTMLDivElement>(null);
@@ -300,19 +315,19 @@ export function Settings() {
               </div>
             </div>
 
-            {sDisc && (
+            {sDisc && subSkillsByDiscipline[sDisc as CollaboratorDiscipline] && (
               <div className="mb-5">
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Sub-skills <span className="text-slate-400 font-normal">({sSub.length} selected)</span>
+                  Sub-skills <span className="text-slate-400 font-normal">({(sSub || []).length} selected)</span>
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {subSkillsByDiscipline[sDisc].map((s) => (
+                  {(subSkillsByDiscipline[sDisc as CollaboratorDiscipline] || []).map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => toggleSubSkill(s)}
                       className={`px-3 py-1 rounded-xl border text-xs font-semibold transition-all ${
-                        sSub.includes(s)
+                        sSub?.includes(s)
                           ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]"
                           : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-600 dark:text-slate-400"
                       }`}
@@ -327,7 +342,7 @@ export function Settings() {
             <div className="mb-5">
               <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Tech Stack</p>
               <div className="flex flex-wrap gap-1.5 mb-2.5">
-                {sStack.map((s) => (
+                {(sStack || []).map((s) => (
                   <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-white/10 text-xs font-medium text-slate-700 dark:text-slate-300">
                     {s}
                     <button onClick={() => setSStack(sStack.filter((x) => x !== s))} className="text-slate-400 hover:text-red-500 font-bold">×</button>
