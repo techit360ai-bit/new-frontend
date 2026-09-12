@@ -62,7 +62,7 @@ export function OrgStep2() {
       businessEmailDomain: emailDomain,
       verificationStatus: status,
     });
-    const activated = await activateRole("organisation", { verificationDocs: docs, businessEmailDomain: emailDomain, verificationStatus: status });
+    const activated = await activateRole("organisation", { verificationRequestId: requestId || null, businessEmailDomain: emailDomain, verificationStatus: status });
     setBusy(false);
     if (activated.error) { setError(activated.error.message); return; }
     navigate("/org/onboarding/step-3");
