@@ -46,8 +46,8 @@ const METRIC_CARDS: MetricCard[] = [
     key: "activePrograms",
     label: "Active Programs",
     icon: GraduationCap,
-    iconClass: "text-blue-700",
-    iconBackground: "bg-blue-50",
+    iconClass: "text-[#20C997]",
+    iconBackground: "bg-[#20C997]/10",
   },
   {
     key: "hackathons",
@@ -85,7 +85,7 @@ function ActivityIcon({ row }: { row: OrganizationActivity }) {
   if (row.type === "warning" || row.type === "risk") {
     return <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />;
   }
-  return <Activity className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />;
+  return <Activity className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#20C997]" />;
 }
 
 function EmptyPanel({ children }: { children: string }) {
@@ -247,7 +247,7 @@ export function Dashboard() {
                     <XAxis dataKey="skill" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="count" fill="#20C997" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -267,7 +267,7 @@ export function Dashboard() {
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="automated" stroke="#2563eb" strokeWidth={3} name="Automated" />
+                    <Line type="monotone" dataKey="automated" stroke="#20C997" strokeWidth={3} name="Automated" />
                     <Line type="monotone" dataKey="manual" stroke="#64748b" strokeWidth={3} name="Manual" />
                   </LineChart>
                 </ResponsiveContainer>
