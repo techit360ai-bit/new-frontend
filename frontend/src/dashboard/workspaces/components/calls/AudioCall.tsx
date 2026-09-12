@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 interface AudioCallProps {
   onClose: () => void;
   participant?: { name: string; avatar: string; role?: string };
-  self?: { name: string; avatar: string };
+  self?: { name: string; avatar: string; role?: string };
 }
 
 export function AudioCall({ onClose, participant, self }: AudioCallProps) {

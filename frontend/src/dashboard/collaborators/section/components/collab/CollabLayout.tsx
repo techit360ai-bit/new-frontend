@@ -501,7 +501,7 @@ export function CollabLayout() {
           </header>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <ProfileCompletionBanner />
+            <ProfileCompletionBanner role="collaborator" profilePath="/collaborator/profile" />
             <Outlet />
           </div>
         </main>

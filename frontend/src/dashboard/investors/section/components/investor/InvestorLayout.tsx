@@ -118,8 +118,9 @@ export function InvestorLayout() {
     return location.pathname.startsWith(path);
   };
 
-  const displayName = profile?.name || investorProfile.location || "Investor Partner";
-  const initials = displayName.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2) || "IN";
+  const userFullName = profile ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() : '';
+  const displayName = userFullName || investorProfile.location || "Investor Partner";
+  const initials = displayName.split(" ").map((p: string) => p[0]).join("").toUpperCase().slice(0, 2) || "IN";
   const investorLabel = investorProfile.investorType || "Venture Capital";
   const activeNavItem = NAV_GROUPS.flatMap((g) => g.items).find((n) => isActive(n.path));
   const activeLabel = activeNavItem?.label ?? "Dashboard";

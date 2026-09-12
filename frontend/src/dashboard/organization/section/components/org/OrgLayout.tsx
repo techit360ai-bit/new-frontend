@@ -121,8 +121,9 @@ export function OrgLayout() {
     return location.pathname === path || location.pathname.startsWith(path);
   };
 
-  const displayName = orgProfile.orgName || profile?.name || "Organization Hub";
-  const initials = displayName.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2) || "OG";
+  const userFullName = profile ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() : '';
+  const displayName = orgProfile.orgName || userFullName || "Organization Hub";
+  const initials = displayName.split(" ").map((p: string) => p[0]).join("").toUpperCase().slice(0, 2) || "OG";
   const planLabel =
     orgProfile.plan === "enterprise"
       ? "Enterprise Plan"

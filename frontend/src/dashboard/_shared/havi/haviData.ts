@@ -2,7 +2,7 @@
 // Adapted from the "AI Tour Guide Setup" design. Where the source tracked a
 // fixed 12-week tour, Havi tracks each user's personal "time to MVP".
 
-export type HaviRole = "founder" | "collaborator";
+export type HaviRole = "founder" | "collaborator" | "explorer";
 
 export type PersonalityMode = "supportive" | "coach" | "strict" | "founder";
 
