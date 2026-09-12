@@ -144,8 +144,8 @@ export function Analytics() {
   const metricStyles = [
     {
       icon: FolderKanban,
-      iconClass: "text-blue-700",
-      iconBackground: "bg-blue-50",
+      iconClass: "text-[#20C997]",
+      iconBackground: "bg-[#20C997]/10",
     },
     {
       icon: Rocket,
@@ -256,7 +256,7 @@ export function Analytics() {
                         tick={{ fontSize: 12 }}
                       />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#2563eb" radius={[0, 6, 6, 0]} />
+                      <Bar dataKey="count" fill="#20C997" radius={[0, 6, 6, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                   <div className="mt-4 grid grid-cols-2 gap-4 border-t border-gray-100 pt-4">
@@ -346,7 +346,7 @@ export function Analytics() {
                 </div>
                 {latestAutomationRate !== null && (
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-700">{latestAutomationRate}%</p>
+                    <p className="text-2xl font-bold text-[#20C997]">{latestAutomationRate}%</p>
                     <p className="text-xs text-gray-500">Latest automation share</p>
                   </div>
                 )}
@@ -362,7 +362,7 @@ export function Analytics() {
                     <Line
                       type="monotone"
                       dataKey="automated"
-                      stroke="#2563eb"
+                      stroke="#20C997"
                       strokeWidth={3}
                       name="Automated"
                     />
