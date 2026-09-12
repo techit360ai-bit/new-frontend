@@ -19,7 +19,7 @@ import {
 import { MobileBottomSheet } from '@/components/mobile/MobilePageTemplates';
 
 const SECTION_STYLE = [
-  { icon: BarChart3, label: 'Metrics Dashboard', color: 'text-blue-400', bgColor: 'bg-blue-500/10' },
+  { icon: BarChart3, label: 'Metrics Dashboard', color: 'text-[#20C997]', bgColor: 'bg-[#20C997]/10' },
   { icon: DollarSign, label: 'Financials', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10' },
   { icon: Zap, label: 'Testing Reports', color: 'text-amber-400', bgColor: 'bg-amber-500/10' },
   { icon: Shield, label: 'Compliance', color: 'text-purple-400', bgColor: 'bg-purple-500/10' },
@@ -285,13 +285,13 @@ export function DataRooms() {
         )}
 
         {/* Info banner */}
-        <div className="mt-8 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+        <div className="mt-8 bg-gradient-to-br from-[#20C997]/10 to-emerald-500/10 border border-[#20C997]/20 rounded-lg p-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Database className="w-5 h-5 text-blue-400" />
+            <div className="p-2 bg-[#20C997]/20 rounded-lg">
+              <Database className="w-5 h-5 text-[#20C997]" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-blue-300 mb-2">AUTO-GENERATED DATA ROOMS</h4>
+              <h4 className="text-sm font-semibold text-[#20C997] mb-2">AUTO-GENERATED DATA ROOMS</h4>
               <p className="text-white mb-1">
                 Every startup on TechIT automatically gets a structured data room populated from their
                 live execution data.
