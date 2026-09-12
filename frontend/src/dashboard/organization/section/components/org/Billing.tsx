@@ -268,7 +268,7 @@ export function Billing() {
         <button
           type="button"
           onClick={() => navigate("/wallet")}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#20C997] px-5 text-sm font-semibold text-white hover:bg-[#1ab386]"
         >
           <WalletCards className="h-5 w-5" />
           Open Wallet
@@ -298,7 +298,7 @@ export function Billing() {
 
       {!loading && !error && (
         <>
-          <section className="mb-8 rounded-lg border border-indigo-200 bg-indigo-50 p-6 lg:p-8">
+          <section className="mb-8 rounded-lg border border-[#20C997]/20 bg-[#20C997]/10 p-6 lg:p-8">
             {activeSubscription ? (
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -333,7 +333,7 @@ export function Billing() {
                 <button
                   type="button"
                   onClick={() => navigate("/wallet")}
-                  className="rounded-lg border border-indigo-200 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
+                  className="rounded-lg border border-[#20C997]/30 bg-white px-5 py-2.5 text-sm font-semibold text-[#20C997] hover:bg-[#20C997]/10"
                 >
                   View Plans
                 </button>
@@ -351,7 +351,7 @@ export function Billing() {
                 <button
                   type="button"
                   onClick={() => navigate("/wallet")}
-                  className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                  className="rounded-lg bg-[#20C997] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1ab386]"
                 >
                   Manage Plans
                 </button>
@@ -397,7 +397,7 @@ export function Billing() {
                     <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Bar dataKey="credits" fill="#4f46e5" name="Credits" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="credits" fill="#20C997" name="Credits" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -426,7 +426,7 @@ export function Billing() {
                           </span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                          <div className="h-full rounded-full bg-cyan-500" style={{ width: `${width}%` }} />
+                          <div className="h-full rounded-full bg-[#20C997]" style={{ width: `${width}%` }} />
                         </div>
                       </div>
                     );
@@ -519,7 +519,7 @@ export function Billing() {
                       <p className="text-xs font-medium uppercase text-gray-500">{paymentMethod.brand}</p>
                       <p className="mt-2 font-mono text-lg text-gray-900">•••• {paymentMethod.last4}</p>
                     </div>
-                    <CreditCard className="h-7 w-7 text-indigo-600" />
+                    <CreditCard className="h-7 w-7 text-[#20C997]" />
                   </div>
                   <p className="mt-6 text-sm text-gray-600">Expires {paymentMethod.expiry}</p>
                 </div>
@@ -592,7 +592,7 @@ function MetricCard({
     purple: "bg-purple-50 text-purple-600",
     orange: "bg-orange-50 text-orange-600",
     green: "bg-emerald-50 text-emerald-600",
-    blue: "bg-blue-50 text-blue-600",
+    blue: "bg-[#20C997]/10 text-[#20C997]",
   };
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-5">
