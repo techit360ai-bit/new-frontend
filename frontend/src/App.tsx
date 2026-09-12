@@ -40,6 +40,14 @@ const Wallet = lazy(() => import("@/TechitWallet/Wallet"));
 const NotFound = lazy(() => import("@/dashboard/NotFound"));
 import { CookieConsent } from "@/components/CookieConsent";
 const ExplorerHome = lazy(() => import("@/dashboard/explorer/ExplorerHome"));
+const ExplorerDiscover = lazy(() => import("@/dashboard/explorer/components/ExplorerDiscover").then((m) => ({ default: m.ExplorerDiscover })));
+const ExplorerStartups = lazy(() => import("@/dashboard/explorer/components/ExplorerStartups").then((m) => ({ default: m.ExplorerStartups })));
+const ExplorerProjects = lazy(() => import("@/dashboard/explorer/components/ExplorerProjects").then((m) => ({ default: m.ExplorerProjects })));
+const ExplorerOpportunities = lazy(() => import("@/dashboard/explorer/components/ExplorerOpportunities").then((m) => ({ default: m.ExplorerOpportunities })));
+const ExplorerEvents = lazy(() => import("@/dashboard/explorer/components/ExplorerEvents").then((m) => ({ default: m.ExplorerEvents })));
+const ExplorerAIGuide = lazy(() => import("@/dashboard/explorer/components/ExplorerAIGuide").then((m) => ({ default: m.ExplorerAIGuide })));
+const ExplorerProfile = lazy(() => import("@/dashboard/explorer/components/ExplorerProfile").then((m) => ({ default: m.ExplorerProfile })));
+const ExplorerSettings = lazy(() => import("@/dashboard/explorer/components/ExplorerSettings").then((m) => ({ default: m.ExplorerSettings })));
 import { ContextSwitcher } from "@/components/context/ContextSwitcher";
 const ComplianceCenter = lazy(() => import("@/dashboard/ComplianceCenter"));
 const InvestorStep1 = lazy(() => import("@/dashboard/investors/onboarding/InvestorStep1").then((m) => ({ default: m.InvestorStep1 })));
@@ -311,6 +319,14 @@ const App = () => {
         </Route>
         <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
         <Route path="/explore" element={<RequireAuth><ExplorerHome /></RequireAuth>} />
+        <Route path="/explore/discover" element={<RequireAuth><ExplorerDiscover /></RequireAuth>} />
+        <Route path="/explore/startups" element={<RequireAuth><ExplorerStartups /></RequireAuth>} />
+        <Route path="/explore/projects" element={<RequireAuth><ExplorerProjects /></RequireAuth>} />
+        <Route path="/explore/opportunities" element={<RequireAuth><ExplorerOpportunities /></RequireAuth>} />
+        <Route path="/explore/events" element={<RequireAuth><ExplorerEvents /></RequireAuth>} />
+        <Route path="/explore/ai-guide" element={<RequireAuth><ExplorerAIGuide /></RequireAuth>} />
+        <Route path="/explore/profile" element={<RequireAuth><ExplorerProfile /></RequireAuth>} />
+        <Route path="/explore/settings" element={<RequireAuth><ExplorerSettings /></RequireAuth>} />
         <Route path="/explorer" element={<Navigate to="/explore" replace />} />
         <Route path="/verification/:role" element={<RequireAuth><VerificationCenter /></RequireAuth>} />
         <Route path="/security/mfa" element={<RequireAuth><MfaSetup /></RequireAuth>} />
