@@ -6,7 +6,7 @@ import {
   Sparkles, Award, MessageSquare, Wrench, Rss, GraduationCap,
   UserCircle, Settings as SettingsIcon, ShieldCheck, Ticket,
   ChevronDown, PanelLeftClose, PanelLeftOpen, LogOut,
-  Menu, Search, Bell, Sun, Moon,
+  Menu, Search, Bell, Sun, Moon, X,
 } from "lucide-react";
 import TechITLogo from "@/components/ui/TechITLogo";
 import { Toaster } from "@/components/ui/sonner";
@@ -399,7 +399,7 @@ export function CollabLayout() {
                 }`}
               >
                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isDark ? "bg-[#0066ff]/20" : "bg-white/40"}`} />
-                <Menu className="w-[18px] h-[18px] relative z-10" />
+                <PanelLeftOpen className="w-[18px] h-[18px] relative z-10" />
               </button>
 
               <h2 className={`text-base font-bold hidden lg:block shrink-0 mr-2 ${isDark ? "text-[#58a6ff]" : "text-[#0066ff]"}`}>
@@ -506,6 +506,104 @@ export function CollabLayout() {
           </div>
         </main>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99]"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              className={`fixed top-0 left-0 bottom-0 w-[280px] z-[100] flex flex-col border-r transition-colors ${
+                isDark 
+                  ? "bg-[#121212] border-white/10 shadow-[25px_0_60px_rgba(0,0,0,0.9)] text-white" 
+                  : "bg-white border-black/[0.06] text-[#171330]"
+              }`}
+            >
+              <div className={`flex items-center justify-between p-4 border-b ${
+                isDark ? "border-white/10 bg-white/[0.02]" : "border-black/[0.06] bg-gradient-to-r from-transparent to-[#0066ff]/[0.02]"
+              }`}>
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center p-1.5 shadow-sm shrink-0 border ${
+                    isDark ? "bg-[#1a1a1a] border-white/10 shadow-[0_0_10px_rgba(0,102,255,0.2)]" : "bg-white border-[#0066ff]/10"
+                  }`}>
+                    <TechITLogo />
+                  </div>
+                  <span className={`font-medium text-sm tracking-tight whitespace-nowrap truncate ${
+                    isDark ? "text-[#58a6ff]" : "text-[#0066ff]"
+                  }`}>TechIT Network</span>
+                </div>
+                <button 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className={`w-8 h-8 flex items-center justify-center rounded-xl border backdrop-blur-md transition-all duration-300 shrink-0 ${
+                    isDark 
+                      ? "bg-[#0066ff]/15 border-[#0066ff]/30 text-[#58a6ff] shadow-[0_0_15px_rgba(0,102,255,0.2)] hover:bg-[#0066ff]/25" 
+                      : "bg-gradient-to-br from-[#0066ff]/5 to-[#58a6ff]/10 border-[#0066ff]/10 shadow-[0_2px_10px_rgba(0,102,255,0.05)] text-[#0066ff] hover:from-[#0066ff]/10 hover:to-[#58a6ff]/20"
+                  }`}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                {NAV_GROUPS.map((group) => (
+                  <div key={group.label}>
+                    <h3 className={`text-[10px] font-black uppercase tracking-widest mb-3 px-2 ${
+                      isDark ? "text-white/40" : "text-[#171330]/35"
+                    }`}>
+                      {group.label}
+                    </h3>
+                    <div className="space-y-1">
+                      {group.items.map((item) => {
+                        const active = isActive(item.path);
+                        return (
+                          <Link
+                            key={item.label}
+                            to={item.path ?? "#"}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all ${
+                              active
+                                ? (isDark 
+                                    ? "bg-[#0066ff]/20 border border-[#0066ff]/40 text-[#58a6ff] shadow-[0_0_15px_rgba(0,102,255,0.2)]" 
+                                    : "bg-gradient-to-r from-[#0066ff]/[0.08] to-transparent border border-[#0066ff]/20 text-[#0066ff]")
+                                : (isDark 
+                                    ? "text-white/60 hover:bg-white/[0.06] hover:text-white" 
+                                    : "text-[#171330]/60 hover:bg-[#f5f8ff] hover:text-[#171330]")
+                            }`}
+                          >
+                            {item.icon && <item.icon className="w-[18px] h-[18px]" />}
+                            <span className="text-sm">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className={`p-4 border-t ${isDark ? "border-white/10" : "border-black/[0.06]"}`}>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); signOut(); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 transition-colors ${
+                    isDark ? "hover:bg-red-500/10" : "hover:bg-red-50"
+                  }`}
+                >
+                  <LogOut className="w-4 h-4" /> Log out
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <Havi
         role="collaborator"
