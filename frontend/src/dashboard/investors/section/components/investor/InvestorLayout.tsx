@@ -28,6 +28,7 @@ import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { RoleMobileMenu } from '@/components/RoleMobileMenu';
 import { NextBestActionNote } from '@/components/authorization/NextBestActionNote';
+import { ContinuousIntelligencePanel } from '@/components/intelligence/ContinuousIntelligencePanel';
 
 interface NavItem {
   path: string;
@@ -189,6 +190,7 @@ export function InvestorLayout() {
       <main className="app-role-content flex-1 overflow-auto pt-14 lg:pt-0">
         <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
         <NextBestActionNote role="investor" />
+        <ContinuousIntelligencePanel role="investor" />
         <Outlet />
       </main>
     </div>

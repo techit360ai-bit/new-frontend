@@ -17,6 +17,7 @@ interface NextAction {
   usageEstimate?: number | null;
   funding?: string;
   freeRemaining?: number | null;
+  purchaseGuidance?: { relevant: boolean; whyNow: string; expectedOutcome: string; observedPriorUses: number; observedSuccessRate: number | null; recommendedFunding: string };
 }
 
 const DISMISSED_KEY = "techit:next-best-action-note:dismissed";
@@ -59,6 +60,7 @@ export function NextBestActionNote({ role }: { role: Role }) {
           <p className="font-semibold text-text-primary">Recommended next step: {next.action.replaceAll("_", " ")}</p>
           <p className="mt-1 text-text-secondary">{next.reason}</p>
           <p className="mt-1 text-xs text-text-muted">Value: {next.expectedValue}</p>
+          {next.purchaseGuidance?.relevant ? <p className="mt-1 text-xs text-text-muted">Why now: {next.purchaseGuidance.whyNow} Expected outcome: {next.purchaseGuidance.expectedOutcome}</p> : null}
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
             <span>{next.access === "available" ? "Included in your current access" : `Access: ${next.access.replaceAll("_", " ")}`}</span>
             {next.usageEstimate ? <span>Estimated use: {next.usageEstimate} credits</span> : null}

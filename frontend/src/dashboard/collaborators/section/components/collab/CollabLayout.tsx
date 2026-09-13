@@ -14,6 +14,7 @@ import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 import { RoleMobileMenu } from "@/components/RoleMobileMenu";
 import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
+import { ContinuousIntelligencePanel } from "@/components/intelligence/ContinuousIntelligencePanel";
 
 interface NavItem {
   name: string;
@@ -157,6 +158,7 @@ export function CollabLayout() {
         <div className="app-role-content flex-1 overflow-y-auto">
           <ProfileCompletionBanner role="collaborator" profilePath="/collaborator/profile" />
           <NextBestActionNote role="collaborator" />
+          <ContinuousIntelligencePanel role="collaborator" />
           <Outlet />
         </div>
       </main>

@@ -15,6 +15,7 @@ import { TopBarRoleMenu } from "./TopBarRoleMenu";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { RoleMobileMenu } from "@/components/RoleMobileMenu";
 import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
+import { ContinuousIntelligencePanel } from "@/components/intelligence/ContinuousIntelligencePanel";
 
 type NavKind = "link" | "external" | "placeholder";
 interface NavItem { name: string; path: string; icon: typeof LayoutDashboard; kind: NavKind; }
@@ -189,6 +190,7 @@ export function FounderLayout() {
         <div className="app-role-content flex-1 overflow-y-auto">
           <ProfileCompletionBanner role="founder" profilePath="/founder/profile" />
           <NextBestActionNote role="founder" />
+          <ContinuousIntelligencePanel role="founder" />
           <Outlet />
         </div>
       </main>
