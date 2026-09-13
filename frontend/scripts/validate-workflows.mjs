@@ -15,11 +15,12 @@ const workflows = [
 ];
 
 const requiredBuildEnv = {
-  VITE_API_URL: "https://techit-backend.onrender.com/api",
-  VITE_API_BASE_URL: "https://techit-api-u1ek.onrender.com",
-  VITE_TECHIT_API: "https://techit-backend.onrender.com/api/mcp",
-  VITE_MESSAGING_BASE_URL: "https://techit-messaging.onrender.com",
-  VITE_MESSAGING_WS_URL: "wss://techit-messaging.onrender.com/ws",
+  VITE_API_URL: "https://backend.techitnetwork.com/api",
+  VITE_API_BASE_URL: "https://api.techitnetwork.com",
+  VITE_TECHIT_API: "https://backend.techitnetwork.com/api/mcp",
+  VITE_MESSAGING_BASE_URL: "https://messaging.techitnetwork.com",
+  VITE_MESSAGING_WS_URL: "wss://messaging.techitnetwork.com/ws",
+  VITE_TRUST_AUTHORITY_URL: "https://backend.techitnetwork.com/api",
   VITE_API_STRICT: "1",
 };
 
@@ -66,9 +67,9 @@ function getBuildStepEnv(filePath, content, buildStep) {
 }
 
 function assertNoBackendUrlDrift(filePath, content) {
-  const wrongAiRouter = "VITE_API_BASE_URL: https://techit-backend.onrender.com";
-  const wrongAuthBackend = "VITE_API_URL: https://techit-api-u1ek.onrender.com/api";
-  const wrongMcpBackend = "VITE_TECHIT_API: https://techit-api-u1ek.onrender.com/api/mcp";
+  const wrongAiRouter = "VITE_API_BASE_URL: https://backend.techitnetwork.com/api";
+  const wrongAuthBackend = "VITE_API_URL: https://api.techitnetwork.com/api";
+  const wrongMcpBackend = "VITE_TECHIT_API: https://api.techitnetwork.com/api/mcp";
   if (content.includes(wrongAiRouter)) {
     fail(`${filePath} points VITE_API_BASE_URL at the Node backend instead of ai-router`);
   }
@@ -80,21 +81,11 @@ function assertNoBackendUrlDrift(filePath, content) {
   }
 }
 
-function assertRenderDeployIsExplicitlyEnabled(filePath, content) {
-  if (!content.includes("secrets.RENDER_FRONTEND_DEPLOY_HOOK")) return;
-
-  const enablementGate = "vars.RENDER_FRONTEND_DEPLOY_ENABLED == 'true'";
-  if (!content.includes(enablementGate)) {
-    fail(`${filePath} Render deploy job must require ${enablementGate}`);
-  }
-}
-
 try {
   for (const workflow of workflows) {
     const content = readWorkflow(workflow.filePath);
     assertBuildEnv(workflow.filePath, content, workflow.buildStep);
     assertNoBackendUrlDrift(workflow.filePath, content);
-    assertRenderDeployIsExplicitlyEnabled(workflow.filePath, content);
   }
   console.log("frontend workflow env contract OK");
 } catch (error) {

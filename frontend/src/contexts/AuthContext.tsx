@@ -45,6 +45,7 @@ export interface Profile {
   role: Role
   activeRole?: Role
   secondaryRoles: Role[]
+  roleProfiles?: Record<string, Record<string, unknown>>
   creditBalance: number
   credibilityScore: number
   isVerified: boolean

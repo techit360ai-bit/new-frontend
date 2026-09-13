@@ -30,6 +30,7 @@ import {
   rankCollaborators,
   type CollaborationInviteDraft,
 } from "@/lib/collaborationMatching";
+import { fetchFounderCollaboratorRecommendations } from "@/lib/api/recommendationIntelligence";
 import {
   markValidationStoryShown,
   ValidationStoryDialog,
@@ -137,10 +138,17 @@ export default function MatchResults() {
       fetchCollaboratorDirectory(),
       hackathonId ? fetchFounderOpportunity(hackathonId) : Promise.resolve(null),
       invitationDraft ? fetchWorkspaces() : Promise.resolve([]),
+      projectId ? fetchFounderCollaboratorRecommendations(projectId, { limit: 50 }).catch(() => null) : Promise.resolve(null),
     ])
-      .then(([profiles, opportunity, workspaceRows]) => {
+      .then(([profiles, opportunity, workspaceRows, serverRecommendations]) => {
         if (!alive) return;
-        const ranked = invitationDraft
+        const ranked = serverRecommendations?.recommendations?.length
+          ? serverRecommendations.recommendations.map((row) => {
+              const person = (row as any).collaborator || {};
+              const profile = profiles.find((item) => item.id === person.id);
+              return profile ? directoryMatch(profile, Number(row.score), Array.isArray(row.reasons) ? row.reasons : []) : null;
+            }).filter(Boolean) as Match[]
+          : invitationDraft
           ? rankCollaborators(profiles, invitationDraft, {
               timezone: authProfile?.timezone,
               location: authProfile?.country,
@@ -165,7 +173,7 @@ export default function MatchResults() {
         if (alive) setLoading(false);
       });
     return () => { alive = false; };
-  }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft]);
+    }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft, projectId]);
 
   useEffect(() => {
     if (!projectName) {
