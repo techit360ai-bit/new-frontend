@@ -7,12 +7,14 @@ import {
   CheckCircle2,
   Clock,
   History,
+  Info,
   Link2,
   Lock,
   Plus,
   RefreshCw,
   ShieldCheck,
   Unplug,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -111,6 +113,7 @@ export function TrustCenter() {
   const [notifications, setNotifications] = useState<TrustNotificationIntent[]>([]);
   const [busySource, setBusySource] = useState<string | null>(null);
   const [accessRequests, setAccessRequests] = useState<FounderTrustAccessRequest[]>([]);
+  const [introDismissed, setIntroDismissed] = useState(false);
 
   const load = useCallback(async () => {
     setState("loading");
@@ -139,6 +142,7 @@ export function TrustCenter() {
   }, []);
 
   useEffect(() => {
+    try { setIntroDismissed(sessionStorage.getItem("techit:trust-center-intro:dismissed") === "1"); } catch { setIntroDismissed(false); }
     void load();
   }, [load]);
 
@@ -184,6 +188,7 @@ export function TrustCenter() {
   };
 
   const score = Math.round(profile?.trust_score ?? 0);
+  const dismissIntro = () => { setIntroDismissed(true); try { sessionStorage.setItem("techit:trust-center-intro:dismissed", "1"); } catch { /* storage unavailable */ } };
 
   const decideAccess = async (requestId: string, decision: "approved" | "rejected") => {
     setBusySource(requestId);
@@ -213,6 +218,12 @@ export function TrustCenter() {
           Refresh
         </Button>
       </div>
+
+      {!introDismissed && <aside className="flex items-start gap-3 rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900" role="note">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-700" aria-hidden="true" />
+        <p className="min-w-0 flex-1"><span className="font-semibold">Why Trust Center matters:</span> verified signals make your founder profile more visible to investors and improve matching quality. Your verification tier controls trust visibility; subscriptions and higher credit purchases expand the amount of matching and metered intelligence you can access. Only approved metadata scopes are shared.</p>
+        <button type="button" onClick={dismissIntro} className="shrink-0 rounded p-1 text-cyan-700 hover:bg-cyan-100" aria-label="Dismiss Trust Center note" title="Dismiss note"><X className="h-4 w-4" /></button>
+      </aside>}
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="rounded-xl border border-border-default bg-surface-primary p-5">
