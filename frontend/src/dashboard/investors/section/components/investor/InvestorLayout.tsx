@@ -27,6 +27,7 @@ import { useInvestorProfile } from '@/contexts/UserContext';
 import { roleDashboardPath, writeStoredActiveRole } from '@/lib/roleRoutes';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { RoleMobileMenu } from '@/components/RoleMobileMenu';
+import { NextBestActionNote } from '@/components/authorization/NextBestActionNote';
 
 interface NavItem {
   path: string;
@@ -187,6 +188,7 @@ export function InvestorLayout() {
       {/* Main Content */}
       <main className="app-role-content flex-1 overflow-auto pt-14 lg:pt-0">
         <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
+        <NextBestActionNote role="investor" />
         <Outlet />
       </main>
     </div>

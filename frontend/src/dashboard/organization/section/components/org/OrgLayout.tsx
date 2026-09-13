@@ -29,6 +29,7 @@ import { useOrgProfile } from "@/contexts/UserContext";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { RoleMobileMenu } from "@/components/RoleMobileMenu";
+import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
 
 interface NavItem {
   name: string;
@@ -179,6 +180,7 @@ export function OrgLayout() {
       {/* Main Content */}
       <main className="app-role-content flex-1 overflow-y-auto pt-14 lg:pt-0">
         <ProfileCompletionBanner role="organisation" profilePath="/org/profile" />
+        <NextBestActionNote role="organisation" />
         <Outlet />
       </main>
     </div>

@@ -14,6 +14,7 @@ import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { RoleMobileMenu } from "@/components/RoleMobileMenu";
+import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
 
 type NavKind = "link" | "external" | "placeholder";
 interface NavItem { name: string; path: string; icon: typeof LayoutDashboard; kind: NavKind; }
@@ -187,6 +188,7 @@ export function FounderLayout() {
         </header>
         <div className="app-role-content flex-1 overflow-y-auto">
           <ProfileCompletionBanner role="founder" profilePath="/founder/profile" />
+          <NextBestActionNote role="founder" />
           <Outlet />
         </div>
       </main>
