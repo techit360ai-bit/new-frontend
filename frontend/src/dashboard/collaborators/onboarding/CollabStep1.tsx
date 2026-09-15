@@ -47,7 +47,7 @@ export function CollabStep1() {
 
   // Glass‑friendly input class
   const inputCls =
-    "w-full h-12 rounded-xl border border-white/20 bg-white/10 pl-11 pr-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0066ff] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]";
+    "w-full h-12 rounded-xl border border-white/20 bg-white/10 pl-11 pr-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]";
 
   const fieldVariants = {
     hidden: { opacity: 0, y: 12 },
@@ -64,13 +64,13 @@ export function CollabStep1() {
 
         {/* ===== Left: animated brand panel ===== */}
         <div className="relative hidden lg:flex flex-col justify-between p-10 bg-[#171330] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#0066ff]/30 via-[#171330] to-[#171330]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#20C997]/30 via-[#171330] to-[#171330]" />
           <BlobField variant="dark" />
 
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 mb-6 px-3 py-1 rounded-full bg-[#58a6ff]/15 border border-[#58a6ff]/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#58a6ff] animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#58a6ff]">Collaborator</span>
+            <div className="inline-flex items-center gap-1.5 mb-6 px-3 py-1 rounded-full bg-[#20C997]/15 border border-[#20C997]/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#20C997]">Collaborator</span>
             </div>
             <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-[1.1] mb-4">
               Build alongside founders who need you.
@@ -90,7 +90,7 @@ export function CollabStep1() {
                 className="flex items-center gap-3"
               >
                 <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-[#58a6ff]" />
+                  <Icon className="w-4 h-4 text-[#20C997]" />
                 </div>
                 <span className="text-white/75 text-sm font-medium">{text}</span>
               </motion.div>
