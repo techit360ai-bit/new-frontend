@@ -42,10 +42,10 @@ export function Agents() {
   const filtered = agents.filter((a) => a.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-5">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
+      <div className="bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 bg-[#0066ff]/10 dark:bg-[#0066ff]/20 rounded-xl border border-[#0066ff]/20"><Bot className="w-6 h-6 text-[#0066ff] dark:text-[#58a6ff]" /></div>
+          <div className="p-2.5 bg-[#20C997]/10 rounded-xl border border-[#20C997]/20"><Bot className="w-6 h-6 text-[#20C997]" /></div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Agents</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">Autonomous & assisted AI agents for your workspace</p>
@@ -53,15 +53,15 @@ export function Agents() {
         </div>
         <Tabs defaultValue="catalog">
           <TabsList className="bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="catalog" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Catalog</TabsTrigger>
-            <TabsTrigger value="console" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Console</TabsTrigger>
+            <TabsTrigger value="catalog" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">Catalog</TabsTrigger>
+            <TabsTrigger value="console" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">Console</TabsTrigger>
           </TabsList>
 
           <TabsContent value="catalog">
             <div className="relative mt-4 mb-6 max-w-md">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search agents..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#1a1a1a] border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 text-sm transition-all" />
+                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#111111] border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 text-sm transition-all" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
               {filtered.map((a) => (<AIAgentCard key={a.id} agent={a} onToggle={handleToggle} />))}
@@ -75,7 +75,7 @@ export function Agents() {
 
           <TabsContent value="console">
             <ConsoleProvider>
-              <div className="mt-4 flex border border-black/[0.08] dark:border-white/10 rounded-2xl overflow-hidden bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-lg" style={{ height: 'calc(100vh - 240px)' }}>
+              <div className="mt-4 flex border border-black/[0.08] dark:border-white/10 rounded-2xl overflow-hidden bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl shadow-lg" style={{ height: 'calc(100vh - 240px)' }}>
                 <TaskList />
                 <div className="flex-1 flex flex-col">
                   <Transcript />

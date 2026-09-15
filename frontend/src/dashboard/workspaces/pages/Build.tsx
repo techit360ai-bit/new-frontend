@@ -96,9 +96,9 @@ export function Build() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
       {/* Page Header */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
+      <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -109,13 +109,13 @@ export function Build() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(`/workspaces/code${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 transition-all font-medium text-sm"><Code2 className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" /><span>Open Code</span></button>
+            <button onClick={() => navigate(`/workspaces/code${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 transition-all font-medium text-sm"><Code2 className="w-4 h-4 text-[#20C997]" /><span>Open Code</span></button>
             <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 transition-all font-medium text-sm">
               <Github className="w-4 h-4" />
               <span>GitHub</span>
-              <Badge className="bg-[#20c937] text-white text-xs font-semibold">Live</Badge>
+              <Badge className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 text-xs font-semibold">Live</Badge>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl font-bold text-sm shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">
+            <button className="flex items-center gap-2 px-4 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl font-bold text-sm shadow-sm transition-all">
               <Plus className="w-4 h-4" />
               <span>New Task</span>
             </button>
@@ -146,7 +146,7 @@ export function Build() {
             title="In Progress"
             tasks={tasks.inProgress}
             onDrop={handleDrop('inProgress')}
-            color="bg-[#0066ff]"
+            color="bg-[#20C997]"
           />
           <KanbanColumn
             title="Review"
@@ -158,14 +158,14 @@ export function Build() {
             title="Done"
             tasks={tasks.done}
             onDrop={handleDrop('done')}
-            color="bg-[#20c937]"
+            color="bg-[#20C997]"
           />
         </div>
       </div>
 
       {/* Floating Action Button */}
       <button
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white rounded-full shadow-[0_8px_25px_rgba(0,102,255,0.35)] hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center group"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-full shadow-lg hover:scale-110 transition-all flex items-center justify-center group font-bold"
         title="Add New Task"
       >
         <Plus className="w-6 h-6" />

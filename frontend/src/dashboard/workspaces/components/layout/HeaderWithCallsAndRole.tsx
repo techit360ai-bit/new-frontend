@@ -97,14 +97,14 @@ export function HeaderWithCallsAndRole() {
 
   return (
     <>
-      <header className="h-[60px] border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl flex items-center justify-between px-6 transition-colors">
+      <header className="h-[60px] border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl flex items-center justify-between px-6 transition-colors">
         <div className="flex items-center gap-3">
           <BackButton fallback="/dashboard" />
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               {activeWorkspace?.name ?? 'Workspace'}
             </h1>
-            <Badge className="bg-[#20c937] text-white font-medium hover:bg-[#20c937]/90">
+            <Badge className="bg-[#20C997] text-slate-950 font-medium hover:bg-[#1db587]">
               {activeWorkspace?.status ?? 'No live workspace'}
             </Badge>
           </div>
@@ -115,7 +115,7 @@ export function HeaderWithCallsAndRole() {
             <DropdownMenuTrigger className="w-full focus:outline-none">
               <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all border border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white shadow-sm group">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-1 rounded-lg bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] shrink-0">
+                  <div className="p-1 rounded-lg bg-[#20C997]/10 text-[#20C997] shrink-0">
                     <Layers className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col items-start min-w-0 text-left">
@@ -129,12 +129,12 @@ export function HeaderWithCallsAndRole() {
               </div>
             </DropdownMenuTrigger>
             
-            <DropdownMenuContent align="start" className="w-[300px] p-2 bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl border border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white shadow-2xl rounded-2xl z-50">
+            <DropdownMenuContent align="start" className="w-[300px] p-2 bg-white/95 dark:bg-[#111111]/95 backdrop-blur-xl border border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white shadow-2xl rounded-2xl z-50">
               <DropdownMenuLabel className="px-2 py-1.5 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Workspaces ({workspaces.length > 0 ? workspaces.length : 1})
                 </span>
-                <Badge className="bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20 text-[10px] px-2">
+                <Badge className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 text-[10px] px-2">
                   Active Sync
                 </Badge>
               </DropdownMenuLabel>
@@ -156,12 +156,12 @@ export function HeaderWithCallsAndRole() {
                         }}
                         className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] font-semibold border border-[#0066ff]/20'
+                            ? 'bg-[#20C997]/15 text-[#20C997] font-semibold border border-[#20C997]/20'
                             : 'hover:bg-black/[0.04] dark:hover:bg-white/5 text-slate-700 dark:text-slate-200'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff]' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}>
+                          <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-[#20C997]/20 text-[#20C997]' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}>
                             <FolderGit2 className="w-4 h-4" />
                           </div>
                           <div className="min-w-0">
@@ -170,8 +170,8 @@ export function HeaderWithCallsAndRole() {
                           </div>
                         </div>
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-[#0066ff] text-white flex items-center justify-center shrink-0">
-                            <Check className="w-3 h-3" />
+                          <div className="w-5 h-5 rounded-full bg-[#20C997] text-slate-950 flex items-center justify-center shrink-0">
+                            <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
                       </DropdownMenuItem>
@@ -179,16 +179,16 @@ export function HeaderWithCallsAndRole() {
                   })
                 ) : (
                   <DropdownMenuItem
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] font-semibold border border-[#0066ff]/20"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-[#20C997]/15 text-[#20C997] font-semibold border border-[#20C997]/20"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-lg bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff]">
+                      <div className="p-1.5 rounded-lg bg-[#20C997]/20 text-[#20C997]">
                         <Layers className="w-4 h-4" />
                       </div>
                       <div className="text-xs font-semibold">Default Workspace</div>
                     </div>
-                    <div className="w-5 h-5 rounded-full bg-[#0066ff] text-white flex items-center justify-center shrink-0">
-                      <Check className="w-3 h-3" />
+                    <div className="w-5 h-5 rounded-full bg-[#20C997] text-slate-950 flex items-center justify-center shrink-0">
+                      <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                   </DropdownMenuItem>
                 )}
@@ -200,7 +200,7 @@ export function HeaderWithCallsAndRole() {
                 onClick={() => navigate('/workspaces/settings')}
                 className="flex items-center gap-2 p-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5 text-[#0066ff]" />
+                <Plus className="w-3.5 h-3.5 text-[#20C997]" />
                 <span>Manage Workspace Settings</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -212,7 +212,7 @@ export function HeaderWithCallsAndRole() {
             {teamMembers.map((member) => (
               <Avatar
                 key={member.name}
-                className="w-8 h-8 border-2 border-white dark:border-[#121212] hover:z-10 transition-all hover:scale-110 cursor-pointer"
+                className="w-8 h-8 border-2 border-white dark:border-[#0a0a0a] hover:z-10 transition-all hover:scale-110 cursor-pointer"
               >
                 <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
                   {member.avatar}
@@ -247,7 +247,7 @@ export function HeaderWithCallsAndRole() {
           >
             <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
             {unreadNotifications > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#0066ff] rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#20C997] rounded-full" />
             )}
           </button>
           <button
@@ -263,14 +263,14 @@ export function HeaderWithCallsAndRole() {
             <DropdownMenuTrigger>
               <div className="flex items-center gap-2 cursor-pointer hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl px-2 py-1 transition-colors">
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white font-bold">
+                  <AvatarFallback className="bg-[#20C997] text-slate-950 font-black">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-[#1a1a1a] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
+            <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-[#111111] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
               <DropdownMenuLabel className="font-semibold">{userName}</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-black/[0.06] dark:bg-white/10" />
               <DropdownMenuLabel className="text-xs text-slate-500 dark:text-slate-400 font-normal">
@@ -282,12 +282,12 @@ export function HeaderWithCallsAndRole() {
                 <DropdownMenuItem
                   key={role.id}
                   onClick={() => handleRoleChange(role.id)}
-                  className={currentRole === role.id ? 'bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] font-semibold cursor-pointer' : 'cursor-pointer'}
+                  className={currentRole === role.id ? 'bg-[#20C997]/10 text-[#20C997] font-semibold cursor-pointer' : 'cursor-pointer'}
                 >
                   <RoleIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                   {role.name}
                   {currentRole === role.id && (
-                    <Badge className="ml-auto bg-[#0066ff] text-white text-xs">Active</Badge>
+                    <Badge className="ml-auto bg-[#20C997] text-slate-950 text-xs font-bold">Active</Badge>
                   )}
                 </DropdownMenuItem>
               );})}

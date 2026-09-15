@@ -54,7 +54,7 @@ function ActivityRow({ activity }: { activity: ActivityEvent }) {
   return (
     <div className="flex items-start gap-3 pb-4 border-b border-black/[0.06] dark:border-white/10 last:border-0">
       <Avatar className="w-8 h-8">
-        <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white text-xs font-bold">
+        <AvatarFallback className="bg-[#20C997] text-slate-950 text-xs font-bold">
           {initials(activity.kind)}
         </AvatarFallback>
       </Avatar>
@@ -104,8 +104,8 @@ export function GitHub() {
   );
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
+      <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-slate-900 dark:bg-white/10 rounded-xl border border-black/[0.08] dark:border-white/10">
@@ -122,11 +122,11 @@ export function GitHub() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={load} disabled={loading} className="rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
-              <RefreshCw className="w-4 h-4 mr-2 text-[#0066ff] dark:text-[#58a6ff]" />
+              <RefreshCw className="w-4 h-4 mr-2 text-[#20C997]" />
               Refresh
             </Button>
             <Button
-              className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+              className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-sm transition-all"
               onClick={async () => {
                 const repoName = window.prompt('Enter the GitHub repository URL or name:');
                 if (!repoName?.trim()) return;
@@ -163,7 +163,7 @@ export function GitHub() {
           </div>
         )}
 
-        <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 mb-6 text-slate-900 dark:text-white">
+        <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 mb-6 text-slate-900 dark:text-white">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -183,19 +183,19 @@ export function GitHub() {
 
         <Tabs defaultValue="repos" className="w-full">
           <TabsList className="mb-6 bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="repos" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="repos" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <Code className="w-4 h-4 mr-2" />
               Repositories
             </TabsTrigger>
-            <TabsTrigger value="prs" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="prs" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <GitPullRequest className="w-4 h-4 mr-2" />
               Pull Requests
             </TabsTrigger>
-            <TabsTrigger value="branches" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="branches" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <GitBranch className="w-4 h-4 mr-2" />
               Branches
             </TabsTrigger>
-            <TabsTrigger value="activity" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="activity" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <GitCommit className="w-4 h-4 mr-2" />
               Activity
             </TabsTrigger>
@@ -205,13 +205,13 @@ export function GitHub() {
             {resources.map((resource) => (
               <div
                 key={resource}
-                className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 hover:shadow-lg transition-all text-slate-900 dark:text-white"
+                className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 hover:shadow-lg transition-all text-slate-900 dark:text-white"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white">{resourceName(resource)}</h3>
-                      <Badge className="bg-[#20c937]/10 text-[#20c937] border border-[#20c937]/30 font-medium">Live resource</Badge>
+                      <Badge className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-medium">Live resource</Badge>
                     </div>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{resource}</p>
                     <div className="flex items-center gap-4 text-sm text-slate-400 dark:text-slate-500">
@@ -248,14 +248,14 @@ export function GitHub() {
 
           <TabsContent value="prs" className="space-y-4">
             {pullRequestActivity.map((item) => (
-              <div key={item.id} className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
+              <div key={item.id} className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
                 <div className="flex items-start gap-4">
                   <div className={`w-2.5 h-2.5 rounded-full ${statusClass(github?.status)} mt-2`} />
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900 dark:text-white mb-1">{item.summary || item.kind}</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400">{formatTimestamp(item.at)}</p>
                   </div>
-                  <Badge className="bg-[#0066ff] text-white">{item.kind}</Badge>
+                  <Badge className="bg-[#20C997] text-slate-950 font-bold">{item.kind}</Badge>
                 </div>
               </div>
             ))}
@@ -266,10 +266,10 @@ export function GitHub() {
 
           <TabsContent value="branches" className="space-y-4">
             {branchActivity.map((item) => (
-              <div key={item.id} className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
+              <div key={item.id} className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <GitBranch className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />
+                    <GitBranch className="w-5 h-5 text-[#20C997]" />
                     <div>
                       <h3 className="font-semibold text-slate-900 dark:text-white">{item.summary || item.kind}</h3>
                       <p className="text-sm text-slate-500 dark:text-slate-400">Updated {formatTimestamp(item.at)}</p>
@@ -285,7 +285,7 @@ export function GitHub() {
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-4">
-            <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
+            <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
               <h3 className="font-bold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
               <div className="space-y-4">
                 {activity.map((item) => (

@@ -54,22 +54,22 @@ export function Files() {
 
   const getFileIcon = (item: DomainFileItem) => {
     if (item.type === 'folder') {
-      return <FolderOpen className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />;
+      return <FolderOpen className="w-5 h-5 text-[#20C997]" />;
     }
     switch (item.fileType) {
       case 'image':
         return <Image className="w-5 h-5 text-purple-500" />;
       case 'code':
-        return <FileCode className="w-5 h-5 text-[#20c937]" />;
+        return <FileCode className="w-5 h-5 text-[#20C997]" />;
       default:
         return <FileText className="w-5 h-5 text-slate-400" />;
     }
   };
 
   return (
-    <div className="h-full bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
+    <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
       {/* Page Header */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
+      <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -88,7 +88,7 @@ export function Files() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl text-sm shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl text-sm shadow-sm transition-all"
           >
             <Upload className="w-4 h-4" />
             <span>Upload Files</span>
@@ -98,7 +98,7 @@ export function Files() {
 
       {/* Files List */}
       <div className="p-6">
-        <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 overflow-hidden">
+        <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 overflow-hidden">
           <table className="w-full">
             <thead className="bg-black/[0.02] dark:bg-white/5 border-b border-black/[0.06] dark:border-white/10">
               <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
@@ -154,13 +154,13 @@ export function Files() {
         </div>
 
         {!loading && !error && files.length > 0 && (
-          <div className="mt-6 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white">
+          <div className="mt-6 bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-slate-900 dark:text-white">Storage Records</h3>
               <span className="text-sm text-slate-500 dark:text-slate-400">{files.filter((file) => file.type === 'file').length} files recorded</span>
             </div>
             <div className="h-3 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-[#0066ff] to-[#58a6ff] rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
+              <div className="h-full bg-[#20C997] rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
             </div>
           </div>
         )}

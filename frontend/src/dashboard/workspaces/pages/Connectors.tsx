@@ -45,10 +45,10 @@ export function Connectors() {
   const drawerActivity = selected ? activity.filter((a) => a.connectorId === selected.id) : [];
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
+      <div className="bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#0066ff]/10 dark:bg-[#0066ff]/20 rounded-xl border border-[#0066ff]/20"><Plug className="w-6 h-6 text-[#0066ff] dark:text-[#58a6ff]" /></div>
+          <div className="p-2.5 bg-[#20C997]/10 rounded-xl border border-[#20C997]/20"><Plug className="w-6 h-6 text-[#20C997]" /></div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Connectors</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">{connectors.length} integrations • capabilities exposed to agents over MCP</p>

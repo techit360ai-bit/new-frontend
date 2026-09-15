@@ -134,9 +134,9 @@ export function Chat() {
   };
 
   return (
-    <div className="h-full bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors flex overflow-hidden min-h-[calc(100vh-60px)]">
+    <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors flex overflow-hidden min-h-[calc(100vh-60px)]">
       {/* Left Glassmorphic Channels Sidebar */}
-      <div className="w-[260px] border-r border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#121212]/80 backdrop-blur-xl flex flex-col shrink-0">
+      <div className="w-[260px] border-r border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#111111]/80 backdrop-blur-xl flex flex-col shrink-0">
         <div className="p-4 border-b border-black/[0.06] dark:border-white/10">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -145,7 +145,7 @@ export function Chat() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search channels..."
-              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#0066ff] outline-none transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#20C997] outline-none transition-all"
             />
           </div>
         </div>
@@ -165,11 +165,11 @@ export function Chat() {
                   onClick={() => setSelectedChannelId(channel.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all relative ${
                     isSelected
-                      ? 'bg-gradient-to-r from-[#0066ff]/15 via-[#0066ff]/10 to-transparent text-[#0066ff] dark:text-[#58a6ff] font-semibold border-l-4 border-[#0066ff] shadow-sm'
+                      ? 'bg-gradient-to-r from-[#20C997]/15 via-[#20C997]/10 to-transparent text-[#20C997] font-semibold border-l-4 border-[#20C997] shadow-sm'
                       : 'text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] font-medium'
                   }`}
                 >
-                  <Hash className={`w-4 h-4 shrink-0 ${isSelected ? 'text-[#0066ff] dark:text-[#58a6ff]' : 'text-slate-400'}`} />
+                  <Hash className={`w-4 h-4 shrink-0 ${isSelected ? 'text-[#20C997]' : 'text-slate-400'}`} />
                   <span className="text-xs truncate flex-1 text-left">{channel.name}</span>
                 </button>
               );
@@ -183,11 +183,11 @@ export function Chat() {
       </div>
 
       {/* Main Chat Conversation Stage */}
-      <div className="flex-1 flex flex-col bg-slate-50/50 dark:bg-[#121212] min-w-0">
+      <div className="flex-1 flex flex-col bg-slate-50/50 dark:bg-[#0a0a0a] min-w-0">
         {/* Chat Stage Header */}
-        <div className="h-[60px] border-b border-black/[0.06] dark:border-white/10 px-6 flex items-center justify-between bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl z-10 shrink-0">
+        <div className="h-[60px] border-b border-black/[0.06] dark:border-white/10 px-6 flex items-center justify-between bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl z-10 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] rounded-xl border border-[#0066ff]/20">
+            <div className="p-1.5 bg-[#20C997]/10 text-[#20C997] rounded-xl border border-[#20C997]/20">
               <Hash className="w-4 h-4" />
             </div>
             <div>
@@ -195,8 +195,8 @@ export function Chat() {
                 <h2 className="font-bold text-slate-900 dark:text-white text-base leading-none">
                   {selectedChannel ? `${selectedChannel.name}` : 'Select Channel'}
                 </h2>
-                <Badge className="bg-[#20c937]/15 text-[#20c937] border border-[#20c937]/30 text-[10px] px-2 py-0.5 font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#20c937] animate-pulse" /> Live Sync
+                <Badge className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 text-[10px] px-2 py-0.5 font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" /> Live Sync
                 </Badge>
               </div>
               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
@@ -211,7 +211,7 @@ export function Chat() {
               className="inline-flex items-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 transition-colors"
               aria-label="Open support tickets"
             >
-              <Ticket className="h-3.5 w-3.5 text-[#0066ff] dark:text-[#58a6ff]" />
+              <Ticket className="h-3.5 w-3.5 text-[#20C997]" />
               <span>Support Center</span>
             </Link>
             <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl text-slate-500 dark:text-slate-400 transition-colors" aria-label="Channel actions">
@@ -237,8 +237,8 @@ export function Chat() {
             ) : liveMessages.length > 0 ? (
               liveMessages.map((msg) => (
                 <div key={msg.id} className={`flex gap-3 items-start ${msg.fromMe ? 'flex-row-reverse' : ''}`}>
-                  <Avatar className="w-9 h-9 shrink-0 ring-2 ring-[#0066ff]/20">
-                    <AvatarFallback className={`${msg.fromMe ? 'bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white' : 'bg-slate-700 text-white'} text-xs font-bold`}>
+                  <Avatar className="w-9 h-9 shrink-0 ring-2 ring-[#20C997]/20">
+                    <AvatarFallback className={`${msg.fromMe ? 'bg-[#20C997] text-slate-950 font-bold' : 'bg-slate-700 text-white'} text-xs font-bold`}>
                       {messageInitials(msg.authorName)}
                     </AvatarFallback>
                   </Avatar>
@@ -250,7 +250,7 @@ export function Chat() {
                     <div
                       className={`p-3.5 rounded-2xl text-xs leading-relaxed transition-all shadow-sm ${
                         msg.fromMe
-                          ? 'bg-gradient-to-r from-[#0066ff]/15 via-[#0066ff]/10 to-transparent dark:bg-[#0066ff]/20 text-slate-900 dark:text-white border border-[#0066ff]/30 rounded-tr-none'
+                          ? 'bg-[#20C997]/15 dark:bg-[#20C997]/20 text-slate-900 dark:text-white border border-[#20C997]/30 rounded-tr-none'
                           : 'bg-white dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-black/[0.06] dark:border-white/10 rounded-tl-none'
                       }`}
                     >
@@ -261,7 +261,7 @@ export function Chat() {
               ))
             ) : (
               <div className="flex flex-col items-center justify-center p-12 text-center text-slate-400">
-                <Hash className="w-10 h-10 text-[#0066ff] opacity-40 mb-2" />
+                <Hash className="w-10 h-10 text-[#20C997] opacity-40 mb-2" />
                 <p className="text-xs font-medium">No persisted messages in this channel yet.</p>
                 <p className="text-[11px] text-slate-500 mt-1">Send a message below to kick off team communication.</p>
               </div>
@@ -270,8 +270,8 @@ export function Chat() {
         </ScrollArea>
 
         {/* Message Input Footer */}
-        <div className="p-4 border-t border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl z-10 shrink-0">
-          <div className="max-w-4xl mx-auto flex items-center gap-2 bg-white dark:bg-white/5 rounded-2xl p-2 border border-black/[0.08] dark:border-white/10 focus-within:border-[#0066ff] focus-within:ring-2 focus-within:ring-[#0066ff]/20 shadow-md transition-all">
+        <div className="p-4 border-t border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl z-10 shrink-0">
+          <div className="max-w-4xl mx-auto flex items-center gap-2 bg-white dark:bg-white/5 rounded-2xl p-2 border border-black/[0.08] dark:border-white/10 focus-within:border-[#20C997] focus-within:ring-2 focus-within:ring-[#20C997]/20 shadow-md transition-all">
             <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-xl transition-colors text-slate-500 dark:text-slate-400" aria-label="Attach file" disabled={!selectedChannel}>
               <Paperclip className="w-4 h-4" />
             </button>
@@ -293,7 +293,7 @@ export function Chat() {
             <button
               onClick={() => { void handleChannelSend(); }}
               disabled={!selectedChannel || sending || !draft.trim()}
-              className="p-2.5 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-40"
+              className="p-2.5 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Send message"
             >
               <Send className="w-4 h-4" />

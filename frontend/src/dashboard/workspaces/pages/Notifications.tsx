@@ -69,8 +69,8 @@ function NotificationCard({
 }) {
   return (
     <div
-      className={`bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border rounded-2xl p-4 transition-all hover:shadow-md text-slate-900 dark:text-white ${
-        !notification.read ? 'border-[#0066ff]/40 bg-[#0066ff]/5 dark:bg-[#0066ff]/10' : 'border-black/[0.06] dark:border-white/10'
+      className={`bg-white dark:bg-[#111111] backdrop-blur-xl border rounded-2xl p-4 transition-all hover:shadow-md text-slate-900 dark:text-white ${
+        !notification.read ? 'border-[#20C997]/40 bg-[#20C997]/5 dark:bg-[#20C997]/10' : 'border-black/[0.06] dark:border-white/10'
       }`}
     >
       <div className="flex items-start gap-4">
@@ -85,7 +85,7 @@ function NotificationCard({
               <span className="text-xs text-slate-400 dark:text-slate-500">{notification.timestamp}</span>
             </div>
             {!notification.read && !compact && (
-              <Badge className="bg-[#0066ff] text-white shrink-0 font-semibold">New</Badge>
+              <Badge className="bg-[#20C997] text-slate-950 shrink-0 font-bold">New</Badge>
             )}
           </div>
         </div>
@@ -99,7 +99,7 @@ function NotificationCard({
                 onClick={() => onRead(notification.id)}
                 aria-label="Mark notification read"
               >
-                <Check className="w-4 h-4 text-[#20c937]" />
+                <Check className="w-4 h-4 text-[#20C997]" />
               </Button>
             )}
             {onDelete && (
@@ -179,12 +179,12 @@ export function Notifications() {
   );
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
+      <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#0066ff]/10 dark:bg-[#0066ff]/20 rounded-xl border border-[#0066ff]/20">
-              <Bell className="w-6 h-6 text-[#0066ff] dark:text-[#58a6ff]" />
+            <div className="p-2.5 bg-[#20C997]/10 rounded-xl border border-[#20C997]/20">
+              <Bell className="w-6 h-6 text-[#20C997]" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -197,11 +197,11 @@ export function Notifications() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={markEveryNotificationRead} disabled={loading || notifications.length === 0} className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">
-              <Check className="w-4 h-4 mr-2 text-[#20c937]" />
+              <Check className="w-4 h-4 mr-2 text-[#20C997]" />
               Mark all as read
             </Button>
             <Button variant="outline" size="sm" onClick={() => toast('Notification filters require persisted preferences.')} className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">
-              <Filter className="w-4 h-4 mr-2 text-[#0066ff] dark:text-[#58a6ff]" />
+              <Filter className="w-4 h-4 mr-2 text-[#20C997]" />
               Filter
             </Button>
           </div>
@@ -218,10 +218,10 @@ export function Notifications() {
 
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="mb-6 bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">All</TabsTrigger>
-            <TabsTrigger value="unread" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Unread ({unreadCount})</TabsTrigger>
-            <TabsTrigger value="mentions" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Mentions</TabsTrigger>
-            <TabsTrigger value="prs" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">Pull Requests</TabsTrigger>
+            <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">All</TabsTrigger>
+            <TabsTrigger value="unread" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">Unread ({unreadCount})</TabsTrigger>
+            <TabsTrigger value="mentions" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">Mentions</TabsTrigger>
+            <TabsTrigger value="prs" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">Pull Requests</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="space-y-3">

@@ -18,12 +18,12 @@ export function Settings() {
   useEffect(() => { void getActiveSessions().then(data => setSessions(data.sessions)).catch(() => setSessions([])); }, []);
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
       {/* Header */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
+      <div className="bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#0066ff]/10 dark:bg-[#0066ff]/20 rounded-xl border border-[#0066ff]/20">
-            <SettingsIcon className="w-6 h-6 text-[#0066ff] dark:text-[#58a6ff]" />
+          <div className="p-2.5 bg-[#20C997]/10 rounded-xl border border-[#20C997]/20">
+            <SettingsIcon className="w-6 h-6 text-[#20C997]" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -38,23 +38,23 @@ export function Settings() {
       <div className="flex-1 overflow-auto px-8 py-6">
         <Tabs defaultValue="profile" className="w-full max-w-4xl">
           <TabsList className="mb-6 bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <User className="w-4 h-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="notifications" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <Bell className="w-4 h-4 mr-2" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="appearance" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="appearance" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <Palette className="w-4 h-4 mr-2" />
               Appearance
             </TabsTrigger>
-            <TabsTrigger value="security" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="security" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <Shield className="w-4 h-4 mr-2" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#0066ff] dark:data-[state=active]:text-[#58a6ff] font-medium text-xs">
+            <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
               <Zap className="w-4 h-4 mr-2" />
               Integrations
             </TabsTrigger>
@@ -62,30 +62,30 @@ export function Settings() {
 
           {/* Profile Settings */}
           <TabsContent value="profile" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
+            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
               <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Profile Information</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName" className="text-slate-700 dark:text-slate-300">First Name</Label>
-                    <Input id="firstName" defaultValue="John" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white" />
+                    <Input id="firstName" defaultValue="John" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
                   </div>
                   <div>
                     <Label htmlFor="lastName" className="text-slate-700 dark:text-slate-300">Last Name</Label>
-                    <Input id="lastName" defaultValue="Doe" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white" />
+                    <Input id="lastName" defaultValue="Doe" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="email" className="text-slate-700 dark:text-slate-300">Email</Label>
-                  <Input id="email" type="email" defaultValue="john.doe@techit.com" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white" />
+                  <Input id="email" type="email" defaultValue="john.doe@techit.com" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
                 </div>
                 <div>
                   <Label htmlFor="role" className="text-slate-700 dark:text-slate-300">Role</Label>
                   <Select defaultValue="developer">
-                    <SelectTrigger className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white">
+                    <SelectTrigger className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-[#1a1a1a] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
+                    <SelectContent className="bg-white dark:bg-[#111111] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
                       <SelectItem value="developer">Software Developer</SelectItem>
                       <SelectItem value="designer">UI/UX Designer</SelectItem>
                       <SelectItem value="manager">Project Manager</SelectItem>
@@ -97,7 +97,7 @@ export function Settings() {
                   <Label htmlFor="bio" className="text-slate-700 dark:text-slate-300">Bio</Label>
                   <textarea
                     id="bio"
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-900 dark:text-white outline-none focus:border-[#0066ff] text-sm"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-900 dark:text-white outline-none focus:border-[#20C997] text-sm"
                     rows={3}
                     defaultValue="Full-stack developer passionate about building scalable applications"
                   />
@@ -105,14 +105,14 @@ export function Settings() {
               </div>
               <div className="mt-6 flex justify-end gap-2">
                 <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">Cancel</Button>
-                <Button className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">Save Changes</Button>
+                <Button className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Save Changes</Button>
               </div>
             </div>
           </TabsContent>
 
           {/* Notifications Settings */}
           <TabsContent value="notifications" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
+            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
               <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Notification Preferences</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -160,7 +160,7 @@ export function Settings() {
 
           {/* Appearance Settings */}
           <TabsContent value="appearance" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
+            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
               <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Appearance</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -175,7 +175,7 @@ export function Settings() {
                   <Label className="text-slate-900 dark:text-white font-medium">Theme Color</Label>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">Choose your accent color</p>
                   <div className="flex gap-3">
-                    <button className="w-10 h-10 rounded-xl bg-[#0066ff] border-2 border-[#0066ff] ring-2 ring-[#0066ff]/30" />
+                    <button className="w-10 h-10 rounded-xl bg-[#20C997] border-2 border-[#20C997] ring-2 ring-[#20C997]/30" />
                     <button className="w-10 h-10 rounded-xl bg-[#20c937] border-2 border-black/[0.08] dark:border-white/10 hover:border-[#20c937]" />
                     <button className="w-10 h-10 rounded-xl bg-amber-500 border-2 border-black/[0.08] dark:border-white/10 hover:border-amber-500" />
                     <button className="w-10 h-10 rounded-xl bg-purple-600 border-2 border-black/[0.08] dark:border-white/10 hover:border-purple-600" />
@@ -186,10 +186,10 @@ export function Settings() {
                 <div>
                   <Label className="text-slate-900 dark:text-white font-medium">Language</Label>
                   <Select defaultValue="en">
-                    <SelectTrigger className="mt-2 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white">
+                    <SelectTrigger className="mt-2 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-[#1a1a1a] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
+                    <SelectContent className="bg-white dark:bg-[#111111] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
                       <SelectItem value="en">English</SelectItem>
                       <SelectItem value="es">Español</SelectItem>
                       <SelectItem value="fr">Français</SelectItem>
@@ -212,17 +212,17 @@ export function Settings() {
 
           {/* Security Settings */}
           <TabsContent value="security" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
+            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
               <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Security</h2>
               <div className="space-y-4">
                 <div>
                   <Label className="text-slate-900 dark:text-white font-medium">Change Password</Label>
                   <div className="space-y-2 mt-2">
-                    <Input type="password" placeholder="Current password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white" />
-                    <Input type="password" placeholder="New password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white" />
-                    <Input type="password" placeholder="Confirm new password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white" />
+                    <Input type="password" placeholder="Current password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
+                    <Input type="password" placeholder="New password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
+                    <Input type="password" placeholder="Confirm new password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
                   </div>
-                  <Button className="mt-3 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">Update Password</Button>
+                  <Button className="mt-3 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Update Password</Button>
                 </div>
                 <Separator className="bg-black/[0.06] dark:bg-white/10" />
                 <div className="flex items-center justify-between">
@@ -237,7 +237,7 @@ export function Settings() {
                   <Label className="text-slate-900 dark:text-white font-medium">Active Sessions</Label>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">Manage your active sessions</p>
                   <div className="space-y-2">
-                    {sessions.map(session => <div key={session.id} className="flex items-center justify-between p-3.5 bg-black/[0.03] dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl"><div><p className="font-medium text-sm text-slate-900 dark:text-white">{session.browser} on {session.platform}</p><p className="text-xs text-slate-400 dark:text-slate-500">{session.current ? 'Current session' : `Last active ${new Date(session.lastActiveAt).toLocaleString()}`}</p></div>{session.current ? <span className="text-xs text-[#20c937] font-bold">Active now</span> : <Button variant="ghost" size="sm" className="text-red-600 dark:text-red-400 rounded-lg" onClick={() => void revokeSession(session.sessionIdentifier).then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Revoke</Button>}</div>)}
+                    {sessions.map(session => <div key={session.id} className="flex items-center justify-between p-3.5 bg-black/[0.03] dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl"><div><p className="font-medium text-sm text-slate-900 dark:text-white">{session.browser} on {session.platform}</p><p className="text-xs text-slate-400 dark:text-slate-500">{session.current ? 'Current session' : `Last active ${new Date(session.lastActiveAt).toLocaleString()}`}</p></div>{session.current ? <span className="text-xs text-[#20C997] font-bold">Active now</span> : <Button variant="ghost" size="sm" className="text-red-600 dark:text-red-400 rounded-lg" onClick={() => void revokeSession(session.sessionIdentifier).then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Revoke</Button>}</div>)}
                     {sessions.length > 1 && <Button variant="outline" size="sm" className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200" onClick={() => void revokeOtherSessions().then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Sign out other devices</Button>}
                     {!sessions.length && <p className="text-sm text-slate-500 dark:text-slate-400">No active sessions available.</p>}
                   </div>
@@ -248,7 +248,7 @@ export function Settings() {
 
           {/* Integrations Settings */}
           <TabsContent value="integrations" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
+            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
               <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Connected Integrations</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.02] dark:bg-white/5">
@@ -265,15 +265,15 @@ export function Settings() {
                 </div>
                 <div className="flex items-center justify-between p-4 border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.02] dark:bg-white/5">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-[#0066ff] rounded-xl">
-                      <Globe className="w-5 h-5 text-white" />
+                    <div className="p-2.5 bg-[#20C997] rounded-xl text-slate-950">
+                      <Globe className="w-5 h-5" />
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900 dark:text-white">Slack</p>
                       <p className="text-sm text-slate-500 dark:text-slate-400">Not connected</p>
                     </div>
                   </div>
-                  <Button className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">Connect</Button>
+                  <Button className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Connect</Button>
                 </div>
                 <div className="flex items-center justify-between p-4 border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.02] dark:bg-white/5">
                   <div className="flex items-center gap-3">
@@ -285,7 +285,7 @@ export function Settings() {
                       <p className="text-sm text-slate-500 dark:text-slate-400">Not connected</p>
                     </div>
                   </div>
-                  <Button className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all">Connect</Button>
+                  <Button className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Connect</Button>
                 </div>
               </div>
             </div>

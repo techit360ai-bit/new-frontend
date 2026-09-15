@@ -57,17 +57,17 @@ export function WorkspaceInvitationPage() {
     }
   };
 
-  if (loading) return <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#121212]"><Loader2 className="h-6 w-6 animate-spin text-[#0066ff] dark:text-[#58a6ff]" /></div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#0a0a0a]"><Loader2 className="h-6 w-6 animate-spin text-[#20C997]" /></div>;
   if (error || !invitation) return <div className="mx-auto mt-16 max-w-lg rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center text-sm text-red-600 dark:text-red-400">{error || "Invitation not found."}</div>;
 
   const actionable = invitation.status === "pending";
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors px-4 py-12">
-      <section className="mx-auto max-w-2xl rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 shadow-xl sm:p-8 text-slate-900 dark:text-white">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors px-4 py-12">
+      <section className="mx-auto max-w-2xl rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl p-6 shadow-xl sm:p-8 text-slate-900 dark:text-white">
         <div className="flex items-start gap-4">
-          <div className="rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 p-3 border border-[#0066ff]/20"><Users className="h-6 w-6 text-[#0066ff] dark:text-[#58a6ff]" /></div>
+          <div className="rounded-xl bg-[#20C997]/10 p-3 border border-[#20C997]/20"><Users className="h-6 w-6 text-[#20C997]" /></div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#0066ff] dark:text-[#58a6ff]">Workspace invitation</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#20C997]">Workspace invitation</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">Join {invitation.workspaceName}</h1>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{invitation.inviterName} invited you as {invitation.requestedRole}.</p>
           </div>
@@ -89,7 +89,7 @@ export function WorkspaceInvitationPage() {
         {actionable ? (
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button disabled={busy !== null} onClick={() => void decline()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 transition-colors disabled:opacity-50"><XCircle className="h-4 w-4" /> Decline</button>
-            <button disabled={busy !== null} onClick={() => void accept()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-50">{busy === "accept" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />} Accept and join</button>
+            <button disabled={busy !== null} onClick={() => void accept()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-5 py-2.5 text-sm font-bold text-slate-950 shadow-md transition-all disabled:opacity-50">{busy === "accept" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />} Accept and join</button>
           </div>
         ) : (
           <p className="mt-6 rounded-xl border border-black/[0.06] dark:border-white/10 p-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">Invitation {invitation.status}.</p>

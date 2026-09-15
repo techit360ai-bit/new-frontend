@@ -41,7 +41,7 @@ export function KanbanColumn({ title, tasks, onDrop, color }: KanbanColumnProps)
           drop(node);
         }}
         className={`space-y-3 min-h-[200px] transition-colors rounded-xl ${
-          isOver ? 'bg-[#0066ff]/10 border-2 border-dashed border-[#0066ff] p-2' : ''
+          isOver ? 'bg-[#20C997]/10 border-2 border-dashed border-[#20C997] p-2' : ''
         }`}
       >
         {tasks.map((task) => (

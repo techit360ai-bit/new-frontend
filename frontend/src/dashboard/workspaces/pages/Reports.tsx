@@ -108,8 +108,8 @@ export function Reports() {
   const totalEvents = tasks.reduce((sum, task) => sum + task.events.length, 0) + activity.length;
 
   return (
-    <div className="h-full bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white transition-colors overflow-auto">
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
+    <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors overflow-auto">
+      <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -140,7 +140,7 @@ export function Reports() {
               toast.success('Report exported successfully');
             }}
             disabled={loading || tasks.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl text-sm shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl text-sm shadow-sm transition-all disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             <span>Export Report</span>
@@ -157,36 +157,36 @@ export function Reports() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
+          <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#0066ff]/10 dark:bg-[#0066ff]/20 rounded-xl flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-[#0066ff] dark:text-[#58a6ff]" />
+              <div className="w-12 h-12 bg-[#20C997]/10 rounded-xl flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6 text-[#20C997]" />
               </div>
-              <Badge className="bg-[#20c937] text-white font-bold">Live</Badge>
+              <Badge className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-bold">Live</Badge>
             </div>
             <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{completedTasks}</div>
             <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">Completed Tasks</div>
             <div className="text-xs text-slate-400 dark:text-slate-500 mt-2">{tasks.length} total recorded</div>
           </div>
 
-          <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
+          <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center">
                 <Clock className="w-6 h-6 text-amber-500" />
               </div>
-              <Badge className="bg-amber-500 text-white font-bold">Open</Badge>
+              <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">Open</Badge>
             </div>
             <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{openTasks}</div>
             <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">Open Workflow Items</div>
             <div className="text-xs text-slate-400 dark:text-slate-500 mt-2">Queued, running, approval, or failed</div>
           </div>
 
-          <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
+          <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#20c937]/10 rounded-xl flex items-center justify-center">
-                <Activity className="w-6 h-6 text-[#20c937]" />
+              <div className="w-12 h-12 bg-[#20C997]/10 rounded-xl flex items-center justify-center">
+                <Activity className="w-6 h-6 text-[#20C997]" />
               </div>
-              <Badge className="bg-[#20c937] text-white font-bold">Events</Badge>
+              <Badge className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-bold">Events</Badge>
             </div>
             <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{totalEvents}</div>
             <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">Activity Events</div>
@@ -195,7 +195,7 @@ export function Reports() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
+          <div className="lg:col-span-2 bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
             <div className="p-6 border-b border-black/[0.06] dark:border-white/10">
               <h2 className="font-bold text-lg text-slate-900 dark:text-white">Contributor Summary</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Grouped by live agent or workspace owner</p>
@@ -218,8 +218,8 @@ export function Reports() {
                       <td className="py-4">
                         <div className="flex items-center gap-3">
                           <div className="relative">
-                            <Avatar className="w-10 h-10 border border-white dark:border-[#121212]">
-                              <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white font-bold">
+                            <Avatar className="w-10 h-10 border border-white dark:border-[#111111]">
+                              <AvatarFallback className="bg-[#20C997] text-slate-950 font-bold">
                                 {contributor.avatar}
                               </AvatarFallback>
                             </Avatar>
@@ -241,14 +241,14 @@ export function Reports() {
                       <td className="py-4">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 max-w-[100px] h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-[#0066ff] to-[#58a6ff] rounded-full" style={{ width: `${contributor.powerScore}%` }} />
+                            <div className="h-full bg-[#20C997] rounded-full" style={{ width: `${contributor.powerScore}%` }} />
                           </div>
                           <span className="text-sm font-semibold text-slate-900 dark:text-white">{contributor.powerScore}</span>
                         </div>
                       </td>
                       <td className="py-4">
                         {contributor.trend === 'up' ? (
-                          <TrendingUp className="w-5 h-5 text-[#20c937]" />
+                          <TrendingUp className="w-5 h-5 text-[#20C997]" />
                         ) : (
                           <TrendingDown className="w-5 h-5 text-red-500" />
                         )}
@@ -263,7 +263,7 @@ export function Reports() {
             </div>
           </div>
 
-          <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
+          <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 text-slate-900 dark:text-white">
             <div className="p-6 border-b border-black/[0.06] dark:border-white/10">
               <h2 className="font-bold text-lg text-slate-900 dark:text-white">Task Status</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Live workspace task distribution</p>
@@ -279,7 +279,7 @@ export function Reports() {
                     <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#888' }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#1a1a1a',
+                        backgroundColor: '#111111',
                         border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '12px',
                         color: '#fff',

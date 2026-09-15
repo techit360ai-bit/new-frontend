@@ -412,19 +412,19 @@ export function Code() {
 
   const conflict = conflicts[0];
   return (
-    <div className="flex h-full min-h-[calc(100vh-60px)] flex-col bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="flex h-full min-h-[calc(100vh-60px)] flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-slate-100 transition-colors">
       {/* Top Glassmorphic IDE Toolbar */}
-      <div className="flex flex-wrap items-center gap-2.5 border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-4 py-2.5 z-10 shrink-0">
+      <div className="flex flex-wrap items-center gap-2.5 border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl px-4 py-2.5 z-10 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] rounded-xl border border-[#0066ff]/20">
+          <div className="p-1.5 bg-[#20C997]/10 text-[#20C997] rounded-xl border border-[#20C997]/20">
             <Code2 className="h-4 w-4" />
           </div>
           <select
             value={workspaceId}
             onChange={event => { setWorkspaceId(event.target.value); setParams({ workspace: event.target.value }); }}
-            className="h-8 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 px-2.5 text-xs font-semibold text-slate-800 dark:text-white outline-none focus:border-[#0066ff] transition-all cursor-pointer"
+            className="h-8 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 px-2.5 text-xs font-semibold text-slate-800 dark:text-white outline-none focus:border-[#20C997] transition-all cursor-pointer"
           >
-            {workspaces.map(row => <option key={row.id} value={row.id} className="dark:bg-[#1a1a1a]">{row.name}</option>)}
+            {workspaces.map(row => <option key={row.id} value={row.id} className="dark:bg-[#111111]">{row.name}</option>)}
           </select>
         </div>
 
@@ -436,7 +436,7 @@ export function Code() {
               onClick={() => setMode(value)}
               className={`px-2.5 py-1 text-xs font-semibold capitalize rounded-lg transition-all ${
                 mode === value
-                  ? 'bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white shadow-sm font-bold'
+                  ? 'bg-[#20C997] text-slate-950 shadow-sm font-bold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -451,8 +451,8 @@ export function Code() {
           <span>•</span>
           <span className="font-semibold text-slate-700 dark:text-slate-200">{changed.length} Edits</span>
           <span>•</span>
-          <span className={`inline-flex items-center gap-1 font-bold ${navigator.onLine ? 'text-[#20c937]' : 'text-amber-400'}`}>
-            <span className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-[#20c937] animate-pulse' : 'bg-amber-400'}`} />
+          <span className={`inline-flex items-center gap-1 font-bold ${navigator.onLine ? 'text-[#20C997]' : 'text-amber-400'}`}>
+            <span className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-[#20C997] animate-pulse' : 'bg-amber-400'}`} />
             {navigator.onLine ? 'Online' : 'Offline'}
           </span>
         </div>
@@ -460,7 +460,7 @@ export function Code() {
         {/* Action Controls */}
         <div className="ml-auto flex flex-wrap items-center gap-1.5">
           <button onClick={createFile} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1 transition-all" title="New file">
-            <FilePlus2 className="h-3.5 w-3.5 text-[#0066ff]" /> New
+            <FilePlus2 className="h-3.5 w-3.5 text-[#20C997]" /> New
           </button>
           <button onClick={() => void renameActive()} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-medium transition-all">
             Rename
@@ -468,17 +468,17 @@ export function Code() {
           <button onClick={() => void removeActive()} className="h-8 px-2.5 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1 transition-all" title="Delete">
             <Trash2 className="h-3.5 w-3.5" />
           </button>
-          <button onClick={() => void saveAll()} disabled={busy || !changed.length} className="h-8 px-3 rounded-xl bg-[#20c937] hover:bg-[#20c937]/90 disabled:opacity-40 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all" title="Save All">
+          <button onClick={() => void saveAll()} disabled={busy || !changed.length} className="h-8 px-3 rounded-xl bg-[#20C997] hover:bg-[#1db587] disabled:opacity-40 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all" title="Save All">
             <Save className="h-3.5 w-3.5" /> Save
           </button>
-          <button onClick={() => void run('dev')} className="h-8 px-3 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
-            <Play className="h-3.5 w-3.5 fill-current text-white" /> Run
+          <button onClick={() => void run('dev')} className="h-8 px-3 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
+            <Play className="h-3.5 w-3.5 fill-current text-slate-950" /> Run
           </button>
           <button onClick={() => { stopWebCommand(); setTerminal(value => `${value}\nProcess stopped by user.`); }} className="h-8 px-2 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-all" title="Stop runtime">
             <Square className="h-3.5 w-3.5" />
           </button>
           <button onClick={() => void run('test')} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-all">
-            <TestTube2 className="h-3.5 w-3.5 text-[#58a6ff]" /> Test
+            <TestTube2 className="h-3.5 w-3.5 text-[#20C997]" /> Test
           </button>
           <button onClick={() => void run('build')} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all">
             Build
@@ -491,16 +491,16 @@ export function Code() {
             title="Synchronization destination"
           >
             <option value="">Destination</option>
-            {destinations.map(row => <option key={row.id} value={row.id} className="dark:bg-[#1a1a1a]">{row.provider}: {row.repository || 'VS Code'}</option>)}
+            {destinations.map(row => <option key={row.id} value={row.id} className="dark:bg-[#111111]">{row.provider}: {row.repository || 'VS Code'}</option>)}
           </select>
 
           <button onClick={() => { const repo = window.prompt('Connected repository', remote.repo); if (repo) setRemote(value => ({ ...value, repo })); }} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1 transition-all" title="Configure repository">
             <Github className="h-3.5 w-3.5" />
           </button>
           <button onClick={() => void pull()} className="h-8 px-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-all">
-            <RefreshCw className="h-3.5 w-3.5 text-[#0066ff]" /> Pull
+            <RefreshCw className="h-3.5 w-3.5 text-[#20C997]" /> Pull
           </button>
-          <button onClick={() => void push()} className="h-8 px-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all">
+          <button onClick={() => void push()} className="h-8 px-2.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold text-xs flex items-center gap-1 shadow-sm transition-all">
             <UploadCloud className="h-3.5 w-3.5" /> Push
           </button>
           <button onClick={() => void deployPreview()} className="h-8 px-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-semibold transition-all">
@@ -515,7 +515,7 @@ export function Code() {
       {/* Main Workspace IDE Grid Layout */}
       <div className="grid min-h-0 flex-1 grid-cols-[230px_minmax(0,1fr)_320px] max-lg:grid-cols-[200px_minmax(0,1fr)] max-md:block">
         {/* Left File Explorer Panel */}
-        <aside className="overflow-y-auto custom-scrollbar border-r border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#121212]/80 backdrop-blur-xl p-3 max-md:flex max-md:max-h-28 max-md:border-b">
+        <aside className="overflow-y-auto custom-scrollbar border-r border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#111111]/80 backdrop-blur-xl p-3 max-md:flex max-md:max-h-28 max-md:border-b">
           <div className="mb-3 px-2 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             <span>Project Files</span>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-500">{files.length}</span>
@@ -530,13 +530,13 @@ export function Code() {
                   onClick={() => setActivePath(file.path)}
                   className={`flex items-center justify-between w-full truncate rounded-xl px-3 py-2 text-left text-xs transition-all ${
                     isSelected
-                      ? 'bg-gradient-to-r from-[#0066ff]/15 via-[#0066ff]/10 to-transparent text-[#0066ff] dark:text-[#58a6ff] font-semibold border-l-4 border-[#0066ff]'
+                      ? 'bg-gradient-to-r from-[#20C997]/15 via-[#20C997]/10 to-transparent text-[#20C997] font-semibold border-l-4 border-[#20C997]'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white font-medium'
                   }`}
                 >
                   <span className="truncate flex-1">{file.path}</span>
                   {isUnsaved && (
-                    <span className="w-2 h-2 rounded-full bg-[#0066ff] shrink-0 ml-1.5" title="Unsaved changes" />
+                    <span className="w-2 h-2 rounded-full bg-[#20C997] shrink-0 ml-1.5" title="Unsaved changes" />
                   )}
                 </button>
               );
@@ -558,22 +558,22 @@ export function Code() {
             />
           ) : (
             <div className="p-8 text-slate-400 flex flex-col items-center justify-center h-full">
-              <Code2 className="w-12 h-12 text-[#0066ff] mb-3 opacity-50" />
+              <Code2 className="w-12 h-12 text-[#20C997] mb-3 opacity-50" />
               <p className="text-sm font-medium">Create or pull a file to start editing code.</p>
             </div>
           )}
         </main>
 
         {/* Right AI Assistant Sidebar */}
-        <aside className="border-l border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#121212]/80 backdrop-blur-xl p-4 max-lg:hidden flex flex-col">
+        <aside className="border-l border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-[#111111]/80 backdrop-blur-xl p-4 max-lg:hidden flex flex-col">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-lg bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+              <div className="p-1 rounded-lg bg-[#20C997]/10 text-[#20C997]">
                 <Bot className="h-4 w-4" />
               </div>
               <span className="font-bold text-sm text-slate-900 dark:text-white">AI Coding Agent</span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wide text-[#20c937] bg-[#20c937]/10 px-2 py-0.5 rounded-full border border-[#20c937]/20">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-[#20C997] bg-[#20C997]/10 px-2 py-0.5 rounded-full border border-[#20C997]/20">
               Active
             </span>
           </div>
@@ -582,13 +582,13 @@ export function Code() {
             value={task}
             onChange={event => setTask(event.target.value)}
             rows={5}
-            className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 p-3 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-[#0066ff] placeholder-slate-400 transition-all resize-none mb-3"
+            className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 p-3 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-[#20C997] placeholder-slate-400 transition-all resize-none mb-3"
             placeholder="Describe what should be built or refactored..."
           />
 
           <button
             onClick={() => void askAI(false)}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-3 py-2.5 text-xs font-bold text-white shadow-md transition-all mb-2"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-3 py-2.5 text-xs font-bold text-slate-950 shadow-md transition-all mb-2"
           >
             <Send className="h-3.5 w-3.5" />
             Prepare Build Plan
@@ -597,7 +597,7 @@ export function Code() {
           {mode !== 'manual' && (
             <button
               onClick={() => void askAI(true)}
-              className="w-full rounded-xl border border-[#0066ff]/40 text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/10 px-3 py-2 text-xs font-semibold transition-all mb-3"
+              className="w-full rounded-xl border border-[#20C997]/40 text-[#20C997] hover:bg-[#20C997]/10 px-3 py-2 text-xs font-semibold transition-all mb-3"
             >
               Generate Reviewable Changes
             </button>
@@ -615,7 +615,7 @@ export function Code() {
       </div>
 
       {/* Bottom Panel Console & Preview Tabs */}
-      <div className="h-[260px] border-t border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl z-10 shrink-0">
+      <div className="h-[260px] border-t border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl z-10 shrink-0">
         <div className="flex h-10 items-center justify-between border-b border-black/[0.06] dark:border-white/10 px-3">
           <div className="flex items-center gap-1">
             {(['terminal','problems','changes','ai','preview'] as BottomPanel[]).map(value => (
@@ -624,7 +624,7 @@ export function Code() {
                 onClick={() => setBottomPanel(value)}
                 className={`px-3 py-1.5 text-xs font-semibold capitalize rounded-lg transition-all ${
                   bottomPanel === value
-                    ? 'bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/30 font-bold'
+                    ? 'bg-[#20C997]/15 text-[#20C997] border border-[#20C997]/30 font-bold'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -646,7 +646,7 @@ export function Code() {
         <div className="h-[220px] overflow-hidden">
           {bottomPanel === 'terminal' && (
             <pre className="h-[220px] overflow-y-auto p-4 text-xs font-mono text-emerald-500 dark:text-emerald-400 bg-slate-950 leading-relaxed custom-scrollbar">
-              <SquareTerminal className="mr-2 inline h-4 w-4 text-[#0066ff]" />
+              <SquareTerminal className="mr-2 inline h-4 w-4 text-[#20C997]" />
               {terminal || 'Runtime initializes when Run, Test, or Build is selected.'}
             </pre>
           )}
@@ -684,7 +684,7 @@ export function Code() {
                         </div>
                       </div>
                     ))}
-                    <button onClick={() => void completeExecutionReview()} className="w-full py-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white font-bold text-xs" disabled={!executionRun?.steps.some(row => row.stage === 'security' && row.status === 'completed')}>Apply Reviewed Hunks</button>
+                    <button onClick={() => void completeExecutionReview()} className="w-full py-2 rounded-xl bg-[#20C997] text-slate-950 font-bold text-xs" disabled={!executionRun?.steps.some(row => row.stage === 'security' && row.status === 'completed')}>Apply Reviewed Hunks</button>
                   </div>
                 </div>
               ) : changed[0] ? (

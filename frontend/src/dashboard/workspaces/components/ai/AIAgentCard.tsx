@@ -25,10 +25,10 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
 
   return (
     <motion.div
-      className={`relative bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-5 border transition-all cursor-pointer text-slate-900 dark:text-white ${
+      className={`relative bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl p-5 border transition-all cursor-pointer text-slate-900 dark:text-white ${
         agent.isPremium
           ? 'border-amber-400/40 shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]'
-          : 'border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-md'
+          : 'border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-md hover:border-[#20C997]/30'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -45,10 +45,10 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
             agent.isPremium
-              ? 'bg-gradient-to-br from-[#0066ff] to-purple-600'
-              : 'bg-[#0066ff]/10 dark:bg-[#0066ff]/20'
+              ? 'bg-[#20C997] text-slate-950'
+              : 'bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20'
           }`}>
-            <Bot className={`w-5 h-5 ${agent.isPremium ? 'text-white' : 'text-[#0066ff] dark:text-[#58a6ff]'}`} />
+            <Bot className={`w-5 h-5 ${agent.isPremium ? 'text-slate-950 font-bold' : 'text-[#20C997]'}`} />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold flex items-center gap-2 text-slate-900 dark:text-white">
@@ -80,7 +80,7 @@ export function AIAgentCard({ agent, onToggle }: AIAgentCardProps) {
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl text-sm font-bold shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+          className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl text-sm font-bold shadow-md transition-all"
         >
           <Settings className="w-4 h-4" />
           Configure

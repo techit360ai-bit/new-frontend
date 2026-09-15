@@ -111,7 +111,7 @@ export function RightPanel() {
     location.pathname === '/workspaces/'
   ) {
     return (
-      <div className="w-[320px] shrink-0 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border-l border-black/[0.06] dark:border-white/10 flex flex-col max-md:hidden text-slate-900 dark:text-white transition-colors">
+      <div className="w-[320px] shrink-0 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-l border-black/[0.06] dark:border-white/10 flex flex-col max-md:hidden text-slate-900 dark:text-white transition-colors">
         <div className="p-4 border-b border-black/[0.06] dark:border-white/10">
           <h3 className="font-semibold text-slate-900 dark:text-white">Team Activity</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Live workspace updates</p>
@@ -128,7 +128,7 @@ export function RightPanel() {
             {!loading && activities.map((activityRow) => (
               <div key={activityRow.id} className="flex gap-3 group hover:bg-black/[0.03] dark:hover:bg-white/[0.05] p-2 rounded-xl -mx-2 transition-colors">
                 <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarFallback className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white text-xs font-bold">
+                  <AvatarFallback className="bg-[#20C997] text-slate-950 text-xs font-bold">
                     {activityRow.avatar}
                   </AvatarFallback>
                 </Avatar>
@@ -138,7 +138,7 @@ export function RightPanel() {
                     {' '}
                     <span className="text-slate-500 dark:text-slate-400">{activityRow.action}</span>
                   </p>
-                  <p className="text-sm text-[#0066ff] dark:text-[#58a6ff] truncate">{activityRow.detail}</p>
+                  <p className="text-sm text-[#20C997] truncate">{activityRow.detail}</p>
                   <div className="flex items-center gap-1 mt-1 text-xs text-slate-400 dark:text-slate-500">
                     <Clock className="w-3 h-3" />
                     {formatTimestamp(activityRow.at)}
@@ -153,9 +153,9 @@ export function RightPanel() {
         </ScrollArea>
 
         <div className="p-4 border-t border-black/[0.06] dark:border-white/10">
-          <div className="bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 p-3.5 rounded-xl border border-[#0066ff]/20 backdrop-blur-sm">
+          <div className="bg-[#20C997]/10 p-3.5 rounded-xl border border-[#20C997]/20 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-4 h-4 text-[#20c937]" />
+              <CheckCircle2 className="w-4 h-4 text-[#20C997]" />
               <span className="text-sm font-semibold text-slate-900 dark:text-white">Task Progress</span>
             </div>
             {tasks.length > 0 ? (
@@ -165,7 +165,7 @@ export function RightPanel() {
                   <span className="font-semibold text-slate-900 dark:text-white">{progress}%</span>
                 </div>
                 <div className="h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#0066ff] to-[#20c937] rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                  <div className="h-full bg-[#20C997] rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
               </div>
             ) : (
