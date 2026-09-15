@@ -24,10 +24,10 @@ export function RightPanel() {
   return (
     <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-[320px] overflow-y-auto p-5 xl:block font-bricolage space-y-4">
       {/* Live Activity Card */}
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm">
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 backdrop-blur-xl shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Live Activity Overview</span>
-          <Activity className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <Activity className="h-4 w-4 text-[#20C997]" />
         </div>
 
         <div className="mt-3 flex items-end justify-between">
@@ -62,9 +62,9 @@ export function RightPanel() {
       </section>
 
       {/* Recent Contributors */}
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm">
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 backdrop-blur-xl shadow-sm">
         <div className="flex items-center gap-2 mb-3">
-          <Users className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <Users className="h-4 w-4 text-[#20C997]" />
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Active Contributors</span>
         </div>
 
@@ -76,12 +76,12 @@ export function RightPanel() {
               className="group flex items-center justify-between rounded-xl border border-transparent p-2 transition-all hover:border-black/[0.06] dark:hover:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
             >
               <div>
-                <p className="truncate text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff]">
+                <p className="truncate text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#20C997]">
                   {post.authorId}
                 </p>
                 <p className="text-[10px] capitalize text-slate-400 dark:text-slate-500">{post.authorRole}</p>
               </div>
-              <span className="text-[10px] font-semibold text-[#0066ff] dark:text-[#58a6ff]">View</span>
+              <span className="text-[10px] font-semibold text-[#20C997]">View</span>
             </Link>
           ))}
 
@@ -92,7 +92,7 @@ export function RightPanel() {
       </section>
 
       {/* Problem Signals */}
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm">
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 backdrop-blur-xl shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <AlertCircle className="h-4 w-4 text-amber-500" />
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Problem Signals</span>

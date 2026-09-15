@@ -77,7 +77,7 @@ export function PostComposer({
   };
 
   return (
-    <div className="mb-5 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-4 sm:p-5 backdrop-blur-xl shadow-sm transition-all font-bricolage">
+    <div className="mb-5 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-4 sm:p-5 backdrop-blur-xl shadow-sm transition-all font-bricolage">
       {expanded && (
         <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           {postTypes.map((type) => (
@@ -87,8 +87,8 @@ export function PostComposer({
               onClick={() => setSelectedType(type.id)}
               className={`whitespace-nowrap rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${
                 selectedType === type.id
-                  ? "bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 border-[#0066ff] text-[#0066ff] dark:text-[#58a6ff]"
-                  : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-300 hover:border-[#0066ff]/40"
+                  ? "bg-[#20C997]/10 border-[#20C997] text-[#20C997]"
+                  : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-300 hover:border-[#20C997]/40"
               }`}
             >
               <type.icon className="mr-1.5 inline h-3.5 w-3.5" aria-hidden="true" />
@@ -99,7 +99,7 @@ export function PostComposer({
       )}
 
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-xs font-black text-white shadow-md">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#20C997] text-xs font-black text-slate-950 shadow-md">
           {initials(name)}
         </div>
 
@@ -108,7 +108,7 @@ export function PostComposer({
             <textarea
               value={body}
               onChange={(event) => setBody(event.target.value)}
-              className="min-h-[120px] w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] p-3.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#0066ff] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 dark:placeholder:text-white/40 dark:focus:border-[#58a6ff] dark:focus:bg-white/10 transition-all"
+              className="min-h-[120px] w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] p-3.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:placeholder:text-white/40 dark:focus:border-[#20C997] dark:focus:bg-white/10 transition-all"
               placeholder="What did you build, ship, or learn today?"
               autoFocus
             />
@@ -145,7 +145,7 @@ export function PostComposer({
               onClick={() => setAudience([])}
               className={`rounded-xl border px-3 py-1 text-xs font-bold transition-all ${
                 audience.length === 0
-                  ? "bg-[#0066ff]/10 border-[#0066ff] text-[#0066ff] dark:text-[#58a6ff]"
+                  ? "bg-[#20C997]/10 border-[#20C997] text-[#20C997]"
                   : "border-black/[0.08] dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
               }`}
             >
@@ -158,7 +158,7 @@ export function PostComposer({
                 onClick={() => toggleAudience(role)}
                 className={`rounded-xl border px-3 py-1 text-xs font-bold capitalize transition-all ${
                   audience.includes(role)
-                    ? "bg-[#0066ff]/10 border-[#0066ff] text-[#0066ff] dark:text-[#58a6ff]"
+                    ? "bg-[#20C997]/10 border-[#20C997] text-[#20C997]"
                     : "border-black/[0.08] dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
                 }`}
               >
@@ -179,7 +179,7 @@ export function PostComposer({
               type="button"
               onClick={() => { void handlePost(); }}
               disabled={!body.trim() || posting}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] px-5 py-2 text-xs font-bold text-white shadow-md hover:from-[#0052cc] hover:to-[#408fe6] transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-5 py-2 text-xs font-bold text-slate-950 shadow-md transition-all disabled:opacity-50"
             >
               <Send className="h-3.5 w-3.5" />
               <span>{posting ? "Publishing..." : "Publish Post"}</span>

@@ -98,19 +98,19 @@ export function LivePostCard({
 
   return (
     <>
-      <article className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:border-[#0066ff]/30 dark:hover:border-white/20 font-bricolage">
+      <article className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:border-[#20C997]/30 dark:hover:border-white/20 font-bricolage">
         {/* Post Header */}
         <div className="mb-3 flex items-start justify-between gap-3">
           <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-xs font-black text-white shadow-md">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#20C997] text-xs font-black text-slate-950 shadow-md">
               {initials(author)}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="truncate text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors">
+                <span className="truncate text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">
                   {author}
                 </span>
-                <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#0066ff] dark:text-[#58a6ff] border border-blue-200 dark:border-blue-800 px-2 py-0.2 text-[9px] font-bold capitalize">
+                <span className="rounded-full bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 px-2 py-0.2 text-[9px] font-bold capitalize">
                   {post.authorRole || "Member"}
                 </span>
               </div>
@@ -174,7 +174,7 @@ export function LivePostCard({
 
         {/* Post Kind Badge & Content */}
         <Link to={`/feed/post/${encodeURIComponent(post.id)}`} className="block">
-          <div className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-white/[0.06] px-2.5 py-0.5 text-[10px] font-bold text-[#0066ff] dark:text-[#58a6ff]">
+          <div className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#20C997]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#20C997]">
             <KindIcon className="h-3 w-3" aria-hidden="true" />
             <span>{meta.label}</span>
           </div>
@@ -207,7 +207,7 @@ export function LivePostCard({
 
             <Link
               to={`/feed/post/${encodeURIComponent(post.id)}`}
-              className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-slate-400 hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors"
+              className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-slate-400 hover:text-[#20C997] transition-colors"
             >
               <MessageCircle className="h-4 w-4" />
               <span>Comment</span>
@@ -218,7 +218,7 @@ export function LivePostCard({
               onClick={() => { void toggleSave(); }}
               aria-label={saved ? "Remove saved post" : "Save post"}
               className={`flex items-center gap-1.5 font-bold transition-colors ${
-                saved ? "text-[#0066ff] dark:text-[#58a6ff]" : "text-slate-500 dark:text-slate-400 hover:text-[#0066ff]"
+                saved ? "text-[#20C997]" : "text-slate-500 dark:text-slate-400 hover:text-[#20C997]"
               }`}
             >
               <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
@@ -230,7 +230,7 @@ export function LivePostCard({
             type="button"
             onClick={() => setShareOpen(true)}
             aria-label="Share post"
-            className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-slate-400 hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors"
+            className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-slate-400 hover:text-[#20C997] transition-colors"
           >
             <Share2 className="h-4 w-4" />
             <span className="hidden sm:inline">Share</span>

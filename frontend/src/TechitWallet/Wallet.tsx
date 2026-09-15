@@ -53,12 +53,12 @@ export default function Wallet() {
   const buckets = summary.wallets || [];
 
   return (
-    <div className="min-h-dvh bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white">
-      <header className="sticky top-0 z-30 border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl">
+    <div className="min-h-dvh bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white">
+      <header className="sticky top-0 z-30 border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <BackButton fallback="/dashboard" />
-            <div className="p-2 rounded-xl bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+            <div className="p-2 rounded-xl bg-[#20C997]/10 text-[#20C997]">
               <WalletCards className="h-5 w-5" />
             </div>
             <div>
@@ -70,7 +70,7 @@ export default function Wallet() {
             <Button variant="ghost" size="sm" onClick={() => void load()} disabled={refreshing} aria-label="Refresh wallet" className="rounded-xl">
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
-            <Badge className="border-[#20c937]/20 bg-[#20c937]/10 text-[#20c937] font-bold px-3 py-1 rounded-full">
+            <Badge className="border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997] font-bold px-3 py-1 rounded-full">
               {summary.creditBalance.toLocaleString()} available
             </Badge>
           </div>
@@ -80,14 +80,14 @@ export default function Wallet() {
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 pb-24 sm:px-6 lg:py-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#0066ff] dark:text-[#58a6ff]">Wallet overview</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-[#20C997]">Wallet overview</p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Your credits, clearly accounted for.</h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-400">Every value shown here comes directly from the TechIT billing API.</p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setView('purchase')}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-5 py-2.5 text-sm font-bold text-slate-950 shadow-sm transition-all"
             >
               <ShoppingCart className="h-4 w-4" />
               Buy credits
@@ -96,7 +96,7 @@ export default function Wallet() {
               onClick={() => setView('plans')}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.1] transition-all"
             >
-              <Sparkles className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+              <Sparkles className="h-4 w-4 text-[#20C997]" />
               Upgrade
             </button>
           </div>
@@ -151,15 +151,15 @@ export default function Wallet() {
 
             <div className="grid gap-4 lg:grid-cols-[1.3fr_.7fr]">
               <UnavailableCard title="Credits consumed" detail="No ledger analytics endpoint is currently available." />
-              <Card className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-sm">
+              <Card className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-slate-900 dark:text-white font-bold">Quick actions</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-2">
-                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium" onClick={() => setView('purchase')}>Buy Credits</Button>
-                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium" onClick={() => setView('plans')}>Upgrade Plan</Button>
-                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium" onClick={() => setView('transactions')}>View Transactions</Button>
-                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium" onClick={() => void load()}>Refresh Wallet</Button>
+                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium hover:border-[#20C997]/40" onClick={() => setView('purchase')}>Buy Credits</Button>
+                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium hover:border-[#20C997]/40" onClick={() => setView('plans')}>Upgrade Plan</Button>
+                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium hover:border-[#20C997]/40" onClick={() => setView('transactions')}>View Transactions</Button>
+                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 font-medium hover:border-[#20C997]/40" onClick={() => void load()}>Refresh Wallet</Button>
                 </CardContent>
               </Card>
             </div>
@@ -211,20 +211,20 @@ export default function Wallet() {
             <div className="grid gap-4 md:grid-cols-3">
               {plans.length ? (
                 plans.map((plan) => (
-                  <Card key={plan.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-sm">
+                  <Card key={plan.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-sm">
                     <CardHeader>
                       <CardTitle className="text-slate-900 dark:text-white font-bold">{plan.name}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <p className="text-2xl font-bold text-slate-900 dark:text-white">{plan.priceNGN || plan.priceUSD || 'Price unavailable'}</p>
-                      <p className="text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff]">{plan.credits || 'Credit allowance unavailable'}</p>
+                      <p className="text-sm font-semibold text-[#20C997]">{plan.credits || 'Credit allowance unavailable'}</p>
                       <ul className="space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
                         {(plan.features || []).map((feature) => (
                           <li key={feature}>• {feature}</li>
                         ))}
                       </ul>
                       <button
-                        className="w-full rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] py-2.5 text-sm font-bold text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                        className="w-full rounded-xl bg-[#20C997] hover:bg-[#1db587] py-2.5 text-sm font-bold text-slate-950 shadow-sm transition-all"
                         onClick={() => toast.info('Upgrade checkout is not exposed by the current billing API.')}
                       >
                         Upgrade
@@ -240,8 +240,8 @@ export default function Wallet() {
         )}
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 gap-2 border-t border-black/[0.06] dark:border-white/10 bg-white/95 dark:bg-[#121212]/95 p-3 backdrop-blur-xl sm:hidden">
-        <Button size="sm" className="rounded-xl bg-[#0066ff] font-semibold text-white" onClick={() => setView('purchase')}>Buy</Button>
+      <div className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 gap-2 border-t border-black/[0.06] dark:border-white/10 bg-white/95 dark:bg-[#0a0a0a]/95 p-3 backdrop-blur-xl sm:hidden">
+        <Button size="sm" className="rounded-xl bg-[#20C997] hover:bg-[#1db587] font-bold text-slate-950" onClick={() => setView('purchase')}>Buy</Button>
         <Button size="sm" variant="outline" className="rounded-xl" onClick={() => setView('transactions')}>History</Button>
         <Button size="sm" variant="outline" className="rounded-xl" onClick={() => void load()}>Refresh</Button>
       </div>
@@ -261,7 +261,7 @@ function Back({ onClick }: { onClick: () => void }) {
 
 function UnavailableCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <Card className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-sm">
+    <Card className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-sm">
       <CardHeader>
         <CardTitle className="text-slate-900 dark:text-white font-bold text-base">{title}</CardTitle>
       </CardHeader>

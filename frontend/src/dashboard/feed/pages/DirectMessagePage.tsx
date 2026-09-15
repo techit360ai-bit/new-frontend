@@ -134,9 +134,9 @@ export function DirectMessagePage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-[#121212] font-bricolage">
+      <div className="flex-1 flex items-center justify-center bg-white dark:bg-[#0a0a0a] font-bricolage">
         <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 font-semibold text-xs">
-          <Loader2 className="w-5 h-5 animate-spin text-[#0066ff] dark:text-[#58a6ff]" />
+          <Loader2 className="w-5 h-5 animate-spin text-[#20C997]" />
           <span>Loading conversation...</span>
         </div>
       </div>
@@ -145,7 +145,7 @@ export function DirectMessagePage() {
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-[#121212] font-bricolage">
+      <div className="flex-1 flex items-center justify-center bg-white dark:bg-[#0a0a0a] font-bricolage">
         <div className="flex flex-col items-center gap-3 text-center px-4">
           <AlertCircle className="w-8 h-8 text-red-500" />
           <p className="text-slate-900 dark:text-white font-bold text-sm">Could not load messages</p>
@@ -156,11 +156,11 @@ export function DirectMessagePage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-[#121212] h-full font-bricolage">
+    <div className="flex-1 flex flex-col bg-white dark:bg-[#0a0a0a] h-full font-bricolage">
       {/* Header */}
-      <div className="border-b border-black/[0.08] dark:border-white/10 px-6 py-4 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl">
+      <div className="border-b border-black/[0.08] dark:border-white/10 px-6 py-4 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#0066ff] to-[#58a6ff] flex items-center justify-center text-white font-bold shadow-md">
+          <div className="w-10 h-10 rounded-2xl bg-[#20C997] flex items-center justify-center text-slate-950 font-bold shadow-md">
             <span className="text-sm">
               {(otherName || userId || '?')[0]?.toUpperCase()}
             </span>
@@ -191,14 +191,14 @@ export function DirectMessagePage() {
               <div
                 className={`max-w-[70%] rounded-2xl px-4 py-2.5 font-medium ${
                   isMe
-                    ? 'bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white rounded-br-xs shadow-sm'
+                    ? 'bg-[#20C997] text-slate-950 rounded-br-xs shadow-sm'
                     : 'bg-slate-100 dark:bg-white/[0.06] text-slate-900 dark:text-white rounded-bl-xs border border-black/[0.04] dark:border-white/5'
                 }`}
               >
                 <p className="text-xs whitespace-pre-wrap break-words leading-relaxed">{msg.body}</p>
                 <p
                   className={`text-[10px] mt-1 font-mono ${
-                    isMe ? 'text-white/75' : 'text-slate-400 dark:text-slate-500'
+                    isMe ? 'text-slate-900/80' : 'text-slate-400 dark:text-slate-500'
                   }`}
                 >
                   {formatTime(msg.ts)}
@@ -211,7 +211,7 @@ export function DirectMessagePage() {
       </div>
 
       {/* Input area */}
-      <div className="border-t border-black/[0.08] dark:border-white/10 px-6 py-4 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl">
+      <div className="border-t border-black/[0.08] dark:border-white/10 px-6 py-4 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <input
             type="text"
@@ -220,12 +220,12 @@ export function DirectMessagePage() {
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             disabled={!conversationId || sending}
-            className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/40 focus:border-[#0066ff] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 dark:focus:border-[#58a6ff] dark:focus:bg-white/10 disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/40 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:focus:border-[#20C997] dark:focus:bg-white/10 disabled:opacity-50"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || !conversationId || sending}
-            className="p-2.5 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2.5 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold"
           >
             {sending ? (
               <Loader2 className="w-4 h-4 animate-spin" />

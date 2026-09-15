@@ -149,27 +149,27 @@ export default function PluginsDashboard() {
   const destructiveCount = tools.filter((t) => t.tool.destructive).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white pb-16">
-      {/* ---- Gradient hero ---- */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-[#0066ff] via-blue-600 to-[#58a6ff] text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white pb-16 transition-colors">
+      {/* ---- Hero ---- */}
+      <header className="relative overflow-hidden bg-[#20C997] text-slate-950">
         <div
-          className="absolute inset-0 opacity-15"
+          className="absolute inset-0 opacity-10"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 20%, white 1px, transparent 1px)",
+              "radial-gradient(circle at 20% 20%, black 1px, transparent 1px)",
             backgroundSize: "28px 28px",
           }}
           aria-hidden
         />
         <div className="relative max-w-7xl mx-auto px-6 pt-6 pb-24">
           <div className="flex items-center justify-between gap-4">
-            <BackButton label="Back" fallback="/feed" className="text-white/90 dark:text-white/90 bg-white/15 dark:bg-white/15 hover:bg-white/25 dark:hover:bg-white/25 border-none shadow-none text-xs font-bold" />
+            <BackButton label="Back" fallback="/feed" className="text-slate-950 bg-black/10 hover:bg-black/20 border-none shadow-none text-xs font-bold" />
             <div className="flex items-center gap-2">
               <StatusBadge online={online} workspace={workspace} />
               <button
                 onClick={refresh}
                 aria-label="Refresh data"
-                className="inline-flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="inline-flex items-center gap-1.5 text-sm font-bold px-3.5 py-1.5 rounded-xl bg-black/10 hover:bg-black/20 transition-colors focus-visible:outline-none"
               >
                 <RefreshCw className={`w-4 h-4 ${busy ? "animate-spin" : ""}`} />
                 Refresh
@@ -178,21 +178,21 @@ export default function PluginsDashboard() {
           </div>
 
           <div className="mt-8 flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/15 backdrop-blur ring-1 ring-white/25">
-              <Boxes className="w-6 h-6" />
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-black/10 ring-1 ring-black/15">
+              <Boxes className="w-6 h-6 text-slate-950" />
             </span>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-white" style={heading}>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-950" style={heading}>
                 Plugins &amp; MCP
               </h1>
-              <p className="text-white/80 text-sm mt-0.5">
+              <p className="text-slate-900/80 text-sm mt-0.5 font-medium">
                 Integrate capabilities, not UIs — every connector is audited, permissioned and
                 approval-gated by the SDK.
               </p>
             </div>
           </div>
           {updatedAt && (
-            <p className="mt-3 text-xs text-white/70">
+            <p className="mt-3 text-xs text-slate-900/70 font-semibold">
               Live · auto-refreshing every {POLL_MS / 1000}s · last updated {updatedAt}
             </p>
           )}
@@ -204,7 +204,7 @@ export default function PluginsDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             icon={<Plug className="w-5 h-5" />}
-            tone="blue"
+            tone="mint"
             value={tools.length}
             label="MCP Tools"
             hint={`${destructiveCount} approval-gated`}
@@ -278,14 +278,14 @@ function StatusBadge({
   const text =
     online === null ? "connecting…" : online ? `online · ${workspace}` : "offline";
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-white/15 backdrop-blur ring-1 ring-white/25">
+    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-black/10 text-slate-950">
       <span className="relative flex w-2 h-2">
         {online && (
-          <span className="absolute inline-flex w-full h-full rounded-full bg-[#20c937] opacity-75 motion-safe:animate-ping" />
+          <span className="absolute inline-flex w-full h-full rounded-full bg-slate-950 opacity-75 motion-safe:animate-ping" />
         )}
         <span
           className={`relative inline-flex w-2 h-2 rounded-full ${
-            online ? "bg-[#20c937]" : online === false ? "bg-red-400" : "bg-white/60"
+            online ? "bg-slate-950" : online === false ? "bg-red-500" : "bg-slate-700"
           }`}
         />
       </span>
@@ -299,10 +299,11 @@ function StatusBadge({
 /* Stat card                                                           */
 /* ------------------------------------------------------------------ */
 const TONES: Record<string, string> = {
-  blue: "bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]",
+  mint: "bg-[#20C997]/10 text-[#20C997]",
+  blue: "bg-[#20C997]/10 text-[#20C997]",
   amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   slate: "bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-400",
-  emerald: "bg-[#20c937]/10 text-[#20c937]",
+  emerald: "bg-[#20C997]/10 text-[#20C997]",
 };
 
 function StatCard({
@@ -321,7 +322,7 @@ function StatCard({
   loading: boolean;
 }) {
   return (
-    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm p-4.5 transition-all hover:shadow-md">
+    <div className="bg-white dark:bg-[#111111] rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm p-4.5 transition-all hover:shadow-md">
       <div className="flex items-center justify-between">
         <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${TONES[tone] ?? TONES.slate}`}>
           {icon}
@@ -353,7 +354,7 @@ function Panel({
   action?: ReactNode;
 }) {
   return (
-    <section className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm">
+    <section className="bg-white dark:bg-[#111111] rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm">
       <div className="px-5 py-4 border-b border-black/[0.06] dark:border-white/10 flex items-center gap-2">
         {icon}
         <h2 className="font-bold text-slate-900 dark:text-white" style={heading}>
@@ -387,7 +388,7 @@ function ToolCatalogue({ tools, loading }: { tools: CatalogueEntry[]; loading: b
   return (
     <Panel
       title="MCP Tool Catalogue"
-      icon={<Boxes className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />}
+      icon={<Boxes className="w-5 h-5 text-[#20C997]" />}
       count={tools.length}
     >
       {loading ? (
@@ -403,11 +404,11 @@ function ToolCatalogue({ tools, loading }: { tools: CatalogueEntry[]; loading: b
           {tools.map(({ plugin, tool }) => (
             <div
               key={`${plugin}.${tool.name}`}
-              className="group border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-3.5 transition-all hover:border-[#0066ff]/40 hover:shadow-sm"
+              className="group border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-3.5 transition-all hover:border-[#20C997]/40 hover:shadow-sm"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 group-hover:bg-[#0066ff]/10 group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors shrink-0">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 group-hover:bg-[#20C997]/10 group-hover:text-[#20C997] transition-colors shrink-0 font-bold">
                     <Plug className="w-3.5 h-3.5" />
                   </span>
                   <code className="text-sm font-bold text-slate-900 dark:text-white font-mono truncate">
@@ -477,7 +478,7 @@ function ApprovalsPanel({
               <button
                 onClick={() => approve(a.id)}
                 disabled={working === a.id}
-                className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-bold px-4 py-1.5 rounded-xl bg-[#20c937] text-white hover:bg-emerald-600 disabled:opacity-60 transition-colors shadow-sm"
+                className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-bold px-4 py-1.5 rounded-xl bg-[#20C997] text-slate-950 hover:bg-[#1db587] disabled:opacity-60 transition-colors shadow-sm"
               >
                 {working === a.id ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
@@ -502,7 +503,7 @@ function ContributionFeed({ events }: { events: ContributionEvent[] }) {
   return (
     <Panel
       title="Contribution Feed"
-      icon={<Activity className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />}
+      icon={<Activity className="w-5 h-5 text-[#20C997]" />}
       count={events.length}
     >
       {events.length === 0 ? (
@@ -637,12 +638,12 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
   };
 
   const selectCls =
-    "mt-1 w-full border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0066ff]";
+    "mt-1 w-full border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 text-sm bg-white dark:bg-[#111111] text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#20C997]";
 
   return (
     <Panel
       title="Invoke a Tool"
-      icon={<Play className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />}
+      icon={<Play className="w-5 h-5 text-[#20C997]" />}
       action={<span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">MCP Inspector</span>}
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -691,7 +692,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
           onChange={(e) => setParams(e.target.value)}
           rows={3}
           spellCheck={false}
-          className="mt-1 w-full border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 font-mono text-xs bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0066ff]"
+          className="mt-1 w-full border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 font-mono text-xs bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#20C997]"
           placeholder='{"repo":"acme/app","path":"README.md"}'
         />
       </label>
@@ -710,7 +711,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
       <button
         onClick={run}
         disabled={running}
-        className="mt-4 inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-60"
+        className="mt-4 inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm transition-all disabled:opacity-60"
       >
         {running ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         Invoke

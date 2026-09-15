@@ -25,12 +25,12 @@ export function LeftSidebar() {
   ];
 
   return (
-    <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-[260px] overflow-y-auto border-r border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl lg:block font-bricolage">
+    <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-[260px] overflow-y-auto border-r border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 backdrop-blur-xl lg:block font-bricolage">
       {/* Profile Card */}
       <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.04] p-4 backdrop-blur-md space-y-3">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">Active Profile</span>
-          <Link to="/feed/profile/me" className="text-sm font-bold text-slate-900 dark:text-white hover:text-[#0066ff] dark:hover:text-[#58a6ff] transition-colors block truncate">
+          <Link to="/feed/profile/me" className="text-sm font-bold text-slate-900 dark:text-white hover:text-[#20C997] transition-colors block truncate">
             {name}
           </Link>
           <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 capitalize block mt-0.5">
@@ -67,11 +67,11 @@ export function LeftSidebar() {
               to={item.to}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition-all ${
                 isActive
-                  ? "bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20"
+                  ? "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20"
                   : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <Icon className={`h-4 w-4 ${isActive ? "text-[#0066ff] dark:text-[#58a6ff]" : "text-slate-400 dark:text-slate-500"}`} />
+              <Icon className={`h-4 w-4 ${isActive ? "text-[#20C997]" : "text-slate-400 dark:text-slate-500"}`} />
               <span>{item.label}</span>
             </Link>
           );

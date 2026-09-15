@@ -72,7 +72,7 @@ export function Layout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className={`min-h-screen font-bricolage transition-colors duration-300 ${isDark ? "dark bg-[#121212] text-white" : "bg-slate-50 text-slate-900"}`}>
+    <div className={`min-h-screen font-bricolage transition-colors duration-300 ${isDark ? "dark bg-[#0a0a0a] text-white" : "bg-slate-50 text-slate-900"}`}>
       <GlobalNav
         isDark={isDark}
         onToggleTheme={() => setIsDark((v) => !v)}
@@ -129,7 +129,7 @@ function GlobalNav({
   const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
 
   return (
-    <nav className={`sticky top-0 z-40 flex h-16 items-center justify-between border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 px-4 sm:px-8 backdrop-blur-xl transition-all duration-200 ${chromeVisible ? "" : "-translate-y-full pointer-events-none"}`}>
+    <nav className={`sticky top-0 z-40 flex h-16 items-center justify-between border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#0a0a0a]/90 px-4 sm:px-8 backdrop-blur-xl transition-all duration-200 ${chromeVisible ? "" : "-translate-y-full pointer-events-none"}`}>
       <div className="flex items-center gap-3 sm:gap-6">
         <BackButton fallback={dashboardPath} />
         <Link to="/feed" className="flex items-center gap-2.5">
@@ -137,7 +137,7 @@ function GlobalNav({
             <TechITLogo />
           </div>
           <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-            TECH<span className="text-[#0066ff] dark:text-[#58a6ff]">•</span>IT <span className="text-xs font-semibold text-slate-400 font-sans ml-1">Hangout</span>
+            TECH<span className="text-[#20C997]">•</span>IT <span className="text-xs font-semibold text-slate-400 font-sans ml-1">Hangout</span>
           </span>
         </Link>
 
@@ -177,7 +177,7 @@ function GlobalNav({
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0066ff] px-1 text-[9px] font-bold text-white shadow-sm">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#20C997] px-1 text-[9px] font-bold text-slate-950 shadow-sm">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -186,7 +186,7 @@ function GlobalNav({
         <Link
           to="/feed/profile/me"
           title="View profile"
-          className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-xs font-black text-white shadow-md border border-transparent hover:border-white/20 transition-all"
+          className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-[#20C997] text-xs font-black text-slate-950 shadow-md border border-transparent hover:border-white/20 transition-all"
         >
           {profile?.avatarUrl ? <img src={profile.avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
         </Link>
@@ -202,11 +202,11 @@ function NavLink({ to, label, active }: { to: string; label: string; active?: bo
     <Link
       to={to}
       className={`relative py-1 transition-colors ${
-        isActive ? "text-[#0066ff] dark:text-[#58a6ff] font-bold" : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+        isActive ? "text-[#20C997] font-bold" : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
       }`}
     >
       {label}
-      {isActive && <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#0066ff] dark:bg-[#58a6ff]" />}
+      {isActive && <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#20C997]" />}
     </Link>
   );
 }
@@ -222,14 +222,14 @@ function MobileTabBar() {
     { id: "discover", path: "/feed/discover", icon: Compass, label: "Discover" },
   ];
   return (
-    <div className={`fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-black/[0.06] dark:border-white/10 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-xl transition-transform duration-200 lg:hidden ${chromeVisible ? "" : "translate-y-full pointer-events-none"}`}>
+    <div className={`fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-black/[0.06] dark:border-white/10 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-xl transition-transform duration-200 lg:hidden ${chromeVisible ? "" : "translate-y-full pointer-events-none"}`}>
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = location.pathname === tab.path;
         return (
           <Link key={tab.id} to={tab.path} className="flex h-full flex-1 flex-col items-center justify-center gap-0.5">
-            <Icon className={`h-4 w-4 ${isActive ? "text-[#0066ff] dark:text-[#58a6ff]" : "text-slate-400 dark:text-white/40"}`} />
-            {isActive && <span className="text-[10px] font-bold text-[#0066ff] dark:text-[#58a6ff]">{tab.label}</span>}
+            <Icon className={`h-4 w-4 ${isActive ? "text-[#20C997]" : "text-slate-400 dark:text-white/40"}`} />
+            {isActive && <span className="text-[10px] font-bold text-[#20C997]">{tab.label}</span>}
           </Link>
         );
       })}
