@@ -242,7 +242,7 @@ export function Settings() {
                     onClick={() => sectionRefs[s.id]?.current?.scrollIntoView({ behavior: "smooth" })}
                     className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] rounded-xl transition-colors"
                   >
-                    <Icon className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+                    <Icon className="w-4 h-4 text-[#20C997]" />
                     <span>{s.label}</span>
                   </a>
                 </li>
@@ -253,7 +253,7 @@ export function Settings() {
 
         <div className="lg:col-span-3 space-y-6">
           {/* Identity */}
-          <section ref={identityRef} id="identity" className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+          <section ref={identityRef} id="identity" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Account & Identity</h2>
             <div className="space-y-4">
               <Row label="Avatar URL"><Input value={iAvatar} onChange={setIAvatar} type="url" placeholder="https://..." /></Row>
@@ -284,7 +284,7 @@ export function Settings() {
               <button
                 disabled={saving === "identity"}
                 onClick={() => void saveIdentity()}
-                className="px-5 py-2.5 text-xs bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] disabled:opacity-50 text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                className="px-5 py-2.5 text-xs bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-sm transition-all"
               >
                 {saving === "identity" ? "Saving..." : "Save Identity"}
               </button>
@@ -292,7 +292,7 @@ export function Settings() {
           </section>
 
           {/* Skills & Availability */}
-          <section ref={skillsRef} id="skills" className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+          <section ref={skillsRef} id="skills" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Skills & Availability</h2>
 
             <div className="mb-5">
@@ -305,7 +305,7 @@ export function Settings() {
                     onClick={() => { setSDisc(d); setSSub([]); }}
                     className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
                       sDisc === d
-                        ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]"
+                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
                         : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-700 dark:text-slate-300"
                     }`}
                   >
@@ -328,7 +328,7 @@ export function Settings() {
                       onClick={() => toggleSubSkill(s)}
                       className={`px-3 py-1 rounded-xl border text-xs font-semibold transition-all ${
                         sSub?.includes(s)
-                          ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]"
+                          ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
                           : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-600 dark:text-slate-400"
                       }`}
                     >
@@ -354,16 +354,16 @@ export function Settings() {
                 onChange={(e) => setSStackDraft(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addStackChip(sStackDraft); } }}
                 placeholder="Add a tool (e.g. Docker, GraphQL) — hit Enter"
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               />
             </div>
 
             <div className="mb-5">
               <div className="flex justify-between items-center mb-1.5">
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Weekly Hours Committed</p>
-                <span className="text-xs font-extrabold text-[#0066ff] dark:text-[#58a6ff]">{sHours} hrs/wk</span>
+                <span className="text-xs font-extrabold text-[#20C997]">{sHours} hrs/wk</span>
               </div>
-              <input type="range" min={5} max={60} value={sHours} onChange={(e) => setSHours(Number(e.target.value))} className="w-full accent-[#0066ff]" />
+              <input type="range" min={5} max={60} value={sHours} onChange={(e) => setSHours(Number(e.target.value))} className="w-full accent-[#20C997]" />
             </div>
 
             <div className="mb-5">
@@ -380,7 +380,7 @@ export function Settings() {
                     onClick={() => setSCommit(opt.v)}
                     className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
                       sCommit === opt.v
-                        ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]"
+                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
                         : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-700 dark:text-slate-300"
                     }`}
                   >
@@ -393,9 +393,9 @@ export function Settings() {
             <div className="mb-5">
               <div className="flex justify-between items-center mb-1.5">
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Equity vs Cash Preference</p>
-                <span className="text-xs font-extrabold text-[#0066ff] dark:text-[#58a6ff]">{sPref}% equity / {100 - sPref}% cash</span>
+                <span className="text-xs font-extrabold text-[#20C997]">{sPref}% equity / {100 - sPref}% cash</span>
               </div>
-              <input type="range" min={0} max={100} value={sPref} onChange={(e) => setSPref(Number(e.target.value))} className="w-full accent-[#0066ff]" />
+              <input type="range" min={0} max={100} value={sPref} onChange={(e) => setSPref(Number(e.target.value))} className="w-full accent-[#20C997]" />
             </div>
 
             <div className="mb-5">
@@ -417,7 +417,7 @@ export function Settings() {
                     onClick={() => setSVesting(opt.v)}
                     className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
                       sVesting === opt.v
-                        ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]"
+                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
                         : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-700 dark:text-slate-300"
                     }`}
                   >
@@ -431,7 +431,7 @@ export function Settings() {
               <button
                 disabled={saving === "skills"}
                 onClick={() => void saveSkills()}
-                className="px-5 py-2.5 text-xs bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] disabled:opacity-50 text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                className="px-5 py-2.5 text-xs bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-sm transition-all"
               >
                 {saving === "skills" ? "Saving..." : "Save Skills & Availability"}
               </button>
@@ -439,7 +439,7 @@ export function Settings() {
           </section>
 
           {/* Notifications */}
-          <section ref={notificationsRef} id="notifications" className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+          <section ref={notificationsRef} id="notifications" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Notification Preferences</h2>
             <div className="space-y-3">
               <NotifGroup label="New opportunities matching your skills"
@@ -460,7 +460,7 @@ export function Settings() {
               <select
                 value={nPrefs.quietHours}
                 onChange={(e) => setNPrefs((cur) => ({ ...cur, quietHours: e.target.value as typeof cur.quietHours }))}
-                className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               >
                 <option value="off">Off</option>
                 <option value="10pm-8am">10pm – 8am</option>
@@ -471,7 +471,7 @@ export function Settings() {
               <button
                 disabled={saving === "notifications"}
                 onClick={() => void saveNotifications()}
-                className="px-5 py-2.5 text-xs bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] disabled:opacity-50 text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                className="px-5 py-2.5 text-xs bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-sm transition-all"
               >
                 {saving === "notifications" ? "Saving..." : "Save Preferences"}
               </button>
@@ -479,7 +479,7 @@ export function Settings() {
           </section>
 
           {/* Roles & Switching */}
-          <section ref={rolesRef} id="roles" className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+          <section ref={rolesRef} id="roles" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Roles & Switching</h2>
             <div className="space-y-3">
               {(["collaborator", "founder", "investor", "org"] as Role[]).map((role) => {
@@ -490,15 +490,15 @@ export function Settings() {
                     key={role}
                     className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
                       isCurrent
-                        ? "bg-[#0066ff]/10 border-[#0066ff]/30"
+                        ? "bg-[#20C997]/10 border-[#20C997]/30"
                         : "border-black/[0.06] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]"
                     }`}
                   >
-                    <span className={`w-2.5 h-2.5 rounded-full ${active ? "bg-[#20c937]" : "bg-slate-300 dark:bg-white/20"}`}></span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${active ? "bg-[#20C997]" : "bg-slate-300 dark:bg-white/20"}`}></span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-slate-900 dark:text-white">
                         {roleLabel[role]}
-                        {isCurrent && <span className="ml-2 text-[10px] text-[#0066ff] dark:text-[#58a6ff] font-semibold uppercase">Current Role</span>}
+                        {isCurrent && <span className="ml-2 text-[10px] text-[#20C997] font-semibold uppercase">Current Role</span>}
                       </p>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{roleBlurb[role]}</p>
                     </div>
@@ -510,7 +510,7 @@ export function Settings() {
                           ? "bg-slate-200 dark:bg-white/10 text-slate-400 cursor-default"
                           : active
                             ? "bg-slate-900 dark:bg-white/10 dark:hover:bg-white/20 text-white"
-                            : "border border-[#0066ff] text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/10"
+                            : "border border-[#20C997] text-[#20C997] hover:bg-[#20C997]/10"
                       }`}
                     >
                       {isCurrent ? "Active" : active ? "Switch Role" : "Activate Role"}
@@ -551,7 +551,7 @@ function Input({ value, onChange, type = "text", placeholder }: { value: string;
       onChange={(e) => onChange(e.target.value)}
       type={type}
       placeholder={placeholder}
-      className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+      className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
     />
   );
 }
@@ -562,10 +562,10 @@ function NotifGroup({ label, email, inApp, onChange }: { label: string; email: b
       <span className="font-semibold text-slate-700 dark:text-slate-300">{label}</span>
       <div className="flex items-center gap-4 text-xs">
         <label className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-medium cursor-pointer">
-          <input type="checkbox" checked={email} onChange={(e) => onChange("email", e.target.checked)} className="accent-[#0066ff] rounded" /> Email
+          <input type="checkbox" checked={email} onChange={(e) => onChange("email", e.target.checked)} className="accent-[#20C997] rounded" /> Email
         </label>
         <label className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-medium cursor-pointer">
-          <input type="checkbox" checked={inApp} onChange={(e) => onChange("inApp", e.target.checked)} className="accent-[#0066ff] rounded" /> In-App
+          <input type="checkbox" checked={inApp} onChange={(e) => onChange("inApp", e.target.checked)} className="accent-[#20C997] rounded" /> In-App
         </label>
       </div>
     </div>

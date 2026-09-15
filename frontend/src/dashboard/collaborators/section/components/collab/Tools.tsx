@@ -145,9 +145,9 @@ export function Tools() {
       )}
 
       {/* Code Editor Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#0066ff]/10 via-cyan-500/5 to-[#58a6ff]/10 dark:from-[#0066ff]/15 dark:via-cyan-500/10 dark:to-[#58a6ff]/15 border border-[#0066ff]/20 dark:border-white/10 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="relative overflow-hidden bg-[#20C997]/10 border border-[#20C997]/20 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0066ff] to-cyan-500 text-white flex items-center justify-center shadow-[0_4px_15px_rgba(0,102,255,0.3)] shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#20C997] text-slate-950 flex items-center justify-center shadow-sm shrink-0 font-bold">
             <Code2 className="h-6 w-6" />
           </div>
           <div>
@@ -170,7 +170,7 @@ export function Tools() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {loading && <p className="text-xs text-slate-500 dark:text-slate-400 md:col-span-3 text-center py-6">Loading live tools...</p>}
         {!loading && !error && toolList.length === 0 && (
-          <div className="border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-8 text-center text-xs text-slate-500 dark:text-slate-400 md:col-span-3 bg-white/40 dark:bg-[#121212]/40">
+          <div className="border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-8 text-center text-xs text-slate-500 dark:text-slate-400 md:col-span-3 bg-white/40 dark:bg-[#111111]/40">
             <Wrench className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
             No live tools are connected to your workspaces yet.
           </div>
@@ -178,14 +178,14 @@ export function Tools() {
         {toolList.map((t) => (
           <div
             key={`${t.workspaceId}:${t.id}`}
-            className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-between"
+            className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-between"
           >
             <div>
               <div className="flex items-start justify-between mb-3">
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">{t.name}</h3>
                 <span className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                   t.status === "connected"
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                    ? "bg-[#20C997]/10 text-[#20C997] border-[#20C997]/20"
                     : "bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/20"
                 }`}>
                   {t.status}
@@ -206,7 +206,7 @@ export function Tools() {
               ) : (
                 <button
                   onClick={() => setConnectOpen(t)}
-                  className="w-full text-xs font-bold px-3 py-2 bg-slate-900 dark:bg-white/10 dark:hover:bg-white/20 text-white rounded-xl transition-colors"
+                  className="w-full text-xs font-bold px-3 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl transition-all shadow-sm"
                 >
                   Connect Integration
                 </button>
@@ -218,7 +218,7 @@ export function Tools() {
 
       {/* Connect dialog */}
       <Dialog open={connectOpen !== null} onOpenChange={(o) => !o && setConnectOpen(null)}>
-        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
           {connectOpen && (
             <>
               <DialogHeader>
@@ -235,7 +235,7 @@ export function Tools() {
                 <button
                   onClick={() => void handleConnect(connectOpen)}
                   disabled={saving}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm transition-all"
                 >
                   Authorize {connectOpen.name}
                 </button>
@@ -247,7 +247,7 @@ export function Tools() {
 
       {/* Manage dialog */}
       <Dialog open={manageOpen !== null} onOpenChange={(o) => !o && setManageOpen(null)}>
-        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
           {manageOpen && (
             <>
               <DialogHeader>
@@ -279,7 +279,7 @@ export function Tools() {
 
       {/* Add tool dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-w-md bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-md bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Connect Developer Tool</DialogTitle>
           </DialogHeader>
@@ -289,7 +289,7 @@ export function Tools() {
                 key={name}
                 onClick={() => void handleAddTool(name)}
                 disabled={saving}
-                className="p-3.5 border border-black/[0.08] dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 hover:border-[#0066ff] hover:bg-[#0066ff]/5 dark:hover:bg-[#0066ff]/10 transition-colors text-center"
+                className="p-3.5 border border-black/[0.08] dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 hover:border-[#20C997] hover:bg-[#20C997]/10 transition-colors text-center"
               >
                 {name}
               </button>

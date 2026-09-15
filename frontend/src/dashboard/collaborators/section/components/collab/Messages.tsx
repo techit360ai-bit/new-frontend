@@ -187,14 +187,14 @@ export function Messages() {
         <div className="flex items-center gap-2.5">
           <Link
             to="/support"
-            className="h-10 px-3.5 text-xs font-semibold inline-flex items-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#181818] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-sm"
+            className="h-10 px-3.5 text-xs font-semibold inline-flex items-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-sm"
           >
-            <Ticket className="h-4 w-4 text-[#0066ff]" />
+            <Ticket className="h-4 w-4 text-[#20C997]" />
             <span>Support</span>
           </Link>
           <button
             onClick={() => setComposeOpen(true)}
-            className="h-10 px-4 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl text-xs font-bold shadow-[0_4px_15px_rgba(0,102,255,0.25)] flex items-center gap-1.5 transition-all"
+            className="h-10 px-4 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Compose</span>
@@ -205,7 +205,7 @@ export function Messages() {
       <div className="flex-1 px-6 lg:px-8 pb-6 max-w-6xl mx-auto w-full overflow-hidden">
         <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Inbox List */}
-          <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-y-auto shadow-sm">
+          <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-y-auto shadow-sm">
             <ul className="divide-y divide-black/[0.04] dark:divide-white/[0.06]">
               {loading && <li className="p-5 text-xs text-slate-500 dark:text-slate-400">Loading live conversations...</li>}
               {!loading && error && (
@@ -226,7 +226,7 @@ export function Messages() {
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#20C997] to-[#128a64] text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-sm">
+                      <div className="w-9 h-9 rounded-xl bg-[#20C997] text-slate-950 font-extrabold flex items-center justify-center text-xs shrink-0 shadow-sm">
                         {c.participantAvatar}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -245,7 +245,7 @@ export function Messages() {
           </div>
 
           {/* Conversation Pane */}
-          <div className="md:col-span-2 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl flex flex-col overflow-hidden shadow-sm">
+          <div className="md:col-span-2 bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl flex flex-col overflow-hidden shadow-sm">
             {!active ? (
               <div className="flex-1 flex flex-col items-center justify-center text-xs text-slate-500 dark:text-slate-400 p-6">
                 <MessageSquare className="w-10 h-10 text-slate-400/40 mb-2" />
@@ -266,12 +266,12 @@ export function Messages() {
                       <div
                         className={`max-w-md px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
                           m.fromMe
-                            ? "bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white shadow-sm rounded-br-none"
+                            ? "bg-[#20C997] text-slate-950 font-medium shadow-sm rounded-br-none"
                             : "bg-slate-100 dark:bg-white/[0.06] text-slate-900 dark:text-slate-100 border border-black/[0.04] dark:border-white/[0.06] rounded-bl-none"
                         }`}
                       >
                         <p>{m.body}</p>
-                        <p className={`text-[10px] mt-1 text-right ${m.fromMe ? "text-white/70" : "text-slate-400"}`}>
+                        <p className={`text-[10px] mt-1 text-right ${m.fromMe ? "text-slate-950/70" : "text-slate-400"}`}>
                           {new Date(m.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                         </p>
                       </div>
@@ -285,7 +285,7 @@ export function Messages() {
                     onChange={(e) => setDraft(e.target.value)}
                     placeholder="Write a message…"
                     rows={2}
-                    className="flex-1 resize-none border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2 text-xs bg-white dark:bg-[#181818] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                    className="flex-1 resize-none border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2 text-xs bg-white dark:bg-[#111111] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
                   />
                   <button
                     onClick={handleAttach}
@@ -296,7 +296,7 @@ export function Messages() {
                   <button
                     onClick={() => void handleSend()}
                     disabled={!draft.trim() || sending}
-                    className="h-10 px-4 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl text-xs disabled:opacity-50 flex items-center gap-1.5 shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                    className="h-10 px-4 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl text-xs disabled:opacity-50 flex items-center gap-1.5 shadow-sm transition-all"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Send</span>
@@ -309,7 +309,7 @@ export function Messages() {
       </div>
 
       <Dialog open={composeOpen} onOpenChange={(o) => { setComposeOpen(o); if (!o) resetCompose(); }}>
-        <DialogContent className="max-w-md bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-md bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">New Message</DialogTitle>
           </DialogHeader>
@@ -320,7 +320,7 @@ export function Messages() {
                 value={cRecipient}
                 onChange={(e) => setCRecipient(e.target.value)}
                 placeholder="User ID or identifier"
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               />
             </div>
             <div>
@@ -329,7 +329,7 @@ export function Messages() {
                 value={cSubject}
                 onChange={(e) => setCSubject(e.target.value)}
                 placeholder="Topic or Project"
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               />
             </div>
             <div>
@@ -339,7 +339,7 @@ export function Messages() {
                 onChange={(e) => setCBody(e.target.value)}
                 rows={4}
                 placeholder="Write your message..."
-                className="w-full resize-none border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="w-full resize-none border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               />
             </div>
           </div>
@@ -353,7 +353,7 @@ export function Messages() {
             <button
               onClick={() => void handleCompose()}
               disabled={!canCompose || sending}
-              className="px-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] disabled:opacity-50 transition-all"
+              className="px-4 py-2 text-xs font-bold rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm disabled:opacity-50 transition-all"
             >
               {sending ? "Sending..." : "Send Message"}
             </button>

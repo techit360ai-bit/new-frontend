@@ -61,7 +61,7 @@ export function Reputation() {
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Reputation & Proof</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Cryptographically verified proof of work earned through shipping milestones.</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20 text-xs font-bold self-start sm:self-auto">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 text-xs font-bold self-start sm:self-auto">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>Live Proof Score</span>
         </span>
@@ -69,7 +69,7 @@ export function Reputation() {
 
       {loading && (
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 py-4">
-          <div className="w-4 h-4 border-2 border-[#0066ff] border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-[#20C997] border-t-transparent rounded-full animate-spin" />
           <span>Loading live reputation proof...</span>
         </div>
       )}
@@ -82,15 +82,15 @@ export function Reputation() {
       )}
 
       {/* Score breakdown */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+      <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Reputation Score Breakdown</h2>
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="text-center p-6 rounded-2xl bg-slate-50/70 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] w-full md:w-56 shrink-0">
-            <p className="text-6xl font-black bg-gradient-to-r from-[#0066ff] to-[#58a6ff] bg-clip-text text-transparent tabular-nums">
+            <p className="text-6xl font-black text-[#20C997] tabular-nums">
               {compositeScore}
             </p>
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-2">Composite Score</p>
-            <span className="inline-block mt-3 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#20c937]/10 text-[#20c937] border border-[#20c937]/20">
+            <span className="inline-block mt-3 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
               Verified Contributor
             </span>
           </div>
@@ -106,7 +106,7 @@ export function Reputation() {
                   <div
                     className={`h-full rounded-full transition-all duration-1000 ${
                       m.name === highest?.name
-                        ? "bg-gradient-to-r from-[#0066ff] to-[#58a6ff]"
+                        ? "bg-[#20C997]"
                         : "bg-slate-400 dark:bg-slate-600"
                     }`}
                     style={{ width: `${m.value}%` }}
@@ -124,7 +124,7 @@ export function Reputation() {
       {/* Badges */}
       <div>
         <div className="flex items-center gap-2 mb-3.5">
-          <Trophy className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <Trophy className="w-4 h-4 text-[#20C997]" />
           <h2 className="text-sm font-bold text-slate-900 dark:text-white">Live Achievements & Badges</h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
@@ -134,7 +134,7 @@ export function Reputation() {
               onClick={() => setOpenBadge(b)}
               className={`border rounded-2xl p-4 text-center transition-all backdrop-blur-xl ${
                 b.earned
-                  ? "border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 hover:border-[#0066ff]/40 shadow-sm"
+                  ? "border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] hover:border-[#20C997]/30 shadow-sm"
                   : "border-black/[0.04] dark:border-white/[0.05] bg-slate-50/50 dark:bg-white/[0.02] opacity-40 hover:opacity-70"
               }`}
             >
@@ -146,10 +146,10 @@ export function Reputation() {
       </div>
 
       {/* Endorsements */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
         <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/10 flex items-center justify-between bg-slate-50/40 dark:bg-white/[0.02]">
           <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+            <Star className="w-4 h-4 text-[#20C997]" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Founder Endorsements (0)</h2>
           </div>
         </div>
@@ -159,13 +159,13 @@ export function Reputation() {
       </div>
 
       {/* Leaderboard */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
         <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/10 flex items-center justify-between bg-slate-50/40 dark:bg-white/[0.02]">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Community Leaderboard</h2>
           <select
             value={range}
             onChange={(e) => setRange(e.target.value as Range)}
-            className="h-8 border border-black/[0.08] dark:border-white/10 rounded-lg px-2 text-xs bg-white dark:bg-[#181818] text-slate-800 dark:text-slate-200"
+            className="h-8 border border-black/[0.08] dark:border-white/10 rounded-lg px-2 text-xs bg-white dark:bg-[#111111] text-slate-800 dark:text-slate-200"
           >
             {RANGES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
           </select>
@@ -176,7 +176,7 @@ export function Reputation() {
       </div>
 
       <Dialog open={openBadge !== null} onOpenChange={(o) => !o && setOpenBadge(null)}>
-        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
           {openBadge && (
             <>
               <DialogHeader>
@@ -186,7 +186,7 @@ export function Reputation() {
                 {(() => {
                   const AchievementIcon = ACHIEVEMENT_ICONS[openBadge.id as keyof typeof ACHIEVEMENT_ICONS] ?? Award;
                   return (
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white flex items-center justify-center mx-auto mb-4 shadow-[0_4px_15px_rgba(0,102,255,0.3)]">
+                    <div className="w-16 h-16 rounded-2xl bg-[#20C997] text-slate-950 flex items-center justify-center mx-auto mb-4 shadow-sm font-bold">
                       <AchievementIcon className="h-8 w-8" aria-hidden="true" />
                     </div>
                   );
@@ -194,7 +194,7 @@ export function Reputation() {
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{openBadge.description}</p>
                 <div className={`mt-5 text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 ${
                   openBadge.earned
-                    ? "bg-[#20c937]/10 text-[#20c937] border border-[#20c937]/20"
+                    ? "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20"
                     : "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400"
                 }`}>
                   {openBadge.earned ? (

@@ -275,7 +275,7 @@ export function CollabProfile() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 text-center shadow-sm">
+    <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 text-center shadow-sm">
       <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums">{value}</p>
       <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider font-bold">{label}</p>
     </div>

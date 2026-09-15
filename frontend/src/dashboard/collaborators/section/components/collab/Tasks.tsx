@@ -37,7 +37,7 @@ function priorityPillClass(p: Priority): string {
   switch (p) {
     case "critical": return "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20";
     case "high":     return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
-    case "medium":   return "bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20";
+    case "medium":   return "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20";
     case "low":      return "bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20";
   }
 }
@@ -190,7 +190,7 @@ export function Tasks() {
           <select
             value={projectFilter}
             onChange={(e) => setProjectFilter(e.target.value)}
-            className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#181818] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30 shadow-sm"
+            className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#111111] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997] shadow-sm"
           >
             <option value="all">All Projects</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -199,7 +199,7 @@ export function Tasks() {
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#181818] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30 shadow-sm"
+            className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#111111] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997] shadow-sm"
           >
             <option value="impact">Sort: Impact Score</option>
             <option value="deadline">Sort: Deadline</option>
@@ -209,7 +209,7 @@ export function Tasks() {
           <button
             onClick={() => setAddOpen(true)}
             disabled={loading || projects.length === 0}
-            className="h-10 px-4 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-50"
+            className="h-10 px-4 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
           >
             <Plus className="w-4 h-4" /> Add Task
           </button>
@@ -230,7 +230,7 @@ export function Tasks() {
       )}
 
       {!loading && !error && taskList.length === 0 && (
-        <div className="border border-dashed border-slate-300 dark:border-white/10 bg-white/50 dark:bg-[#121212]/50 backdrop-blur-xl rounded-2xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        <div className="border border-dashed border-slate-300 dark:border-white/10 bg-white/50 dark:bg-[#111111]/50 backdrop-blur-xl rounded-2xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
           <CheckSquare className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
           No live task assignments yet. Workspace tasks will appear here when assigned.
         </div>
@@ -239,16 +239,16 @@ export function Tasks() {
       {!loading && !error && (
         <>
           <Section title="Today" icon={<Clock className="w-4 h-4 text-amber-500" />} rows={today} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due today." />
-          <Section title="This Week" icon={<Calendar className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />} rows={thisWeek} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due this week." />
+          <Section title="This Week" icon={<Calendar className="w-4 h-4 text-[#20C997]" />} rows={thisWeek} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due this week." />
           <Section title="Later" icon={<Layers className="w-4 h-4 text-purple-500" />} rows={later} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="No upcoming tasks." />
 
-          <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
             <button
               onClick={() => setCompletedOpen((v) => !v)}
               className="w-full p-4 px-5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
             >
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#20c937]" />
+                <CheckCircle2 className="w-4 h-4 text-[#20C997]" />
                 <span>Completed ({completed.length})</span>
               </div>
               <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">{completedOpen ? "Hide" : "Show"}</span>
@@ -269,7 +269,7 @@ export function Tasks() {
       )}
 
       <Dialog open={addOpen} onOpenChange={(o) => { setAddOpen(o); if (!o) resetForm(); }}>
-        <DialogContent className="max-w-md bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-md bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Create Contributor Task</DialogTitle>
           </DialogHeader>
@@ -279,7 +279,7 @@ export function Tasks() {
               <select
                 value={nfProject}
                 onChange={(e) => setNfProject(e.target.value)}
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               >
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
@@ -290,7 +290,7 @@ export function Tasks() {
                 value={nfTitle}
                 onChange={(e) => setNfTitle(e.target.value)}
                 placeholder="What needs to be done?"
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               />
             </div>
             <div>
@@ -299,7 +299,7 @@ export function Tasks() {
                 type="date"
                 value={nfDue}
                 onChange={(e) => setNfDue(e.target.value)}
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30"
+                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
               />
             </div>
             <div>
@@ -312,7 +312,7 @@ export function Tasks() {
                     onClick={() => setNfPriority(p)}
                     className={`h-9 rounded-xl border text-xs font-semibold uppercase tracking-wider transition-all ${
                       nfPriority === p
-                        ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]"
+                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
                         : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-400"
                     }`}
                   >
@@ -324,7 +324,7 @@ export function Tasks() {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Impact Score</label>
-                <span className="text-xs font-extrabold text-[#0066ff] dark:text-[#58a6ff]">{nfImpact}</span>
+                <span className="text-xs font-extrabold text-[#20C997]">{nfImpact}</span>
               </div>
               <input
                 type="range"
@@ -332,7 +332,7 @@ export function Tasks() {
                 max={100}
                 value={nfImpact}
                 onChange={(e) => setNfImpact(Number(e.target.value))}
-                className="w-full accent-[#0066ff]"
+                className="w-full accent-[#20C997]"
               />
             </div>
           </div>
@@ -346,7 +346,7 @@ export function Tasks() {
             <button
               onClick={() => void handleAdd()}
               disabled={!canSubmit || saving}
-              className="px-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] disabled:opacity-50 transition-all"
+              className="px-4 py-2 text-xs font-bold rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm disabled:opacity-50 transition-all"
             >
               {saving ? "Adding..." : "Add Task"}
             </button>
@@ -370,7 +370,7 @@ function Section({
   emptyText: string;
 }) {
   return (
-    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+    <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
       <div className="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/10 flex items-center justify-between bg-slate-50/40 dark:bg-white/[0.02]">
         <div className="flex items-center gap-2">
           {icon}
@@ -389,9 +389,9 @@ function Section({
               <div className="flex items-start gap-3 min-w-0">
                 <button
                   onClick={() => void onComplete(t.id)}
-                  className="mt-0.5 w-4 h-4 rounded border border-slate-300 dark:border-white/20 hover:border-[#0066ff] flex items-center justify-center shrink-0 transition-colors"
+                  className="mt-0.5 w-4 h-4 rounded border border-slate-300 dark:border-white/20 hover:border-[#20C997] flex items-center justify-center shrink-0 transition-colors"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-transparent hover:text-[#0066ff]" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-transparent hover:text-[#20C997]" />
                 </button>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">

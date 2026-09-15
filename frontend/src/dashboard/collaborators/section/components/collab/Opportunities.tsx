@@ -129,9 +129,9 @@ export function Opportunities() {
         <button
           onClick={handleRefresh}
           disabled={loading || refreshing}
-          className="h-10 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-[#181818] border border-black/[0.08] dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
+          className="h-10 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-[#111111] border border-black/[0.08] dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-[#0066ff] ${refreshing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-[#20C997] ${refreshing ? "animate-spin" : ""}`} />
           <span>Refresh Matches</span>
         </button>
       </div>
@@ -143,8 +143,8 @@ export function Opportunities() {
             onClick={() => setFilter(f.value)}
             className={`px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
               filter === f.value
-                ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] shadow-sm"
-                : "border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 text-slate-600 dark:text-slate-400 hover:border-black/20 dark:hover:border-white/20"
+                ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997] shadow-sm"
+                : "border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111] text-slate-600 dark:text-slate-400 hover:border-black/20 dark:hover:border-white/20"
             }`}
           >
             {f.label}
@@ -155,7 +155,7 @@ export function Opportunities() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {loading && (
           <div className="col-span-3 text-center py-12 text-xs text-slate-500 dark:text-slate-400">
-            <div className="w-5 h-5 border-2 border-[#0066ff] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-5 h-5 border-2 border-[#20C997] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             Loading live opportunities...
           </div>
         )}
@@ -174,7 +174,7 @@ export function Opportunities() {
         )}
 
         {!loading && !error && visible.length === 0 && (
-          <div className="col-span-3 border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-10 text-center text-xs text-slate-500 dark:text-slate-400 bg-white/40 dark:bg-[#121212]/40">
+          <div className="col-span-3 border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-10 text-center text-xs text-slate-500 dark:text-slate-400 bg-white/40 dark:bg-[#111111]/40">
             <Briefcase className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
             No live opportunities in this category currently match your filter.
           </div>
@@ -185,16 +185,16 @@ export function Opportunities() {
           return (
             <div
               key={o.id}
-              className={`bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border rounded-2xl p-6 shadow-sm flex flex-col justify-between transition-all ${
+              className={`bg-white dark:bg-[#111111] backdrop-blur-xl border rounded-2xl p-6 shadow-sm flex flex-col justify-between transition-all ${
                 applied
-                  ? "border-[#20c937]/30 bg-emerald-500/[0.03]"
-                  : "border-black/[0.06] dark:border-white/10 hover:border-[#0066ff]/40"
+                  ? "border-[#20C997]/40 bg-[#20C997]/[0.03]"
+                  : "border-black/[0.06] dark:border-white/10 hover:border-[#20C997]/30"
               }`}
             >
               <div>
                 <div className="flex items-start justify-between mb-3 gap-2">
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+                    <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
                       {o.type}
                     </span>
                     <h3 className="font-bold text-slate-900 dark:text-white text-base mt-2">{o.title}</h3>
@@ -204,7 +204,7 @@ export function Opportunities() {
                     </p>
                   </div>
                   {o.matchScore > 0 && (
-                    <span className="text-xs font-black text-[#20c937] bg-[#20c937]/10 px-2.5 py-1 rounded-full border border-[#20c937]/20 tabular-nums shrink-0">
+                    <span className="text-xs font-black text-[#20C997] bg-[#20C997]/10 px-2.5 py-1 rounded-full border border-[#20C997]/20 tabular-nums shrink-0">
                       {o.matchScore}% Fit
                     </span>
                   )}
@@ -229,7 +229,7 @@ export function Opportunities() {
               </div>
 
               {applied ? (
-                <div className="text-xs text-[#20c937] font-bold py-2 px-3 rounded-xl bg-[#20c937]/10 border border-[#20c937]/20 flex items-center justify-center gap-1.5">
+                <div className="text-xs text-[#20C997] font-bold py-2 px-3 rounded-xl bg-[#20C997]/10 border border-[#20C997]/20 flex items-center justify-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Application Submitted</span>
                 </div>
@@ -243,7 +243,7 @@ export function Opportunities() {
                   </button>
                   <button
                     onClick={() => void handleInterest(o.id)}
-                    className="flex-1 text-xs font-bold px-3 py-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+                    className="flex-1 text-xs font-bold px-3 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl transition-all shadow-sm"
                   >
                     Express Interest
                   </button>
@@ -261,12 +261,12 @@ export function Opportunities() {
       </div>
 
       <Sheet open={detail !== null} onOpenChange={(o) => !o && setDetail(null)}>
-        <SheetContent className="sm:max-w-lg bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl border-l border-black/[0.08] dark:border-white/10 p-6 overflow-y-auto">
+        <SheetContent className="sm:max-w-lg bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border-l border-black/[0.08] dark:border-white/10 p-6 overflow-y-auto">
           {detail && (
             <>
               <SheetHeader>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+                  <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
                     {detail.type}
                   </span>
                 </div>
@@ -284,7 +284,7 @@ export function Opportunities() {
 
                 <div>
                   <p className="uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">Proposed Compensation</p>
-                  <p className="text-slate-900 dark:text-white font-bold p-3 rounded-xl bg-[#0066ff]/10 border border-[#0066ff]/20">
+                  <p className="text-slate-900 dark:text-white font-bold p-3 rounded-xl bg-[#20C997]/10 border border-[#20C997]/20">
                     {compLabel(detail)}
                   </p>
                 </div>
@@ -310,7 +310,7 @@ export function Opportunities() {
 
                 <button
                   onClick={() => { void handleInterest(detail.id); setDetail(null); }}
-                  className="w-full h-11 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all text-xs"
+                  className="w-full h-11 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-sm transition-all text-xs"
                 >
                   Express Interest in Role
                 </button>

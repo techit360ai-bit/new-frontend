@@ -19,10 +19,10 @@ const destinations = [
 ];
 
 const STATS = [
-  { label: "Active Startups", value: "128+", change: "+14 this week", icon: Building2, color: "from-blue-500 to-cyan-500" },
-  { label: "Live Projects", value: "340+", change: "28 recruiting", icon: FolderKanban, color: "from-purple-500 to-indigo-500" },
-  { label: "Open Gigs & Roles", value: "85", change: "40% cash + equity", icon: Zap, color: "from-[#0066ff] to-[#58a6ff]" },
-  { label: "Upcoming Events", value: "12", change: "2 hackathons today", icon: CalendarDays, color: "from-emerald-500 to-teal-500" },
+  { label: "Active Startups", value: "128+", change: "+14 this week", icon: Building2, color: "from-[#20C997] to-[#1db587]" },
+  { label: "Live Projects", value: "340+", change: "28 recruiting", icon: FolderKanban, color: "from-[#20C997] to-teal-500" },
+  { label: "Open Gigs & Roles", value: "85", change: "40% cash + equity", icon: Zap, color: "from-[#20C997] to-emerald-400" },
+  { label: "Upcoming Events", value: "12", change: "2 hackathons today", icon: CalendarDays, color: "from-[#20C997] to-teal-400" },
 ];
 
 export default function ExplorerHome() {

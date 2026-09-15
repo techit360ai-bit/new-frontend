@@ -51,7 +51,7 @@ export function Performance() {
         <select
           value={range}
           onChange={(e) => setRange(e.target.value as Range)}
-          className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#181818] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0066ff]/30 shadow-sm"
+          className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#111111] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997] shadow-sm"
         >
           <option value="30">Last 30 days</option>
           <option value="90">Last 90 days</option>
@@ -61,7 +61,7 @@ export function Performance() {
 
       {loading && (
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 py-4">
-          <div className="w-4 h-4 border-2 border-[#0066ff] border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-[#20C997] border-t-transparent rounded-full animate-spin" />
           <span>Loading live performance metrics...</span>
         </div>
       )}
@@ -81,7 +81,7 @@ export function Performance() {
           return (
             <div
               key={m.name}
-              className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 shadow-sm"
+              className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 shadow-sm"
             >
               <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">{m.name}</p>
               <div className="flex items-baseline gap-2 mt-2">
@@ -102,9 +102,9 @@ export function Performance() {
       </div>
 
       {/* Velocity chart */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+      <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <BarChart3 className="w-4 h-4 text-[#20C997]" />
           <h2 className="text-sm font-bold text-slate-900 dark:text-white">Velocity Over Time</h2>
         </div>
         <div className="h-64">
@@ -129,10 +129,10 @@ export function Performance() {
                 <Line
                   type="monotone"
                   dataKey="tasks"
-                  stroke="#0066ff"
+                  stroke="#20C997"
                   strokeWidth={2.5}
-                  dot={{ fill: "#0066ff", r: 4 }}
-                  activeDot={{ r: 6, fill: "#58a6ff" }}
+                  dot={{ fill: "#20C997", r: 4 }}
+                  activeDot={{ r: 6, fill: "#1db587" }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -141,9 +141,9 @@ export function Performance() {
       </div>
 
       {/* Per-project contribution */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
         <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/10 flex items-center gap-2 bg-slate-50/40 dark:bg-white/[0.02]">
-          <Activity className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <Activity className="w-4 h-4 text-[#20C997]" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Per-Project Contribution</h2>
         </div>
         <div className="overflow-x-auto">
@@ -168,7 +168,7 @@ export function Performance() {
                     <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
                   </td>
                   <td className="px-6 py-3.5 text-right tabular-nums font-bold text-slate-900 dark:text-white">{p.shipped}</td>
-                  <td className="px-6 py-3.5 text-right tabular-nums text-[#0066ff] dark:text-[#58a6ff] font-bold">{p.impactAvg}</td>
+                  <td className="px-6 py-3.5 text-right tabular-nums text-[#20C997] font-bold">{p.impactAvg}</td>
                   <td className="px-6 py-3.5 text-right text-slate-500 dark:text-slate-400">{p.lastContribution}</td>
                 </tr>
               ))}

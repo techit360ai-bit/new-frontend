@@ -240,10 +240,10 @@ export function Equity() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm">
+    <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm">
       <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">{label}</p>
       <p className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tabular-nums mt-1">{value}</p>
-      {sub && <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">{sub}</p>}
+      {sub && <p className="text-xs text-[#20C997] mt-1 font-semibold">{sub}</p>}
     </div>
   );
 }
