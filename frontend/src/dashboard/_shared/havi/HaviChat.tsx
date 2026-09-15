@@ -29,7 +29,7 @@ export function HaviChat({ role, route, profile }: { role: HaviRole; route?: str
   return (
     <div className="flex min-h-[440px] flex-col rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/40 dark:bg-white/[0.02] p-4.5 backdrop-blur-md">
       <div className="mb-3.5 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#20C997]/10">
           <img src="/bot-icon.png" alt="Bot Icon" className="h-6 w-6 object-contain drop-shadow-sm" />
         </div>
         <div>
@@ -48,8 +48,8 @@ export function HaviChat({ role, route, profile }: { role: HaviRole; route?: str
             key={`${item.role}-${index}`}
             className={`rounded-2xl p-3 text-sm leading-relaxed ${
               item.role === "user"
-                ? "ml-6 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white rounded-tr-none shadow-sm"
-                : "mr-6 bg-white dark:bg-[#1a1a1a] border border-black/[0.06] dark:border-white/10 text-slate-800 dark:text-slate-200 rounded-tl-none shadow-sm"
+                ? "ml-6 bg-[#20C997] text-slate-950 font-medium rounded-tr-none shadow-sm"
+                : "mr-6 bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 text-slate-800 dark:text-slate-200 rounded-tl-none shadow-sm"
             }`}
           >
             {item.content}
@@ -61,14 +61,14 @@ export function HaviChat({ role, route, profile }: { role: HaviRole; route?: str
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           placeholder="Ask Havi..."
-          className="min-w-0 flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all"
+          className="min-w-0 flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-all"
           disabled={pending}
         />
         <button
           type="submit"
           aria-label="Send to Havi"
           disabled={pending || !message.trim()}
-          className="rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-4 py-2.5 text-white font-bold shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          className="rounded-xl bg-[#20C997] hover:bg-[#1db587] px-4 py-2.5 text-slate-950 font-bold shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
           <Send className="h-4 w-4" />
         </button>

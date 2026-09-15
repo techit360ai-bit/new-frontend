@@ -1,44 +1,34 @@
-// Theme-aware class helpers for the Mentorship Hub.
-//
-// The hub must look like the original prototype in light mode (white surfaces,
-// blue accent) and like the investor section in dark mode (charcoal surfaces,
-// emerald accent). Rather than scatter hardcoded `blue-600 dark:emerald-500`
-// pairs across seven pages, every accent lives here once. Pages compose these
-// constants so re-theming is a single-file change.
-//
-// Surfaces themselves use the app's semantic tokens (bg-background, bg-card,
-// text-foreground, text-muted-foreground, border-border) which already flip
-// with the global `.dark` class — see frontend/src/index.css.
+// Theme-aware class helpers for the Mentorship Hub with unified #20C997 mint theme.
 
 /** Solid accent button (primary call-to-action). */
 export const ACCENT_SOLID =
-  "bg-blue-600 hover:bg-blue-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-black";
+  "bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold transition-all shadow-sm";
 
 /** Accent text / links. */
-export const ACCENT_TEXT = "text-blue-600 hover:text-blue-700 dark:text-emerald-400 dark:hover:text-emerald-300";
+export const ACCENT_TEXT = "text-[#20C997] hover:text-[#1db587] font-semibold transition-colors";
 
 /** Soft accent chip (skills, tags, highlights). */
 export const ACCENT_SOFT =
-  "bg-blue-50 text-blue-700 dark:bg-emerald-500/10 dark:text-emerald-400";
+  "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-semibold";
 
 /** Accent progress-bar fill. */
-export const ACCENT_FILL = "bg-blue-600 dark:bg-emerald-500";
+export const ACCENT_FILL = "bg-[#20C997]";
 
 /** Welcome / hero banner gradient. */
 export const HERO_GRADIENT =
-  "bg-gradient-to-r from-blue-600 to-purple-600 dark:from-emerald-600 dark:to-teal-700 text-white";
+  "bg-gradient-to-r from-[#20C997]/90 to-[#128a66] text-slate-950 font-bold";
 
 /** Advanced-hub hero gradient (distinct from the primary hero). */
 export const HUB_GRADIENT =
-  "bg-gradient-to-r from-purple-600 to-pink-600 dark:from-violet-700 dark:to-fuchsia-800 text-white";
+  "bg-gradient-to-r from-[#20C997] to-[#0f7657] text-slate-950 font-bold";
 
 /** Neutral outline button (cancel / secondary actions). */
 export const NEUTRAL_BTN =
   "border border-border bg-transparent hover:bg-accent text-foreground transition-colors";
 
 /** Recharts stroke/fill colors (no Tailwind here — read once at render). */
-export const CHART_PRIMARY = "#3b82f6"; // blue-500
-export const CHART_SECONDARY = "#8b5cf6"; // violet-500
+export const CHART_PRIMARY = "#20C997";
+export const CHART_SECONDARY = "#0f7657";
 
 /**
  * Status → badge classes. Theme-aware so colored status pills stay legible on
@@ -49,18 +39,18 @@ export function statusBadge(status: string): string {
     case "completed":
     case "active":
     case "accepted":
-      return "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-400";
+      return "bg-[#20C997]/15 text-[#20C997] border border-[#20C997]/30 font-bold";
     case "in-progress":
     case "processing":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400";
+      return "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-semibold";
     case "pending":
     case "invited":
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-400";
+      return "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 font-semibold";
     case "overdue":
     case "rejected":
-      return "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400";
+      return "bg-red-500/15 text-red-600 dark:text-red-400 font-semibold";
     case "vested":
-      return "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-400";
+      return "bg-purple-500/15 text-purple-600 dark:text-purple-400 font-semibold";
     default:
       return "bg-muted text-muted-foreground";
   }

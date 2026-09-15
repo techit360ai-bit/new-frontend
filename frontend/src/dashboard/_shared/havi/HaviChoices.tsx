@@ -35,7 +35,7 @@ export function HaviChoices({
       {/* MVP target date */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Target className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <Target className="w-4 h-4 text-[#20C997]" />
           <h3 className="font-bold text-slate-900 dark:text-white text-sm">Your MVP target date</h3>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-normal">
@@ -48,11 +48,11 @@ export function HaviChoices({
             type="date"
             value={dateDraft}
             onChange={(e) => setDateDraft(e.target.value)}
-            className="flex-1 px-3.5 py-2.5 border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white text-sm outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all font-normal"
+            className="flex-1 px-3.5 py-2.5 border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#111111] text-slate-900 dark:text-white text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-all font-normal"
           />
           <button
             onClick={saveDate}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white text-sm font-bold shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all flex items-center gap-1.5 shrink-0"
+            className="px-4 py-2.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 text-sm font-bold shadow-sm transition-all flex items-center gap-1.5 shrink-0"
           >
             {saved ? <Check className="w-4 h-4" /> : null}
             {saved ? "Saved" : "Save"}
@@ -63,7 +63,7 @@ export function HaviChoices({
       {/* Personality mode */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <User className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <User className="w-4 h-4 text-[#20C997]" />
           <h3 className="font-bold text-slate-900 dark:text-white text-sm">How Havi talks to you</h3>
         </div>
         <div className="grid gap-2.5">
@@ -77,16 +77,16 @@ export function HaviChoices({
                 whileTap={{ scale: 0.98 }}
                 className={`p-3.5 rounded-xl border text-left transition-all ${
                   isSelected
-                    ? "border-[#0066ff] bg-[#0066ff]/10 dark:bg-[#0066ff]/20 shadow-sm"
-                    : "border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#1a1a1a]/80 hover:border-[#0066ff]/40"
+                    ? "border-[#20C997] bg-[#20C997]/10 dark:bg-[#20C997]/20 shadow-sm"
+                    : "border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/80 hover:border-[#20C997]/40"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <h4 className={`text-sm font-bold ${isSelected ? "text-[#0066ff] dark:text-[#58a6ff]" : "text-slate-900 dark:text-white"}`}>
+                  <h4 className={`text-sm font-bold ${isSelected ? "text-[#20C997]" : "text-slate-900 dark:text-white"}`}>
                     <span className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${info.colorClass}`} aria-hidden="true" />
                     {info.name}
                   </h4>
-                  {isSelected && <Check className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />}
+                  {isSelected && <Check className="w-4 h-4 text-[#20C997]" />}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal leading-relaxed">{info.description}</p>
               </motion.button>
@@ -98,7 +98,7 @@ export function HaviChoices({
       {/* Working hours */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-[#0066ff] dark:text-[#58a6ff]" />
+          <Clock className="w-4 h-4 text-[#20C997]" />
           <h3 className="font-bold text-slate-900 dark:text-white text-sm">When Havi nudges you</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -107,7 +107,7 @@ export function HaviChoices({
             <input
               type="time"
               defaultValue="09:00"
-              className="w-full px-3.5 py-2.5 border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white text-sm outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all font-normal"
+              className="w-full px-3.5 py-2.5 border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#111111] text-slate-900 dark:text-white text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-all font-normal"
             />
           </div>
           <div>
@@ -115,7 +115,7 @@ export function HaviChoices({
             <input
               type="time"
               defaultValue="17:00"
-              className="w-full px-3.5 py-2.5 border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white text-sm outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all font-normal"
+              className="w-full px-3.5 py-2.5 border border-black/[0.08] dark:border-white/10 rounded-xl bg-white dark:bg-[#111111] text-slate-900 dark:text-white text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-all font-normal"
             />
           </div>
         </div>

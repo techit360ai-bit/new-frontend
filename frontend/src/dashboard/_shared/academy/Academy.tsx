@@ -77,7 +77,7 @@ export function Academy({ role, userName = "there" }: { role: AcademyRole; userN
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#0066ff] dark:text-[#58a6ff]">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#20C997]">
               Build while you learn
             </p>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -94,13 +94,13 @@ export function Academy({ role, userName = "there" }: { role: AcademyRole; userN
               <select
                 value={projectId}
                 onChange={(event) => setProjectId(event.target.value)}
-                className="mt-1.5 min-h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white px-3.5 py-2.5 text-sm outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all font-normal"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] text-slate-900 dark:text-white px-3.5 py-2.5 text-sm outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-all font-normal"
               >
                 {projects.map((project) => (
                   <option
                     key={project.id}
                     value={project.id}
-                    className="bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white"
+                    className="bg-white dark:bg-[#111111] text-slate-900 dark:text-white"
                   >
                     {project.name} · {project.stage}
                   </option>
@@ -129,10 +129,10 @@ export function Academy({ role, userName = "there" }: { role: AcademyRole; userN
         {curriculum && (
           <>
             {/* Greeting & Progress highlight */}
-            <div className="mt-8 rounded-2xl border border-[#0066ff]/20 dark:border-[#0066ff]/35 bg-gradient-to-br from-[#0066ff]/5 to-[#58a6ff]/10 dark:from-[#0066ff]/10 dark:to-[#58a6ff]/15 p-6 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,102,255,0.05)]">
+            <div className="mt-8 rounded-2xl border border-[#20C997]/25 bg-[#20C997]/5 dark:bg-[#20C997]/10 p-6 backdrop-blur-xl shadow-sm">
               <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 flex items-center justify-center text-[#0066ff] dark:text-[#58a6ff] shrink-0">
-                  <Sparkles className="h-5 w-5" />
+                <div className="w-10 h-10 rounded-xl bg-[#20C997]/10 flex items-center justify-center text-[#20C997] shrink-0 font-bold">
+                  <Sparkles className="h-5 w-5 text-[#20C997]" />
                 </div>
                 <div>
                   <p className="font-bold text-slate-900 dark:text-white text-base">
@@ -148,7 +148,7 @@ export function Academy({ role, userName = "there" }: { role: AcademyRole; userN
                   </p>
                   <p className="mt-2.5 text-xs font-medium text-slate-600 dark:text-slate-300">
                     Next recommended module:{" "}
-                    <span className="font-bold text-[#0066ff] dark:text-[#58a6ff]">
+                    <span className="font-bold text-[#20C997]">
                       {next?.title || "All assigned modules complete"}
                     </span>
                   </p>
@@ -168,14 +168,14 @@ export function Academy({ role, userName = "there" }: { role: AcademyRole; userN
                     module.status === "locked"
                       ? "cursor-not-allowed border-black/[0.04] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.02] opacity-60"
                       : module.status === "complete"
-                      ? "border-[#20c937]/30 bg-[#20c937]/5 dark:bg-[#20c937]/10 hover:border-[#20c937]/50 shadow-[0_4px_20px_rgba(32,201,55,0.05)]"
-                      : "border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 hover:border-[#0066ff]/40 hover:shadow-[0_10px_30px_rgba(0,102,255,0.1)] shadow-[0_4px_20px_rgba(0,0,0,0.02)]"
+                      ? "border-[#20C997]/30 bg-[#20C997]/5 dark:bg-[#20C997]/10 hover:border-[#20C997]/50"
+                      : "border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] hover:border-[#20C997]/40 shadow-sm"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        <span className="text-[#0066ff] dark:text-[#58a6ff]">{module.phase}</span>
+                        <span className="text-[#20C997]">{module.phase}</span>
                         <span>·</span>
                         <span>{module.priority}</span>
                         <span>·</span>
@@ -196,11 +196,11 @@ export function Academy({ role, userName = "there" }: { role: AcademyRole; userN
                           <Lock className="h-4 w-4" />
                         </div>
                       ) : module.status === "complete" ? (
-                        <div className="w-9 h-9 rounded-xl bg-[#20c937]/15 text-[#20c937] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-[#20C997]/15 text-[#20C997] flex items-center justify-center font-bold">
                           <CheckCircle2 className="h-5 w-5" />
                         </div>
                       ) : (
-                        <div className="w-9 h-9 rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-[#20C997]/10 text-[#20C997] flex items-center justify-center font-bold">
                           <BookOpen className="h-4 w-4" />
                         </div>
                       )}
