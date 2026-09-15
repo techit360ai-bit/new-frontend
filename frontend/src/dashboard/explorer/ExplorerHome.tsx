@@ -34,19 +34,19 @@ export default function ExplorerHome() {
     <ExplorerLayout>
       <div className="space-y-8 font-bricolage max-w-7xl mx-auto">
         {/* Hero Banner Card */}
-        <div className="relative overflow-hidden rounded-3xl border border-black/[0.08] dark:border-white/10 bg-gradient-to-br from-white/90 via-slate-50/80 to-blue-50/50 dark:from-[#18181b]/90 dark:via-[#121212]/90 dark:to-[#0066ff]/10 p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+        <div className="relative overflow-hidden rounded-3xl border border-black/[0.08] dark:border-white/10 bg-gradient-to-br from-white/90 via-slate-50/80 to-[#20C997]/5 dark:from-[#111111]/90 dark:via-[#0a0a0a]/90 dark:to-[#20C997]/10 p-6 sm:p-8 backdrop-blur-xl shadow-xl">
           {/* Ambient Glow Orbs */}
-          <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[#0066ff]/15 blur-3xl" />
-          <div className="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-purple-500/15 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[#20C997]/15 blur-3xl" />
+          <div className="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-[#20C997]/10 blur-3xl" />
 
           <div className="relative z-10 max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#0066ff]/20 bg-[#0066ff]/10 px-3 py-1 text-xs font-bold text-[#0066ff] dark:text-[#58a6ff]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#20C997]/20 bg-[#20C997]/10 px-3 py-1 text-xs font-bold text-[#20C997]">
               <Compass className="h-3.5 w-3.5" />
               <span>Ecosystem Gateway</span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-              Welcome back, <span className="bg-gradient-to-r from-[#0066ff] via-[#58a6ff] to-purple-500 bg-clip-text text-transparent">{firstName}</span>.
+              Welcome back, <span className="bg-gradient-to-r from-[#20C997] via-[#1db587] to-teal-400 bg-clip-text text-transparent">{firstName}</span>.
             </h1>
 
             <p className="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
@@ -58,7 +58,7 @@ export default function ExplorerHome() {
               <button
                 type="button"
                 onClick={() => navigate("/feed/discover")}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#0066ff]/25 hover:from-[#0052cc] hover:to-[#408fe6] transition-all"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-[#20C997]/25 transition-all"
               >
                 <Search className="h-4 w-4" />
                 <span>Discover Ecosystem</span>
@@ -87,17 +87,17 @@ export default function ExplorerHome() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, duration: 0.4 }}
-                className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-4 sm:p-5 backdrop-blur-xl shadow-sm hover:border-[#0066ff]/30 dark:hover:border-white/20 transition-all"
+                className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-4 sm:p-5 backdrop-blur-xl shadow-sm hover:border-[#20C997]/30 dark:hover:border-white/20 transition-all"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{stat.label}</span>
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${stat.color} text-white shadow-md`}>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 shadow-sm">
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
                 <div className="mt-3">
                   <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{stat.value}</div>
-                  <div className="mt-1 text-[11px] font-semibold text-[#20c937] flex items-center gap-1">
+                  <div className="mt-1 text-[11px] font-semibold text-[#20C997] flex items-center gap-1">
                     <TrendingUp className="h-3 w-3" />
                     <span>{stat.change}</span>
                   </div>
@@ -121,11 +121,11 @@ export default function ExplorerHome() {
               <Link
                 key={href}
                 to={href}
-                className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0066ff]/40 dark:hover:border-[#58a6ff]/40 hover:shadow-xl"
+                className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#20C997]/40 hover:shadow-xl"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-white/10 text-[#0066ff] dark:text-[#58a6ff] group-hover:bg-[#0066ff] group-hover:text-white transition-colors">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#20C997]/10 text-[#20C997] group-hover:bg-[#20C997] group-hover:text-slate-950 transition-colors">
                       <Icon className="h-5 w-5" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-full">
@@ -133,7 +133,7 @@ export default function ExplorerHome() {
                     </span>
                   </div>
 
-                  <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors">
+                  <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">
                     {label}
                   </h3>
                   <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
@@ -141,7 +141,7 @@ export default function ExplorerHome() {
                   </p>
                 </div>
 
-                <div className="mt-5 flex items-center gap-1.5 text-xs font-bold text-[#0066ff] dark:text-[#58a6ff]">
+                <div className="mt-5 flex items-center gap-1.5 text-xs font-bold text-[#20C997]">
                   <span>Explore module</span>
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </div>
@@ -151,11 +151,11 @@ export default function ExplorerHome() {
         </div>
 
         {/* Ready to Participate Role Activation Surface */}
-        <div className="rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent p-6 dark:border-amber-400/20 backdrop-blur-xl">
+        <div className="rounded-3xl border border-[#20C997]/20 bg-gradient-to-r from-[#20C997]/10 via-[#20C997]/5 to-transparent p-6 backdrop-blur-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1 max-w-xl">
               <div className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-amber-500" />
+                <Lightbulb className="h-5 w-5 text-[#20C997]" />
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Ready to Participate actively?</h3>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300">
@@ -167,18 +167,18 @@ export default function ExplorerHome() {
               <button
                 type="button"
                 onClick={() => void activateRole("founder")}
-                className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-white/10 border border-black/[0.08] dark:border-white/10 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white hover:border-[#0066ff] hover:bg-slate-50 dark:hover:bg-white/20 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-white/10 border border-black/[0.08] dark:border-white/10 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white hover:border-[#20C997] hover:bg-slate-50 dark:hover:bg-white/20 transition-all shadow-sm"
               >
-                <Rocket className="h-4 w-4 text-purple-500" />
+                <Rocket className="h-4 w-4 text-[#20C997]" />
                 <span>Founder Mode</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => void activateRole("collaborator")}
-                className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-white/10 border border-black/[0.08] dark:border-white/10 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white hover:border-[#0066ff] hover:bg-slate-50 dark:hover:bg-white/20 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-white/10 border border-black/[0.08] dark:border-white/10 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white hover:border-[#20C997] hover:bg-slate-50 dark:hover:bg-white/20 transition-all shadow-sm"
               >
-                <Users className="h-4 w-4 text-[#0066ff]" />
+                <Users className="h-4 w-4 text-[#20C997]" />
                 <span>Collaborator Mode</span>
               </button>
             </div>

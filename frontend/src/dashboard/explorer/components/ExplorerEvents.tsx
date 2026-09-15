@@ -75,7 +75,7 @@ export function ExplorerEvents() {
             <p className="text-xs text-slate-500 dark:text-slate-400">Participate in ecosystem hackathons, demo days, webinars, and workshops.</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] bg-blue-50 dark:bg-blue-950/30 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
+            <span className="text-xs font-bold text-[#20C997] bg-[#20C997]/10 px-3 py-1.5 rounded-xl border border-[#20C997]/20">
               {filteredEvents.length} Events Listed
             </span>
           </div>
@@ -90,7 +90,7 @@ export function ExplorerEvents() {
               onClick={() => setSelectedType(t)}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 selectedType === t
-                  ? "bg-[#0066ff] text-white shadow-md shadow-[#0066ff]/25"
+                  ? "bg-[#20C997] text-slate-950 shadow-md shadow-[#20C997]/25"
                   : "bg-slate-100 text-slate-600 dark:bg-white/[0.06] dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
               }`}
             >
@@ -107,7 +107,7 @@ export function ExplorerEvents() {
             return (
               <div
                 key={evt.id}
-                className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0066ff]/40 dark:hover:border-[#58a6ff]/40 hover:shadow-xl"
+                className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#20C997]/40 hover:shadow-xl"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
@@ -115,7 +115,7 @@ export function ExplorerEvents() {
                       className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
                         evt.status === "Live Now"
                           ? "bg-rose-500/10 text-rose-500 border border-rose-500/20 animate-pulse"
-                          : "bg-blue-50 dark:bg-blue-950/40 text-[#0066ff] dark:text-[#58a6ff] border border-blue-200 dark:border-blue-800"
+                          : "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20"
                       }`}
                     >
                       {evt.status}
@@ -124,7 +124,7 @@ export function ExplorerEvents() {
                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{evt.type}</span>
                   </div>
 
-                  <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors">
+                  <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">
                     {evt.title}
                   </h3>
 
@@ -157,8 +157,8 @@ export function ExplorerEvents() {
                     onClick={() => toggleRegister(evt.id)}
                     className={`w-full py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                       isRegistered
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                        : "bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-white shadow-md hover:opacity-95"
+                        ? "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/30"
+                        : "bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-md transition-all"
                     }`}
                   >
                     {isRegistered ? (

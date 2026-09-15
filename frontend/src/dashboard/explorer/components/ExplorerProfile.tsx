@@ -21,15 +21,15 @@ export function ExplorerProfile() {
     <ExplorerLayout>
       <div className="space-y-6 max-w-5xl mx-auto font-bricolage">
         {/* Profile Header Card */}
-        <div className="relative overflow-hidden rounded-3xl border border-black/[0.08] dark:border-white/10 bg-gradient-to-br from-white/90 via-slate-50/80 to-blue-50/50 dark:from-[#18181b]/90 dark:via-[#121212]/90 dark:to-[#0066ff]/10 p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+        <div className="relative overflow-hidden rounded-3xl border border-black/[0.08] dark:border-white/10 bg-gradient-to-br from-white/90 via-slate-50/80 to-[#20C997]/5 dark:from-[#111111]/90 dark:via-[#0a0a0a]/90 dark:to-[#20C997]/10 p-6 sm:p-8 backdrop-blur-xl shadow-xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-2xl font-black text-white shadow-lg">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#20C997] text-2xl font-black text-slate-950 shadow-lg">
                 {name.slice(0, 2).toUpperCase()}
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{name}</h1>
-                <p className="text-xs font-semibold text-[#0066ff] dark:text-[#58a6ff] flex items-center gap-1.5 mt-0.5">
+                <p className="text-xs font-semibold text-[#20C997] flex items-center gap-1.5 mt-0.5">
                   <Compass className="h-3.5 w-3.5" />
                   <span>Explorer Mode Active</span>
                 </p>
@@ -54,16 +54,16 @@ export function ExplorerProfile() {
         {/* Interests & Activity Grid */}
         <div className="grid gap-6 md:grid-cols-2">
           {/* Interests Card */}
-          <div className="rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm space-y-4">
+          <div className="rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-6 backdrop-blur-xl shadow-sm space-y-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+              <Sparkles className="h-4 w-4 text-[#20C997]" />
               <h2 className="text-sm font-bold text-slate-900 dark:text-white">Exploration Interests</h2>
             </div>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((interest) => (
                 <span
                   key={interest}
-                  className="rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#0066ff] dark:text-[#58a6ff] border border-blue-200 dark:border-blue-800 px-3 py-1 text-xs font-bold"
+                  className="rounded-xl bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 px-3 py-1 text-xs font-bold"
                 >
                   {interest}
                 </span>
@@ -72,10 +72,10 @@ export function ExplorerProfile() {
           </div>
 
           {/* Saved Items */}
-          <div className="rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm space-y-4">
+          <div className="rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-6 backdrop-blur-xl shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Bookmark className="h-4 w-4 text-purple-500" />
+                <Bookmark className="h-4 w-4 text-[#20C997]" />
                 <h2 className="text-sm font-bold text-slate-900 dark:text-white">Bookmarks & Saved Items</h2>
               </div>
               <span className="text-[10px] font-bold text-slate-400">{SAVED_ITEMS.length} Saved</span>

@@ -128,14 +128,14 @@ export function ExplorerDiscover() {
             <p className="text-xs text-slate-500 dark:text-slate-400">Search and filter verified founders, startups, projects, and experts across the network.</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] bg-blue-50 dark:bg-blue-950/30 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
+            <span className="text-xs font-bold text-[#20C997] bg-[#20C997]/10 px-3 py-1.5 rounded-xl border border-[#20C997]/20">
               {filteredEntities.length} Matches Found
             </span>
           </div>
         </div>
 
         {/* Search & Filter Bar */}
-        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-4 backdrop-blur-xl space-y-4 shadow-sm">
+        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-4 backdrop-blur-xl space-y-4 shadow-sm">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-white/40" />
             <input
@@ -143,7 +143,7 @@ export function ExplorerDiscover() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by keyword, tech stack, category, or location..."
-              className="h-11 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#0066ff] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#58a6ff] dark:focus:bg-white/10"
+              className="h-11 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#20C997] dark:focus:bg-white/10"
             />
           </div>
 
@@ -156,7 +156,7 @@ export function ExplorerDiscover() {
                 onClick={() => setSelectedType(pill.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   selectedType === pill.id
-                    ? "bg-[#0066ff] text-white shadow-md shadow-[#0066ff]/25"
+                    ? "bg-[#20C997] text-slate-950 shadow-md shadow-[#20C997]/25"
                     : "bg-slate-100 text-slate-600 dark:bg-white/[0.06] dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
                 }`}
               >
@@ -171,16 +171,16 @@ export function ExplorerDiscover() {
           {filteredEntities.map((entity) => (
             <div
               key={entity.id}
-              className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0066ff]/40 dark:hover:border-[#58a6ff]/40 hover:shadow-xl"
+              className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#20C997]/40 hover:shadow-xl"
             >
               <div>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-white/10 dark:to-white/5 text-xl shadow-sm">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#20C997]/10 text-[#20C997] text-xl shadow-sm border border-[#20C997]/20">
                       {entity.avatarEmoji || "🚀"}
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">
                         {entity.name}
                       </h3>
                       <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 block">
@@ -189,7 +189,7 @@ export function ExplorerDiscover() {
                     </div>
                   </div>
 
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-[#20c937]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#20C997]/20 bg-[#20C997]/10 px-2 py-0.5 text-[10px] font-bold text-[#20C997]">
                     <Sparkles className="h-3 w-3" />
                     {entity.matchScore}% Match
                   </span>
@@ -223,7 +223,7 @@ export function ExplorerDiscover() {
                 <button
                   type="button"
                   onClick={() => setSelectedEntity(entity)}
-                  className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] hover:underline"
+                  className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-[#20C997] hover:underline"
                 >
                   <span>Inspect</span>
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -236,10 +236,10 @@ export function ExplorerDiscover() {
         {/* Entity Detail Drawer Modal */}
         {selectedEntity && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#18181b] p-6 shadow-2xl space-y-5">
+            <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-2xl space-y-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-white/10 text-2xl">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#20C997]/10 text-[#20C997] text-2xl border border-[#20C997]/20">
                     {selectedEntity.avatarEmoji || "🚀"}
                   </div>
                   <div>
@@ -264,7 +264,7 @@ export function ExplorerDiscover() {
                 <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Relevant Tags & Stack</h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedEntity.tags.map((t) => (
-                    <span key={t} className="rounded-lg bg-blue-50 dark:bg-white/10 px-2.5 py-1 text-xs font-semibold text-[#0066ff] dark:text-[#58a6ff]">
+                    <span key={t} className="rounded-lg bg-[#20C997]/10 border border-[#20C997]/20 px-2.5 py-1 text-xs font-semibold text-[#20C997]">
                       {t}
                     </span>
                   ))}
@@ -282,7 +282,7 @@ export function ExplorerDiscover() {
                 <button
                   type="button"
                   onClick={() => { alert(`Connection request sent to ${selectedEntity.name}!`); setSelectedEntity(null); }}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-xs font-bold text-white shadow-md hover:opacity-95"
+                  className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
                   Connect in Messages
                 </button>

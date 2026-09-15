@@ -101,14 +101,14 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
   };
 
   return (
-    <div className={`min-h-screen font-bricolage transition-colors duration-300 ${isDark ? "dark bg-[#121212] text-white" : "bg-slate-50 text-slate-900"}`}>
+    <div className={`min-h-screen font-bricolage transition-colors duration-300 ${isDark ? "dark bg-[#0a0a0a] text-white" : "bg-slate-50 text-slate-900"}`}>
       <Toaster position="top-right" theme={isDark ? "dark" : "light"} />
 
       {/* Main Shell Layout */}
       <div className="flex min-h-screen">
         {/* Desktop Collapsible Sidebar */}
         <aside
-          className={`hidden lg:flex flex-col border-r border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl transition-all duration-300 z-20 sticky top-0 h-screen ${
+          className={`hidden lg:flex flex-col border-r border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl transition-all duration-300 z-20 sticky top-0 h-screen ${
             sidebarCollapsed ? "w-20" : "w-64"
           }`}
         >
@@ -119,15 +119,15 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
             <Link to="/explore" className="flex items-center gap-3 overflow-hidden group">
               <div className={`flex h-9 w-9 items-center justify-center rounded-xl p-1.5 backdrop-blur-md border transition-all shrink-0 ${
                 isDark
-                  ? "bg-white/[0.05] border-white/10 shadow-[0_0_12px_rgba(0,102,255,0.15)] group-hover:border-[#58a6ff]/40"
-                  : "bg-white/80 border-black/[0.08] shadow-sm group-hover:border-[#0066ff]/40"
+                  ? "bg-white/[0.05] border-white/10 shadow-[0_0_12px_rgba(32,201,151,0.15)] group-hover:border-[#20C997]/40"
+                  : "bg-white/80 border-black/[0.08] shadow-sm group-hover:border-[#20C997]/40"
               }`}>
                 <TechITLogo />
               </div>
               {!sidebarCollapsed && (
                 <div className="flex flex-col">
                   <span className="text-sm font-black tracking-tight text-slate-900 dark:text-white">TechIT</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#0066ff] dark:text-[#58a6ff]">Explorer</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#20C997]">Explorer</span>
                 </div>
               )}
             </Link>
@@ -174,7 +174,7 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
                           sidebarCollapsed ? "justify-center px-0" : ""
                         } ${
                           active
-                            ? "bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 text-[#0066ff] dark:text-[#58a6ff] font-bold"
+                            ? "bg-[#20C997]/10 text-[#20C997] font-bold"
                             : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
                         }`}
                         title={sidebarCollapsed ? item.label : undefined}
@@ -183,11 +183,11 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
                         {active && !sidebarCollapsed && (
                           <motion.div
                             layoutId="activeSideBarBar"
-                            className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-[#0066ff] dark:bg-[#58a6ff]"
+                            className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-[#20C997]"
                           />
                         )}
 
-                        <Icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#0066ff] dark:text-[#58a6ff]" : "text-slate-400 group-hover:text-slate-700 dark:text-white/40 dark:group-hover:text-white"}`} />
+                        <Icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#20C997]" : "text-slate-400 group-hover:text-slate-700 dark:text-white/40 dark:group-hover:text-white"}`} />
 
                         {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                       </Link>
@@ -206,7 +206,7 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
                 <button
                   type="button"
                   onClick={() => navigate("/explore/settings")}
-                  className="mt-2.5 w-full rounded-lg bg-gradient-to-r from-[#0066ff] to-[#58a6ff] py-1.5 text-center text-[10px] font-bold text-white shadow-sm hover:opacity-95"
+                  className="mt-2.5 w-full rounded-lg bg-[#20C997] hover:bg-[#1db587] py-1.5 text-center text-[10px] font-bold text-slate-950 shadow-sm transition-all"
                 >
                   Explore Modes
                 </button>
@@ -215,10 +215,10 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
               <button
                 type="button"
                 onClick={() => navigate("/explore/settings")}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.06] bg-slate-100/70 text-slate-600 hover:bg-[#0066ff]/10 hover:text-[#0066ff] dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-white/10 transition-colors mx-auto"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.06] bg-slate-100/70 text-slate-600 hover:bg-[#20C997]/10 hover:text-[#20C997] dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-white/10 transition-colors mx-auto"
                 title="Explore Modes & Settings"
               >
-                <Sparkles className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+                <Sparkles className="h-4 w-4 text-[#20C997]" />
               </button>
             )}
           </div>

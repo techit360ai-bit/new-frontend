@@ -88,14 +88,14 @@ export function ExplorerOpportunities() {
             <p className="text-xs text-slate-500 dark:text-slate-400">Discover verified startup gigs, co-founder roles, bounties, and equity positions matched to your skills.</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] bg-blue-50 dark:bg-blue-950/30 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
+            <span className="text-xs font-bold text-[#20C997] bg-[#20C997]/10 px-3 py-1.5 rounded-xl border border-[#20C997]/20">
               {filteredOpps.length} Positions Available
             </span>
           </div>
         </div>
 
         {/* Filter Controls */}
-        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-4 backdrop-blur-xl space-y-4 shadow-sm">
+        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-4 backdrop-blur-xl space-y-4 shadow-sm">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-white/40" />
             <input
@@ -103,7 +103,7 @@ export function ExplorerOpportunities() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search opportunity title, startup, skills..."
-              className="h-11 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#0066ff] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#58a6ff] dark:focus:bg-white/10"
+              className="h-11 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#20C997] dark:focus:bg-white/10"
             />
           </div>
 
@@ -116,7 +116,7 @@ export function ExplorerOpportunities() {
                 onClick={() => setSelectedType(t)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   selectedType === t
-                    ? "bg-[#0066ff] text-white shadow-md shadow-[#0066ff]/25"
+                    ? "bg-[#20C997] text-slate-950 shadow-md shadow-[#20C997]/25"
                     : "bg-slate-100 text-slate-600 dark:bg-white/[0.06] dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
                 }`}
               >
@@ -131,21 +131,21 @@ export function ExplorerOpportunities() {
           {filteredOpps.map((opp) => (
             <div
               key={opp.id}
-              className="group relative flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:border-[#0066ff]/40 dark:hover:border-[#58a6ff]/40 hover:shadow-xl gap-4"
+              className="group relative flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:border-[#20C997]/40 hover:shadow-xl gap-4"
             >
               <div className="space-y-2 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#0066ff] dark:text-[#58a6ff] border border-blue-200 dark:border-blue-800 px-2.5 py-0.5 text-[10px] font-bold">
+                  <span className="rounded-full bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 px-2.5 py-0.5 text-[10px] font-bold">
                     {opp.type}
                   </span>
                   <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{opp.startupName}</span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-[#20c937]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#20C997]/20 bg-[#20C997]/10 px-2 py-0.5 text-[10px] font-bold text-[#20C997]">
                     <Sparkles className="h-3 w-3" />
                     {opp.matchScore}% Fit
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">
                   {opp.title}
                 </h3>
 
@@ -155,7 +155,7 @@ export function ExplorerOpportunities() {
 
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 pt-1">
                   <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
-                    <Zap className="h-3.5 w-3.5 text-amber-500" />
+                    <Zap className="h-3.5 w-3.5 text-[#20C997]" />
                     {opp.compDetails}
                   </span>
                   <span>• {opp.commitment}</span>
@@ -166,7 +166,7 @@ export function ExplorerOpportunities() {
                 <button
                   type="button"
                   onClick={() => setActiveOpp(opp)}
-                  className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-xs font-bold text-white shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-1.5"
+                  className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all flex items-center justify-center gap-1.5"
                 >
                   <span>Apply Now</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -179,11 +179,11 @@ export function ExplorerOpportunities() {
         {/* Application Modal */}
         {activeOpp && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#18181b] p-6 shadow-2xl space-y-5">
+            <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-2xl space-y-5">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-white">{activeOpp.title}</h3>
-                  <p className="text-xs text-[#0066ff] dark:text-[#58a6ff] font-bold">{activeOpp.startupName} • {activeOpp.type}</p>
+                  <p className="text-xs text-[#20C997] font-bold">{activeOpp.startupName} • {activeOpp.type}</p>
                 </div>
                 <button
                   type="button"
@@ -214,7 +214,7 @@ export function ExplorerOpportunities() {
                 <button
                   type="button"
                   onClick={() => { alert(`Application submitted for ${activeOpp.title}! The startup team will review your profile.`); setActiveOpp(null); }}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-xs font-bold text-white shadow-md hover:opacity-95 flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   <span>Submit Application</span>

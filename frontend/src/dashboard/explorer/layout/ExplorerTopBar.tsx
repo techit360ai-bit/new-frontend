@@ -55,7 +55,7 @@ export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTo
   ];
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-black/[0.06] bg-white/80 px-4 backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#121212]/90 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-black/[0.06] bg-white/80 px-4 backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#0a0a0a]/90 sm:px-6">
       {/* Search Input */}
       <div className="flex flex-1 items-center gap-3 max-w-md">
         <div className="relative w-full">
@@ -65,7 +65,7 @@ export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTo
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search startups, projects, skills, events..."
-            className="h-10 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#0066ff] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#58a6ff] dark:focus:bg-white/10"
+            className="h-10 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#20C997] dark:focus:bg-white/10"
           />
         </div>
       </div>
@@ -77,9 +77,9 @@ export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTo
           <button
             type="button"
             onClick={onOpenHavi}
-            className="flex items-center gap-1.5 rounded-xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 px-3 py-1.5 text-xs font-bold text-purple-600 transition-all hover:from-purple-500/20 hover:to-indigo-500/20 dark:border-purple-400/30 dark:text-purple-300"
+            className="flex items-center gap-1.5 rounded-xl border border-[#20C997]/30 bg-[#20C997]/10 px-3 py-1.5 text-xs font-bold text-[#20C997] transition-all hover:bg-[#20C997]/20"
           >
-            <Sparkles className="h-3.5 w-3.5 text-purple-500 animate-pulse" />
+            <Sparkles className="h-3.5 w-3.5 text-[#20C997] animate-pulse" />
             <span className="hidden sm:inline">Ask Havi</span>
           </button>
         )}
@@ -102,23 +102,23 @@ export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTo
             className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.06] text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
           >
             <Bell className="h-4 w-4" />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#0066ff] dark:bg-[#58a6ff]" />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#20C997]" />
           </button>
 
           {notifOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
-              <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-black/[0.08] bg-white/95 p-4 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#18181b]/95">
+              <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-black/[0.08] bg-white/95 p-4 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/95">
                 <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/10">
                   <h3 className="text-xs font-bold text-slate-900 dark:text-white">Notifications</h3>
-                  <span className="text-[10px] font-semibold text-[#0066ff] dark:text-[#58a6ff]">2 New</span>
+                  <span className="text-[10px] font-semibold text-[#20C997]">2 New</span>
                 </div>
                 <div className="mt-2 space-y-2 max-h-64 overflow-y-auto">
                   {notifications.map((n) => (
                     <div
                       key={n.id}
                       className={`p-2.5 rounded-xl text-xs transition-colors ${
-                        n.read ? "bg-transparent text-slate-500 dark:text-slate-400" : "bg-blue-50/50 dark:bg-blue-950/20 text-slate-900 dark:text-white font-medium"
+                        n.read ? "bg-transparent text-slate-500 dark:text-slate-400" : "bg-[#20C997]/10 text-slate-900 dark:text-white font-medium"
                       }`}
                     >
                       <p>{n.title}</p>
@@ -138,7 +138,7 @@ export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTo
             onClick={() => setProfileOpen((v) => !v)}
             className="flex items-center gap-2.5 rounded-xl border border-transparent p-1 transition-colors hover:border-black/[0.06] hover:bg-slate-100 dark:hover:border-white/10 dark:hover:bg-white/10"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-xs font-black text-white shadow-md">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#20C997] text-xs font-black text-slate-950 shadow-md">
               {initials}
             </div>
             <div className="hidden text-left md:block">
@@ -151,7 +151,7 @@ export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTo
           {profileOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-              <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-black/[0.08] bg-white/95 p-2 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#18181b]/95">
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-black/[0.08] bg-white/95 p-2 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/95">
                 <div className="px-3 py-2 border-b border-black/[0.06] dark:border-white/10">
                   <p className="text-xs font-bold text-slate-900 dark:text-white">{displayName}</p>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Explorer Mode Active</p>

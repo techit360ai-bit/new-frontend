@@ -96,14 +96,14 @@ export function ExplorerProjects() {
             <p className="text-xs text-slate-500 dark:text-slate-400">Explore open build logs, repos, and codebases seeking contributors across the network.</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] bg-blue-50 dark:bg-blue-950/30 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
+            <span className="text-xs font-bold text-[#20C997] bg-[#20C997]/10 px-3 py-1.5 rounded-xl border border-[#20C997]/20">
               {filteredProjects.length} Projects Live
             </span>
           </div>
         </div>
 
         {/* Filter Controls */}
-        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-4 backdrop-blur-xl space-y-4 shadow-sm">
+        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-4 backdrop-blur-xl space-y-4 shadow-sm">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-white/40" />
             <input
@@ -111,7 +111,7 @@ export function ExplorerProjects() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by project name, description, repository..."
-              className="h-11 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#0066ff] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#58a6ff] dark:focus:bg-white/10"
+              className="h-11 w-full rounded-xl border border-black/[0.08] bg-slate-50 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#20C997] dark:focus:bg-white/10"
             />
           </div>
 
@@ -124,7 +124,7 @@ export function ExplorerProjects() {
                 onClick={() => setSelectedTech(tech)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   selectedTech === tech
-                    ? "bg-[#0066ff] text-white shadow-md shadow-[#0066ff]/25"
+                    ? "bg-[#20C997] text-slate-950 shadow-md shadow-[#20C997]/25"
                     : "bg-slate-100 text-slate-600 dark:bg-white/[0.06] dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
                 }`}
               >
@@ -139,23 +139,23 @@ export function ExplorerProjects() {
           {filteredProjects.map((p) => (
             <div
               key={p.id}
-              className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0066ff]/40 dark:hover:border-[#58a6ff]/40 hover:shadow-xl"
+              className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-5 backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#20C997]/40 hover:shadow-xl"
             >
               <div>
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-white/10 text-purple-600 dark:text-purple-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
                       <Code2 className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#0066ff] dark:group-hover:text-[#58a6ff] transition-colors">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">
                         {p.name}
                       </h3>
                       <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 block">{p.repoName}</span>
                     </div>
                   </div>
 
-                  <span className="rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-2.5 py-0.5 text-[10px] font-bold">
+                  <span className="rounded-full bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 px-2.5 py-0.5 text-[10px] font-bold">
                     {p.status}
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export function ExplorerProjects() {
                 <button
                   type="button"
                   onClick={() => setActiveProject(p)}
-                  className="inline-flex items-center gap-1 font-bold text-[#0066ff] dark:text-[#58a6ff] hover:underline text-xs"
+                  className="inline-flex items-center gap-1 font-bold text-[#20C997] hover:underline text-xs"
                 >
                   <span>Inspect Repo</span>
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -199,11 +199,11 @@ export function ExplorerProjects() {
         {/* Project Detail Modal */}
         {activeProject && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#18181b] p-6 shadow-2xl space-y-5">
+            <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-2xl space-y-5">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-white">{activeProject.name}</h3>
-                  <p className="text-xs font-mono text-[#0066ff] dark:text-[#58a6ff]">{activeProject.repoName}</p>
+                  <p className="text-xs font-mono text-[#20C997]">{activeProject.repoName}</p>
                 </div>
                 <button
                   type="button"
@@ -229,7 +229,7 @@ export function ExplorerProjects() {
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Open Issues</span>
-                  <span className="font-bold text-emerald-500">{activeProject.openIssuesCount}</span>
+                  <span className="font-bold text-[#20C997]">{activeProject.openIssuesCount}</span>
                 </div>
               </div>
 
@@ -244,7 +244,7 @@ export function ExplorerProjects() {
                 <button
                   type="button"
                   onClick={() => { alert(`Redirecting to IDE workspace for ${activeProject.name}...`); setActiveProject(null); }}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] text-xs font-bold text-white shadow-md hover:opacity-95"
+                  className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
                   Open in Workspace IDE
                 </button>
