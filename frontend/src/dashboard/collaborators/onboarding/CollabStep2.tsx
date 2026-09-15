@@ -147,7 +147,7 @@ export function CollabStep2() {
                   {disciplines.map((d) => (
                     <button key={d} type="button" onClick={() => { setDiscipline(d); setSubSkills([]); }}
                       className={`px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                        discipline === d ? "border-[#0066ff] bg-[#0066ff]/20 text-white"
+                        discipline === d ? "border-[#20C997] bg-[#20C997]/20 text-white"
                                          : "border-white/15 bg-white/5 text-white/60 hover:border-white/30 hover:text-white"}`}>
                       {d}
                     </button>
@@ -165,8 +165,8 @@ export function CollabStep2() {
                     {skillOptions.map((s) => (
                       <button key={s} type="button" onClick={() => toggleSkill(s)}
                         className={`px-3 py-1.5 rounded-full border text-sm transition-all backdrop-blur-sm ${
-                          subSkills.includes(s) ? "border-[#0066ff] bg-[#0066ff]/30 text-white shadow-[0_0_10px_rgba(0,102,255,0.4)]"
-                                                : "border-white/15 bg-white/5 text-white/60 hover:border-[#0066ff]/60 hover:text-white"}`}>
+                          subSkills.includes(s) ? "border-[#20C997] bg-[#20C997]/30 text-white shadow-[0_0_10px_rgba(32,201,151,0.4)]"
+                                                : "border-white/15 bg-white/5 text-white/60 hover:border-[#20C997]/60 hover:text-white"}`}>
                         {s}
                       </button>
                     ))}
@@ -190,7 +190,7 @@ export function CollabStep2() {
               <button
                 onClick={handleNext}
                 disabled={!canContinue}
-                className="group px-8 py-3.5 rounded-2xl bg-[#0066ff] hover:bg-[#171330] text-white font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,102,255,0.4)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0066ff] disabled:hover:shadow-[0_10px_30px_rgba(0,102,255,0.4)]"
+                className="group px-8 py-3.5 rounded-2xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(32,201,151,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>

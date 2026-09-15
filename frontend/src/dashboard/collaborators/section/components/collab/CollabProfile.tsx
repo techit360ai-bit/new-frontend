@@ -94,8 +94,8 @@ export function CollabProfile() {
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header strip */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-8 shadow-sm flex flex-col sm:flex-row items-start gap-6">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#58a6ff] text-white font-black flex items-center justify-center text-2xl shrink-0 shadow-[0_4px_15px_rgba(0,102,255,0.3)]">
+      <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-8 shadow-sm flex flex-col sm:flex-row items-start gap-6">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#20C997] to-[#128a64] text-slate-950 font-black flex items-center justify-center text-2xl shrink-0 shadow-sm">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
@@ -103,7 +103,7 @@ export function CollabProfile() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white">{p.name}</h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
                   Collaborator
                 </span>
               </div>
@@ -113,18 +113,18 @@ export function CollabProfile() {
             </div>
             <Link
               to="/collaborator/settings#identity"
-              className="px-3.5 py-1.5 text-xs font-semibold border border-black/[0.08] dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors self-start"
+              className="px-3.5 py-1.5 text-xs font-semibold border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors self-start"
             >
               Edit Profile
             </Link>
           </div>
 
-          <p className="text-xs text-slate-700 dark:text-slate-300 mt-3 italic bg-slate-50 dark:bg-white/[0.02] p-3 rounded-xl border border-black/[0.03] dark:border-white/[0.04]">
+          <p className="text-xs text-slate-700 dark:text-slate-300 mt-3 italic bg-slate-50 dark:bg-white/[0.02] p-3 rounded-xl border border-slate-200 dark:border-white/10">
             "{p.headline}"
           </p>
 
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-[#20c937] animate-pulse"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-[#20C997] animate-pulse"></span>
             <span>Available · {p.weeklyHours} hrs/week · {commitmentLabel[p.commitmentStyle]}</span>
           </p>
         </div>
@@ -146,11 +146,11 @@ export function CollabProfile() {
       )}
 
       {/* Discipline & skills */}
-      <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
+      <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
         <h2 className="text-base font-bold text-slate-900 dark:text-white mb-3">{p.discipline || "Discipline not set"}</h2>
         <div className="flex flex-wrap gap-1.5 mb-5">
           {p.subSkills.map((s) => (
-            <span key={s} className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20">
+            <span key={s} className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
               {s}
             </span>
           ))}
@@ -166,7 +166,7 @@ export function CollabProfile() {
       </div>
 
       {/* Compensation philosophy */}
-      <div className="bg-gradient-to-r from-[#0066ff]/10 to-[#58a6ff]/10 dark:from-[#0066ff]/15 dark:to-[#58a6ff]/15 border border-[#0066ff]/20 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+      <div className="bg-[#20C997]/10 border border-[#20C997]/20 rounded-2xl p-6 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5">Building for Equity Philosophy</h2>
         <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
           {p.equityPreference}% equity / {100 - p.equityPreference}% cash · Min cash floor ${p.minCashFloor.toLocaleString()}/mo ·
@@ -181,12 +181,12 @@ export function CollabProfile() {
           {builds.map((build) => (
             <div
               key={build.id}
-              className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm"
+              className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm hover:border-[#20C997]/30 transition-all"
             >
               <p className="text-sm font-bold text-slate-900 dark:text-white">{build.name}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{build.shipped} tasks shipped · Impact {build.impactAvg}</p>
               {build.equityPercent > 0 && (
-                <p className="text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] mt-2.5">
+                <p className="text-xs font-bold text-[#20C997] mt-2.5">
                   {build.equityPercent}% equity · ${(build.valueUSD / 1000).toFixed(1)}K
                 </p>
               )}
@@ -211,9 +211,9 @@ export function CollabProfile() {
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 text-xs text-slate-700 dark:text-slate-300 hover:border-[#0066ff]/40 flex items-center gap-2 transition-all shadow-sm"
+                className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 text-xs text-slate-700 dark:text-slate-300 hover:border-[#20C997]/40 flex items-center gap-2 transition-all shadow-sm"
               >
-                <ExternalLink className="w-4 h-4 text-[#0066ff] shrink-0" />
+                <ExternalLink className="w-4 h-4 text-[#20C997] shrink-0" />
                 <span className="truncate font-semibold">{url}</span>
               </a>
             ))}
@@ -228,7 +228,7 @@ export function CollabProfile() {
           {earnedAchievements.map((b) => (
             <span
               key={b.id}
-              className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-2 shadow-sm text-slate-900 dark:text-white"
+              className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-2 shadow-sm text-slate-900 dark:text-white"
             >
               <span className="text-lg">{b.icon}</span>
               <span>{b.title}</span>
@@ -243,17 +243,17 @@ export function CollabProfile() {
       {/* Links */}
       <div className="flex flex-wrap gap-4 text-xs font-semibold pt-2">
         {p.links.github && (
-          <a href={`https://${p.links.github}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#0066ff]">
+          <a href={`https://${p.links.github}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#20C997]">
             <Github className="w-4 h-4" /> <span>{p.links.github}</span>
           </a>
         )}
         {p.links.linkedin && (
-          <a href={`https://${p.links.linkedin}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#0066ff]">
+          <a href={`https://${p.links.linkedin}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#20C997]">
             <Linkedin className="w-4 h-4" /> <span>{p.links.linkedin}</span>
           </a>
         )}
         {p.links.portfolio && (
-          <a href={`https://${p.links.portfolio}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#0066ff]">
+          <a href={`https://${p.links.portfolio}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#20C997]">
             <Globe className="w-4 h-4" /> <span>{p.links.portfolio}</span>
           </a>
         )}
@@ -266,8 +266,8 @@ export function CollabProfile() {
 
       <p className="text-[11px] text-slate-400 text-center pt-4">
         ${earnings.totals.lifetimeUSD.toLocaleString()} cash lifetime · See{" "}
-        <Link to="/collaborator/equity" className="underline text-[#0066ff] dark:text-[#58a6ff]">Equity</Link> and{" "}
-        <Link to="/collaborator/earnings" className="underline text-[#0066ff] dark:text-[#58a6ff]">Earnings</Link>
+        <Link to="/collaborator/equity" className="underline text-[#20C997]">Equity</Link> and{" "}
+        <Link to="/collaborator/earnings" className="underline text-[#20C997]">Earnings</Link>
       </p>
     </div>
   );

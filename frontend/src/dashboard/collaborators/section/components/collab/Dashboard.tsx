@@ -107,9 +107,9 @@ export function Dashboard() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Good morning, <span className="bg-gradient-to-r from-[#0066ff] to-[#58a6ff] bg-clip-text text-transparent">{firstName}</span>.
+              Good morning, <span className="text-[#20C997]">{firstName}</span>.
             </h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066ff]/10 dark:bg-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/20">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
               Collaborator
             </span>
           </div>
@@ -129,7 +129,7 @@ export function Dashboard() {
           </Link>
           <Link
             to="/collaborator/tasks"
-            className="px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all flex items-center gap-1.5"
+            className="px-4 py-2 text-xs font-bold rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm transition-all flex items-center gap-1.5"
           >
             <span>My Tasks</span>
             <ArrowRight className="w-3.5 h-3.5" />

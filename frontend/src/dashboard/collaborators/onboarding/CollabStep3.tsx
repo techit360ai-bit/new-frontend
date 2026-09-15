@@ -42,7 +42,7 @@ export function CollabStep3() {
   const suggestions = SUGGESTIONS.filter((s) => !stack.includes(s)).slice(0, 8);
 
   const inputCls =
-    "w-full h-12 rounded-xl border border-white/20 bg-white/10 pl-4 pr-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0066ff] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]";
+    "w-full h-12 rounded-xl border border-white/20 bg-white/10 pl-4 pr-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]";
 
   const fieldVariants = {
     hidden: { opacity: 0, y: 12 },
@@ -145,14 +145,16 @@ export function CollabStep3() {
                   {stack.length === 0 ? (
                     <p className="text-sm text-white/30 italic">Start adding your tools below</p>
                   ) : (
-                    stack.map((s) => (
-                      <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#0066ff]/40 bg-[#0066ff]/20 text-white/90 text-sm font-medium backdrop-blur-sm">
-                        {s}
-                        <button type="button" onClick={() => removeChip(s)} className="text-white/50 hover:text-white transition-colors leading-none">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </span>
-                    ))
+                    <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1">
+                      {stack.map((s) => (
+                        <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#20C997]/40 bg-[#20C997]/20 text-white/90 text-sm font-medium backdrop-blur-sm">
+                          {s}
+                          <button type="button" onClick={() => removeChip(s)} className="hover:text-red-300">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
               </motion.div>
@@ -163,13 +165,16 @@ export function CollabStep3() {
                   <input
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addChip(draft); } }}
-                    placeholder="e.g. Next.js"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addChip(draft))}
+                    placeholder="Add tech (e.g. React, Python)"
                     className={inputCls}
                   />
-                  <button type="button" onClick={() => addChip(draft)}
-                    className="h-12 w-12 rounded-xl bg-[#0066ff] hover:bg-[#171330] text-white font-bold text-xl flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,102,255,0.3)] hover:shadow-[0_4px_20px_rgba(23,19,48,0.3)] group">
-                    <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />
+                  <button
+                    type="button"
+                    onClick={() => addChip(draft)}
+                    className="h-12 w-12 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold text-xl flex items-center justify-center transition-all shadow-sm shrink-0"
+                  >
+                    <Plus className="h-5 w-5" />
                   </button>
                 </div>
               </motion.div>
@@ -177,14 +182,18 @@ export function CollabStep3() {
               {/* Suggestions */}
               {suggestions.length > 0 && (
                 <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="show">
-                  <label className="flex items-center gap-2 mb-3 text-xs font-black uppercase tracking-widest text-white/60 [text-shadow:0_2px_10px_rgba(0,0,0,0.7)]">
-                    <Sparkles className="w-3.5 h-3.5 text-white/30" /> Suggested
+                  <label className="block mb-2 text-[10px] font-black uppercase tracking-widest text-white/40">
+                    Popular additions
                   </label>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {suggestions.map((s) => (
-                      <button key={s} type="button" onClick={() => addChip(s)}
-                        className="px-3 py-1.5 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-sm text-white/60 text-sm font-medium hover:border-[#58a6ff]/60 hover:bg-white/10 hover:text-white transition-all hover:scale-[1.02] active:scale-95">
-                        {s}
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => addChip(s)}
+                        className="px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:border-white/30 text-white/60 hover:text-white text-xs transition-all"
+                      >
+                        + {s}
                       </button>
                     ))}
                   </div>
@@ -198,11 +207,17 @@ export function CollabStep3() {
               transition={{ delay: 0.45, duration: 0.4 }}
               className="flex justify-between mt-10"
             >
-              <button onClick={handleBack} className="group px-6 py-3 rounded-2xl text-white/70 hover:text-white font-bold text-sm flex items-center gap-2 transition-all hover:bg-white/5">
+              <button
+                onClick={handleBack}
+                className="group px-6 py-3 rounded-2xl text-white/70 hover:text-white font-bold text-sm flex items-center gap-2 transition-all hover:bg-white/5"
+              >
                 <ArrowLeft className="h-4 w-4" /> Back
               </button>
-              <button onClick={handleNext} disabled={!canContinue}
-                className="group px-8 py-3.5 rounded-2xl bg-[#0066ff] hover:bg-[#171330] text-white font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,102,255,0.4)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0066ff] disabled:hover:shadow-[0_10px_30px_rgba(0,102,255,0.4)]">
+              <button
+                onClick={handleNext}
+                disabled={!canContinue}
+                className="group px-8 py-3.5 rounded-2xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(32,201,151,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Continue <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </motion.div>

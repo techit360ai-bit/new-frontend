@@ -96,45 +96,48 @@ export function CollabStep1() {
               </motion.div>
             ))}
           </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Profile progress</span>
-              <span className="text-[10px] font-black text-[#58a6ff]">{fieldsFilled}/{totalFields}</span>
+          <div className="mt-12 space-y-4">
+            <div className="flex items-center gap-3 text-xs text-white/80">
+              <div className="w-6 h-6 rounded-lg bg-[#20C997]/20 border border-[#20C997]/40 flex items-center justify-center text-[#20C997] font-bold">1</div>
+              <span>Proof-of-Work portfolio verification</span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-              <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-[#0066ff] to-[#20c937]"
-                animate={{ width: `${(fieldsFilled / totalFields) * 100}%` }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-              />
+            <div className="flex items-center gap-3 text-xs text-white/80">
+              <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white/50 font-bold">2</div>
+              <span>Smart contract equity vesting</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-white/80">
+              <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white/50 font-bold">3</div>
+              <span>Direct match with funded startups</span>
             </div>
           </div>
         </div>
 
-        {/* ===== Right: slideshow + glass form panel ===== */}
-        <div className="relative flex items-center justify-center p-6 md:p-14 overflow-hidden">
-          {/* Slideshow background */}
-          <div className="absolute inset-0 z-0">
-            <ImageSlideshow images={SLIDE_IMAGES} />
+        {/* Right Column: Form card */}
+        <div className="relative w-full lg:w-1/2 flex justify-center">
+          {/* Background image preview container */}
+          <div className="absolute inset-0 rounded-[32px] overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80"
+              alt="Collaborators"
+              className="w-full h-full object-cover opacity-35 scale-105 filter blur-[2px]"
+            />
           </div>
 
           {/* Dark overlay for readability */}
-          <div className="absolute inset-0 bg-[#171330]/50 z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#171330]/40 via-transparent to-[#171330]/60 z-[1]" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/70 z-[1]" />
 
           {/* Glass card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }}
-            className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-[32px] p-6 md:p-9 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.7)]"
+            className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-[32px] p-6 md:p-9 shadow-2xl"
           >
             {/* Mobile-only header */}
             <div className="lg:hidden mb-8">
-              <div className="inline-flex items-center gap-1.5 mb-3 px-3 py-1 rounded-full bg-[#0066ff]/20 border border-[#0066ff]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#0066ff]" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#0066ff]">Collaborator</span>
+              <div className="inline-flex items-center gap-1.5 mb-3 px-3 py-1 rounded-full bg-[#20C997]/20 border border-[#20C997]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#20C997]" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#20C997]">Collaborator</span>
               </div>
               <h1 className="text-2xl font-black text-white mb-1 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
                 Tell us who you are
@@ -210,7 +213,7 @@ export function CollabStep1() {
               <button
                 onClick={handleNext}
                 disabled={!canContinue || finishing}
-                className="group w-full h-13 py-3.5 rounded-xl bg-[#0066ff] hover:bg-[#171330] text-white font-black text-base flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,102,255,0.4)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#0066ff] disabled:hover:shadow-[0_10px_30px_rgba(0,102,255,0.4)]"
+                className="group w-full h-13 py-3.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-black text-base flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(32,201,151,0.3)] disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {finishing ? (
                   <>

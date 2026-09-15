@@ -135,11 +135,11 @@ export function CollabStep5() {
                 <input
                   type="range" min={0} max={100} value={pref}
                   onChange={(e) => setPref(Number(e.target.value))}
-                  className="w-full accent-[#0066ff] bg-white/10"
+                  className="w-full accent-[#20C997] bg-white/10"
                 />
                 <div className="flex justify-between items-center text-xs text-white/40 mt-2 font-medium">
                   <span>Cash heavy</span>
-                  <span className="text-sm font-semibold text-[#0066ff]">{pref}% equity / {100 - pref}% cash</span>
+                  <span className="text-sm font-semibold text-[#20C997]">{pref}% equity / {100 - pref}% cash</span>
                   <span>Equity heavy</span>
                 </div>
               </motion.div>
@@ -152,7 +152,7 @@ export function CollabStep5() {
                   type="number" min={0} step={100} value={floor}
                   onChange={(e) => setFloor(Number(e.target.value) || 0)}
                   placeholder="e.g. 2000"
-                  className="w-full h-12 rounded-xl border border-white/20 bg-white/10 px-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0066ff] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)] tabular-nums"
+                  className="w-full h-12 rounded-xl border border-white/20 bg-white/10 px-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] focus:border-transparent transition-all backdrop-blur-sm tabular-nums"
                 />
               </motion.div>
 
@@ -164,10 +164,10 @@ export function CollabStep5() {
                   {vestingOptions.map(({ label, sub, value }) => (
                     <button key={value} type="button" onClick={() => setVesting(value)}
                       className={`py-3 px-4 rounded-xl border text-left transition-all ${
-                        vesting === value ? "border-[#0066ff] bg-[#0066ff]/20 shadow-[0_0_10px_rgba(0,102,255,0.4)]"
-                                         : "border-white/15 bg-white/5 hover:border-[#0066ff]/60"}`}>
+                        vesting === value ? "border-[#20C997] bg-[#20C997]/20 shadow-[0_0_10px_rgba(32,201,151,0.4)]"
+                                         : "border-white/15 bg-white/5 hover:border-[#20C997]/60"}`}>
                       <p className={`text-sm font-semibold ${vesting === value ? "text-white" : "text-white/80"}`}>{label}</p>
-                      <p className={`text-[11px] mt-0.5 ${vesting === value ? "text-[#58a6ff]" : "text-white/40"}`}>{sub}</p>
+                      <p className={`text-[11px] mt-0.5 ${vesting === value ? "text-[#20C997]" : "text-white/40"}`}>{sub}</p>
                     </button>
                   ))}
                 </div>
@@ -205,7 +205,7 @@ export function CollabStep5() {
               <button
                 onClick={handleNext}
                 disabled={!canContinue}
-                className="group px-8 py-3.5 rounded-2xl bg-[#0066ff] hover:bg-[#171330] text-white font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,102,255,0.4)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0066ff] disabled:hover:shadow-[0_10px_30px_rgba(0,102,255,0.4)]"
+                className="group px-8 py-3.5 rounded-2xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(32,201,151,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>

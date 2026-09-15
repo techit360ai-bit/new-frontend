@@ -199,7 +199,7 @@ export function CollabStep6() {
                 <textarea
                   value={whyHere} onChange={(e) => setWhyHere(e.target.value)} maxLength={200} rows={2}
                   placeholder="What kind of product do you want to build equity in?"
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0066ff] transition-all backdrop-blur-sm resize-none"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] transition-all backdrop-blur-sm resize-none"
                 />
               </motion.div>
 
@@ -227,7 +227,7 @@ export function CollabStep6() {
                   ))}
                   {pinned.length < 3 && (
                     <button type="button" onClick={addPinned}
-                      className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-bold uppercase tracking-widest text-[#58a6ff] hover:text-white transition-colors">
+                      className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-bold uppercase tracking-widest text-[#20C997] hover:text-white transition-colors">
                       <Plus className="w-3.5 h-3.5" /> Add link
                     </button>
                   )}
@@ -250,11 +250,11 @@ export function CollabStep6() {
               <button
                 onClick={() => void handleFinish()}
                 disabled={finishing}
-                className="group px-8 py-3.5 rounded-2xl bg-[#0066ff] hover:bg-[#171330] text-white font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,102,255,0.4)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0066ff] disabled:hover:shadow-[0_10px_30px_rgba(0,102,255,0.4)]"
+                className="group px-8 py-3.5 rounded-2xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-black text-base flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(32,201,151,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {finishing ? (
                   <>
-                    <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    <span className="w-4 h-4 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" />
                     Finishing…
                   </>
                 ) : (

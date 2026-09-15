@@ -124,7 +124,7 @@ export function Tools() {
         <button
           onClick={() => setAddOpen(true)}
           disabled={loading || workspaces.length === 0}
-          className="h-10 px-4 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white rounded-xl text-xs font-bold shadow-[0_4px_15px_rgba(0,102,255,0.25)] flex items-center gap-1.5 transition-all disabled:opacity-50"
+          className="h-10 px-4 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
         >
           <Plus className="w-4 h-4" />
           <span>Connect New Tool</span>
