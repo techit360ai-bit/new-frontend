@@ -108,7 +108,7 @@ function ScoreCircle({ score, label, size = "md" }: { score: number; label: stri
   const circumference = normalizedRadius * 2 * Math.PI;
   const offset = circumference - (score / 100) * circumference;
 
-  const color = score >= 70 ? "#20c937" : score >= 40 ? "#f59e0b" : "#ef4444";
+  const color = score >= 70 ? "#20C997" : score >= 40 ? "#f59e0b" : "#ef4444";
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -136,7 +136,7 @@ function ScoreCircle({ score, label, size = "md" }: { score: number; label: stri
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`font-bold text-[#171330] dark:text-white ${size === "sm" ? "text-lg" : size === "lg" ? "text-3xl" : "text-2xl"}`}>
+          <span className={`font-bold text-slate-900 dark:text-white ${size === "sm" ? "text-lg" : size === "lg" ? "text-3xl" : "text-2xl"}`}>
             {Math.round(score)}
           </span>
         </div>
@@ -147,12 +147,12 @@ function ScoreCircle({ score, label, size = "md" }: { score: number; label: stri
 }
 
 function EvaluationBar({ label, score }: { label: string; score: number }) {
-  const color = score >= 70 ? "bg-[#20c937]" : score >= 40 ? "bg-amber-500" : "bg-red-500";
+  const color = score >= 70 ? "bg-[#20C997]" : score >= 40 ? "bg-amber-500" : "bg-red-500";
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
         <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</span>
-        <span className="text-sm font-bold text-[#171330] dark:text-white">{Math.round(score)}</span>
+        <span className="text-sm font-bold text-slate-900 dark:text-white">{Math.round(score)}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/10">
         <div className={`h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${score}%` }} />
@@ -436,16 +436,16 @@ export function MainIncubationPanel() {
   };
 
   return (
-    <div className="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col overflow-x-clip bg-[#f4f7fc] dark:bg-[#121212] lg:h-screen lg:flex-row transition-colors duration-300">
+    <div className="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col overflow-x-clip bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white lg:h-screen lg:flex-row transition-colors duration-200">
       {/* LEFT SIDEBAR - 264px */}
-      <aside className="hidden w-[264px] flex-shrink-0 flex-col border-r border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl lg:flex">
+      <aside className="hidden w-[264px] flex-shrink-0 flex-col border-r border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] lg:flex">
         <div className="border-b border-black/[0.06] dark:border-white/10 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Brain className="h-5 w-5 text-[#0066ff] dark:text-[#58a6ff]" />
-            <h2 className="font-bold text-[#171330] dark:text-white">Analysis Types</h2>
+            <Brain className="h-5 w-5 text-[#20C997]" />
+            <h2 className="font-bold text-slate-900 dark:text-white">Analysis Types</h2>
           </div>
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${engineOnline ? "bg-[#20c937]" : "bg-gray-300 dark:bg-gray-600"}`} />
+            <div className={`h-2 w-2 rounded-full ${engineOnline ? "bg-[#20C997]" : "bg-gray-300 dark:bg-gray-600"}`} />
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {engineOnline === null ? "Checking..." : engineOnline ? "AI Engine Active" : "Engine Offline"}
             </span>
@@ -463,8 +463,8 @@ export function MainIncubationPanel() {
                 disabled={analyzing}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-semibold text-left transition-all rounded-xl ${
                   isSelected
-                    ? "bg-gradient-to-r from-[#0066ff]/15 to-[#58a6ff]/10 text-[#0066ff] dark:text-[#58a6ff] border border-[#0066ff]/30 shadow-sm"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-black/[0.03] dark:hover:bg-white/[0.05] hover:text-[#0066ff] dark:hover:text-[#58a6ff]"
+                    ? "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-black/[0.03] dark:hover:bg-white/[0.05] hover:text-[#20C997]"
                 } disabled:opacity-50`}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -481,7 +481,7 @@ export function MainIncubationPanel() {
             onChange={(e) => setCopilotInput(e.target.value)}
             placeholder="Ask AI anything..."
             rows={3}
-            className="w-full text-sm bg-slate-50 dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-colors"
+            className="w-full text-sm bg-slate-50 dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-colors"
           />
           <button
             onClick={() => {
@@ -491,7 +491,7 @@ export function MainIncubationPanel() {
               }
             }}
             disabled={!copilotInput.trim()}
-            className="mt-2 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white px-3 py-2 text-sm font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:shadow-none"
+            className="mt-2 w-full flex items-center justify-center gap-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 px-3 py-2 text-sm font-bold rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:shadow-none"
           >
             <Send className="h-4 w-4" />
             Send
@@ -502,15 +502,15 @@ export function MainIncubationPanel() {
       {/* CENTER PANEL - flex-1 */}
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-4 py-3 sm:px-6 sm:py-4">
+        <header className="border-b border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-black text-[#171330] dark:text-white">Real-Time AI Analysis</h1>
+              <h1 className="text-xl font-black text-slate-900 dark:text-white">Real-Time AI Analysis</h1>
               <div className="flex items-center gap-2 mt-1">
                 {analyzing && (
                   <>
-                    <RefreshCw className="h-4 w-4 animate-spin text-[#0066ff] dark:text-[#58a6ff]" />
-                    <span className="text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff]">Processing...</span>
+                    <RefreshCw className="h-4 w-4 animate-spin text-[#20C997]" />
+                    <span className="text-sm font-semibold text-[#20C997]">Processing...</span>
                   </>
                 )}
               </div>
@@ -518,7 +518,7 @@ export function MainIncubationPanel() {
             <button
               onClick={() => void handleExportReport().catch((err) => toast.error(err instanceof Error ? err.message : "Download failed"))}
               disabled={!projectId}
-              className="app-touch-target flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] px-4 py-2 text-sm font-bold text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:shadow-none"
+              className="app-touch-target flex shrink-0 items-center gap-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition-all disabled:opacity-40 disabled:shadow-none"
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Download Analysis</span>
@@ -530,7 +530,7 @@ export function MainIncubationPanel() {
               value={selectedAnalysis ?? ""}
               onChange={(event) => { if (event.target.value) void handleRunIndividualAnalysis(event.target.value as AnalysisType); }}
               disabled={analyzing}
-              className="min-h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0066ff]"
+              className="min-h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] px-3 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#20C997]"
             >
               <option value="">Choose an analysis type</option>
               {ANALYSIS_TYPES.map((analysis) => <option key={analysis.id} value={analysis.id}>{analysis.label}</option>)}
@@ -540,16 +540,16 @@ export function MainIncubationPanel() {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <section className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-4 sm:p-5 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+          <section className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-4 sm:p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <History className="h-5 w-5 shrink-0 text-[#0066ff] dark:text-[#58a6ff]" />
+                <History className="h-5 w-5 shrink-0 text-[#20C997]" />
                 <div className="min-w-0">
                   <h2 className="text-sm font-bold text-slate-900 dark:text-white">Saved idea validations</h2>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Continue your latest founder Q&amp;A or open another persisted session.</p>
                 </div>
               </div>
-              <button type="button" onClick={startNewValidation} className="min-h-10 rounded-xl border border-[#0066ff]/30 px-3 text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/10 transition-colors">Start new analysis</button>
+              <button type="button" onClick={startNewValidation} className="min-h-10 rounded-xl border border-[#20C997]/30 px-3 text-xs font-bold text-[#20C997] hover:bg-[#20C997]/10 transition-colors">Start new analysis</button>
             </div>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
               <label className="min-w-0 flex-1">
@@ -558,12 +558,12 @@ export function MainIncubationPanel() {
                   value={requestedSessionId}
                   onChange={(event) => event.target.value ? selectValidationSession(event.target.value) : startNewValidation()}
                   disabled={resumeLoading || validationSessions.length === 0}
-                  className="min-h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] px-3 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0066ff] disabled:opacity-50"
+                  className="min-h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] px-3 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#20C997] disabled:opacity-50"
                 >
                   {validationSessions.length === 0 && <option value="">No saved validations</option>}
                   {validationSessions.length > 0 && <option value="">New analysis</option>}
                   {validationSessions.map((session) => (
-                    <option key={session.id} value={session.id} className="dark:bg-[#1a1a1a]">
+                    <option key={session.id} value={session.id} className="dark:bg-[#111111]">
                       {session.ventureName} - {session.status.replaceAll("_", " ")} - {session.answeredCount}/{session.questionCount} answered
                     </option>
                   ))}
@@ -576,13 +576,13 @@ export function MainIncubationPanel() {
 
           {/* Success Banner */}
           {blueprintData && projectId && (
-            <div className="mb-6 rounded-2xl border border-[#20c937]/30 bg-[#20c937]/10 dark:bg-[#20c937]/15 p-4 backdrop-blur-xl">
+            <div className="mb-6 rounded-2xl border border-[#20C997]/30 bg-[#20C997]/10 p-4 backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-[#20c937]" />
+                  <CheckCircle2 className="h-5 w-5 text-[#20C997]" />
                   <div>
-                    <p className="font-bold text-[#171330] dark:text-white">{ventureName} analyzed successfully</p>
-                    <p className="text-xs text-[#20c937]">Project ID: {projectId}</p>
+                    <p className="font-bold text-slate-900 dark:text-white">{ventureName} analyzed successfully</p>
+                    <p className="text-xs text-[#20C997]">Project ID: {projectId}</p>
                   </div>
                 </div>
               </div>
@@ -593,26 +593,26 @@ export function MainIncubationPanel() {
           {(unicornScore !== null || investmentScore !== null) && (
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {unicornScore !== null && (
-                <div className="rounded-2xl bg-gradient-to-br from-[#0066ff] to-[#003d99] dark:from-[#0052cc] dark:to-[#002266] p-6 text-white shadow-[0_10px_30px_rgba(0,102,255,0.2)]">
+                <div className="rounded-2xl bg-gradient-to-br from-[#20C997] to-[#128a66] p-6 text-slate-950 font-extrabold shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold">Unicorn Potential</h3>
-                    <Sparkles className="h-6 w-6 text-[#58a6ff]" />
+                    <Sparkles className="h-6 w-6 text-slate-950" />
                   </div>
                   <p className="text-5xl font-black">{Math.round(unicornScore)}</p>
-                  <div className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: `${unicornScore}%` }} />
+                  <div className="mt-3 h-2 bg-slate-950/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-slate-950 rounded-full" style={{ width: `${unicornScore}%` }} />
                   </div>
                 </div>
               )}
               {investmentScore !== null && (
-                <div className="rounded-2xl bg-gradient-to-br from-[#0047b3] to-[#002b66] dark:from-[#003d99] dark:to-[#001940] p-6 text-white shadow-[0_10px_30px_rgba(0,102,255,0.15)]">
+                <div className="rounded-2xl bg-gradient-to-br from-[#1baa80] to-[#0f6c50] p-6 text-slate-950 font-extrabold shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold">Market Fit Score</h3>
-                    <Target className="h-6 w-6 text-[#58a6ff]" />
+                    <Target className="h-6 w-6 text-slate-950" />
                   </div>
                   <p className="text-5xl font-black">{Math.round(investmentScore)}</p>
-                  <div className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: `${investmentScore}%` }} />
+                  <div className="mt-3 h-2 bg-slate-950/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-slate-950 rounded-full" style={{ width: `${investmentScore}%` }} />
                   </div>
                 </div>
               )}
@@ -621,8 +621,8 @@ export function MainIncubationPanel() {
 
           {/* Detailed Evaluation Bars */}
           {analysisResult && (
-            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-              <h3 className="text-lg font-black text-[#171330] dark:text-white mb-4">Detailed Evaluation</h3>
+            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">Detailed Evaluation</h3>
               <div className="space-y-4">
                 {Object.entries(analysisResult)
                   .filter(([key, val]) => typeof val === "number" && key.includes("score"))
@@ -639,8 +639,8 @@ export function MainIncubationPanel() {
 
           {/* Circular Score Indicators */}
           {analysisResult && Object.keys(analysisResult).some((k) => k.includes("score")) && (
-            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-              <h3 className="text-lg font-black text-[#171330] dark:text-white mb-4">Key Metrics</h3>
+            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">Key Metrics</h3>
               <div className="flex flex-wrap gap-8 justify-center">
                 {Object.entries(analysisResult)
                   .filter(([key, val]) => typeof val === "number" && key.includes("score"))
@@ -659,9 +659,9 @@ export function MainIncubationPanel() {
 
           {/* AI Insights */}
           {analysisResult && (
-            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-              <h3 className="text-lg font-black text-[#171330] dark:text-white mb-4 flex items-center gap-2">
-                <Brain className="h-5 w-5 text-[#0066ff] dark:text-[#58a6ff]" />
+            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <Brain className="h-5 w-5 text-[#20C997]" />
                 AI Insights
               </h3>
               <div className="space-y-3">
@@ -669,7 +669,7 @@ export function MainIncubationPanel() {
                   .filter(([key, val]) => typeof val === "string" && val.length > 50)
                   .slice(0, 3)
                   .map(([key, val]) => (
-                    <div key={key} className="border-l-4 border-[#0066ff] pl-4">
+                    <div key={key} className="border-l-4 border-[#20C997] pl-4">
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">
                         {key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                       </p>
@@ -698,8 +698,8 @@ export function MainIncubationPanel() {
 
           {/* Next AI Actions */}
           {analysisResult && (
-            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-              <h3 className="text-lg font-black text-[#171330] dark:text-white mb-4">Next AI Actions</h3>
+            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">Next AI Actions</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   onClick={async () => {
@@ -715,7 +715,7 @@ export function MainIncubationPanel() {
                     finally { setAnalyzing(false); }
                   }}
                   disabled={analyzing}
-                  className="flex items-center gap-2 bg-[#0066ff]/10 dark:bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/20 px-4 py-3 rounded-xl font-bold border border-[#0066ff]/20 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 bg-[#20C997]/10 text-[#20C997] hover:bg-[#20C997]/20 px-4 py-3 rounded-xl font-bold border border-[#20C997]/20 transition-all disabled:opacity-50"
                 >
                   <FileText className="h-4 w-4" />
                   Generate Pitch Deck
@@ -734,7 +734,7 @@ export function MainIncubationPanel() {
                     finally { setAnalyzing(false); }
                   }}
                   disabled={analyzing}
-                  className="flex items-center gap-2 bg-[#0066ff]/10 dark:bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/20 px-4 py-3 rounded-xl font-bold border border-[#0066ff]/20 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 bg-[#20C997]/10 text-[#20C997] hover:bg-[#20C997]/20 px-4 py-3 rounded-xl font-bold border border-[#20C997]/20 transition-all disabled:opacity-50"
                 >
                   <Rocket className="h-4 w-4" />
                   Build MVP Roadmap
@@ -753,7 +753,7 @@ export function MainIncubationPanel() {
                     finally { setAnalyzing(false); }
                   }}
                   disabled={analyzing}
-                  className="flex items-center gap-2 bg-[#0066ff]/10 dark:bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/20 px-4 py-3 rounded-xl font-bold border border-[#0066ff]/20 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 bg-[#20C997]/10 text-[#20C997] hover:bg-[#20C997]/20 px-4 py-3 rounded-xl font-bold border border-[#20C997]/20 transition-all disabled:opacity-50"
                 >
                   <Lightbulb className="h-4 w-4" />
                   Explore Pivot Ideas
@@ -765,7 +765,7 @@ export function MainIncubationPanel() {
                     ideaTextareaRef.current?.focus();
                   }}
                   disabled={analyzing}
-                  className="flex items-center gap-2 bg-[#0066ff]/10 dark:bg-[#0066ff]/15 text-[#0066ff] dark:text-[#58a6ff] hover:bg-[#0066ff]/20 px-4 py-3 rounded-xl font-bold border border-[#0066ff]/20 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 bg-[#20C997]/10 text-[#20C997] hover:bg-[#20C997]/20 px-4 py-3 rounded-xl font-bold border border-[#20C997]/20 transition-all disabled:opacity-50"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Revise Idea
@@ -773,7 +773,7 @@ export function MainIncubationPanel() {
                 <button
                   onClick={() => navigate(`/matches?project=${projectId}`)}
                   disabled={!projectId}
-                  className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white px-4 py-3 rounded-xl font-bold shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:shadow-none"
+                  className="flex items-center justify-center gap-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 px-4 py-3 rounded-xl font-bold shadow-sm transition-all disabled:opacity-40 disabled:shadow-none"
                 >
                   <Users className="h-4 w-4" />
                   Find Collaborators
@@ -781,7 +781,7 @@ export function MainIncubationPanel() {
                 <button
                   onClick={() => void handleCreateWorkspace()}
                   disabled={!projectId}
-                  className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white px-4 py-3 rounded-xl font-bold shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:shadow-none"
+                  className="flex items-center justify-center gap-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 px-4 py-3 rounded-xl font-bold shadow-sm transition-all disabled:opacity-40 disabled:shadow-none"
                 >
                   <Briefcase className="h-4 w-4" />
                   {asText(blueprintData?.workspace_id) ? "Open Workspace Copilot" : "Create Workspace"}
@@ -793,8 +793,8 @@ export function MainIncubationPanel() {
           {/* Empty State */}
           {!analysisResult && !analyzing && !blueprintData?.incubation_session_id && (
             <div className="flex flex-col items-center justify-center min-h-96 text-center">
-              <Brain className="h-16 w-16 text-[#0066ff]/30 dark:text-[#58a6ff]/30 mb-4" />
-              <h2 className="text-xl font-bold text-[#171330] dark:text-white mb-2">No Analysis Yet</h2>
+              <Brain className="h-16 w-16 text-[#20C997]/30 mb-4" />
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Analysis Yet</h2>
               <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-md">
                 Enter your startup idea below and run an analysis to see detailed insights, scores, and recommendations.
               </p>
@@ -803,7 +803,7 @@ export function MainIncubationPanel() {
         </div>
 
         {/* Bottom Input Area */}
-        <div className="border-t border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-4">
+        <div className="border-t border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-4">
           <div className="mb-3">
             <label className="block">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Target geography</span>
@@ -811,7 +811,7 @@ export function MainIncubationPanel() {
                 value={targetGeography}
                 onChange={(event) => setTargetGeography(event.target.value)}
                 placeholder="Country, city or region"
-                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] px-3 py-2 text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-colors"
+                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] px-3 py-2 text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-colors"
               />
             </label>
           </div>
@@ -822,13 +822,13 @@ export function MainIncubationPanel() {
               onChange={(e) => setIdeaInput(e.target.value)}
               placeholder="Describe your startup idea..."
               rows={2}
-              className="flex-1 text-sm bg-slate-50 dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-colors"
+              className="flex-1 text-sm bg-slate-50 dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-colors"
             />
             <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col">
               <button
                 onClick={() => void handleRunFullAnalysis()}
                 disabled={!ideaInput.trim() || analyzing}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white px-4 py-2 text-sm font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:shadow-none"
+                className="flex items-center justify-center gap-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 px-4 py-2 text-sm font-bold rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:shadow-none"
               >
                 {analyzing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
                 Run Analysis
@@ -857,9 +857,9 @@ export function MainIncubationPanel() {
       {rightPanelOpen && (
         <>
         <button type="button" aria-label="Close document preview" onClick={() => setRightPanelOpen(false)} className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm xl:hidden" />
-        <aside className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[420px] flex-shrink-0 flex-col border-l border-black/[0.06] dark:border-white/10 bg-white/95 dark:bg-[#121212]/95 backdrop-blur-2xl xl:static xl:z-auto xl:w-[420px]">
+        <aside className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[420px] flex-shrink-0 flex-col border-l border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] xl:static xl:z-auto xl:w-[420px]">
           <div className="border-b border-black/[0.06] dark:border-white/10 p-4 flex items-center justify-between">
-            <h2 className="font-bold text-[#171330] dark:text-white">Document Preview</h2>
+            <h2 className="font-bold text-slate-900 dark:text-white">Document Preview</h2>
             <button onClick={() => setRightPanelOpen(false)} className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -869,16 +869,16 @@ export function MainIncubationPanel() {
             {analysisResult ? (
               <div className="space-y-4">
                 <section>
-                  <h3 className="text-sm font-bold text-[#171330] dark:text-white mb-2 flex items-center gap-2">
-                    <ChevronDown className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <ChevronDown className="h-4 w-4 text-[#20C997]" />
                     Idea Summary
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{ideaInput || "Your startup idea"}</p>
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-bold text-[#171330] dark:text-white mb-2 flex items-center gap-2">
-                    <ChevronDown className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <ChevronDown className="h-4 w-4 text-[#20C997]" />
                     AI Analysis Summary
                   </h3>
                   <div className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
@@ -895,8 +895,8 @@ export function MainIncubationPanel() {
 
                 {typeof blueprintData?.business_plan === "string" && blueprintData.business_plan && (
                   <section>
-                    <h3 className="text-sm font-bold text-[#171330] dark:text-white mb-2 flex items-center gap-2">
-                      <ChevronDown className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                      <ChevronDown className="h-4 w-4 text-[#20C997]" />
                       Business Plan Excerpt
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -906,8 +906,8 @@ export function MainIncubationPanel() {
                 )}
 
                 <section>
-                  <h3 className="text-sm font-bold text-[#171330] dark:text-white mb-2 flex items-center gap-2">
-                    <ChevronDown className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <ChevronDown className="h-4 w-4 text-[#20C997]" />
                     Recommendations & Risks
                   </h3>
                   <div className="space-y-2">
@@ -937,7 +937,7 @@ export function MainIncubationPanel() {
             <button
               onClick={() => void handleExportReport().catch((err) => toast.error(err instanceof Error ? err.message : "Export failed"))}
               disabled={!projectId}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:shadow-none"
+              className="w-full flex items-center justify-center gap-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 px-4 py-2.5 text-sm font-bold rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:shadow-none"
             >
               <Download className="h-4 w-4" />
               Export Analysis
@@ -945,7 +945,7 @@ export function MainIncubationPanel() {
             <button
               onClick={() => void handleCreateWorkspace()}
               disabled={!projectId}
-              className="w-full flex items-center justify-center gap-2 bg-white dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.08] px-4 py-2.5 text-sm font-bold rounded-xl transition-all disabled:opacity-40"
+              className="w-full flex items-center justify-center gap-2 bg-[#20C997]/10 hover:bg-[#20C997]/20 border border-[#20C997]/20 text-[#20C997] px-4 py-2.5 text-sm font-bold rounded-xl transition-all disabled:opacity-40"
             >
               <Briefcase className="h-4 w-4" />
               {asText(blueprintData?.workspace_id) ? "Open Workspace Copilot" : "Create Workspace"}
@@ -959,7 +959,7 @@ export function MainIncubationPanel() {
       {!rightPanelOpen && (
         <button
           onClick={() => setRightPanelOpen(true)}
-          className="fixed right-4 top-1/2 z-30 -translate-y-1/2 rounded-l-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] p-2 text-white shadow-lg hover:from-[#0052cc] hover:to-[#408fe6]"
+          className="fixed right-4 top-1/2 z-30 -translate-y-1/2 rounded-l-xl bg-[#20C997] p-2 text-slate-950 shadow-lg hover:bg-[#1db587]"
           aria-label="Open document preview"
         >
           <ChevronRight className="h-5 w-5 rotate-180" />

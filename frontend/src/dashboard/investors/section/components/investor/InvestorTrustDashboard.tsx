@@ -74,12 +74,12 @@ const SECTIONS = [
 ] as const;
 
 const statusClass: Record<string, string> = {
-  verified: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+  verified: 'border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]',
   pending: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
   expired: 'border-orange-500/30 bg-orange-500/10 text-orange-300',
   failed: 'border-red-500/30 bg-red-500/10 text-red-300',
   disconnected: 'border-gray-600 bg-gray-800 text-gray-300',
-  approved: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+  approved: 'border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]',
 };
 
 export function InvestorTrustDashboard() {
@@ -183,8 +183,8 @@ export function InvestorTrustDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#121212] text-slate-900 dark:text-white">
-      <div className="border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl px-8 py-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white">
+      <div className="border-b border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl px-8 py-6">
         <div className="flex items-start justify-between gap-6">
           <div>
             <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#20C997]/20 bg-[#20C997]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#20C997]">
@@ -196,7 +196,7 @@ export function InvestorTrustDashboard() {
               Verified metadata, operational evidence, freshness, and private diligence notes for every startup in your pipeline.
             </p>
           </div>
-          <div className="hidden rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-xl px-4 py-3 text-right lg:block shadow-sm">
+          <div className="hidden rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl px-4 py-3 text-right lg:block shadow-sm">
             <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Privacy Contract</p>
             <p className="mt-1 text-sm font-semibold text-[#20C997]">Investor-safe metadata only</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">No raw payloads, code, customers, tokens, or documents</p>
@@ -205,7 +205,7 @@ export function InvestorTrustDashboard() {
       </div>
 
       <div className="grid min-h-[calc(100vh-112px)] grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)_320px]">
-        <aside className="border-b border-black/[0.06] dark:border-white/10 bg-white/50 dark:bg-[#121212]/50 p-5 xl:border-b-0 xl:border-r">
+        <aside className="border-b border-black/[0.06] dark:border-white/10 bg-white/50 dark:bg-[#0a0a0a]/50 p-5 xl:border-b-0 xl:border-r">
           <div className="mb-4">
             <label htmlFor="trust-search" className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Search Startups
@@ -217,7 +217,7 @@ export function InvestorTrustDashboard() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Name, sector, country..."
-                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] py-2.5 pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#20C997] focus:outline-none"
+                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] py-2.5 pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#20C997] focus:outline-none"
               />
             </div>
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
@@ -248,7 +248,7 @@ export function InvestorTrustDashboard() {
                 className={`w-full rounded-2xl border p-3.5 text-left transition-all ${
                   selectedId === startup.startupId
                     ? 'border-[#20C997]/40 bg-[#20C997]/10 dark:bg-[#20C997]/20'
-                    : 'border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+                    : 'border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -290,7 +290,7 @@ export function InvestorTrustDashboard() {
 
         <main className="overflow-y-auto p-5 lg:p-8">
           {!dashboard ? (
-            <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 text-slate-500 dark:text-slate-400">
+            <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] text-slate-500 dark:text-slate-400">
               Loading investor Trust dashboard...
             </div>
           ) : (
@@ -309,7 +309,7 @@ export function InvestorTrustDashboard() {
           )}
         </main>
 
-        <aside className="border-t border-black/[0.06] dark:border-white/10 bg-white/50 dark:bg-[#121212]/50 p-5 xl:border-l xl:border-t-0">
+        <aside className="border-t border-black/[0.06] dark:border-white/10 bg-white/50 dark:bg-[#0a0a0a]/50 p-5 xl:border-l xl:border-t-0">
           {dashboard && notes && (
             <div className="space-y-5">
               <Panel id="notes" title="Investor Notes" icon={NotebookPen}>
@@ -322,7 +322,7 @@ export function InvestorTrustDashboard() {
                     <textarea
                       value={notes.note}
                       onChange={(event) => updateNote({ note: event.target.value })}
-                      className="min-h-24 w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] p-3 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
+                      className="min-h-24 w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-3 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -330,7 +330,7 @@ export function InvestorTrustDashboard() {
                     <select
                       value={notes.internalRating}
                       onChange={(event) => updateNote({ internalRating: event.target.value as InvestorTrustNote['internalRating'] })}
-                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
+                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
                     >
                       <option value="none">None</option>
                       <option value="watch">Watch</option>
@@ -343,7 +343,7 @@ export function InvestorTrustDashboard() {
                     <input
                       value={notes.followUpReminder}
                       onChange={(event) => updateNote({ followUpReminder: event.target.value })}
-                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#1a1a1a] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
+                      className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-[#20C997] focus:outline-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -362,7 +362,7 @@ export function InvestorTrustDashboard() {
                   </div>
                   <button
                     onClick={saveNotes}
-                    className="w-full rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-400 hover:from-[#1bb285] hover:to-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-[0_4px_15px_rgba(32,201,151,0.25)] transition-all"
+                    className="w-full rounded-xl bg-[#20C997] hover:bg-[#1db587] px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm transition-all"
                   >
                     {saved ? 'Notes Saved' : 'Save Private Notes'}
                   </button>
@@ -399,7 +399,7 @@ export function InvestorTrustDashboard() {
 function Hero({ dashboard, selectedSummary }: { dashboard: InvestorTrustDashboard; selectedSummary?: InvestorTrustStartupSummary }) {
   const startup = dashboard.startup;
   return (
-    <section id="overview" className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-6 shadow-sm">
+    <section id="overview" className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl p-6 shadow-sm">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex gap-5">
           <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-black/[0.08] dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.06] font-mono text-xl font-bold text-slate-900 dark:text-white">
@@ -520,7 +520,7 @@ function ProductDevelopment({ dashboard }: { dashboard: InvestorTrustDashboard }
           <Metric label="Latest Deployment" value={development.latestDeployment} />
           <Metric label="Consistency" value={development.developmentConsistency} />
         </div>
-        <div className="h-64 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-[#121212]/50 p-4">
+        <div className="h-64 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-[#111111]/50 p-4">
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
             <LineChartIcon className="h-4 w-4 text-[#20C997]" />
             Activity Trend
@@ -536,7 +536,7 @@ function ProductDevelopment({ dashboard }: { dashboard: InvestorTrustDashboard }
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis dataKey="label" stroke="#94a3b8" fontSize={12} />
               <YAxis stroke="#94a3b8" fontSize={12} />
-              <Tooltip contentStyle={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff' }} />
+              <Tooltip contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff' }} />
               <Area type="monotone" dataKey="activity" stroke="#20C997" fill="url(#activity)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
@@ -708,7 +708,7 @@ function EvidenceExplorer({ items }: { items: EvidenceExplorerItem[] }) {
 
 function Panel({ id, title, icon: Icon, children }: { id: string; title: string; icon: ComponentType<{ className?: string }>; children: ReactNode }) {
   return (
-    <section id={id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-5 sm:p-6 shadow-sm">
+    <section id={id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl p-5 sm:p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
         <Icon className="h-5 w-5 text-[#20C997]" />
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>

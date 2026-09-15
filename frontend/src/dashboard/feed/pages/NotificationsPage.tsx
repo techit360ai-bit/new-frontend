@@ -87,10 +87,10 @@ export function NotificationsPage() {
       <BackButton className="mb-2" />
       
       {/* Header Glass Card */}
-      <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 p-6 backdrop-blur-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2.5 text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            <Bell className="h-6 w-6 text-[#0066ff] dark:text-[#58a6ff]" />
+            <Bell className="h-6 w-6 text-[#20C997]" />
             Notifications
           </h1>
           <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -101,9 +101,9 @@ export function NotificationsPage() {
           <button
             type="button"
             onClick={markAllRead}
-            className="flex items-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/10 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors shadow-sm self-start sm:self-auto"
+            className="flex items-center gap-1.5 rounded-xl border border-[#20C997]/20 bg-[#20C997]/10 hover:bg-[#20C997]/20 px-3.5 py-2 text-xs font-bold text-[#20C997] transition-colors shadow-sm self-start sm:self-auto"
           >
-            <CheckCheck className="h-4 w-4 text-[#0066ff] dark:text-[#58a6ff]" />
+            <CheckCheck className="h-4 w-4 text-[#20C997]" />
             Mark all read
           </button>
         )}
@@ -123,14 +123,14 @@ export function NotificationsPage() {
               onClick={() => setActiveFilter(tab.id)}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 isActive
-                  ? 'bg-[#0066ff] text-white shadow-md shadow-[#0066ff]/25'
+                  ? 'bg-[#20C997] text-slate-950 shadow-sm'
                   : 'bg-slate-100 text-slate-600 dark:bg-white/[0.06] dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
               }`}
             >
               <span>{tab.label}</span>
               {count > 0 && (
                 <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-extrabold ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-[#0066ff]/10 text-[#0066ff] dark:bg-[#58a6ff]/20 dark:text-[#58a6ff]'
+                  isActive ? 'bg-slate-950/20 text-slate-950' : 'bg-[#20C997]/10 text-[#20C997]'
                 }`}>
                   {count}
                 </span>
@@ -143,7 +143,7 @@ export function NotificationsPage() {
       {loading && <FeedLoadingState label="Loading live notifications..." />}
       {!loading && error && <FeedErrorState message={error} />}
       {!loading && !error && (
-        <div className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] shadow-sm overflow-hidden">
           <VirtualizedList
             items={filtered}
             className="h-[min(70dvh,680px)]"
@@ -176,11 +176,11 @@ function NotificationRow({
       to={notification.linkTo}
       onClick={() => onRead(notification.id)}
       className="flex items-start gap-3 border-b border-black/[0.06] dark:border-white/10 px-5 py-4 last:border-b-0 hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors"
-      style={{ backgroundColor: !notification.read ? 'rgba(0,102,255,0.04)' : undefined }}
+      style={{ backgroundColor: !notification.read ? 'rgba(32,201,151,0.06)' : undefined }}
     >
       <div className="relative shrink-0">
         <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${notification.avatar}`} />
-        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white dark:border-[#121212] bg-[#0066ff] text-white">
+        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white dark:border-[#111111] bg-[#20C997] text-slate-950 font-bold">
           {config.icon}
         </div>
       </div>
@@ -194,7 +194,7 @@ function NotificationRow({
         </p>
       </div>
       {!notification.read && (
-        <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-[#0066ff] dark:bg-[#58a6ff] shadow-sm shadow-[#0066ff]/50" />
+        <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-[#20C997] shadow-sm" />
       )}
     </Link>
   );

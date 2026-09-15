@@ -59,7 +59,7 @@ function statusClass(status?: string) {
     case "disconnected":
       return "border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300";
     default:
-      return "border-[#0066ff]/20 bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]";
+      return "border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]";
   }
 }
 
@@ -181,7 +181,7 @@ export function TrustCenter() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff]">
+          <div className="flex items-center gap-2 text-sm font-semibold text-[#20C997]">
             <ShieldCheck className="w-4 h-4" />
             Trust Engine Lite
           </div>
@@ -190,14 +190,14 @@ export function TrustCenter() {
             Metadata-only verification, expiring badges, immutable history, and founder-only alerts.
           </p>
         </div>
-        <Button type="button" variant="outline" onClick={() => void load()} disabled={state === "loading"} className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white dark:hover:bg-white/[0.06]">
+        <Button type="button" variant="outline" onClick={() => void load()} disabled={state === "loading"} className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#111111] dark:text-white dark:hover:bg-white/[0.06]">
           <RefreshCw className={`w-4 h-4 mr-1.5 ${state === "loading" ? "animate-spin" : ""}`} />
           Refresh
         </Button>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+        <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Trust score</p>
@@ -206,7 +206,7 @@ export function TrustCenter() {
                 <span className="pb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">/100</span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Badge className="border-[#0066ff]/20 bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff] font-semibold" variant="outline">
+                <Badge className="border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997] font-semibold" variant="outline">
                   {profile?.tier ?? "Unverified"}
                 </Badge>
                 <Badge className={`${statusClass(String(profile?.verification_status ?? "pending"))} font-semibold`} variant="outline">
@@ -236,7 +236,7 @@ export function TrustCenter() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+        <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Founder notifications</p>
@@ -276,11 +276,11 @@ export function TrustCenter() {
         </section>
       </div>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+              <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997]">
                 <Award className="w-4 h-4" />
               </div>
               <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Verification badges</h2>
@@ -317,9 +317,9 @@ export function TrustCenter() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
         <div className="mb-4 flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+          <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997]">
             <Lock className="w-4 h-4" />
           </div>
           <div>
@@ -357,7 +357,7 @@ export function TrustCenter() {
                       variant="outline"
                       onClick={() => void refreshSource(manifest.source)}
                       disabled={disabled || !manifest.manual_reverification_supported}
-                      className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#1a1a1a] dark:text-white dark:hover:bg-white/[0.06]"
+                      className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#111111] dark:text-white dark:hover:bg-white/[0.06]"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 mr-1 ${disabled ? "animate-spin" : ""}`} />
                       Refresh
@@ -368,7 +368,7 @@ export function TrustCenter() {
                       variant="outline"
                       onClick={() => void disconnectSource(manifest.source)}
                       disabled={disabled || !manifest.revocation_supported}
-                      className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#1a1a1a] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                      className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#111111] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
                     >
                       <Unplug className="w-3.5 h-3.5 mr-1" />
                       Disconnect
@@ -388,9 +388,9 @@ export function TrustCenter() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
         <div className="mb-4 flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
+          <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997]">
             <Link2 className="w-4 h-4" />
           </div>
           <div>
@@ -417,7 +417,7 @@ export function TrustCenter() {
 
           if (unconnectedSources.length === 0) {
             return (
-              <div className="rounded-xl border border-dashed border-[#0066ff]/20 bg-[#0066ff]/10 p-5 text-sm font-medium text-[#0066ff] dark:text-[#58a6ff]">
+              <div className="rounded-xl border border-dashed border-[#20C997]/20 bg-[#20C997]/10 p-5 text-sm font-medium text-[#20C997]">
                 All sources are connected.
               </div>
             );
@@ -439,7 +439,7 @@ export function TrustCenter() {
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="rounded-xl border-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] bg-[#0066ff]/10 hover:bg-[#0066ff]/20"
+                      className="rounded-xl border-[#20C997]/20 text-[#20C997] bg-[#20C997]/10 hover:bg-[#20C997]/20 font-bold"
                       disabled={disabled}
                       onClick={async () => {
                         setBusySource(source);
@@ -474,7 +474,7 @@ export function TrustCenter() {
         })()}
       </section>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
         <div className="mb-4 flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-300">
             <History className="w-4 h-4" />
