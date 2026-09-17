@@ -74,11 +74,11 @@ export function InvestorStep3() {
   };
 
   return (
-    <div className="min-h-screen bg-[#171330] p-[10px] font-bricolage">
+    <div className="min-h-screen bg-[#081c15] p-[10px] font-bricolage">
       <div className="w-full min-h-[calc(100vh-20px)] rounded-[32px] overflow-hidden grid lg:grid-cols-[42%_58%] border border-white/10">
         {/* Left panel */}
-        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-[#171330] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#20C997]/30 via-[#171330] to-[#171330]" />
+        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-[#081c15] overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#20C997]/30 via-[#081c15] to-[#081c15]" />
           <BlobField variant="dark" />
 
           <div className="relative z-10">
@@ -128,8 +128,8 @@ export function InvestorStep3() {
             <ImageSlideshow images={SLIDE_IMAGES} />
           </div>
 
-          <div className="absolute inset-0 bg-[#171330]/50 z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#171330]/40 via-transparent to-[#171330]/60 z-[1]" />
+          <div className="absolute inset-0 bg-[#081c15]/55 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#081c15]/50 via-transparent to-[#081c15]/70 z-[1]" />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -165,7 +165,7 @@ export function InvestorStep3() {
                   <select
                     value={stage}
                     onChange={(e) => setStage(e.target.value)}
-                    className={`${inputCls} [&>option]:bg-[#171330] [&>option]:text-white`}
+                    className={`${inputCls} [&>option]:bg-[#081c15] [&>option]:text-white`}
                   >
                     {INVESTMENT_STAGES.map((s) => (
                       <option key={s} value={s}>{s}</option>
@@ -177,7 +177,7 @@ export function InvestorStep3() {
                   <select
                     value={outcome}
                     onChange={(e) => setOutcome(e.target.value as any)}
-                    className={`${inputCls} [&>option]:bg-[#171330] [&>option]:text-white`}
+                    className={`${inputCls} [&>option]:bg-[#081c15] [&>option]:text-white`}
                   >
                     {OUTCOMES.map((o) => (
                       <option key={o} value={o}>{o}</option>
