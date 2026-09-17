@@ -4,11 +4,11 @@
 
 | Env var | Points at | Notes |
 |---|---|---|
-| `VITE_API_URL` | `https://<backend>/api` | The platform Node service (`BACKEND` repo, branch `main`). Serves `/auth/*`, `/users/me`. |
-| `VITE_API_BASE_URL` | `https://<ai-router>` | The Python FastAPI AI orchestrator. Serves `/api/v1/*`. |
-| `VITE_TECHIT_API` | `https://<backend>/api/mcp` | The Plugins-MCP mount on the same Node service as `VITE_API_URL` (BACKEND repo, branch `feat/plugins-mcp`). |
-| `VITE_MESSAGING_BASE_URL` | `https://<messaging>` | The Go messaging service (`BACKEND/messaging-backend`). Serves `/api/v1/conversations`, `/channels`, `/posts`, `/demos`. |
-| `VITE_MESSAGING_WS_URL` | `wss://<messaging>/ws` | WebSocket gateway on the same Go service. |
+| `VITE_API_URL` | `https://backend.techitnetwork.com/api` | The platform Node service (`BACKEND` repo). Serves `/auth/*`, `/users/me`. |
+| `VITE_API_BASE_URL` | `https://api.techitnetwork.com` | The Python FastAPI AI orchestrator. Serves `/api/v1/*`. |
+| `VITE_TECHIT_API` | `https://backend.techitnetwork.com/api/mcp` | The Plugins-MCP mount on the same Node service as `VITE_API_URL`. |
+| `VITE_MESSAGING_BASE_URL` | `https://messaging.techitnetwork.com` | The Go messaging service. Serves `/api/v1/conversations`, `/channels`, `/posts`, `/demos`. |
+| `VITE_MESSAGING_WS_URL` | `wss://messaging.techitnetwork.com/ws` | WebSocket gateway on the same Go service. |
 
 All three backends must share the same `JWT_SECRET` so tokens issued by `BACKEND/api/auth/signin` verify on the AI router (`get_user_context` in `main.py`), the Go messaging service (`internal/auth/jwt.go`), and the MCP routes (`Plugins-MCP/server/mount.ts` `resolveActor`).
 

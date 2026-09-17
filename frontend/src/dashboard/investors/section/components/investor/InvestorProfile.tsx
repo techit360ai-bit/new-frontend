@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   CircleSlash,
 } from "lucide-react";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
 
 export function InvestorProfile() {
   const { investorProfile } = useInvestorProfile();
@@ -53,6 +54,9 @@ export function InvestorProfile() {
 
   return (
     <div className="min-h-screen bg-background-inverse">
+      <div className="px-8 pt-6">
+        <RoleAdditionPanel />
+      </div>
       {/* Header */}
       <div className="border-b border-border-inverse bg-surface-inverse px-8 py-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -89,7 +93,7 @@ export function InvestorProfile() {
             className="px-4 py-2.5 rounded-lg bg-status-success/10 hover:bg-status-success/20 border border-status-success/30 text-status-success text-sm font-semibold flex items-center gap-2 transition-colors"
           >
             <Pencil className="w-4 h-4" />
-            Re-run full onboarding
+            Edit identity setup
           </Link>
         </div>
 

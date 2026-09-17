@@ -1,7 +1,7 @@
 // frontend/src/dashboard/collaborators/section/components/collab/CollabProfile.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Globe, Twitter, ExternalLink } from "lucide-react";
+import { Github, Linkedin, Globe, Twitter, ExternalLink, BadgeCheck } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import {
   EMPTY_EQUITY,
@@ -17,6 +17,8 @@ import {
   fetchCollaboratorSummary,
   type CollaboratorLiveSummary,
 } from "@/lib/api/collaboratorSummary";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
+import { fetchTrustProfile, type TrustProfile } from "@/lib/api/trust";
 
 export function CollabProfile() {
   const { collaboratorProfile: p } = useCollaboratorProfile();
@@ -25,6 +27,7 @@ export function CollabProfile() {
   const [earnings, setEarnings] = useState<CollaboratorEarnings>(EMPTY_EARNINGS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trust, setTrust] = useState<TrustProfile | null>(null);
 
   const initials = p.name.split(" ").map((x) => x[0]).join("").toUpperCase().slice(0, 2);
 
@@ -36,12 +39,14 @@ export function CollabProfile() {
       fetchCollaboratorSummary(),
       fetchCollaboratorEquity(),
       fetchCollaboratorEarnings(),
+      fetchTrustProfile(),
     ])
-      .then(([summaryData, equityData, earningsData]) => {
+      .then(([summaryData, equityData, earningsData, trustData]) => {
         if (!alive) return;
         setSummary(summaryData);
         setEquity(equityData);
         setEarnings(earningsData);
+        setTrust(trustData);
       })
       .catch((err) => {
         if (!alive) return;
@@ -93,6 +98,7 @@ export function CollabProfile() {
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+      <RoleAdditionPanel />
       {/* Header strip */}
       <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-start gap-5">
         <div className="w-16 h-16 rounded-full bg-status-warning text-text-primary font-semibold flex items-center justify-center text-xl shrink-0">{initials}</div>
@@ -139,6 +145,7 @@ export function CollabProfile() {
             <span key={t} className="text-xs px-2.5 py-1 rounded-full bg-surface-secondary text-text-muted">{t}</span>
           ))}
         </div>
+        {Array.isArray(trust?.verifiedSkills) && trust.verifiedSkills.length > 0 && <div className="mt-5 border-t border-border-default pt-4"><p className="mb-2 text-xs font-semibold uppercase text-text-muted">Externally verified skills</p><div className="flex flex-wrap gap-2">{trust.verifiedSkills.map((item) => <span key={`${item.skill}-${item.source}`} className="inline-flex items-center gap-1 rounded-full border border-status-success bg-status-success-soft px-2.5 py-1 text-xs text-status-success"><BadgeCheck className="h-3.5 w-3.5" />{item.skill}</span>)}</div></div>}
       </div>
 
       {/* Compensation philosophy */}

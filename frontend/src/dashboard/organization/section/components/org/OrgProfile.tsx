@@ -17,6 +17,7 @@ import {
   Mail,
   ArrowRight,
 } from "lucide-react";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
 
 export function OrgProfile() {
   const { orgProfile } = useOrgProfile();
@@ -38,6 +39,9 @@ export function OrgProfile() {
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
+      <div className="mb-6">
+        <RoleAdditionPanel />
+      </div>
       {/* Header */}
       <div className="bg-surface-primary rounded-xl border border-border-default p-6 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -61,7 +65,7 @@ export function OrgProfile() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-status-info-soft hover:bg-status-info-soft text-brand-accent text-sm font-semibold transition-colors flex-shrink-0"
           >
             <Pencil className="w-4 h-4" />
-            Re-run onboarding
+            Edit identity setup
           </Link>
         </div>
 

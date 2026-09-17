@@ -7,25 +7,32 @@ import {
   CheckCircle2,
   Clock,
   History,
+  Info,
   Link2,
   Lock,
   Plus,
   RefreshCw,
   ShieldCheck,
   Unplug,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   connectTrustSource,
+  createTrustDomainChallenge,
+  verifyTrustDomainChallenge,
   disconnectTrustSource,
+  decideFounderTrustAccessRequest,
   fetchTrustBadges,
+  fetchFounderTrustAccessRequests,
   fetchTrustHistory,
   fetchTrustIntegrations,
   fetchTrustProfile,
   previewTrustNotifications,
   refreshTrustSource,
   type TrustBadge,
+  type FounderTrustAccessRequest,
   type TrustHistoryItem,
   type TrustIntegrationManifest,
   type TrustNotificationIntent,
@@ -105,15 +112,18 @@ export function TrustCenter() {
   const [integrations, setIntegrations] = useState<TrustIntegrationManifest[]>([]);
   const [notifications, setNotifications] = useState<TrustNotificationIntent[]>([]);
   const [busySource, setBusySource] = useState<string | null>(null);
+  const [accessRequests, setAccessRequests] = useState<FounderTrustAccessRequest[]>([]);
+  const [introDismissed, setIntroDismissed] = useState(false);
 
   const load = useCallback(async () => {
     setState("loading");
     try {
-      const [nextProfile, badgeResult, historyResult, integrationResult] = await Promise.all([
+      const [nextProfile, badgeResult, historyResult, integrationResult, accessResult] = await Promise.all([
         fetchTrustProfile(),
         fetchTrustBadges(),
         fetchTrustHistory(30),
         fetchTrustIntegrations(),
+        fetchFounderTrustAccessRequests(),
       ]);
       const events = historyToPreviewEvents(historyResult.history);
       const preview = await previewTrustNotifications(events);
@@ -122,6 +132,7 @@ export function TrustCenter() {
       setHistory(historyResult.history);
       setIntegrations(integrationResult.integrations);
       setNotifications(preview.notification_intents);
+      setAccessRequests(accessResult.requests);
       setState("ready");
     } catch (error) {
       setState("error");
@@ -131,6 +142,7 @@ export function TrustCenter() {
   }, []);
 
   useEffect(() => {
+    try { setIntroDismissed(sessionStorage.getItem("techit:trust-center-intro:dismissed") === "1"); } catch { setIntroDismissed(false); }
     void load();
   }, [load]);
 
@@ -176,6 +188,17 @@ export function TrustCenter() {
   };
 
   const score = Math.round(profile?.trust_score ?? 0);
+  const dismissIntro = () => { setIntroDismissed(true); try { sessionStorage.setItem("techit:trust-center-intro:dismissed", "1"); } catch { /* storage unavailable */ } };
+
+  const decideAccess = async (requestId: string, decision: "approved" | "rejected") => {
+    setBusySource(requestId);
+    try {
+      await decideFounderTrustAccessRequest(requestId, decision);
+      await load();
+    } finally {
+      setBusySource(null);
+    }
+  };
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
@@ -195,6 +218,12 @@ export function TrustCenter() {
           Refresh
         </Button>
       </div>
+
+      {!introDismissed && <aside className="flex items-start gap-3 rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900" role="note">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-700" aria-hidden="true" />
+        <p className="min-w-0 flex-1"><span className="font-semibold">Why Trust Center matters:</span> verified signals make your founder profile more visible to investors and improve matching quality. Your verification tier controls trust visibility; subscriptions and higher credit purchases expand the amount of matching and metered intelligence you can access. Only approved metadata scopes are shared.</p>
+        <button type="button" onClick={dismissIntro} className="shrink-0 rounded p-1 text-cyan-700 hover:bg-cyan-100" aria-label="Dismiss Trust Center note" title="Dismiss note"><X className="h-4 w-4" /></button>
+      </aside>}
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="rounded-xl border border-border-default bg-surface-primary p-5">
@@ -273,6 +302,19 @@ export function TrustCenter() {
           </div>
         </section>
       </div>
+
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-cyan-600" />
+          <div>
+            <h2 className="text-sm font-semibold text-text-secondary">Investor access requests</h2>
+            <p className="mt-1 text-xs text-text-muted">Approve only metadata scopes you are prepared to share with an investor.</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {accessRequests.length === 0 ? <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">No pending investor access requests.</div> : accessRequests.map((request) => <div key={request.id} className="rounded-lg border border-border-default p-4"><p className="font-medium text-text-primary">Investor {request.investorId}</p><p className="mt-1 text-sm text-text-muted">{request.purpose || "Investment due diligence"}</p><p className="mt-2 text-xs text-text-disabled">Startup {request.projectId} · {request.requestedScopes.join(", ")}</p><div className="mt-3 flex gap-2"><Button size="sm" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "approved")}>Approve</Button><Button size="sm" variant="outline" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "rejected")}>Reject</Button></div></div>)}
+        </div>
+      </section>
 
       <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center justify-between">
@@ -434,7 +476,30 @@ export function TrustCenter() {
                       onClick={async () => {
                         setBusySource(source);
                         try {
+                          if (source === "domain" || source === "website") {
+                            const domain = window.prompt("Enter the founder website domain to verify");
+                            if (!domain) return;
+                            const method = source === "website" ? "https" : "dns_txt";
+                            const challenge = await createTrustDomainChallenge({ domain, method }) as { challenge?: { id?: string }; token?: string; instructions?: string };
+                            toast.success("Verification challenge created", {
+                              description: `${challenge.instructions ?? "Publish the verification token, then refresh."} Token: ${challenge.token ?? "hidden"}`,
+                              duration: 12000,
+                            });
+                            if (challenge.challenge?.id && window.confirm("After publishing the token, verify this domain now?")) {
+                              const result = await verifyTrustDomainChallenge(challenge.challenge.id) as { verified?: boolean };
+                              toast[result.verified ? "success" : "info"](result.verified ? "Domain verified" : "Verification is still pending");
+                            }
+                            await load();
+                            return;
+                          }
                           const result = await connectTrustSource(source);
+                          const authorizationUrl = typeof result.authorizationUrl === "string"
+                            ? result.authorizationUrl
+                            : null;
+                          if (authorizationUrl) {
+                            window.location.assign(authorizationUrl);
+                            return;
+                          }
                           toast.success(
                             `${sourceLabels[source] ?? source} verification initiated`,
                             { description: result.next_action }

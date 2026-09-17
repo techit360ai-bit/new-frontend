@@ -9,6 +9,7 @@ import {
 } from "@/contexts/UserContext";
 import { fetchEndorsements, type Endorsement } from "@/lib/api/endorsements";
 import { StartupPassport } from "./StartupPassport";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
 
 interface JourneyStage {
   id: string;
@@ -159,6 +160,8 @@ export function FounderProfile() {
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+
+      <RoleAdditionPanel />
 
       {/* 1. Header strip */}
       <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-start gap-4">

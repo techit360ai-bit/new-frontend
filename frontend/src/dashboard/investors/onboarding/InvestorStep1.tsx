@@ -25,7 +25,7 @@ const fundSizes = ["<$1M", "$1M–$10M", "$10M–$100M", "$100M+"];
 
 export function InvestorStep1() {
   const navigate = useNavigate();
-  const { updateProfile } = useAuth();
+  const { updateProfile, activateRole } = useAuth();
   const { investorProfile, updateInvestorProfile } = useInvestorProfile();
   const [investorType, setInvestorType] = useState(
     investorProfile.investorType,
@@ -41,6 +41,8 @@ export function InvestorStep1() {
   const handleNext = async () => {
     updateInvestorProfile({ investorType, location, fundSize, yearsInvesting });
     setFinishing(true);
+    const activated = await activateRole("investor", { investorType, location, fundSize, yearsInvesting });
+    if (activated.error) { setFinishing(false); return; }
     const { error } = await updateProfile({ isOnboarded: true });
     if (error) { setFinishing(false); return; }
     localStorage.setItem("techit_profile_completion_pending", "investor");

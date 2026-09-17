@@ -46,6 +46,8 @@ export interface PublicUserProfile {
     connections: number;
   };
   skills: string[];
+  trust?: { trust_score: number; tier: string; verification_status: string; confidence_score: number; proof_count?: number };
+  verifiedSkills?: Array<{ skill: string; source: string; confidence: number; verifiedAt?: string; expiresAt?: string }>;
   recentActivity: PublicUserActivity[];
 }
 
@@ -75,6 +77,8 @@ export interface CollaboratorDirectoryEntry {
   subscriptionLabel?: string | null;
   credibilityLevel?: string;
   sharedContext?: boolean;
+  trust?: { trust_score: number; tier: string; verification_status: string; confidence_score: number };
+  verifiedSkills?: Array<{ skill: string; source: string; confidence: number; verifiedAt?: string; expiresAt?: string }>;
 }
 
 export interface CollaborationInvitation {
