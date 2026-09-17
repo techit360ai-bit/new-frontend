@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Video, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Video } from "lucide-react";
 import { createEvent } from "@/lib/demo/client";
 import type { DemoKind } from "@/lib/demo/types";
 
@@ -40,7 +40,7 @@ export function DemoCreate() {
           <span>Back to Demo Rooms</span>
         </button>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-          <Video className="w-7 h-7 text-[#20C997]" />
+          <Video className="w-7 h-7 text-[#0066ff]" />
           <span>New Demo Room</span>
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
@@ -61,7 +61,7 @@ export function DemoCreate() {
                 onClick={() => setKind(k)}
                 className={`px-3 py-2 rounded-xl border text-xs font-bold capitalize transition-all ${
                   kind === k
-                    ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997] shadow-sm"
+                    ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] shadow-sm"
                     : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20"
                 }`}
               >
@@ -79,7 +79,7 @@ export function DemoCreate() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Series A live demo"
-            className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
+            className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff]"
           />
         </div>
 
@@ -92,7 +92,7 @@ export function DemoCreate() {
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="Outline key topics, agenda, or highlights for attendees..."
-            className="w-full resize-none border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
+            className="w-full resize-none border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff]"
           />
         </div>
 
@@ -104,7 +104,7 @@ export function DemoCreate() {
             value={assetUrl}
             onChange={(e) => setAssetUrl(e.target.value)}
             placeholder="https://..."
-            className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
+            className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff]"
           />
         </div>
 
@@ -126,7 +126,7 @@ export function DemoCreate() {
             type="button"
             onClick={submit}
             disabled={!title.trim() || submitting}
-            className="text-xs font-bold text-slate-950 bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 px-5 py-2.5 rounded-xl shadow-sm transition-all"
+            className="text-xs font-bold text-white bg-[#0066ff] hover:bg-[#0052cc] disabled:opacity-50 px-5 py-2.5 rounded-xl shadow-sm transition-all"
           >
             {submitting ? "Creating..." : "Create Demo Room"}
           </button>
