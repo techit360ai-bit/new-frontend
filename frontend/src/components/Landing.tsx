@@ -16,11 +16,9 @@ import "../Landing.css";
 export default function Landing() {
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] font-bricolage text-[#171330] dark:text-white selection:bg-[#0068ff] selection:text-white relative overflow-hidden transition-colors duration-300">
-        {/* Subtle grid pattern for non-plain background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800d_1px,transparent_1px),linear-gradient(to_bottom,#8080800d_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] font-bricolage text-[#171330] dark:text-white selection:bg-[#0068ff] selection:text-white transition-colors duration-300">
         <Header />
-        <main className="relative z-10 flex flex-col gap-6 lg:gap-12 px-2 md:px-6 pt-[15px] pb-12 overflow-hidden max-w-[1600px] mx-auto">
+        <main className="flex flex-col gap-6 lg:gap-12 px-2 md:px-6 pt-[15px] pb-12 overflow-hidden max-w-[1600px] mx-auto">
           <Hero />
           <DashboardShowcase />
           <HowItWorks />
