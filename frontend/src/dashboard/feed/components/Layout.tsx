@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, Globe, Users, FileText, HelpCircle, Compass, Ticket, Sun, Moon, Sparkles } from "lucide-react";
+import { Bell, Globe, Users, FileText, HelpCircle, Compass, Ticket, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { roleSafeReturnPath } from "@/lib/roleRoutes";
 import {
@@ -14,6 +14,8 @@ import { useMobileChromeVisibility } from "@/components/mobile/useMobileChromeVi
 import { BackButton } from "./BackButton";
 import TechITLogo from "@/components/ui/TechITLogo";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -22,25 +24,8 @@ export function Layout({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<FeedNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("techit-theme");
-      if (saved) return saved === "dark";
-      return document.documentElement.classList.contains("dark");
-    }
-    return true;
-  });
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("techit-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("techit-theme", "light");
-    }
-  }, [isDark]);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     let alive = true;
@@ -74,8 +59,6 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className={`min-h-screen font-bricolage transition-colors duration-300 ${isDark ? "dark bg-[#0a0a0a] text-white" : "bg-slate-50 text-slate-900"}`}>
       <GlobalNav
-        isDark={isDark}
-        onToggleTheme={() => setIsDark((v) => !v)}
         unreadCount={notifications.filter((notification) => !notification.read).length}
         onNotifClick={() => setNotifOpen(true)}
         onOpenHavi={() => setHaviOpen(true)}
@@ -100,14 +83,10 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 function GlobalNav({
-  isDark,
-  onToggleTheme,
   unreadCount,
   onNotifClick,
   onOpenHavi,
 }: {
-  isDark: boolean;
-  onToggleTheme: () => void;
   unreadCount: number;
   onNotifClick: () => void;
   onOpenHavi: () => void;
@@ -151,15 +130,8 @@ function GlobalNav({
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Theme Toggle */}
-        <button
-          type="button"
-          onClick={onToggleTheme}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.06] text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10 transition-colors"
-          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
-        </button>
+        {/* Unified theme toggle */}
+        <ThemeToggle variant="inline" />
 
         <Link
           to="/support"

@@ -6,13 +6,12 @@ import LandingButton from "../ui/landing-btn";
 import { getTranslations } from "@/app/lib/i18n";
 import { useLocale } from "@/contexts/LocaleContext";
 import LanguageSwitcher from "../ui/LanguageSwitcher";
-import { Menu, X, Sun, Moon } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Header() {
   const { locale } = useLocale();
   const { header: { navLinks, loginButton, registerButton } } = getTranslations(locale.code);
-  const { resolvedTheme, setTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -87,20 +86,8 @@ export default function Header() {
             {/* Language / Currency switcher */}
             <LanguageSwitcher light={!isScrolled} />
 
-            {/* Dark mode switcher button */}
-            <button
-              type="button"
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className={`p-2 rounded-full transition-colors border ${
-                isScrolled
-                  ? "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/10"
-                  : "border-white/20 text-white hover:bg-white/10"
-              }`}
-              aria-label="Toggle dark mode"
-              title={resolvedTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            {/* Unified theme toggle */}
+            <ThemeToggle variant="inline" className={isScrolled ? "" : "border-white/20 text-white bg-transparent hover:bg-white/10"} />
 
             <Link
               to="/signin"
@@ -151,14 +138,7 @@ export default function Header() {
             <div className="flex flex-col gap-4 pt-4 border-t border-gray-100 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Theme</span>
-                <button
-                  type="button"
-                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 text-xs font-bold text-[#171330] dark:text-white"
-                >
-                  {resolvedTheme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-                  <span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-                </button>
+                <ThemeToggle variant="inline" />
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Language</span>

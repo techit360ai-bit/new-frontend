@@ -6,7 +6,7 @@ import {
   Sparkles, Award, MessageSquare, Wrench, Rss, GraduationCap,
   UserCircle, Settings as SettingsIcon, ShieldCheck, Ticket,
   ChevronDown, PanelLeftClose, PanelLeftOpen, LogOut,
-  Menu, Search, Bell, Sun, Moon, X,
+  Menu, Search, Bell, X,
 } from "lucide-react";
 import TechITLogo from "@/components/ui/TechITLogo";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,6 +16,8 @@ import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type NavItem = {
   label: string;
@@ -78,24 +80,8 @@ export function CollabLayout() {
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("techit-theme");
-      if (saved) return saved === "dark";
-      return document.documentElement.classList.contains("dark");
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("techit-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("techit-theme", "light");
-    }
-  }, [isDark]);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     writeStoredActiveRole("collaborator");
@@ -416,27 +402,8 @@ export function CollabLayout() {
             </div>
             
             <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => setIsDark((v) => !v)}
-                className={`relative w-9 h-9 rounded-lg border flex items-center justify-center transition-colors overflow-hidden ${
-                  isDark 
-                    ? "bg-white/[0.05] border-white/10 text-[#20C997] hover:bg-[#20C997]/20 hover:border-[#20C997]/40" 
-                    : "bg-slate-100 border-slate-200 text-slate-600 hover:text-[#20C997] hover:border-[#20C997]/25"
-                }`}
-                title="Toggle theme"
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={isDark ? "moon" : "sun"}
-                    initial={{ opacity: 0, rotate: -90, scale: 0.6 }}
-                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                    exit={{ opacity: 0, rotate: 90, scale: 0.6 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                  </motion.span>
-                </AnimatePresence>
-              </button>
+              {/* Unified theme toggle */}
+              <ThemeToggle variant="inline" />
 
               <div className="relative">
                 <button

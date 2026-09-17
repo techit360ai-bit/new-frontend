@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Bell, Sun, Moon, ChevronDown, UserCircle, Settings as SettingsIcon, LogOut, Compass, Sparkles } from "lucide-react";
+import { Search, Bell, ChevronDown, UserCircle, Settings as SettingsIcon, LogOut, Compass, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveRoles, type Role } from "@/contexts/UserContext";
 import { roleDashboardPath, roleOnboardingPath } from "@/lib/roleRoutes";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const roleLabel: Record<Role, string> = {
   founder: "Founder",
@@ -13,12 +14,12 @@ const roleLabel: Record<Role, string> = {
 };
 
 interface ExplorerTopBarProps {
-  isDark: boolean;
-  onToggleTheme: () => void;
+  isDark?: boolean;
+  onToggleTheme?: () => void;
   onOpenHavi?: () => void;
 }
 
-export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTopBarProps) {
+export function ExplorerTopBar({ onOpenHavi }: ExplorerTopBarProps) {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
   const { activeRoles } = useActiveRoles();
@@ -84,15 +85,8 @@ export function ExplorerTopBar({ isDark, onToggleTheme, onOpenHavi }: ExplorerTo
           </button>
         )}
 
-        {/* Theme Toggle */}
-        <button
-          type="button"
-          onClick={onToggleTheme}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.06] text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
-          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
-        </button>
+        {/* Unified theme toggle */}
+        <ThemeToggle variant="inline" />
 
         {/* Notifications Dropdown */}
         <div className="relative">

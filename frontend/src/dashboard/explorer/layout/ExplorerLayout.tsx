@@ -10,6 +10,7 @@ import TechITLogo from "@/components/ui/TechITLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { ExplorerTopBar } from "./ExplorerTopBar";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type NavItem = {
   label: string;
@@ -70,24 +71,8 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
     "Account & Support": true,
   });
 
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("techit-theme");
-      if (saved) return saved === "dark";
-      return document.documentElement.classList.contains("dark");
-    }
-    return true;
-  });
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("techit-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("techit-theme", "light");
-    }
-  }, [isDark]);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const toggleGroup = (label: string) => {
     setExpandedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -228,8 +213,6 @@ export function ExplorerLayout({ children }: ExplorerLayoutProps) {
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}
           <ExplorerTopBar
-            isDark={isDark}
-            onToggleTheme={() => setIsDark((v) => !v)}
             onOpenHavi={() => setHaviOpen(true)}
           />
 
