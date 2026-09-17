@@ -64,7 +64,7 @@ export default function HowItWorks() {
   };
 
   return (
-    <div className="p-5 py-20 text-white bg-[#0068ff] rounded-t-[36px] md:rounded-[36px] -mt-7.5 md:mt-6 z-50 relative overflow-hidden">
+    <div className="p-5 py-20 text-white bg-[#0068ff] dark:bg-[#111111] dark:border dark:border-white/10 rounded-t-[36px] md:rounded-[36px] -mt-7.5 md:mt-6 z-50 relative overflow-hidden transition-colors duration-300">
       <motion.div 
         initial="hidden"
         whileInView="visible"
@@ -72,13 +72,13 @@ export default function HowItWorks() {
         variants={header}
         className="max-w-4xl mx-auto text-center mb-16"
       >
-        <h2 className="text-xs font-black uppercase tracking-widest text-white/70 mb-3">
+        <h2 className="text-xs font-black uppercase tracking-widest text-white/70 dark:text-white/60 mb-3">
           {badge}
         </h2>
         <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight mb-4">
           {title}
         </h1>
-        <p className="text-white/80 text-lg font-medium">{description}</p>
+        <p className="text-white/80 dark:text-slate-300 text-lg font-medium">{description}</p>
       </motion.div>
 
       <motion.ul 
@@ -101,9 +101,9 @@ export default function HowItWorks() {
                 boxShadow: "0px 25px 50px -12px rgba(0, 0, 0, 0.25)"
               }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="flex flex-col bg-white rounded-3xl shadow-xl overflow-hidden will-change-transform cursor-pointer border border-white/5"
+              className="flex flex-col bg-white dark:bg-[#181818] rounded-3xl shadow-xl overflow-hidden will-change-transform cursor-pointer border border-white/5 dark:border-white/10"
             >
-              <div className="h-48 w-full bg-gray-100 overflow-hidden relative">
+              <div className="h-48 w-full bg-gray-100 dark:bg-white/5 overflow-hidden relative">
                 <motion.img
                   src={image}
                   alt={step.title}
@@ -119,16 +119,16 @@ export default function HowItWorks() {
                   whileInView={{ scale: 1, opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 + index * 0.1 }}
-                  className="flex justify-center items-center mb-6 rounded-2xl bg-[#171330] size-14 border-4 border-white shadow-md"
+                  className="flex justify-center items-center mb-6 rounded-2xl bg-[#171330] dark:bg-[#0066ff] size-14 border-4 border-white dark:border-[#181818] shadow-md"
                 >
                   <Icon size={24} className="text-white" />
                 </motion.div>
 
-                <h3 className="mb-3 text-2xl font-bold text-[#171330] tracking-tight">
+                <h3 className="mb-3 text-2xl font-bold text-[#171330] dark:text-white tracking-tight">
                   {step.title}
                 </h3>
 
-                <p className="text-slate-500 font-medium leading-relaxed text-sm md:text-base">
+                <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed text-sm md:text-base">
                   {step.description}
                 </p>
               </div>

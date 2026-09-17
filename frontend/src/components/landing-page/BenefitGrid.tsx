@@ -8,15 +8,15 @@ export default function BenefitGrid() {
   const { benefitGrid: { badge, title, description, benefits } } = getTranslations(locale.code);
 
   return (
-    <div className="py-24 bg-white px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden">
+    <div className="py-24 bg-white dark:bg-[#111111] dark:border dark:border-white/10 px-6 rounded-[36px] -mt-6 md:mt-6 relative font-bricolage overflow-hidden transition-colors duration-300">
       <div className="max-w-4xl mx-auto text-center mb-16">
         <h2 className="text-sm font-black uppercase tracking-widest text-[#20c907] mb-3">
           {badge}
         </h2>
-        <h1 className="text-4xl md:text-5xl font-black text-[#171330] tracking-tight leading-tight mb-4">
+        <h1 className="text-4xl md:text-5xl font-black text-[#171330] dark:text-white tracking-tight leading-tight mb-4">
           {title}
         </h1>
-        <p className="text-xl text-gray-500 font-medium">
+        <p className="text-xl text-gray-500 dark:text-slate-400 font-medium">
           {description}
         </p>
       </div>
@@ -29,13 +29,13 @@ export default function BenefitGrid() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="p-8 border border-gray-100 rounded-[24px] bg-gray-50 hover:shadow-xl transition-shadow"
+            className="p-8 border border-gray-100 dark:border-white/10 rounded-[24px] bg-gray-50 dark:bg-[#181818] hover:shadow-xl transition-shadow"
           >
             <div className="w-12 h-12 bg-[#20c907]/10 rounded-2xl flex items-center justify-center mb-6">
               <CheckCircle2 className="text-[#20c907]" size={24} />
             </div>
-            <h3 className="text-2xl font-bold text-[#171330] mb-3">{benefit.title}</h3>
-            <p className="text-gray-500 font-medium leading-relaxed">{benefit.description}</p>
+            <h3 className="text-2xl font-bold text-[#171330] dark:text-white mb-3">{benefit.title}</h3>
+            <p className="text-gray-500 dark:text-slate-400 font-medium leading-relaxed">{benefit.description}</p>
           </motion.div>
         ))}
       </div>

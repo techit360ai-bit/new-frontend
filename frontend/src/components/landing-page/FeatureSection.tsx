@@ -68,8 +68,8 @@ export default function FeatureSection({
         variants={imageVariants}
         className="w-full md:w-1/2 flex justify-center"
       >
-        <div className="relative w-full max-w-lg aspect-square lg:aspect-[4/3] rounded-[32px] overflow-hidden shadow-2xl bg-gray-50 border border-gray-100 p-2 lg:p-4">
-          <div className="w-full h-full rounded-[24px] overflow-hidden bg-white shadow-inner relative">
+        <div className="relative w-full max-w-lg aspect-square lg:aspect-[4/3] rounded-[32px] overflow-hidden shadow-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-2 lg:p-4">
+          <div className="w-full h-full rounded-[24px] overflow-hidden bg-white dark:bg-[#181818] shadow-inner relative">
             <img
               src={imageUrl}
               alt={imageAlt}
@@ -82,14 +82,14 @@ export default function FeatureSection({
       <div className="w-full md:w-1/2 space-y-6 lg:max-w-xl">
         <motion.h3 
           variants={itemVariants}
-          className="text-3xl md:text-4xl lg:text-5xl font-black text-[#171330] tracking-tight leading-[1.1]"
+          className="text-3xl md:text-4xl lg:text-5xl font-black text-[#171330] dark:text-white tracking-tight leading-[1.1]"
         >
           {title}
         </motion.h3>
         
         <motion.p 
           variants={itemVariants}
-          className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed"
+          className="text-lg md:text-xl text-gray-500 dark:text-slate-400 font-medium leading-relaxed"
         >
           {description}
         </motion.p>
@@ -97,7 +97,7 @@ export default function FeatureSection({
         <motion.div variants={itemVariants} className="pt-4">
            <LandingButton 
              href="/signup" 
-             className="bg-[#0068ff] text-white hover:bg-[#171330]"
+             className="bg-[#0068ff] text-white hover:bg-[#171330] dark:hover:bg-white dark:hover:text-[#171330]"
            >
              {buttonText || defaultButtonText}
            </LandingButton>

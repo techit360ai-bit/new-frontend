@@ -33,7 +33,7 @@ export default function HowToRegister() {
   };
 
   return (
-    <div className="bg-white py-20 rounded-t-[36px] md:rounded-[36px] -mt-6 md:mt-6 z-30 relative overflow-hidden">
+    <div className="bg-white dark:bg-[#111111] dark:border dark:border-white/10 py-20 rounded-t-[36px] md:rounded-[36px] -mt-6 md:mt-6 z-30 relative overflow-hidden transition-colors duration-300">
       <motion.div 
         variants={header}
         initial="hidden"
@@ -50,14 +50,14 @@ export default function HowToRegister() {
 
         <motion.h1 
           variants={item} 
-          className="text-4xl md:text-5xl font-black text-[#171330] tracking-tight leading-tight"
+          className="text-4xl md:text-5xl font-black text-[#171330] dark:text-white tracking-tight leading-tight"
         >
           {title}
         </motion.h1>
 
         <motion.p 
           variants={item} 
-          className="mt-4 text-lg text-gray-500 font-medium leading-relaxed"
+          className="mt-4 text-lg text-gray-500 dark:text-slate-400 font-medium leading-relaxed"
         >
           {description}
         </motion.p>

@@ -66,10 +66,10 @@ export default function Pricing() {
   };
 
   return (
-    <div className="py-24 bg-[#d6deec] px-6 rounded-[36px] -mt-6 md:mt-6 z-20 relative font-bricolage overflow-hidden shadow-inner">
+    <div className="py-24 bg-[#d6deec] dark:bg-[#111111] dark:border dark:border-white/10 px-6 rounded-[36px] -mt-6 md:mt-6 z-20 relative font-bricolage overflow-hidden shadow-inner transition-colors duration-300">
       {/* Decorative blobs */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#0068ff]/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#20c907]/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#0068ff]/10 dark:bg-[#0068ff]/15 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#20c907]/10 dark:bg-[#20c907]/15 rounded-full blur-[100px] pointer-events-none" />
 
       <motion.div
         variants={header}
@@ -81,22 +81,22 @@ export default function Pricing() {
         <h2 className="text-sm font-black uppercase tracking-widest text-[#0068ff] mb-4 bg-[#0068ff]/10 inline-block px-5 py-2 rounded-full border border-[#0068ff]/20">
           {badge}
         </h2>
-        <h1 className="text-4xl md:text-6xl font-black text-[#171330] tracking-tight leading-tight mb-6">
+        <h1 className="text-4xl md:text-6xl font-black text-[#171330] dark:text-white tracking-tight leading-tight mb-6">
           {title}
         </h1>
-        <p className="text-[#171330]/70 text-lg md:text-xl font-medium max-w-2xl mx-auto">
+        <p className="text-[#171330]/70 dark:text-slate-300 text-lg md:text-xl font-medium max-w-2xl mx-auto">
           {description}
         </p>
 
-        <div className="flex items-center justify-center mt-12 gap-2 bg-white/60 p-2 rounded-full inline-flex mx-auto backdrop-blur-md border border-white shadow-sm">
+        <div className="flex items-center justify-center mt-12 gap-2 bg-white/60 dark:bg-white/10 p-2 rounded-full inline-flex mx-auto backdrop-blur-md border border-white dark:border-white/10 shadow-sm">
           <span 
-            className={`font-bold px-6 py-2.5 rounded-full transition-all cursor-pointer ${!isYearly ? "bg-white shadow-md text-[#171330]" : "text-gray-500 hover:text-[#171330]"}`} 
+            className={`font-bold px-6 py-2.5 rounded-full transition-all cursor-pointer ${!isYearly ? "bg-white dark:bg-[#181818] shadow-md text-[#171330] dark:text-white" : "text-gray-500 dark:text-slate-400 hover:text-[#171330] dark:hover:text-white"}`} 
             onClick={() => setIsYearly(false)}
           >
             {monthlyLabel}
           </span>
           <span 
-            className={`font-bold px-6 py-2.5 rounded-full transition-all cursor-pointer flex items-center gap-2 ${isYearly ? "bg-white shadow-md text-[#171330]" : "text-gray-500 hover:text-[#171330]"}`} 
+            className={`font-bold px-6 py-2.5 rounded-full transition-all cursor-pointer flex items-center gap-2 ${isYearly ? "bg-white dark:bg-[#181818] shadow-md text-[#171330] dark:text-white" : "text-gray-500 dark:text-slate-400 hover:text-[#171330] dark:hover:text-white"}`} 
             onClick={() => setIsYearly(true)}
           >
             {yearlyLabel} 
@@ -120,26 +120,26 @@ export default function Pricing() {
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className={`relative flex flex-col p-10 rounded-[40px] overflow-hidden transition-all duration-300 ${
               plan.popular 
-                ? "bg-[#171330] text-white shadow-[0_30px_60px_-15px_rgba(0,104,255,0.5)] md:-my-8 py-14 border border-white/10" 
-                : "bg-white/70 backdrop-blur-xl text-[#171330] border border-white/50 shadow-2xl hover:bg-white/90"
+                ? "bg-[#171330] dark:bg-[#0066ff] text-white shadow-[0_30px_60px_-15px_rgba(0,104,255,0.5)] md:-my-8 py-14 border border-white/10" 
+                : "bg-white/70 dark:bg-[#181818]/90 backdrop-blur-xl text-[#171330] dark:text-white border border-white/50 dark:border-white/10 shadow-2xl hover:bg-white/90 dark:hover:bg-[#181818]"
             }`}
           >
             {plan.popular && (
-              <div className="absolute top-6 right-6 bg-gradient-to-r from-[#0068ff] to-[#58A6ff] text-white text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-lg border border-white/20">
+              <div className="absolute top-6 right-6 bg-gradient-to-r from-[#0068ff] to-[#58A6ff] dark:from-white dark:to-slate-200 dark:text-[#171330] text-white text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-lg border border-white/20">
                 <Sparkles size={14} /> {popularLabel}
               </div>
             )}
             
             <h3 className="text-3xl font-black mb-2 tracking-tight">{plan.name}</h3>
-            <p className={`font-semibold mb-8 text-sm ${plan.popular ? "text-[#58A6ff]" : "text-gray-500"}`}>
+            <p className={`font-semibold mb-8 text-sm ${plan.popular ? "text-[#58A6ff] dark:text-blue-100" : "text-gray-500 dark:text-slate-400"}`}>
               {plan.tagline}
             </p>
             
             <div className="mb-10 flex items-baseline">
-              <span className={`text-6xl font-black tracking-tighter ${plan.popular ? "text-white" : "text-[#171330]"}`}>
+              <span className={`text-6xl font-black tracking-tighter ${plan.popular ? "text-white" : "text-[#171330] dark:text-white"}`}>
                 {locale.currencySymbol}{getPrice(i, isYearly)}
               </span>
-              <span className={`font-bold ml-2 ${plan.popular ? "text-white/50" : "text-gray-400"}`}>
+              <span className={`font-bold ml-2 ${plan.popular ? "text-white/50" : "text-gray-400 dark:text-slate-400"}`}>
                 / {isYearly ? 'yr' : 'mo'}
               </span>
             </div>
@@ -149,7 +149,7 @@ export default function Pricing() {
               className={`w-full py-4 rounded-2xl font-black text-lg mb-10 transition-all hover:scale-[1.03] active:scale-95 shadow-lg ${
               plan.popular 
                 ? "bg-gradient-to-r from-[#0068ff] to-[#58A6ff] text-white hover:shadow-[#0068ff]/50" 
-                : "bg-white text-[#171330] border-2 border-[#d6deec] hover:border-[#0068ff] hover:text-[#0068ff]"
+                : "bg-white dark:bg-white/10 text-[#171330] dark:text-white border-2 border-[#d6deec] dark:border-white/10 hover:border-[#0068ff] hover:text-[#0068ff]"
             }`}>
               {plan.cta}
             </button>
@@ -157,10 +157,10 @@ export default function Pricing() {
             <ul className="space-y-5 mt-auto">
               {plan.features.map((feature, j) => (
                 <li key={j} className="flex items-start gap-3">
-                  <div className={`p-1 rounded-full shrink-0 mt-0.5 ${plan.popular ? "bg-[#20c907]/20" : "bg-[#0068ff]/10"}`}>
+                  <div className={`p-1 rounded-full shrink-0 mt-0.5 ${plan.popular ? "bg-[#20c907]/20" : "bg-[#0068ff]/10 dark:bg-[#0068ff]/20"}`}>
                     <Check size={16} strokeWidth={3} className={plan.popular ? "text-[#20c907]" : "text-[#0068ff]"} />
                   </div>
-                  <span className={`font-semibold text-[15px] leading-snug ${plan.popular ? "text-white/90" : "text-[#171330]/80"}`}>
+                  <span className={`font-semibold text-[15px] leading-snug ${plan.popular ? "text-white/90" : "text-[#171330]/80 dark:text-slate-300"}`}>
                     {feature}
                   </span>
                 </li>
