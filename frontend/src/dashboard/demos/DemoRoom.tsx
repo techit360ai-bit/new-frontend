@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Video, Radio, MessageSquare, ThumbsUp, CheckCircle2, Shield, UserPlus, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowLeft, Radio, MessageSquare, ExternalLink } from "lucide-react";
 import { getEvent, transitionStatus, invite, respondInvite } from "@/lib/demo/client";
 import { canTransition } from "@/lib/demo/transitions";
 import { fetchRtcToken, type RtcSession } from "@/lib/demo/rtc";
@@ -15,7 +15,7 @@ const ROOM_ROLES = ["presenter", "judge", "audience"];
 const STATUS_STYLE: Record<string, string> = {
   draft: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20",
   scheduled: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
-  live: "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-bold",
+  live: "bg-[#0066ff]/10 text-[#0066ff] border border-[#0066ff]/20 font-bold",
   ended: "bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/20",
   cancelled: "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20",
 };
@@ -63,7 +63,7 @@ export function DemoRoom() {
 
   if (loading) return (
     <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 p-8 justify-center">
-      <div className="w-4 h-4 border-2 border-[#20C997] border-t-transparent rounded-full animate-spin" />
+      <div className="w-4 h-4 border-2 border-[#0066ff] border-t-transparent rounded-full animate-spin" />
       <span>Loading demo room...</span>
     </div>
   );
@@ -71,7 +71,7 @@ export function DemoRoom() {
   if (!event) return (
     <div className="p-8 max-w-2xl mx-auto text-xs text-slate-500 dark:text-slate-400 font-bricolage text-center">
       <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Demo not found or unavailable.</p>
-      <Link to="/demos" className="text-[#20C997] hover:underline font-bold">
+      <Link to="/demos" className="text-[#0066ff] hover:underline font-bold">
         ← Back to Demo Rooms
       </Link>
     </div>
@@ -151,7 +151,7 @@ export function DemoRoom() {
             href={event.assetUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-[#20C997] hover:underline"
+            className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-[#0066ff] hover:underline"
           >
             <span>View Attached Asset</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -164,7 +164,7 @@ export function DemoRoom() {
         session ? (
           <Suspense fallback={
             <div className="flex items-center gap-2 text-xs text-slate-400 p-6 justify-center">
-              <div className="w-4 h-4 border-2 border-[#20C997] border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[#0066ff] border-t-transparent rounded-full animate-spin" />
               <span>Connecting live video stage...</span>
             </div>
           }>
@@ -180,7 +180,7 @@ export function DemoRoom() {
       {/* Audience Q&A */}
       <div className="border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl rounded-2xl p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <MessageSquare className="w-4 h-4 text-[#20C997]" />
+          <MessageSquare className="w-4 h-4 text-[#0066ff]" />
           <h2 className="text-sm font-bold text-slate-900 dark:text-white">Audience Q&amp;A</h2>
         </div>
 
@@ -191,13 +191,13 @@ export function DemoRoom() {
               onChange={(e) => setQBody(e.target.value)}
               placeholder="Ask a question…"
               onKeyDown={(e) => { if (e.key === "Enter") void submitQuestion(); }}
-              className="flex-1 h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
+              className="flex-1 h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff]"
             />
             <button
               type="button"
               disabled={!qBody.trim()}
               onClick={() => void submitQuestion()}
-              className="h-10 px-4 text-xs font-bold text-slate-950 bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 rounded-xl shadow-sm transition-all"
+              className="h-10 px-4 text-xs font-bold text-white bg-[#0066ff] hover:bg-[#0052cc] disabled:opacity-50 rounded-xl shadow-sm transition-all"
             >
               Ask
             </button>
@@ -217,7 +217,7 @@ export function DemoRoom() {
                   q.state === "dismissed"
                     ? "opacity-50 line-through border-black/[0.04] dark:border-white/[0.04]"
                     : q.state === "answered"
-                      ? "border-[#20C997]/30 bg-[#20C997]/[0.04]"
+                      ? "border-[#0066ff]/30 bg-[#0066ff]/[0.04]"
                       : "border-black/[0.06] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]"
                 }`}
               >
@@ -227,7 +227,7 @@ export function DemoRoom() {
                   onClick={() => void toggleVote(q.id)}
                   className={`flex flex-col items-center px-2 py-1 rounded-lg border transition-colors ${
                     q.mine
-                      ? "border-[#20C997]/40 bg-[#20C997]/10 text-[#20C997]"
+                      ? "border-[#0066ff]/40 bg-[#0066ff]/10 text-[#0066ff]"
                       : "border-black/[0.06] dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   } disabled:opacity-40`}
                 >
@@ -240,7 +240,7 @@ export function DemoRoom() {
                     <button
                       type="button"
                       onClick={() => void setQState(q.id, "answered")}
-                      className="text-[11px] font-bold text-[#20C997] hover:underline"
+                      className="text-[11px] font-bold text-[#0066ff] hover:underline"
                     >
                       Answered
                     </button>
@@ -286,13 +286,13 @@ export function DemoRoom() {
                 value={inviteUser}
                 onChange={(e) => setInviteUser(e.target.value)}
                 placeholder="User ID or handle"
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
+                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff]"
               />
             </div>
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997] capitalize"
+              className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0066ff]/20 focus:border-[#0066ff] capitalize"
             >
               {ROOM_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
@@ -300,7 +300,7 @@ export function DemoRoom() {
               type="button"
               disabled={busy || !inviteUser.trim()}
               onClick={() => act(async () => { await invite(id, inviteUser.trim(), inviteRole); setInviteUser(""); })}
-              className="h-10 px-4 text-xs font-bold text-slate-950 bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 rounded-xl shadow-sm transition-all"
+              className="h-10 px-4 text-xs font-bold text-white bg-[#0066ff] hover:bg-[#0052cc] disabled:opacity-50 rounded-xl shadow-sm transition-all"
             >
               Invite
             </button>
@@ -318,7 +318,7 @@ export function DemoRoom() {
             type="button"
             disabled={busy}
             onClick={() => act(() => respondInvite(id, true))}
-            className="text-xs font-bold text-slate-950 bg-[#20C997] hover:bg-[#1db587] px-3.5 py-1.5 rounded-xl transition-all"
+            className="text-xs font-bold text-white bg-[#0066ff] hover:bg-[#0052cc] px-3.5 py-1.5 rounded-xl transition-all"
           >
             Accept
           </button>
@@ -344,7 +344,7 @@ export function DemoRoom() {
               <li key={r.userId} className="py-2.5 flex items-center justify-between text-xs">
                 <span className="font-bold text-slate-900 dark:text-white">{r.userId}</span>
                 <span className="text-slate-500 dark:text-slate-400 capitalize font-medium">
-                  {r.roomRole} · <span className="text-[#20C997]">{r.status}</span>
+                  {r.roomRole} · <span className="text-[#0066ff]">{r.status}</span>
                 </span>
               </li>
             ))}
