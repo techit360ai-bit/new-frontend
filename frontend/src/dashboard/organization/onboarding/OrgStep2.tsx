@@ -1,21 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, type Variants } from "motion/react";
 import { useOrgProfile } from "@/contexts/UserContext";
-import { OrgProgressBar } from "./OrgProgressBar";
+import { BlobField } from "@/components/ui/blob-field";
+import { ImageSlideshow } from "@/components/ui/image-slideshow";
 import {
   ShieldCheck,
   Upload,
   Mail,
   FileText,
-  X,
-  Info,
+  Trash2,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  Check,
 } from "lucide-react";
+
+const SLIDE_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
+
+const PERKS = [
+  { icon: ShieldCheck, text: "Verified badge across all hackathons and programs" },
+  { icon: Sparkles, text: "Direct corporate sponsorship & talent matching" },
+  { icon: Mail, text: "Custom organisation email domain binding" },
+];
 
 export function OrgStep2() {
   const navigate = useNavigate();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
-  const [docs, setDocs] = useState<string[]>(orgProfile.verificationDocs);
-  const [emailDomain, setEmailDomain] = useState(orgProfile.businessEmailDomain);
+  const [docs, setDocs] = useState<string[]>(orgProfile.verificationDocs || []);
+  const [emailDomain, setEmailDomain] = useState(orgProfile.businessEmailDomain || "");
 
   const addDoc = (name: string) =>
     setDocs((prev) => (prev.includes(name) ? prev : [...prev, name]));
@@ -28,8 +41,7 @@ export function OrgStep2() {
   };
 
   const handleNext = () => {
-    const status =
-      docs.length > 0 && emailDomain.trim() ? "pending" : "unverified";
+    const status = docs.length > 0 && emailDomain.trim() ? "pending" : "unverified";
     updateOrgProfile({
       verificationDocs: docs,
       businessEmailDomain: emailDomain,
@@ -40,132 +52,175 @@ export function OrgStep2() {
 
   const handleBack = () => navigate("/org/onboarding/step-1");
 
+  const inputCls =
+    "w-full h-12 rounded-xl border border-white/20 bg-white/10 pl-11 pr-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]";
+
+  const fieldVariants: Variants = {
+    hidden: { opacity: 0, y: 12 },
+    show: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: 0.1 + i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+    }),
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#20C997]/10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
-      <div className="w-full max-w-3xl">
-        <OrgProgressBar currentStep={2} totalSteps={5} />
+    <div className="min-h-screen bg-[#171330] p-[10px] font-bricolage">
+      <div className="w-full min-h-[calc(100vh-20px)] rounded-[32px] overflow-hidden grid lg:grid-cols-[42%_58%] border border-white/10">
+        {/* Left: brand panel */}
+        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-[#171330] overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#20C997]/30 via-[#171330] to-[#171330]" />
+          <BlobField variant="dark" />
 
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2 flex items-center gap-3">
-            <ShieldCheck className="w-9 h-9 text-[#20C997]" />
-            Verification
-          </h1>
-          <p className="text-base text-slate-600 dark:text-slate-400">
-            Verified organisations get a trust badge across the platform and can
-            post Opportunities, run Hackathons, and broadcast to builders.
-          </p>
-        </div>
-
-        <div className="space-y-7">
-          {/* Document upload */}
-          <div>
-            <label className="block mb-3 text-slate-900 dark:text-white font-semibold">
-              Registration documents
-            </label>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-              Upload your business registration certificate, tax ID or
-              equivalent government-issued document.
-            </p>
-            <label
-              htmlFor="org-docs-input"
-              className="block w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-[#20C997] hover:bg-[#20C997]/5 dark:hover:bg-[#20C997]/10 transition-colors"
-            >
-              <input
-                id="org-docs-input"
-                type="file"
-                multiple
-                onChange={(e) => handleFiles(e.target.files)}
-                className="sr-only"
-                accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
-              />
-              <Upload className="w-8 h-8 text-[#20C997] mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                Click to upload documents
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                PDF, PNG, JPG or DOC up to 10MB each
-              </p>
-            </label>
-
-            {docs.length > 0 && (
-              <ul className="mt-3 space-y-2">
-                {docs.map((d) => (
-                  <li
-                    key={d}
-                    className="flex items-center gap-3 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2.5"
-                  >
-                    <FileText className="w-4 h-4 text-[#20C997] flex-shrink-0" />
-                    <span className="text-sm text-slate-700 dark:text-slate-300 flex-1 truncate">
-                      {d}
-                    </span>
-                    <button
-                      onClick={() => removeDoc(d)}
-                      className="text-slate-400 hover:text-red-500 transition-colors"
-                      aria-label="Remove"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Business email domain */}
-          <div>
-            <label className="flex items-center gap-2 mb-3 text-slate-900 dark:text-white font-semibold">
-              <Mail className="w-4 h-4 text-[#20C997]" />
-              Business email domain
-            </label>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-              We'll send a verification email and check that your admin contacts
-              use this domain.
-            </p>
-            <div className="flex items-center bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 rounded-xl px-5 h-14 focus-within:border-[#20C997] transition-colors">
-              <span className="text-slate-500 dark:text-slate-400 text-base">
-                @
-              </span>
-              <input
-                type="text"
-                value={emailDomain}
-                onChange={(e) =>
-                  setEmailDomain(e.target.value.toLowerCase().trim())
-                }
-                placeholder="yourcompany.org"
-                className="flex-1 bg-transparent border-0 outline-none text-base text-slate-900 dark:text-white px-2"
-              />
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-1.5 mb-6 px-3 py-1 rounded-full bg-[#20C997]/15 border border-[#20C997]/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#20C997]">Step 2 of 5</span>
             </div>
+            <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-[1.1] mb-4">
+              Organisation Verification
+            </h1>
+            <p className="text-white/60 text-sm leading-relaxed max-w-sm">
+              Verified organisations receive a verified platform badge, priority hackathon listings, and builder trust.
+            </p>
           </div>
 
-          {/* Note */}
-          <div className="bg-[#20C997]/10 dark:bg-[#20C997]/20 border border-[#20C997]/30 rounded-xl p-4 flex items-start gap-3">
-            <Info className="w-5 h-5 text-[#20C997] flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-slate-900 dark:text-slate-100">
-              <p className="font-semibold mb-1">
-                Verification takes 1–3 business days
-              </p>
-              <p className="text-slate-600 dark:text-slate-300">
-                You can still finish onboarding and explore the dashboard.
-                Posting Opportunities to the public Board requires a verified
-                badge.
-              </p>
+          <div className="relative z-10 space-y-4">
+            {PERKS.map(({ icon: Icon, text }, i) => (
+              <motion.div
+                key={text}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
+                className="flex items-center gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-[#20C997]" />
+                </div>
+                <span className="text-white/75 text-sm font-medium">{text}</span>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Step progress</span>
+              <span className="text-[10px] font-black text-[#20C997]">2 / 5</span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-[#20C997] to-emerald-400 w-2/5" />
             </div>
           </div>
         </div>
 
-        <div className="mt-12 flex justify-between gap-4">
-          <button
-            onClick={handleBack}
-            className="px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:border-[#20C997] transition-colors"
+        {/* Right: form panel */}
+        <div className="relative flex items-center justify-center p-6 md:p-14 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <ImageSlideshow images={SLIDE_IMAGES} />
+          </div>
+
+          <div className="absolute inset-0 bg-[#171330]/50 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#171330]/40 via-transparent to-[#171330]/60 z-[1]" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 w-full max-w-xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-[32px] p-6 md:p-9 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.7)] overflow-y-auto max-h-[85vh] hide-scrollbar"
           >
-            Back
-          </button>
-          <button
-            onClick={handleNext}
-            className="px-10 py-4 rounded-xl bg-gradient-to-r from-[#20C997] to-emerald-600 hover:from-[#1ba87e] hover:to-emerald-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
-          >
-            Continue
-          </button>
+            <div className="mb-6">
+              <h2 className="text-xl font-black text-white mb-1 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
+                Verification & Domain
+              </h2>
+              <p className="text-sm text-white/60 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
+                Provide verification materials and official corporate domain.
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              {/* Document upload box */}
+              <motion.div custom={0} variants={fieldVariants} initial="hidden" animate="show">
+                <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 mb-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#20C997]" /> Registration / Tax Docs (Optional)
+                </label>
+                <label
+                  htmlFor="org-docs-input"
+                  className="flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-[#20C997]/60 rounded-2xl p-6 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group"
+                >
+                  <Upload className="w-8 h-8 text-white/40 group-hover:text-[#20C997] transition-colors mb-2" />
+                  <p className="text-xs font-bold text-white mb-0.5">Click or drag files to upload</p>
+                  <p className="text-[10px] text-white/40">PDF, PNG, JPG up to 10MB</p>
+                  <input
+                    id="org-docs-input"
+                    type="file"
+                    multiple
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => handleFiles(e.target.files)}
+                    className="hidden"
+                  />
+                </label>
+
+                {docs.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    {docs.map((d) => (
+                      <div
+                        key={d}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/10 text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <FileText className="w-3.5 h-3.5 text-[#20C997] shrink-0" />
+                          <span className="text-white truncate">{d}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeDoc(d)}
+                          className="p-1 text-white/40 hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Official email domain */}
+              <motion.div custom={1} variants={fieldVariants} initial="hidden" animate="show">
+                <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 mb-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
+                  <Mail className="w-3.5 h-3.5 text-[#20C997]" /> Official Email Domain
+                </label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                    <Mail className="w-4 h-4 text-white/40" />
+                  </div>
+                  <input
+                    type="text"
+                    value={emailDomain}
+                    onChange={(e) => setEmailDomain(e.target.value)}
+                    placeholder="e.g. @techhub.org or @university.edu"
+                    className={inputCls}
+                  />
+                </div>
+              </motion.div>
+            </div>
+
+            <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="show" className="mt-8 flex gap-3">
+              <button
+                type="button"
+                onClick={handleBack}
+                className="h-12 px-5 flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-sm uppercase tracking-widest transition-all"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#20C997] to-[#128a64] text-slate-950 font-black text-sm uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(32,201,151,0.4)]"
+              >
+                Continue <ArrowRight className="w-4 h-4" />
+              </button>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </div>
