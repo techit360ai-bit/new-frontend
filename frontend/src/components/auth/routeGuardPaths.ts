@@ -44,15 +44,6 @@ export function roleRedirectPath({
   if (!hasUser) return { to: "/signin", state: { from: currentPath } };
   if (!profileRole) return null;
 
-  // Bypass strict role restrictions for founder, collaborator, and explorer roles
-  const bypassRoles: RouteGuardRole[] = ["founder", "collaborator", "explorer"];
-  if (
-    allowed.some((r) => bypassRoles.includes(r)) ||
-    (profileRole && bypassRoles.includes(profileRole))
-  ) {
-    return null;
-  }
-
   if (!allowed.includes(profileRole)) return { to: homePathFor(profileRole) };
   const onboardingRoot = setupPathFor(profileRole).replace(/\/step-1$/, "");
   if (isOnboarded && currentPath.startsWith(onboardingRoot)) {
