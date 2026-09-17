@@ -18,7 +18,7 @@ const orgTypes = [
 
 export function OrgStep1() {
   const navigate = useNavigate();
-  const { updateProfile } = useAuth();
+  const { updateProfile, activateRole } = useAuth();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
   const [orgName, setOrgName] = useState(orgProfile.orgName);
   const [orgType, setOrgType] = useState(orgProfile.orgType);
@@ -40,6 +40,8 @@ export function OrgStep1() {
       website,
     });
     setFinishing(true);
+    const activated = await activateRole("organisation", { orgName, orgType, location, registrationNumber, foundingYear, website });
+    if (activated.error) { setFinishing(false); return; }
     const { error } = await updateProfile({ isOnboarded: true });
     if (error) { setFinishing(false); return; }
     localStorage.setItem("techit_profile_completion_pending", "organisation");

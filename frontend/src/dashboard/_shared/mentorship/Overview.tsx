@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { fetchMentorshipAnalytics, getMentorshipRoom, listMentorshipApplications, listMentorshipRooms, type MentorshipAnalytics, type MentorshipRoom } from "@/lib/api/mentorship";
 import { ACCENT_SOLID, ACCENT_TEXT, ACCENT_SOFT, HERO_GRADIENT } from "./theme";
+import { fetchMentorRecommendations } from "@/lib/api/recommendationIntelligence";
 
 const BASE = "/investor/mentorship";
 
@@ -19,6 +20,7 @@ export function Overview() {
   const [analytics, setAnalytics] = useState<MentorshipAnalytics | null>(null);
   const [mentees, setMentees] = useState<Array<Record<string, unknown>>>([]);
   const [pendingApplications, setPendingApplications] = useState(0);
+  const [mentorRecommendations, setMentorRecommendations] = useState<Array<{ startup?: { id: string; name: string; stage?: string; skills?: string[] }; score: number; reasons: string[] }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +44,8 @@ export function Overview() {
       .finally(() => alive && setLoading(false));
     return () => { alive = false; };
   }, []);
+
+  useEffect(() => { fetchMentorRecommendations({ limit: 6 }).then((result) => setMentorRecommendations(result.recommendations as typeof mentorRecommendations)).catch(() => setMentorRecommendations([])); }, []);
 
   const activeMentees = analytics?.activeMentees ?? 0;
   const totalMentees = activeMentees + (analytics?.completedMentees ?? 0);
@@ -80,6 +84,8 @@ export function Overview() {
         <h1 className="mb-1 text-3xl">Dashboard</h1>
         <p className="text-muted-foreground">Manage your mentorship rooms and track progress</p>
       </div>
+
+      {mentorRecommendations.length > 0 && <Card><CardHeader><CardTitle>Recommended founders and startups</CardTitle></CardHeader><CardContent className="grid gap-3 md:grid-cols-2">{mentorRecommendations.map((row) => <div key={String(row.startup?.id)} className="rounded border p-3"><div className="flex items-center justify-between"><span className="font-medium">{row.startup?.name || "Startup"}</span><span className={ACCENT_TEXT}>{Math.round(row.score)}%</span></div><p className="mt-1 text-xs text-muted-foreground">{row.startup?.stage || "Stage unavailable"} · {(row.startup?.skills || []).slice(0, 3).join(", ")}</p><p className="mt-2 text-xs text-muted-foreground">{row.reasons.join(" · ")}</p></div>)}</CardContent></Card>}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-4">

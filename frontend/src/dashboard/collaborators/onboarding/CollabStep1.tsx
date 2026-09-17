@@ -7,7 +7,7 @@ import { User, MapPin, Briefcase, Calendar, MessageSquare } from "lucide-react";
 
 export function CollabStep1() {
   const navigate = useNavigate();
-  const { updateProfile } = useAuth();
+  const { updateProfile, activateRole } = useAuth();
   const { collaboratorProfile, updateCollaboratorProfile } = useCollaboratorProfile();
   const [name, setName]             = useState(collaboratorProfile.name);
   const [title, setTitle]           = useState(collaboratorProfile.title);
@@ -21,7 +21,9 @@ export function CollabStep1() {
   const handleNext = async () => {
     updateCollaboratorProfile({ name, title, location, yearsExperience: years, headline });
     setFinishing(true);
-    const { error } = await updateProfile({ isOnboarded: true });
+    const activated = await activateRole("collaborator", { name, title, location, yearsExperience: years, headline });
+    if (activated.error) { setFinishing(false); return; }
+    const { error } = await updateProfile({ isOnboarded: true, title, country: location, yearsExperience: years, bio: headline });
     if (error) { setFinishing(false); return; }
     localStorage.setItem("techit_profile_completion_pending", "collaborator");
     navigate(roleDashboardPath.collaborator, { replace: true });

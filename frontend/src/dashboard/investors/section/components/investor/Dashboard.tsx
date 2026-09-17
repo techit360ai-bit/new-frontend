@@ -6,6 +6,7 @@ import { useInvestorProfile } from '@/contexts/UserContext';
 import { fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
 import { WelcomeBack } from '@/components/WelcomeBack';
 import { InvestorIntelligencePanel } from './InvestorIntelligencePanel';
+import { fetchInvestorThesisRecommendations } from '@/lib/api/recommendationIntelligence';
 
 export function Dashboard() {
   const { investorProfile } = useInvestorProfile();
@@ -15,6 +16,7 @@ export function Dashboard() {
   const [startups, setStartups] = useState<InvestorStartup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [thesisRecommendations, setThesisRecommendations] = useState<Array<{ startup?: { id: string; name: string; sector?: string; stage?: string; execution?: number }; score: number; reasons: string[] }>>([]);
 
   useEffect(() => {
     let alive = true;
@@ -32,6 +34,8 @@ export function Dashboard() {
       });
     return () => { alive = false; };
   }, []);
+
+  useEffect(() => { fetchInvestorThesisRecommendations({ limit: 6 }).then((result) => setThesisRecommendations(result.recommendations as typeof thesisRecommendations)).catch(() => setThesisRecommendations([])); }, []);
 
   const metrics = useMemo(() => ({
     totalStartups: startups.length,
@@ -78,6 +82,8 @@ export function Dashboard() {
         </div>
 
         <InvestorIntelligencePanel />
+
+        {thesisRecommendations.length > 0 && <section className="mb-6 rounded-lg border border-border-inverse bg-surface-inverse p-5"><h2 className="font-semibold text-white">Thesis-matched startups</h2><p className="mt-1 text-xs text-text-on-inverse-muted">Ranked from sector, geography, stage, ticket, risk, and your historical activity.</p><div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">{thesisRecommendations.map((row) => <div key={String(row.startup?.id)} className="rounded border border-border-inverse p-3"><div className="flex items-center justify-between"><span className="font-medium text-white">{row.startup?.name || 'Startup'}</span><span className="text-xs text-status-success">{Math.round(row.score)}%</span></div><p className="mt-1 text-xs text-text-on-inverse-muted">{row.startup?.sector || 'Sector unavailable'} · {row.startup?.stage || 'Stage unavailable'} · execution {row.startup?.execution ?? '—'}</p><p className="mt-2 text-xs text-text-on-inverse-secondary">{row.reasons.join(' · ')}</p></div>)}</div></section>}
 
         {/* Onboarding banner — appears when profile is incomplete */}
         {onboardingIncomplete && !bannerDismissed && (
