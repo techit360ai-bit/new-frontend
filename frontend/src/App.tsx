@@ -203,21 +203,21 @@ const App = () => {
           }
         />
 
-        <Route path="/founder/onboarding/step-1" element={<FounderStep1 />} />
-        <Route path="/founder/onboarding/step-2" element={<FounderStep2 />} />
-        <Route path="/founder/onboarding/step-3" element={<FounderStep3 />} />
-        <Route path="/founder/onboarding/step-4" element={<FounderStep4 />} />
-        <Route path="/founder/onboarding/step-5" element={<FounderStep5 />} />
-        <Route path="/founder/onboarding/step-6" element={<FounderStep6 />} />
+        <Route path="/founder/onboarding/step-1" element={<RequireRole allowed={["founder"]}><FounderStep1 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-2" element={<RequireRole allowed={["founder"]}><FounderStep2 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-3" element={<RequireRole allowed={["founder"]}><FounderStep3 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-4" element={<RequireRole allowed={["founder"]}><FounderStep4 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-5" element={<RequireRole allowed={["founder"]}><FounderStep5 /></RequireRole>} />
+        <Route path="/founder/onboarding/step-6" element={<RequireRole allowed={["founder"]}><FounderStep6 /></RequireRole>} />
         <Route path="/founder/setup"   element={<Navigate to="/founder/onboarding/step-1" replace />} />
         <Route path="/founder/summary" element={<Navigate to="/founder/dashboard" replace />} />
 
-        <Route path="/collaborator/onboarding/step-1" element={<CollabStep1 />} />
-        <Route path="/collaborator/onboarding/step-2" element={<CollabStep2 />} />
-        <Route path="/collaborator/onboarding/step-3" element={<CollabStep3 />} />
-        <Route path="/collaborator/onboarding/step-4" element={<CollabStep4 />} />
-        <Route path="/collaborator/onboarding/step-5" element={<CollabStep5 />} />
-        <Route path="/collaborator/onboarding/step-6" element={<CollabStep6 />} />
+        <Route path="/collaborator/onboarding/step-1" element={<RequireRole allowed={["collaborator"]}><CollabStep1 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-2" element={<RequireRole allowed={["collaborator"]}><CollabStep2 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-3" element={<RequireRole allowed={["collaborator"]}><CollabStep3 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-4" element={<RequireRole allowed={["collaborator"]}><CollabStep4 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-5" element={<RequireRole allowed={["collaborator"]}><CollabStep5 /></RequireRole>} />
+        <Route path="/collaborator/onboarding/step-6" element={<RequireRole allowed={["collaborator"]}><CollabStep6 /></RequireRole>} />
 
         <Route path="/collaborator" element={<RequireRole allowed={["collaborator"]}><CollabLayout /></RequireRole>}>
           <Route index element={<Navigate to="/collaborator/dashboard" replace />} />
