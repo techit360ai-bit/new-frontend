@@ -122,7 +122,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
@@ -193,7 +193,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
@@ -377,7 +377,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
@@ -561,7 +561,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
@@ -745,7 +745,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
@@ -929,7 +929,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
@@ -1113,7 +1113,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {
@@ -1297,7 +1297,7 @@ hero: {
       description: "TechIT Network is an AI-powered execution infrastructure for creating, validating, building, and growing startups.",
       buttonText: "Start Building",
       buttonHref: "/signup",
-      imageSrc: "/mockup/laptop.png",
+      imageSrc: "/showcase.jpg",
       imageAlt: "TechIT Dashboard",
     },
     howItWorks: {

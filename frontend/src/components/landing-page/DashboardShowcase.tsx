@@ -31,8 +31,8 @@ export default function DashboardShowcase() {
           <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
         </div>
         <img 
-          src={hero.imageSrc} 
-          alt={hero.imageAlt} 
+          src="/showcase.jpg" 
+          alt={hero.imageAlt || "TechIT Dashboard Showcase"} 
           className="w-full h-auto object-cover bg-[#171330]"
           loading="lazy"
           decoding="async"
