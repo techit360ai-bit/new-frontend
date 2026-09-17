@@ -1,4 +1,17 @@
-import { apiGet, apiPost } from "./client";
+import { apiGet, apiPost, getAuthToken } from "./client";
+import { env } from "./config";
+
+const BACKEND_API = String((env as Record<string, unknown>).VITE_API_URL || "http://localhost:3000/api").replace(/\/$/, "");
+async function backendTrustAccess<T>(path: string, method: "GET" | "POST", body?: unknown): Promise<T> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  try { const csrf = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith("techit_csrf=")); if (csrf) headers["X-CSRF-Token"] = decodeURIComponent(csrf.slice("techit_csrf=".length)); } catch {}
+  const response = await fetch(`${BACKEND_API}${path}`, { method, credentials: "include", headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(String((payload as { error?: unknown }).error || `Trust access ${response.status}`));
+  return payload as T;
+}
 
 export type TrustHealth = "excellent" | "good" | "needs_attention";
 export type TrustVerificationState = "verified" | "pending" | "expired" | "failed" | "disconnected";
@@ -19,6 +32,7 @@ export interface InvestorTrustStartupSummary {
   activeBadges: string[];
   watchlistIncluded: boolean;
   trustTrend: "improving" | "stable" | "needs_attention";
+  verifiedSkillsCount?: number;
 }
 
 export interface InvestorTrustPrivacy {
@@ -68,6 +82,7 @@ export interface FounderProfessionalSummary {
   yearsBuildingStartup: number;
   previousVentures?: string;
   responseRate: string;
+  verifiedSkillsCount?: number;
 }
 
 export interface ProductDevelopmentSummary {
@@ -208,6 +223,20 @@ export interface InvestorTrustDashboard {
   privacy: InvestorTrustPrivacy;
 }
 
+export interface InvestorTrustAccessRequest {
+  id: string;
+  projectId: string;
+  investorId: string;
+  founderId: string;
+  status: "pending" | "approved" | "rejected" | "cancelled" | "expired";
+  purpose: string;
+  requestedScopes: string[];
+  decisionNote?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  decidedAt?: string | null;
+}
+
 export function fetchInvestorTrustStartups(): Promise<InvestorTrustDashboardList> {
   return apiGet<InvestorTrustDashboardList>("/investor/trust/startups");
 }
@@ -224,4 +253,12 @@ export function saveInvestorTrustNotes(
     `/investor/trust/${encodeURIComponent(startupId)}/notes`,
     notes,
   );
+}
+
+export function fetchInvestorTrustAccessRequest(startupId: string) {
+  return backendTrustAccess<{ ok: boolean; request: InvestorTrustAccessRequest | null; requestAccessAllowed: boolean }>(`/authorization/investor/trust/${encodeURIComponent(startupId)}/access-request`, "GET");
+}
+
+export function requestInvestorTrustAccess(startupId: string, purpose: string) {
+  return backendTrustAccess<{ ok: boolean; created: boolean; request: InvestorTrustAccessRequest }>(`/authorization/investor/trust/${encodeURIComponent(startupId)}/access-request`, "POST", { purpose, requestedScopes: ["approved_evidence_metadata"] });
 }

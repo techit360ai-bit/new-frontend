@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Compass, Lightbulb, MessageCircle, Rocket, Search, Sparkles, Users, CalendarDays, Ticket } from "lucide-react";
+import { Compass, Lightbulb, MessageCircle, Search, Sparkles, CalendarDays, Ticket, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ContextSwitcher } from "@/components/context/ContextSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { RoleMobileMenu } from "@/components/RoleMobileMenu";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
 
 const destinations = [
   { href: "/feed", label: "Personalized Feed", icon: Compass, description: "See ideas, people, startups, and conversations relevant to you." },
@@ -16,7 +17,7 @@ const destinations = [
 ];
 
 export default function ExplorerHome() {
-  const { profile, activateRole } = useAuth();
+  const { profile } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const firstName = profile?.firstName || "there";
   const mobileItems = destinations.map(({ href, label, icon }) => ({ label, path: href, icon }));
@@ -42,7 +43,7 @@ export default function ExplorerHome() {
       <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {destinations.map(({ href, label, icon: Icon, description }) => <Link key={href} to={href} className="group rounded-lg border border-border-default bg-card p-5 transition hover:-translate-y-0.5 hover:border-accent-primary hover:shadow-lg"><Icon className="h-5 w-5 text-accent-primary" /><h2 className="mt-4 text-base font-semibold">{label}</h2><p className="mt-2 text-sm leading-6 text-text-muted">{description}</p><span className="mt-4 inline-flex text-sm font-medium text-accent-primary">Open <span aria-hidden="true" className="ml-1 transition group-hover:translate-x-1">-&gt;</span></span></Link>)}
       </div>
-      <section className="mt-10 border-t border-border-default pt-8"><div className="flex items-center gap-3"><Lightbulb className="h-5 w-5 text-status-warning" /><div><h2 className="text-lg font-semibold">Ready to participate?</h2><p className="text-sm text-text-muted">Activate a specialized mode only when it matches what you want to do.</p></div></div><div className="mt-4 flex flex-wrap gap-3"><button type="button" onClick={() => void activateRole("founder")} className="inline-flex items-center gap-2 rounded-lg border border-border-default px-4 py-2 text-sm font-medium hover:border-accent-primary"><Rocket className="h-4 w-4" /> Explore Founder mode</button><button type="button" onClick={() => void activateRole("collaborator")} className="inline-flex items-center gap-2 rounded-lg border border-border-default px-4 py-2 text-sm font-medium hover:border-accent-primary"><Users className="h-4 w-4" /> Explore Collaborator mode</button></div></section>
+      <section className="mt-10 border-t border-border-default pt-8"><div className="mb-4 flex items-center gap-3"><Lightbulb className="h-5 w-5 text-status-warning" /><div><h2 className="text-lg font-semibold">Ready to participate?</h2><p className="text-sm text-text-muted">Activate a specialized mode only when it matches what you want to do.</p></div></div><RoleAdditionPanel /></section>
     </section>
   </main>;
 }

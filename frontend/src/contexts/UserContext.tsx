@@ -375,36 +375,38 @@ function normalizedCollaboratorDiscipline(value: string | null | undefined): Col
 }
 
 function emptyInvestorProfile(profile: AuthProfile | null = null): InvestorProfile {
+  const role = (profile?.roleProfiles?.investor ?? {}) as Partial<InvestorProfile>;
   return {
-    investorType: "",
-    location: profile?.country ?? "",
-    fundSize: "",
-    yearsInvesting: 0,
-    industries: profile?.investmentFocus ?? [],
-    stage: "",
-    checkSize: profile?.ticketSize ?? "",
-    portfolio: [],
-    riskAppetite: profile?.riskTolerance ?? "",
-    dashboardMetrics: [],
+    investorType: role.investorType ?? "",
+    location: role.location ?? profile?.country ?? "",
+    fundSize: role.fundSize ?? "",
+    yearsInvesting: Number(role.yearsInvesting ?? 0),
+    industries: Array.isArray(role.industries) ? role.industries : (profile?.investmentFocus ?? []),
+    stage: role.stage ?? "",
+    checkSize: role.checkSize ?? profile?.ticketSize ?? "",
+    portfolio: Array.isArray(role.portfolio) ? role.portfolio as PortfolioCompany[] : [],
+    riskAppetite: role.riskAppetite ?? profile?.riskTolerance ?? "",
+    dashboardMetrics: Array.isArray(role.dashboardMetrics) ? role.dashboardMetrics : [],
   };
 }
 
 function emptyOrgProfile(profile: AuthProfile | null = null): OrgProfile {
+  const role = (profile?.roleProfiles?.organization ?? profile?.roleProfiles?.organisation ?? {}) as Partial<OrgProfile>;
   return {
-    orgName: profile?.orgName ?? "",
-    orgType: profile?.orgType ?? "",
-    location: profile?.country ?? "",
-    registrationNumber: "",
-    foundingYear: new Date().getFullYear(),
-    website: profile?.website ?? "",
-    verificationStatus: profile?.isVerified ? "verified" : "unverified",
-    verificationDocs: [],
-    businessEmailDomain: profile?.website ? profile.website.replace(/^https?:\/\//, "").split("/")[0] : "",
-    programmes: [],
-    sectors: profile?.industries ?? [],
-    geographies: profile?.country ? [profile.country] : [],
-    teamMembers: [],
-    plan: "free",
+    orgName: role.orgName ?? profile?.orgName ?? "",
+    orgType: role.orgType ?? profile?.orgType ?? "",
+    location: role.location ?? profile?.country ?? "",
+    registrationNumber: role.registrationNumber ?? "",
+    foundingYear: Number(role.foundingYear ?? new Date().getFullYear()),
+    website: role.website ?? profile?.website ?? "",
+    verificationStatus: role.verificationStatus ?? (profile?.isVerified ? "verified" : "unverified"),
+    verificationDocs: Array.isArray(role.verificationDocs) ? role.verificationDocs : [],
+    businessEmailDomain: role.businessEmailDomain ?? (profile?.website ? profile.website.replace(/^https?:\/\//, "").split("/")[0] : ""),
+    programmes: Array.isArray(role.programmes) ? role.programmes : [],
+    sectors: Array.isArray(role.sectors) ? role.sectors : (profile?.industries ?? []),
+    geographies: Array.isArray(role.geographies) ? role.geographies : (profile?.country ? [profile.country] : []),
+    teamMembers: Array.isArray(role.teamMembers) ? role.teamMembers as OrgTeamMember[] : [],
+    plan: role.plan ?? "free",
   };
 }
 
@@ -608,10 +610,16 @@ function mergeAuthInvestorProfile(prev: InvestorProfile, profile: AuthProfile): 
   const base = emptyInvestorProfile(profile);
   return {
     ...prev,
+    investorType: prev.investorType || base.investorType,
     location: prev.location || base.location,
+    fundSize: prev.fundSize || base.fundSize,
+    yearsInvesting: prev.yearsInvesting || base.yearsInvesting,
     industries: prev.industries.length ? prev.industries : base.industries,
+    stage: prev.stage || base.stage,
     checkSize: prev.checkSize || base.checkSize,
+    portfolio: prev.portfolio.length ? prev.portfolio : base.portfolio,
     riskAppetite: prev.riskAppetite || base.riskAppetite,
+    dashboardMetrics: prev.dashboardMetrics.length ? prev.dashboardMetrics : base.dashboardMetrics,
   };
 }
 
@@ -623,10 +631,16 @@ function mergeAuthOrgProfile(prev: OrgProfile, profile: AuthProfile): OrgProfile
     orgType: prev.orgType || base.orgType,
     location: prev.location || base.location,
     website: prev.website || base.website,
+    registrationNumber: prev.registrationNumber || base.registrationNumber,
+    foundingYear: prev.foundingYear || base.foundingYear,
     verificationStatus: prev.verificationStatus !== "unverified" ? prev.verificationStatus : base.verificationStatus,
+    verificationDocs: prev.verificationDocs.length ? prev.verificationDocs : base.verificationDocs,
     businessEmailDomain: prev.businessEmailDomain || base.businessEmailDomain,
+    programmes: prev.programmes.length ? prev.programmes : base.programmes,
     sectors: prev.sectors.length ? prev.sectors : base.sectors,
     geographies: prev.geographies.length ? prev.geographies : base.geographies,
+    teamMembers: prev.teamMembers.length ? prev.teamMembers : base.teamMembers,
+    plan: prev.plan !== "free" ? prev.plan : base.plan,
   };
 }
 
