@@ -289,7 +289,7 @@ const App = () => {
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
         <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
 
-        <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
+        <Route element={<FounderLayout />}>
           <Route path="/founder/dashboard" element={<Dashboard />} />
           <Route path="/dashboard"        element={<Navigate to="/founder/dashboard" replace />} />
           <Route path="/team-workspace/:teamId" element={<TeamWorkspaceView />} />
