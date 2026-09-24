@@ -15,6 +15,8 @@ import { Havi } from "@/dashboard/_shared/havi/Havi";
 import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
+import { ContinuousIntelligencePanel } from "@/components/intelligence/ContinuousIntelligencePanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -85,11 +87,10 @@ export function FounderLayout() {
   }, []);
 
   useEffect(() => {
-    // TEMPORARILY DISABLED FOR UI UPGRADE
-    // const onboarded = profile?.isOnboarded ?? founderProfile.onboardingComplete;
-    // if (!onboarded && !location.pathname.startsWith("/founder/onboarding")) {
-    //   navigate("/founder/onboarding/step-1", { replace: true });
-    // }
+    const onboarded = profile?.isOnboarded ?? founderProfile.onboardingComplete;
+    if (!onboarded && !location.pathname.startsWith("/founder/onboarding")) {
+      navigate("/founder/onboarding/step-1", { replace: true });
+    }
   }, [profile?.isOnboarded, founderProfile.onboardingComplete, location.pathname, navigate]);
 
   const isActive = (path?: string) => path ? location.pathname === path : false;
@@ -539,8 +540,10 @@ export function FounderLayout() {
                   }`} />
                 </div>
                 
-                <div className="relative z-10">
+                <div className="relative z-10 p-4 lg:p-6 space-y-4">
                   <ProfileCompletionBanner role="founder" profilePath="/founder/profile" />
+                  <NextBestActionNote role="founder" />
+                  <ContinuousIntelligencePanel role="founder" className="mb-4" />
                   <div className="w-full min-h-full">
                     <Outlet />
                   </div>

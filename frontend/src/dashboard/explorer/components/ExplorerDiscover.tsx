@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Search, Filter, Sparkles, Building2, Users, FolderKanban, Award, ChevronRight, ExternalLink, ArrowUpRight } from "lucide-react";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
@@ -91,6 +93,7 @@ const MOCK_ENTITIES: NetworkEntity[] = [
 ];
 
 export function ExplorerDiscover() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedEntity, setSelectedEntity] = useState<NetworkEntity | null>(null);
@@ -281,7 +284,11 @@ export function ExplorerDiscover() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { alert(`Connection request sent to ${selectedEntity.name}!`); setSelectedEntity(null); }}
+                  onClick={() => {
+                    toast.success(`Connection request sent to ${selectedEntity.name}!`);
+                    setSelectedEntity(null);
+                    navigate("/feed/messages");
+                  }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
                   Connect in Messages

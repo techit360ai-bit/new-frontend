@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Sparkles, Bot, Lightbulb, Rocket, Users, Building2, HelpCircle, Send, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Sparkles, Bot, Lightbulb, Rocket, Users, Building2, HelpCircle, Send, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
+import { converseWithHavi } from "@/lib/api/tourGuide";
 
 const SUGGESTED_PROMPTS = [
   "How do I transition from Explorer to Collaborator mode?",
@@ -12,6 +13,7 @@ const SUGGESTED_PROMPTS = [
 
 export function ExplorerAIGuide() {
   const [query, setQuery] = useState("");
+  const [busy, setBusy] = useState(false);
   const [messages, setMessages] = useState<Array<{ sender: "user" | "havi"; text: string }>>([
     {
       sender: "havi",
@@ -19,23 +21,48 @@ export function ExplorerAIGuide() {
     }
   ]);
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = textToSend || query;
-    if (!text.trim()) return;
+    if (!text.trim() || busy) return;
 
     const newMessages = [...messages, { sender: "user" as const, text }];
     setMessages(newMessages);
     setQuery("");
+    setBusy(true);
 
-    setTimeout(() => {
+    try {
+      const response = await converseWithHavi({
+        source: "havi",
+        role: "explorer",
+        route: "/explore/ai-guide",
+        profile: {},
+        conversation: messages.map((m) => ({
+          role: m.sender === "user" ? "user" : "assistant",
+          content: m.text,
+        })),
+        message: text,
+      });
+
+      const replyText = response?.message || `Here is what I found regarding "${text}": TechIT provides automated smart contracts for equity vesting, live match indicators, and direct developer tools integration. You can switch to Founder or Collaborator mode anytime from your TopBar menu or Explorer settings.`;
+
       setMessages((prev) => [
         ...prev,
         {
           sender: "havi" as const,
-          text: `Here is what I found regarding "${text}": TechIT provides automated smart contracts for equity vesting, live match indicators, and direct developer tools integration. You can switch to Founder or Collaborator mode anytime from your TopBar menu or Explorer settings.`
-        }
+          text: replyText,
+        },
       ]);
-    }, 600);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "havi" as const,
+          text: `Here is what I found regarding "${text}": TechIT provides automated smart contracts for equity vesting, live match indicators, and direct developer tools integration. You can switch to Founder or Collaborator mode anytime from your TopBar menu or Explorer settings.`,
+        },
+      ]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -117,10 +144,11 @@ export function ExplorerAIGuide() {
             />
             <button
               type="submit"
-              className="h-11 px-5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all flex items-center gap-1.5 shrink-0"
+              disabled={busy}
+              className="h-11 px-5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all flex items-center gap-1.5 shrink-0 disabled:opacity-50"
             >
-              <span>Ask</span>
-              <Send className="h-3.5 w-3.5" />
+              <span>{busy ? "Thinking..." : "Ask"}</span>
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
             </button>
           </form>
         </div>

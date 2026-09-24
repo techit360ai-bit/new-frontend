@@ -16,6 +16,9 @@ import {
   Check,
 } from "lucide-react";
 
+import { createVerificationRequest, createEvidenceUpload, finalizeEvidenceUpload, submitEvidence } from "@/lib/api/authorization";
+import { activateRole } from "@/lib/api/users";
+
 const SLIDE_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
 
 const PERKS = [
@@ -29,24 +32,63 @@ export function OrgStep2() {
   const { orgProfile, updateOrgProfile } = useOrgProfile();
   const [docs, setDocs] = useState<string[]>(orgProfile.verificationDocs || []);
   const [emailDomain, setEmailDomain] = useState(orgProfile.businessEmailDomain || "");
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const addDoc = (name: string) =>
     setDocs((prev) => (prev.includes(name) ? prev : [...prev, name]));
   const removeDoc = (name: string) =>
     setDocs((prev) => prev.filter((d) => d !== name));
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    Array.from(files).forEach((f) => addDoc(f.name));
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      let activeRequestId = requestId;
+      if (!activeRequestId) {
+        const created = await createVerificationRequest({
+          targetRole: "organization",
+          metadata: { organizationName: orgProfile.orgName, website: orgProfile.website },
+        });
+        activeRequestId = created.id;
+      }
+      setRequestId(activeRequestId);
+      for (const file of Array.from(files)) {
+        const signed = await createEvidenceUpload(activeRequestId, { contentType: file.type, sizeBytes: file.size });
+        const uploaded = await fetch(signed.uploadUrl, { method: "PUT", headers: signed.requiredHeaders, body: file });
+        if (!uploaded.ok) throw new Error("Secure document upload failed.");
+        await finalizeEvidenceUpload(signed.object.id);
+        await submitEvidence(activeRequestId, { method: "official_document", metadata: { objectId: signed.object.id, fileName: file.name } });
+        addDoc(file.name);
+      }
+      setMessage("Evidence uploaded securely and queued for review.");
+      updateOrgProfile({ verificationDocs: [...docs, ...Array.from(files).map((file) => file.name)], verificationStatus: "pending", businessEmailDomain: emailDomain });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Verification upload failed.");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const handleNext = () => {
-    const status = docs.length > 0 && emailDomain.trim() ? "pending" : "unverified";
+  const handleNext = async () => {
+    setBusy(true);
+    setError("");
+    const status = docs.length > 0 ? "pending" : "unverified";
     updateOrgProfile({
       verificationDocs: docs,
       businessEmailDomain: emailDomain,
       verificationStatus: status,
     });
+    const activated = await activateRole("organisation", { verificationRequestId: requestId || null, businessEmailDomain: emailDomain, verificationStatus: status });
+    setBusy(false);
+    if (activated.error) {
+      setError(activated.error.message);
+      return;
+    }
     navigate("/org/onboarding/step-3");
   };
 
@@ -202,22 +244,27 @@ export function OrgStep2() {
                   />
                 </div>
               </motion.div>
+
+              {message && <p role="status" className="text-xs text-emerald-400 font-semibold">{message}</p>}
+              {error && <p role="alert" className="text-xs text-red-400 font-semibold">{error}</p>}
             </div>
 
             <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="show" className="mt-8 flex gap-3">
               <button
                 type="button"
                 onClick={handleBack}
-                className="h-12 px-5 flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-sm uppercase tracking-widest transition-all"
+                disabled={busy}
+                className="h-12 px-5 flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-sm uppercase tracking-widest transition-all disabled:opacity-50"
               >
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#20C997] to-[#128a64] text-slate-950 font-black text-sm uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(32,201,151,0.4)]"
+                disabled={busy}
+                className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#20C997] to-[#128a64] text-slate-950 font-black text-sm uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(32,201,151,0.4)] disabled:opacity-50"
               >
-                Continue <ArrowRight className="w-4 h-4" />
+                {busy ? "Processing..." : "Continue"} <ArrowRight className="w-4 h-4" />
               </button>
             </motion.div>
           </motion.div>

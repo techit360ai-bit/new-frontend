@@ -158,6 +158,7 @@ const FeedNotificationsPage = lazy(() => import("@/dashboard/feed/pages/Notifica
 const PostDetailPage = lazy(() => import("@/dashboard/feed/pages/PostDetailPage").then((m) => ({ default: m.PostDetailPage })));
 const MyLogPage = lazy(() => import("@/dashboard/feed/pages/MyLogPage").then((m) => ({ default: m.MyLogPage })));
 const UserProfilePage = lazy(() => import("@/dashboard/feed/pages/UserProfilePage").then((m) => ({ default: m.UserProfilePage })));
+const MessagesInboxPage = lazy(() => import("@/dashboard/feed/pages/MessagesInboxPage").then((m) => ({ default: m.MessagesInboxPage })));
 const DirectMessagePage = lazy(() => import("@/dashboard/feed/pages/DirectMessagePage").then((m) => ({ default: m.DirectMessagePage })));
 const SupportCenter = lazy(() => import("@/dashboard/support/SupportCenter"));
 const PublicMomentPage = lazy(() => import("@/dashboard/moments/PublicMomentPage"));
@@ -250,20 +251,20 @@ const App = () => {
         <Route path="/investor" element={<RequireRole allowed={["investor"]}><InvestorLayout /></RequireRole>}>
           <Route index element={<InvestorDashboard />} />
           <Route path="dashboard" element={<InvestorDashboard />} />
-          <Route path="deal-intelligence" element={<InvestorDealIntelligence />} />
-          <Route path="risk-analysis" element={<InvestorRiskAnalysis />} />
+          <Route path="deal-intelligence" element={<CapabilityGate capability="investor.intelligence.view" role="investor"><InvestorDealIntelligence /></CapabilityGate>} />
+          <Route path="risk-analysis" element={<CapabilityGate capability="investor.risk.monitor" role="investor"><InvestorRiskAnalysis /></CapabilityGate>} />
           <Route path="startup/:startupId" element={<InvestorStartupOverview />} />
-          <Route path="risk-radar/:startupId" element={<InvestorRiskRadar />} />
-          <Route path="allocation" element={<InvestorAllocationEngine />} />
+          <Route path="risk-radar/:startupId" element={<CapabilityGate capability="investor.risk.monitor" role="investor"><InvestorRiskRadar /></CapabilityGate>} />
+          <Route path="allocation" element={<CapabilityGate capability="investor.portfolio.analytics" role="investor"><InvestorAllocationEngine /></CapabilityGate>} />
           <Route path="watchlist" element={<InvestorWatchlist />} />
-          <Route path="trust" element={<InvestorTrustDashboard />} />
-          <Route path="trust/:startupId" element={<InvestorTrustDashboard />} />
-          <Route path="capital-pools" element={<InvestorCapitalPools />} />
-          <Route path="heatmap" element={<InvestorHeatmap />} />
-          <Route path="data-rooms" element={<InvestorDataRooms />} />
-          <Route path="data-room/:startupId" element={<InvestorDataRoom />} />
-          <Route path="deal-rooms" element={<InvestorDealRooms />} />
-          <Route path="deal-room/:startupId" element={<InvestorDealRoom />} />
+          <Route path="trust" element={<CapabilityGate capability="investor.intelligence.view" role="investor"><InvestorTrustDashboard /></CapabilityGate>} />
+          <Route path="trust/:startupId" element={<CapabilityGate capability="investor.intelligence.view" role="investor"><InvestorTrustDashboard /></CapabilityGate>} />
+          <Route path="capital-pools" element={<CapabilityGate capability="investor.portfolio.analytics" role="investor"><InvestorCapitalPools /></CapabilityGate>} />
+          <Route path="heatmap" element={<CapabilityGate capability="investor.intelligence.view" role="investor"><InvestorHeatmap /></CapabilityGate>} />
+          <Route path="data-rooms" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDataRooms /></CapabilityGate>} />
+          <Route path="data-room/:startupId" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDataRoom /></CapabilityGate>} />
+          <Route path="deal-rooms" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDealRooms /></CapabilityGate>} />
+          <Route path="deal-room/:startupId" element={<CapabilityGate capability="dealroom.access" role="investor"><InvestorDealRoom /></CapabilityGate>} />
           <Route path="reputation" element={<InvestorReputation />} />
           <Route path="profile" element={<InvestorProfile />} />
           <Route path="deals" element={<InvestorDealPipeline />} />
@@ -357,13 +358,13 @@ const App = () => {
           <Route index element={<OrgDashboard />} />
           <Route path="dashboard" element={<OrgDashboard />} />
           <Route path="intelligence" element={<OrgIntelligenceLayout />}>
-            <Route index element={<OrgCohortHealth />} />
-            <Route path="cohort-health" element={<OrgCohortHealth />} />
-            <Route path="impact" element={<OrgImpactReporting />} />
-            <Route path="demo-day" element={<OrgDemoDayPipeline />} />
-            <Route path="allocation" element={<OrgResourceAllocation />} />
-            <Route path="alumni" element={<OrgAlumniOutcomes />} />
-            <Route path="benchmarks" element={<OrgCohortBenchmarks />} />
+            <Route index element={<CapabilityGate capability="organization.analytics" role="organization"><OrgCohortHealth /></CapabilityGate>} />
+            <Route path="cohort-health" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgCohortHealth /></CapabilityGate>} />
+            <Route path="impact" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgImpactReporting /></CapabilityGate>} />
+            <Route path="demo-day" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgDemoDayPipeline /></CapabilityGate>} />
+            <Route path="allocation" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgResourceAllocation /></CapabilityGate>} />
+            <Route path="alumni" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgAlumniOutcomes /></CapabilityGate>} />
+            <Route path="benchmarks" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgCohortBenchmarks /></CapabilityGate>} />
           </Route>
           <Route path="teams" element={<OrgTeams />} />
           <Route path="projects" element={<OrgProjects />} />
@@ -371,10 +372,10 @@ const App = () => {
           <Route path="hackathons" element={<OrgHackathons />} />
           <Route path="hackathons/new" element={<OrgHackathonCreate />} />
           <Route path="hackathons/:id" element={<OrgHackathonDetail />} />
-          <Route path="talent" element={<OrgTalentPool />} />
+          <Route path="talent" element={<CapabilityGate capability="organization.recruit" role="organization"><OrgTalentPool /></CapabilityGate>} />
           <Route path="ai-ops" element={<OrgAIOps />} />
-          <Route path="analytics" element={<OrgAnalytics />} />
-          <Route path="marketplace" element={<OrgMarketplace />} />
+          <Route path="analytics" element={<CapabilityGate capability="organization.analytics" role="organization"><OrgAnalytics /></CapabilityGate>} />
+          <Route path="marketplace" element={<CapabilityGate capability="organization.opportunity.create" role="organization"><OrgMarketplace /></CapabilityGate>} />
           <Route path="market-ready" element={<OrgMarketReady />} />
           <Route path="hangout" element={<OrgHangout />} />
           <Route path="integrations" element={<OrgIntegrations />} />
@@ -396,6 +397,7 @@ const App = () => {
           <Route path="post/:postId" element={<PostDetailPage />} />
           <Route path="problem/:problemId" element={<PostDetailPage />} />
           <Route path="profile/:userId" element={<UserProfilePage />} />
+          <Route path="messages" element={<MessagesInboxPage />} />
           <Route path="messages/:userId" element={<DirectMessagePage />} />
         </Route>
 

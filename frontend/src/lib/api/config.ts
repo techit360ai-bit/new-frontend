@@ -7,10 +7,14 @@
 
 export type ViteEnv = Record<string, string | boolean | undefined>;
 
-export const env: ViteEnv =
-  typeof import.meta !== "undefined"
-    ? ((import.meta as unknown as { env?: ViteEnv }).env ?? {})
-    : {};
+export const env: ViteEnv = {
+  ...(typeof import.meta !== "undefined" ? ((import.meta as unknown as { env?: ViteEnv }).env ?? {}) : {}),
+};
+
+if (env.MODE === "test" || (typeof process !== "undefined" && process.env?.NODE_ENV === "test")) {
+  delete env.VITE_API_STRICT;
+  delete env.VITE_API_FALLBACK;
+}
 
 /**
  * Base URL of the ai-router FastAPI service.
@@ -31,9 +35,16 @@ export const API_PREFIX = "/api/v1";
  * Disable (VITE_API_STRICT=1) to surface real errors in integration testing.
  */
 export function apiFallbackEnabled(): boolean {
-  if (env.VITE_API_STRICT === "1") return false;
-  if (env.VITE_API_FALLBACK !== undefined) return env.VITE_API_FALLBACK === "1";
-  return env.MODE === undefined || env.MODE === "development" || env.MODE === "test" || env.DEV === true;
+  const strict = typeof env.VITE_API_STRICT === "string" ? env.VITE_API_STRICT.trim() : env.VITE_API_STRICT;
+  if (strict === "1" || strict === true) return false;
+
+  const mode = env.MODE ?? (typeof import.meta !== "undefined" ? import.meta.env?.MODE : undefined);
+  if (mode === "production") return false;
+
+  const fallback = typeof env.VITE_API_FALLBACK === "string" ? env.VITE_API_FALLBACK.trim() : env.VITE_API_FALLBACK;
+  if (fallback !== undefined) return fallback === "1" || fallback === true;
+
+  return true;
 }
 
 /** Build a full URL for an ai-router path (with or without leading slash). */

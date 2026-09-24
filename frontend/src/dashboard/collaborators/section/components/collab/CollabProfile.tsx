@@ -1,7 +1,7 @@
 // frontend/src/dashboard/collaborators/section/components/collab/CollabProfile.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Globe, Twitter, ExternalLink, ShieldCheck, Sparkles, CheckCircle2, User, Trophy, Layers } from "lucide-react";
+import { Github, Linkedin, Globe, Twitter, ExternalLink, ShieldCheck, Sparkles, CheckCircle2, User, Trophy, Layers, BadgeCheck } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import {
   EMPTY_EQUITY,
@@ -17,12 +17,15 @@ import {
   fetchCollaboratorSummary,
   type CollaboratorLiveSummary,
 } from "@/lib/api/collaboratorSummary";
+import { fetchTrustProfile, type TrustProfile } from "@/lib/api/trust";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
 
 export function CollabProfile() {
   const { collaboratorProfile: p } = useCollaboratorProfile();
   const [summary, setSummary] = useState<CollaboratorLiveSummary | null>(null);
   const [equity, setEquity] = useState<CollaboratorEquity>(EMPTY_EQUITY);
   const [earnings, setEarnings] = useState<CollaboratorEarnings>(EMPTY_EARNINGS);
+  const [trust, setTrust] = useState<TrustProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,18 +39,21 @@ export function CollabProfile() {
       fetchCollaboratorSummary(),
       fetchCollaboratorEquity(),
       fetchCollaboratorEarnings(),
+      fetchTrustProfile(),
     ])
-      .then(([summaryData, equityData, earningsData]) => {
+      .then(([summaryData, equityData, earningsData, trustData]) => {
         if (!alive) return;
         setSummary(summaryData);
         setEquity(equityData);
         setEarnings(earningsData);
+        setTrust(trustData);
       })
       .catch((err) => {
         if (!alive) return;
         setSummary(null);
         setEquity(EMPTY_EQUITY);
         setEarnings(EMPTY_EARNINGS);
+        setTrust(null);
         setError(err instanceof Error ? err.message : "Live collaborator profile data is unavailable.");
       })
       .finally(() => {
@@ -163,7 +169,22 @@ export function CollabProfile() {
             </span>
           ))}
         </div>
+        {Array.isArray(trust?.verifiedSkills) && trust.verifiedSkills.length > 0 && (
+          <div className="mt-5 border-t border-slate-200 dark:border-white/10 pt-4">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Externally Verified Skills</p>
+            <div className="flex flex-wrap gap-2">
+              {trust.verifiedSkills.map((item) => (
+                <span key={`${item.skill}-${item.source}`} className="inline-flex items-center gap-1.5 rounded-xl border border-[#20C997]/30 bg-[#20C997]/10 px-3 py-1 text-xs font-semibold text-[#20C997]">
+                  <BadgeCheck className="h-4 w-4" />
+                  {item.skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      <RoleAdditionPanel />
 
       {/* Compensation philosophy */}
       <div className="bg-[#20C997]/10 border border-[#20C997]/20 rounded-2xl p-6 shadow-sm">

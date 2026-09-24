@@ -119,6 +119,9 @@ test("apiGet throws ApiError with parsed response body on non-2xx responses", as
 
 test("withFallback returns fallback data and logs when fallback mode is enabled", async () => {
   const previousFallback = env.VITE_API_FALLBACK;
+  const previousStrict = env.VITE_API_STRICT;
+  delete env.VITE_API_STRICT;
+  if (typeof process !== "undefined" && process.env) delete process.env.VITE_API_STRICT;
   env.VITE_API_FALLBACK = "1";
   const warn = captureWarn();
 
@@ -137,6 +140,8 @@ test("withFallback returns fallback data and logs when fallback mode is enabled"
   } finally {
     if (previousFallback === undefined) delete env.VITE_API_FALLBACK;
     else env.VITE_API_FALLBACK = previousFallback;
+    if (previousStrict === undefined) delete env.VITE_API_STRICT;
+    else env.VITE_API_STRICT = previousStrict;
     warn.restore();
     resetAuth();
   }

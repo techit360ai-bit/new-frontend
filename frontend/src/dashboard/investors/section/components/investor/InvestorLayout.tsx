@@ -12,6 +12,8 @@ import { useInvestorProfile, useActiveRoles, type Role } from "@/contexts/UserCo
 import { useAuth } from "@/contexts/AuthContext";
 import { roleDashboardPath, roleOnboardingPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
+import { ContinuousIntelligencePanel } from "@/components/intelligence/ContinuousIntelligencePanel";
 import { RoleMobileMenu } from "@/components/RoleMobileMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -611,8 +613,10 @@ export function InvestorLayout() {
           />
 
           {/* Viewport content */}
-          <div className="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar space-y-4">
             <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
+            <NextBestActionNote role="investor" />
+            <ContinuousIntelligencePanel role="investor" className="mb-4" />
             <Outlet />
           </div>
         </main>

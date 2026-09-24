@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Search, Building2, Rocket, Users, ShieldCheck, ExternalLink, ArrowRight, Zap, Award } from "lucide-react";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
@@ -79,6 +81,7 @@ const MOCK_STARTUPS: StartupItem[] = [
 ];
 
 export function ExplorerStartups() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStage, setSelectedStage] = useState<string>("all");
   const [activeStartup, setActiveStartup] = useState<StartupItem | null>(null);
@@ -250,7 +253,11 @@ export function ExplorerStartups() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { alert(`Navigating to open positions for ${activeStartup.name}...`); setActiveStartup(null); }}
+                  onClick={() => {
+                    toast.info(`Viewing open positions for ${activeStartup.name}...`);
+                    setActiveStartup(null);
+                    navigate("/explore/opportunities");
+                  }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
                   Explore Open Roles

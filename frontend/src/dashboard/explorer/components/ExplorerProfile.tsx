@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { UserCircle, Compass, Sparkles, Building2, Bookmark, Clock, ShieldCheck, Edit, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
@@ -36,14 +37,13 @@ export function ExplorerProfile() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => alert("Redirecting to profile edit settings...")}
+            <Link
+              to="/explore/settings"
               className="inline-flex items-center gap-2 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-white/5 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
             >
               <Edit className="h-3.5 w-3.5" />
               <span>Edit Profile</span>
-            </button>
+            </Link>
           </div>
 
           <p className="mt-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300 max-w-2xl">

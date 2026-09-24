@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Sparkles, DollarSign, PieChart, Clock, Award, Search, ArrowRight, Zap, CheckCircle2 } from "lucide-react";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
@@ -59,6 +61,7 @@ const MOCK_OPPORTUNITIES: OpportunityItem[] = [
 ];
 
 export function ExplorerOpportunities() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [activeOpp, setActiveOpp] = useState<OpportunityItem | null>(null);
@@ -213,7 +216,11 @@ export function ExplorerOpportunities() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { alert(`Application submitted for ${activeOpp.title}! The startup team will review your profile.`); setActiveOpp(null); }}
+                  onClick={() => {
+                    toast.success(`Application submitted for ${activeOpp.title}! The startup team will review your profile.`);
+                    setActiveOpp(null);
+                    navigate("/opportunity-hub");
+                  }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="h-4 w-4" />

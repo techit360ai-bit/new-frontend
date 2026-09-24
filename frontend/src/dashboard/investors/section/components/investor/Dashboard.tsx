@@ -6,6 +6,7 @@ import { useInvestorProfile } from '@/contexts/UserContext';
 import { fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
 import { WelcomeBack } from '@/components/WelcomeBack';
 import { InvestorIntelligencePanel } from './InvestorIntelligencePanel';
+import { fetchInvestorThesisRecommendations } from '@/lib/api/recommendationIntelligence';
 
 export function Dashboard() {
   const { investorProfile } = useInvestorProfile();
@@ -15,6 +16,7 @@ export function Dashboard() {
   const [startups, setStartups] = useState<InvestorStartup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [thesisRecommendations, setThesisRecommendations] = useState<Array<{ startup?: { id: string; name: string; sector?: string; stage?: string; execution?: number }; score: number; reasons: string[] }>>([]);
 
   useEffect(() => {
     let alive = true;
@@ -31,6 +33,12 @@ export function Dashboard() {
         if (alive) setIsLoading(false);
       });
     return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    fetchInvestorThesisRecommendations({ limit: 6 })
+      .then((result) => setThesisRecommendations((result.recommendations || []) as typeof thesisRecommendations))
+      .catch(() => setThesisRecommendations([]));
   }, []);
 
   const metrics = useMemo(() => ({
@@ -71,6 +79,25 @@ export function Dashboard() {
       </div>
 
       <InvestorIntelligencePanel />
+
+      {thesisRecommendations.length > 0 && (
+        <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 shadow-sm">
+          <h2 className="font-bold text-slate-900 dark:text-white text-base">Thesis-Matched Startups</h2>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Ranked from sector, geography, stage, ticket, risk, and historical activity.</p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {thesisRecommendations.map((row) => (
+              <div key={String(row.startup?.id)} className="rounded-xl border border-slate-200 dark:border-white/10 p-3.5 bg-slate-50/50 dark:bg-white/[0.02]">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-slate-900 dark:text-white">{row.startup?.name || 'Startup'}</span>
+                  <span className="text-xs font-black text-[#20C997] bg-[#20C997]/10 px-2 py-0.5 rounded-full border border-[#20C997]/20">{Math.round(row.score)}%</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{row.startup?.sector || 'Sector unavailable'} &middot; {row.startup?.stage || 'Stage unavailable'}</p>
+                <p className="mt-2 text-xs text-slate-600 dark:text-slate-300 font-medium">{row.reasons.join(' &middot; ')}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Onboarding banner — appears when profile is incomplete */}
       {onboardingIncomplete && !bannerDismissed && (

@@ -110,6 +110,9 @@ test("msgPost, msgPatch, and msgDelete preserve auth headers after spreading ini
 
 test("messaging withFallback returns fallback data on failures", async () => {
   const previousFallback = env.VITE_API_FALLBACK;
+  const previousStrict = env.VITE_API_STRICT;
+  delete env.VITE_API_STRICT;
+  if (typeof process !== "undefined" && process.env) delete process.env.VITE_API_STRICT;
   env.VITE_API_FALLBACK = "1";
   const warn = captureWarn();
 
@@ -128,6 +131,8 @@ test("messaging withFallback returns fallback data on failures", async () => {
   } finally {
     if (previousFallback === undefined) delete env.VITE_API_FALLBACK;
     else env.VITE_API_FALLBACK = previousFallback;
+    if (previousStrict === undefined) delete env.VITE_API_STRICT;
+    else env.VITE_API_STRICT = previousStrict;
     warn.restore();
   }
 });

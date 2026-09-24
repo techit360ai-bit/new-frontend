@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { FolderKanban, GitBranch, GitCommit, Users, Zap, Search, ArrowUpRight, Code2 } from "lucide-react";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
@@ -67,6 +69,7 @@ const MOCK_PROJECTS: BuildProject[] = [
 ];
 
 export function ExplorerProjects() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTech, setSelectedTech] = useState<string>("all");
   const [activeProject, setActiveProject] = useState<BuildProject | null>(null);
@@ -243,7 +246,11 @@ export function ExplorerProjects() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { alert(`Redirecting to IDE workspace for ${activeProject.name}...`); setActiveProject(null); }}
+                  onClick={() => {
+                    toast.info(`Opening IDE workspace for ${activeProject.name}...`);
+                    setActiveProject(null);
+                    navigate("/workspaces");
+                  }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
                   Open in Workspace IDE
