@@ -1,52 +1,31 @@
 # new-frontend — Security Remediation Plan
 
 **Date:** 2026-09-26
-**Status:** plan only; no code changed yet
-**Master report:** `BACKEND/docs/PLATFORM_SECURITY_AUDIT_2026-09-26.md` (full findings, severity, tests)
+**Status:** plan only; no code changed
+**Master report:** `BACKEND/docs/PLATFORM_SECURITY_AUDIT_2026-09-26.md`
+**Full plan:** `BACKEND/docs/PLATFORM_SECURITY_IMPLEMENTATION_PLAN_2026-09-26.md`
 
-This file scopes the frontend workstream of the platform-wide DevTools exposure and authorization
-audit. It lists only what this repository must change. No new modules, layers, or folders are
-introduced — every change lands in an existing file.
+Scoped frontend workstreams from the platform-wide DevTools exposure and authorization audit. Only
+existing files change — no new modules, layers, or folders.
 
-## Owned findings
+## Owned workstreams
 
-| ID | Finding | Severity |
-|---|---|---|
-| C-1 | Access token persisted in `sessionStorage` and delivered in response bodies | Critical |
-| M-2 | Full user object persisted in `localStorage` as `techit_user` | Medium |
-| M-6 | Production mock fallback can mask real authorization state | Medium |
-| L-4 | Re-verify source maps disabled and `.env` untracked at release | Low |
-| L-5 | Confirm no module reads `sessionStorage` for tokens after C-1 | Low |
+| WS | Finding | Severity | Files |
+|---|---|---|---|
+| WS-01 | C-1 — access token in `sessionStorage` and in response bodies | Critical | `lib/authStorage.ts`, `lib/api/client.ts`, `contexts/AuthContext.tsx` |
+| WS-10 | ETag/response cache in the API client must not cross authorization boundaries | Medium | `lib/api/client.ts` |
+| WS-12 | Bundle search for secrets; verify source maps stay disabled; `.env` untracked | Medium | build config, `scripts/` |
+| WS-13 | CSP on the static host, compatible with API, ai-router, messaging (WSS), analytics | Medium | `render.yaml`, Vite config |
+| WS-19 | Tests: token never in web storage; premium data not rendered from a free entitlement | Medium | `src/__tests__` |
+| WS-06/07 | Repo governance + dependency gate (see master plan) | High | GitHub settings |
 
-## Changes
+## WS-01 detail
+- Keep the in-memory token for the current tab; rely on the HttpOnly cookie for browser transport.
+- Do not read or write a JWT in `sessionStorage`/`localStorage` in production.
+- Preserve the existing mobile/non-browser explicit-token path and the CSRF double-submit header.
+- Do not regress onboarding, which was the original reason the token was mirrored.
 
-### WS-1 — Token handling (Critical)
-- `src/lib/authStorage.ts` — stop writing the access token to `sessionStorage`; keep in-memory only.
-- `src/lib/api/client.ts` — `getAuthToken()` must not fall back to web storage in production; rely on
-  the HttpOnly cookie for browser transport and the in-memory copy for the current tab.
-- `src/contexts/AuthContext.tsx` — stop consuming `token` from signin/session response bodies; keep
-  the cookie-based flow and the existing CSRF double-submit header. Preserve the mobile/non-browser
-  path that legitimately needs an explicit token.
-- Verify no regression in onboarding, where cookie-only mutations were historically the reason the
-  token was mirrored.
-
-### WS-6 — Persisted state minimization (Medium)
-- `src/contexts/AuthContext.tsx` — persist only the minimum UI state, not the full user/profile.
-- `src/contexts/MessagingProvider.tsx`, `src/dashboard/demos/DemoRoom.tsx` — read current user from
-  `AuthContext` instead of parsing `localStorage`.
-- `scripts/validate-env.mjs` — fail the production build when `VITE_API_STRICT` is not `1`.
-
-### WS-8 — Rate-limit / abuse UX (Medium)
-- No new UI. Ensure 429 responses surface as retryable states using existing error handling so the
-  backend limits added in BACKEND WS-8 are not hidden by fallbacks.
-
-## Tests to add (existing runner: `vitest`)
-- After signin, `sessionStorage`/`localStorage` contain no JWT.
-- Signin/session responses are not parsed for a `token` field.
-- `techit_user` absent after signout and on fresh load.
-- Production build config rejects `VITE_API_FALLBACK` without `VITE_API_STRICT=1`.
-
-## Acceptance
+## Verification
 - `npm test`, `npm run build`, `npm run env:check`, `npm run lint` pass.
-- DevTools walkthrough for founder/collaborator/investor/org shows no token in Storage and no
-  private data in Network responses.
+- DevTools walkthrough per role: no JWT in Storage, no private data in Network.
+- Confirm the ETag cache never serves one user's authorized response to another.
