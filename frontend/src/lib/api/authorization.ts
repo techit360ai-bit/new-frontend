@@ -1,8 +1,15 @@
+import { getAuthToken } from './client'
+
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-const token = () => typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('techit_access_token') : null
+// Read the tab-scoped in-memory token. The previous sessionStorage lookup
+// returned null after WS-01 stopped writing `techit_access_token`, which left
+// every capability/verification/MFA call unauthenticated.
+const token = () => getAuthToken()
+// Cookie-authenticated requests need the double-submit token (BACKEND csrf.js).
+const csrf = () => { try { const part = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf=')); return part ? decodeURIComponent(part.slice('techit_csrf='.length)) : null } catch { return null } }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API}/authorization${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...(token() ? { Authorization: `Bearer ${token()}` } : {}), ...(options.headers || {}) } })
+  const response = await fetch(`${API}/authorization${path}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json', ...(token() ? { Authorization: `Bearer ${token()}` } : {}), ...(csrf() ? { 'X-CSRF-Token': csrf() as string } : {}), ...(options.headers || {}) } })
   const data = await response.json(); if (!response.ok) throw Object.assign(new Error(data.error || 'Authorization request failed'), { data }); return data
 }
 export type CapabilityDecision = { allowed: boolean; code: string; capability: string; assurance?: string; availableCredits?: number; funding?: string; metering?: string; policy?: { assurance?: string; mfaRequired?: boolean } }

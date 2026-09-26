@@ -5,6 +5,8 @@
  * VITE_TECHIT_API; defaults to the local backend's /api/mcp on :3000.
  */
 
+import { getAuthToken } from "./api/client";
+
 type ViteEnv = Record<string, string | undefined>;
 
 const env: ViteEnv =
@@ -14,13 +16,28 @@ const env: ViteEnv =
 
 const BASE = env.VITE_TECHIT_API ?? "http://localhost:3000/api/mcp";
 
+// The session token is held in memory for the tab (see lib/authStorage.ts).
+// Reading `techit_access_token` from sessionStorage here would always return
+// null once WS-01 removed the writer, sending every MCP/plugins call
+// unauthenticated.
 let tokenGetter: () => string | null = () => {
   try {
-    return (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem("techit_access_token") : null) || (import.meta.env.MODE === 'test' ? localStorage.getItem("techit_token") : null);
+    return getAuthToken();
   } catch {
     return null;
   }
 };
+
+// Double-submit token, needed when the session cookie authenticates the request
+// instead of the bearer header (see BACKEND src/middlewares/csrf.js).
+function csrfToken(): string | null {
+  try {
+    const part = document.cookie.split(";").map((v) => v.trim()).find((v) => v.startsWith("techit_csrf="));
+    return part ? decodeURIComponent(part.slice("techit_csrf=".length)) : null;
+  } catch {
+    return null;
+  }
+}
 
 export function setTechitApiTokenGetter(getter: () => string | null) {
   tokenGetter = getter;
@@ -103,6 +120,8 @@ function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   const token = tokenGetter();
   if (token) h.Authorization = `Bearer ${token}`;
+  const csrf = csrfToken();
+  if (csrf) h["X-CSRF-Token"] = csrf;
   return { ...h, ...(extra as Record<string, string>) };
 }
 
@@ -117,6 +136,7 @@ async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method: "GET",
     headers: headers(),
+    credentials: "include",
   });
   return parseJson<T>(path, res);
 }
@@ -126,6 +146,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     method: "POST",
     headers: headers(),
     body: JSON.stringify(body),
+    credentials: "include",
   });
   return parseJson<T>(path, res);
 }
