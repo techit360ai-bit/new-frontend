@@ -23,7 +23,21 @@ function headers(extra?: HeadersInit): HeadersInit {
   try { if (typeof localStorage !== 'undefined' && localStorage.getItem('techit-data-saver') === '1') h['X-TechIT-Data-Saver'] = '1'; } catch { /* storage unavailable */ }
   const t = messagingToken();
   if (t) h.Authorization = `Bearer ${t}`;
+  // The browser session is an ambient HttpOnly cookie, so a state-changing
+  // request must also carry the double-submit token (mirrors lib/api/client.ts
+  // and the Go service's csrfOK check). Harmless when a bearer token is used.
+  const csrf = csrfToken();
+  if (csrf) h['X-CSRF-Token'] = csrf;
   return { ...h, ...(extra as Record<string, string>) };
+}
+
+function csrfToken(): string | null {
+  try {
+    const part = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf='));
+    return part ? decodeURIComponent(part.slice('techit_csrf='.length)) : null;
+  } catch {
+    return null;
+  }
 }
 
 async function parse<T>(res: Response): Promise<T> {
