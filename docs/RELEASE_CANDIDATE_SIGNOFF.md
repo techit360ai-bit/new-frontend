@@ -52,6 +52,24 @@ Root cause of the feed/DM outage: the messaging service never emitted CORS heade
 the browser blocked every cross-origin feed/DM call. See
 `BACKEND/docs/PLATFORM_SECURITY_AUDIT_2026-09-26.md` §15.
 
+### Branch CI runs (not the `main` gates above)
+
+| Repo | Head | Workflow | Result | Run |
+|---|---|---|---|---|
+| BACKEND | `64a7a86` (WS-16) | TECHIT Backend Services — Go Messaging Unit + Integration, Node Backend, MCP gates | success | https://github.com/techit360ai-bit/BACKEND/actions/runs/36491997121 |
+| BACKEND | `239485e` (WS-21) | TECHIT Backend Services | success | https://github.com/techit360ai-bit/BACKEND/actions/runs/36492312935 |
+| new-frontend | `0804fa5` (WS-10/WS-21) | Frontend Quality Gates; Build & Deploy to S3; Dependency Assurance; frontend-security-policy | success | https://github.com/techit360ai-bit/new-frontend/actions/runs/36492322374 |
+| ai-router | `3ee57e7` (WS-10/WS-15) | AI Router Quality Gates | **failure — pre-existing** | https://github.com/techit360ai-bit/ai-router/actions/runs/36483430741 |
+
+**Known red, unrelated to this branch's code:**
+
+- ai-router `deployment-env-contract` fails with "model registry is stale for production
+  routing" (`MODEL_REGISTRY_MAX_AGE_DAYS`, default 30). This fails on commits before the
+  security work too; it needs the model registry review dates refreshed.
+- new-frontend CodeQL fails with "Code scanning is not enabled for this repository" —
+  governance gap G-4, not a code defect.
+- new-frontend "Live WebContainer Runtime" fails even on a docs-only commit — CI flake.
+
 ## Hard Stop Conditions
 
 - Any required gate is pending, skipped without written exception, or failed.
