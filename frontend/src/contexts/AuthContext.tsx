@@ -4,6 +4,7 @@ import {
 } from 'react'
 import { getAuthToken, refreshAccessToken } from '../lib/api/client'
 import { persistAccessToken } from '../lib/authStorage'
+import { setCacheScope } from '../lib/resilience/cache'
 
 // ── Types ─────────────────────────────────────────────────────
 export type Role = 'explorer' | 'founder' | 'collaborator' | 'investor' | 'organisation'
@@ -230,10 +231,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!res.ok) throw new Error('Session invalid')
         const { user: freshUser } = await res.json()
         setUser(freshUser)
+        setCacheScope(freshUser.id)
         await fetchProfile(freshUser.id)
         await fetchContext()
       } catch {
         saveToken(null); saveUser(null)
+        setCacheScope(null)
         setUser(null); setProfile(null); setRoleAssignments([]); setActiveContext(null)
         setLoading(false)
       }
@@ -244,7 +247,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (e.key === TOKEN_KEY || e.key === USER_KEY || e.key === 'techit_auth_event') {
         const { token, user: u } = getStored()
         setUser(u)
-        if (e.key === 'techit_auth_event' && !token) { setProfile(null); setRoleAssignments([]); setActiveContext(null); setLoading(false); return }
+        if (e.key === 'techit_auth_event' && !token) { setCacheScope(null); setProfile(null); setRoleAssignments([]); setActiveContext(null); setLoading(false); return }
         if (token && u) fetchProfile(u.id)
         else { setProfile(null); setLoading(false) }
       }
@@ -286,6 +289,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { token, user: u, profile: p } = json
       saveToken(token ?? null)
       saveUser(u)
+      setCacheScope(u?.id ?? null)
       setUser(u)
       setProfile(p)
       await fetchContext()
@@ -299,6 +303,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     try { await apiFetch('/auth/signout', { method: 'POST' }) } catch {}
     saveToken(null); saveUser(null); localStorage.setItem('techit_auth_event', JSON.stringify({ type: 'logout', at: Date.now() }))
+    setCacheScope(null)
     setUser(null); setProfile(null); setRoleAssignments([]); setActiveContext(null)
   }
 
