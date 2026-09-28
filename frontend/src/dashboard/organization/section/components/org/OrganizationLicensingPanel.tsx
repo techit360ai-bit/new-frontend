@@ -45,7 +45,8 @@ export function OrganizationLicensingPanel() {
   if (!organizationId) return null;
   const commercial = overview?.commercial;
   const expiry = commercial?.expiresAt ? new Date(commercial.expiresAt).toLocaleDateString() : "No expiry";
-  const remainingCredits = commercial?.budgets.reduce((sum, budget) => sum + budget.remaining, 0) || 0;
+  const remainingCredits = Array.isArray(commercial?.budgets) ? commercial.budgets.reduce((sum: number, budget: { remaining?: number }) => sum + (budget.remaining || 0), 0) : 0;
+
 
   return (
     <section className="mb-6 rounded-2xl border border-teal-500/20 bg-slate-900/60 backdrop-blur-xl p-6 shadow-xl" aria-label="Organization licensing">

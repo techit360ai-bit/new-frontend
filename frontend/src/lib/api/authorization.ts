@@ -9,6 +9,8 @@ export type CapabilityDecision = { allowed: boolean; code: string; capability: s
 export const checkCapability = (capability: string, role?: string) => request<CapabilityDecision>('/capabilities/check', { method: 'POST', body: JSON.stringify({ capability, context: { role } }), headers: typeof sessionStorage !== 'undefined' && sessionStorage.getItem('techit_mfa_assertion') ? { 'x-mfa-assertion': sessionStorage.getItem('techit_mfa_assertion')! } : {} })
 export const getVerification = (role: string) => request<{ profile: Record<string, unknown> | null; evidence: Array<Record<string, unknown>>; requests: Array<Record<string, unknown>> }>(`/verification/status?role=${encodeURIComponent(role)}`)
 export const requestVerification = (role: string, requestedCapability?: string) => request<{ request: { id: string } }>('/verification/request', { method: 'POST', body: JSON.stringify({ role, requestedCapability }) })
+export const createVerificationRequest = requestVerification;
+
 export const submitEvidence = (requestId: string, input: Record<string, unknown>) => request(`/verification/requests/${requestId}/evidence`, { method: 'POST', body: JSON.stringify(input) })
 export const createEvidenceUpload = (requestId: string, input: { contentType: string; sizeBytes: number }) => request<{ object: { id: string }; uploadUrl: string; requiredHeaders: Record<string, string> }>(`/verification/requests/${requestId}/evidence/upload-url`, { method: 'POST', body: JSON.stringify(input) })
 export const finalizeEvidenceUpload = (objectId: string) => request(`/verification/evidence/${objectId}/finalize`, { method: 'POST' })

@@ -15,7 +15,8 @@ export function AttachExistingProjectCard({ registration }: { registration: Hack
   const [attached, setAttached] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { void Promise.all([fetchFounderProjects(), fetchWorkspaces()]).then(([nextProjects, nextWorkspaces]) => { setProjects(nextProjects); setWorkspaces(nextWorkspaces); }).catch(() => undefined); void fetchAttachedProject(registration.hackathonId, registration.teamId).then((entry) => { if (entry) { setAttached(true); setProjectId(entry.projectId); setWorkspaceId(entry.workspaceId); } }); }, [registration.hackathonId, registration.teamId]);
+  useEffect(() => { void Promise.all([fetchFounderProjects(), fetchWorkspaces()]).then(([nextProjects, nextWorkspaces]) => { setProjects(nextProjects); setWorkspaces(nextWorkspaces); }).catch(() => undefined); void fetchAttachedProject(registration.hackathonId, registration.teamId).then((entry: { projectId: string; workspaceId?: string } | null) => { if (entry) { setAttached(true); setProjectId(entry.projectId); setWorkspaceId(entry.workspaceId || ""); } }); }, [registration.hackathonId, registration.teamId]);
+
   const eligible = useMemo(() => projects.filter((project) => project.hasWorkspace), [projects]);
   const workspaceOptions = useMemo(() => workspaces.filter((workspace) => workspace.projectId === projectId), [workspaces, projectId]);
 

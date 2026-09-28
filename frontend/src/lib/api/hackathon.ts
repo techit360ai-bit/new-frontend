@@ -468,3 +468,35 @@ export function reportTeamToOrganizers(
     report,
   );
 }
+
+export interface AttachedProjectEntry {
+  projectId: string;
+  projectName?: string;
+  workspaceId?: string;
+  repoUrl?: string;
+  attachedAt?: string;
+}
+
+export async function attachExistingProject(
+  id: string,
+  teamId: string,
+  input: string | { projectId: string; workspaceId?: string; consent?: boolean; judgeAccess?: Record<string, unknown> },
+): Promise<{ ok: boolean; project?: AttachedProjectEntry; error?: string }> {
+  const payload = typeof input === "string" ? { projectId: input } : input;
+  return domainPost<{ ok: boolean; project?: AttachedProjectEntry; error?: string }>(
+    `/hackathons/${encodeURIComponent(id)}/teams/${encodeURIComponent(teamId)}/attach-project`,
+    payload,
+  );
+}
+
+
+export async function fetchAttachedProject(
+  id: string,
+  teamId: string,
+): Promise<AttachedProjectEntry | null> {
+  const data = await domainGet<{ project?: AttachedProjectEntry }>(
+    `/hackathons/${encodeURIComponent(id)}/teams/${encodeURIComponent(teamId)}/attached-project`,
+  );
+  return data.project || null;
+}
+

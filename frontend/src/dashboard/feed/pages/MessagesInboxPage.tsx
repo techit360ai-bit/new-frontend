@@ -10,11 +10,11 @@ import { mapConvSummary } from '@/lib/messaging/map';
 import type { MessageIdentity, UIConversation } from '@/lib/messaging/types';
 import { formatRelative } from '@/lib/formatRelative';
 
-export function conversationPath(conversation: Pick<UIConversation, 'participantId'>): string | null {
+export function conversationPath(conversation: { participantId?: string }): string | null {
   return conversation.participantId ? `/feed/messages/${encodeURIComponent(conversation.participantId)}` : null;
 }
 export function conversationState(
-  conversation: Pick<UIConversation, 'requestStatus' | 'initiatedBy' | 'unread'>,
+  conversation: { requestStatus?: string; initiatedBy?: string; unread: boolean },
   currentUserId?: string,
 ): string {
   if (conversation.requestStatus === 'declined') return 'Request declined';
@@ -55,9 +55,10 @@ export function MessagesInboxPage() {
   );
 
   const openRecipient = (recipient: MessageIdentity | null) => {
-    if (!recipient?.id || !recipient.canMessage) return;
+    if (!recipient?.id) return;
     navigate(`/feed/messages/${encodeURIComponent(recipient.id)}`);
   };
+
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 pb-20 sm:px-6 lg:pb-8">

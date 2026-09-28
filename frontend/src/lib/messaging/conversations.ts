@@ -1,5 +1,5 @@
 import { msgGet, msgPost, withFallback } from "./client";
-import type { WireConvSummary, WireMessage } from "./types";
+import type { MessageIdentity, WireConvSummary, WireMessage } from "./types";
 
 export function fetchConversations(): Promise<WireConvSummary[]> {
   return withFallback(
@@ -28,3 +28,12 @@ export function restSendDM(convId: string, clientMsgId: string, body: string): P
 export function markConvRead(convId: string, msgId: string): Promise<unknown> {
   return withFallback(() => msgPost(`/conversations/${convId}/read`, { msgId }), () => null, "mark read");
 }
+
+export function searchMessageRecipients(query: string): Promise<MessageIdentity[]> {
+  return withFallback(
+    async () => (await msgGet<{ recipients: MessageIdentity[] }>(`/recipients/search?q=${encodeURIComponent(query)}`)).recipients,
+    [],
+    "search recipients",
+  );
+}
+

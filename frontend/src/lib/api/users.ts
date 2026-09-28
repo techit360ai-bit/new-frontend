@@ -138,3 +138,12 @@ export async function uploadProfileAvatar(file: File): Promise<{ avatarUrl: stri
 export async function removeProfileAvatar(): Promise<void> {
   await request<void>("/me/avatar", { method: "DELETE" })
 }
+
+export async function activateRole(role: string, payload?: Record<string, unknown>): Promise<{ ok: boolean; error?: { message: string } }> {
+  return request<{ ok: boolean; error?: { message: string } }>("/me/role", {
+    method: "POST",
+    body: JSON.stringify({ role, ...payload }),
+  });
+}
+
+

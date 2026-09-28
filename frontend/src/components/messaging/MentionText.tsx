@@ -5,7 +5,8 @@ import type { Mention } from '@/lib/messaging/types';
 function escapePattern(value: string): string { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 export function MentionText({ body, mentions = [], className = '' }: { body: string; mentions?: Mention[]; className?: string }) {
-  const byUsername = new Map(mentions.map(item => [item.username.toLowerCase(), item]));
+  const byUsername = new Map(mentions.filter((item): item is Mention & { username: string } => Boolean(item.username)).map(item => [item.username.toLowerCase(), item]));
+
   if (byUsername.size === 0) return <span className={className}>{body}</span>;
   const expression = new RegExp(`(@(?:${[...byUsername.keys()].map(escapePattern).join('|')}))(?![A-Za-z0-9_.-])`, 'gi');
   const parts = body.split(expression);

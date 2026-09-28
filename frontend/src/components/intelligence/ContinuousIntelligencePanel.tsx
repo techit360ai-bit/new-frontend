@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Activity, AlertTriangle, RefreshCw, ShieldCheck, X } from 'lucide-react'
 import { fetchDailyIntelligence, fetchMatchingAccess, type DailyIntelligence, type MatchingAccess } from '@/lib/api/recommendationIntelligence'
 
-export function ContinuousIntelligencePanel({ role, organizationId }: { role: 'founder' | 'collaborator' | 'investor' | 'organisation'; organizationId?: string }) {
+export function ContinuousIntelligencePanel({ role, organizationId, className }: { role: 'founder' | 'collaborator' | 'investor' | 'organisation'; organizationId?: string; className?: string }) {
   const [data, setData] = useState<DailyIntelligence['intelligence'] | null>(null)
   const [access, setAccess] = useState<MatchingAccess | null>(null)
   const [loading, setLoading] = useState(true)
@@ -20,12 +20,13 @@ export function ContinuousIntelligencePanel({ role, organizationId }: { role: 'f
     const timer = window.setInterval(load, 300_000)
     return () => { active = false; window.clearInterval(timer) }
   }, [role, organizationId])
-  if (loading && !data) return <div className="mx-4 mt-3 rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md px-5 py-4 text-xs text-slate-400 lg:mx-6">Loading continuous intelligence...</div>
+  if (loading && !data) return <div className={className || "mx-4 mt-3 rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md px-5 py-4 text-xs text-slate-400 lg:mx-6"}>Loading continuous intelligence...</div>
   if (!data) return null
   const risks = Array.isArray(data.risks) ? data.risks : []
   const recommendations = Array.isArray(data.recommendations) ? data.recommendations : []
   const dismissNote = () => { setNoteDismissed(true); try { sessionStorage.setItem(`techit:matching-access-note:${role}`, '1') } catch { /* storage unavailable */ } }
-  return <section className="mx-4 mt-3 rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md px-5 py-4 shadow-xl lg:mx-6" aria-label="Continuous intelligence">
+  return <section className={className || "mx-4 mt-3 rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md px-5 py-4 shadow-xl lg:mx-6"} aria-label="Continuous intelligence">
+
     <div className="flex items-center gap-2.5"><div className="rounded-lg bg-emerald-500/10 p-1.5 text-emerald-400 ring-1 ring-emerald-500/20"><Activity className="h-4 w-4" /></div><p className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-bricolage">Daily intelligence · {data.date}</p><RefreshCw className="ml-auto h-3.5 w-3.5 text-slate-500" /></div>
     <div className="mt-3 grid gap-3 sm:grid-cols-2">
       <div className="flex items-center gap-2.5 rounded-xl border border-slate-800/60 bg-slate-950/40 px-3.5 py-2.5 text-sm text-slate-200"><AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" /><span>{risks.length ? `${risks.length} risk signal${risks.length === 1 ? '' : 's'} need attention.` : 'No active risk signals detected.'}</span></div>

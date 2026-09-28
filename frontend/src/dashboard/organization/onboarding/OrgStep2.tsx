@@ -50,14 +50,12 @@ export function OrgStep2() {
     try {
       let activeRequestId = requestId;
       if (!activeRequestId) {
-        const created = await createVerificationRequest({
-          targetRole: "organization",
-          metadata: { organizationName: orgProfile.orgName, website: orgProfile.website },
-        });
-        activeRequestId = created.id;
+        const created = await createVerificationRequest("organization");
+        activeRequestId = created.request.id;
       }
       setRequestId(activeRequestId);
       for (const file of Array.from(files)) {
+        if (!activeRequestId) continue;
         const signed = await createEvidenceUpload(activeRequestId, { contentType: file.type, sizeBytes: file.size });
         const uploaded = await fetch(signed.uploadUrl, { method: "PUT", headers: signed.requiredHeaders, body: file });
         if (!uploaded.ok) throw new Error("Secure document upload failed.");
@@ -65,6 +63,7 @@ export function OrgStep2() {
         await submitEvidence(activeRequestId, { method: "official_document", metadata: { objectId: signed.object.id, fileName: file.name } });
         addDoc(file.name);
       }
+
       setMessage("Evidence uploaded securely and queued for review.");
       updateOrgProfile({ verificationDocs: [...docs, ...Array.from(files).map((file) => file.name)], verificationStatus: "pending", businessEmailDomain: emailDomain });
     } catch (cause) {

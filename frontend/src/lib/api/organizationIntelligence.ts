@@ -14,8 +14,10 @@ export interface OrganizationIntelligenceOverview {
   health: OrganizationHealth;
   risks: { total: number; critical: number; high: number; medium: number; low: number };
   actions: { total: number; critical: number; high: number };
+  commercial?: Record<string, any>;
   generatedAt: string;
 }
+
 
 export interface OrganizationPulse {
   window: string;

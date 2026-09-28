@@ -37,6 +37,29 @@ export interface WireComment {
 }
 
 // UI shapes the screens already use (kept identical to the existing mock types).
+export interface Mention {
+  userId: string;
+  name: string;
+  username?: string;
+}
+
+export interface MessageIdentity {
+  id: string;
+  name: string;
+  displayName?: string;
+  username?: string;
+  avatarUrl?: string;
+  role?: string;
+  organization?: string;
+  verified?: boolean;
+  subscriber?: boolean;
+  credibilityScore?: number;
+  deliveryMode?: string;
+  sharedContext?: string;
+  canMessage?: boolean;
+}
+
+
 export interface UIMessage {
   id: string;
   fromMe: boolean;
@@ -53,4 +76,13 @@ export interface UIConversation {
   unread: boolean;
   lastMessageId?: string;
   thread: UIMessage[];
+  participantId?: string;
+  requestStatus?: string;
+  initiatedBy?: string;
+  lastActivityAt?: string;
+  participantVerified?: boolean;
+  participantSubscriber?: boolean;
+  participantCredibilityScore?: number;
+  participantUsername?: string;
 }
+
