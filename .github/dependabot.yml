@@ -5,7 +5,18 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # Vite majors must go through an engineer-led compatibility review
+      # (see .github/DEPENDENCY_POLICY.md and dependency-audit-baseline.json).
+      # The repo is pinned to the patched vite 6.4.x line, which is the version
+      # range required by vitest 5 and supported by the current plugins.
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
     groups:
+      # react-router and react-router-dom must move together: a mismatched pair
+      # installs two react-router copies and crashes every route at runtime.
+      react-router:
+        patterns: ["react-router", "react-router-dom"]
       frontend-patch-minor:
         update-types: ["patch", "minor"]
   - package-ecosystem: github-actions
