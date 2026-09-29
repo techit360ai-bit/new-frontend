@@ -1,11 +1,30 @@
 # Platform Functionality Audit and Implementation Plan
 
 **Date:** 2026-09-29
-**Status:** findings report + implementation plan — **NOT IMPLEMENTED. Awaiting explicit go-ahead.**
+**Status:** Phases 0–3 **implemented** (Phase 4 not started). See the implementation log below.
 **Scope:** founder/collaborator dashboard intelligence coverage, Wallet billing/payment UX, workspace UI mock/non-functional surfaces, coding-area seams, and the two CI blockers currently on `main`.
 **Method:** direct source reading of `new-frontend/frontend/src/**`, `BACKEND/backend/src/**`, plus live `gh` PR/CI inspection.
 
 Companion document (commercial model): `BACKEND/docs/TVCE_UNIT_ECONOMICS_PAYMENTS_AND_ENTITLEMENTS.md`.
+
+---
+
+# Part 0 — Implementation log
+
+| Phase | Status | Evidence |
+|---|---|---|
+| Phase 0 — restore `main` | done | `fix/frontend-vite-vitest-peer-conflict` (new-frontend PR #162) + `frontend.yml` green |
+| Phase 1 — wallet ↔ billing truthfulness | done | BACKEND PR #138, new-frontend PR #168 — `GET /api/tvce/checkout/providers`, `GET /api/domain/wallet/analytics`, truthful `walletSummary` fields, hosted checkout wiring, real usage cards |
+| Phase 2 — dashboard intelligence coverage | done | new-frontend PR #169 — GSIS v2 metrics + evidence provenance, real signals/tasks/journey/activity, Customer evidence card, collaborator Contribution intelligence |
+| **T2.4 — founder equity/cap table** | done | BACKEND PR #139 (`GET /api/domain/founder/equity`), new-frontend PR #170 — derived cap table card. Founder-declared splits, external investors and option pools are **not** tracked, so `retainedPercent` is rendered as a labelled derivation, never as a fabricated split |
+| Phase 3 — workspace UI honesty & polish | done | new-frontend PR #170 (T3.1–T3.7) + BACKEND PR #139 (`POST`/`DELETE /api/domain/files`) |
+| Phase 4 — coding area polish | not started | — |
+
+Deliberately left honest rather than faked:
+
+- **Agents console transport (T3.5):** no SSE/WebSocket/polling event producer exists for workspace tasks, so the transcript is labelled a **snapshot** instead of pretending to stream live.
+- **Connectors (T3.6):** no provider OAuth/credential handshake exists, so "Connect" is relabelled "Mark connected (metadata only)" with an explicit notice.
+- **Files (T3.3):** only metadata (name/type/size) is stored; the UI is relabelled "Register File" and reports real registered bytes rather than a fabricated storage bar.
 
 ---
 
@@ -161,7 +180,7 @@ Legend: **[REAL]** wired to an API · **[LOCAL]** state-only, not persisted · *
 
 # Part B — Implementation Plan
 
-> **Status: proposed only. No code changes made. Do not start until explicitly approved.**
+> **Status: implemented.** Phases 0–3 landed (see the implementation log at the top). Phase 4 (coding area polish, T4.1–T4.x) is not started.
 
 ## Sequencing principle
 Fix the red build first (everything else is unverifiable while `main` is failing), then billing truthfulness (money path), then dashboard intelligence, then workspace UX polish.
