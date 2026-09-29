@@ -38,6 +38,9 @@ jobs:
           VITE_TRUST_AUTHORITY_URL: https://backend.techitnetwork.com/api
           VITE_API_STRICT: "1"
 
+      - name: Validate dependency parity
+        run: cd frontend && npm run deps:parity
+
       - name: Validate frontend workflow env parity
         run: cd frontend && npm run workflow:check
 
