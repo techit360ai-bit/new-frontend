@@ -2,8 +2,9 @@ import {
   createContext, useContext, useEffect, useRef,
   useState, useCallback, type ReactNode,
 } from 'react'
-import { getAuthToken, refreshAccessToken, setAuthTokenGetter } from '../lib/api/client'
+import { getAuthToken, refreshAccessToken } from '../lib/api/client'
 import { persistAccessToken } from '../lib/authStorage'
+import { setCacheScope } from '../lib/resilience/cache'
 
 // ── Types ─────────────────────────────────────────────────────
 export type Role = 'explorer' | 'founder' | 'collaborator' | 'investor' | 'organisation'
@@ -147,19 +148,11 @@ const getStored = () => ({
   user: (() => { try { const u = localStorage.getItem(USER_KEY); return u ? JSON.parse(u) : null } catch { return null } })(),
 })
 try { localStorage.removeItem('techit_token') } catch {}
-// Keep the access token available to the API client even when browser cookies
-// are enabled. The frontend and API may be different origins, so the API's
-// CSRF cookie is not readable by this app and cookie-only mutations cannot be
-// completed reliably from onboarding.
+// The access token is held in memory by the API client for the current tab and
+// carried on the wire by the HttpOnly session cookie. It is never persisted to
+// web storage, where DevTools or an injected script could read it.
 const saveToken = persistAccessToken
 const saveUser  = (u: User | null)   => u ? localStorage.setItem(USER_KEY, JSON.stringify(u)) : localStorage.removeItem(USER_KEY)
-
-// Forward the stored JWT to the ai-router API client so every dashboard request
-// carries `Authorization: Bearer <token>`. Registered at module load (reads the
-// current token on each call) so it's live before <AuthProvider> even mounts.
-setAuthTokenGetter(() => accessTokenForApi())
-
-function accessTokenForApi() { return sessionStorage.getItem('techit_access_token') }
 
 // ── API base URL ──────────────────────────────────────────────
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
@@ -172,7 +165,10 @@ async function apiFetch(path: string, opts: RequestInit = {}) {
   try { const csrf = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf=')); if (csrf) headers['X-CSRF-Token'] = decodeURIComponent(csrf.slice('techit_csrf='.length)) } catch {}
   const request = async (token: string | null) => fetch(`${API}${path}`, { ...opts, credentials: 'include', headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(opts.headers as Record<string, string> || {}) } })
   let res = await request(getAuthToken())
-  if (res.status === 401 && path !== '/auth/refresh') { const token = await refreshAccessToken(); if (token) res = await request(token) }
+  // On a 401, rotate the session once and retry. The hardened cookie flow
+  // returns no body token, so retry with whatever the client now holds (which
+  // may be nothing when the HttpOnly cookie carries the session).
+  if (res.status === 401 && path !== '/auth/refresh') { const token = await refreshAccessToken(); res = await request(token ?? getAuthToken()) }
   return res
 }
 
@@ -235,10 +231,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!res.ok) throw new Error('Session invalid')
         const { user: freshUser } = await res.json()
         setUser(freshUser)
+        setCacheScope(freshUser.id)
         await fetchProfile(freshUser.id)
         await fetchContext()
       } catch {
         saveToken(null); saveUser(null)
+        setCacheScope(null)
         setUser(null); setProfile(null); setRoleAssignments([]); setActiveContext(null)
         setLoading(false)
       }
@@ -249,7 +247,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (e.key === TOKEN_KEY || e.key === USER_KEY || e.key === 'techit_auth_event') {
         const { token, user: u } = getStored()
         setUser(u)
-        if (e.key === 'techit_auth_event' && !token) { setProfile(null); setRoleAssignments([]); setActiveContext(null); setLoading(false); return }
+        if (e.key === 'techit_auth_event' && !token) { setCacheScope(null); setProfile(null); setRoleAssignments([]); setActiveContext(null); setLoading(false); return }
         if (token && u) fetchProfile(u.id)
         else { setProfile(null); setLoading(false) }
       }
@@ -289,8 +287,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!res.ok) throw new Error(json.error || 'Sign in failed')
 
       const { token, user: u, profile: p } = json
-      saveToken(token)
+      saveToken(token ?? null)
       saveUser(u)
+      setCacheScope(u?.id ?? null)
       setUser(u)
       setProfile(p)
       await fetchContext()
@@ -304,6 +303,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     try { await apiFetch('/auth/signout', { method: 'POST' }) } catch {}
     saveToken(null); saveUser(null); localStorage.setItem('techit_auth_event', JSON.stringify({ type: 'logout', at: Date.now() }))
+    setCacheScope(null)
     setUser(null); setProfile(null); setRoleAssignments([]); setActiveContext(null)
   }
 

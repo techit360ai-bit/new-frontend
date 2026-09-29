@@ -50,17 +50,20 @@ let refreshPromise: Promise<string | null> | null = null;
 const inFlightGets = new Map<string, Promise<unknown>>();
 const etags = new Map<string, string>();
 const etagBodies = new Map<string, unknown>();
-function sessionValue(key: string) { try { return typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null } catch { return null } }
 function csrfToken() { try { const part = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf=')); return part ? decodeURIComponent(part.slice('techit_csrf='.length)) : null } catch { return null } }
-function setSessionValue(key: string, value: string | null) { try { if (typeof sessionStorage !== 'undefined') { if (value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key) } } catch {} }
 export function setAuthTokenGetter(fn: () => string | null) {
   authTokenGetter = fn;
 }
 
-export function setAccessToken(token: string | null) { accessToken = token; setSessionValue('techit_access_token', token); }
+// The access token lives in memory for the current tab only. It is never
+// written to sessionStorage/localStorage: web storage is readable from DevTools
+// and by injected scripts, which turns one XSS into session theft across every
+// service sharing the platform JWT. Browser sessions use the HttpOnly
+// `techit_access` cookie instead.
+export function setAccessToken(token: string | null) { accessToken = token; }
 
 export function getAuthToken(): string | null {
-  return accessToken ?? authTokenGetter?.() ?? sessionValue('techit_access_token') ?? (import.meta.env.MODE === 'test' ? (() => { try { return localStorage.getItem('techit_token') } catch { return null } })() : null);
+  return accessToken ?? authTokenGetter?.() ?? (import.meta.env.MODE === 'test' ? (() => { try { return localStorage.getItem('techit_token') } catch { return null } })() : null);
 }
 
 function headers(extra?: HeadersInit): HeadersInit {
@@ -90,9 +93,12 @@ async function requestWithRefresh<T>(path: string, init: RequestInit, method: st
     return fetch(url, { method, ...init, headers: requestHeaders, body: body === undefined ? init.body : JSON.stringify(body), credentials: 'include', signal: timeoutSignal(init) });
   }
   let response = method === 'GET' ? await fetchIdempotent(run) : await run()
-  if (response.status === 401 && getAuthToken() && path !== '/auth/refresh' && path !== 'auth/refresh') {
-    const token = await refreshAccessToken()
-    if (token) response = await run()
+  if (response.status === 401 && path !== '/auth/refresh' && path !== 'auth/refresh') {
+    // Rotate the session once, then retry. The hardened cookie flow can return
+    // no body token, so a missing in-memory token does not mean the session is
+    // unrecoverable — the HttpOnly refresh cookie may still be valid.
+    await refreshAccessToken()
+    response = await run()
   }
   if (method === 'GET' && response.status === 304 && etagBodies.has(url)) return etagBodies.get(url) as T;
   const parsed = await parse<T>(response);

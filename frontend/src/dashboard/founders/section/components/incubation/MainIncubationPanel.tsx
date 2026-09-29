@@ -54,6 +54,8 @@ import {
 import { IncubationHumanLoopPanel } from "./IncubationHumanLoopPanel";
 import { provisionWorkspace } from "@/lib/api/workspaces";
 import { checkHealth } from "@/lib/api/health";
+import { apiPost } from "@/lib/api/client";
+import type { WorkspaceConversationMessage } from "@/dashboard/workspaces/lib/api/workspaceAI";
 
 type AnalysisType =
   | "unicorn"
@@ -168,6 +170,8 @@ export function MainIncubationPanel() {
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisType | null>(null);
   const [ideaInput, setIdeaInput] = useState("");
   const [copilotInput, setCopilotInput] = useState("");
+  const [copilotMessages, setCopilotMessages] = useState<WorkspaceConversationMessage[]>([]);
+  const [copilotLoading, setCopilotLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1280);
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
@@ -421,6 +425,39 @@ export function MainIncubationPanel() {
     }
   };
 
+  const handleSendCopilot = async () => {
+    const text = copilotInput.trim();
+    if (!text || copilotLoading) return;
+    const prior = copilotMessages;
+    setCopilotMessages([...prior, { role: "user", content: text }]);
+    setCopilotInput("");
+    setCopilotLoading(true);
+    try {
+      let workspaceId = asText(blueprintData?.workspace_id);
+      if (!workspaceId) {
+        if (!projectId) {
+          throw new Error("Run an analysis first so the copilot has project context.");
+        }
+        const provisioned = await provisionWorkspace(projectId, `${ventureName} Workspace`);
+        workspaceId = asText(provisioned.workspace?.id);
+        if (!provisioned.ok || !workspaceId) {
+          throw new Error(provisioned.error || "Could not create a workspace for the copilot.");
+        }
+        setBlueprintData((prev) => ({ ...(prev ?? {}), workspace_id: workspaceId }));
+      }
+      const response = await apiPost<{ message: string }>("/workspace/conversation", {
+        workspace_id: workspaceId,
+        message: text,
+        messages: prior,
+      });
+      setCopilotMessages((current) => [...current, { role: "assistant", content: response.message }]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Copilot request failed");
+    } finally {
+      setCopilotLoading(false);
+    }
+  };
+
   const handleExportReport = async () => {
     if (!projectId) { toast.error("Run the full analysis before downloading"); return; }
     const blob = await downloadProjectAnalysis(projectId);
@@ -476,25 +513,40 @@ export function MainIncubationPanel() {
 
         <div className="border-t border-border-default p-4">
           <h3 className="text-xs font-semibold text-text-muted mb-2">AI Copilot</h3>
+          {copilotMessages.length > 0 && (
+            <div className="mb-2 max-h-48 space-y-2 overflow-y-auto" aria-live="polite">
+              {copilotMessages.map((message, index) => (
+                <p
+                  key={`${message.role}-${index}`}
+                  className={`rounded px-2 py-1 text-xs whitespace-pre-wrap ${
+                    message.role === "user" ? "bg-violet-100 text-violet-900" : "bg-gray-100 text-text-secondary"
+                  }`}
+                >
+                  {message.content}
+                </p>
+              ))}
+            </div>
+          )}
           <textarea
             value={copilotInput}
             onChange={(e) => setCopilotInput(e.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void handleSendCopilot();
+              }
+            }}
             placeholder="Ask AI anything..."
             rows={3}
             className="w-full text-sm border border-border-strong rounded px-3 py-2 resize-none focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-100"
           />
           <button
-            onClick={() => {
-              if (copilotInput.trim()) {
-                toast.info("Copilot feature coming soon");
-                setCopilotInput("");
-              }
-            }}
-            disabled={!copilotInput.trim()}
+            onClick={() => void handleSendCopilot()}
+            disabled={!copilotInput.trim() || copilotLoading}
             className="mt-2 w-full flex items-center justify-center gap-2 bg-violet-600 text-white px-3 py-2 text-sm font-medium rounded hover:bg-violet-700 disabled:bg-gray-300"
           >
-            <Send className="h-4 w-4" />
-            Send
+            {copilotLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {copilotLoading ? "Thinking..." : "Send"}
           </button>
         </div>
       </aside>
