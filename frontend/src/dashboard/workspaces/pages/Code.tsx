@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Editor, { DiffEditor } from '@monaco-editor/react';
-import { Bot, Code2, FilePlus2, Github, Play, RefreshCw, Save, Send, Square, SquareTerminal, TestTube2, Trash2, UploadCloud } from 'lucide-react';
+import { Bot, Check, Code2, Copy, FilePlus2, Github, Play, RefreshCw, Save, Send, Square, SquareTerminal, TestTube2, Trash2, UploadCloud } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { fetchWorkspaces, type WorkspaceRef } from '@/lib/api/workspaces';
@@ -19,7 +19,8 @@ import { restartWebContainer, runWebCommand, stopWebCommand } from '../lib/runti
 import { setActiveWorkspaceId } from '../lib/api/client';
 import { applyAcceptedHunks, buildReviewHunks, sha256, threeWayMerge } from '../lib/codeReview';
 import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
-import { createModelConnection, listModelConnections } from '../lib/api/capabilities';
+import { bindWorkspaceModel, createModelConnection, listModelConnections, listWorkspaceModels, unbindWorkspaceModel } from '../lib/api/capabilities';
+import { useActionDialogs } from '../components/actionDialogs';
 
 type OpenFile = CodeSnapshot['files'][number] & { savedContent: string };
 type Mode = 'manual' | 'assist' | 'agent' | 'autonomous';
@@ -78,11 +79,19 @@ export function Code() {
   const [reviewDecisions, setReviewDecisions] = useState<Record<string, Record<string, boolean>>>({});
   const [queuedCount, setQueuedCount] = useState(0);
   const [modelConnections, setModelConnections] = useState<Array<{ id: string; provider: string; displayName: string; maskedIdentifier?: string; status: string }>>([]);
+  const [modelBindings, setModelBindings] = useState<Array<{ id: string; connectionId: string; modelId: string }>>([]);
+  const [modelSelection, setModelSelection] = useState('platform');
+  const [modelSaving, setModelSaving] = useState(false);
   const [showByokForm, setShowByokForm] = useState(false);
   const [byokProvider, setByokProvider] = useState('openai');
   const [byokName, setByokName] = useState('Personal model');
   const [byokKey, setByokKey] = useState('');
   const [byokSaving, setByokSaving] = useState(false);
+  const [terminalInput, setTerminalInput] = useState('');
+  const [terminalRunning, setTerminalRunning] = useState(false);
+  const [vscodeSetup, setVscodeSetup] = useState<{ command: string; expiresAt: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+  const { prompt, confirm, dialogs } = useActionDialogs();
 
   const active = files.find(file => file.path === activePath) || files[0];
   const changed = files.filter(file => file.content !== file.savedContent);
@@ -135,8 +144,49 @@ export function Code() {
   // reload is intentionally scoped to the selected Workspace; destination selection is restored inside it.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setActiveWorkspaceId(workspaceId || null); void reload(); }, [workspaceId]);
-  useEffect(() => { void listModelConnections().then(result => setModelConnections(result.connections || [])).catch(() => setModelConnections([])); }, []);
-  async function saveByokConnection() { if (!byokKey.trim()) return; setByokSaving(true); try { const created = await createModelConnection({ provider: byokProvider, displayName: byokName, apiKey: byokKey.trim() }); if (!created) throw new Error('Connection could not be created.'); setByokKey(''); setShowByokForm(false); const next = await listModelConnections(); setModelConnections(next.connections || []); toast.success('Personal model connected.'); } catch (error) { toast.error(error instanceof Error ? error.message : 'Personal model connection failed.'); } finally { setByokSaving(false); } }
+  async function reloadModelSelection() {
+    const [connections, models] = await Promise.all([
+      listModelConnections().catch(() => ({ connections: [] as Array<{ id: string; provider: string; displayName: string; maskedIdentifier?: string; status: string }> })),
+      workspaceId ? listWorkspaceModels(workspaceId).catch(() => ({ bindings: [] as Array<{ id: string; connectionId: string; modelId: string }> })) : Promise.resolve({ bindings: [] as Array<{ id: string; connectionId: string; modelId: string }> }),
+    ]);
+    setModelConnections(connections.connections || []);
+    const bindings = models.bindings || [];
+    setModelBindings(bindings);
+    setModelSelection(bindings[0]?.connectionId || 'platform');
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void reloadModelSelection(); }, [workspaceId]);
+
+  async function selectModel(connectionId: string) {
+    setModelSelection(connectionId);
+    const existing = modelBindings[0];
+    if (connectionId === 'platform') {
+      if (!existing) return;
+      setModelSaving(true);
+      try {
+        await unbindWorkspaceModel(workspaceId, existing.id);
+        setModelBindings([]);
+        toast.success('Coding intelligence now uses the TechIT platform model.');
+      } catch (error) {
+        setModelSelection(existing.connectionId);
+        toast.error(error instanceof Error ? error.message : 'Could not switch back to the platform model.');
+      } finally { setModelSaving(false); }
+      return;
+    }
+    setModelSaving(true);
+    try {
+      if (existing && existing.connectionId !== connectionId) await unbindWorkspaceModel(workspaceId, existing.id);
+      if (!existing || existing.connectionId !== connectionId) {
+        const created = await bindWorkspaceModel(workspaceId, { connectionId, operations: ['plan', 'chat', 'propose', 'review', 'scaffold'] });
+        setModelBindings(created.binding ? [created.binding] : []);
+      }
+      toast.success('Personal model bound. The platform router still serves the request (BYOK routing is disclosed in the plan).');
+    } catch (error) {
+      setModelSelection(existing?.connectionId || 'platform');
+      toast.error(error instanceof Error ? error.message : 'Could not bind the personal model.');
+    } finally { setModelSaving(false); }
+  }
+  async function saveByokConnection() { if (!byokKey.trim()) return; setByokSaving(true); try { const created = await createModelConnection({ provider: byokProvider, displayName: byokName, apiKey: byokKey.trim() }); if (!created) throw new Error('Connection could not be created.'); setByokKey(''); setShowByokForm(false); await reloadModelSelection(); toast.success('Personal model connected. Select it in the model list to bind it to this workspace.'); } catch (error) { toast.error(error instanceof Error ? error.message : 'Personal model connection failed.'); } finally { setByokSaving(false); } }
   useEffect(() => {
     const flush = () => { if (navigator.onLine) void saveAll(); };
     window.addEventListener('online', flush); return () => window.removeEventListener('online', flush);
@@ -187,7 +237,7 @@ export function Code() {
   }
 
   async function debugFailedProposal(runRecord: CodeExecutionRun, failureOutput: string) {
-    const response = await proposeCodeChanges({ workspace_id: workspaceId, project_id: snapshot?.workspace.projectId, requirement: `${task}\n\nDebugger evidence:\n${failureOutput.slice(-8000)}`, files: runtimeProject(reviewProposals).slice(0, 80).map(file => ({ path: file.path, language: file.language, content: file.content })) });
+    const response = await proposeCodeChanges(workspaceId, { requirement: `${task}\n\nDebugger evidence:\n${failureOutput.slice(-8000)}`, files: runtimeProject(reviewProposals).slice(0, 80).map(file => ({ path: file.path, language: file.language, content: file.content })) });
     const proposals: ReviewProposal[] = [];
     for (const proposal of response.proposal.changes) {
       const baseline = files.find(file => file.path === proposal.path)?.content || '';
@@ -245,8 +295,27 @@ export function Code() {
     catch (error) { setTerminal(value => `${value}\n${error instanceof Error ? error.message : 'Execution environment restart failed.'}`); }
   }
 
-  function createFile() {
-    const path = window.prompt('New project-relative file path');
+  async function runTerminalCommand(event: React.FormEvent) {
+    event.preventDefault();
+    const command = terminalInput.trim();
+    if (!command || terminalRunning) return;
+    if (!adapter?.supportedInBrowser) return toast.error('The detected project adapter cannot run commands in the browser runtime.');
+    setTerminalInput('');
+    setTerminalRunning(true);
+    setTerminal(value => `${value}${value && !value.endsWith('\n') ? '\n' : ''}$ ${command}\n`);
+    try {
+      const started = performance.now();
+      let output = '';
+      const result = await runWebCommand(files.map(file => ({ path: file.path, content: file.content })), command, chunk => { output += chunk; setTerminal(value => value + chunk); });
+      await recordRuntime(workspaceId, { adapter: adapter.adapter, commandType: 'terminal', command, status: result.exitCode === 0 ? 'completed' : 'failed', exitCode: result.exitCode, durationMs: Math.round(performance.now() - started), outputSummary: output.slice(-3000) });
+    } catch (error) {
+      setTerminal(value => `${value}\n${error instanceof Error ? error.message : String(error)}`);
+      await recordRuntime(workspaceId, { adapter: adapter?.adapter, commandType: 'terminal', command, status: 'crashed', outputSummary: String(error) });
+    } finally { setTerminalRunning(false); }
+  }
+
+  async function createFile() {
+    const path = await prompt({ title: 'Create file', label: 'Project-relative path', placeholder: 'src/components/New.tsx', confirmLabel: 'Create' });
     if (!path || files.some(file => file.path === path)) return;
     if (!isCodeSyncPathSafe(path)) return toast.error('That path is unsafe or may expose sensitive project data.');
     const file: OpenFile = { path, content: '', savedContent: '', version: 0, contentHash: '', language: editorLanguage(path) };
@@ -255,7 +324,9 @@ export function Code() {
   }
 
   async function renameActive() {
-    if (!active) return; const path = window.prompt('New project-relative path', active.path); if (!path || path === active.path) return;
+    if (!active) return;
+    const path = await prompt({ title: 'Rename file', label: 'New project-relative path', initial: active.path, confirmLabel: 'Rename' });
+    if (!path || path === active.path) return;
     if (!isCodeSyncPathSafe(path)) return toast.error('That path is unsafe or may expose sensitive project data.');
     if (active.version > 0 && navigator.onLine) await moveCodeFile(workspaceId, active.path, path, active.version);
     else await queueChange({ workspaceId, path: active.path, operation: 'move', nextPath: path, baseVersion: active.version });
@@ -263,7 +334,9 @@ export function Code() {
   }
 
   async function removeActive() {
-    if (!active || !window.confirm(`Delete ${active.path}? History will remain auditable.`)) return;
+    if (!active) return;
+    const ok = await confirm({ title: `Delete ${active.path}?`, description: 'The file is removed from the workspace. Version history remains auditable.', confirmLabel: 'Delete', destructive: true });
+    if (!ok) return;
     if (active.version > 0 && navigator.onLine) await deleteCodeFile(workspaceId, active.path, active.version);
     else await queueChange({ workspaceId, path: active.path, operation: 'delete', baseVersion: active.version });
     const remaining = files.filter(file => file.path !== active.path); setFiles(remaining); setActivePath(remaining[0]?.path || '');
@@ -333,13 +406,20 @@ export function Code() {
     if (conflicts.length) return toast.error('Resolve all pull conflicts before pushing.');
     const pendingChanges = changed.map(file => ({ path: file.path, content: file.content }));
     if (!await saveAll()) return;
-    const input = { projectId: snapshot?.workspace.projectId || '', repo: remote.repo, branch: remote.branch, expectedHeadSha: remote.headSha, message: window.prompt('Commit message') || 'Update from TechIT Workspace', files: pendingChanges };
+    const message = await prompt({ title: 'Commit message', initial: 'Update from TechIT Workspace', confirmLabel: 'Commit & push' });
+    if (!message) return;
+    const input = { projectId: snapshot?.workspace.projectId || '', repo: remote.repo, branch: remote.branch, expectedHeadSha: remote.headSha, message, files: pendingChanges };
     const result = await pushToDestination(input, remote.provider);
-    if (!result.ok && result.error.code === 'pending_approval' && result.approvalRequestId && window.confirm('Approve this repository push?')) {
+    if (result.ok) return;
+    if (result.error.code === 'pending_approval' && result.approvalRequestId) {
+      const approved = await confirm({ title: 'Approve repository push?', description: `Push ${pendingChanges.length} file(s) to ${remote.repo}@${remote.branch}.`, confirmLabel: 'Approve & push' });
+      if (!approved) return;
       const executed = await approveAndPushToDestination(input, result.approvalRequestId, remote.provider);
       if (executed.ok) { const data = executed.data as { commitSha: string }; setRemote(value => ({ ...value, headSha: data.commitSha })); toast.success('Committed and pushed. Team and investor evidence recorded.'); }
       else toast.error(executed.error.detail || executed.error.error);
-    } else if (!result.ok) toast.error(result.error.detail || result.error.error);
+      return;
+    }
+    toast.error(result.error.detail || result.error.error);
   }
 
   async function askAI(applyProposal: boolean) {
@@ -347,26 +427,25 @@ export function Code() {
     setBusy(true); setBottomPanel('ai');
     try {
       if (!applyProposal) {
-        const response = await planCodeTask({ workspace_id: workspaceId, project_id: snapshot.workspace.projectId, requirement: task, active_file: active?.path, files: files.map(file => ({ path: file.path, language: file.language })), diff: changed.map(file => ({ path: file.path })), adapter });
-        setPlan(JSON.stringify(response.plan, null, 2)); return;
+        const response = await planCodeTask(workspaceId, { requirement: task, active_file: active?.path, mode });
+        setPlan(JSON.stringify({ plan: response.plan, authoritative: response.authoritative, ai_routing: response.ai_routing }, null, 2)); return;
       }
       if (changed.length && !await saveAll()) throw new Error('Save or resolve current edits before starting an agent run.');
       let runRecord: CodeExecutionRun | null = null;
       let proposalFiles = files.slice(0, 80).map(file => ({ path: file.path, language: file.language, content: file.content }));
       if (mode === 'agent' || mode === 'autonomous') {
-        const scopedPlan = await planCodeTask({ workspace_id: workspaceId, project_id: snapshot.workspace.projectId, requirement: task, active_file: active?.path, files: files.map(file => ({ path: file.path, language: file.language })), adapter });
+        const scopedPlan = await planCodeTask(workspaceId, { requirement: task, active_file: active?.path, mode });
         const plannedNewPaths = scopedPlan.plan.changes.filter(change => change.action === 'create' && isCodeSyncPathSafe(change.path) && !files.some(file => file.path === change.path)).slice(0, 20).map(change => change.path);
         proposalFiles = [...proposalFiles, ...plannedNewPaths.map(path => ({ path, language: editorLanguage(path), content: '' }))];
         const allowedPaths = proposalFiles.map(file => file.path);
         runRecord = await createCodeExecutionRun(workspaceId, { requirement: task, mode, adapter: adapter?.adapter, allowedPaths, allowedCommands: Object.values(adapter?.commands || {}).filter(Boolean) });
-        const orchestration = await orchestrateCodeTask({ workspace_id: workspaceId, project_id: snapshot.workspace.projectId, requirement: task, allowed_paths: allowedPaths, allowed_commands: Object.values(adapter?.commands || {}).filter(Boolean), files: proposalFiles.map(file => ({ path: file.path, language: file.language })), adapter });
-        for (const stageName of ['execution_intelligence', 'mvp_builder', 'product_architect'] as const) {
-          const stage = orchestration.orchestration.stages.find(row => row.stage === stageName);
-          runRecord = await recordCodeExecutionStage(workspaceId, runRecord.id, { stage: stageName, status: 'completed', agent: stage?.agent || stageName, summary: stage?.summary || '', evidence: { actions: stage?.actions || [], risks: stage?.risks || [] } });
+        const orchestration = await orchestrateCodeTask(workspaceId, { requirement: task, mode });
+        for (const stage of orchestration.orchestration.stages) {
+          runRecord = await recordCodeExecutionStage(workspaceId, runRecord.id, { stage: stage.stage, status: 'completed', agent: stage.agent, summary: stage.summary, evidence: { actions: stage.actions, risks: stage.risks, requiresEvidence: stage.requiresEvidence, recommendedFlow: orchestration.orchestration.recommendedFlow, ai_routing: orchestration.ai_routing } });
         }
         setPlan(JSON.stringify(orchestration.orchestration, null, 2));
       }
-      const response = await proposeCodeChanges({ workspace_id: workspaceId, project_id: snapshot.workspace.projectId, requirement: task, files: proposalFiles });
+      const response = await proposeCodeChanges(workspaceId, { requirement: task, files: proposalFiles });
       if (!runRecord) setPlan(JSON.stringify(response.proposal, null, 2));
       if (runRecord) {
         const proposals: ReviewProposal[] = [];
@@ -377,12 +456,15 @@ export function Code() {
         runRecord = await recordCodeExecutionStage(workspaceId, runRecord.id, { stage: 'code', status: 'completed', agent: 'CodeAgent', changes: proposals.map(row => ({ path: row.path, contentHash: row.contentHash, baseContentHash: row.baseContentHash, hunks: row.hunks, reason: response.proposal.changes.find(change => change.path === row.path)?.reason })) });
         setExecutionRun(runRecord); setReviewProposals(proposals); setReviewPath(proposals[0]?.path || ''); setReviewDecisions({}); setBottomPanel('changes');
         toast.success('Agent proposals are ready for hunk review. Run tests before applying.');
-      } else if (window.confirm(`Apply ${response.proposal.changes.length} proposed change(s) to editor buffers for review?`)) {
+      } else if (await confirm({ title: `Apply ${response.proposal.changes.length} proposed change(s)?`, description: 'The proposed content is written to your editor buffers for review. Nothing is saved or pushed until you choose to.', confirmLabel: 'Apply to editor' })) {
         setFiles(current => current.map(file => { const proposal = response.proposal.changes.find(item => item.path === file.path); return proposal ? { ...file, content: proposal.content } : file; }));
         for (const proposal of response.proposal.changes) { const file = files.find(item => item.path === proposal.path); await queueChange({ workspaceId, path: proposal.path, operation: 'upsert', content: proposal.content, baseVersion: file?.version }); }
         setBottomPanel('changes');
       }
-    } catch (error) { setPlan(error instanceof Error ? error.message : 'TechIT AI is unavailable. No project files were changed.'); }
+    } catch (error) {
+      const body = (error as { body?: { error?: string; detail?: string } })?.body;
+      setPlan(body?.detail || body?.error || (error instanceof Error ? error.message : 'TechIT AI is unavailable. No project files were changed.'));
+    }
     finally { setBusy(false); }
   }
 
@@ -410,10 +492,12 @@ export function Code() {
   async function deployPreview() {
     if (!snapshot || !remote.repo || !remote.headSha) return toast.error('A pushed commit and repository are required.');
     if (!selectedDestination?.capabilities.deploy || remote.provider !== 'github') return toast.error('The selected destination does not expose a deployment adapter.');
-    const workflow = window.prompt('Existing GitHub deployment workflow file', 'deploy.yml'); if (!workflow) return;
+    const workflow = await prompt({ title: 'Run deployment workflow', label: 'Workflow file in the repository', initial: 'deploy.yml', confirmLabel: 'Dispatch' });
+    if (!workflow) return;
     const workflowInput = { projectId: snapshot.workspace.projectId, repo: remote.repo, workflow, ref: remote.branch };
     const pending = await techitApi.invoke('github', 'run_workflow', workflowInput);
-    if (!pending.ok && pending.error.code === 'pending_approval' && pending.approvalRequestId && window.confirm('Approve preview deployment workflow?')) {
+    if (!pending.ok && pending.error.code === 'pending_approval' && pending.approvalRequestId
+      && await confirm({ title: 'Approve preview deployment?', description: `Dispatch workflow ${workflow} on ${remote.repo}@${remote.branch}.`, confirmLabel: 'Approve & dispatch' })) {
       await techitApi.approve(pending.approvalRequestId);
       const run = await techitApi.invoke('github', 'run_workflow', { ...workflowInput, approvalRequestId: pending.approvalRequestId });
       if (run.ok) {
@@ -433,9 +517,24 @@ export function Code() {
   }
 
   async function openVSCode() {
-    const grant = await createVsCodeGrant(workspaceId, {});
-    const command = `npx @techit/code-bridge connect --api ${platformApiOrigin()} --grant ${grant.token} --root .`;
-    window.prompt('Run from the project directory, then use techit-code open --workspace ' + workspaceId, command);
+    try {
+      const grant = await createVsCodeGrant(workspaceId, {});
+      const command = `npx @techit/code-bridge connect --api ${platformApiOrigin()} --grant ${grant.token} --root .`;
+      setVscodeSetup({ command, expiresAt: grant.expiresAt });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'VS Code connection could not be prepared.');
+    }
+  }
+
+  async function copyVsCodeCommand() {
+    if (!vscodeSetup) return;
+    try {
+      await navigator.clipboard.writeText(vscodeSetup.command);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Clipboard access was blocked. Select the command and copy it manually.');
+    }
   }
 
   const conflict = conflicts[0];
@@ -447,7 +546,7 @@ export function Code() {
         <div className="flex rounded border border-border-inverse-strong bg-background-inverse p-0.5">{(['manual','assist','agent','autonomous'] as Mode[]).map(value => <button key={value} onClick={() => setMode(value)} className={`px-2 py-1 text-xs capitalize ${mode === value ? 'bg-feature-code-strong text-text-on-inverse' : 'text-text-disabled'}`}>{value}</button>)}</div>
         <span className="text-xs text-text-disabled">{adapter?.adapter || 'detecting'} · {changed.length} changed · {queuedCount ? `${queuedCount} pending` : 'saved'} · {navigator.onLine ? 'online' : 'offline'}</span>
         <div className="ml-auto flex flex-wrap gap-2">
-          <button onClick={createFile} className="icon-button" title="New file"><FilePlus2 className="h-4 w-4" /></button>
+          <button onClick={() => void createFile()} className="icon-button" title="New file"><FilePlus2 className="h-4 w-4" /></button>
           <button onClick={() => void renameActive()} className="toolbar-button">Rename</button>
           <button onClick={() => void removeActive()} className="icon-button" title="Delete"><Trash2 className="h-4 w-4" /></button>
           <button onClick={() => void saveAll()} disabled={busy || !changed.length} className="icon-button" title="Save"><Save className="h-4 w-4" /></button>
@@ -456,7 +555,7 @@ export function Code() {
           <button onClick={() => void run('test')} className="toolbar-button"><TestTube2 className="h-4 w-4" />Test</button>
           <button onClick={() => void run('build')} className="toolbar-button">Build</button>
           <select value={destinationId} onChange={event => { const selected = destinations.find(row => row.id === event.target.value); setDestinationId(event.target.value); if (selected?.repository && selected.provider !== 'local') { const provider = selected.provider; setRemote(value => ({ ...value, provider, repo: selected.repository!, headSha: '' })); } }} className="h-9 max-w-44 rounded border border-border-inverse-strong bg-background-inverse px-2 text-xs" title="Synchronization destination"><option value="">Destination</option>{destinations.map(row => <option key={row.id} value={row.id}>{row.provider}: {row.repository || 'VS Code'}</option>)}</select>
-          <button onClick={() => { const repo = window.prompt('Connected repository', remote.repo); if (repo) setRemote(value => ({ ...value, repo })); }} className="icon-button" title="Configure repository"><Github className="h-4 w-4" /></button>
+          <button onClick={() => { void prompt({ title: 'Connected repository', label: 'owner/repo', initial: remote.repo, placeholder: 'owner/repo', confirmLabel: 'Set repository' }).then(repo => { if (repo) setRemote(value => ({ ...value, repo })); }); }} className="icon-button" title="Configure repository"><Github className="h-4 w-4" /></button>
           <button onClick={() => void pull()} className="toolbar-button"><RefreshCw className="h-4 w-4" />Pull</button>
           <button onClick={() => void push()} className="toolbar-button"><UploadCloud className="h-4 w-4" />Push</button>
           <button onClick={() => void deployPreview()} className="toolbar-button">Deploy</button>
@@ -467,17 +566,31 @@ export function Code() {
       <div className="grid min-h-0 flex-1 grid-cols-[220px_minmax(0,1fr)_300px] max-lg:grid-cols-[180px_minmax(0,1fr)] max-md:block">
         <aside className="overflow-auto border-r border-border-inverse bg-background-inverse p-2 max-md:flex max-md:max-h-28 max-md:border-b"><div className="mb-2 px-2 text-xs font-semibold uppercase text-text-muted">Files</div>{files.map(file => <button key={file.path} onClick={() => setActivePath(file.path)} className={`block w-full truncate rounded px-2 py-1.5 text-left text-xs ${active?.path === file.path ? 'bg-feature-code/15 text-feature-code' : 'text-text-on-inverse-secondary hover:bg-surface-inverse-muted'}`}>{file.content !== file.savedContent ? '● ' : ''}{file.path}</button>)}</aside>
         <main className="min-h-0 bg-editor-background">{active ? <Editor height="100%" path={active.path} language={active.language} value={active.content} onChange={updateActive} theme="vs-dark" options={{ minimap: { enabled: true }, fontSize: 13, automaticLayout: true, wordWrap: 'on', tabSize: 2, formatOnPaste: true }} /> : <div className="p-8 text-text-disabled">Create or pull a file to begin.</div>}</main>
-        <aside className="border-l border-border-inverse bg-background-inverse p-3 max-lg:hidden"><div className="mb-3 flex items-center gap-2"><Bot className="h-4 w-4 text-brand-accent" /><span className="font-medium">Coding Intelligence</span></div><select className="mb-2 w-full rounded border border-border-inverse-strong bg-background-inverse p-2 text-xs" defaultValue="platform"><option value="platform">TechIT model · subscription/credits</option>{modelConnections.map(connection => <option key={connection.id} value={connection.id}>{connection.displayName} · personal key</option>)}</select><button type="button" onClick={() => setShowByokForm((value) => !value)} className="mb-2 w-full rounded border border-border-inverse-strong px-3 py-2 text-xs text-text-on-inverse-secondary">{showByokForm ? 'Cancel personal connection' : 'Connect personal model'}</button>{showByokForm && <div className="mb-3 space-y-2 rounded border border-border-inverse-strong p-2"><select value={byokProvider} onChange={(event) => setByokProvider(event.target.value)} className="w-full rounded bg-background-inverse p-2 text-xs"><option value="openai">OpenAI-compatible</option><option value="anthropic">Anthropic</option><option value="gemini">Google Gemini</option><option value="custom">Custom endpoint</option></select><input value={byokName} onChange={(event) => setByokName(event.target.value)} className="w-full rounded bg-background-inverse p-2 text-xs" placeholder="Connection name" /><input type="password" value={byokKey} onChange={(event) => setByokKey(event.target.value)} className="w-full rounded bg-background-inverse p-2 text-xs" placeholder="API key" autoComplete="off" /><button type="button" disabled={!byokKey.trim() || byokSaving} onClick={() => void saveByokConnection()} className="w-full rounded bg-brand-accent px-3 py-2 text-xs">{byokSaving ? 'Connecting...' : 'Save encrypted connection'}</button></div>}<textarea value={task} onChange={event => setTask(event.target.value)} rows={5} className="w-full rounded border border-border-inverse-strong bg-background-inverse p-2 text-sm" placeholder="Describe what should be built and why..." /><button onClick={() => void askAI(false)} className="mt-2 flex w-full items-center justify-center gap-2 rounded bg-brand-accent px-3 py-2 text-sm"><Send className="h-4 w-4" />Prepare build plan</button>{mode !== 'manual' && <button onClick={() => void askAI(true)} className="mt-2 w-full rounded border border-brand-accent px-3 py-2 text-sm">Generate reviewable changes</button>}<pre className="mt-3 max-h-[48vh] overflow-auto whitespace-pre-wrap text-xs text-text-on-inverse-secondary">{plan || 'AI uses existing Workspace context and cannot push or deploy without approval.'}</pre></aside>
+        <aside className="border-l border-border-inverse bg-background-inverse p-3 max-lg:hidden"><div className="mb-3 flex items-center gap-2"><Bot className="h-4 w-4 text-brand-accent" /><span className="font-medium">Coding Intelligence</span></div><select className="mb-2 w-full rounded border border-border-inverse-strong bg-background-inverse p-2 text-xs" value={modelSelection} disabled={modelSaving} onChange={event => void selectModel(event.target.value)}><option value="platform">TechIT model · subscription/credits</option>{modelConnections.map(connection => <option key={connection.id} value={connection.id}>{connection.displayName} · personal key</option>)}</select><button type="button" onClick={() => setShowByokForm((value) => !value)} className="mb-2 w-full rounded border border-border-inverse-strong px-3 py-2 text-xs text-text-on-inverse-secondary">{showByokForm ? 'Cancel personal connection' : 'Connect personal model'}</button>{showByokForm && <div className="mb-3 space-y-2 rounded border border-border-inverse-strong p-2"><select value={byokProvider} onChange={(event) => setByokProvider(event.target.value)} className="w-full rounded bg-background-inverse p-2 text-xs"><option value="openai">OpenAI-compatible</option><option value="anthropic">Anthropic</option><option value="gemini">Google Gemini</option><option value="custom">Custom endpoint</option></select><input value={byokName} onChange={(event) => setByokName(event.target.value)} className="w-full rounded bg-background-inverse p-2 text-xs" placeholder="Connection name" /><input type="password" value={byokKey} onChange={(event) => setByokKey(event.target.value)} className="w-full rounded bg-background-inverse p-2 text-xs" placeholder="API key" autoComplete="off" /><button type="button" disabled={!byokKey.trim() || byokSaving} onClick={() => void saveByokConnection()} className="w-full rounded bg-brand-accent px-3 py-2 text-xs">{byokSaving ? 'Connecting...' : 'Save encrypted connection'}</button></div>}<textarea value={task} onChange={event => setTask(event.target.value)} rows={5} className="w-full rounded border border-border-inverse-strong bg-background-inverse p-2 text-sm" placeholder="Describe what should be built and why..." /><button onClick={() => void askAI(false)} className="mt-2 flex w-full items-center justify-center gap-2 rounded bg-brand-accent px-3 py-2 text-sm"><Send className="h-4 w-4" />Prepare build plan</button>{mode !== 'manual' && <button onClick={() => void askAI(true)} className="mt-2 w-full rounded border border-brand-accent px-3 py-2 text-sm">Generate reviewable changes</button>}<pre className="mt-3 max-h-[48vh] overflow-auto whitespace-pre-wrap text-xs text-text-on-inverse-secondary">{plan || 'AI uses existing Workspace context and cannot push or deploy without approval.'}</pre></aside>
       </div>
 
       <div className="h-[260px] border-t border-border-inverse bg-background-inverse">
         <div className="flex h-9 items-center gap-1 border-b border-border-inverse px-2">{(['terminal','problems','changes','ai','preview'] as BottomPanel[]).map(value => <button key={value} onClick={() => setBottomPanel(value)} className={`px-3 py-1 text-xs capitalize ${bottomPanel === value ? 'text-feature-code' : 'text-text-muted'}`}>{value}{value === 'problems' && problems.length ? ` (${problems.length})` : ''}</button>)}<button onClick={() => void restartRuntime()} className="ml-auto icon-button" title="Restart runtime"><RefreshCw className="h-3 w-3" /></button></div>
-        {bottomPanel === 'terminal' && <pre className="h-[220px] overflow-auto p-3 text-xs text-status-success"><SquareTerminal className="mr-2 inline h-4 w-4" />{terminal || 'Runtime initializes only when Run, Test, or Build is selected.'}</pre>}
+        {bottomPanel === 'terminal' && <div className="flex h-[220px] flex-col"><pre className="flex-1 overflow-auto p-3 text-xs text-status-success"><SquareTerminal className="mr-2 inline h-4 w-4" />{terminal || 'Runtime initializes when a command runs. Type a command below to execute it in the WebContainer.'}</pre><form onSubmit={runTerminalCommand} className="flex items-center gap-2 border-t border-border-inverse px-2 py-1"><span className="text-xs text-status-success">$</span><input value={terminalInput} onChange={event => setTerminalInput(event.target.value)} disabled={terminalRunning || !adapter?.supportedInBrowser} placeholder={adapter?.supportedInBrowser ? 'npm test' : 'No browser runtime adapter for this project'} className="flex-1 bg-transparent text-xs text-text-on-inverse outline-none disabled:opacity-50" /><button type="submit" disabled={terminalRunning || !terminalInput.trim()} className="toolbar-button h-7">{terminalRunning ? 'Executing…' : 'Execute'}</button></form></div>}
         {bottomPanel === 'problems' && <pre className="h-[220px] overflow-auto p-3 text-xs text-status-warning">{problems.join('\n') || 'No parsed problems.'}</pre>}
         {bottomPanel === 'changes' && <div className="h-[220px]">{conflict ? <div className="grid h-full grid-cols-[1fr_210px]"><DiffEditor height="100%" original={conflict.base} modified={conflict.merged} language={editorLanguage(conflict.path)} theme="vs-dark" /><div className="space-y-2 overflow-auto border-l border-border-inverse p-3 text-xs"><p className="font-medium">Three-way conflict: {conflict.path}</p><button onClick={() => void resolveConflict(conflict, 'local')} className="toolbar-button w-full">Keep Local</button><button onClick={() => void resolveConflict(conflict, 'remote')} className="toolbar-button w-full">Keep Remote</button><button onClick={() => void resolveConflict(conflict, 'merge')} className="toolbar-button w-full">Use Diff3 Result</button><button onClick={() => setConflicts([])} className="toolbar-button w-full">Cancel Pull</button></div></div> : reviewProposal ? <div className="grid h-full grid-cols-[1fr_280px]"><DiffEditor height="100%" original={reviewProposal.baseline} modified={reviewContent} language={editorLanguage(reviewProposal.path)} theme="vs-dark" /><div className="overflow-auto border-l border-border-inverse p-2 text-xs"><select value={reviewProposal.path} onChange={event => setReviewPath(event.target.value)} className="mb-2 h-8 w-full border border-border-inverse-strong bg-background-inverse px-2">{reviewProposals.map(row => <option key={row.path} value={row.path}>{row.path}</option>)}</select>{reviewProposal.hunks.map((hunk, index) => <div key={hunk.id} className="mb-2 border border-border-inverse p-2"><p className="mb-1 text-text-disabled">Hunk {index + 1} · lines {hunk.oldStart + 1}-{Math.max(hunk.oldStart + 1, hunk.oldEnd)}</p><div className="flex gap-1"><button onClick={() => setReviewDecisions(current => ({ ...current, [reviewProposal.path]: { ...(current[reviewProposal.path] || {}), [hunk.id]: true } }))} className={`toolbar-button flex-1 ${reviewDecisions[reviewProposal.path]?.[hunk.id] === true ? 'border-status-success text-status-success' : ''}`}>Accept</button><button onClick={() => setReviewDecisions(current => ({ ...current, [reviewProposal.path]: { ...(current[reviewProposal.path] || {}), [hunk.id]: false } }))} className={`toolbar-button flex-1 ${reviewDecisions[reviewProposal.path]?.[hunk.id] === false ? 'border-status-error text-status-error' : ''}`}>Reject</button></div></div>)}<button onClick={() => void completeExecutionReview()} className="toolbar-button w-full" disabled={!executionRun?.steps.some(row => row.stage === 'security' && row.status === 'completed')}>Apply Reviewed Hunks</button></div></div> : changed[0] ? <DiffEditor height="100%" original={changed[0].savedContent} modified={changed[0].content} language={changed[0].language} theme="vs-dark" /> : <div className="p-4 text-sm text-text-muted">No changes.</div>}</div>}
         {bottomPanel === 'ai' && <pre className="h-[220px] overflow-auto p-3 text-xs">{plan}</pre>}
         {bottomPanel === 'preview' && (previewUrl ? <iframe title="Live preview" src={previewUrl} className="h-full w-full bg-surface-primary" sandbox="allow-scripts allow-forms allow-modals allow-same-origin" /> : <div className="p-4 text-sm text-text-muted">Start a supported development server to open preview.</div>)}
       </div>
+      {dialogs}
+      {vscodeSetup && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setVscodeSetup(null); }}>
+          <div role="dialog" aria-modal="true" aria-label="Manual VS Code setup" className="w-full max-w-lg space-y-3 rounded-lg border border-border-inverse-strong bg-background-inverse p-4 text-text-on-inverse shadow-xl">
+            <p className="text-sm font-medium">Connect VS Code — manual setup</p>
+            <p className="text-xs text-text-on-inverse-secondary">This deployment has no registered <code>vscode://</code> URI handler, so the bridge is completed manually. The grant expires at {new Date(vscodeSetup.expiresAt).toLocaleTimeString()} and is scoped to workspace {workspaceId}. Run this from the project directory on your machine:</p>
+            <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded border border-border-inverse-strong bg-black/40 p-2 text-xs text-status-success">{vscodeSetup.command}</pre>
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setVscodeSetup(null)} className="toolbar-button">Close</button>
+              <button type="button" onClick={() => void copyVsCodeCommand()} className="toolbar-button border-brand-accent text-brand-accent">{copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy command</>}</button>
+            </div>
+          </div>
+        </div>
+      )}
       <style>{`.icon-button{display:inline-flex;height:36px;width:36px;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--techit-border-inverse-strong);background:var(--techit-background-inverse)}.toolbar-button{display:inline-flex;height:36px;align-items:center;justify-content:center;gap:6px;border-radius:6px;border:1px solid var(--techit-border-inverse-strong);background:var(--techit-background-inverse);padding:0 10px;font-size:12px}.icon-button:disabled,.toolbar-button:disabled{opacity:.4}`}</style>
     </div>
   );

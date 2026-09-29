@@ -1,7 +1,7 @@
 # Platform Functionality Audit and Implementation Plan
 
 **Date:** 2026-09-29
-**Status:** Phases 0–3 **implemented** (Phase 4 not started). See the implementation log below.
+**Status:** Phases 0–4 **implemented** (Phase 4 code-complete; see the implementation log below).
 **Scope:** founder/collaborator dashboard intelligence coverage, Wallet billing/payment UX, workspace UI mock/non-functional surfaces, coding-area seams, and the two CI blockers currently on `main`.
 **Method:** direct source reading of `new-frontend/frontend/src/**`, `BACKEND/backend/src/**`, plus live `gh` PR/CI inspection.
 
@@ -18,12 +18,12 @@ Companion document (commercial model): `BACKEND/docs/TVCE_UNIT_ECONOMICS_PAYMENT
 | Phase 2 — dashboard intelligence coverage | done | new-frontend PR #169 — GSIS v2 metrics + evidence provenance, real signals/tasks/journey/activity, Customer evidence card, collaborator Contribution intelligence |
 | **T2.4 — founder equity/cap table** | done | BACKEND PR #139 (`GET /api/domain/founder/equity`), new-frontend PR #170 — derived cap table card. Founder-declared splits, external investors and option pools are **not** tracked, so `retainedPercent` is rendered as a labelled derivation, never as a fabricated split |
 | Phase 3 — workspace UI honesty & polish | done | new-frontend PR #170 (T3.1–T3.7) + BACKEND PR #139 (`POST`/`DELETE /api/domain/files`) |
-| Phase 4 — coding area polish | not started | — |
+| Phase 4 — coding area polish | done | new-frontend `feat/phase4-coding-transports` + BACKEND same-named branch (T4.1–T4.3). Real `plan`/`propose`/`orchestrate` coding intelligence on the platform backend (the three `/workspace/code/*` ai-router endpoints did not exist), `vscode://` replaced by a labelled copy-to-clipboard setup panel, `window.prompt`/`confirm` replaced by an in-app dialog primitive, and a terminal command input. Also repointed `workspace/lib/api/capabilities.ts` from the ai-router base to the platform base (it was calling non-existent `/api/v1/code/*` routes, breaking BYOK + Build/Preview) |
 
 Deliberately left honest rather than faked:
 
-- **Agents console transport (T3.5):** no SSE/WebSocket/polling event producer exists for workspace tasks, so the transcript is labelled a **snapshot** instead of pretending to stream live.
-- **Connectors (T3.6):** no provider OAuth/credential handshake exists, so "Connect" is relabelled "Mark connected (metadata only)" with an explicit notice.
+- **Agents console transport (T3.5):** now a **real polling transport** — `GET /api/domain/workspaces/:id/tasks/:id` reads a backend task record and `POST .../run` drives one real AI-router conversation (`workspaceTaskService.js`). The transcript polls that record and updates live; when the router is unreachable the task is marked `failed` with an explicit error event, never a fabricated reply. (Still polling rather than SSE/WebSocket — the UI says so.)
+- **Connectors (T3.6):** now a **real credential handshake** — `POST /api/domain/workspaces/:id/connectors/:id/credential` seals a provider token at rest (same key material as BYOK) and masks it in every response. This is explicitly **not** a browser OAuth redirect: `oauthRedirectSupported: false` and the UI states that no OAuth callback endpoint exists.
 - **Files (T3.3):** only metadata (name/type/size) is stored; the UI is relabelled "Register File" and reports real registered bytes rather than a fabricated storage bar.
 
 ---
@@ -180,7 +180,7 @@ Legend: **[REAL]** wired to an API · **[LOCAL]** state-only, not persisted · *
 
 # Part B — Implementation Plan
 
-> **Status: implemented.** Phases 0–3 landed (see the implementation log at the top). Phase 4 (coding area polish, T4.1–T4.x) is not started.
+> **Status: implemented.** Phases 0–4 landed (see the implementation log at the top). Phase 4 acceptance is met: the model selection takes effect (it binds/unbinds a workspace model and is passed to the plan/propose calls), and the VS Code entry point performs a real action — it issues a time-boxed bridge grant and shows a copy-to-clipboard setup panel labelled as manual.
 
 ## Sequencing principle
 Fix the red build first (everything else is unverifiable while `main` is failing), then billing truthfulness (money path), then dashboard intelligence, then workspace UX polish.
@@ -215,7 +215,7 @@ Fix the red build first (everything else is unverifiable while `main` is failing
 - **T3.7** Remove stale “mock console seam” comment; gate or remove the `/workspaces/components` dev route in production.
 - **Acceptance:** no visible control silently does nothing; no fabricated metrics presented as live.
 
-## Phase 4 — Coding area polish (~2–3 days)
+## Phase 4 — Coding area polish (~2–3 days) — implemented
 - **T4.1** Wire the Coding Intelligence model selector to `onChange` and pass the chosen connection to the AI calls.
 - **T4.2** Replace the VS Code `window.prompt` command with a real `vscode://` deep link (or an in-app copy-to-clipboard panel clearly labelled as manual setup).
 - **T4.3** Replace `window.prompt`/`confirm` CRUD with proper dialogs (also unblocks automated tests).
