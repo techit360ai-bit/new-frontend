@@ -1,11 +1,14 @@
 // frontend/src/dashboard/collaborators/section/components/collab/Dashboard.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { TrendingUp, ArrowRight, CheckCircle, GraduationCap, Headphones, Award, Target } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { EMPTY_EQUITY, fetchCollaboratorEquity, type CollaboratorEquity } from "@/lib/api/equity";
 import { EMPTY_EARNINGS, fetchCollaboratorEarnings, type CollaboratorEarnings } from "@/lib/api/earnings";
 import { fetchCollaboratorScores, type CollaboratorScores } from "@/lib/api/collaboratorScores";
+import { fetchCollaboratorSummary, type CollaboratorLiveSummary } from "@/lib/api/collaboratorSummary";
+import { patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
 import { WelcomeBack } from "@/components/WelcomeBack";
 
 interface BuildSummary {
@@ -46,6 +49,41 @@ export function Dashboard() {
       });
     return () => { alive = false; };
   }, []);
+
+  const [summary, setSummary] = useState<CollaboratorLiveSummary | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchCollaboratorSummary()
+      .then((data) => { if (alive) setSummary(data); })
+      .catch(() => { if (alive) setSummary(null); });
+    return () => { alive = false; };
+  }, []);
+
+  const focusTasks = useMemo(
+    () => (summary?.tasks ?? []).filter((task) => task.status !== "completed").slice(0, 5),
+    [summary],
+  );
+  const recentActivity = useMemo(
+    () => (summary?.tasks ?? [])
+      .filter((task) => task.status === "completed")
+      .slice(0, 5)
+      .map((task) => ({ id: `task-${task.id}`, message: `Completed “${task.title}” in ${task.projectName}`, href: `/workspaces/build?startup=${task.projectId}` })),
+    [summary],
+  );
+
+  const completeTask = async (task: CollaboratorTask) => {
+    const nextStatus = task.status === "completed" ? "pending" : "completed";
+    try {
+      await patchCollaboratorTask(
+        { id: task.id, workspaceId: task.workspaceId, projectId: task.projectId, projectName: task.projectName },
+        { status: nextStatus },
+      );
+      setSummary((cur) => cur ? { ...cur, tasks: cur.tasks.map((row) => row.id === task.id ? { ...row, status: nextStatus } : row) } : cur);
+      toast(nextStatus === "completed" ? "Task marked complete" : "Task reopened");
+    } catch {
+      toast.error("Could not update the task.");
+    }
+  };
 
   const firstName = (collaboratorProfile.name || "Collaborator").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -253,6 +291,49 @@ export function Dashboard() {
         )}
       </div>
 
+      {/* Contribution intelligence — workspace/project health + contribution signal (T2.3) */}
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Target className="w-5 h-5 text-brand-accent" />
+          <h2 className="text-sm font-semibold text-text-secondary">Contribution intelligence</h2>
+        </div>
+        {summary && summary.tasks.length > 0 ? (
+          <div className="grid gap-6 lg:grid-cols-[auto_1fr_1fr]">
+            <div>
+              <p className="text-3xl font-bold text-text-primary tabular-nums">{summary.compositeScore}</p>
+              <p className="text-xs text-text-muted mt-0.5">Composite contribution score</p>
+              <p className="text-xs text-text-muted mt-2">{summary.tasks.length} tasks across {summary.projects.length} workspace{summary.projects.length === 1 ? "" : "s"}</p>
+            </div>
+            <div className="space-y-2">
+              {summary.metrics.map((metric) => (
+                <div key={metric.name}>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-text-secondary font-medium">{metric.name}</span>
+                    <span className="text-text-primary font-semibold tabular-nums">{metric.value}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-surface-secondary rounded-full overflow-hidden">
+                    <div className="h-full bg-brand-accent" style={{ width: `${metric.value}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              {summary.perProject.slice(0, 4).map((project) => (
+                <div key={project.id} className="flex items-center justify-between gap-3 text-sm border border-border-subtle rounded-lg px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-text-secondary">{project.name}</p>
+                    <p className="text-xs text-text-muted">{project.shipped} shipped · impact {project.impactAvg}</p>
+                  </div>
+                  <button type="button" onClick={() => navigate(`/workspaces/build?startup=${project.id}`)} className="text-xs text-status-warning hover:underline shrink-0">Open</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-text-muted">No workspace contribution signal yet. Assigned workspace tasks will build your contribution intelligence here.</p>
+        )}
+      </div>
+
       {/* Active Builds */}
       <div>
         <h2 className="text-sm font-semibold text-text-secondary mb-3">Active Builds</h2>
@@ -303,7 +384,27 @@ export function Dashboard() {
             <h2 className="text-sm font-semibold text-text-secondary">Today's focus</h2>
             <Link to="/collaborator/tasks" className="text-xs text-status-warning hover:underline">View all tasks</Link>
           </div>
-          <p className="text-sm text-text-muted">No live task assignments yet. Workspace tasks will appear here when assigned.</p>
+          {focusTasks.length > 0 ? (
+            <ul className="space-y-3">
+              {focusTasks.map((task) => (
+                <li key={task.id} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={task.status === "completed"}
+                    onChange={() => { void completeTask(task); }}
+                    className="w-4 h-4 accent-brand-accent cursor-pointer"
+                  />
+                  <Link to={`/workspaces/build?startup=${task.projectId}`} className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-text-primary truncate">{task.title}</p>
+                    <p className="text-xs text-text-muted truncate">{task.aiReason || task.projectName}</p>
+                  </Link>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider bg-surface-secondary text-text-secondary">{task.priority}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-muted">No live task assignments yet. Workspace tasks will appear here when assigned.</p>
+          )}
         </div>
 
         <div className="border border-border-default bg-surface-primary rounded-xl p-6">
@@ -329,7 +430,21 @@ export function Dashboard() {
       {/* Recent activity */}
       <div className="border border-border-default bg-surface-primary rounded-xl p-6">
         <h2 className="text-sm font-semibold text-text-secondary mb-4">Recent activity</h2>
-        <p className="text-sm text-text-muted">No persisted collaborator activity yet.</p>
+        {recentActivity.length > 0 ? (
+          <ul className="space-y-2">
+            {recentActivity.map((item) => (
+              <li key={item.id}>
+                <Link to={item.href} className="flex items-center gap-3 text-sm text-text-secondary hover:text-status-warning">
+                  <CheckCircle className="w-4 h-4 text-text-disabled shrink-0" />
+                  <span className="flex-1">{item.message}</span>
+                  <ArrowRight className="w-4 h-4 text-text-disabled shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-text-muted">No persisted collaborator activity yet. Completed workspace tasks will appear here.</p>
+        )}
       </div>
 
       {/* TechIT Academy — Collaborator Learning */}
