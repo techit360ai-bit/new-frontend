@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MoreVertical, Paperclip, Search, Send, Smile, Ticket } from 'lucide-react';
+import { Search, Send, Ticket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -185,7 +185,7 @@ export function Chat() {
               {selectedChannel ? `${liveMessages.length} persisted message${liveMessages.length === 1 ? '' : 's'}` : 'Connect messaging channels to start chatting'}
             </p>
           </div>
-          <div className="flex items-center gap-2"><Link to="/support" className="inline-flex items-center gap-2 rounded-lg border border-border-default px-3 py-2 text-sm text-text-secondary hover:bg-background-primary" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link><button className="p-2 hover:bg-surface-secondary rounded-lg" aria-label="Channel actions"><MoreVertical className="w-5 h-5 text-text-muted" /></button></div>
+          <div className="flex items-center gap-2"><Link to="/support" className="inline-flex items-center gap-2 rounded-lg border border-border-default px-3 py-2 text-sm text-text-secondary hover:bg-background-primary" aria-label="Open support tickets"><Ticket className="h-4 w-4" />Support</Link></div>
         </div>
 
         {error && (
@@ -224,9 +224,6 @@ export function Chat() {
 
         <div className="p-4 border-t border-border-default">
           <div className="flex items-center gap-2 bg-background-primary rounded-lg p-2 border border-border-default focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-[#2196F3]">
-            <button className="p-2 hover:bg-gray-200 rounded transition-colors" aria-label="Attach file" disabled={!selectedChannel}>
-              <Paperclip className="w-4 h-4 text-text-muted" />
-            </button>
             <input
               type="text"
               value={draft}
@@ -236,10 +233,8 @@ export function Chat() {
               placeholder={selectedChannel ? `Message #${selectedChannel.name.toLowerCase()}` : 'Select a channel'}
               className="flex-1 bg-transparent outline-none disabled:cursor-not-allowed"
             />
-            <button className="p-2 hover:bg-gray-200 rounded transition-colors" aria-label="Emoji" disabled={!selectedChannel}>
-              <Smile className="w-4 h-4 text-text-muted" />
-            </button>
             <button
+              type="button"
               onClick={() => { void handleChannelSend(); }}
               disabled={!selectedChannel || sending || !draft.trim()}
               className="p-2 bg-brand-primary text-white rounded hover:bg-brand-primary/90 transition-colors disabled:cursor-not-allowed disabled:bg-gray-300"

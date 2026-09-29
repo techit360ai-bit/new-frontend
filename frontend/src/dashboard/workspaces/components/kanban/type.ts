@@ -1,3 +1,5 @@
+import type { AgentTaskStatus } from '../../lib/types';
+
 export interface Task {
   id: string;
   title: string;
@@ -8,6 +10,6 @@ export interface Task {
   };
   priority: 'high' | 'medium' | 'low';
   dueDate: string;
-  timeTracked: string;
+  status: AgentTaskStatus;
   labels?: string[];
 }

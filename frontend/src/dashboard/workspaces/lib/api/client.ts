@@ -1,4 +1,4 @@
-import { domainGet, domainPost } from '@/lib/domainApi';
+import { domainGet, domainPatch, domainPost } from '@/lib/domainApi';
 import { fetchWorkspaces } from '@/lib/api/workspaces';
 
 let activeWorkspaceId: string | null | undefined;
@@ -31,4 +31,11 @@ export async function workspacePost<T>(path: string, body: unknown): Promise<T |
   if (!workspaceId) return null;
   const clean = path.startsWith('/') ? path : `/${path}`;
   return domainPost<T>(`/workspaces/${workspaceId}${clean}`, body);
+}
+
+export async function workspacePatch<T>(path: string, body: unknown): Promise<T | null> {
+  const workspaceId = await resolveWorkspaceId();
+  if (!workspaceId) return null;
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  return domainPatch<T>(`/workspaces/${workspaceId}${clean}`, body);
 }

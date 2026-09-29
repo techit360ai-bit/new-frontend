@@ -331,7 +331,9 @@ const App = () => {
           <Route path="notifications" element={<WsNotifications />} />
           <Route path="settings" element={<WsSettings />} />
         </Route>
-        <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />
+        {import.meta.env.DEV && (
+          <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />
+        )}
 
         {/* Organization onboarding (flat, outside layout) */}
         <Route path="/org/onboarding/step-1" element={<RequireRole allowed={["organisation"]}><OrgStep1 /></RequireRole>} />

@@ -1,7 +1,14 @@
-import { FileText, FolderOpen, Image, FileCode, Download, MoreVertical, Upload } from 'lucide-react';
+import { FileText, FolderOpen, Image, FileCode, Trash2, Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { fetchDomainFiles, createDomainFile, type DomainFileItem } from '@/lib/api/files';
+import { fetchDomainFiles, createDomainFile, deleteDomainFile, type DomainFileItem } from '@/lib/api/files';
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
 
 export function Files() {
   const [files, setFiles] = useState<DomainFileItem[]>([]);
@@ -24,12 +31,22 @@ export function Files() {
           sizeBytes: file.size,
         });
         setFiles((prev) => [created, ...prev]);
-        toast.success(`${file.name} uploaded`);
+        toast.success(`${file.name} registered`);
       } catch (err) {
         toast.error(`Failed to upload ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDelete = async (file: DomainFileItem) => {
+    try {
+      await deleteDomainFile(file.id);
+      setFiles((prev) => prev.filter((row) => row.id !== file.id));
+      toast.success(`${file.name} removed`);
+    } catch (err) {
+      toast.error(`Could not remove ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
 
   useEffect(() => {
@@ -66,6 +83,9 @@ export function Files() {
     }
   };
 
+  // Real total of the metadata we actually hold — never a fabricated % bar.
+  const registeredBytes = files.reduce((sum, file) => sum + (file.sizeBytes ?? 0), 0);
+
   return (
     <div className="h-full bg-background-primary">
       {/* Page Header */}
@@ -76,7 +96,7 @@ export function Files() {
               Files
             </h1>
             <p className="text-sm text-text-muted mt-1">
-              Manage and organize your project files
+              Register file metadata (name, type, size). File bytes are not uploaded or stored.
             </p>
           </div>
           <input
@@ -91,7 +111,7 @@ export function Files() {
             className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm"
           >
             <Upload className="w-4 h-4" />
-            <span className="text-sm font-medium">Upload Files</span>
+            <span className="text-sm font-medium">Register File</span>
           </button>
         </div>
       </div>
@@ -137,13 +157,14 @@ export function Files() {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
-                      {file.type === 'file' && (
-                        <button className="p-2 hover:bg-surface-secondary rounded transition-colors">
-                          <Download className="w-4 h-4 text-text-muted" />
-                        </button>
-                      )}
-                      <button className="p-2 hover:bg-surface-secondary rounded transition-colors">
-                        <MoreVertical className="w-4 h-4 text-text-muted" />
+                      <button
+                        type="button"
+                        onClick={() => { void handleDelete(file); }}
+                        aria-label={`Remove ${file.name}`}
+                        title={`Remove ${file.name}`}
+                        className="p-2 hover:bg-surface-secondary rounded transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-text-muted" />
                       </button>
                     </div>
                   </td>
@@ -156,12 +177,14 @@ export function Files() {
         {!loading && !error && files.length > 0 && (
           <div className="mt-6 bg-surface-primary rounded-xl shadow-sm border border-border-default p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">Storage Records</h3>
-              <span className="text-sm text-text-muted">{files.filter((file) => file.type === 'file').length} files recorded</span>
+              <h3 className="font-semibold">Registered records</h3>
+              <span className="text-sm text-text-muted">
+                {files.filter((file) => file.type === 'file').length} files · {formatBytes(registeredBytes)} of metadata
+              </span>
             </div>
-            <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-brand-primary rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
-            </div>
+            <p className="text-sm text-text-muted">
+              Registration stores name, type and size only. No file bytes are uploaded, so there is no storage quota to display.
+            </p>
           </div>
         )}
       </div>

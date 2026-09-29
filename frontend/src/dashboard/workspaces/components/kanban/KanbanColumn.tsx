@@ -7,10 +7,11 @@ interface KanbanColumnProps {
   title: string;
   tasks: Task[];
   onDrop: (taskId: string) => void;
+  onAdd?: () => void;
   color: string;
 }
 
-export function KanbanColumn({ title, tasks, onDrop, color }: KanbanColumnProps) {
+export function KanbanColumn({ title, tasks, onDrop, onAdd, color }: KanbanColumnProps) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'TASK',
     drop: (item: { id: string }) => onDrop(item.id),
@@ -30,7 +31,14 @@ export function KanbanColumn({ title, tasks, onDrop, color }: KanbanColumnProps)
             {tasks.length}
           </span>
         </div>
-        <button className="p-1 hover:bg-surface-primary rounded transition-colors">
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={!onAdd}
+          aria-label={`New task in ${title}`}
+          title={`New task in ${title}`}
+          className="p-1 hover:bg-surface-primary rounded transition-colors disabled:opacity-40 disabled:cursor-default"
+        >
           <Plus className="w-4 h-4 text-text-muted" />
         </button>
       </div>

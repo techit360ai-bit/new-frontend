@@ -15,6 +15,7 @@ import { fetchAudioBriefing } from "@/lib/api/audio";
 import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
 import { fetchCollaboratorTasks, patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
 import { fetchCustomerValidationSessions, type CustomerValidationSession } from "@/lib/api/incubation";
+import { fetchFounderCapTable, type FounderCapTable } from "@/lib/api/founderEquity";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
@@ -89,6 +90,7 @@ export function Dashboard() {
   const [tasks, setTasks] = useState<FounderTask[]>([]);
   const [workspaceTasks, setWorkspaceTasks] = useState<CollaboratorTask[]>([]);
   const [validationSessions, setValidationSessions] = useState<CustomerValidationSession[]>([]);
+  const [capTable, setCapTable] = useState<FounderCapTable | null>(null);
   const [openStage, setOpenStage] = useState<string | null>(null);
 
   // GSIS master score + alerts from ai-router (surfaced for the first time).
@@ -127,6 +129,15 @@ export function Dashboard() {
     fetchCustomerValidationSessions(5)
       .then((result) => { if (alive) setValidationSessions(Array.isArray(result.sessions) ? result.sessions : []); })
       .catch(() => { if (alive) setValidationSessions([]); });
+    return () => { alive = false; };
+  }, []);
+
+  // Committed collaborator equity per venture → cap table (derived, never invented).
+  useEffect(() => {
+    let alive = true;
+    fetchFounderCapTable()
+      .then((result) => { if (alive) setCapTable(result); })
+      .catch(() => { if (alive) setCapTable(null); });
     return () => { alive = false; };
   }, []);
 
@@ -548,6 +559,59 @@ export function Dashboard() {
           <p className="text-sm text-text-muted">No customer-validation sessions yet. Start one to turn customer evidence into a GSIS signal.</p>
         )}
       </div>
+
+      {/* Cap table — committed collaborator equity (derived, never invented) */}
+      {capTable && (
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="text-sm font-semibold text-text-secondary">Equity &amp; cap table</h2>
+            <span className="text-[10px] uppercase tracking-wide text-text-muted">Derived from committed equity</span>
+          </div>
+          {capTable.totals.ventures > 0 ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <IntelligenceMetric label="Ventures" value={String(capTable.totals.ventures)} />
+                <IntelligenceMetric label="Committed grants" value={String(capTable.totals.committedGrants)} />
+                <IntelligenceMetric label="Pending proposals" value={String(capTable.totals.pendingProposals)} />
+              </div>
+              <ul className="space-y-3">
+                {capTable.ventures.map((venture) => (
+                  <li key={venture.workspaceId} className="rounded-lg border border-border-subtle p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-text-primary truncate">{venture.name}</p>
+                      <span className="text-xs text-text-muted tabular-nums">
+                        {venture.committedPercent}% committed · {venture.retainedPercent}% retained{venture.retainedDerived ? " (derived)" : ""}
+                      </span>
+                    </div>
+                    {venture.grants.length > 0 ? (
+                      <ul className="mt-2 space-y-1 text-xs text-text-secondary">
+                        {venture.grants.map((grant) => (
+                          <li key={grant.collaboratorId} className="flex items-center justify-between gap-3">
+                            <span className="truncate">{grant.collaboratorName} · {grant.role}</span>
+                            <span className="shrink-0 tabular-nums text-status-success">{grant.equityPercent}%</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-xs text-text-muted">No committed collaborator equity recorded for this venture.</p>
+                    )}
+                    {venture.pending.length > 0 && (
+                      <p className="mt-2 text-xs text-text-muted">
+                        Pending (not yet committed): {venture.pending.map((proposal) => `${proposal.collaboratorName} ${proposal.equityPercent}%`).join(" · ")}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-text-disabled">{capTable.basis}</p>
+            </div>
+          ) : (
+            <p className="text-sm text-text-muted">
+              No ventures yet. Equity you commit to collaborators through workspace invitations will appear here.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Journey strip */}
       <div className="border border-border-default bg-surface-primary rounded-xl p-6">

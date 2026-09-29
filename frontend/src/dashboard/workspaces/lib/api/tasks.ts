@@ -1,5 +1,5 @@
 import type { AgentTask, TaskEvent } from '../types';
-import { workspaceGet, workspacePost } from './client';
+import { workspaceGet, workspacePatch, workspacePost } from './client';
 
 function normalizeTask(row: Partial<AgentTask> & Record<string, unknown>): AgentTask {
   return {
@@ -32,6 +32,15 @@ export async function createTask(agentId: string, prompt: string): Promise<strin
   return String(data.task.id);
 }
 
+/** Persist a task's status so Kanban moves survive a reload. */
+export async function updateTaskStatus(id: string, status: AgentTask['status']): Promise<AgentTask | undefined> {
+  const data = await workspacePatch<{ task: Partial<AgentTask> & Record<string, unknown> }>(
+    `/tasks/${encodeURIComponent(id)}`,
+    { status },
+  );
+  return data?.task ? normalizeTask(data.task) : undefined;
+}
+
 export async function resolveApproval(taskId: string, approvalId: string, decision: 'approved' | 'rejected'): Promise<void> {
   await workspacePost('/tasks', {
     taskId,
@@ -42,6 +51,11 @@ export async function resolveApproval(taskId: string, approvalId: string, decisi
   });
 }
 
+/**
+ * Yields the events already recorded on a task — a one-shot snapshot, NOT a live
+ * stream. This workspace has no SSE/WebSocket/polling producer for agent events,
+ * so callers must treat the transcript as a snapshot (see Transcript.tsx).
+ */
 export async function* streamTask(taskId: string): AsyncGenerator<TaskEvent> {
   const task = await getTask(taskId);
   for (const event of task?.events ?? []) {

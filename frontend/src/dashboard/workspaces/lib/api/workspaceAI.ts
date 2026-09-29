@@ -2,7 +2,7 @@
 //
 // Workspace AI — talks to the ai-router backend (github.com/techit360ai-bit/ai-router)
 // /api/v1/workspace/* : task suggestions, code review, sprint planning.
-// Separate from the mock console seam (client.ts); these hit the real engine and
+// Independent of client.ts (workspace domain API); these hit the real engine and
 // return null on failure so the console degrades gracefully.
 
 import { apiPost } from "@/lib/api/client";
