@@ -1,4 +1,6 @@
-import { apiGet, apiPost } from '@/lib/api/client'
+// TVCE endpoints live on the BACKEND service (/api/tvce/*), not the ai-router.
+// apiUrl() points at the ai-router, so use the generic BACKEND client.
+import { platformGet as apiGet, platformPost as apiPost } from '@/lib/platformApi'
 
 export interface TvceDecision {
   allowed: boolean
