@@ -74,3 +74,14 @@ export interface TvceCheckoutResponse {
 export function createTvceCheckout(input: TvceCheckoutRequest) {
   return apiPost<TvceCheckoutResponse>('/tvce/checkout/session', input)
 }
+
+export type CheckoutProvider = 'stripe' | 'paystack' | 'flutterwave'
+
+/** Booleans only — which hosted checkout providers this deployment can actually reach. */
+export interface CheckoutProvidersResponse {
+  providers: Record<CheckoutProvider, boolean>
+}
+
+export function fetchCheckoutProviders() {
+  return apiGet<CheckoutProvidersResponse>('/tvce/checkout/providers')
+}

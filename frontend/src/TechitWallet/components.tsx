@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { CreditPackage, WalletBucket, WalletRestriction, WalletTransaction } from '@/lib/api/wallet';
+import type { CreditPackage, SubscriptionUsage, WalletAnalytics, WalletBucket, WalletRestriction, WalletTransaction } from '@/lib/api/wallet';
+import type { TvceFreeUsage } from '@/lib/api/tvce';
 
 export function WalletCard({ wallet }: { wallet: WalletBucket }) {
   const expiry = wallet.expiresAt ? new Date(wallet.expiresAt).toLocaleDateString() : null;
@@ -19,7 +20,7 @@ export function WalletCard({ wallet }: { wallet: WalletBucket }) {
 
 export function WalletSummary({ wallets, deductionOrder }: { wallets: WalletBucket[]; deductionOrder: string[] }) {
   const labels = Object.fromEntries(wallets.map(wallet => [wallet.id, wallet.label]));
-  return <section aria-labelledby="deduction-order" className="rounded-xl border bg-muted/30 p-4"><div className="flex items-start gap-3"><Info className="mt-0.5 h-5 w-5 text-primary" /><div><h2 id="deduction-order" className="font-medium">Credit deduction order</h2><p className="mt-1 text-sm text-muted-foreground">The backend applies credits in this order. The frontend does not perform deductions.</p><div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-medium">{deductionOrder.map((id, index) => <span key={id} className="flex items-center gap-2"><span className="rounded-md bg-background px-2 py-1">{labels[id] || id}</span>{index < deductionOrder.length - 1 && <ArrowDown className="h-4 w-4 text-muted-foreground sm:rotate-[-90deg]" />}</span>)}</div></div></div></section>;
+  return <section aria-labelledby="deduction-order" className="rounded-xl border bg-muted/30 p-4"><div className="flex items-start gap-3"><Info className="mt-0.5 h-5 w-5 text-primary" /><div><h2 id="deduction-order" className="font-medium">Funding sources applied</h2><p className="mt-1 text-sm text-muted-foreground">Reported from completed usage, most-used first. The metering service records which funding source paid for each run; the frontend never performs deductions.</p><div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-medium">{deductionOrder.map((id, index) => <span key={id} className="flex items-center gap-2"><span className="rounded-md bg-background px-2 py-1">{labels[id] || id}</span>{index < deductionOrder.length - 1 && <ArrowDown className="h-4 w-4 text-muted-foreground sm:rotate-[-90deg]" />}</span>)}</div></div></div></section>;
 }
 
 export function WalletAlert({ children, tone = 'warning' }: { children: React.ReactNode; tone?: 'warning' | 'info' }) { return <div className={`flex items-start gap-3 rounded-xl border p-4 text-sm ${tone === 'warning' ? 'border-status-warning/60 bg-status-warning-soft text-amber-950 dark:bg-amber-950/20 dark:text-amber-100' : 'border-primary/30 bg-primary/5'}`}><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><div>{children}</div></div>; }
@@ -34,3 +35,38 @@ export function CreditPackCard({ pack, onSelect }: { pack: CreditPackage; onSele
 
 export function WalletSkeleton() { return <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <Card key={index} className="space-y-4 p-5"><Skeleton className="h-5 w-2/3" /><Skeleton className="h-10 w-1/2" /><Skeleton className="h-2 w-full" /><Skeleton className="h-4 w-full" /></Card>)}</div>; }
 export function EmptyWalletState({ onStart }: { onStart: () => void }) { return <div className="rounded-xl border border-dashed p-10 text-center"><Clock3 className="mx-auto h-8 w-8 text-muted-foreground" /><h2 className="mt-3 font-semibold">No wallet activity yet.</h2><p className="mt-1 text-sm text-muted-foreground">Start using TechIT to see credits and transactions here.</p><Button className="mt-4" onClick={onStart}>Start using TechIT</Button></div>; }
+
+export function InfoCard({ title, detail }: { title: string; detail: string }) {
+  return <Card><CardHeader><CardTitle>{title}</CardTitle></CardHeader><CardContent><p className="text-sm text-muted-foreground">{detail}</p></CardContent></Card>;
+}
+
+export function SubscriptionUsageCard({ usage }: { usage?: SubscriptionUsage | null }) {
+  if (!usage) return <InfoCard title="Subscription usage" detail="No active subscription. Subscribe to a plan to see included, consumed, and remaining credits." />;
+  const included = Number(usage.included ?? 0);
+  const consumed = Number(usage.consumed ?? 0);
+  const remaining = Number(usage.remaining ?? Math.max(0, included - consumed));
+  const percent = included > 0 ? Math.min(100, Math.round((consumed / included) * 100)) : 0;
+  return <Card><CardHeader><CardTitle>Subscription usage</CardTitle></CardHeader><CardContent className="space-y-3"><div className="flex items-end justify-between"><span className="text-3xl font-semibold tracking-tight">{remaining.toLocaleString()}</span><span className="text-sm text-muted-foreground">credits remaining</span></div><Progress value={percent} aria-label="Subscription usage" /><div className="flex justify-between text-xs text-muted-foreground"><span>{consumed.toLocaleString()} used of {included.toLocaleString()}</span><span>{usage.renewalAt ? `Renews ${new Date(usage.renewalAt).toLocaleDateString()}` : 'No renewal date'}</span></div></CardContent></Card>;
+}
+
+export function WalletAnalyticsCard({ analytics, error }: { analytics: WalletAnalytics | null; error?: boolean }) {
+  if (error) return <InfoCard title="Wallet source analytics" detail="Wallet analytics could not be loaded from the billing API." />;
+  const totals = analytics?.sourceTotals || {};
+  const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+  if (!entries.length) return <InfoCard title="Wallet source analytics" detail="No completed credit usage has been recorded for this account yet." />;
+  const peak = Math.max(...entries.map(([, credits]) => credits), 1);
+  return <Card><CardHeader><CardTitle>Wallet source analytics</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-muted-foreground">{Number(analytics?.totalConsumed ?? 0).toLocaleString()} credits consumed across {entries.length} funding source{entries.length === 1 ? '' : 's'} ({analytics?.period}).</p>{entries.map(([source, credits]) => <div key={source} className="space-y-1"><div className="flex justify-between text-sm"><span className="font-medium">{analytics?.sourceLabels?.[source] || source}</span><span className="text-muted-foreground">{credits.toLocaleString()}</span></div><Progress value={Math.round((credits / peak) * 100)} aria-label={`${source} credits consumed`} /></div>)}</CardContent></Card>;
+}
+
+export function FreeUsageCard({ usage }: { usage: TvceFreeUsage[] }) {
+  if (!usage.length) return <InfoCard title="Free plan details" detail="The billing service has not reported free-plan allowances for this account yet." />;
+  return <Card><CardHeader><CardTitle>Free plan details</CardTitle></CardHeader><CardContent className="space-y-3">{usage.map(row => { const quota = Number(row.quota || 0); const used = Number(row.used || 0); const percent = quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0; return <div key={row.capability} className="space-y-1"><div className="flex justify-between text-sm"><span className="font-medium">{formatCapability(row.capability)}</span><span className="text-muted-foreground">{used} / {quota}</span></div><Progress value={percent} aria-label={`${row.capability} free usage`} /></div>; })}<p className="text-xs text-muted-foreground">Included free usage resets {String(usage[0]?.period || 'monthly').replace('_', ' ')}.</p></CardContent></Card>;
+}
+
+export function CreditsConsumedCard({ consumedThisPeriod, lifetimeCreditsUsed }: { consumedThisPeriod?: number; lifetimeCreditsUsed: number }) {
+  return <Card><CardHeader><CardTitle>Credits consumed</CardTitle></CardHeader><CardContent className="space-y-3"><div className="flex items-end justify-between"><span className="text-3xl font-semibold tracking-tight">{Number(consumedThisPeriod ?? 0).toLocaleString()}</span><span className="text-sm text-muted-foreground">this month</span></div><p className="text-sm text-muted-foreground">{Number(lifetimeCreditsUsed ?? 0).toLocaleString()} credits consumed in total.</p></CardContent></Card>;
+}
+
+function formatCapability(capability: string): string {
+  return capability.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
+}
