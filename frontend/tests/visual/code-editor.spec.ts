@@ -62,7 +62,7 @@ for (const viewport of [{ name: 'desktop', width: 1440, height: 900 }, { name: '
     await page.setViewportSize(viewport);
     await prepare(page);
     await page.goto('/workspaces/code?workspace=workspace-1');
-    if (viewport.name === 'desktop') await expect(page.getByText('TechIT Coding Intelligence')).toBeVisible({ timeout: 20_000 });
+    if (viewport.name === 'desktop') await expect(page.getByText('Coding Intelligence')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText('src/App.tsx')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Run', exact: true })).toBeVisible();
     await expect(page.locator('.monaco-editor')).toBeVisible({ timeout: 20_000 });
