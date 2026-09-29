@@ -13,33 +13,22 @@ import {
 } from "@/lib/api/gsis";
 import { fetchAudioBriefing } from "@/lib/api/audio";
 import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
+import { fetchCollaboratorTasks, patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
+import { fetchCustomerValidationSessions, type CustomerValidationSession } from "@/lib/api/incubation";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
 import { WelcomeBack } from "@/components/WelcomeBack";
-
-interface Signal {
-  id: string;
-  message: string;
-  href: string;
-}
-
-interface FounderTask {
-  id: string;
-  title: string;
-  detail: string;
-  priority: "overdue" | "due-soon" | "this-week";
-  href: string;
-  done: boolean;
-}
-
-interface JourneyStage {
-  id: string;
-  label: string;
-  status: "complete" | "active" | "upcoming";
-  progress: number;
-  detail: string;
-}
+import {
+  deriveFounderSignals,
+  deriveJourney,
+  deriveRecentActivity,
+  toFounderTask,
+  validationTotals as computeValidationTotals,
+  type FounderSignal as Signal,
+  type FounderTask,
+  type JourneyStage,
+} from "@/lib/dashboard/founderIntelligence";
 
 interface Build {
   id: string;
@@ -77,10 +66,6 @@ function normalizedStage(stage: string | undefined): FounderStage {
   return "Idea";
 }
 
-const EMPTY_SIGNALS: Signal[] = [];
-const EMPTY_TASKS: FounderTask[] = [];
-const EMPTY_JOURNEY: JourneyStage[] = [];
-
 function displayScore(value: number | null | undefined) {
   return value == null ? "Unknown" : Math.round(value).toString();
 }
@@ -101,9 +86,9 @@ function IntelligenceMetric({ label, value }: { label: string; value: string }) 
 export function Dashboard() {
   const navigate = useNavigate();
   const { founderProfile: p } = useFounderProfile();
-  const [tasks, setTasks]     = useState<FounderTask[]>(EMPTY_TASKS);
-  const [signals] = useState<Signal[]>(EMPTY_SIGNALS);
-  const [journey] = useState<JourneyStage[]>(EMPTY_JOURNEY);
+  const [tasks, setTasks] = useState<FounderTask[]>([]);
+  const [workspaceTasks, setWorkspaceTasks] = useState<CollaboratorTask[]>([]);
+  const [validationSessions, setValidationSessions] = useState<CustomerValidationSession[]>([]);
   const [openStage, setOpenStage] = useState<string | null>(null);
 
   // GSIS master score + alerts from ai-router (surfaced for the first time).
@@ -120,6 +105,28 @@ export function Dashboard() {
     let alive = true;
     runAnomalyScan([{ kind: "founder_execution", source: "dashboard" }])
       .then((r) => { if (alive) setRiskFlags(r.risk_flags ?? []); });
+    return () => { alive = false; };
+  }, []);
+
+  // Live workspace tasks for this founder → "Today's focus" (persisted on toggle).
+  useEffect(() => {
+    let alive = true;
+    fetchCollaboratorTasks()
+      .then((snapshot) => {
+        if (!alive) return;
+        setWorkspaceTasks(snapshot.tasks);
+        setTasks(snapshot.tasks.filter((task) => task.status !== "completed").slice(0, 5).map(toFounderTask));
+      })
+      .catch(() => { if (alive) { setWorkspaceTasks([]); setTasks([]); } });
+    return () => { alive = false; };
+  }, []);
+
+  // Live customer-validation sessions → evidence metric + dashboard card.
+  useEffect(() => {
+    let alive = true;
+    fetchCustomerValidationSessions(5)
+      .then((result) => { if (alive) setValidationSessions(Array.isArray(result.sessions) ? result.sessions : []); })
+      .catch(() => { if (alive) setValidationSessions([]); });
     return () => { alive = false; };
   }, []);
 
@@ -196,6 +203,16 @@ export function Dashboard() {
     if ((activeVenture?.progress ?? 0) > 0) {
       metrics.product = { score: activeVenture?.progress, status: "derived", evidence_level: 2, source: "project_progress", observed_at: observedAt };
     }
+    const totalResponses = validationSessions.reduce((sum, session) => sum + Number(session.totalResponseCount || 0), 0);
+    const qualifiedResponses = validationSessions.reduce((sum, session) => sum + Number(session.qualifiedResponseCount || 0), 0);
+    if (totalResponses > 0) {
+      // Observed share of validation responses that qualified (0–1 → 0–100).
+      metrics.customer_validation = { value: Math.min(1, qualifiedResponses / totalResponses), status: "observed", evidence_level: 3, source: "customer_validation", observed_at: observedAt };
+    }
+    if (workspaceTasks.length > 0) {
+      const completedTasks = workspaceTasks.filter((task) => task.status === "completed").length;
+      metrics.execution = { value: completedTasks / workspaceTasks.length, status: "derived", evidence_level: 2, source: "workspace_tasks", observed_at: observedAt };
+    }
     computeGsisV2({
       startup_id: activeVenture?.id,
       declared_stage: activeVenture?.stage ?? p.stage,
@@ -205,7 +222,37 @@ export function Dashboard() {
       metrics,
     }).then((result) => { if (alive) setScorecard(result); });
     return () => { alive = false; };
-  }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users]);
+  }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users, validationSessions, workspaceTasks]);
+
+  const signals = useMemo<Signal[]>(
+    () => deriveFounderSignals({ riskFlags, validationSessions, tasks }),
+    [riskFlags, validationSessions, tasks],
+  );
+
+  const journey = useMemo<JourneyStage[]>(
+    () => deriveJourney(activeVenture?.stage ?? p.stage, activeVenture?.progress),
+    [activeVenture, p.stage],
+  );
+
+  const evidenceSources = useMemo(
+    () => [...new Set(Object.values(scorecard?.components ?? {}).map((component) => component.source).filter(Boolean))],
+    [scorecard],
+  );
+  const evidencePlan = useMemo(() => [
+    { label: "Team size", available: p.currentTeamSize > 0, source: "founder profile" },
+    { label: "Product progress", available: (activeVenture?.progress ?? 0) > 0, source: "project" },
+    { label: "Active users", available: (activeVenture?.users ?? p.users) > 0, source: "venture" },
+    { label: "Monthly revenue", available: (activeVenture?.revenueMonthly ?? p.revenueMonthly) > 0, source: "venture" },
+    { label: "Customer validation", available: validationSessions.some((session) => Number(session.totalResponseCount || 0) > 0), source: "validation sessions" },
+    { label: "Execution evidence", available: workspaceTasks.length > 0, source: "workspace tasks" },
+  ], [p.currentTeamSize, p.users, p.revenueMonthly, activeVenture, validationSessions, workspaceTasks]);
+
+  const validationTotals = useMemo(() => computeValidationTotals(validationSessions), [validationSessions]);
+
+  const recentActivity = useMemo(
+    () => deriveRecentActivity({ workspaceTasks, validationSessions }),
+    [workspaceTasks, validationSessions],
+  );
 
   const firstName = (p.name || "Founder").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -214,9 +261,21 @@ export function Dashboard() {
     [p.foundingYear],
   );
 
-  const toggleTask = (id: string) => {
-    setTasks((cur) => cur.map((t) => t.id === id ? { ...t, done: !t.done } : t));
-    toast("Marked complete");
+  const toggleTask = async (id: string) => {
+    const task = tasks.find((row) => row.id === id);
+    if (!task) return;
+    const nextStatus = task.done ? "pending" : "completed";
+    setTasks((cur) => cur.map((row) => row.id === id ? { ...row, done: !row.done } : row));
+    try {
+      await patchCollaboratorTask(
+        { id: task.id, workspaceId: task.workspaceId, projectId: task.projectId, projectName: task.projectName },
+        { status: nextStatus },
+      );
+      toast(nextStatus === "completed" ? "Task marked complete" : "Task reopened");
+    } catch {
+      setTasks((cur) => cur.map((row) => row.id === id ? { ...row, done: task.done } : row));
+      toast.error("Could not update the task.");
+    }
   };
 
   return (
@@ -383,6 +442,49 @@ export function Dashboard() {
               </p>
             )}
           </div>
+          <div className="mt-5 border-t border-border-subtle pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold uppercase text-text-muted">Evidence sources</p>
+              {evidenceSources.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {evidenceSources.map((source) => <span key={source} className="rounded bg-surface-secondary px-2 py-0.5 text-[10px] text-text-muted">{source}</span>)}
+                </div>
+              ) : <span className="text-[11px] text-text-muted">None observed yet.</span>}
+            </div>
+            {Object.keys(scorecard.components ?? {}).length > 0 && (
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="text-text-muted">
+                    <tr>
+                      <th className="py-1 pr-3 font-medium">Component</th>
+                      <th className="py-1 pr-3 font-medium">Score</th>
+                      <th className="py-1 pr-3 font-medium">Confidence</th>
+                      <th className="py-1 pr-3 font-medium">Status</th>
+                      <th className="py-1 font-medium">Freshness</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.values(scorecard.components ?? {}).map((component) => (
+                      <tr key={component.key} className="border-t border-border-subtle">
+                        <td className="py-1 pr-3 text-text-secondary">{metricLabel(component.key)} <span className="text-text-disabled">· {component.source}</span></td>
+                        <td className="py-1 pr-3 tabular-nums text-text-primary">{Math.round(component.score)}</td>
+                        <td className="py-1 pr-3 tabular-nums text-text-muted">{Math.round(component.confidence * 100)}%</td>
+                        <td className="py-1 pr-3 text-text-muted">{component.status}</td>
+                        <td className="py-1 text-text-muted">{component.freshness}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
+              {evidencePlan.map((entry) => (
+                <p key={entry.label} className={`text-xs ${entry.available ? "text-status-success" : "text-text-muted"}`}>
+                  {entry.available ? "✓" : "○"} {entry.label} <span className="text-text-disabled">· {entry.source}</span>
+                </p>
+              ))}
+            </div>
+          </div>
         </div>
       ) : intel?.gsis ? (
         <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-center justify-between">
@@ -417,6 +519,33 @@ export function Dashboard() {
               ))}
             </ul>
           </div>
+        )}
+      </div>
+
+      {/* Customer evidence — composed from real validation sessions (T2.4) */}
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary">Customer evidence</h2>
+          <Link to="/incubation-hub" className="text-xs text-violet-600 hover:underline">Run validation →</Link>
+        </div>
+        {validationSessions.length > 0 ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-4">
+              <IntelligenceMetric label="Sessions" value={String(validationSessions.length)} />
+              <IntelligenceMetric label="Responses" value={validationTotals.responses.toLocaleString()} />
+              <IntelligenceMetric label="Qualified" value={validationTotals.qualified.toLocaleString()} />
+            </div>
+            <ul className="space-y-1.5 text-sm">
+              {validationSessions.slice(0, 3).map((session) => (
+                <li key={session.id} className="flex items-center justify-between gap-3">
+                  <span className="truncate text-text-secondary">{session.title}</span>
+                  <span className="shrink-0 text-xs text-text-muted">{session.qualifiedResponseCount}/{session.totalResponseCount} qualified · {session.confidenceLevel}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-sm text-text-muted">No customer-validation sessions yet. Start one to turn customer evidence into a GSIS signal.</p>
         )}
       </div>
 
@@ -474,7 +603,7 @@ export function Dashboard() {
                 <input
                   type="checkbox"
                   checked={t.done}
-                  onChange={() => toggleTask(t.id)}
+                  onChange={() => { void toggleTask(t.id); }}
                   className="w-4 h-4 accent-violet-600 cursor-pointer"
                 />
                 <Link to={t.href} className={`flex-1 min-w-0 ${t.done ? "opacity-50 line-through" : ""}`}>
@@ -549,7 +678,21 @@ export function Dashboard() {
       {/* Recent activity */}
       <div className="border border-border-default bg-surface-primary rounded-xl p-6">
         <h2 className="text-sm font-semibold text-text-secondary mb-4">Recent activity</h2>
-        <p className="text-sm text-text-muted">No persisted activity yet.</p>
+        {recentActivity.length > 0 ? (
+          <ul className="space-y-2">
+            {recentActivity.map((item) => (
+              <li key={item.id}>
+                <Link to={item.href} className="flex items-center gap-3 text-sm text-text-secondary hover:text-violet-600">
+                  <CheckCircle className="w-4 h-4 text-text-disabled shrink-0" />
+                  <span className="flex-1">{item.message}</span>
+                  <ArrowRight className="w-4 h-4 text-text-disabled shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-text-muted">No persisted activity yet. Completed workspace tasks and validation updates will appear here.</p>
+        )}
       </div>
 
       {/* Hackathon Momentum */}
