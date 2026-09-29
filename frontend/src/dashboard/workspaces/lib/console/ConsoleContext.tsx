@@ -6,6 +6,7 @@ interface State { tasks: AgentTask[]; activeTaskId: string | null; }
 type Action =
   | { type: 'set_tasks'; tasks: AgentTask[] }
   | { type: 'add_task'; task: AgentTask }
+  | { type: 'set_task'; task: AgentTask }
   | { type: 'select'; id: string }
   | { type: 'append_event'; taskId: string; event: TaskEvent }
   | { type: 'set_status'; taskId: string; status: AgentTaskStatus }
@@ -15,6 +16,7 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'set_tasks': return { ...state, tasks: action.tasks };
     case 'add_task': return { ...state, tasks: [action.task, ...state.tasks], activeTaskId: action.task.id };
+    case 'set_task': return { ...state, tasks: state.tasks.map((t) => (t.id === action.task.id ? action.task : t)) };
     case 'select': return { ...state, activeTaskId: action.id };
     case 'append_event':
       return { ...state, tasks: state.tasks.map((t) => t.id === action.taskId ? { ...t, events: [...t.events, action.event] } : t) };

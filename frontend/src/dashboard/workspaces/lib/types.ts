@@ -22,6 +22,10 @@ export interface Connector {
   capabilities: Capability[];
   tools: MCPTool[];
   resources: string[];
+  authMode?: 'credential' | null;
+  credentialMasked?: string | null;
+  credentialLabel?: string | null;
+  credentialConnectedAt?: string | null;
   deepLink?: string;
   lastSync?: string;
 }

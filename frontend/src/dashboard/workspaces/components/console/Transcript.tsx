@@ -1,6 +1,6 @@
-import { Bot } from 'lucide-react';
+import { Bot, RefreshCw } from 'lucide-react';
 import { useConsole } from '../../lib/console/ConsoleContext';
-import { resolveApproval } from '../../lib/api/tasks';
+import { getTask, resolveApproval } from '../../lib/api/tasks';
 import { ToolCallEvent } from './ToolCallEvent';
 import { ApprovalCard } from './ApprovalCard';
 
@@ -14,6 +14,11 @@ export function Transcript() {
     resolveApproval(taskId, approvalId, decision);
   };
 
+  const refresh = async (taskId: string) => {
+    const latest = await getTask(taskId);
+    if (latest) dispatch({ type: 'set_task', task: latest });
+  };
+
   if (!task) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-text-disabled">
@@ -25,10 +30,15 @@ export function Transcript() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
-      <p className="rounded border border-border-default bg-background-primary px-3 py-2 text-xs text-text-muted">
-        Snapshot of the events recorded on this task. Live agent streaming is not available for this workspace, so this
-        transcript does not update on its own — reopen the task to refresh it.
-      </p>
+      <div className="flex items-start gap-2 rounded border border-border-default bg-background-primary px-3 py-2">
+        <p className="flex-1 text-xs text-text-muted">
+          Live transcript. This view polls the backend task record, which is the real producer: runs execute server-side
+          against the AI router and each event (status, message, error) is written as it happens.
+        </p>
+        <button type="button" onClick={() => void refresh(task.id)} className="inline-flex items-center gap-1 rounded border border-border-default px-2 py-0.5 text-xs text-text-muted hover:bg-background-soft">
+          <RefreshCw className="h-3 w-3" /> Refresh
+        </button>
+      </div>
       {task.events.length === 0 && (
         <p className="text-sm text-text-muted">No events have been recorded on this task yet.</p>
       )}

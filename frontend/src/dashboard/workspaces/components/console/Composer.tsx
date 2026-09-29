@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { listAgents } from '../../lib/api/agents';
-import { createTask, streamTask, getTask, listTasks } from '../../lib/api/tasks';
+import { createTask, streamTask, getTask, listTasks, runTask } from '../../lib/api/tasks';
 import { suggestTasks, flattenSuggestions } from '../../lib/api/workspaceAI';
 import { useConsole } from '../../lib/console/ConsoleContext';
 import type { AIAgent } from '../ai/AIAgentCard';
@@ -60,6 +60,8 @@ export function Composer() {
       if (created) dispatch({ type: 'add_task', task: created });
       setPrompt('');
       dispatch({ type: 'set_status', taskId: id, status: 'running' });
+      // Kick off the real backend run, then stream its recorded events while it works.
+      const run = runTask(id).catch(() => undefined);
       for await (const event of streamTask(id)) {
         dispatch({ type: 'append_event', taskId: id, event });
         if (event.type === 'approval_request') dispatch({ type: 'set_status', taskId: id, status: 'needs_approval' });
@@ -68,7 +70,9 @@ export function Composer() {
         if (event.type === 'status' && event.text === 'Cancelled by user') dispatch({ type: 'set_status', taskId: id, status: 'cancelled' });
         if (event.type === 'error') dispatch({ type: 'set_status', taskId: id, status: 'failed' });
       }
-      setError(null);
+      const settled = await run;
+      if (settled) dispatch({ type: 'set_status', taskId: id, status: settled.status });
+      setError(settled?.status === 'failed' ? 'The AI router did not answer, so the task stopped without a result.' : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Workspace task creation failed.');
     } finally {

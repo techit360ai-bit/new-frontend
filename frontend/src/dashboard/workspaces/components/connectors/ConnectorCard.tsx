@@ -36,14 +36,17 @@ export function ConnectorCard({ connector, onOpen, onToggle }: Props) {
         {connector.capabilities.map((c) => (<Badge key={c} variant="secondary" className="text-xs">{c}</Badge>))}
       </div>
       <p className="text-xs text-text-muted mb-4">{connector.tools.length} MCP tools exposed</p>
+      {connected && connector.credentialMasked && (
+        <p className="mb-3 text-xs text-text-muted">Credential <code>{connector.credentialMasked}</code>{connector.credentialLabel ? ` · ${connector.credentialLabel}` : ''}</p>
+      )}
       <div className="flex items-center gap-2">
         <Button variant="outline" className="flex-1" onClick={() => onOpen(connector)}>Details</Button>
         {connector.deepLink ? (
           <Button asChild variant="ghost"><Link to={connector.deepLink}><ExternalLink className="w-4 h-4 mr-1" />Open</Link></Button>
+        ) : connected ? (
+          <Button className="bg-gray-200 text-text-secondary hover:bg-gray-300" onClick={() => onToggle(connector)}>Disconnect</Button>
         ) : (
-          <Button className={connected ? 'bg-gray-200 text-text-secondary hover:bg-gray-300' : 'bg-brand-primary hover:bg-brand-primary-hover'} onClick={() => onToggle(connector)}>
-            {connected ? 'Mark disconnected' : 'Mark connected'}
-          </Button>
+          <Button className="bg-brand-primary hover:bg-brand-primary-hover" onClick={() => onOpen(connector)}>Connect</Button>
         )}
       </div>
     </div>

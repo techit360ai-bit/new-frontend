@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plug } from 'lucide-react';
 import { ConnectorCard } from '../components/connectors/ConnectorCard';
 import { ConnectorDrawer } from '../components/connectors/ConnectorDrawer';
-import { listConnectors, listActivity, connect, disconnect } from '../lib/api/connectors';
+import { listConnectors, listActivity, disconnect } from '../lib/api/connectors';
 import type { Connector, ActivityEvent } from '../lib/types';
 
 export function Connectors() {
@@ -32,14 +32,18 @@ export function Connectors() {
 
   const handleOpen = (c: Connector) => { setSelected(c); setDrawerOpen(true); };
 
-  const handleToggle = async (c: Connector) => {
+  const handleDisconnect = async (c: Connector) => {
     try {
-      const updated = c.status === 'connected' ? await disconnect(c.id) : await connect(c.id);
+      const updated = await disconnect(c.id);
       if (updated) setConnectors((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connector update failed.');
     }
+  };
+
+  const handleCredentialChange = (updated: Connector) => {
+    setConnectors((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
   };
 
   const drawerActivity = selected ? activity.filter((a) => a.connectorId === selected.id) : [];
@@ -56,13 +60,14 @@ export function Connectors() {
         </div>
       </div>
       <div className="border-b border-border-default bg-status-warning-soft px-8 py-3 text-sm text-status-warning">
-        Connector state is workspace metadata only. Marking a connector connected records its status — it does not yet
-        perform a provider OAuth or credential handshake, and no provider API is called.
+        Connecting a connector requires a provider token, which is sealed at rest and stored outside the connector list.
+        This is a credential handshake, not a browser OAuth redirect (no OAuth callback endpoint exists in this
+        deployment), and no provider API is called until an agent explicitly invokes a tool.
       </div>
       <div className="flex-1 overflow-auto p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {connectors.map((c) => (
-            <ConnectorCard key={c.id} connector={c} onOpen={handleOpen} onToggle={handleToggle} />
+            <ConnectorCard key={c.id} connector={c} onOpen={handleOpen} onToggle={handleDisconnect} />
           ))}
           {connectors.length === 0 && (
             <div className="md:col-span-2 lg:col-span-3 rounded-lg border border-dashed border-border-strong bg-surface-primary px-4 py-8 text-sm text-text-muted">
@@ -71,7 +76,7 @@ export function Connectors() {
           )}
         </div>
       </div>
-      <ConnectorDrawer connector={selected} activity={drawerActivity} open={drawerOpen} onOpenChange={setDrawerOpen} />
+      <ConnectorDrawer connector={selected} activity={drawerActivity} open={drawerOpen} onOpenChange={setDrawerOpen} onCredentialChange={handleCredentialChange} />
     </div>
   );
 }
