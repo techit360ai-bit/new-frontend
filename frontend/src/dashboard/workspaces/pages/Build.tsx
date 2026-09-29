@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { KanbanColumn } from '../components/kanban/KanbanColumn';
 import type { Task } from '../components/kanban/type';
 import { Plus, Github, Code2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { listTasks } from '../lib/api/tasks';
+import { listTasks, updateTaskStatus } from '../lib/api/tasks';
+import { listConnectors } from '../lib/api/connectors';
 import { chooseBuildPath, getBuildContext, type BuildContext } from '../lib/api/capabilities';
 import type { AgentTask } from '../lib/types';
 
@@ -19,10 +21,19 @@ const EMPTY_COLUMNS: Record<ColumnType, Task[]> = {
 };
 
 function columnForStatus(status: AgentTask['status']): ColumnType {
-  if (status === 'running' || status === 'needs_approval') return 'inProgress';
   if (status === 'done') return 'done';
+  if (status === 'running') return 'inProgress';
+  if (status === 'needs_approval') return 'review';
   if (status === 'failed' || status === 'cancelled') return 'review';
   return 'backlog';
+}
+
+/** Kanban column → the persisted task status a drop writes. Inverse of columnForStatus. */
+function statusForColumn(column: ColumnType): AgentTask['status'] {
+  if (column === 'done') return 'done';
+  if (column === 'inProgress') return 'running';
+  if (column === 'review') return 'needs_approval';
+  return 'queued';
 }
 
 function normalizeTask(task: AgentTask): Task {
@@ -32,7 +43,7 @@ function normalizeTask(task: AgentTask): Task {
     assignee: { name: task.agentId || 'Workspace', avatar: (task.agentId || 'WS').slice(0, 2).toUpperCase(), color: 'bg-status-info' },
     priority: task.status === 'failed' ? 'high' : 'medium',
     dueDate: task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—',
-    timeTracked: '0h',
+    status: task.status,
     labels: [task.status],
   };
 }
@@ -44,7 +55,9 @@ export function Build() {
   const [error, setError] = useState<string | null>(null);
   const [buildContext, setBuildContext] = useState<BuildContext | null>(null);
   const [choosing, setChoosing] = useState(false);
+  const [githubConnected, setGithubConnected] = useState(false);
   const workspaceId = new URLSearchParams(location.search).get('workspace') || undefined;
+  const search = location.search;
 
   useEffect(() => {
     let alive = true;
@@ -68,6 +81,17 @@ export function Build() {
 
   useEffect(() => { void getBuildContext(workspaceId).then(setBuildContext).catch(() => setBuildContext(null)); }, [workspaceId]);
 
+  // GitHub button truthfulness: reflect the real connector status, no fake "Live" badge.
+  useEffect(() => {
+    let alive = true;
+    listConnectors()
+      .then((rows) => { if (alive) setGithubConnected(rows.some((row) => row.id === 'github' && row.status === 'connected')); })
+      .catch(() => { if (alive) setGithubConnected(false); });
+    return () => { alive = false; };
+  }, []);
+
+  const openConsole = () => navigate(`/workspaces/agents?tab=console${search ? `&${search.replace(/^\?/, '')}` : ''}`);
+
   async function selectPath(path: 'prototype' | 'mvp') {
     setChoosing(true);
     try { const result = await chooseBuildPath(path); if (result) setBuildContext(await getBuildContext(workspaceId)); }
@@ -81,31 +105,35 @@ export function Build() {
   );
 
   const handleDrop = (column: ColumnType) => (taskId: string) => {
-    setTasks((prev) => {
-      // Find the task in all columns
-      let movedTask: Task | null = null;
-      let sourceColumn: ColumnType | null = null;
+    const sourceColumn = COLUMNS.find((col) => tasks[col].some((task) => task.id === taskId));
+    if (!sourceColumn || sourceColumn === column) return;
+    const moved = tasks[sourceColumn].find((task) => task.id === taskId);
+    if (!moved) return;
 
-      for (const col of COLUMNS) {
-        const task = prev[col].find((item) => item.id === taskId);
-        if (task) {
-          movedTask = task;
-          sourceColumn = col;
-          break;
-        }
-      }
+    const previousStatus = moved.status;
+    const nextStatus = statusForColumn(column);
+    setTasks((prev) => ({
+      ...prev,
+      [sourceColumn]: prev[sourceColumn].filter((task) => task.id !== taskId),
+      [column]: [...prev[column], { ...moved, status: nextStatus }],
+    }));
 
-      if (!movedTask || !sourceColumn || sourceColumn === column) return prev;
-
-      // Remove from source and add to destination
-      const from = sourceColumn;
-      const taskToMove = movedTask;
-      return {
-        ...prev,
-        [from]: prev[from].filter((task) => task.id !== taskId),
-        [column]: [...prev[column], taskToMove],
-      };
-    });
+    updateTaskStatus(taskId, nextStatus)
+      .then((updated) => {
+        if (!updated) throw new Error('no active workspace');
+        setTasks((prev) => ({
+          ...prev,
+          [column]: prev[column].map((task) => (task.id === taskId ? normalizeTask(updated) : task)),
+        }));
+      })
+      .catch(() => {
+        setTasks((prev) => ({
+          ...prev,
+          [column]: prev[column].filter((task) => task.id !== taskId),
+          [sourceColumn]: [...prev[sourceColumn], { ...moved, status: previousStatus }],
+        }));
+        toast.error('Could not persist the task move.');
+      });
   };
 
   return (
@@ -122,13 +150,15 @@ export function Build() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(`/workspaces/code${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-surface-primary border border-border-strong rounded-lg hover:bg-background-primary transition-colors"><Code2 className="w-4 h-4" /><span className="text-sm font-medium">Open Code</span></button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-surface-primary border border-border-strong rounded-lg hover:bg-background-primary transition-colors">
+            <button type="button" onClick={() => navigate(`/workspaces/code${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-surface-primary border border-border-strong rounded-lg hover:bg-background-primary transition-colors"><Code2 className="w-4 h-4" /><span className="text-sm font-medium">Open Code</span></button>
+            <button type="button" onClick={() => navigate(`/workspaces/github${location.search}`)} className="flex items-center gap-2 px-4 py-2 bg-surface-primary border border-border-strong rounded-lg hover:bg-background-primary transition-colors">
               <Github className="w-4 h-4" />
               <span className="text-sm font-medium">GitHub</span>
-              <Badge className="bg-status-success text-white text-xs">Live</Badge>
+              <Badge className={githubConnected ? 'bg-status-success text-white text-xs' : 'bg-surface-secondary text-text-muted text-xs'}>
+                {githubConnected ? 'Connected' : 'Not connected'}
+              </Badge>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm">
+            <button type="button" onClick={openConsole} className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm">
               <Plus className="w-4 h-4" />
               <span className="text-sm font-medium">New Task</span>
             </button>
@@ -142,8 +172,8 @@ export function Build() {
           <div className="mb-6 rounded-lg border border-border-default bg-surface-primary p-5">
             <div className="flex items-center justify-between gap-4 mb-4"><div><h2 className="text-lg font-semibold">Choose a build path</h2><p className="text-sm text-text-muted">Use the same editor, files, and live preview for either path.</p></div>{buildContext?.costEstimate && <span className="text-xs text-text-muted">Estimate updates after selection</span>}</div>
             <div className="grid gap-3 md:grid-cols-2">
-              <button disabled={choosing} onClick={() => void selectPath('prototype')} className="text-left rounded-lg border border-border-strong p-4 hover:border-brand-primary hover:bg-background-primary disabled:opacity-60"><div className="font-medium">Prototype</div><div className="text-sm text-text-muted mt-1">Narrow hypothesis, scaffold, preview, and feedback.</div><div className="text-xs text-text-muted mt-3">Typical estimate: 35 credits, 15 runtime minutes</div></button>
-              <button disabled={choosing} onClick={() => void selectPath('mvp')} className="text-left rounded-lg border border-brand-primary p-4 hover:bg-background-primary disabled:opacity-60"><div className="font-medium">Build MVP</div><div className="text-sm text-text-muted mt-1">Bounded product scope with tests, security, and deployment evidence.</div><div className="text-xs text-text-muted mt-3">Typical estimate: 120 credits, 45 runtime minutes</div></button>
+              <button type="button" disabled={choosing} onClick={() => void selectPath('prototype')} className="text-left rounded-lg border border-border-strong p-4 hover:border-brand-primary hover:bg-background-primary disabled:opacity-60"><div className="font-medium">Prototype</div><div className="text-sm text-text-muted mt-1">Narrow hypothesis, scaffold, preview, and feedback.</div><div className="text-xs text-text-muted mt-3">Estimate shown after selection</div></button>
+              <button type="button" disabled={choosing} onClick={() => void selectPath('mvp')} className="text-left rounded-lg border border-brand-primary p-4 hover:bg-background-primary disabled:opacity-60"><div className="font-medium">Build MVP</div><div className="text-sm text-text-muted mt-1">Bounded product scope with tests, security, and deployment evidence.</div><div className="text-xs text-text-muted mt-3">Estimate shown after selection</div></button>
             </div>
           </div>
         )}
@@ -165,24 +195,28 @@ export function Build() {
             title="Backlog"
             tasks={tasks.backlog}
             onDrop={handleDrop('backlog')}
+            onAdd={openConsole}
             color="bg-gray-400"
           />
           <KanbanColumn
             title="In Progress"
             tasks={tasks.inProgress}
             onDrop={handleDrop('inProgress')}
+            onAdd={openConsole}
             color="bg-brand-primary"
           />
           <KanbanColumn
             title="Review"
             tasks={tasks.review}
             onDrop={handleDrop('review')}
+            onAdd={openConsole}
             color="bg-status-warning"
           />
           <KanbanColumn
             title="Done"
             tasks={tasks.done}
             onDrop={handleDrop('done')}
+            onAdd={openConsole}
             color="bg-status-success"
           />
         </div>
@@ -190,8 +224,10 @@ export function Build() {
 
       {/* Floating Action Button */}
       <button
+        type="button"
+        onClick={openConsole}
+        aria-label="Add new task"
         className="fixed bottom-8 right-8 w-14 h-14 bg-brand-primary text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center group"
-        title="Add New Task"
       >
         <Plus className="w-6 h-6" />
       </button>

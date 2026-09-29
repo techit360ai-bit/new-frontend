@@ -55,6 +55,10 @@ export function Connectors() {
           </div>
         </div>
       </div>
+      <div className="border-b border-border-default bg-status-warning-soft px-8 py-3 text-sm text-status-warning">
+        Connector state is workspace metadata only. Marking a connector connected records its status — it does not yet
+        perform a provider OAuth or credential handshake, and no provider API is called.
+      </div>
       <div className="flex-1 overflow-auto p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {connectors.map((c) => (

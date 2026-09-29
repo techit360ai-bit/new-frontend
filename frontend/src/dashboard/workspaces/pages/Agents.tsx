@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bot, Search } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIAgentCard } from '../components/ai/AIAgentCard';
 import type { AIAgent } from '../components/ai/AIAgentCard';
@@ -10,9 +11,17 @@ import { Transcript } from '../components/console/Transcript';
 import { Composer } from '../components/console/Composer';
 
 export function Agents() {
+  const location = useLocation();
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // Deep-linkable tab so "New Task" in Build can open the live console composer.
+  const initialTab = useMemo(
+    () => (new URLSearchParams(location.search).get('tab') === 'console' ? 'console' : 'catalog'),
+    [location.search],
+  );
+  const [tab, setTab] = useState(initialTab);
+  useEffect(() => { setTab(initialTab); }, [initialTab]);
 
   useEffect(() => {
     let alive = true;
@@ -48,7 +57,7 @@ export function Agents() {
           <div className="p-2 bg-brand-primary/10 rounded-lg"><Bot className="w-6 h-6 text-brand-primary" /></div>
           <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Agents</h1>
         </div>
-        <Tabs defaultValue="catalog">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="catalog">Catalog</TabsTrigger>
             <TabsTrigger value="console">Console</TabsTrigger>

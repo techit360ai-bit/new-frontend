@@ -1,5 +1,5 @@
 import { useDrag } from 'react-dnd';
-import { Calendar, Clock, Flag } from 'lucide-react';
+import { Calendar, Flag } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
@@ -65,12 +65,6 @@ export function TaskCard({ task }: TaskCardProps) {
           <div className="flex items-center gap-1 text-xs text-text-muted">
             <Calendar className="w-3 h-3" />
             <span>{task.dueDate}</span>
-          </div>
-
-          {/* Time Tracker */}
-          <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${config.bg}`}>
-            <Clock className="w-3 h-3" />
-            <span className="font-medium">{task.timeTracked}</span>
           </div>
         </div>
       </div>

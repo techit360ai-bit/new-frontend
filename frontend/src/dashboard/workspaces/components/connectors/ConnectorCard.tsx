@@ -42,7 +42,7 @@ export function ConnectorCard({ connector, onOpen, onToggle }: Props) {
           <Button asChild variant="ghost"><Link to={connector.deepLink}><ExternalLink className="w-4 h-4 mr-1" />Open</Link></Button>
         ) : (
           <Button className={connected ? 'bg-gray-200 text-text-secondary hover:bg-gray-300' : 'bg-brand-primary hover:bg-brand-primary-hover'} onClick={() => onToggle(connector)}>
-            {connected ? 'Disconnect' : 'Connect'}
+            {connected ? 'Mark disconnected' : 'Mark connected'}
           </Button>
         )}
       </div>

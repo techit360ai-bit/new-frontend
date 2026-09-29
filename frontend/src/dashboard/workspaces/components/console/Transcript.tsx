@@ -25,6 +25,13 @@ export function Transcript() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <p className="rounded border border-border-default bg-background-primary px-3 py-2 text-xs text-text-muted">
+        Snapshot of the events recorded on this task. Live agent streaming is not available for this workspace, so this
+        transcript does not update on its own — reopen the task to refresh it.
+      </p>
+      {task.events.length === 0 && (
+        <p className="text-sm text-text-muted">No events have been recorded on this task yet.</p>
+      )}
       {task.events.map((e) => {
         if (e.type === 'message' || e.type === 'status') {
           return <p key={e.id} className={`text-sm ${e.type === 'status' ? 'text-text-disabled italic' : 'text-text-primary'}`}>{e.text}</p>;
