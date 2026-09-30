@@ -22,17 +22,20 @@ export function fetchPostsPage(options: { zone?: 'global' | 'tribe'; category?: 
   if (options.category) params.set('category', options.category);
   if (options.before) params.set('before', options.before);
   if (options.limit) params.set('limit', String(options.limit));
-  return withFallback(
-    () => msgGet<FeedPageResponse>(`/posts?${params.toString()}`).then(page => ({ ...page, posts: page.posts ?? [] })),
-    { posts: [], category: options.category, nextCursor: '', hasMore: false },
-    'posts page',
-  );
+  // Errors must propagate: swallowing them here made a down/unauthorized
+  // messaging service look like an empty feed ("No live posts") instead of a
+  // real error. useFeedPosts() owns cache + error rendering; callers of this
+  // function must not silently degrade.
+  return msgGet<FeedPageResponse>(`/posts?${params.toString()}`)
+    .then(page => ({ ...page, posts: page.posts ?? [] }));
 }
 export async function createPost(kind: string, body: string, audience?: string[]): Promise<WirePost | null> {
   const payload = { kind, body, ...(audience && audience.length ? { audience } : {}) };
   try { return await msgPost<WirePost>('/posts', payload); }
   catch (error) {
-    if (!isNetworkFailure(error)) return withFallback(() => Promise.reject(error), () => null, 'create post');
+    // Surface real server rejections (invalid kind for role, moderation, 401…)
+    // instead of masking them behind a fallback null.
+    if (!isNetworkFailure(error)) throw error;
     const id = `offline_post_${Date.now().toString(36)}`;
     await enqueue({ type: 'feed.post.create', endpoint: messagingUrl('/posts'), payload, entityKey: 'feed' });
     return { id, authorId: '', authorRole: 'community', audience: audience || ['all'], kind, body, ts: new Date().toISOString(), pending: true };

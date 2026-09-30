@@ -64,6 +64,9 @@ export function PostComposer({
         audience.length ? audience : undefined,
       );
       if (!created) throw new Error('Post was not persisted.');
+      if (created.pending) {
+        toast.info('Saved offline. This post will publish once the messaging service is reachable.');
+      }
       setBody('');
       setAudience([]);
       setExpanded(false);

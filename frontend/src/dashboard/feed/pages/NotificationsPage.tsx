@@ -19,6 +19,11 @@ import {
   type FeedNotification,
   type FeedNotificationType,
 } from '@/lib/api/notifications';
+import {
+  fetchConnectionRequests,
+  respondConnectionRequest,
+  type ConnectionRequest,
+} from '@/lib/api/users';
 import { BackButton } from '../components/BackButton';
 import { FeedErrorState, FeedLoadingState } from '../components/FeedStates';
 import { VirtualizedList } from '@/components/mobile/VirtualizedList';
@@ -41,6 +46,8 @@ export function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [requests, setRequests] = useState<ConnectionRequest[]>([]);
+  const [respondingId, setRespondingId] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -52,8 +59,30 @@ export function NotificationsPage() {
         setError(err instanceof Error ? err.message : 'Live notifications are unavailable.');
       })
       .finally(() => { if (alive) setLoading(false); });
+    fetchConnectionRequests()
+      .then((rows) => { if (alive) setRequests(rows); })
+      .catch(() => { if (alive) setRequests([]); });
     return () => { alive = false; };
   }, []);
+
+  const respond = async (request: ConnectionRequest, decision: 'accept' | 'decline') => {
+    setRespondingId(request.id);
+    try {
+      await respondConnectionRequest(request.id, decision);
+      setRequests((current) => current.filter((row) => row.id !== request.id));
+      if (decision === 'accept') {
+        setNotifications((current) => current.map((notification) => (
+          notification.metadata?.connectionRequest
+            ? { ...notification, read: true }
+            : notification
+        )));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Connection request could not be updated.');
+    } finally {
+      setRespondingId(null);
+    }
+  };
 
   const markRead = (id: string) => {
     const row = notifications.find((notification) => notification.id === id);
@@ -105,6 +134,44 @@ export function NotificationsPage() {
           </button>
         )}
       </div>
+
+      {requests.length > 0 && (
+        <section className="mb-5 border-y border-border-default bg-surface-primary sm:rounded-lg sm:border">
+          <h2 className="border-b border-border-default px-4 py-3 text-xs font-semibold uppercase text-text-muted">
+            Connection requests · {requests.length}
+          </h2>
+          {requests.map((requestRow) => (
+            <div key={requestRow.id} className="flex items-start gap-3 border-b border-border-default px-4 py-3 last:border-b-0">
+              <div className={`h-10 w-10 shrink-0 rounded-full bg-gradient-to-br ${requestRow.avatar}`} />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-text-primary">
+                  <Link to={`/feed/profile/${encodeURIComponent(requestRow.fromUserId)}`} className="font-medium hover:underline">{requestRow.name}</Link>{' '}
+                  <span className="text-text-secondary">wants to connect with you</span>
+                </p>
+                {requestRow.message && <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{requestRow.message}</p>}
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { void respond(requestRow, 'accept'); }}
+                    disabled={respondingId === requestRow.id}
+                    className="rounded-lg bg-accent-primary px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { void respond(requestRow, 'decline'); }}
+                    disabled={respondingId === requestRow.id}
+                    className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:border-status-error disabled:opacity-60"
+                  >
+                    Decline
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       <div className="mb-5 flex items-center gap-2 overflow-x-auto pb-1">
         {filterTabs.map((tab) => {

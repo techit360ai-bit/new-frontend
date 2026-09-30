@@ -38,6 +38,7 @@ export interface FeedNotification {
   timeAgo: string;
   linkTo: string;
   createdAt?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface BackendNotification {
@@ -50,6 +51,7 @@ interface BackendNotification {
   timeAgo?: string;
   linkTo?: string;
   createdAt?: string;
+  metadata?: Record<string, unknown>;
 }
 
 const FEED_NOTIFICATION_TYPES = new Set<FeedNotificationType>([
@@ -145,6 +147,7 @@ export function normalizeFeedNotification(row: BackendNotification): FeedNotific
     timeAgo: String(row.timeAgo ?? row.createdAt ?? ''),
     linkTo,
     createdAt: typeof row.createdAt === 'string' ? row.createdAt : undefined,
+    metadata: row.metadata && typeof row.metadata === 'object' ? row.metadata : undefined,
   };
 }
 

@@ -1,198 +1,146 @@
-import { useState } from 'react';
-import { Video, VideoOff, Mic, MicOff, MonitorUp, Users, MoreVertical, X, Minimize2 } from 'lucide-react';
+import '@livekit/components-styles';
+import { GridLayout, LiveKitRoom, ParticipantTile, RoomAudioRenderer, ControlBar, useTracks } from '@livekit/components-react';
+import { Track } from 'livekit-client';
+import { Loader2, Video, X, Minimize2, VideoOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useWorkspaceCall } from './useWorkspaceCall';
 
 interface VideoCallProps {
   onClose: () => void;
-  participants?: Array<{ name: string; avatar: string; isMuted?: boolean; isVideoOff?: boolean }>;
-  self?: { name: string; avatar: string };
+  workspaceId?: string;
   isPIP?: boolean;
   onTogglePIP?: () => void;
 }
 
-export function VideoCall({ onClose, participants, self, isPIP = false, onTogglePIP }: VideoCallProps) {
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
+function CameraStage() {
+  const tracks = useTracks(
+    [
+      { source: Track.Source.Camera, withPlaceholder: true },
+      { source: Track.Source.ScreenShare, withPlaceholder: false },
+    ],
+    { onlySubscribed: false },
+  );
+  return (
+    <GridLayout tracks={tracks} style={{ height: '100%' }}>
+      <ParticipantTile />
+    </GridLayout>
+  );
+}
 
-  const liveParticipants = participants ?? [];
-  const currentUser = self ?? { name: 'You', avatar: 'YU' };
+function CallNotice({ title, detail, onClose }: { title: string; detail: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-secondary/95">
+      <div className="mx-4 w-full max-w-md rounded-2xl border border-border-inverse-strong bg-surface-primary/10 p-8 text-center backdrop-blur-xl">
+        <VideoOff className="mx-auto mb-4 h-10 w-10 text-text-disabled" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-sm text-text-disabled">{detail}</p>
+        <Button className="mt-6" variant="secondary" onClick={onClose}>Close</Button>
+      </div>
+    </div>
+  );
+}
+
+export function VideoCall({ onClose, workspaceId, isPIP = false, onTogglePIP }: VideoCallProps) {
+  const session = useWorkspaceCall(workspaceId);
+
+  if (session.state === 'loading') {
+    return (
+      <CallNotice title="Connecting live call" detail="Requesting a secure room token for this workspace." onClose={onClose} />
+    );
+  }
+  if (session.state === 'unavailable') {
+    return (
+      <CallNotice
+        title="Live video is not configured"
+        detail={session.reason === 'live_calls_not_configured'
+          ? 'The deployment has no LiveKit credentials, so audio/video calls cannot start yet.'
+          : 'This workspace call is not available right now.'}
+        onClose={onClose}
+      />
+    );
+  }
+  if (session.state === 'error' || !session.token || !session.url) {
+    return (
+      <CallNotice
+        title="Live call could not start"
+        detail={session.reason || 'The call service rejected the request. Workspace membership is required.'}
+        onClose={onClose}
+      />
+    );
+  }
 
   if (isPIP) {
     return (
-      <div className="fixed bottom-6 right-6 w-80 bg-brand-secondary rounded-lg shadow-2xl overflow-hidden border-2 border-brand-primary z-50">
-        <div className="relative">
-          <div className="aspect-video bg-background-inverse flex items-center justify-center">
-            <Avatar className="w-16 h-16">
-              <AvatarFallback className="bg-brand-primary text-white text-xl">{currentUser.avatar}</AvatarFallback>
-            </Avatar>
+      <div className="fixed bottom-6 right-6 z-50 w-80 overflow-hidden rounded-lg border-2 border-brand-primary bg-brand-secondary shadow-2xl">
+        <LiveKitRoom
+          serverUrl={session.url}
+          token={session.token}
+          connect
+          audio
+          video={session.canPublish !== false}
+          onDisconnected={onClose}
+        >
+          <div className="relative aspect-video bg-background-inverse">
+            <CameraStage />
+            <div className="absolute right-3 top-3 flex gap-2">
+              {onTogglePIP && (
+                <Button size="sm" variant="secondary" className="h-8 w-8 bg-black/50 p-0 hover:bg-black/70" onClick={onTogglePIP} aria-label="Expand call">
+                  <Minimize2 className="h-4 w-4" />
+                </Button>
+              )}
+              <Button size="sm" variant="secondary" className="h-8 w-8 bg-black/50 p-0 hover:bg-black/70" onClick={onClose} aria-label="Close call">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="absolute top-3 right-3 flex gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="w-8 h-8 p-0 bg-black/50 hover:bg-black/70"
-              onClick={onTogglePIP}
-            >
-              <Minimize2 className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="w-8 h-8 p-0 bg-black/50 hover:bg-black/70"
-              onClick={onClose}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="absolute bottom-3 left-3 right-3 flex justify-center gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              className={`w-10 h-10 p-0 rounded-full ${isMuted ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/20 hover:bg-surface-primary/30'}`}
-              onClick={() => setIsMuted(!isMuted)}
-            >
-              {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              className={`w-10 h-10 p-0 rounded-full ${isVideoOff ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/20 hover:bg-surface-primary/30'}`}
-              onClick={() => setIsVideoOff(!isVideoOff)}
-            >
-              {isVideoOff ? <VideoOff className="w-4 h-4" /> : <Video className="w-4 h-4" />}
-            </Button>
-          </div>
-        </div>
+          <RoomAudioRenderer />
+        </LiveKitRoom>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-brand-secondary z-50 flex flex-col">
-      {/* Header */}
-      <div className="h-16 border-b border-border-inverse-strong flex items-center justify-between px-6">
+    <div className="fixed inset-0 z-50 flex flex-col bg-brand-secondary">
+      <div className="flex h-16 items-center justify-between border-b border-border-inverse-strong px-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand-primary/10 rounded-lg">
-            <Video className="w-5 h-5 text-brand-primary" />
+          <div className="rounded-lg bg-brand-primary/10 p-2">
+            <Video className="h-5 w-5 text-brand-primary" />
           </div>
           <div>
-            <h2 className="text-white font-semibold">Workspace Call</h2>
-            <p className="text-sm text-text-disabled">{liveParticipants.length + 1} participants</p>
+            <h2 className="font-semibold text-white">Workspace Call</h2>
+            <p className="text-sm text-text-disabled">{session.room}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {onTogglePIP && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-surface-primary/10"
-              onClick={onTogglePIP}
-            >
-              <Minimize2 className="w-4 h-4 mr-2" />
+            <Button variant="ghost" size="sm" className="text-white hover:bg-surface-primary/10" onClick={onTogglePIP}>
+              <Minimize2 className="mr-2 h-4 w-4" />
               Minimize
             </Button>
           )}
-          <Button variant="ghost" size="sm" className="text-white hover:bg-surface-primary/10" onClick={onClose}>
-            <X className="w-5 h-5" />
+          <Button variant="ghost" size="sm" className="text-white hover:bg-surface-primary/10" onClick={onClose} aria-label="Close call">
+            <X className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      {/* Main Video Area */}
-      <div className="flex-1 grid grid-cols-2 gap-4 p-6">
-        {liveParticipants.map((participant) => (
-          <div
-            key={participant.name}
-            className="bg-background-inverse rounded-lg relative overflow-hidden flex items-center justify-center"
-          >
-            {participant.isVideoOff ? (
-              <Avatar className="w-24 h-24">
-                <AvatarFallback className="bg-brand-primary text-white text-2xl">
-                  {participant.avatar}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
-                <Avatar className="w-24 h-24">
-                  <AvatarFallback className="bg-brand-primary text-white text-2xl">
-                    {participant.avatar}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            )}
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-              <div className="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full">
-              <span className="text-white text-sm font-medium">{participant.name}</span>
-                {participant.isMuted && <MicOff className="w-4 h-4 text-status-error" />}
-              </div>
-              <Button variant="ghost" size="sm" className="w-8 h-8 p-0 bg-black/50 hover:bg-black/70">
-                <MoreVertical className="w-4 h-4 text-white" />
-              </Button>
-            </div>
-          </div>
-        ))}
-        {/* Your video (larger) */}
-        <div className="col-span-2 bg-background-inverse rounded-lg relative overflow-hidden flex items-center justify-center">
-          {isVideoOff ? (
-            <Avatar className="w-32 h-32">
-              <AvatarFallback className="bg-brand-primary text-white text-4xl">{currentUser.avatar}</AvatarFallback>
-            </Avatar>
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-cyan-900 to-blue-900 flex items-center justify-center">
-              <Avatar className="w-32 h-32">
-                <AvatarFallback className="bg-brand-primary text-white text-4xl">{currentUser.avatar}</AvatarFallback>
-              </Avatar>
-            </div>
-          )}
-          <div className="absolute bottom-4 left-4">
-            <div className="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full">
-              <span className="text-white font-medium">{currentUser.name}</span>
-              {isMuted && <MicOff className="w-4 h-4 text-status-error" />}
-            </div>
-          </div>
+      <LiveKitRoom
+        serverUrl={session.url}
+        token={session.token}
+        connect
+        audio
+        video={session.canPublish !== false}
+        onDisconnected={onClose}
+        style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}
+      >
+        <div className="flex-1 p-6" style={{ minHeight: 0 }}>
+          <CameraStage />
         </div>
-      </div>
-
-      {/* Controls */}
-      <div className="h-20 border-t border-border-inverse-strong flex items-center justify-center gap-4 px-6">
-        <Button
-          size="lg"
-          className={`rounded-full w-14 h-14 ${isMuted ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/10 hover:bg-surface-primary/20'}`}
-          onClick={() => setIsMuted(!isMuted)}
-        >
-          {isMuted ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
-        </Button>
-        <Button
-          size="lg"
-          className={`rounded-full w-14 h-14 ${isVideoOff ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/10 hover:bg-surface-primary/20'}`}
-          onClick={() => setIsVideoOff(!isVideoOff)}
-        >
-          {isVideoOff ? <VideoOff className="w-6 h-6 text-white" /> : <Video className="w-6 h-6 text-white" />}
-        </Button>
-        <Button
-          size="lg"
-          className={`rounded-full w-14 h-14 ${isScreenSharing ? 'bg-brand-primary hover:bg-brand-primary-hover' : 'bg-surface-primary/10 hover:bg-surface-primary/20'}`}
-          onClick={() => setIsScreenSharing(!isScreenSharing)}
-        >
-          <MonitorUp className="w-6 h-6 text-white" />
-        </Button>
-        <Button
-          size="lg"
-          className="rounded-full w-14 h-14 bg-surface-primary/10 hover:bg-surface-primary/20"
-        >
-          <Users className="w-6 h-6 text-white" />
-        </Button>
-        <div className="w-px h-8 bg-gray-700" />
-        <Button
-          size="lg"
-          className="rounded-full w-14 h-14 bg-status-error hover:bg-status-error"
-          onClick={onClose}
-        >
-          <X className="w-6 h-6 text-white" />
-        </Button>
-      </div>
+        <div className="flex h-20 items-center justify-center border-t border-border-inverse-strong">
+          <ControlBar controls={{ microphone: true, camera: true, screenShare: true, chat: false, leave: true }} />
+        </div>
+        <RoomAudioRenderer />
+      </LiveKitRoom>
     </div>
   );
 }
