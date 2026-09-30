@@ -38,6 +38,8 @@ export interface PublicUserProfile {
   subscriptionLabel?: string | null;
   sharedContext?: boolean;
   isOwnProfile: boolean;
+  connectionStatus?: 'self' | 'connected' | 'pending' | 'incoming' | 'none';
+  connectionRequestId?: string | null;
   stats: {
     decay: number;
     stageProgress: number;
@@ -133,11 +135,49 @@ export function fetchCollaboratorDirectory(): Promise<CollaboratorDirectoryEntry
     .then((data) => Array.isArray(data.users) ? data.users : []);
 }
 
-export async function connectWithUser(userId: string, invitation?: CollaborationInvitation): Promise<void> {
-  await request<{ ok: boolean }>(`/${encodeURIComponent(userId)}/connect`, {
+export interface ConnectionRequest {
+  id: string;
+  fromUserId: string;
+  name: string;
+  avatar: string;
+  role: string;
+  username: string | null;
+  message: string;
+  createdAt: string;
+  status: string;
+}
+
+export interface ConnectionSummary {
+  id: string;
+  name: string;
+  username: string | null;
+  role: string;
+  avatar: string;
+  headline: string;
+}
+
+export async function connectWithUser(userId: string, invitation?: CollaborationInvitation): Promise<{ ok: boolean; connectionRequestId?: string; status?: string }> {
+  return request<{ ok: boolean; connectionRequestId?: string; status?: string }>(`/${encodeURIComponent(userId)}/connect`, {
     method: 'POST',
     body: invitation ? JSON.stringify({ invitation }) : undefined,
   });
+}
+
+export function fetchConnectionRequests(): Promise<ConnectionRequest[]> {
+  return request<{ requests?: ConnectionRequest[] }>('/connections/requests')
+    .then((data) => Array.isArray(data.requests) ? data.requests : []);
+}
+
+export function respondConnectionRequest(requestId: string, decision: 'accept' | 'decline'): Promise<{ ok: boolean; status: string }> {
+  return request<{ ok: boolean; status: string }>(`/connections/requests/${encodeURIComponent(requestId)}/${decision}`, {
+    method: 'POST',
+    body: JSON.stringify({ decision }),
+  });
+}
+
+export function fetchConnections(): Promise<ConnectionSummary[]> {
+  return request<{ connections?: ConnectionSummary[] }>('/connections')
+    .then((data) => Array.isArray(data.connections) ? data.connections : []);
 }
 
 export async function uploadProfileAvatar(file: File): Promise<{ avatarUrl: string }> {

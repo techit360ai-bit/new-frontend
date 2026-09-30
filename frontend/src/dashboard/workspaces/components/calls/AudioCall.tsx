@@ -1,90 +1,109 @@
-import { useState } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, MoreVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import '@livekit/components-styles';
+import { ControlBar, LiveKitRoom, RoomAudioRenderer, useParticipants } from '@livekit/components-react';
+import { Loader2, PhoneOff, MicOff } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { useWorkspaceCall } from './useWorkspaceCall';
 
 interface AudioCallProps {
   onClose: () => void;
-  participant?: { name: string; avatar: string };
-  self?: { name: string; avatar: string };
+  workspaceId?: string;
 }
 
-export function AudioCall({ onClose, participant, self }: AudioCallProps) {
-  const [isMuted, setIsMuted] = useState(false);
-  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
-  const [callDuration, setCallDuration] = useState('00:00');
+function initials(value: string): string {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '??';
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
+}
 
-  const activeParticipant = participant ?? self ?? { name: 'Workspace audio room', avatar: 'WS' };
+function Participants() {
+  const participants = useParticipants();
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-4">
+      {participants.map((participant) => (
+        <div key={participant.identity} className="flex flex-col items-center gap-2">
+          <Avatar className="h-20 w-20 ring-2 ring-white/20">
+            <AvatarFallback className="bg-gradient-to-br from-brand-primary to-brand-primary-hover text-2xl text-white">
+              {initials(participant.name || participant.identity)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-white/80">{participant.name || participant.identity}{participant.isLocal ? ' (you)' : ''}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AudioNotice({ title, detail, onClose }: { title: string; detail: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-brand-secondary via-feature-call-overlay to-brand-primary/20">
+      <div className="mx-4 w-full max-w-md rounded-3xl border border-white/20 bg-surface-primary/10 p-8 text-center shadow-2xl backdrop-blur-xl">
+        <MicOff className="mx-auto mb-4 h-10 w-10 text-white/70" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-sm text-white/60">{detail}</p>
+        <Button className="mt-6" variant="secondary" onClick={onClose}>Close</Button>
+      </div>
+    </div>
+  );
+}
+
+export function AudioCall({ onClose, workspaceId }: AudioCallProps) {
+  const session = useWorkspaceCall(workspaceId);
+
+  if (session.state === 'loading') {
+    return <AudioNotice title="Connecting live call" detail="Requesting a secure room token for this workspace." onClose={onClose} />;
+  }
+  if (session.state === 'unavailable') {
+    return (
+      <AudioNotice
+        title="Live audio is not configured"
+        detail={session.reason === 'live_calls_not_configured'
+          ? 'The deployment has no LiveKit credentials, so audio calls cannot start yet.'
+          : 'This workspace call is not available right now.'}
+        onClose={onClose}
+      />
+    );
+  }
+  if (session.state === 'error' || !session.token || !session.url) {
+    return (
+      <AudioNotice
+        title="Live call could not start"
+        detail={session.reason || 'The call service rejected the request. Workspace membership is required.'}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-brand-secondary via-feature-call-overlay to-brand-primary/20 z-50 flex items-center justify-center">
-      <div className="w-full max-w-md mx-4">
-        <div className="bg-surface-primary/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
-          {/* Participant Info */}
-          <div className="text-center mb-8">
-            <div className="relative inline-block mb-6">
-              <Avatar className="w-32 h-32 ring-4 ring-white/20">
-                <AvatarFallback className="bg-gradient-to-br from-brand-primary to-brand-primary-hover text-white text-4xl">
-                  {activeParticipant.avatar}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                <div className="bg-status-success px-4 py-1 rounded-full text-white text-xs font-medium">
-                  Active
-                </div>
-              </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-brand-secondary via-feature-call-overlay to-brand-primary/20">
+      <LiveKitRoom
+        serverUrl={session.url}
+        token={session.token}
+        connect
+        audio
+        video={false}
+        onDisconnected={onClose}
+        className="w-full max-w-lg"
+      >
+        <div className="mx-4 rounded-3xl border border-white/20 bg-surface-primary/10 p-8 shadow-2xl backdrop-blur-xl">
+          <div className="mb-8 text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-status-success px-4 py-1 text-xs font-medium text-white">
+              <Loader2 className="h-3 w-3 animate-spin" /> Connected
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">{activeParticipant.name}</h2>
-            <p className="text-white/60">{callDuration}</p>
+            <Participants />
+            <p className="mt-4 text-white/60">{session.room}</p>
           </div>
-
-          {/* Audio Visualization */}
-          <div className="flex justify-center gap-2 mb-8 h-16 items-end">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="w-2 bg-brand-primary rounded-full animate-pulse"
-                style={{
-                  height: `${Math.random() * 60 + 20}%`,
-                  animationDelay: `${i * 0.1}s`,
-                }}
-              />
-            ))}
+          <div className="flex items-center justify-center gap-6">
+            <ControlBar controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: true }} />
           </div>
-
-          {/* Controls */}
-          <div className="flex justify-center gap-6 mb-4">
-            <Button
-              size="lg"
-              className={`rounded-full w-16 h-16 ${isMuted ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/20 hover:bg-surface-primary/30'}`}
-              onClick={() => setIsMuted(!isMuted)}
-            >
-              {isMuted ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
-            </Button>
-            <Button
-              size="lg"
-              className="rounded-full w-20 h-20 bg-status-error hover:bg-status-error"
-              onClick={onClose}
-            >
-              <PhoneOff className="w-7 h-7 text-white" />
-            </Button>
-            <Button
-              size="lg"
-              className={`rounded-full w-16 h-16 ${!isSpeakerOn ? 'bg-status-error hover:bg-status-error' : 'bg-surface-primary/20 hover:bg-surface-primary/30'}`}
-              onClick={() => setIsSpeakerOn(!isSpeakerOn)}
-            >
-              {isSpeakerOn ? <Volume2 className="w-6 h-6 text-white" /> : <VolumeX className="w-6 h-6 text-white" />}
-            </Button>
-          </div>
-
-          {/* Additional Options */}
-          <div className="flex justify-center">
-            <Button variant="ghost" className="text-white/60 hover:text-white hover:bg-surface-primary/10">
-              <MoreVertical className="w-5 h-5" />
+          <div className="mt-4 flex justify-center">
+            <Button variant="ghost" className="text-white/60 hover:bg-surface-primary/10 hover:text-white" onClick={onClose}>
+              <PhoneOff className="mr-2 h-4 w-4" /> Leave
             </Button>
           </div>
         </div>
-      </div>
+        <RoomAudioRenderer />
+      </LiveKitRoom>
     </div>
   );
 }

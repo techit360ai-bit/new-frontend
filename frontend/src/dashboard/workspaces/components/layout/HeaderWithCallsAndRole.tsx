@@ -224,8 +224,7 @@ export function HeaderWithCallsAndRole() {
 
       {showVideoCall && (
         <VideoCall
-          participants={teamMembers.map((member) => ({ name: member.name, avatar: member.avatar }))}
-          self={{ name: userName, avatar: userInitials }}
+          workspaceId={activeWorkspace?.id}
           onClose={() => setShowVideoCall(false)}
           isPIP={isVideoPIP}
           onTogglePIP={() => setIsVideoPIP(!isVideoPIP)}
@@ -233,11 +232,7 @@ export function HeaderWithCallsAndRole() {
       )}
 
       {showAudioCall && (
-        <AudioCall
-          participant={teamMembers[0] ? { name: teamMembers[0].name, avatar: teamMembers[0].avatar } : undefined}
-          self={{ name: userName, avatar: userInitials }}
-          onClose={() => setShowAudioCall(false)}
-        />
+        <AudioCall workspaceId={activeWorkspace?.id} onClose={() => setShowAudioCall(false)} />
       )}
     </>
   );

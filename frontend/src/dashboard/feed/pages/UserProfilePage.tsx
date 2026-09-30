@@ -5,8 +5,10 @@ import { toast } from 'sonner';
 import {
   connectWithUser,
   fetchPublicUserProfile,
+  respondConnectionRequest,
   type PublicUserProfile,
 } from '@/lib/api/users';
+import { fetchFollowCounts, followUser, unfollowUser } from '@/lib/messaging/discovery';
 import { BackButton } from '../components/BackButton';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
 
@@ -35,7 +37,11 @@ export function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
-  const [connected, setConnected] = useState(false);
+  const [relationship, setRelationship] = useState<'self' | 'connected' | 'pending' | 'incoming' | 'none'>('none');
+  const [incomingRequestId, setIncomingRequestId] = useState<string | null>(null);
+  const [followCounts, setFollowCounts] = useState<{ followers: number; following: number } | null>(null);
+  const [viewerFollows, setViewerFollows] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -43,7 +49,11 @@ export function UserProfilePage() {
     setError(null);
     fetchPublicUserProfile(userId)
       .then((liveProfile) => {
-        if (alive) setProfile(liveProfile);
+        if (alive) {
+          setProfile(liveProfile);
+          setRelationship(liveProfile.connectionStatus ?? (liveProfile.isOwnProfile ? 'self' : 'none'));
+          setIncomingRequestId(liveProfile.connectionRequestId ?? null);
+        }
       })
       .catch((err) => {
         if (!alive) return;
@@ -56,13 +66,55 @@ export function UserProfilePage() {
     return () => { alive = false; };
   }, [userId]);
 
+  useEffect(() => {
+    let alive = true;
+    setFollowCounts(null);
+    setViewerFollows(false);
+    fetchFollowCounts(userId)
+      .then((counts) => { if (alive && counts) { setFollowCounts(counts); setViewerFollows(Boolean(counts.viewerFollows)); } })
+      .catch(() => { if (alive) setFollowCounts(null); });
+    return () => { alive = false; };
+  }, [userId]);
+
+  const toggleFollow = async () => {
+    if (followBusy) return;
+    setFollowBusy(true);
+    const next = !viewerFollows;
+    try {
+      const result = next ? await followUser(userId) : await unfollowUser(userId);
+      if (result) {
+        setViewerFollows(next);
+        setFollowCounts((current) => current ? { ...current, followers: Math.max(0, current.followers + (next ? 1 : -1)) } : current);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Follow could not be updated.');
+    } finally {
+      setFollowBusy(false);
+    }
+  };
+
   const connect = async () => {
     setConnecting(true);
     try {
-      await connectWithUser(userId);
-      setConnected(true);
+      const result = await connectWithUser(userId);
+      setRelationship(result?.status === 'connected' ? 'connected' : 'pending');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Connection request could not be saved.');
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const respond = async (decision: 'accept' | 'decline') => {
+    if (!incomingRequestId) return;
+    setConnecting(true);
+    try {
+      const result = await respondConnectionRequest(incomingRequestId, decision);
+      setRelationship(result?.status === 'connected' ? 'connected' : 'none');
+      setIncomingRequestId(null);
+      toast.success(decision === 'accept' ? 'Connection accepted.' : 'Connection request declined.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Connection request could not be updated.');
     } finally {
       setConnecting(false);
     }
@@ -126,15 +178,47 @@ export function UserProfilePage() {
                 </Link>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => { void connect(); }}
-                    disabled={connecting || connected}
-                    className="flex items-center gap-2 rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
-                  >
-                    <UserPlus className="h-4 w-4" />
-                    {connected ? 'Requested' : connecting ? 'Saving...' : 'Connect'}
-                  </button>
+                  {relationship === 'incoming' ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => { void respond('accept'); }}
+                        disabled={connecting}
+                        className="flex items-center gap-2 rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        {connecting ? 'Saving...' : 'Accept request'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { void respond('decline'); }}
+                        disabled={connecting}
+                        className="flex items-center gap-2 rounded-lg border border-border-default px-5 py-2.5 text-sm text-text-primary hover:border-status-error disabled:opacity-60"
+                      >
+                        Decline
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => { void connect(); }}
+                        disabled={connecting || relationship === 'connected' || relationship === 'pending'}
+                        className="flex items-center gap-2 rounded-lg bg-accent-primary px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        {relationship === 'connected' ? 'Connected' : relationship === 'pending' ? 'Requested' : connecting ? 'Saving...' : 'Connect'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { void toggleFollow(); }}
+                        disabled={followBusy}
+                        className="flex items-center gap-2 rounded-lg border border-border-default px-5 py-2.5 text-sm text-text-primary hover:border-accent-primary disabled:opacity-60"
+                      >
+                        {followBusy ? 'Saving...' : viewerFollows ? 'Following' : 'Follow'}
+                      </button>
+                    </>
+                  )}
                   <Link
                     to={`/feed/messages/${encodeURIComponent(profile.id)}`}
                     className="flex items-center gap-2 rounded-lg border border-border-default px-5 py-2.5 text-sm text-text-primary hover:border-accent-primary"
@@ -147,11 +231,13 @@ export function UserProfilePage() {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border-default pt-6 md:grid-cols-5">
+        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border-default pt-6 md:grid-cols-4 lg:grid-cols-7">
           <Metric label="Stage progress" value={`${profile.stats.stageProgress}%`} />
           <Metric label="Posts" value={profile.stats.posts} />
           <Metric label="Answers" value={profile.stats.answers} />
           <Metric label="Connections" value={profile.stats.connections} />
+          <Metric label="Followers" value={followCounts ? followCounts.followers : '—'} />
+          <Metric label="Following" value={followCounts ? followCounts.following : '—'} />
           <Metric label="Decay" value={profile.stats.decay} />
         </div>
       </section>
