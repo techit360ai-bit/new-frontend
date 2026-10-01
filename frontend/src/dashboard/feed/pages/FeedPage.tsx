@@ -278,7 +278,7 @@ export function FeedPage() {
             {innovationRow.length > 0 && (
               <section className="px-4 pt-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-text-primary">Startups &amp; ideas for you</h2>
+                  <h2 className="text-sm font-semibold text-text-primary">Startups, projects &amp; ideas</h2>
                   <div className="flex items-center gap-3">
                     {innovationUpdatedAt && <span className="text-[11px] text-text-muted">Updated {relativeTime(innovationUpdatedAt)}</span>}
                     <Link to="/feed/discover" className="text-xs font-medium text-accent-primary hover:underline">See all</Link>
