@@ -32,6 +32,9 @@ const CATEGORY_IDS: Record<string, string> = {
   Hackathons: 'hackathons', Organizations: 'organizations', Learning: 'learning', 'AI Recommendations': 'ai-recommendations',
 };
 
+// Startups, projects and ideas share one labelled feed surface.
+const INNOVATION_TYPES: DiscoveryRecommendation['entityType'][] = ['startup', 'project', 'idea'];
+
 /** Unobtrusive freshness label from the recommendation set's generatedAt. */
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -54,6 +57,10 @@ export function FeedPage() {
   const [opportunities, setOpportunities] = useState<DiscoveryRecommendation[]>([]);
   const [peopleUpdatedAt, setPeopleUpdatedAt] = useState<string | null>(null);
   const [opportunitiesUpdatedAt, setOpportunitiesUpdatedAt] = useState<string | null>(null);
+  const [innovation, setInnovation] = useState<DiscoveryRecommendation[]>([]);
+  const [innovationUpdatedAt, setInnovationUpdatedAt] = useState<string | null>(null);
+  const [recommended, setRecommended] = useState<DiscoveryRecommendation[]>([]);
+  const [recommendedUpdatedAt, setRecommendedUpdatedAt] = useState<string | null>(null);
   const [returnSummary, setReturnSummary] = useState<ReturnSummary | null>(null);
   const [catchUpMode, setCatchUpMode] = useState(false);
   const [caughtUp, setCaughtUp] = useState(false);
@@ -94,12 +101,42 @@ export function FeedPage() {
         result.recommendations.slice(0, 4).forEach(item => { void recordRecommendationExposure(item.id, 'impression', 'feed-opportunities').catch(() => undefined); });
       })
       .catch(() => { if (alive) { setOpportunities([]); setOpportunitiesUpdatedAt(null); } });
+    listRecommendations({ surface: 'feed', limit: 12 })
+      .then(result => {
+        if (!alive) return;
+        const filtered = result.recommendations.filter(item => INNOVATION_TYPES.includes(item.entityType));
+        setInnovation(filtered);
+        setInnovationUpdatedAt(result.meta?.generatedAt ?? new Date().toISOString());
+        filtered.slice(0, 4).forEach(item => { void recordRecommendationExposure(item.id, 'impression', 'feed-innovation').catch(() => undefined); });
+      })
+      .catch(() => { if (alive) { setInnovation([]); setInnovationUpdatedAt(null); } });
+    listRecommendations({ surface: 'feed', limit: 6 })
+      .then(result => {
+        if (!alive) return;
+        setRecommended(result.recommendations.slice(0, 3));
+        setRecommendedUpdatedAt(result.meta?.generatedAt ?? new Date().toISOString());
+        result.recommendations.slice(0, 3).forEach(item => { void recordRecommendationExposure(item.id, 'impression', 'feed').catch(() => undefined); });
+      })
+      .catch(() => { if (alive) { setRecommended([]); setRecommendedUpdatedAt(null); } });
     return () => { alive = false; };
   }, [searchParams]);
 
   const visiblePosts = useMemo(() => {
     return posts;
   }, [posts]);
+
+  // The original mixed "Recommended for you" module leads the feed; the labelled
+  // rows below are de-duplicated against it so one entity is never shown (or
+  // counted as an impression) twice.
+  const featuredKeys = useMemo(
+    () => new Set(recommended.map(item => `${item.entityType}:${item.entityId}`)),
+    [recommended],
+  );
+  const dedupeFeatured = <T extends DiscoveryRecommendation>(items: T[]): T[] =>
+    items.filter(item => !featuredKeys.has(`${item.entityType}:${item.entityId}`));
+  const peopleRow = dedupeFeatured(people);
+  const opportunitiesRow = dedupeFeatured(opportunities);
+  const innovationRow = dedupeFeatured(innovation);
 
   const changeZone = (zone: string) => {
     setActiveZone(zone);
@@ -172,7 +209,29 @@ export function FeedPage() {
               />
             </div>
 
-            {people.length > 0 && (
+            {recommended.length > 0 && (
+              <section className="px-4 pt-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-text-primary">Recommended for you</h2>
+                  <div className="flex items-center gap-3">
+                    {recommendedUpdatedAt && <span className="text-[11px] text-text-muted">Updated {relativeTime(recommendedUpdatedAt)}</span>}
+                    <Link to="/feed/discover" className="text-xs font-medium text-accent-primary hover:underline">See all</Link>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {recommended.slice(0, 3).map(item => (
+                    <RecommendationCard
+                      key={item.id}
+                      recommendation={item}
+                      onDismiss={dismissFrom(setRecommended)}
+                      onAction={(recommendation, action) => void recordRecommendationExposure(recommendation.id, action, 'feed').catch(() => undefined)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {peopleRow.length > 0 && (
               <section className="px-4 pt-5">
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-text-primary">People you may know</h2>
@@ -182,7 +241,7 @@ export function FeedPage() {
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {people.slice(0, 4).map(item => (
+                  {peopleRow.slice(0, 4).map(item => (
                     <RecommendationCard
                       key={item.id}
                       recommendation={item}
@@ -194,7 +253,7 @@ export function FeedPage() {
               </section>
             )}
 
-            {opportunities.length > 0 && (
+            {opportunitiesRow.length > 0 && (
               <section className="px-4 pt-5">
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-text-primary">Opportunities for you</h2>
@@ -204,12 +263,34 @@ export function FeedPage() {
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {opportunities.slice(0, 4).map(item => (
+                  {opportunitiesRow.slice(0, 4).map(item => (
                     <RecommendationCard
                       key={item.id}
                       recommendation={item}
                       onDismiss={dismissFrom(setOpportunities)}
                       onAction={(recommendation, action) => void recordRecommendationExposure(recommendation.id, action, 'feed-opportunities').catch(() => undefined)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {innovationRow.length > 0 && (
+              <section className="px-4 pt-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-text-primary">Startups &amp; ideas for you</h2>
+                  <div className="flex items-center gap-3">
+                    {innovationUpdatedAt && <span className="text-[11px] text-text-muted">Updated {relativeTime(innovationUpdatedAt)}</span>}
+                    <Link to="/feed/discover" className="text-xs font-medium text-accent-primary hover:underline">See all</Link>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {innovationRow.slice(0, 4).map(item => (
+                    <RecommendationCard
+                      key={item.id}
+                      recommendation={item}
+                      onDismiss={dismissFrom(setInnovation)}
+                      onAction={(recommendation, action) => void recordRecommendationExposure(recommendation.id, action, 'feed-innovation').catch(() => undefined)}
                     />
                   ))}
                 </div>
