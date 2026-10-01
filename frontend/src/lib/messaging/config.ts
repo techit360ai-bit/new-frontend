@@ -18,10 +18,16 @@ export const MESSAGING_WS_URL: string =
 
 export const MESSAGING_PREFIX = "/api/v1";
 
-export function messagingFallbackEnabled(): boolean {
-  if (env.VITE_API_STRICT === "1") return false;
-  if (env.VITE_API_FALLBACK !== undefined) return env.VITE_API_FALLBACK === "1";
-  return env.MODE === undefined || env.MODE === "development" || env.MODE === "test" || env.DEV === true;
+/**
+ * Mirrors lib/api/config.ts: a production build is always strict. Mock data
+ * must never be rendered as if it came from the messaging service.
+ * The optional `source` argument exists only so tests can exercise the matrix.
+ */
+export function messagingFallbackEnabled(source: ViteEnv = env): boolean {
+  if (source.PROD === true || source.MODE === "production") return false;
+  if (source.VITE_API_STRICT === "1") return false;
+  if (source.VITE_API_FALLBACK !== undefined) return source.VITE_API_FALLBACK === "1";
+  return source.MODE === undefined || source.MODE === "development" || source.MODE === "test" || source.DEV === true;
 }
 
 // Auth token getter; defaults to the AuthContext localStorage key.

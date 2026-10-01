@@ -26,14 +26,27 @@ export const API_BASE_URL: string =
 export const API_PREFIX = "/api/v1";
 
 /**
+ * True when running a production Vite build. A production runtime must never
+ * disguise a failed request as mock data, so this short-circuits the fallback.
+ */
+export function isProductionBuild(source: ViteEnv = env): boolean {
+  return source.PROD === true || source.MODE === "production";
+}
+
+/**
  * When true, network failures fall back to bundled mock data instead of throwing,
  * so the UI still renders during local dev / when the backend is down.
- * Disable (VITE_API_STRICT=1) to surface real errors in integration testing.
+ *
+ * Fail-closed rule: a production build is ALWAYS strict, regardless of
+ * VITE_API_FALLBACK, so mock data can never be shown as if it were real.
+ * Disable explicitly in dev with VITE_API_STRICT=1 to surface real errors.
+ * The optional `source` argument exists only so tests can exercise the matrix.
  */
-export function apiFallbackEnabled(): boolean {
-  if (env.VITE_API_STRICT === "1") return false;
-  if (env.VITE_API_FALLBACK !== undefined) return env.VITE_API_FALLBACK === "1";
-  return env.MODE === undefined || env.MODE === "development" || env.MODE === "test" || env.DEV === true;
+export function apiFallbackEnabled(source: ViteEnv = env): boolean {
+  if (isProductionBuild(source)) return false;
+  if (source.VITE_API_STRICT === "1") return false;
+  if (source.VITE_API_FALLBACK !== undefined) return source.VITE_API_FALLBACK === "1";
+  return source.MODE === undefined || source.MODE === "development" || source.MODE === "test" || source.DEV === true;
 }
 
 /** Build a full URL for an ai-router path (with or without leading slash). */
