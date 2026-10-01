@@ -39,6 +39,8 @@ export function FeedPage() {
   const [composerExpanded, setComposerExpanded] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState('milestone');
   const [recommendations, setRecommendations] = useState<DiscoveryRecommendation[]>([]);
+  const [people, setPeople] = useState<DiscoveryRecommendation[]>([]);
+  const [opportunities, setOpportunities] = useState<DiscoveryRecommendation[]>([]);
   const [returnSummary, setReturnSummary] = useState<ReturnSummary | null>(null);
   const [catchUpMode, setCatchUpMode] = useState(false);
   const [caughtUp, setCaughtUp] = useState(false);
@@ -70,6 +72,20 @@ export function FeedPage() {
         result.recommendations.slice(0, 3).forEach(item => { void recordRecommendationExposure(item.id, 'impression', 'feed').catch(() => undefined); });
       })
       .catch(() => { if (alive) setRecommendations([]); });
+    listRecommendations({ surface: 'feed', type: 'people', limit: 4 })
+      .then(result => {
+        if (!alive) return;
+        setPeople(result.recommendations);
+        result.recommendations.slice(0, 4).forEach(item => { void recordRecommendationExposure(item.id, 'impression', 'feed-people').catch(() => undefined); });
+      })
+      .catch(() => { if (alive) setPeople([]); });
+    listRecommendations({ surface: 'feed', type: 'opportunities', limit: 4 })
+      .then(result => {
+        if (!alive) return;
+        setOpportunities(result.recommendations);
+        result.recommendations.slice(0, 4).forEach(item => { void recordRecommendationExposure(item.id, 'impression', 'feed-opportunities').catch(() => undefined); });
+      })
+      .catch(() => { if (alive) setOpportunities([]); });
     return () => { alive = false; };
   }, [searchParams]);
 
@@ -86,6 +102,11 @@ export function FeedPage() {
 
   const dismissRecommendation = (recommendation: DiscoveryRecommendation) => {
     setRecommendations(current => current.filter(item => item.id !== recommendation.id));
+    void sendRecommendationFeedback(recommendation.id, 'not_interested').catch(() => undefined);
+  };
+
+  const dismissFrom = (setter: typeof setRecommendations) => (recommendation: DiscoveryRecommendation) => {
+    setter(current => current.filter(item => item.id !== recommendation.id));
     void sendRecommendationFeedback(recommendation.id, 'not_interested').catch(() => undefined);
   };
 
@@ -161,6 +182,44 @@ export function FeedPage() {
                       recommendation={item}
                       onDismiss={dismissRecommendation}
                       onAction={(recommendation, action) => void recordRecommendationExposure(recommendation.id, action, 'feed').catch(() => undefined)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {people.length > 0 && (
+              <section className="px-4 pt-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-text-primary">People you may know</h2>
+                  <Link to="/feed/discover" className="text-xs font-medium text-accent-primary hover:underline">See all</Link>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {people.slice(0, 4).map(item => (
+                    <RecommendationCard
+                      key={item.id}
+                      recommendation={item}
+                      onDismiss={dismissFrom(setPeople)}
+                      onAction={(recommendation, action) => void recordRecommendationExposure(recommendation.id, action, 'feed-people').catch(() => undefined)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {opportunities.length > 0 && (
+              <section className="px-4 pt-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-text-primary">Opportunities for you</h2>
+                  <Link to="/feed/discover" className="text-xs font-medium text-accent-primary hover:underline">See all</Link>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {opportunities.slice(0, 4).map(item => (
+                    <RecommendationCard
+                      key={item.id}
+                      recommendation={item}
+                      onDismiss={dismissFrom(setOpportunities)}
+                      onAction={(recommendation, action) => void recordRecommendationExposure(recommendation.id, action, 'feed-opportunities').catch(() => undefined)}
                     />
                   ))}
                 </div>
