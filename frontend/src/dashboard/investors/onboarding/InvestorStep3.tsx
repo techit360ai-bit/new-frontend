@@ -1,51 +1,60 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, type Variants } from "motion/react";
-import { useInvestorProfile, type PortfolioCompany } from "@/contexts/UserContext";
-import { BlobField } from "@/components/ui/blob-field";
-import { ImageSlideshow } from "@/components/ui/image-slideshow";
 import {
-  BarChart3,
-  Plus,
-  Trash2,
-  Sparkles,
-  ArrowRight,
-  ArrowLeft,
-  Building2,
-} from "lucide-react";
+  useInvestorProfile,
+  type PortfolioCompany,
+} from "@/contexts/UserContext";
+import { InvestorProgressBar } from "./InvestorProgressBar";
+import { Button } from "@/components/ui/button";
+import { BarChart3, Plus, X } from "lucide-react";
 
-const SLIDE_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
+const investmentStages = [
+  "Idea",
+  "Pre-Seed",
+  "Seed",
+  "Series A",
+  "Series B+",
+] as const;
+const outcomes = ["Active", "Exited", "Failed", "Acquired"] as const;
 
-const PERKS = [
-  { icon: Sparkles, text: "Build credibility with your existing track record" },
-  { icon: Building2, text: "Attract founders seeking value-add partners" },
-  { icon: BarChart3, text: "Automate portfolio monitoring on TechIT" },
-];
-
-const INVESTMENT_STAGES = ["Idea", "Pre-Seed", "Seed", "Series A", "Series B+"];
-const OUTCOMES = ["Active", "Exited", "Acquired", "Failed"] as const;
+const outcomeColors: Record<string, string> = {
+  Active: "bg-status-info",
+  Exited: "bg-teal-500",
+  Failed: "bg-status-error",
+  Acquired: "bg-violet-500",
+};
 
 export function InvestorStep3() {
   const navigate = useNavigate();
   const { investorProfile, updateInvestorProfile } = useInvestorProfile();
-
   const [portfolio, setPortfolio] = useState<PortfolioCompany[]>(
-    investorProfile.portfolio || []
+    investorProfile.portfolio,
   );
-  const [name, setName] = useState("");
-  const [stage, setStage] = useState("Seed");
-  const [outcome, setOutcome] = useState<(typeof OUTCOMES)[number]>("Active");
+
+  const [newCompany, setNewCompany] = useState<{
+    name: string;
+    stage: string;
+    outcome: (typeof outcomes)[number];
+  }>({
+    name: "",
+    stage: "",
+    outcome: "Active",
+  });
+
+  const [showStageDropdown, setShowStageDropdown] = useState(false);
+  const [showOutcomeDropdown, setShowOutcomeDropdown] = useState(false);
 
   const handleAddCompany = () => {
-    if (!name.trim()) return;
-    const company: PortfolioCompany = {
-      id: Date.now().toString(),
-      name: name.trim(),
-      stage,
-      outcome,
-    };
-    setPortfolio([...portfolio, company]);
-    setName("");
+    if (newCompany.name && newCompany.stage) {
+      const company: PortfolioCompany = {
+        id: Date.now().toString(),
+        name: newCompany.name,
+        stage: newCompany.stage,
+        outcome: newCompany.outcome,
+      };
+      setPortfolio([...portfolio, company]);
+      setNewCompany({ name: "", stage: "", outcome: "Active" });
+    }
   };
 
   const handleRemoveCompany = (id: string) => {
@@ -61,186 +70,169 @@ export function InvestorStep3() {
     navigate("/investor/onboarding/step-2");
   };
 
-  const inputCls =
-    "w-full h-11 rounded-xl border border-white/20 bg-white/10 px-4 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] focus:border-transparent transition-all backdrop-blur-sm";
-
-  const fieldVariants: Variants = {
-    hidden: { opacity: 0, y: 12 },
-    show: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: 0.1 + i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] },
-    }),
-  };
-
   return (
-    <div className="min-h-screen bg-[#081c15] p-[10px] font-bricolage">
-      <div className="w-full min-h-[calc(100vh-20px)] rounded-[32px] overflow-hidden grid lg:grid-cols-[42%_58%] border border-white/10">
-        {/* Left panel */}
-        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-[#081c15] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#20C997]/30 via-[#081c15] to-[#081c15]" />
-          <BlobField variant="dark" />
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-teal-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+      <div className="w-full max-w-3xl">
+        <InvestorProgressBar currentStep={3} totalSteps={5} />
 
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 mb-6 px-3 py-1 rounded-full bg-[#20C997]/15 border border-[#20C997]/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#20C997]">Step 3 of 5</span>
-            </div>
-            <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-[1.1] mb-4">
-              Track Record & Portfolio
-            </h1>
-            <p className="text-white/60 text-sm leading-relaxed max-w-sm">
-              Highlight prior startup investments or ventures you’ve backed. (Optional, can be edited later).
-            </p>
-          </div>
-
-          <div className="relative z-10 space-y-4">
-            {PERKS.map(({ icon: Icon, text }, i) => (
-              <motion.div
-                key={text}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
-                className="flex items-center gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-[#20C997]" />
-                </div>
-                <span className="text-white/75 text-sm font-medium">{text}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Step progress</span>
-              <span className="text-[10px] font-black text-[#20C997]">3 / 5</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#20C997] to-emerald-400 w-3/5" />
-            </div>
-          </div>
+        <div className="mb-12">
+          <h1 className="text-5xl sm:text-4xl mb-3 text-text-primary dark:text-white font-bold tracking-tight">
+            Your Investment Track Record
+          </h1>
+          <p className="text-lg text-text-muted dark:text-text-disabled font-medium">
+            This builds your Investor Credibility Score
+          </p>
         </div>
 
-        {/* Right panel */}
-        <div className="relative flex items-center justify-center p-6 md:p-14 overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <ImageSlideshow images={SLIDE_IMAGES} />
+        {/* Add Investment Form */}
+        <div className="bg-surface-primary dark:bg-surface-inverse-muted/40 border-2 border-border-strong dark:border-border-inverse-strong rounded-xl p-7 mb-8 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+            <div>
+              <label className="block mb-3 text-sm text-text-secondary dark:text-text-disabled font-semibold">
+                Startup Name
+              </label>
+              <input
+                type="text"
+                value={newCompany.name}
+                onChange={(e) =>
+                  setNewCompany({ ...newCompany, name: e.target.value })
+                }
+                placeholder="e.g., TechCorp"
+                className="w-full h-11 bg-surface-primary dark:bg-background-inverse/30 border-2 border-border-strong dark:border-border-inverse-strong rounded-lg px-4 text-text-primary dark:text-white placeholder:text-text-muted dark:placeholder:text-text-muted focus:border-teal-500 dark:focus:border-teal-400 focus:shadow-[0_0_0_3px_rgba(20,184,166,0.1)] transition-all outline-none font-medium hover:border-slate-400"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-3 text-sm text-text-secondary dark:text-text-disabled font-semibold">
+                Stage at Investment
+              </label>
+              <div className="relative">
+                <button
+                  onClick={() => setShowStageDropdown(!showStageDropdown)}
+                  className="w-full h-11 bg-surface-primary dark:bg-background-inverse/30 border-2 border-border-strong dark:border-border-inverse-strong rounded-lg px-4 text-text-primary dark:text-white text-left transition-all hover:border-teal-400 dark:hover:border-teal-500 font-medium"
+                >
+                  {newCompany.stage || "Select stage"}
+                </button>
+                {showStageDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-surface-primary dark:bg-surface-inverse-muted border-2 border-border-strong dark:border-border-inverse-strong rounded-lg shadow-xl z-50">
+                    {investmentStages.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => {
+                          setNewCompany({ ...newCompany, stage: s });
+                          setShowStageDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-teal-50 dark:hover:bg-slate-700/50 hover:text-teal-700 dark:hover:text-teal-300 transition-all text-text-secondary dark:text-text-on-inverse-secondary border-b border-border-default dark:border-border-inverse-strong/50 last:border-b-0 font-medium"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block mb-3 text-sm text-text-secondary dark:text-text-disabled font-semibold">
+                Outcome
+              </label>
+              <div className="relative">
+                <button
+                  onClick={() => setShowOutcomeDropdown(!showOutcomeDropdown)}
+                  className="w-full h-11 bg-surface-primary dark:bg-background-inverse/30 border-2 border-border-strong dark:border-border-inverse-strong rounded-lg px-4 text-text-primary dark:text-white text-left transition-all hover:border-teal-400 dark:hover:border-teal-500 font-medium"
+                >
+                  {newCompany.outcome}
+                </button>
+                {showOutcomeDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-surface-primary dark:bg-surface-inverse-muted border-2 border-border-strong dark:border-border-inverse-strong rounded-lg shadow-xl z-50">
+                    {outcomes.map((o) => (
+                      <button
+                        key={o}
+                        onClick={() => {
+                          setNewCompany({
+                            ...newCompany,
+                            outcome: o,
+                          });
+                          setShowOutcomeDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-teal-50 dark:hover:bg-slate-700/50 hover:text-teal-700 dark:hover:text-teal-300 transition-all text-text-secondary dark:text-text-on-inverse-secondary border-b border-border-default dark:border-border-inverse-strong/50 last:border-b-0 font-medium"
+                      >
+                        {o}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="absolute inset-0 bg-[#081c15]/55 z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#081c15]/50 via-transparent to-[#081c15]/70 z-[1]" />
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 w-full max-w-xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-[32px] p-6 md:p-9 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.7)] overflow-y-auto max-h-[85vh] hide-scrollbar"
+          <Button
+            onClick={handleAddCompany}
+            disabled={!newCompany.name || !newCompany.stage}
+            className="w-full bg-teal-50 dark:bg-teal-500/20 hover:bg-teal-100 dark:hover:bg-teal-500/30 text-teal-700 dark:text-teal-300 border-2 border-teal-500 dark:border-teal-400 font-bold transition-all duration-200"
+            variant="outline"
           >
-            <div className="mb-6">
-              <h2 className="text-xl font-black text-white mb-1 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
-                Portfolio Companies
-              </h2>
-              <p className="text-sm text-white/60 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
-                Add any past or present investments.
+            <Plus className="w-5 h-5 mr-2" />
+            Add Investment
+          </Button>
+        </div>
+
+        {/* Portfolio List */}
+        <div className="space-y-4 mb-10">
+          {portfolio.map((company) => (
+            <div
+              key={company.id}
+              className="bg-surface-primary dark:bg-surface-inverse-muted/40 border-2 border-border-strong dark:border-border-inverse-strong rounded-xl p-5 flex items-center justify-between hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-[0_6px_16px_rgba(20,184,166,0.12)] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg text-text-primary dark:text-white font-bold">
+                    {company.name}
+                  </h3>
+                  <span
+                    className={`px-3 py-1 rounded-lg text-xs font-bold text-white ${outcomeColors[company.outcome]}`}
+                  >
+                    {company.outcome}
+                  </span>
+                </div>
+                <p className="text-sm text-text-muted dark:text-text-disabled mt-2 font-medium">
+                  Invested at {company.stage}
+                </p>
+              </div>
+              <button
+                onClick={() => handleRemoveCompany(company.id)}
+                className="p-2.5 hover:bg-status-error/10 rounded-lg transition-all flex-shrink-0"
+              >
+                <X className="w-5 h-5 text-status-error dark:text-status-error" />
+              </button>
+            </div>
+          ))}
+
+          {portfolio.length === 0 && (
+            <div className="text-center py-16 text-text-muted dark:text-text-muted bg-background-primary dark:bg-surface-inverse-muted/20 rounded-xl">
+              <BarChart3 className="mx-auto mb-3 h-10 w-10 text-text-disabled" aria-hidden="true" />
+              <p className="font-medium text-base">No investments added yet.</p>
+              <p className="text-sm mt-1">
+                Add your first investment above to get started.
               </p>
             </div>
+          )}
+        </div>
 
-            {/* Add Company Box */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-5 space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-white/70 mb-1">Company name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Stripe, Paystack"
-                  className={inputCls}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-white/70 mb-1">Entry Stage</label>
-                  <select
-                    value={stage}
-                    onChange={(e) => setStage(e.target.value)}
-                    className={`${inputCls} [&>option]:bg-[#081c15] [&>option]:text-white`}
-                  >
-                    {INVESTMENT_STAGES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-white/70 mb-1">Status</label>
-                  <select
-                    value={outcome}
-                    onChange={(e) => setOutcome(e.target.value as any)}
-                    className={`${inputCls} [&>option]:bg-[#081c15] [&>option]:text-white`}
-                  >
-                    {OUTCOMES.map((o) => (
-                      <option key={o} value={o}>{o}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleAddCompany}
-                disabled={!name.trim()}
-                className="w-full h-10 flex items-center justify-center gap-1.5 rounded-xl bg-[#20C997]/20 border border-[#20C997]/40 text-[#20C997] font-bold text-xs uppercase tracking-wider transition-all hover:bg-[#20C997]/30 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Plus className="w-4 h-4" /> Add Company
-              </button>
-            </div>
-
-            {/* List */}
-            <div className="space-y-2 mb-6 max-h-44 overflow-y-auto custom-scrollbar">
-              {portfolio.length === 0 ? (
-                <div className="p-4 rounded-xl border border-dashed border-white/15 text-center text-xs text-white/40">
-                  No portfolio companies added yet (you can skip this).
-                </div>
-              ) : (
-                portfolio.map((c) => (
-                  <div
-                    key={c.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 text-xs"
-                  >
-                    <div>
-                      <span className="font-bold text-white block">{c.name}</span>
-                      <span className="text-white/40">{c.stage} · {c.outcome}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCompany(c.id)}
-                      className="p-1.5 text-white/40 hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="show" className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="h-12 px-5 flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-sm uppercase tracking-widest transition-all"
-              >
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#20C997] to-[#128a64] text-slate-950 font-black text-sm uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(32,201,151,0.4)]"
-              >
-                Continue <ArrowRight className="w-4 h-4" />
-              </button>
-            </motion.div>
-          </motion.div>
+        <div className="mt-16 flex justify-between">
+          <Button
+            onClick={handleBack}
+            variant="outline"
+            className="px-8 py-6 text-base font-semibold border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary hover:border-teal-400 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-300 transition-all duration-200"
+          >
+            Back
+          </Button>
+          <Button
+            onClick={handleNext}
+            className="px-10 py-6 text-lg bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 dark:from-teal-500 dark:to-cyan-500 dark:hover:from-teal-600 dark:hover:to-cyan-600 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            Continue
+          </Button>
         </div>
       </div>
     </div>

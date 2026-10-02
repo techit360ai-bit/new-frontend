@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { ApiError, apiGet, apiPost, setAuthTokenGetter, withFallback } from "./client";
+import { ApiError, apiGet, apiPost, isCapacityError, setAuthTokenGetter, withFallback } from "./client";
 import { env } from "./config";
 
 function response(body: unknown, init: ResponseInit = {}) {
@@ -119,9 +119,6 @@ test("apiGet throws ApiError with parsed response body on non-2xx responses", as
 
 test("withFallback returns fallback data and logs when fallback mode is enabled", async () => {
   const previousFallback = env.VITE_API_FALLBACK;
-  const previousStrict = env.VITE_API_STRICT;
-  delete env.VITE_API_STRICT;
-  if (typeof process !== "undefined" && process.env) delete process.env.VITE_API_STRICT;
   env.VITE_API_FALLBACK = "1";
   const warn = captureWarn();
 
@@ -140,9 +137,35 @@ test("withFallback returns fallback data and logs when fallback mode is enabled"
   } finally {
     if (previousFallback === undefined) delete env.VITE_API_FALLBACK;
     else env.VITE_API_FALLBACK = previousFallback;
-    if (previousStrict === undefined) delete env.VITE_API_STRICT;
-    else env.VITE_API_STRICT = previousStrict;
     warn.restore();
+    resetAuth();
+  }
+});
+
+test("apiGet revalidates ETagged reads and serves the prior body on 304", async () => {
+  let calls = 0;
+  const fetchMock = stubFetch(async (_url, init) => {
+    calls += 1;
+    if (calls === 1) return response({ value: 1 }, { headers: { ETag: "v1" } });
+    expect((init?.headers as Record<string, string>)["If-None-Match"]).toBe("v1");
+    return response(undefined, { status: 304 });
+  });
+  try {
+    await expect(apiGet("/etagged")).resolves.toEqual({ value: 1 });
+    await expect(apiGet("/etagged")).resolves.toEqual({ value: 1 });
+    expect(calls).toBe(2);
+  } finally {
+    fetchMock.restore();
+    resetAuth();
+  }
+});
+
+test("capacity errors expose retry metadata", async () => {
+  const fetchMock = stubFetch(async () => response({ error: "busy", retryAfterSeconds: 7 }, { status: 503 }));
+  try {
+    await expect(apiGet("/busy")).rejects.toSatisfy((error: unknown) => isCapacityError(error) && error.retryAfterSeconds === 7);
+  } finally {
+    fetchMock.restore();
     resetAuth();
   }
 });

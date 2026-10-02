@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Eye, EyeOff, ArrowRight, Mail, Lock, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Zap, ArrowRight, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { motion, AnimatePresence } from "motion/react";
+import { Button } from '@/components/ui/button'
 import { authRoleOnboardingPath, normalizeRole, roleForPath, roleSafeReturnPath } from "@/lib/roleRoutes";
-import { useLocale } from "@/contexts/LocaleContext";
-import { getTranslations } from "@/app/lib/i18n";
-
-const LOGIN_SLIDES = [
-  "/auth/login1.jpg",
-  "/auth/login2.avif",
-  "/auth/login3.avif",
-];
 
 export default function Login() {
   const { signIn, profile, user, loading: authLoading } = useAuth();
@@ -24,17 +16,6 @@ export default function Login() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const { locale } = useLocale();
-  const { login } = getTranslations(locale.code);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % LOGIN_SLIDES.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -71,155 +52,136 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faff] flex font-bricolage">
-      {/* Left panel – unchanged */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-[#171330] overflow-hidden flex-col justify-between p-12 lg:p-16">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#0068ff]/30 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#0068ff]/20 blur-[100px] rounded-full" />
+    <div className="min-h-screen bg-[color:var(--background)] flex">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-[color:var(--primary)]/20 via-brand-primary/10 to-[color:var(--background)] overflow-hidden flex-col justify-between p-12">
+        <div className="orb orb-violet w-[400px] h-[400px] -top-20 -left-20 absolute" />
+        <div className="orb orb-cyan w-[300px] h-[300px] bottom-0 right-0 absolute" />
         <div className="relative z-10">
-          <Link to="/" className="inline-flex items-center gap-2.5 mb-16 group">
-            <div className="bg-white rounded-2xl px-4 py-2.5 shadow-lg group-hover:shadow-xl transition-all">
-              <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-9 object-contain" />
+          <Link to="/" className="flex items-center gap-2.5 mb-16">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[color:var(--primary)] to-brand-primary flex items-center justify-center shadow-lg">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <div className="font-bold leading-none">TECHIT</div>
+              <div className="font-mono text-[0.6rem] text-[color:var(--primary)] tracking-widest">
+                NETWORK
+              </div>
             </div>
           </Link>
-          <h2 className="font-black text-5xl md:text-6xl text-white leading-[1.1] tracking-tight mb-6">
-            {login.title}
+          <h2 className="font-bold text-4xl leading-tight tracking-tight mb-4">
+            Welcome
+            <br />
+            Back.
           </h2>
-          <p className="text-white/70 text-lg leading-relaxed max-w-md font-medium">
-            {login.subtitle}
+          <p className="text-[color:var(--muted-foreground)] text-base leading-relaxed max-w-sm">
+            Your projects, your team, your investors — all waiting for you.
           </p>
         </div>
         <div className="relative z-10 space-y-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 text-sm text-white/70 shadow-2xl">
+          <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)]/50 p-4 text-sm text-[color:var(--muted-foreground)]">
             Live account and platform metrics become available after authentication.
           </div>
         </div>
       </div>
 
-      {/* Right panel – with slideshow background + glass form card */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
-        {/* Slideshow background */}
-        <div className="absolute inset-0 z-0">
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="absolute inset-0"
-            >
-              <img
-                src={LOGIN_SLIDES[currentSlide]}
-                alt="Login Background"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Glass card – with stronger shadow */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-[36px] p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)]"
-        >
-          {/* Logo – mobile only */}
-          <div className="lg:hidden flex items-center gap-2.5 mb-10">
-            <Link to="/" className="inline-flex group">
-              <div className="bg-white rounded-2xl px-4 py-2.5 shadow-lg group-hover:shadow-xl transition-all">
-                <img src="/TechIT-logo.png" alt="TechIT Logo" className="h-8 object-contain" />
+      {/* Right form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          <div className="lg:hidden flex items-center gap-2.5 mb-8">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[color:var(--primary)] to-brand-primary flex items-center justify-center">
+                <Zap className="h-4 w-4 text-white" />
               </div>
+              <span className="font-bold text-sm">TECHIT NETWORK</span>
             </Link>
           </div>
 
-          <div className="mb-10">
-            <h1 className="font-black text-4xl text-white tracking-tight mb-3 [text-shadow:0_4px_20px_rgba(0,0,0,0.8)]">
-              {login.title}
-            </h1>
-            <p className="text-white/90 text-base font-medium [text-shadow:0_2px_10px_rgba(0,0,0,0.7)]">
-              {login.noAccount}{" "}
+          <div className="mb-8">
+            <h1 className="font-bold text-3xl tracking-tight">Sign In</h1>
+            <p className="text-[color:var(--muted-foreground)] text-sm mt-2">
+              Don't have an account?{" "}
               <Link
                 to="/signup"
-                className="text-white font-bold underline underline-offset-2 hover:text-[#0068ff] transition-colors [text-shadow:0_2px_10px_rgba(0,0,0,0.7)]"
+                className="text-[color:var(--primary)] font-medium hover:underline"
               >
-                {login.signupLink}
+                Create one free
               </Link>
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/20 border border-red-400/40 text-sm text-white backdrop-blur-sm flex items-center gap-3 [text-shadow:0_1px_6px_rgba(0,0,0,0.6)]">
-              <AlertCircle className="h-5 w-5 text-red-300 flex-shrink-0" />
+            <div className="mb-4 p-4 rounded-xl bg-status-error/10 border border-status-error/30 text-sm text-status-error">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-xs font-black uppercase tracking-widest text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
-                {login.emailLabel}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[color:var(--muted-foreground)]">
+                Email Address
               </label>
-              <div className="relative group">
-                <Mail className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-[#0068ff] transition-colors" />
+              <div className="relative">
+                <Mail className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={login.emailPlaceholder}
+                  placeholder="you@example.com"
                   required
                   autoComplete="email"
-                  className="w-full h-14 rounded-2xl border border-white/20 bg-white/10 pl-12 pr-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0068ff] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]"
+                  className="w-full h-11 rounded-xl border border-[color:var(--border)] bg-[color:var(--input)] pl-10 pr-4 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)] transition-all"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-black uppercase tracking-widest text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
-                  {login.passLabel}
+                <label className="block text-xs font-semibold uppercase tracking-wide text-[color:var(--muted-foreground)]">
+                  Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-white/80 hover:text-white transition-colors [text-shadow:0_2px_8px_rgba(0,0,0,0.7)]"
+                  className="text-xs text-[color:var(--primary)] hover:underline"
                 >
-                  {login.forgot}
+                  Forgot password?
                 </Link>
               </div>
-              <div className="relative group">
-                <Lock className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-[#0068ff] transition-colors" />
+              <div className="relative">
+                <Lock className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
                 <input
                   type={showPwd ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={login.passPlaceholder}
+                  placeholder="Your password"
                   required
                   autoComplete="current-password"
-                  className="w-full h-14 rounded-2xl border border-white/20 bg-white/10 pl-12 pr-12 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#0068ff] focus:border-transparent transition-all backdrop-blur-sm [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]"
+                  className="w-full h-11 rounded-xl border border-[color:var(--border)] bg-[color:var(--input)] pl-10 pr-10 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)] transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)] transition-colors"
                 >
-                  {showPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPwd ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full h-14 rounded-2xl bg-[#0068ff] hover:bg-[#171330] hover:scale-[1.02] active:scale-95 text-white font-black text-lg flex items-center justify-center gap-2 transition-all shadow-[0_10px_30px_rgba(0,104,255,0.4)] hover:shadow-[0_10px_30px_rgba(23,19,48,0.3)] disabled:opacity-70 disabled:pointer-events-none mt-4 group"
+              size="lg"
+              className="w-full"
+             
             >
-              {loading ? "..." : login.btn}
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+              Sign In <ArrowRight className="h-4 w-4" />
+            </Button>
           </form>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,7 @@
 import { ApiError, getAuthToken } from './client';
+import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
+import { enqueue } from '@/lib/resilience/queue';
+import { isNetworkFailure } from '@/lib/resilience/connectivity';
 
 const env =
   typeof import.meta !== 'undefined'
@@ -35,6 +38,7 @@ export interface FeedNotification {
   timeAgo: string;
   linkTo: string;
   createdAt?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface BackendNotification {
@@ -47,6 +51,7 @@ interface BackendNotification {
   timeAgo?: string;
   linkTo?: string;
   createdAt?: string;
+  metadata?: Record<string, unknown>;
 }
 
 const FEED_NOTIFICATION_TYPES = new Set<FeedNotificationType>([
@@ -142,30 +147,61 @@ export function normalizeFeedNotification(row: BackendNotification): FeedNotific
     timeAgo: String(row.timeAgo ?? row.createdAt ?? ''),
     linkTo,
     createdAt: typeof row.createdAt === 'string' ? row.createdAt : undefined,
+    metadata: row.metadata && typeof row.metadata === 'object' ? row.metadata : undefined,
   };
 }
 
 export async function listNotifications(): Promise<WorkspaceNotification[]> {
-  const data = await request<{ notifications?: BackendNotification[] }>('/');
-  return (data.notifications ?? []).map(normalizeNotification);
+  const key = 'notifications:workspace';
+  try {
+    const data = await request<{ notifications?: BackendNotification[] }>('/');
+    const rows = (data.notifications ?? []).map(normalizeNotification);
+    void cacheSnapshot(key, rows);
+    return rows;
+  } catch (error) {
+    const cached = await readSnapshot<WorkspaceNotification[]>(key);
+    if (cached) return cached.value;
+    throw error;
+  }
 }
 
 export async function listFeedNotifications(): Promise<FeedNotification[]> {
-  const data = await request<{ notifications?: BackendNotification[] }>('/');
-  return (data.notifications ?? []).map(normalizeFeedNotification);
+  const key = 'notifications:feed';
+  try {
+    const data = await request<{ notifications?: BackendNotification[] }>('/');
+    const rows = (data.notifications ?? []).map(normalizeFeedNotification);
+    void cacheSnapshot(key, rows);
+    return rows;
+  } catch (error) {
+    const cached = await readSnapshot<FeedNotification[]>(key);
+    if (cached) return cached.value;
+    throw error;
+  }
+}
+
+export async function notificationSnapshotInfo(kind: 'feed' | 'workspace'): Promise<{ stale: boolean; updatedAt: string } | null> {
+  const snapshot = await readSnapshot<unknown>(`notifications:${kind}`);
+  return snapshot ? { stale: snapshot.stale, updatedAt: snapshot.updatedAt } : null;
 }
 
 export async function markNotificationRead(id: string): Promise<WorkspaceNotification> {
-  const data = await request<BackendNotification>(`/${encodeURIComponent(id)}/read`, {
-    method: 'PATCH',
-  });
-  return normalizeNotification(data);
+  try {
+    const data = await request<BackendNotification>(`/${encodeURIComponent(id)}/read`, { method: 'PATCH' });
+    return normalizeNotification(data);
+  } catch (error) {
+    if (!isNetworkFailure(error)) throw error;
+    await enqueue({ type: 'notification.read', endpoint: notificationUrl(`/${encodeURIComponent(id)}/read`), method: 'PATCH', payload: {} });
+    return { id, type: 'system', title: 'TechIT Platform', message: '', timestamp: '', read: true };
+  }
 }
 
 export async function markAllNotificationsRead(): Promise<void> {
-  await request<{ ok: boolean }>('/read-all', {
-    method: 'POST',
-  });
+  try {
+    await request<{ ok: boolean }>('/read-all', { method: 'POST' });
+  } catch (error) {
+    if (!isNetworkFailure(error)) throw error;
+    await enqueue({ type: 'notification.read-all', endpoint: notificationUrl('/read-all'), method: 'POST', payload: {} });
+  }
 }
 
 export async function deleteNotification(id: string): Promise<void> {

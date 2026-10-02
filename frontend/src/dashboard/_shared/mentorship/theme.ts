@@ -1,34 +1,44 @@
-// Theme-aware class helpers for the Mentorship Hub with unified #20C997 mint theme.
+// Theme-aware class helpers for the Mentorship Hub.
+//
+// The hub must look like the original prototype in light mode (white surfaces,
+// blue accent) and like the investor section in dark mode (charcoal surfaces,
+// emerald accent). Rather than scatter hardcoded `blue-600 dark:emerald-500`
+// pairs across seven pages, every accent lives here once. Pages compose these
+// constants so re-theming is a single-file change.
+//
+// Surfaces themselves use the app's semantic tokens (bg-background, bg-card,
+// text-foreground, text-muted-foreground, border-border) which already flip
+// with the global `.dark` class — see frontend/src/index.css.
 
 /** Solid accent button (primary call-to-action). */
 export const ACCENT_SOLID =
-  "bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold transition-all shadow-sm";
+  "bg-action-primary hover:bg-action-primary text-white dark:bg-status-success dark:hover:bg-status-success dark:text-black";
 
 /** Accent text / links. */
-export const ACCENT_TEXT = "text-[#20C997] hover:text-[#1db587] font-semibold transition-colors";
+export const ACCENT_TEXT = "text-status-info hover:text-status-info dark:text-status-success dark:hover:text-status-success";
 
 /** Soft accent chip (skills, tags, highlights). */
 export const ACCENT_SOFT =
-  "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-semibold";
+  "bg-status-info-soft text-status-info dark:bg-status-success/10 dark:text-status-success";
 
 /** Accent progress-bar fill. */
-export const ACCENT_FILL = "bg-[#20C997]";
+export const ACCENT_FILL = "bg-action-primary dark:bg-status-success";
 
 /** Welcome / hero banner gradient. */
 export const HERO_GRADIENT =
-  "bg-gradient-to-r from-[#20C997]/90 to-[#128a66] text-slate-950 font-bold";
+  "bg-gradient-to-r from-brand-primary to-status-pending dark:from-emerald-600 dark:to-teal-700 text-white";
 
 /** Advanced-hub hero gradient (distinct from the primary hero). */
 export const HUB_GRADIENT =
-  "bg-gradient-to-r from-[#20C997] to-[#0f7657] text-slate-950 font-bold";
+  "bg-gradient-to-r from-status-pending to-pink-600 dark:from-violet-700 dark:to-fuchsia-800 text-white";
 
 /** Neutral outline button (cancel / secondary actions). */
 export const NEUTRAL_BTN =
   "border border-border bg-transparent hover:bg-accent text-foreground transition-colors";
 
 /** Recharts stroke/fill colors (no Tailwind here — read once at render). */
-export const CHART_PRIMARY = "#20C997";
-export const CHART_SECONDARY = "#0f7657";
+export const CHART_PRIMARY = "#3b82f6"; // blue-500
+export const CHART_SECONDARY = "#8b5cf6"; // violet-500
 
 /**
  * Status → badge classes. Theme-aware so colored status pills stay legible on
@@ -39,18 +49,18 @@ export function statusBadge(status: string): string {
     case "completed":
     case "active":
     case "accepted":
-      return "bg-[#20C997]/15 text-[#20C997] border border-[#20C997]/30 font-bold";
+      return "bg-status-success text-status-success dark:bg-status-success/15 dark:text-status-success";
     case "in-progress":
     case "processing":
-      return "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-semibold";
+      return "bg-status-info text-status-info dark:bg-status-info/15 dark:text-status-info";
     case "pending":
     case "invited":
-      return "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 font-semibold";
+      return "bg-status-warning text-status-warning dark:bg-status-warning/15 dark:text-status-warning";
     case "overdue":
     case "rejected":
-      return "bg-red-500/15 text-red-600 dark:text-red-400 font-semibold";
+      return "bg-status-error text-status-error dark:bg-status-error/15 dark:text-status-error";
     case "vested":
-      return "bg-purple-500/15 text-purple-600 dark:text-purple-400 font-semibold";
+      return "bg-status-pending text-status-pending dark:bg-status-pending/15 dark:text-status-pending";
     default:
       return "bg-muted text-muted-foreground";
   }

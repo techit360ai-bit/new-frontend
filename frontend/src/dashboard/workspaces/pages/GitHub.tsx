@@ -31,36 +31,36 @@ function resourceName(resource: string): string {
 function statusClass(status: Connector['status'] | undefined): string {
   switch (status) {
     case 'connected':
-      return 'bg-green-500';
+      return 'bg-status-success';
     case 'pending':
-      return 'bg-yellow-500';
+      return 'bg-status-warning';
     case 'error':
-      return 'bg-red-500';
+      return 'bg-status-error';
     default:
-      return 'bg-gray-500';
+      return 'bg-status-inactive';
   }
 }
 
 function EmptyState({ children }: { children: string }) {
   return (
-    <div className="bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-8 text-center text-slate-900 dark:text-white">
-      <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-3" />
-      <p className="text-sm text-slate-500 dark:text-slate-400">{children}</p>
+    <div className="bg-surface-primary border border-border-default rounded-lg p-8 text-center">
+      <AlertCircle className="w-8 h-8 text-text-disabled mx-auto mb-3" />
+      <p className="text-sm text-text-muted">{children}</p>
     </div>
   );
 }
 
 function ActivityRow({ activity }: { activity: ActivityEvent }) {
   return (
-    <div className="flex items-start gap-3 pb-4 border-b border-black/[0.06] dark:border-white/10 last:border-0">
+    <div className="flex items-start gap-3 pb-4 border-b last:border-0">
       <Avatar className="w-8 h-8">
-        <AvatarFallback className="bg-[#20C997] text-slate-950 text-xs font-bold">
+        <AvatarFallback className="bg-brand-primary text-white text-xs">
           {initials(activity.kind)}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <p className="text-sm text-slate-800 dark:text-slate-200">{activity.summary || activity.kind}</p>
-        <span className="text-xs text-slate-400 dark:text-slate-500">{formatTimestamp(activity.at)}</span>
+        <p className="text-sm text-text-secondary">{activity.summary || activity.kind}</p>
+        <span className="text-xs text-text-disabled">{formatTimestamp(activity.at)}</span>
       </div>
     </div>
   );
@@ -104,29 +104,29 @@ export function GitHub() {
   );
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
-      <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
+    <div className="h-full flex flex-col bg-background-primary">
+      <div className="bg-surface-primary border-b border-border-default px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-slate-900 dark:bg-white/10 rounded-xl border border-black/[0.08] dark:border-white/10">
+            <div className="p-2 bg-background-inverse rounded-lg">
               <Github className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 GitHub Integration
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-text-muted">
                 {github ? `${github.name} is ${github.status}` : 'No live GitHub connector is attached'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={load} disabled={loading} className="rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
-              <RefreshCw className="w-4 h-4 mr-2 text-[#20C997]" />
+            <Button variant="outline" onClick={load} disabled={loading}>
+              <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
             <Button
-              className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-sm transition-all"
+              className="bg-brand-primary hover:bg-brand-primary-hover"
               onClick={async () => {
                 const repoName = window.prompt('Enter the GitHub repository URL or name:');
                 if (!repoName?.trim()) return;
@@ -156,46 +156,46 @@ export function GitHub() {
       </div>
 
       <div className="flex-1 overflow-auto px-8 py-6">
-        {loading && <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Loading live GitHub workspace data...</p>}
+        {loading && <p className="text-sm text-text-muted mb-4">Loading live GitHub workspace data...</p>}
         {!loading && error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400 mb-4">
+          <div className="rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error mb-4">
             GitHub data could not be loaded: {error}
           </div>
         )}
 
-        <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 mb-6 text-slate-900 dark:text-white">
+        <div className="bg-surface-primary border border-border-default rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-2.5 h-2.5 rounded-full ${statusClass(github?.status)}`} />
-                <h2 className="font-bold text-slate-900 dark:text-white">{github?.name ?? 'GitHub connector'}</h2>
-                <Badge variant="outline" className="border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300">{github?.status ?? 'missing'}</Badge>
+                <h2 className="font-semibold">{github?.name ?? 'GitHub connector'}</h2>
+                <Badge variant="outline">{github?.status ?? 'missing'}</Badge>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-text-muted">
                 {github
                   ? `${github.capabilities.length} capabilities, ${github.tools.length} tools, ${resources.length} linked resources`
                   : 'Connect GitHub from workspace connectors to populate live repository resources.'}
               </p>
             </div>
-            <span className="text-xs text-slate-400 dark:text-slate-500">Last sync: {formatTimestamp(github?.lastSync)}</span>
+            <span className="text-xs text-text-muted">Last sync: {formatTimestamp(github?.lastSync)}</span>
           </div>
         </div>
 
         <Tabs defaultValue="repos" className="w-full">
-          <TabsList className="mb-6 bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="repos" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+          <TabsList className="mb-6">
+            <TabsTrigger value="repos">
               <Code className="w-4 h-4 mr-2" />
               Repositories
             </TabsTrigger>
-            <TabsTrigger value="prs" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="prs">
               <GitPullRequest className="w-4 h-4 mr-2" />
               Pull Requests
             </TabsTrigger>
-            <TabsTrigger value="branches" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="branches">
               <GitBranch className="w-4 h-4 mr-2" />
               Branches
             </TabsTrigger>
-            <TabsTrigger value="activity" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="activity">
               <GitCommit className="w-4 h-4 mr-2" />
               Activity
             </TabsTrigger>
@@ -205,16 +205,16 @@ export function GitHub() {
             {resources.map((resource) => (
               <div
                 key={resource}
-                className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 hover:shadow-lg transition-all text-slate-900 dark:text-white"
+                className="bg-surface-primary border border-border-default rounded-lg p-6 hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">{resourceName(resource)}</h3>
-                      <Badge className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 font-medium">Live resource</Badge>
+                      <h3 className="text-lg font-semibold">{resourceName(resource)}</h3>
+                      <Badge className="bg-status-success/10 text-status-success border-status-success">Live resource</Badge>
                     </div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{resource}</p>
-                    <div className="flex items-center gap-4 text-sm text-slate-400 dark:text-slate-500">
+                    <p className="text-sm text-text-muted mb-4">{resource}</p>
+                    <div className="flex items-center gap-4 text-sm text-text-muted">
                       <span>Source connector: GitHub</span>
                       <span>Updated {formatTimestamp(github?.lastSync)}</span>
                     </div>
@@ -222,8 +222,8 @@ export function GitHub() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                     onClick={() => {
+                      // Try to open as URL; if not a valid URL, show toast with name
                       const url = resource.startsWith('http')
                         ? resource
                         : resource.includes('/')
@@ -248,14 +248,14 @@ export function GitHub() {
 
           <TabsContent value="prs" className="space-y-4">
             {pullRequestActivity.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
+              <div key={item.id} className="bg-surface-primary border border-border-default rounded-lg p-6">
                 <div className="flex items-start gap-4">
-                  <div className={`w-2.5 h-2.5 rounded-full ${statusClass(github?.status)} mt-2`} />
+                  <div className={`w-2 h-2 rounded-full ${statusClass(github?.status)} mt-2`} />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-1">{item.summary || item.kind}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{formatTimestamp(item.at)}</p>
+                    <h3 className="font-semibold mb-1">{item.summary || item.kind}</h3>
+                    <p className="text-sm text-text-muted">{formatTimestamp(item.at)}</p>
                   </div>
-                  <Badge className="bg-[#20C997] text-slate-950 font-bold">{item.kind}</Badge>
+                  <Badge className="bg-brand-primary text-white">{item.kind}</Badge>
                 </div>
               </div>
             ))}
@@ -266,16 +266,16 @@ export function GitHub() {
 
           <TabsContent value="branches" className="space-y-4">
             {branchActivity.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
+              <div key={item.id} className="bg-surface-primary border border-border-default rounded-lg p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <GitBranch className="w-5 h-5 text-[#20C997]" />
+                    <GitBranch className="w-5 h-5 text-brand-primary" />
                     <div>
-                      <h3 className="font-semibold text-slate-900 dark:text-white">{item.summary || item.kind}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Updated {formatTimestamp(item.at)}</p>
+                      <h3 className="font-semibold">{item.summary || item.kind}</h3>
+                      <p className="text-sm text-text-muted">Updated {formatTimestamp(item.at)}</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300">{item.kind}</Badge>
+                  <Badge variant="outline">{item.kind}</Badge>
                 </div>
               </div>
             ))}
@@ -285,14 +285,14 @@ export function GitHub() {
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-4">
-            <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
-              <h3 className="font-bold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
+            <div className="bg-surface-primary border border-border-default rounded-lg p-6">
+              <h3 className="font-semibold mb-4">Recent Activity</h3>
               <div className="space-y-4">
                 {activity.map((item) => (
                   <ActivityRow key={item.id} activity={item} />
                 ))}
                 {!loading && activity.length === 0 && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">No live GitHub activity reports are recorded yet.</p>
+                  <p className="text-sm text-text-muted">No live GitHub activity reports are recorded yet.</p>
                 )}
               </div>
             </div>

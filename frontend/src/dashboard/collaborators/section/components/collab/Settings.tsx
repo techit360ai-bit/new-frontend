@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { User, Briefcase, Bell, UserCog, LogOut, CheckCircle2, Shield, Sparkles } from "lucide-react";
+import { User, Briefcase, Bell, UserCog, LogOut } from "lucide-react";
 import {
   useCollaboratorProfile,
   useActiveRoles,
@@ -51,14 +51,6 @@ const roleBlurb: Record<Role, string> = {
   org: "Run programs, hackathons, talent pools.",
 };
 
-const DEFAULT_NOTIFICATIONS: NotificationPrefs = {
-  opportunities: { email: true, inApp: true },
-  deadlines:     { email: true, inApp: true },
-  payments:      { email: true, inApp: true },
-  equityEvents:  { email: true, inApp: true },
-  quietHours:    "off",
-};
-
 export function Settings() {
   const navigate = useNavigate();
   const { collaboratorProfile, updateCollaboratorProfile } = useCollaboratorProfile();
@@ -67,37 +59,30 @@ export function Settings() {
   const [saving, setSaving] = useState<string | null>(null);
 
   // Identity form state
-  const [iName,      setIName]      = useState(collaboratorProfile?.name || "");
-  const [iTitle,     setITitle]     = useState(collaboratorProfile?.title || "");
-  const [iLocation,  setILocation]  = useState(collaboratorProfile?.location || "");
-  const [iYears,     setIYears]     = useState(collaboratorProfile?.yearsExperience ?? 0);
-  const [iHeadline,  setIHeadline]  = useState(collaboratorProfile?.headline || "");
-  const [iAvatar,    setIAvatar]    = useState(collaboratorProfile?.avatarUrl || "");
+  const [iName,      setIName]      = useState(collaboratorProfile.name);
+  const [iTitle,     setITitle]     = useState(collaboratorProfile.title);
+  const [iLocation,  setILocation]  = useState(collaboratorProfile.location);
+  const [iYears,     setIYears]     = useState(collaboratorProfile.yearsExperience);
+  const [iHeadline,  setIHeadline]  = useState(collaboratorProfile.headline);
+  const [iAvatar,    setIAvatar]    = useState(collaboratorProfile.avatarUrl);
   const iEmail                       = profile?.email ?? "";
   const [iCurrentPw, setICurrentPw] = useState("");
   const [iPw1, setIPw1]             = useState("");
   const [iPw2, setIPw2]             = useState("");
 
   // Skills form state
-  const [sDisc,      setSDisc]      = useState<CollaboratorDiscipline | "">(
-    (disciplines.includes(collaboratorProfile?.discipline as CollaboratorDiscipline)
-      ? collaboratorProfile.discipline
-      : "Engineering") as CollaboratorDiscipline
-  );
-  const [sSub,       setSSub]       = useState<string[]>(collaboratorProfile?.subSkills || []);
-  const [sStack,     setSStack]     = useState<string[]>(collaboratorProfile?.techStack || []);
+  const [sDisc,      setSDisc]      = useState<CollaboratorDiscipline | "">(collaboratorProfile.discipline);
+  const [sSub,       setSSub]       = useState<string[]>(collaboratorProfile.subSkills);
+  const [sStack,     setSStack]     = useState<string[]>(collaboratorProfile.techStack);
   const [sStackDraft, setSStackDraft] = useState("");
-  const [sHours,     setSHours]     = useState(collaboratorProfile?.weeklyHours ?? 20);
-  const [sCommit,    setSCommit]    = useState<typeof collaboratorProfile.commitmentStyle>(collaboratorProfile?.commitmentStyle || "deep");
-  const [sPref,      setSPref]      = useState(collaboratorProfile?.equityPreference ?? 40);
-  const [sFloor,     setSFloor]     = useState(collaboratorProfile?.minCashFloor ?? 0);
-  const [sVesting,   setSVesting]   = useState<typeof collaboratorProfile.vestingComfort>(collaboratorProfile?.vestingComfort || "standard");
+  const [sHours,     setSHours]     = useState(collaboratorProfile.weeklyHours);
+  const [sCommit,    setSCommit]    = useState<typeof collaboratorProfile.commitmentStyle>(collaboratorProfile.commitmentStyle);
+  const [sPref,      setSPref]      = useState(collaboratorProfile.equityPreference);
+  const [sFloor,     setSFloor]     = useState(collaboratorProfile.minCashFloor);
+  const [sVesting,   setSVesting]   = useState<typeof collaboratorProfile.vestingComfort>(collaboratorProfile.vestingComfort);
 
   // Notifications form state
-  const [nPrefs, setNPrefs] = useState<NotificationPrefs>(() => ({
-    ...DEFAULT_NOTIFICATIONS,
-    ...(collaboratorProfile?.notifications || {}),
-  }));
+  const [nPrefs, setNPrefs] = useState(collaboratorProfile.notifications);
 
   // Anchor scroll on mount
   const identityRef      = useRef<HTMLDivElement>(null);
@@ -224,10 +209,9 @@ export function Settings() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Account Settings</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Manage your identity, technical disciplines, notifications, and active roles.</p>
+    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -237,13 +221,9 @@ export function Settings() {
               const Icon = s.icon;
               return (
                 <li key={s.id}>
-                  <a
-                    href={`#${s.id}`}
-                    onClick={() => sectionRefs[s.id]?.current?.scrollIntoView({ behavior: "smooth" })}
-                    className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] rounded-xl transition-colors"
-                  >
-                    <Icon className="w-4 h-4 text-[#20C997]" />
-                    <span>{s.label}</span>
+                  <a href={`#${s.id}`} onClick={() => sectionRefs[s.id]?.current?.scrollIntoView({ behavior: "smooth" })}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-surface-secondary rounded-lg">
+                    <Icon className="w-4 h-4 text-text-disabled" /> {s.label}
                   </a>
                 </li>
               );
@@ -253,199 +233,137 @@ export function Settings() {
 
         <div className="lg:col-span-3 space-y-6">
           {/* Identity */}
-          <section ref={identityRef} id="identity" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Account & Identity</h2>
+          <section ref={identityRef} id="identity" className="border border-border-default bg-surface-primary rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-text-secondary mb-4">Account & Identity</h2>
             <div className="space-y-4">
-              <Row label="Avatar URL"><Input value={iAvatar} onChange={setIAvatar} type="url" placeholder="https://..." /></Row>
-              <Row label="Full Name"><Input value={iName} onChange={setIName} /></Row>
-              <Row label="Professional Title"><Input value={iTitle} onChange={setITitle} /></Row>
+              <Row label="Avatar URL"><Input value={iAvatar} onChange={setIAvatar} type="url" /></Row>
+              <Row label="Name"><Input value={iName} onChange={setIName} /></Row>
+              <Row label="Professional title"><Input value={iTitle} onChange={setITitle} /></Row>
               <Row label="Location"><Input value={iLocation} onChange={setILocation} /></Row>
-              <Row label="Years of Experience"><Input value={String(iYears)} onChange={(v) => setIYears(Number(v) || 0)} type="number" /></Row>
-              <Row label="Headline & Bio"><Input value={iHeadline} onChange={setIHeadline} /></Row>
-              <Row label="Contact Email">
-                <input value={iEmail} readOnly className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-100 dark:bg-white/[0.03] text-slate-500" />
+              <Row label="Years of experience"><Input value={String(iYears)} onChange={(v) => setIYears(Number(v) || 0)} type="number" /></Row>
+              <Row label="Headline"><Input value={iHeadline} onChange={setIHeadline} /></Row>
+              <Row label="Contact email">
+                <input value={iEmail} readOnly className="w-full h-10 border border-border-default rounded-lg px-3 text-sm bg-background-primary text-text-muted" />
               </Row>
-              <Row label="Change Password">
-                <div className="space-y-2.5">
+              <Row label="Change password">
+                <div className="space-y-2">
                   <Input value={iCurrentPw} onChange={setICurrentPw} type="password" placeholder="Current password" />
                   <Input value={iPw1} onChange={setIPw1} type="password" placeholder="New password" />
                   <Input value={iPw2} onChange={setIPw2} type="password" placeholder="Confirm new password" />
-                  <button
-                    onClick={() => void updatePassword()}
-                    disabled={!iCurrentPw || !iPw1 || iPw1 !== iPw2 || saving === "password"}
-                    className="text-xs px-3.5 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-50 font-bold text-slate-700 dark:text-slate-300 transition-colors"
-                  >
-                    {saving === "password" ? "Updating..." : "Update Password"}
+                  <button onClick={() => void updatePassword()} disabled={!iCurrentPw || !iPw1 || iPw1 !== iPw2 || saving === "password"}
+                    className="text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary disabled:opacity-50">
+                    {saving === "password" ? "Updating..." : "Update password"}
                   </button>
                 </div>
               </Row>
             </div>
             <div className="mt-6 flex justify-end">
-              <button
-                disabled={saving === "identity"}
-                onClick={() => void saveIdentity()}
-                className="px-5 py-2.5 text-xs bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-sm transition-all"
-              >
-                {saving === "identity" ? "Saving..." : "Save Identity"}
+              <button disabled={saving === "identity"} onClick={() => void saveIdentity()} className="px-4 py-2 text-sm bg-status-warning hover:bg-amber-400 disabled:bg-slate-300 text-text-primary font-semibold rounded-lg">
+                {saving === "identity" ? "Saving..." : "Save"}
               </button>
             </div>
           </section>
 
           {/* Skills & Availability */}
-          <section ref={skillsRef} id="skills" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Skills & Availability</h2>
+          <section ref={skillsRef} id="skills" className="border border-border-default bg-surface-primary rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-text-secondary mb-4">Skills & Availability</h2>
 
             <div className="mb-5">
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Primary Discipline</p>
+              <p className="text-xs font-semibold text-text-secondary mb-2">Discipline</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {disciplines.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => { setSDisc(d); setSSub([]); }}
-                    className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
-                      sDisc === d
-                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
-                        : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    {d}
-                  </button>
+                  <button key={d} type="button" onClick={() => { setSDisc(d); setSSub([]); }}
+                    className={`px-3 py-2 rounded-lg border-2 text-xs font-medium ${sDisc === d ? "border-status-warning bg-status-warning-soft text-status-warning" : "border-border-strong bg-surface-primary text-text-muted"}`}>{d}</button>
                 ))}
               </div>
             </div>
 
-            {sDisc && subSkillsByDiscipline[sDisc as CollaboratorDiscipline] && (
+            {sDisc && (
               <div className="mb-5">
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Sub-skills <span className="text-slate-400 font-normal">({(sSub || []).length} selected)</span>
-                </p>
+                <p className="text-xs font-semibold text-text-secondary mb-2">Sub-skills <span className="text-text-disabled font-normal">({sSub.length} selected)</span></p>
                 <div className="flex flex-wrap gap-1.5">
-                  {(subSkillsByDiscipline[sDisc as CollaboratorDiscipline] || []).map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => toggleSubSkill(s)}
-                      className={`px-3 py-1 rounded-xl border text-xs font-semibold transition-all ${
-                        sSub?.includes(s)
-                          ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
-                          : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-600 dark:text-slate-400"
-                      }`}
-                    >
-                      {s}
-                    </button>
+                  {subSkillsByDiscipline[sDisc].map((s) => (
+                    <button key={s} type="button" onClick={() => toggleSubSkill(s)}
+                      className={`px-2.5 py-1 rounded-full border text-xs ${sSub.includes(s) ? "border-status-warning bg-status-warning-soft text-status-warning" : "border-border-strong bg-surface-primary text-text-muted"}`}>{s}</button>
                   ))}
                 </div>
               </div>
             )}
 
             <div className="mb-5">
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Tech Stack</p>
-              <div className="flex flex-wrap gap-1.5 mb-2.5">
-                {(sStack || []).map((s) => (
-                  <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-white/10 text-xs font-medium text-slate-700 dark:text-slate-300">
+              <p className="text-xs font-semibold text-text-secondary mb-2">Tech stack</p>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {sStack.map((s) => (
+                  <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-secondary text-xs text-text-secondary">
                     {s}
-                    <button onClick={() => setSStack(sStack.filter((x) => x !== s))} className="text-slate-400 hover:text-red-500 font-bold">×</button>
+                    <button onClick={() => setSStack(sStack.filter((x) => x !== s))} className="text-text-disabled hover:text-text-secondary">×</button>
                   </span>
                 ))}
               </div>
-              <input
-                value={sStackDraft}
-                onChange={(e) => setSStackDraft(e.target.value)}
+              <input value={sStackDraft} onChange={(e) => setSStackDraft(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addStackChip(sStackDraft); } }}
-                placeholder="Add a tool (e.g. Docker, GraphQL) — hit Enter"
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
-              />
+                placeholder="Add a tool — hit Enter"
+                className="w-full h-9 border border-border-strong rounded-lg px-3 text-sm focus:outline-none focus:border-status-warning" />
             </div>
 
             <div className="mb-5">
-              <div className="flex justify-between items-center mb-1.5">
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Weekly Hours Committed</p>
-                <span className="text-xs font-extrabold text-[#20C997]">{sHours} hrs/wk</span>
-              </div>
-              <input type="range" min={5} max={60} value={sHours} onChange={(e) => setSHours(Number(e.target.value))} className="w-full accent-[#20C997]" />
+              <p className="text-xs font-semibold text-text-secondary mb-2">Weekly hours <span className="text-status-warning font-semibold">({sHours})</span></p>
+              <input type="range" min={5} max={60} value={sHours} onChange={(e) => setSHours(Number(e.target.value))} className="w-full accent-amber-500" />
             </div>
 
             <div className="mb-5">
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Commitment Style</p>
+              <p className="text-xs font-semibold text-text-secondary mb-2">Commitment style</p>
               <div className="grid grid-cols-3 gap-2">
                 {([
                   { v: "deep" as const,     label: "One deeply" },
                   { v: "parallel" as const, label: "2–3 parallel" },
                   { v: "many" as const,     label: "Many short" },
                 ]).map((opt) => (
-                  <button
-                    key={opt.v}
-                    type="button"
-                    onClick={() => setSCommit(opt.v)}
-                    className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
-                      sCommit === opt.v
-                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
-                        : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
+                  <button key={opt.v} type="button" onClick={() => setSCommit(opt.v)}
+                    className={`px-3 py-2 rounded-lg border-2 text-xs font-medium ${sCommit === opt.v ? "border-status-warning bg-status-warning-soft text-status-warning" : "border-border-strong bg-surface-primary text-text-muted"}`}>{opt.label}</button>
                 ))}
               </div>
             </div>
 
             <div className="mb-5">
-              <div className="flex justify-between items-center mb-1.5">
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Equity vs Cash Preference</p>
-                <span className="text-xs font-extrabold text-[#20C997]">{sPref}% equity / {100 - sPref}% cash</span>
-              </div>
-              <input type="range" min={0} max={100} value={sPref} onChange={(e) => setSPref(Number(e.target.value))} className="w-full accent-[#20C997]" />
+              <p className="text-xs font-semibold text-text-secondary mb-2">Equity vs cash <span className="text-status-warning font-semibold">({sPref}% equity / {100 - sPref}% cash)</span></p>
+              <input type="range" min={0} max={100} value={sPref} onChange={(e) => setSPref(Number(e.target.value))} className="w-full accent-amber-500" />
             </div>
 
             <div className="mb-5">
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Min Cash Floor (USD / mo)</p>
+              <p className="text-xs font-semibold text-text-secondary mb-2">Min cash floor (per month)</p>
               <Input value={String(sFloor)} onChange={(v) => setSFloor(Number(v) || 0)} type="number" />
             </div>
 
             <div className="mb-2">
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Vesting Schedule Comfort</p>
+              <p className="text-xs font-semibold text-text-secondary mb-2">Vesting comfort</p>
               <div className="grid grid-cols-3 gap-2">
                 {([
                   { v: "1y-cliff-4y" as const, label: "1y cliff, 4y" },
                   { v: "standard" as const,    label: "Standard" },
                   { v: "custom" as const,      label: "Custom" },
                 ]).map((opt) => (
-                  <button
-                    key={opt.v}
-                    type="button"
-                    onClick={() => setSVesting(opt.v)}
-                    className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
-                      sVesting === opt.v
-                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
-                        : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
+                  <button key={opt.v} type="button" onClick={() => setSVesting(opt.v)}
+                    className={`px-3 py-2 rounded-lg border-2 text-xs font-medium ${sVesting === opt.v ? "border-status-warning bg-status-warning-soft text-status-warning" : "border-border-strong bg-surface-primary text-text-muted"}`}>{opt.label}</button>
                 ))}
               </div>
             </div>
 
             <div className="mt-6 flex justify-end">
-              <button
-                disabled={saving === "skills"}
-                onClick={() => void saveSkills()}
-                className="px-5 py-2.5 text-xs bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-sm transition-all"
-              >
-                {saving === "skills" ? "Saving..." : "Save Skills & Availability"}
+              <button disabled={saving === "skills"} onClick={() => void saveSkills()} className="px-4 py-2 text-sm bg-status-warning hover:bg-amber-400 disabled:bg-slate-300 text-text-primary font-semibold rounded-lg">
+                {saving === "skills" ? "Saving..." : "Save"}
               </button>
             </div>
           </section>
 
           {/* Notifications */}
-          <section ref={notificationsRef} id="notifications" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Notification Preferences</h2>
+          <section ref={notificationsRef} id="notifications" className="border border-border-default bg-surface-primary rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-text-secondary mb-4">Notifications</h2>
             <div className="space-y-3">
               <NotifGroup label="New opportunities matching your skills"
                 email={nPrefs.opportunities.email} inApp={nPrefs.opportunities.inApp}
                 onChange={(c, v) => updateNotifGroup("opportunities", c, v)} />
-              <NotifGroup label="Task deadlines & sprint reminders"
+              <NotifGroup label="Task deadlines"
                 email={nPrefs.deadlines.email} inApp={nPrefs.deadlines.inApp}
                 onChange={(c, v) => updateNotifGroup("deadlines", c, v)} />
               <NotifGroup label="Payments & cash payouts"
@@ -456,76 +374,55 @@ export function Settings() {
                 onChange={(c, v) => updateNotifGroup("equityEvents", c, v)} />
             </div>
             <div className="mt-5">
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Quiet Hours</p>
-              <select
-                value={nPrefs.quietHours}
-                onChange={(e) => setNPrefs((cur) => ({ ...cur, quietHours: e.target.value as typeof cur.quietHours }))}
-                className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
-              >
+              <p className="text-xs font-semibold text-text-secondary mb-2">Quiet hours</p>
+              <select value={nPrefs.quietHours} onChange={(e) => setNPrefs((cur) => ({ ...cur, quietHours: e.target.value as typeof cur.quietHours }))}
+                className="h-9 border border-border-strong rounded-lg px-3 text-sm bg-surface-primary">
                 <option value="off">Off</option>
                 <option value="10pm-8am">10pm – 8am</option>
                 <option value="weekends">Always quiet on weekends</option>
               </select>
             </div>
             <div className="mt-6 flex justify-end">
-              <button
-                disabled={saving === "notifications"}
-                onClick={() => void saveNotifications()}
-                className="px-5 py-2.5 text-xs bg-[#20C997] hover:bg-[#1db587] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-sm transition-all"
-              >
-                {saving === "notifications" ? "Saving..." : "Save Preferences"}
+              <button disabled={saving === "notifications"} onClick={() => void saveNotifications()} className="px-4 py-2 text-sm bg-status-warning hover:bg-amber-400 disabled:bg-slate-300 text-text-primary font-semibold rounded-lg">
+                {saving === "notifications" ? "Saving..." : "Save"}
               </button>
             </div>
           </section>
 
           {/* Roles & Switching */}
-          <section ref={rolesRef} id="roles" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Roles & Switching</h2>
+          <section ref={rolesRef} id="roles" className="border border-border-default bg-surface-primary rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-text-secondary mb-4">Roles & Switching</h2>
             <div className="space-y-3">
               {(["collaborator", "founder", "investor", "org"] as Role[]).map((role) => {
                 const active = activeRoles.has(role);
                 const isCurrent = role === currentRole;
                 return (
-                  <div
-                    key={role}
-                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
-                      isCurrent
-                        ? "bg-[#20C997]/10 border-[#20C997]/30"
-                        : "border-black/[0.06] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]"
-                    }`}
-                  >
-                    <span className={`w-2.5 h-2.5 rounded-full ${active ? "bg-[#20C997]" : "bg-slate-300 dark:bg-white/20"}`}></span>
+                  <div key={role} className={`flex items-center gap-4 p-4 border rounded-xl ${isCurrent ? "bg-status-warning-soft border-status-warning" : "border-border-default bg-surface-primary"}`}>
+                    <span className={`w-2 h-2 rounded-full ${active ? "bg-status-success" : "bg-slate-300"}`}></span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                      <p className="text-sm font-semibold text-text-primary">
                         {roleLabel[role]}
-                        {isCurrent && <span className="ml-2 text-[10px] text-[#20C997] font-semibold uppercase">Current Role</span>}
+                        {isCurrent && <span className="ml-2 text-xs text-status-warning font-normal">current role</span>}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{roleBlurb[role]}</p>
+                      <p className="text-xs text-text-muted">{roleBlurb[role]}</p>
                     </div>
-                    <button
-                      onClick={() => handleRoleAction(role)}
-                      disabled={isCurrent}
-                      className={`text-xs px-3.5 py-1.5 rounded-xl font-bold transition-all ${
+                    <button onClick={() => handleRoleAction(role)} disabled={isCurrent}
+                      className={`text-xs px-3 py-1.5 rounded-lg font-semibold ${
                         isCurrent
-                          ? "bg-slate-200 dark:bg-white/10 text-slate-400 cursor-default"
+                          ? "bg-slate-200 text-text-disabled cursor-default"
                           : active
-                            ? "bg-slate-900 dark:bg-white/10 dark:hover:bg-white/20 text-white"
-                            : "border border-[#20C997] text-[#20C997] hover:bg-[#20C997]/10"
-                      }`}
-                    >
-                      {isCurrent ? "Active" : active ? "Switch Role" : "Activate Role"}
+                            ? "bg-background-inverse text-white hover:bg-surface-inverse-muted"
+                            : "border border-status-warning text-status-warning hover:bg-status-warning-soft"
+                      }`}>
+                      {isCurrent ? "Current" : active ? "Switch to" : "Activate role"}
                     </button>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-6 pt-6 border-t border-black/[0.06] dark:border-white/10 flex justify-end">
-              <button
-                onClick={() => { void signOut(); }}
-                className="flex items-center gap-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-500/10 px-4 py-2 rounded-xl transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
+            <div className="mt-6 pt-6 border-t border-border-subtle flex justify-end">
+              <button onClick={() => { void signOut(); }} className="flex items-center gap-1.5 text-sm text-status-error hover:bg-status-error-soft px-3 py-1.5 rounded-lg">
+                <LogOut className="w-4 h-4" /> Sign out
               </button>
             </div>
           </section>
@@ -538,7 +435,7 @@ export function Settings() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">{label}</label>
+      <label className="block text-xs font-semibold text-text-secondary mb-1.5">{label}</label>
       {children}
     </div>
   );
@@ -546,26 +443,21 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function Input({ value, onChange, type = "text", placeholder }: { value: string; onChange: (v: string) => void; type?: string; placeholder?: string }) {
   return (
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      type={type}
-      placeholder={placeholder}
-      className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
-    />
+    <input value={value} onChange={(e) => onChange(e.target.value)} type={type} placeholder={placeholder}
+      className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm focus:outline-none focus:border-status-warning" />
   );
 }
 
 function NotifGroup({ label, email, inApp, onChange }: { label: string; email: boolean; inApp: boolean; onChange: (channel: "email" | "inApp", value: boolean) => void }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-black/[0.04] dark:border-white/[0.06] last:border-0 text-xs">
-      <span className="font-semibold text-slate-700 dark:text-slate-300">{label}</span>
+    <div className="flex items-center justify-between py-2 border-b border-border-subtle last:border-0">
+      <span className="text-sm text-text-secondary">{label}</span>
       <div className="flex items-center gap-4 text-xs">
-        <label className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-medium cursor-pointer">
-          <input type="checkbox" checked={email} onChange={(e) => onChange("email", e.target.checked)} className="accent-[#20C997] rounded" /> Email
+        <label className="flex items-center gap-1.5 text-text-muted">
+          <input type="checkbox" checked={email} onChange={(e) => onChange("email", e.target.checked)} className="accent-amber-500" /> Email
         </label>
-        <label className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-medium cursor-pointer">
-          <input type="checkbox" checked={inApp} onChange={(e) => onChange("inApp", e.target.checked)} className="accent-[#20C997] rounded" /> In-App
+        <label className="flex items-center gap-1.5 text-text-muted">
+          <input type="checkbox" checked={inApp} onChange={(e) => onChange("inApp", e.target.checked)} className="accent-amber-500" /> In-app
         </label>
       </div>
     </div>

@@ -30,6 +30,7 @@ import {
   rankCollaborators,
   type CollaborationInviteDraft,
 } from "@/lib/collaborationMatching";
+import { fetchFounderCollaboratorRecommendations } from "@/lib/api/recommendationIntelligence";
 import {
   markValidationStoryShown,
   ValidationStoryDialog,
@@ -137,10 +138,17 @@ export default function MatchResults() {
       fetchCollaboratorDirectory(),
       hackathonId ? fetchFounderOpportunity(hackathonId) : Promise.resolve(null),
       invitationDraft ? fetchWorkspaces() : Promise.resolve([]),
+      projectId ? fetchFounderCollaboratorRecommendations(projectId, { limit: 50 }).catch(() => null) : Promise.resolve(null),
     ])
-      .then(([profiles, opportunity, workspaceRows]) => {
+      .then(([profiles, opportunity, workspaceRows, serverRecommendations]) => {
         if (!alive) return;
-        const ranked = invitationDraft
+        const ranked = serverRecommendations?.recommendations?.length
+          ? serverRecommendations.recommendations.map((row) => {
+              const person = (row as any).collaborator || {};
+              const profile = profiles.find((item) => item.id === person.id);
+              return profile ? directoryMatch(profile, Number(row.score), Array.isArray(row.reasons) ? row.reasons : []) : null;
+            }).filter(Boolean) as Match[]
+          : invitationDraft
           ? rankCollaborators(profiles, invitationDraft, {
               timezone: authProfile?.timezone,
               location: authProfile?.country,
@@ -165,7 +173,7 @@ export default function MatchResults() {
         if (alive) setLoading(false);
       });
     return () => { alive = false; };
-  }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft]);
+    }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft, projectId]);
 
   useEffect(() => {
     if (!projectName) {
@@ -284,14 +292,14 @@ export default function MatchResults() {
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <label className="text-xs font-semibold text-violet-900">
                   Workspace
-                  <select value={selectedWorkspaceId} onChange={(event) => setSelectedWorkspaceId(event.target.value)} className="mt-1 w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-sm">
+                  <select value={selectedWorkspaceId} onChange={(event) => setSelectedWorkspaceId(event.target.value)} className="mt-1 w-full rounded-md border border-violet-200 bg-surface-primary px-3 py-2 text-sm">
                     {workspaces.length === 0 && <option value="">Create {invitationDraft.projectName} Workspace when inviting</option>}
                     {workspaces.map((workspace) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
                   </select>
                 </label>
                 <label className="text-xs font-semibold text-violet-900">
                   Access after acceptance
-                  <select value={workspaceAccess} onChange={(event) => setWorkspaceAccess(event.target.value as "contributor" | "viewer")} className="mt-1 w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-sm">
+                  <select value={workspaceAccess} onChange={(event) => setWorkspaceAccess(event.target.value as "contributor" | "viewer")} className="mt-1 w-full rounded-md border border-violet-200 bg-surface-primary px-3 py-2 text-sm">
                     <option value="contributor">Contributor - tasks and reports</option>
                     <option value="viewer">Viewer - read only</option>
                   </select>
@@ -313,7 +321,7 @@ export default function MatchResults() {
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   placeholder="Project name"
-                  className="w-full bg-transparent text-lg font-semibold text-foreground border-b border-border focus:border-indigo-500 outline-none pb-1"
+                  className="w-full bg-transparent text-lg font-semibold text-foreground border-b border-border focus:border-brand-accent outline-none pb-1"
                 />
               </div>
 
@@ -323,7 +331,7 @@ export default function MatchResults() {
                     Equity allocated
                   </div>
                   <div
-                    className={`text-2xl font-bold ${over ? "text-red-500" : "text-indigo-600 dark:text-indigo-400"}`}
+                    className={`text-2xl font-bold ${over ? "text-status-error" : "text-brand-accent dark:text-brand-accent"}`}
                   >
                     {totalEquity}%
                   </div>
@@ -334,7 +342,7 @@ export default function MatchResults() {
                     Founder retains
                   </div>
                   <div
-                    className={`text-2xl font-bold ${over ? "text-red-500" : "text-emerald-600 dark:text-emerald-400"}`}
+                    className={`text-2xl font-bold ${over ? "text-status-error" : "text-status-success dark:text-status-success"}`}
                   >
                     {founderRetained}%
                   </div>
@@ -343,14 +351,14 @@ export default function MatchResults() {
             </div>
 
             {/* Allocation bar */}
-            <div className="mt-4 h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
+            <div className="mt-4 h-3 rounded-full bg-slate-200 dark:bg-surface-inverse-muted overflow-hidden flex">
               {visibleMatches.map((m, i) => {
                 const pct = equity[m.id] ?? 0;
                 const colors = [
-                  "bg-indigo-500",
+                  "bg-status-info-soft",
                   "bg-cyan-500",
                   "bg-fuchsia-500",
-                  "bg-amber-500",
+                  "bg-status-warning",
                 ];
                 return (
                   <div
@@ -363,7 +371,7 @@ export default function MatchResults() {
               })}
             </div>
             {over && (
-              <div className="mt-2 text-xs text-red-500 font-semibold">
+              <div className="mt-2 text-xs text-status-error font-semibold">
                 Total equity exceeds 100%. Reduce one or more proposals before generating contracts.
               </div>
             )}
@@ -377,13 +385,13 @@ export default function MatchResults() {
             </div>
           )}
           {!loading && error && (
-            <div className="border border-red-200 rounded-xl bg-red-50 p-6 text-sm text-red-700">
+            <div className="border border-status-error rounded-xl bg-status-error-soft p-6 text-sm text-status-error">
               {error}
             </div>
           )}
           {!loading && !error && visibleMatches.length === 0 && (
-            <div className="border border-slate-200 rounded-xl bg-white p-8 text-center">
-              <p className="text-sm text-slate-700 font-medium">
+            <div className="border border-border-default rounded-xl bg-surface-primary p-8 text-center">
+              <p className="text-sm text-text-secondary font-medium">
                 {hackathonId
                   ? "No live collaborator profiles match the team's open roles."
                   : "No collaborator profiles are available yet."}
@@ -401,16 +409,16 @@ export default function MatchResults() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-card rounded-xl p-4 lg:p-6 border border-border hover:border-indigo-500/50 transition-all"
+                  className="bg-card rounded-xl p-4 lg:p-6 border border-border hover:border-brand-accent/50 transition-all"
                 >
                   <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-6">
                     {/* Avatar */}
                     <div className="flex-shrink-0 w-full sm:w-auto flex sm:flex-col items-start sm:items-center gap-4 sm:gap-2">
-                      <div className="size-16 sm:size-20 rounded-full bg-linear-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-xl sm:text-2xl font-bold text-white shrink-0">
+                      <div className="size-16 sm:size-20 rounded-full bg-linear-to-br from-brand-accent to-cyan-500 flex items-center justify-center text-xl sm:text-2xl font-bold text-white shrink-0">
                         {match.avatar}
                       </div>
                       {/* Match Badge */}
-                      <div className="px-3 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 rounded-full text-xs sm:text-sm font-medium text-center">
+                      <div className="px-3 py-1 bg-status-success/20 text-status-success dark:text-status-success rounded-full text-xs sm:text-sm font-medium text-center">
                         {match.matchScore !== null ? `${match.matchScore}% profile fit` : match.isVerified ? "Verified profile" : "Live profile"}
                       </div>
                     </div>
@@ -436,7 +444,7 @@ export default function MatchResults() {
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0 text-xs text-muted-foreground">
-                          <Star className="size-4 text-amber-500" />
+                          <Star className="size-4 text-status-warning" />
                           {match.credibilityScore > 0
                             ? `${match.credibilityScore} credibility`
                             : "No credibility score"}
@@ -448,7 +456,7 @@ export default function MatchResults() {
                         {match.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="px-2 py-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-full text-xs sm:text-sm"
+                            className="px-2 py-1 bg-status-info-soft dark:bg-status-info-soft/20 text-brand-accent dark:text-brand-accent rounded-full text-xs sm:text-sm"
                           >
                             {skill}
                           </span>
@@ -458,19 +466,19 @@ export default function MatchResults() {
                       {match.matchReasons.length > 0 && (
                         <div className="mb-3 flex flex-wrap gap-2">
                           {match.matchReasons.map((reason) => (
-                            <span key={reason} className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-800">{reason}</span>
+                            <span key={reason} className="rounded-full border border-status-success bg-status-success-soft px-2 py-1 text-[11px] font-medium text-status-success">{reason}</span>
                           ))}
                         </div>
                       )}
 
                       {/* Equity proposal slider */}
-                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-border rounded-lg p-3 mb-3 lg:mb-4">
+                      <div className="bg-background-primary dark:bg-background-inverse/40 border border-border rounded-lg p-3 mb-3 lg:mb-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-foreground">
-                            <PieChart className="size-4 text-indigo-500" />
+                            <PieChart className="size-4 text-brand-accent" />
                             Equity proposal
                           </div>
-                          <div className="text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 tabular-nums">
+                          <div className="text-lg sm:text-xl font-bold text-brand-accent dark:text-brand-accent tabular-nums">
                             {pct}%
                           </div>
                         </div>
@@ -503,7 +511,7 @@ export default function MatchResults() {
                             <button
                               type="button"
                               disabled
-                              className="flex-1 sm:flex-none py-2 px-4 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                              className="flex-1 sm:flex-none py-2 px-4 rounded-lg bg-status-success-soft text-status-success border border-status-success cursor-not-allowed flex items-center justify-center gap-2 text-sm"
                             >
                               <CheckCircle2 className="size-4" />
                               <span>Invited</span>
@@ -523,7 +531,7 @@ export default function MatchResults() {
                           <button
                             onClick={() => void handleConnect(match)}
                             disabled={invitedIds.has(match.id) || inviting}
-                            className="flex-1 sm:flex-none py-2 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
+                            className="flex-1 sm:flex-none py-2 px-4 bg-brand-accent hover:bg-status-info-soft disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
                           >
                             {invitedIds.has(match.id) ? <CheckCircle2 className="size-4" /> : <Mail className="size-4" />}
                             <span>{invitedIds.has(match.id) ? "Request sent" : inviting ? "Sending..." : "Connect"}</span>
@@ -531,7 +539,7 @@ export default function MatchResults() {
                         )}
                         <button
                           onClick={() => navigate(`/founder/messages?recipient=${encodeURIComponent(match.id)}`)}
-                          className="flex-1 sm:flex-none py-2 px-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-white rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                          className="flex-1 sm:flex-none py-2 px-4 bg-slate-200 dark:bg-surface-inverse-muted hover:bg-slate-300 dark:hover:bg-slate-700 text-text-secondary dark:text-white rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                         >
                           <MessageCircle className="size-4" />
                           <span>Message</span>
@@ -539,7 +547,7 @@ export default function MatchResults() {
                         <button
                           onClick={() => setContractFor(match)}
                           disabled={pct <= 0 || over || !projectName.trim()}
-                          className="flex-1 sm:flex-none py-2 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                          className="flex-1 sm:flex-none py-2 px-4 bg-status-success hover:bg-status-success disabled:bg-slate-300 dark:disabled:bg-surface-inverse-muted disabled:text-text-muted disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                           title={
                             !projectName.trim()
                               ? "Set a project name first"
@@ -622,7 +630,7 @@ function ContractModal({
         {/* Modal header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-linear-to-r from-emerald-50 to-indigo-50 dark:from-emerald-950/40 dark:to-indigo-950/40">
           <div>
-            <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-semibold uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-xs text-status-success dark:text-status-success font-semibold uppercase tracking-wider">
               <CheckCircle2 className="size-3.5" />
               Term of Contract — Draft
             </div>
@@ -632,7 +640,7 @@ function ContractModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-surface-inverse-muted transition-colors"
             aria-label="Close contract preview"
           >
             <X className="size-4 text-foreground" />
@@ -646,7 +654,7 @@ function ContractModal({
               Parties
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 border border-border">
+              <div className="bg-background-primary dark:bg-background-inverse/40 rounded-lg p-3 border border-border">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
                   Founder
                 </div>
@@ -655,7 +663,7 @@ function ContractModal({
                   Project owner — {projectName}
                 </div>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 border border-border">
+              <div className="bg-background-primary dark:bg-background-inverse/40 rounded-lg p-3 border border-border">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
                   Collaborator
                 </div>
@@ -672,11 +680,11 @@ function ContractModal({
               Allocation
             </h3>
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-800/50 rounded-lg p-3">
-                <div className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-semibold mb-1">
+              <div className="bg-status-info-soft dark:bg-indigo-950/40 border border-brand-accent/50 dark:border-indigo-800/50 rounded-lg p-3">
+                <div className="text-[10px] uppercase tracking-wider text-brand-accent dark:text-brand-accent font-semibold mb-1">
                   Equity grant
                 </div>
-                <div className="text-xl font-bold text-indigo-700 dark:text-indigo-300">
+                <div className="text-xl font-bold text-brand-accent dark:text-brand-accent">
                   {equity}%
                 </div>
               </div>
@@ -688,11 +696,11 @@ function ContractModal({
                   {weeklyHours}h
                 </div>
               </div>
-              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/50 rounded-lg p-3">
-                <div className="text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-semibold mb-1">
+              <div className="bg-status-success-soft dark:bg-emerald-950/40 border border-status-success/50 dark:border-emerald-800/50 rounded-lg p-3">
+                <div className="text-[10px] uppercase tracking-wider text-status-success dark:text-status-success font-semibold mb-1">
                   Effective date
                 </div>
-                <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                <div className="text-sm font-semibold text-status-success dark:text-status-success">
                   {today}
                 </div>
               </div>
@@ -759,10 +767,10 @@ function ContractModal({
         </div>
 
         {/* Modal footer */}
-        <div className="px-6 py-3 border-t border-border flex items-center justify-end gap-2 bg-slate-50 dark:bg-slate-900/40">
+        <div className="px-6 py-3 border-t border-border flex items-center justify-end gap-2 bg-background-primary dark:bg-background-inverse/40">
           <button
             onClick={() => window.print()}
-            className="px-3 py-2 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-foreground text-sm flex items-center gap-2 transition-colors"
+            className="px-3 py-2 rounded-lg bg-slate-200 dark:bg-surface-inverse-muted hover:bg-slate-300 dark:hover:bg-slate-700 text-foreground text-sm flex items-center gap-2 transition-colors"
           >
             <Printer className="size-4" />
             Print
@@ -782,7 +790,7 @@ function ContractModal({
               a.click();
               URL.revokeObjectURL(url);
             }}
-            className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm flex items-center gap-2 transition-colors"
+            className="px-3 py-2 rounded-lg bg-status-success hover:bg-status-success text-white text-sm flex items-center gap-2 transition-colors"
           >
             <Download className="size-4" />
             Download draft

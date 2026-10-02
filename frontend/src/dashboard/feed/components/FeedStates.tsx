@@ -6,7 +6,7 @@ export function FeedLoadingState({ label = 'Loading live posts...' }: { label?: 
 
 export function FeedErrorState({ message }: { message: string }) {
   return (
-    <div className="mx-4 my-6 flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+    <div className="mx-4 my-6 flex items-start gap-3 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
       <span>{message}</span>
     </div>

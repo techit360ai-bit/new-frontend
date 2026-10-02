@@ -7,25 +7,32 @@ import {
   CheckCircle2,
   Clock,
   History,
+  Info,
   Link2,
   Lock,
   Plus,
   RefreshCw,
   ShieldCheck,
   Unplug,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   connectTrustSource,
+  createTrustDomainChallenge,
+  verifyTrustDomainChallenge,
   disconnectTrustSource,
+  decideFounderTrustAccessRequest,
   fetchTrustBadges,
+  fetchFounderTrustAccessRequests,
   fetchTrustHistory,
   fetchTrustIntegrations,
   fetchTrustProfile,
   previewTrustNotifications,
   refreshTrustSource,
   type TrustBadge,
+  type FounderTrustAccessRequest,
   type TrustHistoryItem,
   type TrustIntegrationManifest,
   type TrustNotificationIntent,
@@ -51,15 +58,15 @@ const sourceLabels: Record<string, string> = {
 function statusClass(status?: string) {
   switch ((status ?? "").toLowerCase()) {
     case "verified":
-      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400";
+      return "border-status-success bg-status-success-soft text-status-success";
     case "expired":
-      return "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400";
+      return "border-status-warning bg-status-warning-soft text-status-warning";
     case "failed":
-      return "border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-400";
+      return "border-rose-200 bg-rose-50 text-rose-700";
     case "disconnected":
-      return "border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300";
+      return "border-border-default bg-surface-secondary text-text-secondary";
     default:
-      return "border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997]";
+      return "border-cyan-200 bg-cyan-50 text-cyan-700";
   }
 }
 
@@ -105,15 +112,18 @@ export function TrustCenter() {
   const [integrations, setIntegrations] = useState<TrustIntegrationManifest[]>([]);
   const [notifications, setNotifications] = useState<TrustNotificationIntent[]>([]);
   const [busySource, setBusySource] = useState<string | null>(null);
+  const [accessRequests, setAccessRequests] = useState<FounderTrustAccessRequest[]>([]);
+  const [introDismissed, setIntroDismissed] = useState(false);
 
   const load = useCallback(async () => {
     setState("loading");
     try {
-      const [nextProfile, badgeResult, historyResult, integrationResult] = await Promise.all([
+      const [nextProfile, badgeResult, historyResult, integrationResult, accessResult] = await Promise.all([
         fetchTrustProfile(),
         fetchTrustBadges(),
         fetchTrustHistory(30),
         fetchTrustIntegrations(),
+        fetchFounderTrustAccessRequests(),
       ]);
       const events = historyToPreviewEvents(historyResult.history);
       const preview = await previewTrustNotifications(events);
@@ -122,6 +132,7 @@ export function TrustCenter() {
       setHistory(historyResult.history);
       setIntegrations(integrationResult.integrations);
       setNotifications(preview.notification_intents);
+      setAccessRequests(accessResult.requests);
       setState("ready");
     } catch (error) {
       setState("error");
@@ -131,6 +142,7 @@ export function TrustCenter() {
   }, []);
 
   useEffect(() => {
+    try { setIntroDismissed(sessionStorage.getItem("techit:trust-center-intro:dismissed") === "1"); } catch { setIntroDismissed(false); }
     void load();
   }, [load]);
 
@@ -176,95 +188,110 @@ export function TrustCenter() {
   };
 
   const score = Math.round(profile?.trust_score ?? 0);
+  const dismissIntro = () => { setIntroDismissed(true); try { sessionStorage.setItem("techit:trust-center-intro:dismissed", "1"); } catch { /* storage unavailable */ } };
+
+  const decideAccess = async (requestId: string, decision: "approved" | "rejected") => {
+    setBusySource(requestId);
+    try {
+      await decideFounderTrustAccessRequest(requestId, decision);
+      await load();
+    } finally {
+      setBusySource(null);
+    }
+  };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#20C997]">
+          <div className="flex items-center gap-2 text-sm font-medium text-cyan-700">
             <ShieldCheck className="w-4 h-4" />
             Trust Engine Lite
           </div>
-          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Trust Center</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="mt-1 text-2xl font-bold text-text-primary">Trust Center</h1>
+          <p className="mt-1 text-sm text-text-muted">
             Metadata-only verification, expiring badges, immutable history, and founder-only alerts.
           </p>
         </div>
-        <Button type="button" variant="outline" onClick={() => void load()} disabled={state === "loading"} className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#111111] dark:text-white dark:hover:bg-white/[0.06]">
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${state === "loading" ? "animate-spin" : ""}`} />
+        <Button type="button" variant="outline" onClick={() => void load()} disabled={state === "loading"}>
+          <RefreshCw className={state === "loading" ? "animate-spin" : ""} />
           Refresh
         </Button>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      {!introDismissed && <aside className="flex items-start gap-3 rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900" role="note">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-700" aria-hidden="true" />
+        <p className="min-w-0 flex-1"><span className="font-semibold">Why Trust Center matters:</span> verified signals make your founder profile more visible to investors and improve matching quality. Your verification tier controls trust visibility; subscriptions and higher credit purchases expand the amount of matching and metered intelligence you can access. Only approved metadata scopes are shared.</p>
+        <button type="button" onClick={dismissIntro} className="shrink-0 rounded p-1 text-cyan-700 hover:bg-cyan-100" aria-label="Dismiss Trust Center note" title="Dismiss note"><X className="h-4 w-4" /></button>
+      </aside>}
+
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <section className="rounded-xl border border-border-default bg-surface-primary p-5">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Trust score</p>
+              <p className="text-sm font-semibold text-text-secondary">Trust score</p>
               <div className="mt-3 flex items-end gap-3">
-                <span className="text-5xl sm:text-6xl font-black tabular-nums text-slate-900 dark:text-white">{score}</span>
-                <span className="pb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">/100</span>
+                <span className="text-5xl font-bold tabular-nums text-text-primary">{score}</span>
+                <span className="pb-2 text-sm text-text-muted">/100</span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Badge className="border-[#20C997]/20 bg-[#20C997]/10 text-[#20C997] font-semibold" variant="outline">
+                <Badge className="border-violet-200 bg-violet-50 text-violet-700" variant="outline">
                   {profile?.tier ?? "Unverified"}
                 </Badge>
-                <Badge className={`${statusClass(String(profile?.verification_status ?? "pending"))} font-semibold`} variant="outline">
+                <Badge className={statusClass(String(profile?.verification_status ?? "pending"))} variant="outline">
                   {String(profile?.verification_status ?? "pending")}
                 </Badge>
               </div>
             </div>
             <div className="grid min-w-[260px] gap-3 text-sm">
-              <div className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-3.5">
-                <p className="text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Active badges</p>
-                <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white">{activeBadges.length}</p>
+              <div className="rounded-lg border border-border-default p-3">
+                <p className="text-xs uppercase tracking-wider text-text-disabled">Active badges</p>
+                <p className="mt-1 text-xl font-semibold text-text-primary">{activeBadges.length}</p>
               </div>
-              <div className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-3.5">
-                <p className="text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Last sync</p>
-                <p className="mt-1 font-semibold text-slate-900 dark:text-white">{formatDate(profile?.last_sync_at)}</p>
+              <div className="rounded-lg border border-border-default p-3">
+                <p className="text-xs uppercase tracking-wider text-text-disabled">Last sync</p>
+                <p className="mt-1 font-medium text-text-primary">{formatDate(profile?.last_sync_at)}</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/10 grid gap-3 grid-cols-2 md:grid-cols-4">
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
             {Object.entries(profile?.breakdown ?? {}).slice(0, 8).map(([key, value]) => (
-              <div key={key} className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/10 p-3">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">{key.replaceAll("_", " ")}</p>
-                <p className="mt-1 text-lg font-bold tabular-nums text-slate-900 dark:text-white">{Math.round(value)}</p>
+              <div key={key} className="rounded-lg bg-background-primary p-3">
+                <p className="text-xs text-text-muted">{key.replaceAll("_", " ")}</p>
+                <p className="mt-1 text-lg font-semibold tabular-nums text-text-primary">{Math.round(value)}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+        <section className="rounded-xl border border-border-default bg-surface-primary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Founder notifications</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{actionRequired.length} item(s) need attention</p>
+              <p className="text-sm font-semibold text-text-secondary">Founder notifications</p>
+              <p className="text-xs text-text-muted">{actionRequired.length} item(s) need attention</p>
             </div>
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-              <Bell className="w-5 h-5" />
-            </div>
+            <Bell className="w-5 h-5 text-status-warning" />
           </div>
           <div className="mt-4 space-y-3">
             {notifications.length === 0 ? (
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <div className="rounded-lg border border-status-success bg-status-success-soft p-3 text-sm text-status-success">
                 No Trust alerts right now.
               </div>
             ) : (
               notifications.slice(0, 4).map((notification) => (
-                <div key={notification.notification_id} className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-3.5">
-                  <div className="flex items-start gap-2.5">
+                <div key={notification.notification_id} className="rounded-lg border border-border-default p-3">
+                  <div className="flex items-start gap-2">
                     {notification.severity === "critical" ? (
-                      <AlertTriangle className="mt-0.5 w-4 h-4 text-rose-500 shrink-0" />
+                      <AlertTriangle className="mt-0.5 w-4 h-4 text-rose-500" />
                     ) : notification.action_required ? (
-                      <Clock className="mt-0.5 w-4 h-4 text-amber-500 shrink-0" />
+                      <Clock className="mt-0.5 w-4 h-4 text-status-warning" />
                     ) : (
-                      <CheckCircle2 className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
+                      <CheckCircle2 className="mt-0.5 w-4 h-4 text-status-success" />
                     )}
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{notification.message}</p>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-sm font-medium text-text-primary">{notification.message}</p>
+                      <p className="mt-1 text-xs text-text-muted">
                         {sourceLabels[notification.source ?? ""] ?? notification.source ?? "Trust"} · investor visible: no
                       </p>
                     </div>
@@ -276,77 +303,86 @@ export function TrustCenter() {
         </section>
       </div>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-cyan-600" />
+          <div>
+            <h2 className="text-sm font-semibold text-text-secondary">Investor access requests</h2>
+            <p className="mt-1 text-xs text-text-muted">Approve only metadata scopes you are prepared to share with an investor.</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {accessRequests.length === 0 ? <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">No pending investor access requests.</div> : accessRequests.map((request) => <div key={request.id} className="rounded-lg border border-border-default p-4"><p className="font-medium text-text-primary">Investor {request.investorId}</p><p className="mt-1 text-sm text-text-muted">{request.purpose || "Investment due diligence"}</p><p className="mt-2 text-xs text-text-disabled">Startup {request.projectId} · {request.requestedScopes.join(", ")}</p><div className="mt-3 flex gap-2"><Button size="sm" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "approved")}>Approve</Button><Button size="sm" variant="outline" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "rejected")}>Reject</Button></div></div>)}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997]">
-                <Award className="w-4 h-4" />
-              </div>
-              <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Verification badges</h2>
+              <Award className="w-4 h-4 text-violet-600" />
+              <h2 className="text-sm font-semibold text-text-secondary">Verification badges</h2>
             </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Badges expire with their source verification.</p>
+            <p className="mt-1 text-xs text-text-muted">Badges expire with their source verification.</p>
           </div>
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {badges.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-black/[0.1] dark:border-white/10 p-5 text-sm text-slate-500 dark:text-slate-400 text-center col-span-full">
+            <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">
               No active Trust badges yet.
             </div>
           ) : (
             badges.map((badge) => (
-              <div key={`${badge.badge_type}-${badge.source}`} className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-4">
+              <div key={`${badge.badge_type}-${badge.source}`} className="rounded-lg border border-border-default p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">{badge.label}</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{sourceLabels[badge.source] ?? badge.source}</p>
+                    <p className="font-semibold text-text-primary">{badge.label}</p>
+                    <p className="mt-1 text-xs text-text-muted">{sourceLabels[badge.source] ?? badge.source}</p>
                   </div>
-                  <Badge className={`${statusClass(String(badge.status))} font-semibold`} variant="outline">
+                  <Badge className={statusClass(String(badge.status))} variant="outline">
                     {badge.active === false ? "expired" : badge.status}
                   </Badge>
                 </div>
-                <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">Expires {formatDate(badge.expires_at)}</p>
+                <p className="mt-4 text-xs text-text-muted">Expires {formatDate(badge.expires_at)}</p>
               </div>
             ))
           )}
         </div>
         {expiringBadges.length > 0 && (
-          <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-sm font-medium text-amber-800 dark:text-amber-300">
+          <div className="mt-4 rounded-lg border border-status-warning bg-status-warning-soft p-3 text-sm text-status-warning">
             Next expiry: {expiringBadges[0].label} on {formatDate(expiringBadges[0].expires_at)}.
           </div>
         )}
       </section>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997]">
-            <Lock className="w-4 h-4" />
-          </div>
+          <Lock className="w-4 h-4 text-cyan-600" />
           <div>
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Connected verification sources</h2>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Manual re-verification and disconnect controls.</p>
+            <h2 className="text-sm font-semibold text-text-secondary">Connected verification sources</h2>
+            <p className="mt-1 text-xs text-text-muted">Manual re-verification and disconnect controls.</p>
           </div>
         </div>
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid gap-3 xl:grid-cols-2">
           {integrations.map((manifest) => {
             const latest = latestBySource.get(manifest.source);
             const disabled = busySource === manifest.source;
             return (
-              <div key={manifest.provider} className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-5">
+              <div key={manifest.provider} className="rounded-lg border border-border-default p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-bold text-slate-900 dark:text-white">{manifest.display_name}</p>
-                      <Badge className={`${statusClass(String(latest?.status ?? "pending"))} font-semibold`} variant="outline">
+                      <p className="font-semibold text-text-primary">{manifest.display_name}</p>
+                      <Badge className={statusClass(String(latest?.status ?? "pending"))} variant="outline">
                         {latest?.status ?? "not verified"}
                       </Badge>
-                      <Badge className="border-black/[0.06] dark:border-white/10 bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400" variant="outline">
+                      <Badge className="border-border-default bg-background-primary text-text-muted" variant="outline">
                         {formatFrequency(manifest.sync_frequency_seconds)}
                       </Badge>
                     </div>
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{manifest.access_description}</p>
-                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{manifest.storage_description}</p>
-                    <p className="mt-3 text-xs text-slate-400">
+                    <p className="mt-2 text-sm text-text-muted">{manifest.access_description}</p>
+                    <p className="mt-2 text-xs text-text-muted">{manifest.storage_description}</p>
+                    <p className="mt-3 text-xs text-text-disabled">
                       Latest hash: {latest?.metadata_hash ? `${latest.metadata_hash.slice(0, 12)}...` : "none"}
                     </p>
                   </div>
@@ -357,9 +393,8 @@ export function TrustCenter() {
                       variant="outline"
                       onClick={() => void refreshSource(manifest.source)}
                       disabled={disabled || !manifest.manual_reverification_supported}
-                      className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#111111] dark:text-white dark:hover:bg-white/[0.06]"
                     >
-                      <RefreshCw className={`w-3.5 h-3.5 mr-1 ${disabled ? "animate-spin" : ""}`} />
+                      <RefreshCw className={disabled ? "animate-spin" : ""} />
                       Refresh
                     </Button>
                     <Button
@@ -368,16 +403,15 @@ export function TrustCenter() {
                       variant="outline"
                       onClick={() => void disconnectSource(manifest.source)}
                       disabled={disabled || !manifest.revocation_supported}
-                      className="rounded-xl border-black/[0.08] dark:border-white/10 dark:bg-[#111111] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
                     >
-                      <Unplug className="w-3.5 h-3.5 mr-1" />
+                      <Unplug />
                       Disconnect
                     </Button>
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {manifest.stored_fields.slice(0, 5).map((field) => (
-                    <span key={field} className="rounded-lg bg-black/[0.04] dark:bg-white/[0.06] px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-400">
+                    <span key={field} className="rounded bg-surface-secondary px-2 py-1 text-xs text-text-muted">
                       {field}
                     </span>
                   ))}
@@ -388,14 +422,12 @@ export function TrustCenter() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997]">
-            <Link2 className="w-4 h-4" />
-          </div>
+          <Link2 className="w-4 h-4 text-violet-600" />
           <div>
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Connect a Source</h2>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Initiate verification for sources not yet connected.</p>
+            <h2 className="text-sm font-semibold text-text-secondary">Connect a Source</h2>
+            <p className="mt-1 text-xs text-text-muted">Initiate verification for sources not yet connected.</p>
           </div>
         </div>
         {(() => {
@@ -417,7 +449,7 @@ export function TrustCenter() {
 
           if (unconnectedSources.length === 0) {
             return (
-              <div className="rounded-xl border border-dashed border-[#20C997]/20 bg-[#20C997]/10 p-5 text-sm font-medium text-[#20C997]">
+              <div className="rounded-lg border border-dashed border-violet-200 bg-violet-50 p-4 text-sm text-violet-700">
                 All sources are connected.
               </div>
             );
@@ -430,21 +462,44 @@ export function TrustCenter() {
                 return (
                   <div
                     key={source}
-                    className="flex items-center justify-between rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-4"
+                    className="flex items-center justify-between rounded-lg border border-violet-200 bg-violet-50 p-4"
                   >
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">
+                    <p className="font-medium text-violet-700">
                       {sourceLabels[source] ?? source}
                     </p>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="rounded-xl border-[#20C997]/20 text-[#20C997] bg-[#20C997]/10 hover:bg-[#20C997]/20 font-bold"
+                      className="border-violet-200 text-violet-700 hover:bg-violet-100"
                       disabled={disabled}
                       onClick={async () => {
                         setBusySource(source);
                         try {
+                          if (source === "domain" || source === "website") {
+                            const domain = window.prompt("Enter the founder website domain to verify");
+                            if (!domain) return;
+                            const method = source === "website" ? "https" : "dns_txt";
+                            const challenge = await createTrustDomainChallenge({ domain, method }) as { challenge?: { id?: string }; token?: string; instructions?: string };
+                            toast.success("Verification challenge created", {
+                              description: `${challenge.instructions ?? "Publish the verification token, then refresh."} Token: ${challenge.token ?? "hidden"}`,
+                              duration: 12000,
+                            });
+                            if (challenge.challenge?.id && window.confirm("After publishing the token, verify this domain now?")) {
+                              const result = await verifyTrustDomainChallenge(challenge.challenge.id) as { verified?: boolean };
+                              toast[result.verified ? "success" : "info"](result.verified ? "Domain verified" : "Verification is still pending");
+                            }
+                            await load();
+                            return;
+                          }
                           const result = await connectTrustSource(source);
+                          const authorizationUrl = typeof result.authorizationUrl === "string"
+                            ? result.authorizationUrl
+                            : null;
+                          if (authorizationUrl) {
+                            window.location.assign(authorizationUrl);
+                            return;
+                          }
                           toast.success(
                             `${sourceLabels[source] ?? source} verification initiated`,
                             { description: result.next_action }
@@ -460,9 +515,9 @@ export function TrustCenter() {
                       }}
                     >
                       {disabled ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <RefreshCw className="animate-spin" />
                       ) : (
-                        <Plus className="w-3.5 h-3.5 mr-1" />
+                        <Plus className="w-4 h-4" />
                       )}
                       Connect
                     </Button>
@@ -474,40 +529,38 @@ export function TrustCenter() {
         })()}
       </section>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6">
+      <section className="rounded-xl border border-border-default bg-surface-primary p-5">
         <div className="mb-4 flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-300">
-            <History className="w-4 h-4" />
-          </div>
+          <History className="w-4 h-4 text-text-muted" />
           <div>
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Immutable Trust timeline</h2>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Append-only verification history with metadata hashes.</p>
+            <h2 className="text-sm font-semibold text-text-secondary">Immutable Trust timeline</h2>
+            <p className="mt-1 text-xs text-text-muted">Append-only verification history with metadata hashes.</p>
           </div>
         </div>
         <div className="space-y-3">
           {history.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-black/[0.1] dark:border-white/10 p-5 text-sm text-slate-500 dark:text-slate-400 text-center">
+            <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">
               No Trust timeline entries yet.
             </div>
           ) : (
             history.map((item) => (
-              <div key={item.verification_id} className="grid gap-3 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-4 md:grid-cols-[1fr_auto]">
+              <div key={item.verification_id} className="grid gap-3 rounded-lg border border-border-default p-4 md:grid-cols-[1fr_auto]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-slate-900 dark:text-white">{item.event_type || `${item.source}_${item.status}`}</p>
-                    <Badge className={`${statusClass(String(item.status))} font-semibold`} variant="outline">
+                    <p className="font-medium text-text-primary">{item.event_type || `${item.source}_${item.status}`}</p>
+                    <Badge className={statusClass(String(item.status))} variant="outline">
                       {item.status}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-sm text-text-muted">
                     {sourceLabels[item.source] ?? item.source} · created {formatDate(item.created_at)} · expires {formatDate(item.expires_at)}
                   </p>
-                  <p className="mt-2 text-xs text-slate-400 font-mono">
+                  <p className="mt-2 text-xs text-text-disabled">
                     Hash: {item.metadata_hash ? `${item.metadata_hash.slice(0, 18)}...` : "none"}
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  <Lock className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2 text-xs text-text-muted">
+                  <Lock className="w-3 h-3" />
                   append-only
                 </div>
               </div>

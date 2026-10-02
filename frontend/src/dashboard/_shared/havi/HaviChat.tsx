@@ -1,4 +1,4 @@
-import { Send } from "lucide-react";
+import { Bot, Send } from "lucide-react";
 import { useState } from "react";
 import type { HaviRole } from "./haviData";
 import { converseWithHavi } from "@/lib/api/tourGuide";
@@ -27,51 +27,18 @@ export function HaviChat({ role, route, profile }: { role: HaviRole; route?: str
   };
 
   return (
-    <div className="flex min-h-[440px] flex-col rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/40 dark:bg-white/[0.02] p-4.5 backdrop-blur-md">
-      <div className="mb-3.5 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#20C997]/10">
-          <img src="/bot-icon.png" alt="Bot Icon" className="h-6 w-6 object-contain drop-shadow-sm" />
-        </div>
-        <div>
-          <h3 className="font-bold text-sm text-slate-900 dark:text-white">Ask Havi</h3>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Answers use your current TechIT context.</p>
-        </div>
+    <div className="flex min-h-[420px] flex-col rounded-xl border border-border-default bg-background-primary p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100"><Bot className="h-5 w-5 text-cyan-700" /></div>
+        <div><h3 className="font-semibold text-text-primary">Ask Havi</h3><p className="text-xs text-text-muted">Answers use your current TechIT context.</p></div>
       </div>
-      <div className="flex-1 space-y-3 overflow-y-auto rounded-xl bg-black/[0.02] dark:bg-black/30 border border-black/[0.04] dark:border-white/[0.06] p-3.5">
-        {history.length === 0 && (
-          <p className="text-sm font-medium text-slate-400 dark:text-slate-500 text-center py-8">
-            Ask about your next step, TechIT tools, or how to move this project forward.
-          </p>
-        )}
-        {history.map((item, index) => (
-          <div
-            key={`${item.role}-${index}`}
-            className={`rounded-2xl p-3 text-sm leading-relaxed ${
-              item.role === "user"
-                ? "ml-6 bg-[#20C997] text-slate-950 font-medium rounded-tr-none shadow-sm"
-                : "mr-6 bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 text-slate-800 dark:text-slate-200 rounded-tl-none shadow-sm"
-            }`}
-          >
-            {item.content}
-          </div>
-        ))}
+      <div className="flex-1 space-y-2 overflow-y-auto rounded-lg bg-surface-primary p-3">
+        {history.length === 0 && <p className="text-sm text-text-muted">Ask about your next step, TechIT tools, or how to move this project forward.</p>}
+        {history.map((item, index) => <div key={`${item.role}-${index}`} className={`rounded-lg p-2 text-sm ${item.role === "user" ? "ml-8 bg-cyan-50 text-text-primary" : "mr-8 bg-surface-secondary text-text-secondary"}`}>{item.content}</div>)}
       </div>
-      <form className="mt-3.5 flex gap-2" onSubmit={(event) => { event.preventDefault(); void send(); }}>
-        <input
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder="Ask Havi..."
-          className="min-w-0 flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-all"
-          disabled={pending}
-        />
-        <button
-          type="submit"
-          aria-label="Send to Havi"
-          disabled={pending || !message.trim()}
-          className="rounded-xl bg-[#20C997] hover:bg-[#1db587] px-4 py-2.5 text-slate-950 font-bold shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-        >
-          <Send className="h-4 w-4" />
-        </button>
+      <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void send(); }}>
+        <input value={message} onChange={event => setMessage(event.target.value)} placeholder="Ask Havi..." className="min-w-0 flex-1 rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm" disabled={pending} />
+        <button type="submit" aria-label="Send to Havi" disabled={pending || !message.trim()} className="rounded-lg bg-cyan-600 px-3 py-2 text-white disabled:opacity-50"><Send className="h-4 w-4" /></button>
       </form>
     </div>
   );

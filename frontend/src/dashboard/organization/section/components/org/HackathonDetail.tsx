@@ -57,10 +57,10 @@ const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
 ];
 
 const statusStyles: Record<OrganizerHackathon["hackathonStatus"], string> = {
-  upcoming: "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20",
-  live: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-  judging: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
-  completed: "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10",
+  upcoming: "bg-status-info-soft text-status-info",
+  live: "bg-status-success-soft text-status-success",
+  judging: "bg-status-warning-soft text-status-warning",
+  completed: "bg-surface-secondary text-text-secondary",
 };
 
 function dateLabel(value: string): string {
@@ -142,11 +142,11 @@ export function HackathonDetail() {
   );
 
   return (
-    <div className="mx-auto max-w-[1600px] p-6 lg:p-8 space-y-6 transition-colors">
-      <div className="flex items-center justify-between gap-4">
+    <div className="mx-auto max-w-[1600px] p-6 lg:p-8">
+      <div className="mb-6 flex items-center justify-between gap-4">
         <Link
           to="/org/hackathons"
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[#20C997] transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-brand-accent"
         >
           <ArrowLeft className="h-4 w-4" />
           All hackathons
@@ -155,32 +155,32 @@ export function HackathonDetail() {
           type="button"
           onClick={() => void load()}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#20C997] hover:border-[#20C997]/30 transition-all disabled:opacity-50 shadow-sm"
+          className="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm font-medium text-text-secondary hover:bg-background-primary disabled:opacity-50"
         >
-          <RefreshCw className={`h-4 w-4 text-[#20C997] ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </button>
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-bold text-red-600 dark:text-red-400">
-          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+        <div className="flex items-start gap-3 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <div>
-            <p className="font-bold">Live hackathon data could not be loaded.</p>
-            <p className="mt-0.5 text-slate-600 dark:text-slate-400">{error}</p>
+            <p className="font-medium">Live hackathon data could not be loaded.</p>
+            <p className="mt-1">{error}</p>
           </div>
         </div>
       )}
 
       {loading && !data ? (
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-6 py-16 text-center text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+        <div className="rounded-lg border border-border-default bg-surface-primary px-6 py-12 text-center text-sm text-text-muted">
           Loading persisted hackathon data...
         </div>
       ) : data ? (
         <>
           <EventHeader event={data.event} overview={data.overview} />
 
-          <div className="flex gap-1 overflow-x-auto border-b border-black/[0.06] dark:border-white/10 pb-1">
+          <div className="mb-6 flex gap-1 overflow-x-auto border-b border-border-default">
             {tabs.map((item) => {
               const Icon = item.icon;
               const active = tab === item.id;
@@ -189,10 +189,10 @@ export function HackathonDetail() {
                   key={item.id}
                   type="button"
                   onClick={() => setTab(item.id)}
-                  className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-xs font-bold transition-all ${
+                  className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold ${
                     active
-                      ? "border-[#20C997] text-[#20C997]"
-                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? "border-brand-accent text-brand-accent"
+                      : "border-transparent text-text-muted hover:text-text-primary"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -228,47 +228,47 @@ function EventHeader({
   overview: HackathonOverview;
 }) {
   return (
-    <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
+    <section className="mb-6 rounded-lg border border-border-default bg-surface-primary p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-3">
-            <span className="rounded-xl bg-[#20C997]/10 border border-[#20C997]/20 p-2">
-              <Trophy className="h-6 w-6 text-[#20C997]" />
+            <span className="rounded-lg bg-status-info-soft p-2">
+              <Trophy className="h-6 w-6 text-brand-accent" />
             </span>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{event.title}</h1>
-            <span className={`rounded-full px-3 py-0.5 text-xs font-bold ${statusStyles[event.hackathonStatus]}`}>
+            <h1 className="text-2xl font-bold text-text-primary">{event.title}</h1>
+            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[event.hackathonStatus]}`}>
               {titleLabel(event.hackathonStatus)}
             </span>
           </div>
-          <p className="text-xs font-medium text-slate-600 dark:text-slate-400">{event.theme || "No theme has been persisted."}</p>
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-text-muted">{event.theme || "No theme has been persisted."}</p>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-muted">
             <span className="inline-flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-[#20C997]" />
+              <Calendar className="h-3.5 w-3.5" />
               {dateLabel(event.startDate)} to {dateLabel(event.endDate)}
               {event.durationHours > 0 ? ` (${event.durationHours}h)` : ""}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5 text-[#20C997]" />
+              <Users className="h-3.5 w-3.5" />
               {overview.registrants} registrants
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-[#20C997]" />
+              <Sparkles className="h-3.5 w-3.5" />
               {overview.totalTeams} teams
             </span>
           </div>
         </div>
         <div className="max-w-md">
-          <p className="mb-2 text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Partners</p>
+          <p className="mb-2 text-xs font-medium text-text-muted">Partners</p>
           {event.partners.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {event.partners.map((partner) => (
-                <span key={partner} className="rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 px-3 py-0.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                <span key={partner} className="rounded-full bg-surface-secondary px-2.5 py-1 text-xs font-medium text-text-secondary">
                   {partner}
                 </span>
               ))}
             </div>
           ) : (
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">No partners are attached.</p>
+            <p className="text-sm text-text-muted">No partners are attached.</p>
           )}
         </div>
       </div>
@@ -288,11 +288,11 @@ function OverviewTab({ event }: { event: OrganizerHackathon }) {
 
       <Card title="Prize structure" icon={Award}>
         {event.prizes.length > 0 ? (
-          <div className="divide-y divide-black/[0.05] dark:divide-white/10">
+          <div className="divide-y divide-gray-100">
             {event.prizes.map((prize, index) => (
               <div key={`${prize.rank}-${index}`} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{prize.rank || "Prize tier"}</span>
-                <span className="text-xs font-black font-mono text-slate-900 dark:text-white">{prize.amount || "Amount not set"}</span>
+                <span className="text-sm font-medium text-text-secondary">{prize.rank || "Prize tier"}</span>
+                <span className="text-sm font-bold text-text-primary">{prize.amount || "Amount not set"}</span>
               </div>
             ))}
           </div>
@@ -305,7 +305,7 @@ function OverviewTab({ event }: { event: OrganizerHackathon }) {
         {event.judgingDimensions.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {event.judgingDimensions.map((dimension) => (
-              <span key={dimension} className="rounded-full bg-[#20C997]/10 border border-[#20C997]/20 px-3 py-1 text-xs font-bold text-[#20C997]">
+              <span key={dimension} className="rounded-full bg-status-info-soft px-3 py-1.5 text-xs font-medium text-brand-accent">
                 {titleLabel(dimension)}
               </span>
             ))}
@@ -316,7 +316,7 @@ function OverviewTab({ event }: { event: OrganizerHackathon }) {
       </Card>
 
       <Card title="Event summary" icon={ClipboardList}>
-        <p className="text-xs font-medium leading-relaxed text-slate-700 dark:text-slate-300">
+        <p className="text-sm leading-6 text-text-secondary">
           {event.summary || event.theme || "No event summary has been persisted."}
         </p>
       </Card>
@@ -343,22 +343,22 @@ function RegistrationTab({
       <Card title="Persisted teams" icon={Users}>
         {teams.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-black/[0.06] dark:border-white/10 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <tr className="border-b border-border-default text-left text-xs font-semibold uppercase text-text-muted">
                   <th className="px-3 py-2">Team</th>
                   <th className="px-3 py-2">Build velocity</th>
                   <th className="px-3 py-2">Composite score</th>
                   <th className="px-3 py-2">CRS band</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black/[0.05] dark:divide-white/10">
+              <tbody>
                 {teams.map((team) => (
-                  <tr key={team.id}>
-                    <td className="px-3 py-3 font-bold text-slate-900 dark:text-white">{team.name}</td>
-                    <td className="px-3 py-3 font-mono font-semibold text-slate-700 dark:text-slate-300">{team.activity}</td>
-                    <td className="px-3 py-3 font-mono font-bold text-[#20C997]">{team.composite}</td>
-                    <td className="px-3 py-3 font-medium text-slate-700 dark:text-slate-300">{titleLabel(team.crsBand)}</td>
+                  <tr key={team.id} className="border-b border-border-subtle last:border-0">
+                    <td className="px-3 py-3 font-semibold text-text-primary">{team.name}</td>
+                    <td className="px-3 py-3 tabular-nums text-text-secondary">{team.activity}</td>
+                    <td className="px-3 py-3 tabular-nums text-text-secondary">{team.composite}</td>
+                    <td className="px-3 py-3 text-text-secondary">{titleLabel(team.crsBand)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -397,26 +397,26 @@ function LiveTab({
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
               {velocity.map((team) => {
                 const color = team.activity > 66
-                  ? "bg-emerald-500"
+                  ? "bg-status-success"
                   : team.activity > 33
-                    ? "bg-amber-500"
-                    : "bg-red-500";
+                    ? "bg-amber-400"
+                    : "bg-status-error";
                 return (
                   <div
                     key={team.teamId}
-                    className={`flex min-h-20 flex-col items-center justify-center rounded-xl p-2 text-center text-white font-bold ${color}`}
+                    className={`flex min-h-20 flex-col items-center justify-center rounded-lg px-2 text-center text-white ${color}`}
                     title={`${team.name}: ${team.activity}`}
                   >
-                    <span className="line-clamp-2 text-xs">{team.name || "Untitled team"}</span>
-                    <span className="mt-1 text-sm font-black font-mono">{team.activity}</span>
+                    <span className="line-clamp-2 text-xs font-semibold">{team.name || "Untitled team"}</span>
+                    <span className="mt-1 text-sm font-bold tabular-nums">{team.activity}</span>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-4 flex flex-wrap gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
-              <Legend color="bg-emerald-500" label="High" />
-              <Legend color="bg-amber-500" label="Medium" />
-              <Legend color="bg-red-500" label="Stalled" />
+            <div className="mt-4 flex flex-wrap gap-4 text-xs text-text-muted">
+              <Legend color="bg-status-success" label="High" />
+              <Legend color="bg-amber-400" label="Medium" />
+              <Legend color="bg-status-error" label="Stalled" />
             </div>
           </>
         ) : (
@@ -425,9 +425,9 @@ function LiveTab({
       </Card>
 
       <Card title="Idea submission progress" icon={ClipboardList}>
-        <Progress label="Submitted" value={overview.ideaSubmissions} total={overview.totalTeams} color="bg-[#20C997]" />
+        <Progress label="Submitted" value={overview.ideaSubmissions} total={overview.totalTeams} color="bg-status-success" />
         <div className="mt-4">
-          <Progress label="Not submitted" value={pendingIdeas} total={overview.totalTeams} color="bg-amber-500" />
+          <Progress label="Not submitted" value={pendingIdeas} total={overview.totalTeams} color="bg-amber-400" />
         </div>
       </Card>
 
@@ -451,7 +451,7 @@ function JudgingTab({
         {event.judgingDimensions.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {event.judgingDimensions.map((dimension) => (
-              <span key={dimension} className="rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 px-3 py-1 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <span key={dimension} className="rounded-full bg-surface-secondary px-3 py-1.5 text-xs font-medium text-text-secondary">
                 {titleLabel(dimension)}
               </span>
             ))}
@@ -464,22 +464,22 @@ function JudgingTab({
       <Card title="Persisted leaderboard" icon={Award}>
         {leaderboard.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-black/[0.06] dark:border-white/10 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <tr className="border-b border-border-default text-left text-xs font-semibold uppercase text-text-muted">
                   <th className="px-3 py-2">Rank</th>
                   <th className="px-3 py-2">Team</th>
                   <th className="px-3 py-2">Composite</th>
                   <th className="px-3 py-2">CRS band</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black/[0.05] dark:divide-white/10">
+              <tbody>
                 {leaderboard.map((team, index) => (
-                  <tr key={team.teamId}>
-                    <td className="px-3 py-3 font-black font-mono text-slate-900 dark:text-white">{index + 1}</td>
-                    <td className="px-3 py-3 font-bold text-slate-900 dark:text-white">{team.name || "Untitled team"}</td>
-                    <td className="px-3 py-3 font-black font-mono text-[#20C997]">{team.composite}</td>
-                    <td className="px-3 py-3 font-medium text-slate-700 dark:text-slate-300">{titleLabel(team.crsBand)}</td>
+                  <tr key={team.teamId} className="border-b border-border-subtle last:border-0">
+                    <td className="px-3 py-3 font-bold text-text-primary">{index + 1}</td>
+                    <td className="px-3 py-3 font-semibold text-text-primary">{team.name || "Untitled team"}</td>
+                    <td className="px-3 py-3 font-bold tabular-nums text-brand-accent">{team.composite}</td>
+                    <td className="px-3 py-3 text-text-secondary">{titleLabel(team.crsBand)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -523,14 +523,14 @@ function ReportTab({
 
       <Card title="Scored teams" icon={CheckCircle2}>
         {leaderboard.length > 0 ? (
-          <div className="divide-y divide-black/[0.05] dark:divide-white/10">
+          <div className="divide-y divide-gray-100">
             {leaderboard.slice(0, 10).map((team, index) => (
               <div key={team.teamId} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-slate-900 dark:text-white">{index + 1}. {team.name || "Untitled team"}</p>
-                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{titleLabel(team.crsBand)}</p>
+                  <p className="truncate text-sm font-semibold text-text-primary">{index + 1}. {team.name || "Untitled team"}</p>
+                  <p className="text-xs text-text-muted">{titleLabel(team.crsBand)}</p>
                 </div>
-                <span className="text-base font-black font-mono text-[#20C997]">{team.composite}</span>
+                <span className="text-lg font-bold tabular-nums text-brand-accent">{team.composite}</span>
               </div>
             ))}
           </div>
@@ -543,7 +543,7 @@ function ReportTab({
         {event.partners.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {event.partners.map((partner) => (
-              <span key={partner} className="rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 px-3 py-1 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <span key={partner} className="rounded-full bg-surface-secondary px-3 py-1.5 text-sm font-medium text-text-secondary">
                 {partner}
               </span>
             ))}
@@ -551,7 +551,7 @@ function ReportTab({
         ) : (
           <EmptyState>No partner records are attached to this event.</EmptyState>
         )}
-        <p className="mt-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+        <p className="mt-4 text-xs text-text-muted">
           Sponsor-specific attribution is not recorded, so this report does not assign event-wide outcomes to individual partners.
         </p>
       </Card>
@@ -573,9 +573,9 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
-      <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
-        <Icon className="h-5 w-5 text-[#20C997]" />
+    <section className="rounded-lg border border-border-default bg-surface-primary p-5">
+      <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-text-primary">
+        <Icon className="h-5 w-5 text-brand-accent" />
         {title}
       </h2>
       {children}
@@ -593,9 +593,9 @@ function Stat({
   tone?: "warn" | "neutral";
 }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 shadow-sm transition-all hover:border-[#20C997]/30">
-      <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{label}</p>
-      <p className={`mt-2 text-2xl font-black font-mono ${tone === "warn" ? "text-amber-500 dark:text-amber-400" : "text-slate-900 dark:text-white"}`}>
+    <div className="rounded-lg border border-border-default bg-surface-primary p-4">
+      <p className="text-xs font-medium uppercase text-text-muted">{label}</p>
+      <p className={`mt-1 text-2xl font-bold tabular-nums ${tone === "warn" ? "text-status-warning" : "text-text-primary"}`}>
         {value}
       </p>
     </div>
@@ -604,16 +604,16 @@ function Stat({
 
 function Definition({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-black/[0.05] dark:border-white/10 py-3 first:pt-0 last:border-0 last:pb-0">
-      <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{label}</span>
-      <span className="text-right text-xs font-semibold text-slate-900 dark:text-white">{value}</span>
+    <div className="flex items-start justify-between gap-4 border-b border-border-subtle py-3 first:pt-0 last:border-0 last:pb-0">
+      <span className="text-sm text-text-muted">{label}</span>
+      <span className="text-right text-sm font-medium text-text-primary">{value}</span>
     </div>
   );
 }
 
 function EmptyState({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-dashed border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] px-5 py-8 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+    <div className="rounded-lg border border-dashed border-border-strong bg-background-primary px-5 py-8 text-center text-sm text-text-muted">
       {children}
     </div>
   );
@@ -621,8 +621,8 @@ function EmptyState({ children }: { children: React.ReactNode }) {
 
 function UnavailablePanel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] p-4 text-xs font-medium text-slate-600 dark:text-slate-400">
-      <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400 dark:text-slate-500" />
+    <div className="flex items-start gap-3 rounded-lg border border-border-default bg-background-primary px-4 py-3 text-sm text-text-muted">
+      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-text-muted" />
       <p>{children}</p>
     </div>
   );
@@ -642,11 +642,11 @@ function Progress({
   const percent = total > 0 ? Math.min(100, Math.max(0, (value / total) * 100)) : 0;
   return (
     <div>
-      <div className="mb-1 flex justify-between gap-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
-        <span>{label}</span>
-        <span className="font-mono">{value} / {total}</span>
+      <div className="mb-1 flex justify-between gap-4 text-xs text-text-muted">
+        <span className="font-medium">{label}</span>
+        <span className="tabular-nums">{value} / {total}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+      <div className="h-2 overflow-hidden rounded-full bg-surface-secondary">
         <div className={`h-full ${color}`} style={{ width: `${percent}%` }} />
       </div>
     </div>
@@ -664,9 +664,9 @@ function Legend({ color, label }: { color: string; label: string }) {
 
 function PipelineMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border-l-2 border-[#20C997] pl-4">
-      <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{label}</p>
-      <p className="mt-1 text-2xl font-black font-mono text-slate-900 dark:text-white">{value}</p>
+    <div className="border-l-2 border-brand-accent pl-4">
+      <p className="text-xs font-medium uppercase text-text-muted">{label}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{value}</p>
     </div>
   );
 }

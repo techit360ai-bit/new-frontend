@@ -37,19 +37,19 @@ export function DiscoverStage() {
   const otherHackathons = allHackathons.filter((h) => !registeredIds.has(h.id));
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading live hackathons...</p>;
+    return <p className="text-sm text-text-muted">Loading live hackathons...</p>;
   }
 
   if (error) {
-    return <p className="text-sm text-red-600">Live hackathons are unavailable: {error}</p>;
+    return <p className="text-sm text-status-error">Live hackathons are unavailable: {error}</p>;
   }
 
   if (registrations.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-          <h2 className="text-base font-bold text-[#171330] dark:text-white">Find a hackathon to join</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <div className="border border-border-default rounded-xl p-6 bg-surface-primary">
+          <h2 className="text-base font-semibold text-text-primary">Find a hackathon to join</h2>
+          <p className="text-sm text-text-muted mt-1">
             Pick a hackathon below to register your team, or browse the full Opportunity Hub.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
@@ -57,8 +57,8 @@ export function DiscoverStage() {
               <OpportunityCard key={h.id} opportunity={h} />
             ))}
           </div>
-          <div className="mt-5 pt-4 border-t border-black/[0.06] dark:border-white/10">
-            <Link to="/opportunity-hub" className="text-xs font-bold text-[#0066ff] dark:text-[#58a6ff] hover:underline">
+          <div className="mt-5 pt-4 border-t border-border-subtle">
+            <Link to="/opportunity-hub" className="text-xs font-medium text-violet-600 hover:text-violet-700">
               Browse all opportunities →
             </Link>
           </div>
@@ -70,7 +70,7 @@ export function DiscoverStage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Your teams</h2>
+        <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">Your teams</h2>
         <div className="space-y-3">
             {registrations.map((reg) => {
               const hackathon = allHackathons.find((h) => h.id === reg.hackathonId);
@@ -81,7 +81,7 @@ export function DiscoverStage() {
       </div>
       {otherHackathons.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Other open hackathons</h2>
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">Other open hackathons</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {otherHackathons.map((h) => (
               <OpportunityCard key={h.id} opportunity={h} />

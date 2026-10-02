@@ -52,6 +52,9 @@ export interface RecommendationResponse {
     returned?: number
     configVersion?: string
     coldStart?: boolean
+    /** Wall-clock time the recommendation set was generated (for freshness). */
+    generatedAt?: string
+    cached?: boolean
   }
 }
 

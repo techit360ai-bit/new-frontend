@@ -1,250 +1,187 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, type Variants } from "motion/react";
 import { useOrgProfile } from "@/contexts/UserContext";
-import { BlobField } from "@/components/ui/blob-field";
-import { ImageSlideshow } from "@/components/ui/image-slideshow";
-import {
-  Trophy,
-  Rocket,
-  HandCoins,
-  Compass,
-  UserSearch,
-  Handshake,
-  Sparkles,
-  ArrowRight,
-  ArrowLeft,
-  Check,
-  Globe2,
-} from "lucide-react";
-
-const SLIDE_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
-
-const PERKS = [
-  { icon: Trophy, text: "Host competitive challenges & build-a-thons" },
-  { icon: HandCoins, text: "Disburse and track grant milestones" },
-  { icon: Sparkles, text: "Cross-promote initiatives across ecosystems" },
-];
+import { OrgProgressBar } from "./OrgProgressBar";
+import { Target, MapPin, Trophy, Rocket, HandCoins, Compass, UserSearch, Handshake } from "lucide-react";
 
 const PROGRAMMES = [
-  { id: "Hackathons", label: "Hackathons", icon: Trophy, desc: "Theme build sprints" },
-  { id: "Accelerator", label: "Accelerators", icon: Rocket, desc: "8–16 week cohorts" },
-  { id: "Grants", label: "Grants", icon: HandCoins, desc: "Early-stage funding" },
-  { id: "Mentorship", label: "Mentorship", icon: Compass, desc: "1-on-1 guidance" },
-  { id: "Hiring", label: "Talent / Hiring", icon: UserSearch, desc: "Recruit verified talent" },
-  { id: "Sponsorship", label: "Sponsorships", icon: Handshake, desc: "Back external events" },
+  { id: "Hackathons", icon: Trophy, desc: "Theme-driven build sprints" },
+  { id: "Accelerator", icon: Rocket, desc: "Structured 8–16 week cohorts" },
+  { id: "Grants", icon: HandCoins, desc: "Funding for early-stage projects" },
+  { id: "Mentorship", icon: Compass, desc: "1-on-1 founder support" },
+  { id: "Hiring", icon: UserSearch, desc: "Recruit verified builders" },
+  { id: "Sponsorship", icon: Handshake, desc: "Back third-party events" },
 ];
 
 const SECTORS = [
-  "AI & ML", "FinTech", "HealthTech", "Climate", "Education", "Deep Tech", "Web3", "Agriculture"
+  "AI",
+  "FinTech",
+  "Healthcare",
+  "Climate",
+  "Education",
+  "Logistics",
+  "Deep Tech",
+  "Web3",
+  "Agriculture",
+  "Energy",
 ];
 
 const GEOGRAPHIES = [
-  "West Africa", "East Africa", "Southern Africa", "North Africa", "Middle East", "Europe", "North America"
+  "West Africa",
+  "East Africa",
+  "Southern Africa",
+  "North Africa",
+  "Middle East",
+  "South Asia",
+  "South-East Asia",
+  "Latin America",
+  "Europe",
+  "North America",
 ];
 
 export function OrgStep3() {
   const navigate = useNavigate();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
+  const [programmes, setProgrammes] = useState<string[]>(orgProfile.programmes);
+  const [sectors, setSectors] = useState<string[]>(orgProfile.sectors);
+  const [geographies, setGeographies] = useState<string[]>(
+    orgProfile.geographies,
+  );
 
-  const [programmes, setProgrammes] = useState<string[]>(orgProfile.programmes || ["Hackathons"]);
-  const [sectors, setSectors] = useState<string[]>(orgProfile.sectors || ["AI & ML"]);
-  const [geographies, setGeographies] = useState<string[]>(orgProfile.geographies || ["West Africa"]);
-
-  const toggle = (list: string[], setList: (v: string[]) => void, val: string) => {
+  const toggle = (
+    list: string[],
+    setList: (v: string[]) => void,
+    val: string,
+  ) =>
     setList(list.includes(val) ? list.filter((x) => x !== val) : [...list, val]);
-  };
 
   const handleNext = () => {
     updateOrgProfile({ programmes, sectors, geographies });
     navigate("/org/onboarding/step-4");
   };
-
   const handleBack = () => navigate("/org/onboarding/step-2");
 
-  const fieldVariants: Variants = {
-    hidden: { opacity: 0, y: 12 },
-    show: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: 0.1 + i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] },
-    }),
-  };
-
   return (
-    <div className="min-h-screen bg-[#081c15] p-[10px] font-bricolage">
-      <div className="w-full min-h-[calc(100vh-20px)] rounded-[32px] overflow-hidden grid lg:grid-cols-[42%_58%] border border-white/10">
-        {/* Left: brand panel */}
-        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-[#081c15] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#20C997]/30 via-[#081c15] to-[#081c15]" />
-          <BlobField variant="dark" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+      <div className="w-full max-w-3xl">
+        <OrgProgressBar currentStep={3} totalSteps={5} />
 
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 mb-6 px-3 py-1 rounded-full bg-[#20C997]/15 border border-[#20C997]/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#20C997]">Step 3 of 5</span>
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold text-text-primary dark:text-white tracking-tight mb-2">
+            Programmes & Focus
+          </h1>
+          <p className="text-base text-text-muted dark:text-text-disabled">
+            What does your organisation offer, and where do you operate? We use
+            this to route the right builders to you.
+          </p>
+        </div>
+
+        <div className="space-y-9">
+          {/* Programmes */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Target className="w-4 h-4 text-brand-accent" />
+              <h3 className="text-text-primary dark:text-white font-semibold">
+                What you run
+              </h3>
             </div>
-            <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-[1.1] mb-4">
-              Programs & Focus Areas
-            </h1>
-            <p className="text-white/60 text-sm leading-relaxed max-w-sm">
-              Specify what initiatives your organisation runs and which sectors you support.
-            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {PROGRAMMES.map((p) => {
+                const active = programmes.includes(p.id);
+                const Icon = p.icon;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => toggle(programmes, setProgrammes, p.id)}
+                    className={`text-left p-4 rounded-xl border-2 transition-all ${
+                      active
+                        ? "border-brand-accent bg-status-info-soft dark:bg-status-info-soft/10"
+                        : "border-border-strong dark:border-border-inverse-strong bg-surface-primary dark:bg-surface-inverse-muted/40 hover:border-brand-accent"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 mb-1">
+                      <Icon className="h-5 w-5 text-brand-accent dark:text-brand-accent" aria-hidden="true" />
+                      <p className="font-bold text-text-primary dark:text-white">
+                        {p.id}
+                      </p>
+                    </div>
+                    <p className="text-xs text-text-muted dark:text-text-disabled">
+                      {p.desc}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="relative z-10 space-y-4">
-            {PERKS.map(({ icon: Icon, text }, i) => (
-              <motion.div
-                key={text}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
-                className="flex items-center gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-[#20C997]" />
-                </div>
-                <span className="text-white/75 text-sm font-medium">{text}</span>
-              </motion.div>
-            ))}
+          {/* Sectors */}
+          <div>
+            <h3 className="text-text-primary dark:text-white font-semibold mb-4">
+              Sectors of focus
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {SECTORS.map((s) => {
+                const active = sectors.includes(s);
+                return (
+                  <button
+                    key={s}
+                    onClick={() => toggle(sectors, setSectors, s)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                      active
+                        ? "bg-brand-accent text-white shadow-md"
+                        : "bg-surface-primary dark:bg-surface-inverse-muted/40 text-text-secondary dark:text-text-on-inverse-secondary border-2 border-border-strong dark:border-border-inverse-strong hover:border-brand-accent"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Step progress</span>
-              <span className="text-[10px] font-black text-[#20C997]">3 / 5</span>
+          {/* Geographies */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="w-4 h-4 text-brand-accent" />
+              <h3 className="text-text-primary dark:text-white font-semibold">
+                Where you operate
+              </h3>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#20C997] to-emerald-400 w-3/5" />
+            <div className="flex flex-wrap gap-2">
+              {GEOGRAPHIES.map((g) => {
+                const active = geographies.includes(g);
+                return (
+                  <button
+                    key={g}
+                    onClick={() => toggle(geographies, setGeographies, g)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                      active
+                        ? "bg-violet-600 text-white shadow-md"
+                        : "bg-surface-primary dark:bg-surface-inverse-muted/40 text-text-secondary dark:text-text-on-inverse-secondary border-2 border-border-strong dark:border-border-inverse-strong hover:border-violet-400"
+                    }`}
+                  >
+                    {g}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* Right: form panel */}
-        <div className="relative flex items-center justify-center p-6 md:p-14 overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <ImageSlideshow images={SLIDE_IMAGES} />
-          </div>
-
-          <div className="absolute inset-0 bg-[#081c15]/55 z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#081c15]/50 via-transparent to-[#081c15]/70 z-[1]" />
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 w-full max-w-xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-[32px] p-6 md:p-9 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.7)] overflow-y-auto max-h-[85vh] hide-scrollbar"
+        <div className="mt-12 flex justify-between gap-4">
+          <button
+            onClick={handleBack}
+            className="px-6 py-4 rounded-xl border-2 border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary font-semibold hover:border-brand-accent transition-colors"
           >
-            <div className="mb-6">
-              <h2 className="text-xl font-black text-white mb-1 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
-                Programmes & Domains
-              </h2>
-              <p className="text-sm text-white/60 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
-                Select your active and planned programmes.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {/* Programmes */}
-              <motion.div custom={0} variants={fieldVariants} initial="hidden" animate="show">
-                <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 mb-3 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
-                  <Trophy className="w-3.5 h-3.5 text-[#20C997]" /> Active Programmes
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {PROGRAMMES.map(({ id, label, icon: Icon, desc }) => {
-                    const sel = programmes.includes(id);
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => toggle(programmes, setProgrammes, id)}
-                        className={`p-3 rounded-xl border text-left transition-all ${
-                          sel
-                            ? "bg-[#20C997]/20 border-[#20C997]/50 text-white shadow-[0_0_12px_rgba(32,201,151,0.25)]"
-                            : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Icon className={`w-4 h-4 ${sel ? "text-[#20C997]" : "text-white/40"}`} />
-                          <span className="text-xs font-bold truncate">{label}</span>
-                        </div>
-                        <span className="text-[10px] text-white/40 block truncate">{desc}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-
-              {/* Sectors */}
-              <motion.div custom={1} variants={fieldVariants} initial="hidden" animate="show">
-                <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 mb-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
-                  <Sparkles className="w-3.5 h-3.5 text-[#20C997]" /> Focus Sectors
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {SECTORS.map((s) => {
-                    const sel = sectors.includes(s);
-                    return (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => toggle(sectors, setSectors, s)}
-                        className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${
-                          sel
-                            ? "bg-[#20C997] border-[#20C997] text-slate-950 shadow-[0_0_10px_rgba(32,201,151,0.3)]"
-                            : "bg-white/5 border-white/15 text-white/70 hover:bg-white/10"
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-
-              {/* Geographies */}
-              <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="show">
-                <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 mb-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
-                  <Globe2 className="w-3.5 h-3.5 text-[#20C997]" /> Target Geographies
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {GEOGRAPHIES.map((g) => {
-                    const sel = geographies.includes(g);
-                    return (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => toggle(geographies, setGeographies, g)}
-                        className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${
-                          sel
-                            ? "bg-[#20C997] border-[#20C997] text-slate-950 shadow-[0_0_10px_rgba(32,201,151,0.3)]"
-                            : "bg-white/5 border-white/15 text-white/70 hover:bg-white/10"
-                        }`}
-                      >
-                        {g}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            </div>
-
-            <motion.div custom={3} variants={fieldVariants} initial="hidden" animate="show" className="mt-8 flex gap-3">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="h-12 px-5 flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-sm uppercase tracking-widest transition-all"
-              >
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#20C997] to-[#128a64] text-slate-950 font-black text-sm uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(32,201,151,0.4)]"
-              >
-                Continue <ArrowRight className="w-4 h-4" />
-              </button>
-            </motion.div>
-          </motion.div>
+            Back
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={programmes.length === 0 || sectors.length === 0}
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-brand-accent to-violet-600 hover:from-brand-accent hover:to-violet-500 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            Continue
+          </button>
         </div>
       </div>
     </div>

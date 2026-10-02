@@ -5,6 +5,10 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   createComment,
+  deleteComment,
+  deletePost,
+  editComment,
+  editPost,
   fetchComments,
   fetchPost,
   likePost,
@@ -16,6 +20,9 @@ import { fetchPublicUserProfile, type PublicUserProfile } from '@/lib/api/users'
 import { ShareModal } from '../components/ShareModal';
 import { BackButton } from '../components/BackButton';
 import { FeedEmptyState, FeedErrorState, FeedLoadingState } from '../components/FeedStates';
+import { IdentityBadges } from '@/components/messaging/IdentityBadges';
+import { MentionText } from '@/components/messaging/MentionText';
+import { MentionTextarea } from '@/components/messaging/MentionTextarea';
 
 function formatTimestamp(value: string): string {
   const date = new Date(value);
@@ -54,6 +61,10 @@ export function PostDetailPage() {
   const [likeCount, setLikeCount] = useState<number | null>(null);
   const [liking, setLiking] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(false);
+  const [postDraft, setPostDraft] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [commentDraft, setCommentDraft] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -128,6 +139,9 @@ export function PostDetailPage() {
     }
   };
 
+  const savePostEdit = async () => { if (!post || !postDraft.trim()) return; try { const updated = await editPost(post.id, postDraft.trim(), post.editVersion || 0); setPost((current) => current ? { ...current, ...updated } : current); setEditingPost(false); } catch (err) { toast.error(err instanceof Error ? err.message : 'Post could not be edited.'); } };
+  const removePost = async () => { if (!post) return; try { await deletePost(post.id, post.editVersion || 0); setPost(null); } catch (err) { toast.error(err instanceof Error ? err.message : 'Post could not be deleted.'); } };
+
   if (loading) return <FeedLoadingState label="Loading live post..." />;
   if (error) return <FeedErrorState message={error} />;
   if (!post) {
@@ -145,95 +159,97 @@ export function PostDetailPage() {
   const meta = postMeta(post.kind);
   const KindIcon = meta.icon;
   const author = profiles[post.authorId];
-  const authorName = author?.name || post.authorId;
+  const authorName = author?.name || post.author?.displayName || post.authorId;
   const ownName = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
     || profile?.username
     || profile?.email
     || 'You';
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 pb-20 lg:pb-6 space-y-6 font-bricolage">
-      <BackButton label="Back to Feed" className="mb-2" />
+    <div className="mx-auto max-w-3xl px-4 py-6 pb-20 lg:pb-6">
+      <BackButton label="Back to Feed" className="mb-6" />
 
-      <article className={`rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm border-l-4 ${kindColorClass(post.kind).split(' ')[0]}`}>
+      <article className={`mb-6 border-y border-border-default border-l-4 bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6 ${kindColorClass(post.kind).split(' ')[0]}`}>
         <div className="mb-4 flex items-start justify-between gap-3">
-          <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3 group">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#20C997] text-sm font-bold text-slate-950 shadow-sm">
+          <Link to={`/feed/profile/${encodeURIComponent(post.authorId)}`} className="flex min-w-0 items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-primary text-sm font-semibold text-white">
               {initials(authorName)}
             </div>
             <div className="min-w-0">
-              <p className="truncate font-bold text-slate-900 dark:text-white group-hover:text-[#20C997] transition-colors">{authorName}</p>
-              <p className="text-xs font-semibold capitalize text-slate-500 dark:text-slate-400">
+              <p className="flex items-center gap-1.5 truncate font-medium text-text-primary">{authorName}<IdentityBadges verified={author?.isVerified ?? post.author?.verified} subscriber={author?.subscriber ?? post.author?.subscriber} credibilityScore={author?.credibilityScore ?? post.author?.credibilityScore} /></p>
+              <p className="text-sm capitalize text-text-secondary">
                 {author ? `${author.role} · ${author.category} · ${author.stage}` : post.authorRole}
               </p>
             </div>
           </Link>
-          <time className="text-[11px] font-mono text-slate-400 dark:text-slate-500 shrink-0" dateTime={post.ts}>{formatTimestamp(post.ts)}</time>
+          <time className="text-xs text-text-muted" dateTime={post.ts}>{formatTimestamp(post.ts)}</time>
         </div>
 
-        <p className={`mb-3 inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider ${kindColorClass(post.kind).split(' ')[1]}`}>
+        <p className={`mb-3 flex items-center gap-1.5 text-xs font-medium uppercase ${kindColorClass(post.kind).split(' ')[1]}`}>
           <KindIcon className="h-4 w-4" aria-hidden="true" />{meta.label}
         </p>
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800 dark:text-slate-200">{post.body}</p>
+        {editingPost ? <div className="space-y-2"><textarea value={postDraft} onChange={(event) => setPostDraft(event.target.value)} className="w-full rounded border border-border-default bg-surface-secondary p-2 text-sm" rows={4} /><div className="flex gap-2"><button type="button" onClick={() => void savePostEdit()} className="text-xs text-accent-primary">Save</button><button type="button" onClick={() => setEditingPost(false)} className="text-xs text-text-muted">Cancel</button></div></div> : <MentionText body={post.body} mentions={post.mentions} className="whitespace-pre-wrap text-base leading-relaxed text-text-primary" />}
 
-        <div className="mt-6 flex items-center gap-6 border-t border-black/[0.06] dark:border-white/10 pt-4">
+        {profile?.id === post.authorId && !editingPost && <div className="mt-3 flex gap-3 text-xs"><button type="button" onClick={() => { setPostDraft(post.body); setEditingPost(true); }} className="text-accent-primary">Edit</button><button type="button" onClick={() => void removePost()} className="text-score-red">Delete</button></div>}
+
+        <div className="mt-6 flex items-center gap-6 border-t border-border-default pt-4">
           <button
             type="button"
             onClick={() => { void toggleLike(); }}
             disabled={liking}
-            className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 text-sm text-text-secondary hover:text-score-red disabled:opacity-50"
           >
-            <Flame className={`h-4 w-4 ${liked ? 'fill-amber-500 text-amber-500' : ''}`} />
+            <Flame className={`h-5 w-5 ${liked ? 'fill-current text-score-red' : ''}`} />
             {likeCount === null ? 'React' : likeCount}
           </button>
-          <span className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
-            <MessageCircle className="h-4 w-4 text-[#20C997]" />
+          <span className="flex items-center gap-2 text-sm text-text-secondary">
+            <MessageCircle className="h-5 w-5" />
             {comments.length} comments
           </span>
           <button
             type="button"
             onClick={() => setShareOpen(true)}
-            className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-[#20C997] transition-colors"
+            className="flex items-center gap-2 text-sm text-text-secondary hover:text-accent-primary"
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className="h-5 w-5" />
             Share
           </button>
         </div>
       </article>
 
-      <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm space-y-6">
-        <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Comments ({comments.length})</h2>
-        <div className="flex gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#20C997] text-xs font-bold text-slate-950 shadow-sm">
+      <section className="border-y border-border-default bg-surface-primary py-6 sm:rounded-lg sm:border sm:p-6">
+        <h2 className="mb-4 text-lg font-semibold text-text-primary">Comments ({comments.length})</h2>
+        <div className="mb-6 flex gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-semibold text-white">
             {initials(ownName)}
           </div>
-          <div className="flex-1 space-y-3">
-            <textarea
+          <div className="flex-1">
+            <MentionTextarea
               value={commentText}
-              onChange={(event) => setCommentText(event.target.value)}
-              className="min-h-[80px] w-full resize-none rounded-xl border border-black/[0.08] bg-slate-50 p-3.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 dark:focus:border-[#20C997] dark:focus:bg-white/10"
+              onChange={setCommentText}
+              className="min-h-[80px] w-full resize-none rounded-lg bg-surface-secondary px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
               placeholder="Share your thoughts..."
             />
-            <div className="flex justify-end">
+            <div className="mt-2 flex justify-end">
               <button
                 type="button"
                 onClick={() => { void addComment(); }}
                 disabled={!commentText.trim() || commenting}
-                className="flex items-center gap-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-4 py-2 text-xs font-bold text-slate-950 shadow-sm disabled:opacity-50 transition-all"
+                className="flex items-center gap-2 rounded-lg bg-accent-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
-                <Send className="h-3.5 w-3.5" />
+                <Send className="h-4 w-4" />
                 {commenting ? 'Saving...' : 'Comment'}
               </button>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4 pt-2">
+        <div className="space-y-4">
           {comments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} profile={profiles[comment.authorId]} />
+            <CommentItem key={comment.id} comment={comment} profile={profiles[comment.authorId]} currentUserId={profile?.id} editingId={editingCommentId} draft={commentDraft} onEdit={(value) => { setEditingCommentId(value.id); setCommentDraft(value.body); }} onCancel={() => setEditingCommentId(null)} onDraft={setCommentDraft} onSave={async () => { if (!editingCommentId || !commentDraft.trim()) return; try { const updated = await editComment(postId, editingCommentId, commentDraft.trim(), comment.editVersion || 0); setComments((current) => current.map((item) => item.id === updated.id ? { ...item, ...updated } : item)); setEditingCommentId(null); } catch (err) { toast.error(err instanceof Error ? err.message : 'Comment could not be edited.'); } }} onDelete={async () => { try { const updated = await deleteComment(postId, comment.id, comment.editVersion || 0); setComments((current) => current.map((item) => item.id === updated.id ? { ...item, body: 'This comment was deleted', deletedAt: updated.deletedAt, editVersion: updated.editVersion } : item)); } catch (err) { toast.error(err instanceof Error ? err.message : 'Comment could not be deleted.'); } }} />
           ))}
           {comments.length === 0 && (
-            <p className="py-6 text-center text-xs font-semibold text-slate-400 dark:text-slate-500">No persisted comments yet.</p>
+            <p className="py-6 text-center text-sm text-text-muted">No persisted comments yet.</p>
           )}
         </div>
       </section>
@@ -253,32 +269,49 @@ export function PostDetailPage() {
 function CommentItem({
   comment,
   profile,
+  currentUserId,
+  editingId,
+  draft,
+  onEdit,
+  onCancel,
+  onDraft,
+  onSave,
+  onDelete,
 }: {
   comment: WireComment;
   profile?: PublicUserProfile;
+  currentUserId?: string;
+  editingId?: string | null;
+  draft: string;
+  onEdit: (comment: WireComment) => void;
+  onCancel: () => void;
+  onDraft: (value: string) => void;
+  onSave: () => void;
+  onDelete: () => void;
 }) {
-  const name = profile?.name || comment.authorId;
+  const name = profile?.name || comment.author?.displayName || comment.authorId;
   return (
-    <div className="flex gap-3 border-b border-black/[0.06] dark:border-white/10 pb-4 last:border-b-0">
+    <div className="flex gap-3 border-b border-border-default pb-4 last:border-b-0">
       <Link
         to={`/feed/profile/${encodeURIComponent(comment.authorId)}`}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#20C997]/10 text-xs font-bold text-[#20C997]"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-xs font-semibold text-text-primary"
       >
         {initials(name)}
       </Link>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
-          <Link to={`/feed/profile/${encodeURIComponent(comment.authorId)}`} className="text-xs font-bold text-slate-900 dark:text-white hover:text-[#20C997] transition-colors">
-            {name}
+          <Link to={`/feed/profile/${encodeURIComponent(comment.authorId)}`} className="flex items-center gap-1.5 text-sm font-medium text-text-primary hover:text-accent-primary">
+            {name}<IdentityBadges verified={profile?.isVerified ?? comment.author?.verified} subscriber={profile?.subscriber ?? comment.author?.subscriber} credibilityScore={profile?.credibilityScore ?? comment.author?.credibilityScore} compact />
           </Link>
-          <time className="shrink-0 text-[10px] font-mono text-slate-400 dark:text-slate-500" dateTime={comment.ts}>
+          <time className="shrink-0 text-xs text-text-muted" dateTime={comment.ts}>
             {formatTimestamp(comment.ts)}
           </time>
         </div>
         {profile && (
-          <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{profile.category} · {profile.stage}</p>
+          <p className="text-xs text-text-secondary">{profile.category} · {profile.stage}</p>
         )}
-        <p className="mt-1.5 whitespace-pre-wrap text-xs leading-relaxed text-slate-700 dark:text-slate-300">{comment.body}</p>
+        {editingId === comment.id ? <div className="mt-2 space-y-2"><textarea value={draft} onChange={(event) => onDraft(event.target.value)} className="w-full rounded border border-border-default bg-surface-secondary p-2 text-sm" rows={2} /><div className="flex gap-2 text-xs"><button type="button" onClick={onSave} className="text-accent-primary">Save</button><button type="button" onClick={onCancel} className="text-text-muted">Cancel</button></div></div> : <MentionText body={comment.body} mentions={comment.mentions} className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-primary" />}
+        {currentUserId === comment.authorId && !comment.deletedAt && editingId !== comment.id && <div className="mt-2 flex gap-3 text-xs"><button type="button" onClick={() => onEdit(comment)} className="text-accent-primary">Edit</button><button type="button" onClick={onDelete} className="text-score-red">Delete</button></div>}
       </div>
     </div>
   );

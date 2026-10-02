@@ -2,7 +2,8 @@
 // Adapted from the "AI Tour Guide Setup" design. Where the source tracked a
 // fixed 12-week tour, Havi tracks each user's personal "time to MVP".
 
-export type HaviRole = "founder" | "collaborator" | "explorer";
+export type HaviRole = "founder" | "collaborator" | "investor" | "organisation" | "explorer";
+
 
 export type PersonalityMode = "supportive" | "coach" | "strict" | "founder";
 
@@ -17,8 +18,8 @@ export const personalityModes: Record<
   PersonalityMode,
   { name: string; description: string; colorClass: string }
 > = {
-  supportive: { name: "Supportive", description: "Gentle nudges and encouragement", colorClass: "bg-emerald-500" },
-  coach: { name: "Coach", description: "Balanced accountability", colorClass: "bg-blue-500" },
+  supportive: { name: "Supportive", description: "Gentle nudges and encouragement", colorClass: "bg-status-success" },
+  coach: { name: "Coach", description: "Balanced accountability", colorClass: "bg-status-info" },
   strict: { name: "Strict", description: "Deadlines enforced", colorClass: "bg-rose-500" },
   founder: { name: "Founder Mode", description: "Blunt, execution-focused", colorClass: "bg-violet-500" },
 };

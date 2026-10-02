@@ -1,10 +1,11 @@
-import { ChevronDown, Send, Sparkles } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { createPost } from "@/lib/messaging/feed";
-import { VIEWER_ROLES, normalizeRole } from "@/lib/messaging/roles";
-import { kindsForRole, KIND_META, kindColorClass } from "@/lib/messaging/postKinds";
-import { useAuth } from "@/contexts/AuthContext";
+import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { createPost } from '@/lib/messaging/feed';
+import { VIEWER_ROLES, normalizeRole } from '@/lib/messaging/roles';
+import { kindsForRole, KIND_META, kindColorClass } from '@/lib/messaging/postKinds';
+import { useAuth } from '@/contexts/AuthContext';
+import { MentionTextarea } from '@/components/messaging/MentionTextarea';
 
 function initials(value: string): string {
   return value
@@ -12,7 +13,7 @@ function initials(value: string): string {
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
-    .join("") || "U";
+    .join('') || 'U';
 }
 
 export function PostComposer({
@@ -35,16 +36,15 @@ export function PostComposer({
     label: KIND_META[kind].label,
     icon: KIND_META[kind].icon,
   }));
-
-  const name = `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim()
+  const name = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
     || profile?.username
     || profile?.email
-    || "User";
+    || 'User';
 
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState('');
   const [audience, setAudience] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
-  const targetRoles = VIEWER_ROLES.filter((role) => role !== "community");
+  const targetRoles = VIEWER_ROLES.filter((role) => role !== 'community');
 
   const toggleAudience = (role: string) => {
     setAudience((current) => (
@@ -63,52 +63,52 @@ export function PostComposer({
         body.trim(),
         audience.length ? audience : undefined,
       );
-      if (!created) throw new Error("Post was not persisted.");
-      setBody("");
+      if (!created) throw new Error('Post was not persisted.');
+      if (created.pending) {
+        toast.info('Saved offline. This post will publish once the messaging service is reachable.');
+      }
+      setBody('');
       setAudience([]);
       setExpanded(false);
       await onCreated?.();
-      toast.success("Post published successfully!");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Post could not be published.");
+      toast.error(err instanceof Error ? err.message : 'Post could not be published.');
     } finally {
       setPosting(false);
     }
   };
 
   return (
-    <div className="mb-5 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-4 sm:p-5 backdrop-blur-xl shadow-sm transition-all font-bricolage">
+    <div className="mb-4 border-y border-border-default bg-surface-primary p-4 sm:rounded-lg sm:border">
       {expanded && (
-        <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="mb-3 flex gap-2 overflow-x-auto pb-2">
           {postTypes.map((type) => (
             <button
               key={type.id}
               type="button"
               onClick={() => setSelectedType(type.id)}
-              className={`whitespace-nowrap rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${
+              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 selectedType === type.id
-                  ? "bg-[#20C997]/10 border-[#20C997] text-[#20C997]"
-                  : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-300 hover:border-[#20C997]/40"
+                  ? `bg-accent-primary/10 ${kindColorClass(type.id)}`
+                  : 'border-border-default text-text-secondary hover:border-border-active'
               }`}
             >
-              <type.icon className="mr-1.5 inline h-3.5 w-3.5" aria-hidden="true" />
-              {type.label}
+              <type.icon className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />{type.label}
             </button>
           ))}
         </div>
       )}
 
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#20C997] text-xs font-black text-slate-950 shadow-md">
+      <div className="flex gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-semibold text-white">
           {initials(name)}
         </div>
-
-        <div className="flex-1 min-w-0">
+        <div className="flex-1">
           {expanded ? (
-            <textarea
+            <MentionTextarea
               value={body}
-              onChange={(event) => setBody(event.target.value)}
-              className="min-h-[120px] w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] p-3.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:placeholder:text-white/40 dark:focus:border-[#20C997] dark:focus:bg-white/10 transition-all"
+              onChange={setBody}
+              className="min-h-[120px] w-full resize-none rounded-lg bg-surface-secondary px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary"
               placeholder="What did you build, ship, or learn today?"
               autoFocus
             />
@@ -116,37 +116,36 @@ export function PostComposer({
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] px-4 text-left text-xs font-semibold text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
+              className="h-11 w-full rounded-lg bg-surface-secondary px-4 text-left text-sm text-text-muted transition-colors hover:bg-surface-overlay"
             >
               What did you build, ship, or learn today?
             </button>
           )}
         </div>
-
         {!expanded && (
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shrink-0"
+            className="flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-surface-overlay"
           >
             {KIND_META[selectedType] && (() => { const Icon = KIND_META[selectedType].icon; return <Icon className="h-3.5 w-3.5" aria-hidden="true" />; })()}
-            <span className="hidden sm:inline">{KIND_META[selectedType]?.label}</span>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+            {KIND_META[selectedType]?.label}
+            <ChevronDown className="h-3 w-3" />
           </button>
         )}
       </div>
 
       {expanded && (
-        <div className="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/10 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Target Audience:</span>
+        <>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs text-text-muted">Audience:</span>
             <button
               type="button"
               onClick={() => setAudience([])}
-              className={`rounded-xl border px-3 py-1 text-xs font-bold transition-all ${
+              className={`rounded-full border px-2 py-1 text-xs transition-colors ${
                 audience.length === 0
-                  ? "bg-[#20C997]/10 border-[#20C997] text-[#20C997]"
-                  : "border-black/[0.08] dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+                  ? 'border-accent-primary text-accent-primary'
+                  : 'border-border-default text-text-secondary'
               }`}
             >
               Everyone
@@ -156,10 +155,10 @@ export function PostComposer({
                 key={role}
                 type="button"
                 onClick={() => toggleAudience(role)}
-                className={`rounded-xl border px-3 py-1 text-xs font-bold capitalize transition-all ${
+                className={`rounded-full border px-2 py-1 text-xs capitalize transition-colors ${
                   audience.includes(role)
-                    ? "bg-[#20C997]/10 border-[#20C997] text-[#20C997]"
-                    : "border-black/[0.08] dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+                    ? 'border-accent-primary text-accent-primary'
+                    : 'border-border-default text-text-secondary'
                 }`}
               >
                 {role}
@@ -167,11 +166,11 @@ export function PostComposer({
             ))}
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="mt-4 flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+              className="text-sm text-text-secondary hover:text-text-primary"
             >
               Cancel
             </button>
@@ -179,13 +178,12 @@ export function PostComposer({
               type="button"
               onClick={() => { void handlePost(); }}
               disabled={!body.trim() || posting}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] px-5 py-2 text-xs font-bold text-slate-950 shadow-md transition-all disabled:opacity-50"
+              className="rounded-lg bg-accent-primary px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
-              <Send className="h-3.5 w-3.5" />
-              <span>{posting ? "Publishing..." : "Publish Post"}</span>
+              {posting ? 'Publishing...' : 'Publish'}
             </button>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

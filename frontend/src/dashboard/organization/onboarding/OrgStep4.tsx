@@ -1,42 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, type Variants } from "motion/react";
 import { useOrgProfile, type OrgTeamMember } from "@/contexts/UserContext";
-import { BlobField } from "@/components/ui/blob-field";
-import { ImageSlideshow } from "@/components/ui/image-slideshow";
-import {
-  Users,
-  Plus,
-  Trash2,
-  Sparkles,
-  ArrowRight,
-  ArrowLeft,
-  Crown,
-  Mail,
-  User,
-} from "lucide-react";
-
-const SLIDE_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
-
-const PERKS = [
-  { icon: Users, text: "Collaborate with program managers & review panels" },
-  { icon: Crown, text: "Granular judge scoring & assessment roles" },
-  { icon: Sparkles, text: "Invite mentors to live office-hour sessions" },
-];
-
-const ROLES = [
-  "Programme Manager",
-  "Director / Lead",
-  "Judge & Assessor",
-  "Ecosystem Mentor",
-  "Operations Lead",
-];
+import { OrgProgressBar } from "./OrgProgressBar";
+import { Users, Plus, X, Crown } from "lucide-react";
 
 export function OrgStep4() {
   const navigate = useNavigate();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
-
-  const [members, setMembers] = useState<OrgTeamMember[]>(orgProfile.teamMembers || []);
+  const [members, setMembers] = useState<OrgTeamMember[]>(
+    orgProfile.teamMembers,
+  );
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("Programme Manager");
@@ -55,195 +28,136 @@ export function OrgStep4() {
     setRole("Programme Manager");
   };
 
-  const removeMember = (id: string) => {
-    setMembers(members.filter((m) => m.id !== id));
-  };
+  const removeMember = (id: string) =>
+    setMembers((prev) => prev.filter((m) => m.id !== id));
 
   const handleNext = () => {
     updateOrgProfile({ teamMembers: members });
     navigate("/org/onboarding/step-5");
   };
-
   const handleBack = () => navigate("/org/onboarding/step-3");
 
-  const inputCls =
-    "w-full h-11 rounded-xl border border-white/20 bg-white/10 px-4 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] focus:border-transparent transition-all backdrop-blur-sm";
-
-  const fieldVariants: Variants = {
-    hidden: { opacity: 0, y: 12 },
-    show: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: 0.1 + i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] },
-    }),
-  };
-
   return (
-    <div className="min-h-screen bg-[#081c15] p-[10px] font-bricolage">
-      <div className="w-full min-h-[calc(100vh-20px)] rounded-[32px] overflow-hidden grid lg:grid-cols-[42%_58%] border border-white/10">
-        {/* Left: brand panel */}
-        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-[#081c15] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#20C997]/30 via-[#081c15] to-[#081c15]" />
-          <BlobField variant="dark" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900/80 flex items-center justify-center p-4 md:p-8">
+      <div className="w-full max-w-3xl">
+        <OrgProgressBar currentStep={4} totalSteps={5} />
 
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 mb-6 px-3 py-1 rounded-full bg-[#20C997]/15 border border-[#20C997]/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#20C997]">Step 4 of 5</span>
-            </div>
-            <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-[1.1] mb-4">
-              Team & Staff Access
-            </h1>
-            <p className="text-white/60 text-sm leading-relaxed max-w-sm">
-              Add your program directors, judges, and reviewers who will manage cohorts and evaluate submissions.
-            </p>
-          </div>
-
-          <div className="relative z-10 space-y-4">
-            {PERKS.map(({ icon: Icon, text }, i) => (
-              <motion.div
-                key={text}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
-                className="flex items-center gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-[#20C997]" />
-                </div>
-                <span className="text-white/75 text-sm font-medium">{text}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Step progress</span>
-              <span className="text-[10px] font-black text-[#20C997]">4 / 5</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#20C997] to-emerald-400 w-4/5" />
-            </div>
-          </div>
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold text-text-primary dark:text-white tracking-tight mb-2 flex items-center gap-3">
+            <Users className="w-9 h-9 text-brand-accent" />
+            Team & Contacts
+          </h1>
+          <p className="text-base text-text-muted dark:text-text-disabled">
+            Add the people who will run programmes and review applications.
+          </p>
         </div>
 
-        {/* Right: form panel */}
-        <div className="relative flex items-center justify-center p-6 md:p-14 overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <ImageSlideshow images={SLIDE_IMAGES} />
+        {/* Add member form */}
+        <div className="bg-surface-primary dark:bg-surface-inverse-muted/60 border-2 border-border-default dark:border-border-inverse-strong rounded-2xl p-6 mb-8">
+          <h3 className="text-base font-bold text-text-primary dark:text-white mb-4">
+            Add a team member
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Full name"
+              className="h-12 bg-background-primary dark:bg-background-inverse/60 border-2 border-border-default dark:border-border-inverse-strong rounded-lg px-4 text-sm text-text-primary dark:text-white outline-none focus:border-brand-accent transition-colors"
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="work@email.com"
+              className="h-12 bg-background-primary dark:bg-background-inverse/60 border-2 border-border-default dark:border-border-inverse-strong rounded-lg px-4 text-sm text-text-primary dark:text-white outline-none focus:border-brand-accent transition-colors"
+            />
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="h-12 bg-background-primary dark:bg-background-inverse/60 border-2 border-border-default dark:border-border-inverse-strong rounded-lg px-4 text-sm text-text-primary dark:text-white outline-none focus:border-brand-accent transition-colors"
+            >
+              <option>Programme Manager</option>
+              <option>Admin</option>
+              <option>Mentor Lead</option>
+              <option>Partnerships</option>
+              <option>Finance</option>
+              <option>Marketing</option>
+            </select>
           </div>
-
-          <div className="absolute inset-0 bg-[#081c15]/55 z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#081c15]/50 via-transparent to-[#081c15]/70 z-[1]" />
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 w-full max-w-xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-[32px] p-6 md:p-9 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.7)] overflow-y-auto max-h-[85vh] hide-scrollbar"
+          <button
+            onClick={addMember}
+            disabled={!name.trim() || !email.trim()}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-accent hover:bg-brand-accent disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
           >
-            <div className="mb-6">
-              <h2 className="text-xl font-black text-white mb-1 [text-shadow:0_2px_10px_rgba(0,0,0,0.8)]">
-                Team Members
-              </h2>
-              <p className="text-sm text-white/60 [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">
-                Add team members now or later from your settings.
+            <Plus className="w-4 h-4" />
+            Add member
+          </button>
+        </div>
+
+        {/* Member list */}
+        <div className="space-y-2.5">
+          {members.length === 0 ? (
+            <div className="text-center py-12 border-2 border-dashed border-border-strong dark:border-border-inverse-strong rounded-xl">
+              <p className="text-sm text-text-muted dark:text-text-disabled">
+                No team members yet — you can add them later from Settings.
               </p>
             </div>
-
-            {/* Add Box */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-5 space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-white/70 mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Jane Doe"
-                    className={inputCls}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-white/70 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="jane@hub.org"
-                    className={inputCls}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-white/70 mb-1">Role / Responsibility</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className={`${inputCls} [&>option]:bg-[#081c15] [&>option]:text-white`}
-                >
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>{r}</option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="button"
-                onClick={addMember}
-                disabled={!name.trim() || !email.trim()}
-                className="w-full h-10 flex items-center justify-center gap-1.5 rounded-xl bg-[#20C997]/20 border border-[#20C997]/40 text-[#20C997] font-bold text-xs uppercase tracking-wider transition-all hover:bg-[#20C997]/30 disabled:opacity-40 disabled:cursor-not-allowed"
+          ) : (
+            members.map((m, idx) => (
+              <div
+                key={m.id}
+                className="flex items-center gap-4 bg-surface-primary dark:bg-surface-inverse-muted/60 border border-border-default dark:border-border-inverse-strong rounded-xl p-4"
               >
-                <Plus className="w-4 h-4" /> Add Team Member
-              </button>
-            </div>
-
-            {/* Members List */}
-            <div className="space-y-2 mb-6 max-h-44 overflow-y-auto custom-scrollbar">
-              {members.length === 0 ? (
-                <div className="p-4 rounded-xl border border-dashed border-white/15 text-center text-xs text-white/40">
-                  No additional members added yet (you can invite team members later).
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-accent to-violet-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  {m.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
                 </div>
-              ) : (
-                members.map((m) => (
-                  <div
-                    key={m.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 text-xs"
-                  >
-                    <div>
-                      <span className="font-bold text-white block">{m.name}</span>
-                      <span className="text-white/40">{m.email} · {m.role}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeMember(m.id)}
-                      className="p-1.5 text-white/40 hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-text-primary dark:text-white">
+                      {m.name}
+                    </p>
+                    {idx === 0 && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-warning dark:bg-status-warning/10 text-status-warning dark:text-status-warning text-[10px] font-mono uppercase tracking-wider">
+                        <Crown className="w-3 h-3" />
+                        Owner
+                      </span>
+                    )}
                   </div>
-                ))
-              )}
-            </div>
+                  <p className="text-xs text-text-muted dark:text-text-disabled">
+                    {m.email} · {m.role}
+                  </p>
+                </div>
+                <button
+                  onClick={() => removeMember(m.id)}
+                  className="text-text-disabled hover:text-status-error transition-colors"
+                  aria-label="Remove"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
 
-            <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="show" className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="h-12 px-5 flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-sm uppercase tracking-widest transition-all"
-              >
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#20C997] to-[#128a64] text-slate-950 font-black text-sm uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(32,201,151,0.4)]"
-              >
-                Continue <ArrowRight className="w-4 h-4" />
-              </button>
-            </motion.div>
-          </motion.div>
+        <div className="mt-12 flex justify-between gap-4">
+          <button
+            onClick={handleBack}
+            className="px-6 py-4 rounded-xl border-2 border-border-strong dark:border-border-inverse-strong text-text-secondary dark:text-text-on-inverse-secondary font-semibold hover:border-brand-accent transition-colors"
+          >
+            Back
+          </button>
+          <button
+            onClick={handleNext}
+            className="px-10 py-4 rounded-xl bg-gradient-to-r from-brand-accent to-violet-600 hover:from-brand-accent hover:to-violet-500 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            Continue
+          </button>
         </div>
       </div>
     </div>

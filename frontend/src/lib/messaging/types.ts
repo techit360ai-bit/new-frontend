@@ -1,3 +1,23 @@
+export interface Mention {
+  userId: string;
+  username: string;
+  start: number;
+  end: number;
+}
+export interface MessageIdentity {
+  id: string;
+  displayName: string;
+  username?: string;
+  avatarUrl?: string;
+  role?: string;
+  verified?: boolean;
+  subscriber?: boolean;
+  subscriptionLabel?: string | null;
+  credibilityScore?: number;
+  sharedContext?: boolean;
+  canMessage?: boolean;
+  deliveryMode?: "direct" | "request" | "unavailable";
+}
 // Backend wire shapes (what the Go service returns).
 export interface WireMessage {
   id: string;
@@ -8,11 +28,24 @@ export interface WireMessage {
   body: string;
   ts: string;
   category?: string;
+  mentions?: Mention[];
+  pending?: boolean;
+  editedAt?: string;
+  deletedAt?: string;
+  editVersion?: number;
 }
 export interface WireConvSummary {
   id: string;
   otherUserId: string;
   otherName: string;
+  otherUsername?: string;
+  otherAvatarUrl?: string;
+  otherRole?: string;
+  otherVerified?: boolean;
+  otherSubscriber?: boolean;
+  otherCredibilityScore?: number;
+  requestStatus?: "active" | "pending" | "declined";
+  initiatedBy?: string;
   lastBody: string;
   lastTs: string;
   lastMsgId: string;
@@ -27,6 +60,12 @@ export interface WirePost {
   kind: string;
   body: string;
   ts: string;
+  mentions?: Mention[];
+  author?: MessageIdentity | null;
+  pending?: boolean;
+  editedAt?: string;
+  deletedAt?: string;
+  editVersion?: number;
 }
 export interface WireComment {
   id: string;
@@ -34,38 +73,26 @@ export interface WireComment {
   authorId: string;
   body: string;
   ts: string;
+  mentions?: Mention[];
+  author?: MessageIdentity | null;
+  pending?: boolean;
+  editedAt?: string;
+  deletedAt?: string;
+  editVersion?: number;
 }
 
 // UI shapes the screens already use (kept identical to the existing mock types).
-export interface Mention {
-  userId: string;
-  name: string;
-  username?: string;
-}
-
-export interface MessageIdentity {
-  id: string;
-  name: string;
-  displayName?: string;
-  username?: string;
-  avatarUrl?: string;
-  role?: string;
-  organization?: string;
-  verified?: boolean;
-  subscriber?: boolean;
-  credibilityScore?: number;
-  deliveryMode?: string;
-  sharedContext?: string;
-  canMessage?: boolean;
-}
-
-
 export interface UIMessage {
   id: string;
   fromMe: boolean;
   authorName: string;
   body: string;
   timestamp: string;
+  mentions?: Mention[];
+  pending?: boolean;
+  editedAt?: string;
+  deletedAt?: string;
+  editVersion?: number;
 }
 export interface UIConversation {
   id: string;
@@ -75,14 +102,14 @@ export interface UIConversation {
   subject: string;
   unread: boolean;
   lastMessageId?: string;
-  thread: UIMessage[];
-  participantId?: string;
-  requestStatus?: string;
-  initiatedBy?: string;
   lastActivityAt?: string;
+  participantId?: string;
+  participantUsername?: string;
+  participantRole?: string;
   participantVerified?: boolean;
   participantSubscriber?: boolean;
   participantCredibilityScore?: number;
-  participantUsername?: string;
+  requestStatus?: "active" | "pending" | "declined";
+  initiatedBy?: string;
+  thread: UIMessage[];
 }
-

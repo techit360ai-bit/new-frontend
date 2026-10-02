@@ -128,23 +128,23 @@ export function HackathonCreate() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 transition-colors">
+    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
       <Link
         to="/org/hackathons"
-        className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[#20C997] transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-brand-accent transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to hackathons
       </Link>
 
-      <div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-          <span className="bg-[#20C997]/10 border border-[#20C997]/20 p-2 rounded-xl">
-            <Trophy className="w-7 h-7 text-[#20C997]" />
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-text-primary flex items-center gap-3">
+          <span className="bg-status-info-soft p-2 rounded-lg">
+            <Trophy className="w-7 h-7 text-brand-accent" />
           </span>
           Create new hackathon
         </h1>
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-2">
+        <p className="text-text-muted mt-2">
           Stage 1 — set the theme, judging framework and partners. The event will
           be published to the Opportunities Board.
         </p>
@@ -159,7 +159,7 @@ export function HackathonCreate() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. AI for Africa 2026"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] focus:ring-1 focus:ring-[#20C997] outline-none text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+              className="w-full px-4 py-3 rounded-lg border border-border-strong focus:border-brand-accent focus:ring-2 focus:ring-indigo-100 outline-none text-text-primary"
             />
           </Field>
           <Field label="Theme / problem statement">
@@ -168,7 +168,7 @@ export function HackathonCreate() {
               onChange={(e) => setTheme(e.target.value)}
               rows={3}
               placeholder="One paragraph describing what you want teams to build."
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] focus:ring-1 focus:ring-[#20C997] outline-none text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none"
+              className="w-full px-4 py-3 rounded-lg border border-border-strong focus:border-brand-accent focus:ring-2 focus:ring-indigo-100 outline-none text-text-primary resize-none"
             />
           </Field>
           <Field label="Eligibility">
@@ -176,7 +176,7 @@ export function HackathonCreate() {
               type="text"
               value={eligibility}
               onChange={(e) => setEligibility(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] focus:ring-1 focus:ring-[#20C997] outline-none text-xs font-medium text-slate-900 dark:text-white"
+              className="w-full px-4 py-3 rounded-lg border border-border-strong focus:border-brand-accent focus:ring-2 focus:ring-indigo-100 outline-none text-text-primary"
             />
           </Field>
         </Section>
@@ -189,7 +189,7 @@ export function HackathonCreate() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] outline-none text-xs font-bold text-slate-900 dark:text-white"
+                className="w-full px-4 py-3 rounded-lg border border-border-strong focus:border-brand-accent outline-none text-text-primary"
               />
             </Field>
             <Field label="End date">
@@ -197,7 +197,7 @@ export function HackathonCreate() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] outline-none text-xs font-bold text-slate-900 dark:text-white"
+                className="w-full px-4 py-3 rounded-lg border border-border-strong focus:border-brand-accent outline-none text-text-primary"
               />
             </Field>
             <Field label="Build window (hours)">
@@ -207,7 +207,7 @@ export function HackathonCreate() {
                 onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
                 min={6}
                 max={336}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] outline-none text-xs font-bold text-slate-900 dark:text-white"
+                className="w-full px-4 py-3 rounded-lg border border-border-strong focus:border-brand-accent outline-none text-text-primary"
               />
             </Field>
           </div>
@@ -222,19 +222,19 @@ export function HackathonCreate() {
                   type="text"
                   value={p.rank}
                   onChange={(e) => updatePrize(idx, "rank", e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] outline-none text-xs font-medium text-slate-900 dark:text-white"
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-border-strong focus:border-brand-accent outline-none text-text-primary"
                 />
                 <input
                   type="text"
                   value={p.amount}
                   placeholder="$10,000"
                   onChange={(e) => updatePrize(idx, "amount", e.target.value)}
-                  className="w-40 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] outline-none text-xs font-medium text-slate-900 dark:text-white"
+                  className="w-40 px-4 py-2.5 rounded-lg border border-border-strong focus:border-brand-accent outline-none text-text-primary"
                 />
                 <button
                   onClick={() => removePrizeTier(idx)}
                   disabled={prizes.length <= 1}
-                  className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 rounded-lg text-text-disabled hover:text-status-error hover:bg-status-error-soft disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   aria-label="Remove tier"
                 >
                   <X className="w-4 h-4" />
@@ -243,7 +243,7 @@ export function HackathonCreate() {
             ))}
             <button
               onClick={addPrizeTier}
-              className="text-xs text-[#20C997] hover:underline font-bold flex items-center gap-1.5"
+              className="text-sm text-brand-accent hover:text-brand-accent font-semibold flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
               Add prize tier
@@ -253,7 +253,7 @@ export function HackathonCreate() {
 
         {/* Judging */}
         <Section icon={Scale} title="Judging framework">
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+          <p className="text-xs text-text-muted mb-3">
             Each enabled dimension is scored 1–10 by judges. These combine with
             three platform-computed metrics (Problem Clarity Score, Team Momentum
             Score, Prototype Demo Readiness time) into a composite Hackathon
@@ -266,16 +266,16 @@ export function HackathonCreate() {
                 <button
                   key={d.id}
                   onClick={() => toggleDimension(d.id)}
-                  className={`text-left px-4 py-3 rounded-xl border-2 transition-all ${
+                  className={`text-left px-4 py-3 rounded-lg border-2 transition-all ${
                     active
-                      ? "border-[#20C997] bg-[#20C997]/10 text-slate-900 dark:text-white"
-                      : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-700 dark:text-slate-300 hover:border-[#20C997]/30"
+                      ? "border-brand-accent bg-status-info-soft text-indigo-900"
+                      : "border-border-default bg-surface-primary text-text-secondary hover:border-brand-accent"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold">{d.label}</span>
+                    <span className="text-sm font-semibold">{d.label}</span>
                     <span
-                      className={`text-[10px] font-mono font-bold uppercase tracking-wider ${active ? "text-[#20C997]" : "text-slate-400 dark:text-slate-500"}`}
+                      className={`text-[10px] font-mono uppercase tracking-wider ${active ? "text-brand-accent" : "text-text-disabled"}`}
                     >
                       {active ? "On" : "Off"}
                     </span>
@@ -285,7 +285,7 @@ export function HackathonCreate() {
             })}
           </div>
           {selectedDimensions.length < 3 && (
-            <p className="text-xs text-amber-500 font-bold mt-3">
+            <p className="text-xs text-status-warning font-medium mt-3">
               Pick at least 3 dimensions for a meaningful composite score.
             </p>
           )}
@@ -300,11 +300,11 @@ export function HackathonCreate() {
               onChange={(e) => setPartnerInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addPartner()}
               placeholder="Add a partner or sponsor name"
-              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] outline-none text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+              className="flex-1 px-4 py-2.5 rounded-lg border border-border-strong focus:border-brand-accent outline-none text-text-primary"
             />
             <button
               onClick={addPartner}
-              className="px-4 py-2.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 text-xs font-bold transition-all"
+              className="px-4 py-2.5 rounded-lg bg-brand-accent hover:bg-brand-accent text-white text-sm font-semibold transition-colors"
             >
               Add
             </button>
@@ -313,14 +313,14 @@ export function HackathonCreate() {
             {partners.map((p) => (
               <span
                 key={p}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#20C997]/10 text-[#20C997] text-xs font-bold border border-[#20C997]/20"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-status-info-soft text-brand-accent text-sm font-medium border border-brand-accent"
               >
                 {p}
                 <button
                   onClick={() => removePartner(p)}
-                  className="text-[#20C997]/60 hover:text-[#20C997]"
+                  className="text-brand-accent hover:text-brand-accent"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3 h-3" />
                 </button>
               </span>
             ))}
@@ -331,21 +331,21 @@ export function HackathonCreate() {
               value={mentorPool}
               onChange={(e) => setMentorPool(parseInt(e.target.value) || 0)}
               min={0}
-              className="w-32 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] focus:border-[#20C997] outline-none text-xs font-bold text-slate-900 dark:text-white"
+              className="w-32 px-4 py-2.5 rounded-lg border border-border-strong focus:border-brand-accent outline-none text-text-primary"
             />
           </Field>
         </Section>
 
         {/* Publish row */}
-        <div className="flex items-center justify-between bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
-          <div className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <div className="flex items-center justify-between bg-surface-primary border border-border-default rounded-lg p-5">
+          <div className="text-sm text-text-muted">
             On publish, the event will be routed to matching builders on the
             Opportunities Board.
           </div>
           <button
             onClick={() => void handlePublish()}
             disabled={!canPublish || publishing}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#20C997] hover:bg-[#1db587] disabled:bg-slate-100 dark:disabled:bg-white/10 disabled:text-slate-400 disabled:cursor-not-allowed text-slate-950 rounded-xl text-xs font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-accent hover:bg-brand-accent disabled:bg-gray-200 disabled:text-text-muted disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors"
           >
             <Send className="w-4 h-4" />
             {publishing ? "Publishing..." : "Publish hackathon"}
@@ -366,9 +366,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
-      <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-        <Icon className="w-5 h-5 text-[#20C997]" />
+    <div className="bg-surface-primary border border-border-default rounded-lg p-6">
+      <h3 className="text-lg font-bold text-text-primary flex items-center gap-2 mb-4">
+        <Icon className="w-5 h-5 text-brand-accent" />
         {title}
       </h3>
       <div className="space-y-4">{children}</div>
@@ -379,7 +379,7 @@ function Section({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+      <label className="block text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
         {label}
       </label>
       {children}

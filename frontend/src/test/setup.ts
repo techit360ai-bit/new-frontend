@@ -5,13 +5,6 @@ import { env as apiEnv } from "@/lib/api/config";
 import { env as messagingEnv } from "@/lib/messaging/config";
 
 delete apiEnv.VITE_API_STRICT;
-apiEnv.VITE_API_FALLBACK = "1";
-
+delete apiEnv.VITE_API_FALLBACK;
 delete messagingEnv.VITE_API_STRICT;
-messagingEnv.VITE_API_FALLBACK = "1";
-
-if (typeof process !== "undefined" && process.env) {
-  delete process.env.VITE_API_STRICT;
-  process.env.VITE_API_FALLBACK = "1";
-}
-
+delete messagingEnv.VITE_API_FALLBACK;

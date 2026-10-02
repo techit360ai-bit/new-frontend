@@ -8,19 +8,19 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
 } from 'recharts';
-import { Radar as RadarIcon, AlertCircle, CheckCircle, TrendingUp, Calendar, FileText, Eye, PieChart, Sparkles } from 'lucide-react';
+import { Radar as RadarIcon, AlertCircle, CheckCircle, TrendingUp, Calendar, FileText, Eye, PieChart } from 'lucide-react';
 import { addToWatchlist, fetchDealFlow, type InvestorStartup } from '@/lib/api/dealFlow';
 
 function metricColor(value: number) {
-  if (value >= 85) return 'text-[#20C997]';
-  if (value >= 70) return 'text-amber-600 dark:text-amber-400';
-  return 'text-red-600 dark:text-red-400';
+  if (value >= 85) return 'text-status-success';
+  if (value >= 70) return 'text-status-warning';
+  return 'text-status-error';
 }
 
 function metricBarColor(value: number) {
-  if (value >= 85) return 'bg-[#20C997]';
-  if (value >= 70) return 'bg-amber-500';
-  return 'bg-red-500';
+  if (value >= 85) return 'bg-status-success';
+  if (value >= 70) return 'bg-status-warning';
+  return 'bg-status-error';
 }
 
 function formatMoney(value: number) {
@@ -65,7 +65,7 @@ export function RiskRadar() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] flex items-center justify-center text-slate-500 dark:text-slate-400">
+      <div className="min-h-screen bg-background-inverse flex items-center justify-center text-text-on-inverse-muted">
         Loading live risk radar...
       </div>
     );
@@ -73,13 +73,13 @@ export function RiskRadar() {
 
   if (!startup) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] flex items-center justify-center p-4">
-        <div className="text-center bg-white dark:bg-[#111111] p-8 rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm max-w-md">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Live startup not found</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+      <div className="min-h-screen bg-background-inverse flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white mb-2">Live startup not found</h2>
+          <p className="text-sm text-text-on-inverse-muted mb-4">
             This deal-flow record is not available for the current investor account.
           </p>
-          <Link to="/investor/deal-intelligence" className="inline-flex items-center justify-center px-4 py-2.5 bg-[#20C997] text-slate-950 font-bold rounded-xl text-xs">
+          <Link to="/investor/deal-intelligence" className="text-status-success hover:text-status-success">
             Return to Deal Intelligence
           </Link>
         </div>
@@ -103,93 +103,87 @@ export function RiskRadar() {
   const weakest = [...radarData].sort((a, b) => a.value - b.value)[0];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors duration-200">
-      {/* Header Banner */}
-      <div className="border-b border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-4 py-6 sm:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="min-h-screen bg-background-inverse">
+      <div className="border-b border-border-inverse bg-surface-inverse px-8 py-6">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-1">{startup.name}</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Risk Radar
-              </span>
-            </div>
-            <div className="flex items-center gap-3 text-xs sm:text-sm mt-1">
-              <span className="px-2.5 py-0.5 bg-purple-500/10 text-purple-600 dark:text-purple-300 border border-purple-500/20 rounded-full font-mono font-semibold">
+            <h1 className="text-3xl font-bold text-white mb-1">{startup.name}</h1>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="px-2 py-1 bg-status-pending/20 text-status-pending rounded font-mono">
                 {startup.sector}
               </span>
-              <span className="text-slate-500 dark:text-slate-400">{startup.region}</span>
-              <span className={`font-bold ${overallRiskColor}`}>{overallRiskLevel}</span>
+              <span className="text-text-on-inverse-muted">{startup.region}</span>
+              <span className={`font-medium ${overallRiskColor}`}>{overallRiskLevel}</span>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-3">
             <button
               onClick={handleWatch}
               disabled={startup.watchlisted}
-              className="px-3.5 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-60 font-semibold text-slate-800 dark:text-slate-200 text-xs rounded-xl transition-all flex items-center gap-1.5"
+              className="px-4 py-2 bg-status-info/10 hover:bg-status-info/20 disabled:hover:bg-status-info/10 text-status-info disabled:text-status-info font-medium rounded-lg transition-all flex items-center gap-2"
             >
-              <Eye className="w-4 h-4 text-[#20C997]" />
-              {startup.watchlisted ? 'Watching' : 'Watch'}
+              <Eye className="w-4 h-4" />
+              {startup.watchlisted ? 'Watching' : 'Add to Watchlist'}
             </button>
             <Link
               to={`/investor/data-room/${startup.id}`}
-              className="px-3.5 py-2 bg-[#20C997]/10 hover:bg-[#20C997]/20 text-[#20C997] text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5"
+              className="px-4 py-2 bg-status-success/10 hover:bg-status-success/20 text-status-success font-medium rounded-lg transition-all flex items-center gap-2"
             >
               <FileText className="w-4 h-4" />
               Data Room
             </Link>
             <Link
               to="/investor/allocation"
-              className="px-3.5 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5"
+              className="px-4 py-2 bg-status-pending/10 hover:bg-status-pending/20 text-status-pending font-medium rounded-lg transition-all flex items-center gap-2"
             >
               <PieChart className="w-4 h-4" />
-              Simulate
+              Simulate Allocation
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="p-8">
         {error && (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <RadarIcon className="w-5 h-5 text-[#20C997]" />
-              Risk Heatmap & Radar
+          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <RadarIcon className="w-5 h-5 text-status-success" />
+              Risk Heatmap
             </h3>
-            <div className="h-72">
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="rgba(148, 163, 184, 0.2)" />
-                  <PolarAngleAxis dataKey="category" stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#94a3b8" tick={false} />
-                  <Radar name="Risk Score" dataKey="value" stroke="#20C997" fill="#20C997" fillOpacity={0.25} />
+                  <PolarGrid stroke="#333" />
+                  <PolarAngleAxis dataKey="category" stroke="#666" />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#666" />
+                  <Radar name="Risk Score" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="mt-4 space-y-2.5">
+            <div className="mt-4 space-y-2">
               {radarData.map((item) => (
-                <div key={item.category} className="flex items-center justify-between text-xs sm:text-sm">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">{item.category}</span>
+                <div key={item.category} className="flex items-center justify-between text-sm">
+                  <span className="text-text-on-inverse-muted">{item.category}</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-24 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className="w-24 h-2 bg-surface-inverse-muted rounded-full overflow-hidden">
                       <div className={`h-full ${metricBarColor(item.value)}`} style={{ width: `${item.value}%` }} />
                     </div>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white w-6 text-right">{item.value}</span>
+                    <span className="font-mono text-white w-8">{item.value}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/10">
+            <div className="mt-6 pt-6 border-t border-border-inverse">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Overall Risk Score</span>
+                <span className="text-text-on-inverse-muted">Overall Risk Score</span>
                 <span className={`text-2xl font-bold font-mono ${overallRiskColor}`}>
                   {avgRisk.toFixed(0)}
                 </span>
@@ -197,27 +191,27 @@ export function RiskRadar() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-status-pending" />
               Execution Timeline
             </h3>
             {startup.milestones.length === 0 ? (
-              <p className="text-xs text-slate-500 dark:text-slate-400">No live milestones are attached to this deal-flow snapshot yet.</p>
+              <p className="text-sm text-text-on-inverse-muted">No live milestones are attached to this deal-flow snapshot yet.</p>
             ) : (
               <div className="space-y-4">
                 {startup.milestones.map((milestone, index) => (
                   <div key={milestone.id} className="relative pl-6">
                     {index < startup.milestones.length - 1 && (
-                      <div className="absolute left-2 top-6 w-0.5 h-full bg-slate-200 dark:bg-white/10" />
+                      <div className="absolute left-2 top-6 w-0.5 h-full bg-surface-inverse-muted" />
                     )}
-                    <div className="absolute left-0 top-0.5">
-                      <CheckCircle className="w-4 h-4 text-[#20C997]" />
+                    <div className="absolute left-0 top-1">
+                      <CheckCircle className="w-5 h-5 text-status-success" />
                     </div>
                     <div>
-                      <p className="text-slate-900 dark:text-white font-bold text-xs sm:text-sm">{milestone.title}</p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">{milestone.date || 'Date unavailable'}</p>
-                      <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#20C997]/15 text-[#20C997]">
+                      <p className="text-white font-medium">{milestone.title}</p>
+                      <p className="text-sm text-text-on-inverse-muted">{milestone.date || 'Date unavailable'}</p>
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-mono bg-status-info/20 text-status-info">
                         {milestone.type}
                       </span>
                     </div>
@@ -226,7 +220,7 @@ export function RiskRadar() {
               </div>
             )}
 
-            <div className="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/10 space-y-2.5">
+            <div className="mt-6 pt-6 border-t border-border-inverse space-y-3">
               <MetricItem label="Market Readiness" value={startup.readinessScore} />
               <MetricItem label="Execution Velocity" value={startup.executionVelocity} />
               <MetricItem label="Beta Retention" value={`${startup.betaRetention}%`} />
@@ -237,60 +231,60 @@ export function RiskRadar() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#20C997]/10 to-teal-500/5 border border-[#20C997]/20 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">AI Risk Commentary</h3>
-              <div className="space-y-3">
+            <div className="bg-gradient-to-br from-brand-primary/10 to-status-pending/10 border border-status-info/20 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">AI Risk Commentary</h3>
+              <div className="space-y-4">
                 {startup.riskMetrics.execution >= 85 && (
-                  <InsightCard type="positive" text="Execution risk is low based on high operational velocity score." />
+                  <InsightCard type="positive" text="Execution risk is low based on the persisted execution score." />
                 )}
                 {weakest && weakest.value > 0 && weakest.value < 75 && (
                   <InsightCard type="warning" text={`${weakest.category} is currently the weakest persisted risk dimension.`} />
                 )}
                 {startup.complianceVerified && (
-                  <InsightCard type="positive" text="Compliance verification is active in the live deal-flow record." />
+                  <InsightCard type="positive" text="Compliance verification is present in the live deal-flow record." />
                 )}
                 {startup.founderReliability >= 90 && (
-                  <InsightCard type="positive" text="Founder reliability score exceeds 90%." />
+                  <InsightCard type="positive" text="Founder reliability is above 90 in the persisted investor signal." />
                 )}
                 {radarData.every((item) => item.value === 0) && (
-                  <InsightCard type="neutral" text="Risk commentary will refine as new telemetry is recorded." />
+                  <InsightCard type="neutral" text="Risk commentary will become more specific once risk metrics are persisted for this project." />
                 )}
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">Comparative Analysis</h3>
-              <div className="space-y-2.5 text-xs">
-                <p className="text-slate-600 dark:text-slate-400">
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Comparative Analysis</h3>
+              <div className="space-y-3 text-sm">
+                <p className="text-text-on-inverse-secondary">
                   Live rank:{' '}
-                  <span className="text-[#20C997] font-bold">
+                  <span className="text-status-success font-semibold">
                     {startup.rank ? `#${startup.rank}` : 'Unranked'}
                   </span>
                 </p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Rank score: <span className="text-[#20C997] font-bold font-mono">{startup.rankScore.toFixed(0)}</span>
+                <p className="text-text-on-inverse-secondary">
+                  Rank score: <span className="text-status-info font-semibold">{startup.rankScore.toFixed(0)}</span>
                 </p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Investors watching: <span className="text-[#20C997] font-bold font-mono">{startup.investorsWatching}</span>
+                <p className="text-text-on-inverse-secondary">
+                  Investors watching: <span className="text-status-info font-semibold">{startup.investorsWatching}</span>
                 </p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Pivot frequency: <span className="text-purple-600 dark:text-purple-400 font-bold font-mono">{startup.pivotFrequency}</span>
+                <p className="text-text-on-inverse-secondary">
+                  Pivot frequency: <span className="text-status-pending font-semibold">{startup.pivotFrequency}</span>
                 </p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Experiment velocity: <span className="text-purple-600 dark:text-purple-400 font-bold font-mono">{startup.experimentVelocity}/week</span>
+                <p className="text-text-on-inverse-secondary">
+                  Experiment velocity: <span className="text-status-pending font-semibold">{startup.experimentVelocity}/week</span>
                 </p>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Investment Thesis</h3>
-              <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
-                {startup.name} has a live readiness score of {startup.readinessScore} and execution velocity of{' '}
-                {startup.executionVelocity}. Classified as{' '}
-                <span className={`font-bold ${overallRiskColor}`}>{overallRiskLevel.toLowerCase()}</span>, with {formatMoney(startup.mrr)} MRR.
+            <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-white mb-3">Investment Thesis</h3>
+              <p className="text-text-on-inverse-secondary text-sm leading-relaxed">
+                {startup.name} has a live readiness score of {startup.readinessScore} and an execution velocity of{' '}
+                {startup.executionVelocity}. The persisted risk record currently classifies the opportunity as{' '}
+                <span className={overallRiskColor}>{overallRiskLevel.toLowerCase()}</span>, with {formatMoney(startup.mrr)} MRR and {startup.revenueGrowth}% revenue growth.
               </p>
-              <button className="mt-4 w-full py-2.5 bg-[#20C997]/10 hover:bg-[#20C997]/20 text-[#20C997] text-xs font-semibold rounded-xl transition-all">
-                Generate Investment Memo
+              <button className="mt-4 w-full py-2 bg-status-success/10 hover:bg-status-success/20 text-status-success font-medium rounded-lg transition-all">
+                Generate Full Investment Memo
               </button>
             </div>
           </div>
@@ -307,9 +301,9 @@ interface MetricItemProps {
 
 function MetricItem({ label, value }: MetricItemProps) {
   return (
-    <div className="flex items-center justify-between text-xs">
-      <span className="text-slate-500 dark:text-slate-400">{label}</span>
-      <span className="font-mono font-bold text-slate-900 dark:text-white">{value}</span>
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-text-on-inverse-muted">{label}</span>
+      <span className="text-sm font-mono font-medium text-white">{value}</span>
     </div>
   );
 }
@@ -323,21 +317,21 @@ function InsightCard({ type, text }: InsightCardProps) {
   const colors = {
     positive: {
       icon: CheckCircle,
-      iconColor: 'text-[#20C997]',
-      bgColor: 'bg-[#20C997]/10',
-      borderColor: 'border-[#20C997]/20',
+      iconColor: 'text-status-success',
+      bgColor: 'bg-status-success/10',
+      borderColor: 'border-status-success/20',
     },
     warning: {
       icon: AlertCircle,
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      bgColor: 'bg-amber-500/10',
-      borderColor: 'border-amber-500/20',
+      iconColor: 'text-status-warning',
+      bgColor: 'bg-status-warning/10',
+      borderColor: 'border-status-warning/20',
     },
     neutral: {
       icon: TrendingUp,
-      iconColor: 'text-[#20C997]',
-      bgColor: 'bg-[#20C997]/10',
-      borderColor: 'border-[#20C997]/20',
+      iconColor: 'text-status-info',
+      bgColor: 'bg-status-info/10',
+      borderColor: 'border-status-info/20',
     },
   };
 
@@ -345,9 +339,9 @@ function InsightCard({ type, text }: InsightCardProps) {
   const Icon = config.icon;
 
   return (
-    <div className={`${config.bgColor} border ${config.borderColor} rounded-xl p-3.5 flex gap-3`}>
-      <Icon className={`w-4 h-4 ${config.iconColor} shrink-0 mt-0.5`} />
-      <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-medium">{text}</p>
+    <div className={`${config.bgColor} border ${config.borderColor} rounded-lg p-4 flex gap-3`}>
+      <Icon className={`w-5 h-5 ${config.iconColor} flex-shrink-0 mt-0.5`} />
+      <p className="text-sm text-text-on-inverse-secondary leading-relaxed">{text}</p>
     </div>
   );
 }

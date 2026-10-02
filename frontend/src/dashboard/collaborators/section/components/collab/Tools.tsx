@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Code2, Plus, Wrench, Shield, ArrowUpRight, CheckCircle2, RefreshCw } from "lucide-react";
+import { Code2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   createCollaboratorTool,
@@ -115,101 +115,52 @@ export function Tools() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Workspace Tools</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Your connected developer integrations and dev environment across projects.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Tools</h1>
+          <p className="text-sm text-text-muted mt-0.5">Your build environment across projects.</p>
         </div>
-        <button
-          onClick={() => setAddOpen(true)}
-          disabled={loading || workspaces.length === 0}
-          className="h-10 px-4 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Connect New Tool</span>
+        <button onClick={() => setAddOpen(true)} disabled={loading || workspaces.length === 0}
+          className="h-9 px-3 bg-status-warning hover:bg-amber-400 text-text-primary rounded-lg text-sm font-semibold flex items-center gap-1">
+          <Plus className="w-4 h-4" /> Connect new tool
         </button>
       </div>
 
       {error && (
-        <div className="border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 rounded-2xl p-5 backdrop-blur-md">
-          <p className="text-sm font-bold text-red-700 dark:text-red-400">Live tools are unavailable.</p>
-          <p className="text-xs text-red-600 dark:text-red-300 mt-1">{error}</p>
-          <button
-            onClick={() => void loadTools()}
-            className="mt-3 text-xs px-3.5 py-1.5 border border-red-500/30 rounded-xl text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 font-semibold"
-          >
+        <div className="border border-status-error bg-status-error-soft rounded-xl p-4">
+          <p className="text-sm font-semibold text-status-error">Live tools are unavailable.</p>
+          <p className="text-sm text-status-error mt-1">{error}</p>
+          <button onClick={() => void loadTools()}
+            className="mt-3 text-xs px-3 py-1.5 border border-status-error rounded-lg text-status-error hover:bg-status-error-soft">
             Try again
           </button>
         </div>
       )}
 
-      {/* Code Editor Hero */}
-      <div className="relative overflow-hidden bg-[#20C997]/10 border border-[#20C997]/20 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#20C997] text-slate-950 flex items-center justify-center shadow-sm shrink-0 font-bold">
-            <Code2 className="h-6 w-6" />
-          </div>
-          <div>
-            <h2 className="font-bold text-slate-900 dark:text-white text-base">Integrated Web IDE & Terminal</h2>
-            <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 max-w-xl">
-              Write, execute, test, and ship code directly inside your project's live sandboxed TechIT Workspace.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => navigate(`/workspaces/code${workspaces[0]?.id ? `?workspace=${encodeURIComponent(workspaces[0].id)}` : ''}`)}
-          disabled={!workspaces.length}
-          className="h-10 rounded-xl bg-slate-900 dark:bg-white/10 dark:hover:bg-white/20 px-5 text-xs font-bold text-white transition-colors disabled:opacity-50 shrink-0 flex items-center gap-1.5"
-        >
-          <span>Open Code Editor</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
-        </button>
+      <div className="flex flex-col gap-4 rounded-xl border border-cyan-200 bg-cyan-50 p-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3"><Code2 className="mt-0.5 h-6 w-6 text-cyan-700" /><div><h2 className="font-semibold text-text-primary">Code Editor</h2><p className="mt-1 text-sm text-text-muted">Write, run, test and improve the current project inside its existing TechIT Workspace.</p></div></div>
+        <button onClick={() => navigate(`/workspaces/code${workspaces[0]?.id ? `?workspace=${encodeURIComponent(workspaces[0].id)}` : ''}`)} disabled={!workspaces.length} className="min-h-10 rounded-lg bg-background-inverse px-4 text-sm font-semibold text-white disabled:opacity-50">Open Code Editor</button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {loading && <p className="text-xs text-slate-500 dark:text-slate-400 md:col-span-3 text-center py-6">Loading live tools...</p>}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {loading && <p className="text-sm text-text-muted md:col-span-3">Loading live tools...</p>}
         {!loading && !error && toolList.length === 0 && (
-          <div className="border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-8 text-center text-xs text-slate-500 dark:text-slate-400 md:col-span-3 bg-white/40 dark:bg-[#111111]/40">
-            <Wrench className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
-            No live tools are connected to your workspaces yet.
-          </div>
+          <p className="text-sm text-text-muted md:col-span-3">No live tools are connected to your workspaces yet.</p>
         )}
         {toolList.map((t) => (
-          <div
-            key={`${t.workspaceId}:${t.id}`}
-            className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">{t.name}</h3>
-                <span className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
-                  t.status === "connected"
-                    ? "bg-[#20C997]/10 text-[#20C997] border-[#20C997]/20"
-                    : "bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/20"
-                }`}>
-                  {t.status}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Last sync: {formatLastSync(t.lastSyncedAt)}</p>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-semibold">{t.updates} updates tracked</p>
+          <div key={`${t.workspaceId}:${t.id}`} className="border border-border-default bg-surface-primary rounded-xl p-5">
+            <div className="flex items-start justify-between mb-3">
+              <h3 className="font-semibold text-text-primary">{t.name}</h3>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${t.status === "connected" ? "bg-status-success-soft text-status-success" : "bg-surface-secondary text-text-muted"}`}>{t.status}</span>
             </div>
-
-            <div className="mt-5 pt-3 border-t border-black/[0.04] dark:border-white/06">
+            <p className="text-xs text-text-muted">Last sync: {formatLastSync(t.lastSyncedAt)}</p>
+            <p className="text-xs text-text-muted mt-1">{t.updates} updates</p>
+            <div className="mt-4">
               {t.status === "connected" ? (
-                <button
-                  onClick={() => setManageOpen(t)}
-                  className="w-full text-xs font-semibold px-3 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors"
-                >
-                  Manage Scopes
-                </button>
+                <button onClick={() => setManageOpen(t)} className="w-full text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">Manage</button>
               ) : (
-                <button
-                  onClick={() => setConnectOpen(t)}
-                  className="w-full text-xs font-bold px-3 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl transition-all shadow-sm"
-                >
-                  Connect Integration
-                </button>
+                <button onClick={() => setConnectOpen(t)} className="w-full text-xs px-3 py-1.5 bg-background-inverse text-white rounded-lg hover:bg-surface-inverse-muted">Connect</button>
               )}
             </div>
           </div>
@@ -218,27 +169,14 @@ export function Tools() {
 
       {/* Connect dialog */}
       <Dialog open={connectOpen !== null} onOpenChange={(o) => !o && setConnectOpen(null)}>
-        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-sm">
           {connectOpen && (
             <>
-              <DialogHeader>
-                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Connect {connectOpen.name}</DialogTitle>
-              </DialogHeader>
-              <p className="text-xs text-slate-600 dark:text-slate-300 py-2">Grant workspace repository and event access for {connectOpen.name}.</p>
-              <DialogFooter className="gap-2 sm:gap-0 pt-2">
-                <button
-                  onClick={() => setConnectOpen(null)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => void handleConnect(connectOpen)}
-                  disabled={saving}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm transition-all"
-                >
-                  Authorize {connectOpen.name}
-                </button>
+              <DialogHeader><DialogTitle>Connect to {connectOpen.name}</DialogTitle></DialogHeader>
+              <p className="text-sm text-text-muted">Continue to grant workspace access for {connectOpen.name}.</p>
+              <DialogFooter>
+                <button onClick={() => setConnectOpen(null)} className="px-4 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-secondary">Cancel</button>
+                <button onClick={() => void handleConnect(connectOpen)} disabled={saving} className="px-4 py-2 text-sm rounded-lg bg-status-warning text-text-primary font-semibold hover:bg-amber-400">Continue to {connectOpen.name}</button>
               </DialogFooter>
             </>
           )}
@@ -247,30 +185,20 @@ export function Tools() {
 
       {/* Manage dialog */}
       <Dialog open={manageOpen !== null} onOpenChange={(o) => !o && setManageOpen(null)}>
-        <DialogContent className="max-w-sm bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-sm">
           {manageOpen && (
             <>
-              <DialogHeader>
-                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Manage {manageOpen.name}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3 py-2 text-xs">
+              <DialogHeader><DialogTitle>Manage {manageOpen.name}</DialogTitle></DialogHeader>
+              <div className="space-y-3">
                 <div>
-                  <p className="uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-2">Granted Scopes</p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <p className="text-xs uppercase tracking-wider text-text-muted font-semibold mb-1">Scopes granted</p>
+                  <ul className="space-y-1">
                     {manageOpen.scopes.map((s) => (
-                      <span key={s} className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-mono text-[11px]">
-                        {s}
-                      </span>
+                      <li key={s} className="text-xs px-2 py-1 rounded bg-surface-secondary text-text-secondary inline-block mr-1">{s}</li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
-                <button
-                  onClick={() => void handleDisconnect(manageOpen)}
-                  disabled={saving}
-                  className="w-full mt-4 px-3 py-2.5 text-xs rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 border border-red-500/20 font-bold transition-colors"
-                >
-                  Disconnect Tool
-                </button>
+                <button onClick={() => void handleDisconnect(manageOpen)} disabled={saving} className="w-full mt-4 px-3 py-2 text-sm rounded-lg bg-status-error-soft text-status-error hover:bg-status-error-soft font-semibold">Disconnect</button>
               </div>
             </>
           )}
@@ -279,20 +207,12 @@ export function Tools() {
 
       {/* Add tool dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-w-md bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Connect Developer Tool</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-2.5 py-3">
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Add a tool</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-2 gap-2">
             {ADDITIONAL_TOOLS.map((name) => (
-              <button
-                key={name}
-                onClick={() => void handleAddTool(name)}
-                disabled={saving}
-                className="p-3.5 border border-black/[0.08] dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 hover:border-[#20C997] hover:bg-[#20C997]/10 transition-colors text-center"
-              >
-                {name}
-              </button>
+              <button key={name} onClick={() => void handleAddTool(name)} disabled={saving}
+                className="p-3 border border-border-strong rounded-lg text-sm text-text-secondary hover:border-status-warning hover:bg-status-warning-soft">{name}</button>
             ))}
           </div>
         </DialogContent>

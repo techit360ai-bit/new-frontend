@@ -38,16 +38,9 @@ const WorkspaceInvitationPage = lazy(() => import("@/dashboard/workspaces/pages/
 const ContractSigningPage = lazy(() => import("@/dashboard/founders/section/components/founder/ContractSigningPage"));
 const Wallet = lazy(() => import("@/TechitWallet/Wallet"));
 const NotFound = lazy(() => import("@/dashboard/NotFound"));
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { CookieConsent } from "@/components/CookieConsent";
 const ExplorerHome = lazy(() => import("@/dashboard/explorer/ExplorerHome"));
-const ExplorerDiscover = lazy(() => import("@/dashboard/explorer/components/ExplorerDiscover").then((m) => ({ default: m.ExplorerDiscover })));
-const ExplorerStartups = lazy(() => import("@/dashboard/explorer/components/ExplorerStartups").then((m) => ({ default: m.ExplorerStartups })));
-const ExplorerProjects = lazy(() => import("@/dashboard/explorer/components/ExplorerProjects").then((m) => ({ default: m.ExplorerProjects })));
-const ExplorerOpportunities = lazy(() => import("@/dashboard/explorer/components/ExplorerOpportunities").then((m) => ({ default: m.ExplorerOpportunities })));
-const ExplorerEvents = lazy(() => import("@/dashboard/explorer/components/ExplorerEvents").then((m) => ({ default: m.ExplorerEvents })));
-const ExplorerAIGuide = lazy(() => import("@/dashboard/explorer/components/ExplorerAIGuide").then((m) => ({ default: m.ExplorerAIGuide })));
-const ExplorerProfile = lazy(() => import("@/dashboard/explorer/components/ExplorerProfile").then((m) => ({ default: m.ExplorerProfile })));
-const ExplorerSettings = lazy(() => import("@/dashboard/explorer/components/ExplorerSettings").then((m) => ({ default: m.ExplorerSettings })));
 import { ContextSwitcher } from "@/components/context/ContextSwitcher";
 const ComplianceCenter = lazy(() => import("@/dashboard/ComplianceCenter"));
 const InvestorStep1 = lazy(() => import("@/dashboard/investors/onboarding/InvestorStep1").then((m) => ({ default: m.InvestorStep1 })));
@@ -132,7 +125,6 @@ const Login = lazy(() => import("@/components/Login"));
 const ForgotPassword = lazy(() => import("@/components/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/components/ResetPassword"));
 import { RedirectAuthenticated, RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
-
 const WorkspacesLayout = lazy(() => import("@/dashboard/workspaces/components/layout/MainLayout").then((m) => ({ default: m.MainLayout })));
 const WsCode = lazy(() => import("@/dashboard/workspaces/pages/Code").then((m) => ({ default: m.Code })));
 import { CodeErrorBoundary } from "@/dashboard/workspaces/components/code/CodeErrorBoundary";
@@ -176,13 +168,19 @@ setMessagingToken(() => {
   try { return getAuthToken(); } catch { return null; }
 });
 
-import Preloader from "@/components/landing-page/Preloader";
-import { RouteTrackerProvider } from "@/contexts/RouteTrackerContext";
-
 function RouteMemory() { const location = useLocation(); useEffect(() => { if (!location.pathname.startsWith('/signin') && !location.pathname.startsWith('/signup')) sessionStorage.setItem('techit_last_route', `${location.pathname}${location.search}`) }, [location.pathname, location.search]); return null }
 
 function RouteLoadingState() {
-  return <Preloader />;
+  return (
+    <div className="app-shell flex min-h-screen items-center justify-center p-6" role="status" aria-live="polite">
+      <div className="w-full max-w-md space-y-4" aria-label="Loading page">
+        <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+        <div className="h-8 w-3/4 animate-pulse rounded-lg bg-muted" />
+        <div className="h-32 w-full animate-pulse rounded-xl bg-muted" />
+        <span className="sr-only">Loading page</span>
+      </div>
+    </div>
+  );
 }
 
 const App = () => {
@@ -190,7 +188,6 @@ const App = () => {
     <AuthProvider>
     <UserProvider>
       <MessagingProvider>
-      <RouteTrackerProvider>
       <RouteMemory />
       <Suspense fallback={<RouteLoadingState />}>
       <Routes>
@@ -236,7 +233,7 @@ const App = () => {
           <Route path="settings" element={<CollabSettings />} />
         </Route>
 
-        {/* Legacy redirects */}
+        {/* Legacy redirects — Landing.tsx still navigates to /collaborator/setup */}
         <Route path="/collaborator/setup"   element={<Navigate to="/collaborator/onboarding/step-1" replace />} />
         <Route path="/collaborator/summary" element={<Navigate to="/collaborator/dashboard" replace />} />
 
@@ -272,7 +269,7 @@ const App = () => {
           <Route path="intelligence/startups/:startupId" element={<InvestorIntelligenceDetail />} />
         </Route>
 
-        {/* Mentorship Hub (own focused layout) */}
+        {/* Mentorship Hub (own focused layout, gated by role) */}
         <Route path="/investor/mentorship" element={<RequireRole allowed={["investor"]}><MentorshipGate /></RequireRole>}>
           <Route index element={<MentorshipOverview />} />
           <Route path="room/:roomId" element={<MentorshipRoom />} />
@@ -309,14 +306,6 @@ const App = () => {
         </Route>
         <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
         <Route path="/explore" element={<RequireAuth><ExplorerHome /></RequireAuth>} />
-        <Route path="/explore/discover" element={<RequireAuth><ExplorerDiscover /></RequireAuth>} />
-        <Route path="/explore/startups" element={<RequireAuth><ExplorerStartups /></RequireAuth>} />
-        <Route path="/explore/projects" element={<RequireAuth><ExplorerProjects /></RequireAuth>} />
-        <Route path="/explore/opportunities" element={<RequireAuth><ExplorerOpportunities /></RequireAuth>} />
-        <Route path="/explore/events" element={<RequireAuth><ExplorerEvents /></RequireAuth>} />
-        <Route path="/explore/ai-guide" element={<RequireAuth><ExplorerAIGuide /></RequireAuth>} />
-        <Route path="/explore/profile" element={<RequireAuth><ExplorerProfile /></RequireAuth>} />
-        <Route path="/explore/settings" element={<RequireAuth><ExplorerSettings /></RequireAuth>} />
         <Route path="/explorer" element={<Navigate to="/explore" replace />} />
         <Route path="/verification/:role" element={<RequireAuth><VerificationCenter /></RequireAuth>} />
         <Route path="/security/mfa" element={<RequireAuth><MfaSetup /></RequireAuth>} />
@@ -342,7 +331,9 @@ const App = () => {
           <Route path="notifications" element={<WsNotifications />} />
           <Route path="settings" element={<WsSettings />} />
         </Route>
-        <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />
+        {import.meta.env.DEV && (
+          <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />
+        )}
 
         {/* Organization onboarding (flat, outside layout) */}
         <Route path="/org/onboarding/step-1" element={<RequireRole allowed={["organisation"]}><OrgStep1 /></RequireRole>} />
@@ -410,9 +401,9 @@ const App = () => {
       </Routes>
       </Suspense>
       <TechitMomentPrompt />
+      <ThemeToggle />
       <div className="fixed bottom-20 left-5 z-30 lg:bottom-5"><ContextSwitcher /></div>
       <CookieConsent />
-      </RouteTrackerProvider>
       </MessagingProvider>
     </UserProvider>
     </AuthProvider>

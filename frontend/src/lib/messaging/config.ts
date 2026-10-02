@@ -1,14 +1,11 @@
 // Messaging service config - a SEPARATE origin from ai-router (lib/api/config.ts).
 export type ViteEnv = Record<string, string | boolean | undefined>;
 
-export const env: ViteEnv = {
-  ...(typeof import.meta !== "undefined" ? ((import.meta as unknown as { env?: ViteEnv }).env ?? {}) : {}),
-};
+export const env: ViteEnv =
+  typeof import.meta !== "undefined"
+    ? { ...((import.meta as unknown as { env?: ViteEnv }).env ?? {}) }
+    : {};
 
-if (env.MODE === "test" || (typeof process !== "undefined" && process.env?.NODE_ENV === "test")) {
-  delete env.VITE_API_STRICT;
-  delete env.VITE_API_FALLBACK;
-}
 
 export const MESSAGING_BASE_URL: string =
   (typeof env.VITE_MESSAGING_BASE_URL === "string"
@@ -22,18 +19,23 @@ export const MESSAGING_WS_URL: string =
 
 export const MESSAGING_PREFIX = "/api/v1";
 
-export function messagingFallbackEnabled(): boolean {
-  const mode = env.MODE ?? (typeof import.meta !== "undefined" ? import.meta.env?.MODE : undefined);
-  const strict = typeof env.VITE_API_STRICT === "string" ? env.VITE_API_STRICT.trim() : env.VITE_API_STRICT;
-  if (strict === "1" || strict === true) return false;
-
-  if (mode === "production") return false;
-
-  const fallback = typeof env.VITE_API_FALLBACK === "string" ? env.VITE_API_FALLBACK.trim() : env.VITE_API_FALLBACK;
-  if (fallback !== undefined) return fallback === "1" || fallback === true;
-
-  return true;
+/**
+ * Mirrors lib/api/config.ts: a production build is always strict. Mock data
+ * must never be rendered as if it came from the messaging service.
+ * The optional `source` argument exists only so tests can exercise the matrix.
+ */
+export function messagingFallbackEnabled(source: ViteEnv = env): boolean {
+  if (source.MODE === "test" && source.VITE_API_STRICT !== "1") return true;
+  if (source.PROD === true || source.MODE === "production") return false;
+  if (typeof source.VITE_API_STRICT === "string" ? source.VITE_API_STRICT.trim() === "1" : Boolean(source.VITE_API_STRICT)) return false;
+  if (source.VITE_API_FALLBACK !== undefined) return source.VITE_API_FALLBACK === "1";
+  return source.MODE === undefined || source.MODE === "development" || source.DEV === true;
 }
+
+
+
+
+
 
 // Auth token getter; defaults to the AuthContext localStorage key.
 let tokenGetter: () => string | null = () => {

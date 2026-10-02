@@ -71,7 +71,7 @@ export default function InviteAcceptPage() {
   if (state.kind === "loading") {
     return (
       <Wrapper>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Loading live team invite...</p>
+        <p className="text-sm text-text-muted">Loading live team invite...</p>
       </Wrapper>
     );
   }
@@ -80,25 +80,21 @@ export default function InviteAcceptPage() {
     const url = `https://techit.ai/h/${state.hackathonId}/team/${state.teamId}?token=${state.inviteToken}`;
     return (
       <Wrapper>
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">You're the leader of this team</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 font-normal">
+        <h1 className="text-xl font-semibold text-text-primary">You're the leader of this team</h1>
+        <p className="text-sm text-text-muted mt-2">
           Share this invite link with collaborators instead of clicking it yourself.
         </p>
         <div className="flex items-center gap-2 mt-4">
-          <input
-            readOnly
-            value={url}
-            className="flex-1 text-xs px-3.5 py-2 border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.03] dark:bg-black/40 text-slate-800 dark:text-slate-200 outline-none"
-          />
+          <input readOnly value={url} className="flex-1 text-xs px-3 py-2 border border-border-strong rounded-lg bg-background-primary text-text-secondary" />
           <button
             type="button"
             onClick={() => { navigator.clipboard.writeText(url); toast.success("Invite link copied"); }}
-            className="text-xs font-semibold px-3.5 py-2 rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] flex items-center gap-1.5 transition-colors shrink-0"
+            className="text-xs font-medium px-3 py-2 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary flex items-center gap-1"
           >
-            <Copy className="w-3.5 h-3.5 text-[#0066ff] dark:text-[#58a6ff]" /> Copy
+            <Copy className="w-3.5 h-3.5" /> Copy
           </button>
         </div>
-        <Link to="/incubation-hub?panel=hackathon" className="inline-block mt-6 text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline">
+        <Link to="/incubation-hub?panel=hackathon" className="inline-block mt-6 text-sm font-medium text-violet-700 hover:underline">
           ← Back to your hackathon panel
         </Link>
       </Wrapper>
@@ -120,15 +116,15 @@ export default function InviteAcceptPage() {
 
   const messages: Record<Exclude<InviteState["kind"], "ok" | "leader" | "loading">, { title: string; body: React.ReactNode }> = {
     "token-mismatch":     { title: "This invite link is invalid or has expired.", body: <BackLink to="/opportunity-hub" /> },
-    "not-found":          { title: "We can't find that team.", body: <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">The invite link may be from a hackathon you're not signed in for. <BackLink to="/opportunity-hub" /></p> },
-    "team-full":          { title: "This team is already full.", body: <Link to={`/opportunity-hub/${(state as { hackathonId: string }).hackathonId}`} className="inline-block mt-4 text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline">Find another team in the hackathon →</Link> },
+    "not-found":          { title: "We can't find that team.", body: <p className="text-sm text-text-muted mt-2">The invite link may be from a hackathon you're not signed in for. <BackLink to="/opportunity-hub" /></p> },
+    "team-full":          { title: "This team is already full.", body: <Link to={`/opportunity-hub/${(state as { hackathonId: string }).hackathonId}`} className="inline-block mt-4 text-sm font-medium text-violet-700 hover:underline">Find another team in the hackathon →</Link> },
     "roster-closed":      { title: "This team's roster is closed.", body: <BackLink to="/opportunity-hub" /> },
     "hackathon-missing":  { title: "This hackathon is no longer available.", body: <BackLink to="/opportunity-hub" /> },
   };
   const m = messages[state.kind];
   return (
     <Wrapper>
-      <h1 className="text-xl font-bold text-slate-900 dark:text-white">{m.title}</h1>
+      <h1 className="text-xl font-semibold text-text-primary">{m.title}</h1>
       {m.body}
     </Wrapper>
   );
@@ -182,51 +178,45 @@ function AcceptForm({
   };
   return (
     <Wrapper>
-      <p className="text-xs text-[#0066ff] dark:text-[#58a6ff] uppercase tracking-wider font-bold">You're invited to join</p>
-      <div className="flex items-center gap-3.5 mt-2">
+      <p className="text-xs text-text-muted uppercase tracking-wider font-medium">You're invited to join</p>
+      <div className="flex items-center gap-3 mt-2">
         <span className="text-3xl" aria-hidden="true">{state.hackathon.poster}</span>
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">{state.hackathon.title}</h1>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">{state.hackathon.organizer.name} · {state.hackathon.startDate} → {state.hackathon.endDate}</p>
+          <h1 className="text-xl font-semibold text-text-primary">{state.hackathon.title}</h1>
+          <p className="text-xs text-text-muted">{state.hackathon.organizer.name} · {state.hackathon.startDate} → {state.hackathon.endDate}</p>
         </div>
       </div>
-      <hr className="my-5 border-black/[0.06] dark:border-white/10" />
-      <p className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider font-bold">Team</p>
-      <h2 className="text-base font-bold text-slate-900 dark:text-white mt-1">{state.teamName}</h2>
-      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">Led by {state.leaderName}</p>
-      <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 font-bold uppercase tracking-wider">
+      <hr className="my-5 border-border-default" />
+      <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Team</p>
+      <h2 className="text-base font-semibold text-text-primary mt-1">{state.teamName}</h2>
+      <p className="text-xs text-text-muted mt-0.5">Led by {state.leaderName}</p>
+      <p className="text-xs text-text-muted mt-3 font-medium uppercase tracking-wider">
         Members ({state.memberCount} of {state.teamSize}) · {state.openRoles.length} role{state.openRoles.length === 1 ? "" : "s"} open
       </p>
-      <ul className="mt-2 space-y-2">
+      <ul className="mt-2 space-y-1.5">
         {state.openRoles.map((r) => (
-          <li key={r} className="text-sm font-medium text-slate-700 dark:text-slate-300 border border-dashed border-black/[0.08] dark:border-white/15 bg-black/[0.02] dark:bg-white/[0.03] rounded-xl px-3.5 py-2 flex items-center gap-2">
-            <span className="text-[#0066ff] dark:text-[#58a6ff]">○</span> {r}
-          </li>
+          <li key={r} className="text-sm text-text-secondary border border-dashed border-border-default rounded-lg px-3 py-2">○ {r}</li>
         ))}
       </ul>
-      <hr className="my-5 border-black/[0.06] dark:border-white/10" />
-      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Choose your role</label>
+      <hr className="my-5 border-border-default" />
+      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5">Choose your role</label>
       <select
         value={selectedRole}
         onChange={(e) => setSelectedRole(e.target.value)}
         disabled={state.openRoles.length === 1}
-        className="w-full px-3.5 py-2.5 border border-black/[0.08] dark:border-white/10 rounded-xl text-sm bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all"
+        className="w-full px-3 py-2 border border-border-strong rounded-lg text-sm"
       >
-        {state.openRoles.map((r) => (<option key={r} value={r} className="bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white">{r}</option>))}
+        {state.openRoles.map((r) => (<option key={r} value={r}>{r}</option>))}
       </select>
       <div className="flex items-center justify-between gap-3 mt-6">
-        <button
-          type="button"
-          onClick={handleDecline}
-          className="text-sm font-semibold px-4 py-2.5 rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
-        >
+        <button type="button" onClick={handleDecline} className="text-sm font-medium px-4 py-2 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary">
           Decline
         </button>
         <button
           type="button"
           onClick={() => void handleJoin()}
           disabled={!selectedRole || joining}
-          className="text-sm font-bold px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:bg-slate-300"
         >
           {joining ? "Joining..." : "Join team & continue →"}
         </button>
@@ -237,14 +227,12 @@ function AcceptForm({
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="p-6 min-h-[70vh] flex items-center justify-center">
-      <div className="max-w-xl w-full mx-auto">
-        <Link to="/opportunity-hub" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white mb-4 transition-colors">
+    <div className="p-6">
+      <div className="max-w-xl mx-auto">
+        <Link to="/opportunity-hub" className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Opportunity Hub
         </Link>
-        <div className="border border-black/[0.06] dark:border-white/10 rounded-2xl bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-          {children}
-        </div>
+        <div className="border border-border-default rounded-xl bg-surface-primary p-6">{children}</div>
       </div>
     </div>
   );
@@ -252,7 +240,7 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 
 function BackLink({ to }: { to: string }) {
   return (
-    <Link to={to} className="inline-block mt-4 text-sm font-semibold text-[#0066ff] dark:text-[#58a6ff] hover:underline">
+    <Link to={to} className="inline-block mt-4 text-sm font-medium text-violet-700 hover:underline">
       ← Back to Opportunity Hub
     </Link>
   );

@@ -5,12 +5,21 @@ import {
   fetchConversations,
   fetchHistory,
   createConversation,
+  acceptMessageRequest,
+  declineMessageRequest,
   restSendDM,
   markConvRead,
+  editDM,
+  deleteDM,
 } from '@/lib/messaging/conversations';
-import type { WireMessage, WireConvSummary } from '@/lib/messaging/types';
+import type { MessageIdentity, WireMessage, WireConvSummary } from '@/lib/messaging/types';
+import { MentionTextarea } from '@/components/messaging/MentionTextarea';
+import { MentionText } from '@/components/messaging/MentionText';
+import { IdentityBadges } from '@/components/messaging/IdentityBadges';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function DirectMessagePage() {
+  const { user } = useAuth();
   const { userId } = useParams<{ userId: string }>();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<WireMessage[]>([]);
@@ -19,6 +28,12 @@ export function DirectMessagePage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [otherName, setOtherName] = useState<string>('');
+  const [otherIdentity, setOtherIdentity] = useState<MessageIdentity | null>(null);
+  const [requestStatus, setRequestStatus] = useState<'active' | 'pending' | 'declined'>('active');
+  const [initiatedBy, setInitiatedBy] = useState('');
+  const [requestMessageSent, setRequestMessageSent] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -42,6 +57,9 @@ export function DirectMessagePage() {
           if (!alive) return;
           setConversationId(existing.id);
           setOtherName(existing.otherName || userId || '');
+          setOtherIdentity({ id: existing.otherUserId, displayName: existing.otherName, username: existing.otherUsername, avatarUrl: existing.otherAvatarUrl, role: existing.otherRole, verified: existing.otherVerified, subscriber: existing.otherSubscriber, credibilityScore: existing.otherCredibilityScore });
+          setRequestStatus(existing.requestStatus || 'active');
+          setInitiatedBy(existing.initiatedBy || '');
 
           // Load message history
           const history = await fetchHistory(existing.id);
@@ -58,7 +76,10 @@ export function DirectMessagePage() {
           if (!alive) return;
           if (created && created.id) {
             setConversationId(created.id);
-            setOtherName(userId || '');
+            setOtherName(created.recipient?.displayName || userId || '');
+            setOtherIdentity(created.recipient || null);
+            setRequestStatus(created.requestStatus || 'active');
+            setInitiatedBy(user?.id || '');
           } else {
             setError('Could not create conversation. The messaging service may be unavailable.');
           }
@@ -73,7 +94,7 @@ export function DirectMessagePage() {
 
     init();
     return () => { alive = false; };
-  }, [userId]);
+  }, [user?.id, userId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -104,8 +125,10 @@ export function DirectMessagePage() {
       if (result) {
         // Replace optimistic message with confirmed one
         setMessages((prev) =>
-          prev.map((m) => (m.id === clientMsgId ? { ...m, id: result.msgId } : m)),
+          prev.map((m) => (m.id === clientMsgId ? { ...m, id: result.msgId, pending: result.pending } : m)),
         );
+        if (result.pending) setError('Saved locally. Waiting for connection.');
+        if (requestStatus === 'pending') setRequestMessageSent(true);
       }
     } catch (err) {
       // Mark optimistic message as failed
@@ -119,7 +142,24 @@ export function DirectMessagePage() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const respondToRequest = async (status: 'active' | 'declined') => {
+    if (!conversationId) return;
+    try { if (status === 'active') await acceptMessageRequest(conversationId); else await declineMessageRequest(conversationId); setRequestStatus(status); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Message request could not be updated.'); }
+  };
+
+  const saveEdit = async (message: WireMessage) => {
+    if (!conversationId || !editBody.trim()) return;
+    try { const updated = await editDM(conversationId, message.id, editBody.trim(), message.editVersion || 0); setMessages(prev => prev.map(item => item.id === message.id ? { ...item, body: updated.body, editedAt: updated.editedAt, editVersion: updated.editVersion } : item)); setEditingId(null); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Message could not be edited.'); }
+  };
+  const removeMessage = async (message: WireMessage) => {
+    if (!conversationId) return;
+    try { const updated = await deleteDM(conversationId, message.id, message.editVersion || 0); setMessages(prev => prev.map(item => item.id === message.id ? { ...item, body: 'This message was deleted', deletedAt: updated.deletedAt, editVersion: updated.editVersion } : item)); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Message could not be deleted.'); }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -134,9 +174,9 @@ export function DirectMessagePage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-[#0a0a0a] font-bricolage">
-        <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 font-semibold text-xs">
-          <Loader2 className="w-5 h-5 animate-spin text-[#20C997]" />
+      <div className="flex-1 flex items-center justify-center bg-surface-primary">
+        <div className="flex items-center gap-3 text-text-muted">
+          <Loader2 className="w-5 h-5 animate-spin" />
           <span>Loading conversation...</span>
         </div>
       </div>
@@ -145,64 +185,65 @@ export function DirectMessagePage() {
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-[#0a0a0a] font-bricolage">
+      <div className="flex-1 flex items-center justify-center bg-surface-primary">
         <div className="flex flex-col items-center gap-3 text-center px-4">
-          <AlertCircle className="w-8 h-8 text-red-500" />
-          <p className="text-slate-900 dark:text-white font-bold text-sm">Could not load messages</p>
-          <p className="text-slate-500 dark:text-slate-400 text-xs max-w-md">{error}</p>
+          <AlertCircle className="w-8 h-8 text-status-error" />
+          <p className="text-text-primary font-medium">Could not load messages</p>
+          <p className="text-text-muted text-sm max-w-md">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-[#0a0a0a] h-full font-bricolage">
+    <div className="flex-1 flex flex-col bg-surface-primary h-full">
       {/* Header */}
-      <div className="border-b border-black/[0.08] dark:border-white/10 px-6 py-4 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl">
+      <div className="border-b border-border-default px-6 py-4 bg-surface-primary">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#20C997] flex items-center justify-center text-slate-950 font-bold shadow-md">
-            <span className="text-sm">
+          <div className="w-9 h-9 rounded-full bg-accent-primary/20 flex items-center justify-center">
+            <span className="text-sm font-semibold text-accent-primary">
               {(otherName || userId || '?')[0]?.toUpperCase()}
             </span>
           </div>
           <div>
-            <h2 className="text-slate-900 dark:text-white font-black text-base tracking-tight">
-              {otherName || userId}
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Direct message</p>
+            <h2 className="flex items-center gap-1.5 text-text-primary font-semibold text-base">{otherName || userId}<IdentityBadges verified={otherIdentity?.verified} subscriber={otherIdentity?.subscriber} credibilityScore={otherIdentity?.credibilityScore} /></h2>
+            <p className="text-text-muted text-xs">{otherIdentity?.username ? `@${otherIdentity.username} · ` : ''}{requestStatus === 'pending' ? 'Message request' : 'Direct message'}</p>
           </div>
         </div>
       </div>
 
+      {requestStatus === 'pending' && <div className="flex items-center justify-between gap-3 border-b border-border-default bg-surface-secondary px-6 py-3 text-sm text-text-primary"><span>{initiatedBy === user?.id ? 'Waiting for this member to accept your request.' : 'Review this message request before replying.'}</span>{initiatedBy !== user?.id && <span className="flex gap-2"><button type="button" onClick={() => void respondToRequest('declined')} className="rounded border border-border-default px-3 py-1.5 text-xs">Decline</button><button type="button" onClick={() => void respondToRequest('active')} className="rounded bg-accent-primary px-3 py-1.5 text-xs text-white">Accept</button></span>}</div>}
+
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
         {messages.length === 0 && (
-          <div className="text-center text-slate-400 dark:text-slate-500 font-semibold text-xs py-8">
+          <div className="text-center text-text-muted text-sm py-8">
             No messages yet. Start the conversation!
           </div>
         )}
         {messages.map((msg) => {
-          const isMe = msg.senderId === 'me';
+          const isMe = msg.senderId === 'me' || msg.senderId === user?.id;
           return (
             <div
               key={msg.id}
               className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[70%] rounded-2xl px-4 py-2.5 font-medium ${
+                className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
                   isMe
-                    ? 'bg-[#20C997] text-slate-950 rounded-br-xs shadow-sm'
-                    : 'bg-slate-100 dark:bg-white/[0.06] text-slate-900 dark:text-white rounded-bl-xs border border-black/[0.04] dark:border-white/5'
+                    ? 'bg-accent-primary text-white rounded-br-md'
+                    : 'bg-surface-secondary text-text-primary rounded-bl-md'
                 }`}
               >
-                <p className="text-xs whitespace-pre-wrap break-words leading-relaxed">{msg.body}</p>
+                {editingId === msg.id ? <div className="space-y-2"><textarea value={editBody} onChange={event => setEditBody(event.target.value)} className="w-full rounded border border-white/40 bg-transparent p-2 text-sm text-inherit" rows={2} /><div className="flex gap-2 text-[11px]"><button type="button" onClick={() => void saveEdit(msg)} className="underline">Save</button><button type="button" onClick={() => setEditingId(null)} className="underline">Cancel</button></div></div> : <MentionText body={msg.body} mentions={msg.mentions} className="text-sm whitespace-pre-wrap break-words" />}
                 <p
-                  className={`text-[10px] mt-1 font-mono ${
-                    isMe ? 'text-slate-900/80' : 'text-slate-400 dark:text-slate-500'
+                  className={`text-[10px] mt-1 ${
+                    isMe ? 'text-white/70' : 'text-text-muted'
                   }`}
                 >
-                  {formatTime(msg.ts)}
+                  {formatTime(msg.ts)} {msg.editedAt && !msg.deletedAt ? '· Edited' : ''}
                 </p>
+                {isMe && !msg.deletedAt && editingId !== msg.id && <div className="mt-1 flex gap-2 text-[10px] opacity-80"><button type="button" onClick={() => { setEditingId(msg.id); setEditBody(msg.body); }} className="underline">Edit</button><button type="button" onClick={() => void removeMessage(msg)} className="underline">Delete</button></div>}
               </div>
             </div>
           );
@@ -211,21 +252,21 @@ export function DirectMessagePage() {
       </div>
 
       {/* Input area */}
-      <div className="border-t border-black/[0.08] dark:border-white/10 px-6 py-4 bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl">
+      <div className="border-t border-border-default px-6 py-4 bg-surface-primary">
         <div className="flex items-center gap-3">
-          <input
-            type="text"
+          <MentionTextarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={setInput}
+            containerClassName="flex-1"
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            disabled={!conversationId || sending}
-            className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/40 focus:border-[#20C997] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 dark:focus:border-[#20C997] dark:focus:bg-white/10 disabled:opacity-50"
+            rows={2}
+            className="w-full resize-none px-4 py-2.5 bg-surface-secondary border border-border-default rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 focus:border-accent-primary disabled:opacity-50"
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim() || !conversationId || sending}
-            className="p-2.5 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+            disabled={!input.trim() || !conversationId || sending || requestStatus === 'declined' || (requestStatus === 'pending' && (initiatedBy !== user?.id || requestMessageSent || messages.some(message => message.senderId === user?.id || message.senderId === 'me')))}
+            className="p-2.5 bg-accent-primary text-white rounded-xl hover:bg-accent-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? (
               <Loader2 className="w-4 h-4 animate-spin" />

@@ -1,107 +1,69 @@
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
 import {
   LayoutDashboard, CheckSquare, TrendingUp, DollarSign, PieChart,
-  Sparkles, Award, MessageSquare, Wrench, Rss, GraduationCap,
-  UserCircle, Settings as SettingsIcon, ShieldCheck, Ticket,
-  ChevronDown, PanelLeftClose, PanelLeftOpen, LogOut,
-  Menu, Search, Bell, X,
+  Sparkles, Award, MessageSquare, Wrench, Rss, UserCircle,
+  Settings as SettingsIcon, ArrowLeft, PanelLeftClose, PanelLeftOpen, Scale, Ticket,
 } from "lucide-react";
-import TechITLogo from "@/components/ui/TechITLogo";
 import { Toaster } from "@/components/ui/sonner";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Havi } from "@/dashboard/_shared/havi/Havi";
-import { writeStoredActiveRole } from "@/lib/roleRoutes";
+import { roleDashboardPath, writeStoredActiveRole } from "@/lib/roleRoutes";
 import { TopBarRoleMenu } from "./TopBarRoleMenu";
-import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { useTheme } from "@/contexts/ThemeContext";
+import { RoleMobileMenu } from "@/components/RoleMobileMenu";
+import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
+import { ContinuousIntelligencePanel } from "@/components/intelligence/ContinuousIntelligencePanel";
 
-type NavItem = {
-  label: string;
-  path?: string;
-  icon?: any;
-  kind?: "link" | "external" | "placeholder";
-};
+interface NavItem {
+  name: string;
+  path: string;
+  icon: typeof LayoutDashboard;
+  external?: boolean;
+}
 
-type NavGroup = {
-  label: string;
-  items: NavItem[];
-};
+const primaryNav: NavItem[] = [
+  { name: "Dashboard",     path: "/collaborator/dashboard",     icon: LayoutDashboard },
+  { name: "Tasks",         path: "/collaborator/tasks",         icon: CheckSquare },
+  { name: "Performance",   path: "/collaborator/performance",   icon: TrendingUp },
+  { name: "Earnings",      path: "/collaborator/earnings",      icon: DollarSign },
+  { name: "Equity",        path: "/collaborator/equity",        icon: PieChart },
+  { name: "Opportunities", path: "/collaborator/opportunities", icon: Sparkles },
+  { name: "Reputation",    path: "/collaborator/reputation",    icon: Award },
+  { name: "Messages",      path: "/collaborator/messages",      icon: MessageSquare },
+  { name: "Support",       path: "/support",                    icon: Ticket, external: true },
+  { name: "Tools",         path: "/collaborator/tools",         icon: Wrench },
+  { name: "Feed",          path: "/feed",                       icon: Rss, external: true },
+];
 
-const NAV_GROUPS: NavGroup[] = [
-  {
-    label: "Workspace",
-    items: [
-      { label: "Dashboard", path: "/collaborator/dashboard", icon: LayoutDashboard },
-      { label: "Tasks", path: "/collaborator/tasks", icon: CheckSquare },
-      { label: "Performance", path: "/collaborator/performance", icon: TrendingUp },
-      { label: "Earnings", path: "/collaborator/earnings", icon: DollarSign },
-      { label: "Equity Ledger", path: "/collaborator/equity", icon: PieChart },
-      { label: "Opportunities", path: "/collaborator/opportunities", icon: Sparkles },
-    ]
-  },
-  {
-    label: "Network & Growth",
-    items: [
-      { label: "Messages", path: "/collaborator/messages", icon: MessageSquare },
-      { label: "Reputation", path: "/collaborator/reputation", icon: Award },
-      { label: "Feed", path: "/feed", icon: Rss, kind: "external" },
-      { label: "Academy", path: "/collaborator/academy", icon: GraduationCap },
-      { label: "Tools", path: "/collaborator/tools", icon: Wrench },
-    ]
-  },
-  {
-    label: "Account",
-    items: [
-      { label: "Profile", path: "/collaborator/profile", icon: UserCircle },
-      { label: "Settings", path: "/collaborator/settings", icon: SettingsIcon },
-      { label: "Privacy & Compliance", path: "/compliance", icon: ShieldCheck },
-      { label: "Support", path: "/support", icon: Ticket, kind: "external" },
-    ]
-  }
+const accountNav: NavItem[] = [
+  { name: "Profile",  path: "/collaborator/profile",  icon: UserCircle },
+  { name: "Settings", path: "/collaborator/settings", icon: SettingsIcon },
+  { name: "Privacy", path: "/compliance", icon: Scale },
 ];
 
 export function CollabLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { collaboratorProfile } = useCollaboratorProfile();
-  const { profile, signOut } = useAuth();
-  
+  const { profile } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    "Workspace": true,
-    "Network & Growth": true,
-    "Account": true,
-  });
-
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     writeStoredActiveRole("collaborator");
   }, []);
 
-  const isActive = (path?: string) => path ? location.pathname === path : false;
-  const displayName = collaboratorProfile.name || "Collaborator";
-  const initials = displayName.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
-  const disciplineLabel = collaboratorProfile.discipline || "Contributor";
-  const activeLabel = NAV_GROUPS.flatMap(g => g.items).find(n => isActive(n.path))?.label ?? "Dashboard";
-
-  const toggleGroup = (groupLabel: string) => {
-    if (sidebarCollapsed) {
-      setSidebarCollapsed(false);
-      setExpandedGroups(prev => ({ ...prev, [groupLabel]: true }));
-      return;
+  // Defensive redirect: un-onboarded users go to step 1
+  useEffect(() => {
+    const onboarded = profile?.isOnboarded ?? collaboratorProfile.onboardingComplete;
+    if (!onboarded && !location.pathname.startsWith("/collaborator/onboarding")) {
+      navigate("/collaborator/onboarding/step-1", { replace: true });
     }
-    setExpandedGroups(prev => ({ ...prev, [groupLabel]: !prev[groupLabel] }));
-  };
+  }, [profile?.isOnboarded, collaboratorProfile.onboardingComplete, location.pathname, navigate]);
 
+  const isActive = (path: string) => location.pathname === path;
   const haviContext = useMemo(() => ({
     discipline: collaboratorProfile.discipline,
     subSkills: collaboratorProfile.subSkills,
@@ -116,453 +78,100 @@ export function CollabLayout() {
     pinnedWorkCount: collaboratorProfile.pinnedWork.length,
   }), [collaboratorProfile]);
 
+  const displayName = collaboratorProfile.name || "Collaborator";
+
+  const renderNavItem = (item: NavItem) => {
+    const Icon = item.icon;
+    const active = isActive(item.path);
+    return (
+      <Link key={item.path} to={item.path}
+        className={`app-nav-link flex items-center gap-3 px-4 transition-colors text-sm ${
+          active
+            ? "bg-role-collaborator/10 text-role-collaborator border-l-2 border-role-collaborator"
+            : "text-text-on-inverse-secondary hover:bg-surface-inverse-muted hover:text-white"
+        }`}>
+        <Icon className="w-4 h-4" />
+        <span className="flex-1 font-medium">{item.name}</span>
+      </Link>
+    );
+  };
+
   return (
-    <div className={`flex h-screen w-full p-[5px] overflow-hidden font-bricolage transition-colors duration-300 ${isDark ? "bg-[#0a0a0a] dark" : "bg-slate-50"}`}>
-      <div className={`flex w-full h-full rounded-xl p-[5px] relative overflow-hidden transition-all duration-300 ${
-        isDark 
-          ? "bg-[#111111] border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)]" 
-          : "bg-white border border-black/[0.06] shadow-sm"
-      }`}>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <motion.div 
-            animate={{ scale: [1, 1.15, 1], opacity: isDark ? [0.2, 0.35, 0.2] : [0.3, 0.5, 0.3], x: [0, 60, 0], y: [0, 40, 0] }}
-            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-            className={`absolute -top-1/4 -left-1/4 w-[60%] h-[60%] rounded-full blur-[120px] ${isDark ? "bg-[#20C997]/15" : "bg-[#20C997]/[0.05]"}`}
-          />
-          <motion.div 
-            animate={{ scale: [1, 1.2, 1], opacity: isDark ? [0.15, 0.3, 0.15] : [0.25, 0.45, 0.25], x: [0, -50, 0], y: [0, 60, 0] }}
-            transition={{ duration: 30, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-            className={`absolute -bottom-1/4 -right-1/4 w-[70%] h-[70%] rounded-full blur-[120px] ${isDark ? "bg-[#20C997]/10" : "bg-[#20C997]/[0.04]"}`}
-          />
+    <div className="app-shell flex h-screen overflow-hidden bg-background-primary">
+      <aside className={`hidden lg:flex lg:flex-col bg-background-inverse border-r border-border-inverse transition-[width] duration-200 ${sidebarCollapsed ? "w-20 [&_nav_span]:hidden" : "w-64"}`}>
+        <div className="p-5 border-b border-border-inverse">
+          <button onClick={() => setSidebarCollapsed((value) => !value)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="mb-3 rounded-lg p-2 text-text-disabled hover:bg-surface-inverse-muted hover:text-role-collaborator">
+            {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          </button>
+          {!sidebarCollapsed && <>
+          <Link to={roleDashboardPath.collaborator} className="flex items-center gap-1.5 text-xs text-text-muted hover:text-role-collaborator transition-colors mb-3">
+            <ArrowLeft className="w-3 h-3" />
+            Back to TechIT
+          </Link>
+          <h1 className="text-xl font-bold text-role-collaborator tracking-wide">TECHIT</h1>
+          <p className="text-xs text-text-disabled mt-0.5">Collaborator Portal</p>
+          </>}
         </div>
 
-        <aside
-          onMouseLeave={() => setProfileMenuOpen(false)}
-          className={`relative flex flex-col h-full rounded-md transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-visible shrink-0 z-10 ${
-            isDark 
-              ? "bg-[#141414] border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(32,201,151,0.06)]" 
-              : "bg-white border border-black/[0.06] shadow-sm"
-          } ${
-            sidebarCollapsed ? "w-[76px]" : "w-64"
-          } hidden lg:flex`}
-        >
-          <div className={`flex items-center p-4 mb-2 ${sidebarCollapsed ? "flex-col justify-center gap-4" : "justify-between"}`}>
-            {!sidebarCollapsed && (
-              <Link to="/" className="flex items-center gap-2.5 group">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center p-1.5 shadow-sm border transition-colors ${
-                    isDark ? "bg-[#1a1a1a] border-white/10 shadow-[0_0_12px_rgba(32,201,151,0.15)]" : "bg-slate-50 border-black/[0.06]"
-                  }`}>
-                    <TechITLogo />
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className={`font-black tracking-tight leading-none text-[15px] transition-colors ${
-                    isDark ? "text-white group-hover:text-[#20C997]" : "text-slate-900 group-hover:text-[#20C997]"
-                  }`}>TechIT Network</span>
-                  <span className={`font-bold text-[10px] tracking-wider uppercase mt-1 ${
-                    isDark ? "text-[#20C997]/80" : "text-[#20C997]"
-                  }`}>Collaborator</span>
-                </div>
-              </Link>
-            )}
-            {sidebarCollapsed && (
-              <Link to="/" className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#20C997] relative shadow-[0_4px_12px_rgba(32,201,151,0.35)] shrink-0">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center p-1.5 shadow-sm border transition-colors ${
-                  isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-black/[0.06]"
-                }`}>
-                  <TechITLogo />
-                </div>
-              </Link>
-            )}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className={`w-9 h-9 shrink-0 rounded-lg border transition-colors flex justify-center items-center ${
-                isDark 
-                  ? "bg-white/[0.05] border-white/10 text-white/70 hover:bg-[#20C997]/20 hover:text-[#20C997] hover:border-[#20C997]/30" 
-                  : "bg-slate-100 border-slate-200 text-slate-500 hover:bg-[#20C997]/10 hover:text-[#20C997] hover:border-[#20C997]/20"
-              }`}
-              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {sidebarCollapsed ? <PanelLeftOpen className="w-[18px] h-[18px]" /> : <PanelLeftClose className="w-[18px] h-[18px]" />}
-            </button>
+        <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
+          {primaryNav.map(renderNavItem)}
+          <div className="h-px bg-surface-inverse-muted my-3" />
+          {accountNav.map(renderNavItem)}
+        </nav>
+
+        {!sidebarCollapsed && <Link to="/collaborator/equity" className="m-3 p-3 rounded-lg bg-surface-inverse-muted hover:bg-surface-inverse-muted/70 transition-colors border border-border-inverse-strong">
+          <p className="text-xs text-text-disabled uppercase tracking-wider font-semibold">Building for Equity</p>
+          <p className="text-sm text-white mt-1">View your persisted ownership ledger</p>
+          <p className="text-xs text-role-collaborator mt-1">View equity →</p>
+        </Link>}
+      </aside>
+
+      <RoleMobileMenu
+        brand="TECHIT"
+        title="Collaborator Portal"
+        open={mobileMenuOpen}
+        onToggle={() => setMobileMenuOpen((value) => !value)}
+        onNavigate={() => setMobileMenuOpen(false)}
+        backPath={roleDashboardPath.collaborator}
+        items={[...primaryNav, ...accountNav].map((item) => ({
+          label: item.name,
+          path: item.path,
+          icon: item.icon,
+          active: isActive(item.path),
+        }))}
+  primaryItems={[primaryNav[0], primaryNav[1], primaryNav[9], primaryNav[5], primaryNav[3]].map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
+        headerActions={<>
+          <Link to="/collaborator/messages" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link>
+          <Link to="/collaborator/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
+        </>}
+      />
+
+      <main className="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
+        <header className="hidden min-h-14 items-center justify-between border-b border-border-default bg-surface-primary px-4 lg:flex lg:px-6">
+          <div className="text-sm text-text-muted">
+            {primaryNav.find((n) => isActive(n.path))?.name ?? accountNav.find((n) => isActive(n.path))?.name ?? ""}
           </div>
+          <TopBarRoleMenu />
+        </header>
 
-          <nav className="flex-1 overflow-y-auto px-3 pb-4 custom-scrollbar space-y-5">
-            {NAV_GROUPS.map((group) => (
-              <div key={group.label}>
-                {!sidebarCollapsed ? (
-                  <button
-                    onClick={() => toggleGroup(group.label)}
-                    className="w-full flex items-center justify-between px-2 mb-1.5 group/btn"
-                  >
-                    <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
-                      isDark ? "text-slate-400 group-hover/btn:text-white" : "text-slate-400 group-hover/btn:text-slate-700"
-                    }`}>
-                      {group.label}
-                    </span>
-                    <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                        isDark ? "text-slate-500" : "text-slate-400"
-                      } ${
-                        expandedGroups[group.label] ? "rotate-180 text-[#20C997]" : ""
-                      }`}
-                    />
-                  </button>
-                ) : (
-                  <button onClick={() => toggleGroup(group.label)} className="w-full flex justify-center mb-3">
-                    <span className={`w-4 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
-                  </button>
-                )}
+        <div className="app-role-content flex-1 overflow-y-auto">
+          <ProfileCompletionBanner role="collaborator" profilePath="/collaborator/profile" />
+          <NextBestActionNote role="collaborator" />
+          <ContinuousIntelligencePanel role="collaborator" />
+          <Outlet />
+        </div>
+      </main>
 
-                <AnimatePresence initial={false}>
-                  {(expandedGroups[group.label] || sidebarCollapsed) && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="space-y-1 overflow-hidden"
-                    >
-                      {group.items.map((item) => {
-                        const active = isActive(item.path);
-                        return (
-                          <Link
-                            key={item.label}
-                            to={item.path ?? "#"}
-                            title={sidebarCollapsed ? item.label : undefined}
-                            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group/nav ${
-                              active
-                                ? "text-[#20C997] font-bold"
-                                : (isDark ? "text-slate-400 hover:bg-white/[0.05] hover:text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
-                            } ${sidebarCollapsed ? "justify-center" : ""}`}
-                          >
-                            {active && (
-                              <motion.div
-                                layoutId="activeNavBgCollab"
-                                className={`absolute inset-0 rounded-xl ${
-                                  isDark 
-                                    ? "bg-[#20C997]/15 border border-[#20C997]/30 shadow-[0_0_15px_rgba(32,201,151,0.15)]" 
-                                    : "bg-[#20C997]/10 border border-[#20C997]/20"
-                                }`}
-                                transition={{ type: "spring", stiffness: 350, damping: 32 }}
-                              />
-                            )}
-                            {active && !sidebarCollapsed && (
-                              <motion.div
-                                layoutId="activeNavIndicatorCollab"
-                                className="absolute left-[-4px] top-2 bottom-2 w-[3px] rounded-r-full bg-[#20C997] shadow-[0_0_10px_rgba(32,201,151,0.5)]"
-                                transition={{ type: "spring", stiffness: 350, damping: 32 }}
-                              />
-                            )}
-                            <item.icon className={`relative z-10 w-[18px] h-[18px] shrink-0 transition-colors ${
-                              active 
-                                ? "text-[#20C997]" 
-                                : (isDark ? "text-slate-400 group-hover/nav:text-[#20C997]" : "text-slate-400 group-hover/nav:text-[#20C997]")
-                            }`} />
-                            {!sidebarCollapsed && (
-                              <span className={`relative z-10 font-bold text-sm truncate ${
-                                active ? "text-[#20C997]" : ""
-                              }`}>
-                                {item.label}
-                              </span>
-                            )}
-                            {active && !sidebarCollapsed && (
-                              <span className="relative z-10 ml-auto w-1.5 h-1.5 rounded-full bg-[#20C997] shadow-[0_0_8px_rgba(32,201,151,0.8)]" />
-                            )}
-                          </Link>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </nav>
+      <Toaster richColors position="bottom-right" />
 
-          <div className={`p-3 mt-auto border-t relative ${isDark ? "border-white/10" : "border-slate-200"}`}>
-            <button
-              onClick={() => setProfileMenuOpen((v) => !v)}
-              className={`w-full flex items-center gap-3 p-2 rounded-xl border transition-colors ${
-                isDark 
-                  ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/10" 
-                  : "bg-slate-50 hover:bg-slate-100 border-slate-200"
-              } ${
-                sidebarCollapsed ? "justify-center" : ""
-              }`}
-            >
-              <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-[#20C997] to-[#128a64] text-slate-950 text-xs font-black flex items-center justify-center shrink-0 shadow-sm">
-                {initials}
-                <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#20C997] border-2 ${isDark ? "border-[#141414]" : "border-slate-50"}`} />
-              </div>
-              {!sidebarCollapsed && (
-                <>
-                  <div className="min-w-0 flex-1 text-left">
-                    <p className={`text-[13px] font-bold truncate leading-tight ${isDark ? "text-white" : "text-slate-900"}`}>{displayName}</p>
-                    <p className={`text-[11px] truncate font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>{disciplineLabel}</p>
-                  </div>
-                  <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${isDark ? "text-slate-400" : "text-slate-400"} ${profileMenuOpen ? "rotate-180" : ""}`} />
-                </>
-              )}
-            </button>
-
-            <AnimatePresence>
-              {profileMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                  className={`absolute bottom-full mb-2 ${sidebarCollapsed ? "left-full ml-2 w-56" : "left-3 right-3"} rounded-xl border p-1.5 z-30 ${
-                    isDark 
-                      ? "bg-[#141414] border-white/10 shadow-xl" 
-                      : "bg-white border-slate-200 shadow-xl"
-                  }`}
-                >
-                  <Link
-                    to="/collaborator/profile"
-                    onClick={() => setProfileMenuOpen(false)}
-                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
-                      isDark ? "text-slate-300 hover:bg-white/[0.06] hover:text-[#20C997]" : "text-slate-700 hover:bg-slate-100 hover:text-[#20C997]"
-                    }`}
-                  >
-                    <UserCircle className="w-4 h-4" /> View profile
-                  </Link>
-                  <Link
-                    to="/collaborator/settings"
-                    onClick={() => setProfileMenuOpen(false)}
-                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
-                      isDark ? "text-slate-300 hover:bg-white/[0.06] hover:text-[#20C997]" : "text-slate-700 hover:bg-slate-100 hover:text-[#20C997]"
-                    }`}
-                  >
-                    <SettingsIcon className="w-4 h-4" /> Settings
-                  </Link>
-                  <div className={`h-px my-1 ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
-                  <button
-                    onClick={() => { setProfileMenuOpen(false); signOut(); }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-500 transition-colors ${
-                      isDark ? "hover:bg-red-500/10" : "hover:bg-red-50"
-                    }`}
-                  >
-                    <LogOut className="w-4 h-4" /> Log out
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </aside>
-
-        <div className="hidden lg:block w-[5px] shrink-0 rounded-md bg-gradient-to-b from-[#20C997]/80 via-[#20C997]/40 to-[#20C997]/60 shadow-[0_0_15px_rgba(32,201,151,0.3)] z-10 my-[2px] mx-[2px]" />
-
-        <main className={`flex-1 rounded-md overflow-hidden flex flex-col relative z-20 transition-all duration-300 ${
-          isDark 
-            ? "bg-[#0a0a0a]" 
-            : "bg-slate-50"
-        }`}>
-          <header className={`flex min-h-[64px] items-center justify-between gap-4 border-b px-4 lg:px-6 z-20 sticky top-0 rounded-t-md transition-all duration-300 ${
-            isDark 
-              ? "bg-[#111111] border-white/10 shadow-sm" 
-              : "bg-white border-slate-200 shadow-sm"
-          }`}>
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className={`lg:hidden relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all duration-300 shrink-0 overflow-hidden group ${
-                  isDark 
-                    ? "bg-[#20C997]/15 border-[#20C997]/30 text-[#20C997]" 
-                    : "bg-[#20C997]/10 border-[#20C997]/20 text-[#20C997]"
-                }`}
-              >
-                <PanelLeftOpen className="w-[18px] h-[18px] relative z-10" />
-              </button>
-
-              <h2 className={`text-base font-bold hidden lg:block shrink-0 mr-2 ${isDark ? "text-[#20C997]" : "text-[#20C997]"}`}>
-                {activeLabel}
-              </h2>
-
-              <div className={`hidden sm:flex items-center gap-2 h-9 px-3 rounded-lg border w-full max-w-xs transition-all ${
-                isDark 
-                  ? "bg-white/[0.05] border-white/10 text-white focus-within:border-[#20C997] focus-within:ring-2 focus-within:ring-[#20C997]/20" 
-                  : "bg-slate-100 border-slate-200 text-slate-900 focus-within:border-[#20C997] focus-within:ring-2 focus-within:ring-[#20C997]/20"
-              }`}>
-                <Search className={`w-4 h-4 shrink-0 ${isDark ? "text-slate-400" : "text-slate-400"}`} />
-                <input
-                  type="text"
-                  placeholder="Search tasks, equity, tools..."
-                  className={`bg-transparent outline-none text-sm w-full ${
-                    isDark ? "placeholder:text-slate-500 text-white" : "placeholder:text-slate-400 text-slate-900"
-                  }`}
-                />
-                <kbd className={`hidden md:inline text-[10px] font-bold rounded px-1.5 py-0.5 shrink-0 border ${
-                  isDark ? "bg-white/10 text-slate-400 border-white/10" : "bg-white text-slate-400 border-slate-200"
-                }`}>
-                  ⌘K
-                </kbd>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 shrink-0">
-              {/* Unified theme toggle */}
-              <ThemeToggle variant="inline" />
-
-              <div className="relative">
-                <button
-                  onClick={() => { setNotifOpen((v) => !v); setProfileMenuOpen(false); }}
-                  className={`relative w-9 h-9 rounded-lg border flex items-center justify-center transition-colors ${
-                    isDark 
-                      ? "bg-white/[0.05] border-white/10 text-slate-300 hover:bg-white/[0.08]" 
-                      : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                  }`}
-                  title="Notifications"
-                >
-                  <Bell className="w-4 h-4" />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#20C997] ring-2 ring-white dark:ring-[#111111]" />
-                </button>
-                <AnimatePresence>
-                  {notifOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                      className={`absolute right-0 mt-2 w-80 rounded-2xl border p-4 z-50 ${
-                        isDark 
-                          ? "bg-[#141414] border-white/10 shadow-xl text-white" 
-                          : "bg-white border-slate-200 shadow-xl text-slate-900"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-white/10">
-                        <h4 className="font-bold text-sm">Notifications</h4>
-                        <span className="text-[10px] font-bold text-[#20C997] bg-[#20C997]/10 border border-[#20C997]/20 px-2 py-0.5 rounded-full">
-                          2 new
-                        </span>
-                      </div>
-                      <div className="space-y-2 text-xs">
-                        <div className={`p-2.5 rounded-xl border transition-colors ${isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-slate-50 border-slate-200"}`}>
-                          <p className="font-bold">New task assigned in sprint</p>
-                          <p className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>AI connector integration task is now open.</p>
-                        </div>
-                        <div className={`p-2.5 rounded-xl border transition-colors ${isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-slate-50 border-slate-200"}`}>
-                          <p className="font-bold">Equity grant scheduled</p>
-                          <p className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>Next vesting milestone arrives this month.</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              <TopBarRoleMenu isDark={isDark} />
-            </div>
-          </header>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <ProfileCompletionBanner role="collaborator" profilePath="/collaborator/profile" />
-            <Outlet />
-          </div>
-        </main>
-      </div>
-
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99]"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className={`fixed top-0 left-0 bottom-0 w-[280px] z-[100] flex flex-col border-r transition-colors ${
-                isDark 
-                  ? "bg-[#141414] border-white/10 text-white" 
-                  : "bg-white border-slate-200 text-slate-900"
-              }`}
-            >
-              <div className={`flex items-center justify-between p-4 border-b ${
-                isDark ? "border-white/10" : "border-slate-200"
-              }`}>
-                <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center p-1.5 shadow-sm shrink-0 border ${
-                    isDark ? "bg-[#1a1a1a] border-white/10" : "bg-slate-50 border-slate-200"
-                  }`}>
-                    <TechITLogo />
-                  </div>
-                  <span className="font-medium text-sm tracking-tight whitespace-nowrap truncate text-[#20C997]">TechIT Network</span>
-                </div>
-                <button 
-                  onClick={() => setMobileMenuOpen(false)} 
-                  className={`w-8 h-8 flex items-center justify-center rounded-xl border backdrop-blur-md transition-all duration-300 shrink-0 ${
-                    isDark 
-                      ? "bg-[#20C997]/15 border-[#20C997]/30 text-[#20C997]" 
-                      : "bg-[#20C997]/10 border-[#20C997]/20 text-[#20C997]"
-                  }`}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {NAV_GROUPS.map((group) => (
-                  <div key={group.label}>
-                    <h3 className={`text-[10px] font-black uppercase tracking-widest mb-3 px-2 ${
-                      isDark ? "text-slate-400" : "text-slate-400"
-                    }`}>
-                      {group.label}
-                    </h3>
-                    <div className="space-y-1">
-                      {group.items.map((item) => {
-                        const active = isActive(item.path);
-                        return (
-                          <Link
-                            key={item.label}
-                            to={item.path ?? "#"}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all ${
-                              active
-                                ? "bg-[#20C997]/15 border border-[#20C997]/30 text-[#20C997]" 
-                                : (isDark 
-                                    ? "text-slate-400 hover:bg-white/[0.06] hover:text-white" 
-                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
-                            }`}
-                          >
-                            {item.icon && <item.icon className="w-[18px] h-[18px]" />}
-                            <span className="text-sm">{item.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className={`p-4 border-t ${isDark ? "border-white/10" : "border-slate-200"}`}>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); signOut(); }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 transition-colors ${
-                    isDark ? "hover:bg-red-500/10" : "hover:bg-red-50"
-                  }`}
-                >
-                  <LogOut className="w-4 h-4" /> Log out
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
+      {/* Havi — AI build companion (founders & collaborators only) */}
       <Havi
         role="collaborator"
-        userName={collaboratorProfile.name?.split(" ")[0] || "Collaborator"}
+        userName={displayName.split(" ")[0]}
         route={location.pathname}
         profileContext={haviContext}
       />
-      <Toaster richColors position="bottom-right" />
     </div>
   );
 }

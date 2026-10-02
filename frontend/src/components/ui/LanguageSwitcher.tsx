@@ -7,9 +7,12 @@ import { cn } from "@/lib/utils";
 interface LanguageSwitcherProps {
   /** When true (on transparent hero), uses light/white styling */
   light?: boolean;
+  variant?: string;
+  className?: string;
 }
 
-export default function LanguageSwitcher({ light = false }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({ light = false, className }: LanguageSwitcherProps) {
+
   const { locale, setLocale } = useLocale();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

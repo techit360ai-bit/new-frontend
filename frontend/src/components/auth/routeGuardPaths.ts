@@ -42,8 +42,7 @@ export function roleRedirectPath({
 }) {
   if (loading) return null;
   if (!hasUser) return { to: "/signin", state: { from: currentPath } };
-  if (!profileRole) return null;
-
+  if (!profileRole) return { to: "/" };
   if (!allowed.includes(profileRole)) return { to: homePathFor(profileRole) };
   const onboardingRoot = setupPathFor(profileRole).replace(/\/step-1$/, "");
   if (isOnboarded && currentPath.startsWith(onboardingRoot)) {

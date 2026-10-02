@@ -1,7 +1,14 @@
-import { FileText, FolderOpen, Image, FileCode, Download, MoreVertical, Upload } from 'lucide-react';
+import { FileText, FolderOpen, Image, FileCode, Trash2, Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { fetchDomainFiles, createDomainFile, type DomainFileItem } from '@/lib/api/files';
+import { fetchDomainFiles, createDomainFile, deleteDomainFile, type DomainFileItem } from '@/lib/api/files';
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
 
 export function Files() {
   const [files, setFiles] = useState<DomainFileItem[]>([]);
@@ -24,12 +31,22 @@ export function Files() {
           sizeBytes: file.size,
         });
         setFiles((prev) => [created, ...prev]);
-        toast.success(`${file.name} uploaded`);
+        toast.success(`${file.name} registered`);
       } catch (err) {
         toast.error(`Failed to upload ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDelete = async (file: DomainFileItem) => {
+    try {
+      await deleteDomainFile(file.id);
+      setFiles((prev) => prev.filter((row) => row.id !== file.id));
+      toast.success(`${file.name} removed`);
+    } catch (err) {
+      toast.error(`Could not remove ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
 
   useEffect(() => {
@@ -54,29 +71,32 @@ export function Files() {
 
   const getFileIcon = (item: DomainFileItem) => {
     if (item.type === 'folder') {
-      return <FolderOpen className="w-5 h-5 text-[#20C997]" />;
+      return <FolderOpen className="w-5 h-5 text-brand-primary" />;
     }
     switch (item.fileType) {
       case 'image':
-        return <Image className="w-5 h-5 text-purple-500" />;
+        return <Image className="w-5 h-5 text-status-pending" />;
       case 'code':
-        return <FileCode className="w-5 h-5 text-[#20C997]" />;
+        return <FileCode className="w-5 h-5 text-status-success" />;
       default:
-        return <FileText className="w-5 h-5 text-slate-400" />;
+        return <FileText className="w-5 h-5 text-text-muted" />;
     }
   };
 
+  // Real total of the metadata we actually hold — never a fabricated % bar.
+  const registeredBytes = files.reduce((sum, file) => sum + (file.sizeBytes ?? 0), 0);
+
   return (
-    <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
+    <div className="h-full bg-background-primary">
       {/* Page Header */}
-      <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-6 py-4">
+      <div className="bg-surface-primary border-b border-border-default px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <h1 className="text-2xl font-semibold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Files
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Manage and organize your project files
+            <p className="text-sm text-text-muted mt-1">
+              Register file metadata (name, type, size). File bytes are not uploaded or stored.
             </p>
           </div>
           <input
@@ -88,62 +108,63 @@ export function Files() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl text-sm shadow-sm transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm"
           >
             <Upload className="w-4 h-4" />
-            <span>Upload Files</span>
+            <span className="text-sm font-medium">Register File</span>
           </button>
         </div>
       </div>
 
       {/* Files List */}
       <div className="p-6">
-        <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 overflow-hidden">
+        <div className="bg-surface-primary rounded-xl shadow-sm border border-border-default overflow-hidden">
           <table className="w-full">
-            <thead className="bg-black/[0.02] dark:bg-white/5 border-b border-black/[0.06] dark:border-white/10">
-              <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
-                <th className="py-3.5 px-6 font-semibold">Name</th>
-                <th className="py-3.5 px-6 font-semibold">Size</th>
-                <th className="py-3.5 px-6 font-semibold">Modified</th>
-                <th className="py-3.5 px-6 font-semibold"></th>
+            <thead className="bg-background-primary border-b border-border-default">
+              <tr className="text-left text-sm text-text-muted">
+                <th className="py-3 px-6 font-medium">Name</th>
+                <th className="py-3 px-6 font-medium">Size</th>
+                <th className="py-3 px-6 font-medium">Modified</th>
+                <th className="py-3 px-6 font-medium"></th>
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td className="py-6 px-6 text-sm text-slate-500 dark:text-slate-400" colSpan={4}>Loading live files...</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-text-muted" colSpan={4}>Loading live files...</td></tr>
               )}
               {!loading && error && (
-                <tr><td className="py-6 px-6 text-sm text-red-600 dark:text-red-400" colSpan={4}>Live files could not be loaded: {error}</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-status-error" colSpan={4}>Live files could not be loaded: {error}</td></tr>
               )}
               {!loading && !error && files.length === 0 && (
-                <tr><td className="py-6 px-6 text-sm text-slate-500 dark:text-slate-400" colSpan={4}>No live files are recorded yet.</td></tr>
+                <tr><td className="py-6 px-6 text-sm text-text-muted" colSpan={4}>No live files are recorded yet.</td></tr>
               )}
               {files.map((file) => (
                 <tr
                   key={file.id}
-                  className="border-b border-black/[0.04] dark:border-white/5 last:border-0 hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
+                  className="border-b border-border-subtle last:border-0 hover:bg-background-primary transition-colors cursor-pointer"
                 >
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
                       {getFileIcon(file)}
-                      <span className="font-medium text-slate-900 dark:text-white">{file.name}</span>
+                      <span className="font-medium">{file.name}</span>
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-sm text-slate-500 dark:text-slate-400">
+                  <td className="py-4 px-6 text-sm text-text-muted">
                     {file.size || '—'}
                   </td>
-                  <td className="py-4 px-6 text-sm text-slate-500 dark:text-slate-400">
+                  <td className="py-4 px-6 text-sm text-text-muted">
                     {file.modified}
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
-                      {file.type === 'file' && (
-                        <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-lg transition-colors text-slate-500 dark:text-slate-400">
-                          <Download className="w-4 h-4" />
-                        </button>
-                      )}
-                      <button className="p-2 hover:bg-black/[0.05] dark:hover:bg-white/10 rounded-lg transition-colors text-slate-500 dark:text-slate-400">
-                        <MoreVertical className="w-4 h-4" />
+                      <button
+                        type="button"
+                        onClick={() => { void handleDelete(file); }}
+                        aria-label={`Remove ${file.name}`}
+                        title={`Remove ${file.name}`}
+                        className="p-2 hover:bg-surface-secondary rounded transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-text-muted" />
                       </button>
                     </div>
                   </td>
@@ -154,14 +175,16 @@ export function Files() {
         </div>
 
         {!loading && !error && files.length > 0 && (
-          <div className="mt-6 bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white">
+          <div className="mt-6 bg-surface-primary rounded-xl shadow-sm border border-border-default p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-slate-900 dark:text-white">Storage Records</h3>
-              <span className="text-sm text-slate-500 dark:text-slate-400">{files.filter((file) => file.type === 'file').length} files recorded</span>
+              <h3 className="font-semibold">Registered records</h3>
+              <span className="text-sm text-text-muted">
+                {files.filter((file) => file.type === 'file').length} files · {formatBytes(registeredBytes)} of metadata
+              </span>
             </div>
-            <div className="h-3 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-[#20C997] rounded-full" style={{ width: `${Math.min(100, files.length * 10)}%` }} />
-            </div>
+            <p className="text-sm text-text-muted">
+              Registration stores name, type and size only. No file bytes are uploaded, so there is no storage quota to display.
+            </p>
           </div>
         )}
       </div>

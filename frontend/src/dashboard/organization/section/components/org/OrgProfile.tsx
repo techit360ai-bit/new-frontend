@@ -17,6 +17,7 @@ import {
   Mail,
   ArrowRight,
 } from "lucide-react";
+import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
 
 export function OrgProfile() {
   const { orgProfile } = useOrgProfile();
@@ -37,54 +38,57 @@ export function OrgProfile() {
   const pct = Math.round((completed / 5) * 100);
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6 transition-colors">
+    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
+      <div className="mb-6">
+        <RoleAdditionPanel />
+      </div>
       {/* Header */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 shadow-sm">
+      <div className="bg-surface-primary rounded-xl border border-border-default p-6 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div className="flex-1">
-            <p className="text-xs font-mono uppercase tracking-wider text-[#20C997] font-bold mb-1">
+            <p className="text-xs font-mono uppercase tracking-wider text-text-muted mb-1">
               Organisation profile
             </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h1 className="text-3xl font-bold text-text-primary">
                 {orgProfile.orgName || "Untitled organisation"}
               </h1>
               <VerificationBadge status={orgProfile.verificationStatus} />
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-sm text-text-muted mt-1">
               {orgProfile.orgType || "—"} · {orgProfile.location || "—"}
               {orgProfile.foundingYear ? ` · founded ${orgProfile.foundingYear}` : ""}
             </p>
           </div>
           <Link
             to="/org/onboarding/step-1"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#20C997]/10 hover:bg-[#20C997]/20 border border-[#20C997]/30 text-[#20C997] text-xs font-bold transition-all flex-shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-status-info-soft hover:bg-status-info-soft text-brand-accent text-sm font-semibold transition-colors flex-shrink-0"
           >
             <Pencil className="w-4 h-4" />
-            Re-run onboarding
+            Edit identity setup
           </Link>
         </div>
 
         {/* Completeness bar */}
-        <div className="mt-6">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+        <div className="mt-5">
+          <div className="flex items-center justify-between text-xs mb-1.5">
+            <span className="text-text-muted font-mono uppercase tracking-wider">
               Profile completeness
             </span>
             <span
-              className={`font-black font-mono ${pct === 100 ? "text-[#20C997]" : pct >= 60 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400"}`}
+              className={`font-bold ${pct === 100 ? "text-status-success" : pct >= 60 ? "text-status-warning" : "text-status-error"}`}
             >
               {completed} / 5 sections · {pct}%
             </span>
           </div>
-          <div className="h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
+          <div className="h-2 bg-surface-secondary rounded-full overflow-hidden">
             <div
               className={`h-full transition-all ${
                 pct === 100
-                  ? "bg-[#20C997]"
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
                   : pct >= 60
-                    ? "bg-amber-500"
-                    : "bg-red-500"
+                    ? "bg-gradient-to-r from-amber-500 to-amber-400"
+                    : "bg-gradient-to-r from-red-500 to-red-400"
               }`}
               style={{ width: `${pct}%` }}
             />
@@ -153,7 +157,7 @@ export function OrgProfile() {
             icon={Mail}
           />
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">
+            <p className="text-[10px] uppercase tracking-wider text-text-muted font-mono mb-1.5">
               Documents
             </p>
             {orgProfile.verificationDocs.length > 0 ? (
@@ -161,7 +165,7 @@ export function OrgProfile() {
                 {orgProfile.verificationDocs.map((d) => (
                   <li
                     key={d}
-                    className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate bg-slate-50 dark:bg-white/[0.03] rounded-lg px-2.5 py-2 border border-black/[0.05] dark:border-white/10"
+                    className="text-xs text-text-secondary truncate bg-background-primary rounded px-2 py-1.5 border border-border-subtle"
                   >
                     {d}
                   </li>
@@ -183,17 +187,17 @@ export function OrgProfile() {
           <Chips
             label="Programmes"
             values={orgProfile.programmes}
-            color="bg-[#20C997]/10 text-[#20C997] border-[#20C997]/20"
+            color="bg-status-info-soft text-brand-accent border-brand-accent"
           />
           <Chips
             label="Sectors"
             values={orgProfile.sectors}
-            color="bg-[#20C997]/10 text-[#20C997] border-[#20C997]/20"
+            color="bg-violet-50 text-violet-700 border-violet-100"
           />
           <Chips
             label="Geographies"
             values={orgProfile.geographies}
-            color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+            color="bg-status-success-soft text-status-success border-status-success"
           />
         </Section>
 
@@ -209,9 +213,9 @@ export function OrgProfile() {
               {orgProfile.teamMembers.map((m) => (
                 <li
                   key={m.id}
-                  className="flex items-center gap-3 bg-slate-50 dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/10 rounded-xl px-3 py-2.5"
+                  className="flex items-center gap-3 bg-background-primary rounded-lg px-3 py-2"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#20C997] text-slate-950 flex items-center justify-center text-xs font-black flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-accent to-violet-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
                     {m.name
                       .split(" ")
                       .map((n) => n[0])
@@ -220,10 +224,10 @@ export function OrgProfile() {
                       .toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    <p className="text-sm font-semibold text-text-primary truncate">
                       {m.name}
                     </p>
-                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">
+                    <p className="text-[10px] text-text-muted truncate">
                       {m.email} · {m.role}
                     </p>
                   </div>
@@ -242,39 +246,39 @@ export function OrgProfile() {
           editPath="/org/onboarding/step-5"
           complete={stepStatus.step5}
         >
-          <div className="rounded-xl bg-[#20C997]/10 border border-[#20C997]/20 p-4">
-            <p className="text-[10px] uppercase tracking-wider text-[#20C997] font-bold mb-1">
+          <div className="rounded-lg bg-gradient-to-br from-indigo-50 to-violet-50 border border-brand-accent p-4">
+            <p className="text-[10px] uppercase tracking-wider text-brand-accent font-mono mb-1.5">
               Current plan
             </p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white capitalize">
+            <p className="text-2xl font-bold text-text-primary capitalize">
               {orgProfile.plan}
             </p>
             <Link
               to="/org/billing"
-              className="text-xs text-[#20C997] hover:underline font-bold mt-2 inline-flex items-center gap-1"
+              className="text-xs text-brand-accent hover:text-brand-accent font-semibold mt-2 inline-flex items-center gap-1"
             >
               Manage billing
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
         </Section>
 
         {/* Footer cta */}
-        <div className="lg:col-span-3 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="lg:col-span-3 rounded-xl border border-border-default bg-surface-primary p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            <h3 className="text-sm font-semibold text-text-primary">
               {pct === 100
                 ? "Profile complete — your org is ready to broadcast."
                 : "Finish your profile to unlock broadcasting and verified posting."}
             </h3>
-            <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-xs text-text-muted mt-1">
               Verified orgs can post Opportunities, run Hackathons, and
               broadcast to matching builders.
             </p>
           </div>
           <Link
             to="/org/dashboard"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 text-xs font-bold transition-all flex-shrink-0 shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-accent hover:bg-brand-accent text-white text-sm font-semibold transition-colors flex-shrink-0"
           >
             Open dashboard
             <ArrowRight className="w-4 h-4" />
@@ -292,20 +296,20 @@ function VerificationBadge({
 }) {
   if (status === "verified")
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#20C997]/10 text-[#20C997] text-xs font-bold border border-[#20C997]/20">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-success-soft text-status-success text-xs font-bold border border-status-success">
         <CheckCircle2 className="w-3.5 h-3.5" />
         Verified
       </span>
     );
   if (status === "pending")
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 text-xs font-bold border border-amber-500/20">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-warning-soft text-status-warning text-xs font-bold border border-status-warning">
         <Clock className="w-3.5 h-3.5" />
         Pending
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-white/10">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-secondary text-text-muted text-xs font-bold border border-border-default">
       <XCircle className="w-3.5 h-3.5" />
       Unverified
     </span>
@@ -326,28 +330,28 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col transition-all hover:border-[#20C997]/30">
+    <div className="bg-surface-primary border border-border-default rounded-xl p-5 flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <span
-            className={`w-8 h-8 rounded-xl flex items-center justify-center ${complete ? "bg-[#20C997]/10 text-[#20C997]" : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-slate-500"}`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${complete ? "bg-status-success-soft text-status-success" : "bg-surface-secondary text-text-muted"}`}
           >
             <Icon className="w-4 h-4" />
           </span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">{title}</h3>
+          <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
           {complete && (
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#20C997]" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-status-success" />
           )}
         </div>
         <Link
           to={editPath}
-          className="text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-[#20C997] flex items-center gap-1 transition-colors"
+          className="text-[11px] font-mono uppercase tracking-wider text-text-disabled hover:text-brand-accent flex items-center gap-1 transition-colors"
         >
           <Pencil className="w-3 h-3" />
           Edit
         </Link>
       </div>
-      <div className="space-y-4 flex-1">{children}</div>
+      <div className="space-y-3 flex-1">{children}</div>
     </div>
   );
 }
@@ -363,12 +367,12 @@ function Field({
 }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1">
+      <p className="text-[10px] uppercase tracking-wider text-text-muted font-mono mb-1">
         {label}
       </p>
       {value ? (
-        <p className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2 break-words">
-          {Icon && <Icon className="w-3.5 h-3.5 text-[#20C997] flex-shrink-0" />}
+        <p className="text-sm text-text-primary font-medium flex items-center gap-2 break-words">
+          {Icon && <Icon className="w-3.5 h-3.5 text-text-disabled flex-shrink-0" />}
           {value}
         </p>
       ) : (
@@ -389,7 +393,7 @@ function Chips({
 }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">
+      <p className="text-[10px] uppercase tracking-wider text-text-muted font-mono mb-1.5">
         {label}
       </p>
       {values.length > 0 ? (
@@ -397,7 +401,7 @@ function Chips({
           {values.map((v) => (
             <span
               key={v}
-              className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${color}`}
+              className={`px-2 py-0.5 rounded-full text-xs font-medium border ${color}`}
             >
               {v}
             </span>
@@ -412,6 +416,6 @@ function Chips({
 
 function EmptyHint({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs italic text-slate-400 dark:text-slate-500 font-medium">{children}</p>
+    <p className="text-xs italic text-text-disabled font-medium">{children}</p>
   );
 }

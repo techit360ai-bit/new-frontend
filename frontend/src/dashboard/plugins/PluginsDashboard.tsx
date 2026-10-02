@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Wifi,
   WifiOff,
+  ArrowLeft,
   CircleCheck,
   CircleX,
   Clock,
@@ -26,7 +27,6 @@ import {
   Bot,
   User,
 } from "lucide-react";
-import { BackButton } from "@/dashboard/feed/components/BackButton";
 import {
   techitApi,
   type ApprovalRequest,
@@ -49,12 +49,12 @@ const RESULT_META: Record<
   { cls: string; icon: ReactNode; label: string }
 > = {
   success: {
-    cls: "bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-400 dark:ring-emerald-500/30",
+    cls: "bg-status-success text-status-success ring-emerald-600/20 dark:bg-status-success/15 dark:text-status-success dark:ring-emerald-500/30",
     icon: <CircleCheck className="w-3.5 h-3.5" />,
     label: "success",
   },
   failure: {
-    cls: "bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/15 dark:text-red-400 dark:ring-red-500/30",
+    cls: "bg-status-error text-status-error ring-red-600/20 dark:bg-status-error/15 dark:text-status-error dark:ring-red-500/30",
     icon: <CircleX className="w-3.5 h-3.5" />,
     label: "failure",
   },
@@ -64,7 +64,7 @@ const RESULT_META: Record<
     label: "denied",
   },
   pending_approval: {
-    cls: "bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-400 dark:ring-amber-500/30",
+    cls: "bg-status-warning text-status-warning ring-amber-600/20 dark:bg-status-warning/15 dark:text-status-warning dark:ring-amber-500/30",
     icon: <Clock className="w-3.5 h-3.5" />,
     label: "pending",
   },
@@ -149,27 +149,34 @@ export default function PluginsDashboard() {
   const destructiveCount = tools.filter((t) => t.tool.destructive).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white pb-16 transition-colors">
-      {/* ---- Hero ---- */}
-      <header className="relative overflow-hidden bg-[#20C997] text-slate-950">
+    // Theme-driven: tokens flip with the global light/dark/auto toggle.
+    // color-scheme follows the theme so native <select> dropdowns stay readable.
+    <div className="min-h-screen bg-background text-foreground pb-16 [color-scheme:light] dark:[color-scheme:dark]">
+      {/* ---- Gradient hero (reads well in both themes) ---- */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-brand-accent via-violet-600 to-fuchsia-600 text-white">
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-20"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 20%, black 1px, transparent 1px)",
+              "radial-gradient(circle at 20% 20%, white 1px, transparent 1px)",
             backgroundSize: "28px 28px",
           }}
           aria-hidden
         />
         <div className="relative max-w-7xl mx-auto px-6 pt-6 pb-24">
           <div className="flex items-center justify-between gap-4">
-            <BackButton label="Back" fallback="/feed" className="text-slate-950 bg-black/10 hover:bg-black/20 border-none shadow-none text-xs font-bold" />
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <ArrowLeft className="w-4 h-4" /> Home
+            </Link>
             <div className="flex items-center gap-2">
               <StatusBadge online={online} workspace={workspace} />
               <button
                 onClick={refresh}
                 aria-label="Refresh data"
-                className="inline-flex items-center gap-1.5 text-sm font-bold px-3.5 py-1.5 rounded-xl bg-black/10 hover:bg-black/20 transition-colors focus-visible:outline-none"
+                className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-surface-primary/15 hover:bg-surface-primary/25 backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
                 <RefreshCw className={`w-4 h-4 ${busy ? "animate-spin" : ""}`} />
                 Refresh
@@ -178,33 +185,33 @@ export default function PluginsDashboard() {
           </div>
 
           <div className="mt-8 flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-black/10 ring-1 ring-black/15">
-              <Boxes className="w-6 h-6 text-slate-950" />
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-surface-primary/15 backdrop-blur ring-1 ring-white/25">
+              <Boxes className="w-6 h-6" />
             </span>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-950" style={heading}>
+              <h1 className="text-3xl font-bold tracking-tight" style={heading}>
                 Plugins &amp; MCP
               </h1>
-              <p className="text-slate-900/80 text-sm mt-0.5 font-medium">
+              <p className="text-white/75 text-sm mt-0.5">
                 Integrate capabilities, not UIs — every connector is audited, permissioned and
                 approval-gated by the SDK.
               </p>
             </div>
           </div>
           {updatedAt && (
-            <p className="mt-3 text-xs text-slate-900/70 font-semibold">
+            <p className="mt-3 text-xs text-white/60">
               Live · auto-refreshing every {POLL_MS / 1000}s · last updated {updatedAt}
             </p>
           )}
         </div>
       </header>
 
-      {/* ---- KPI stat cards ---- */}
+      {/* ---- KPI stat cards (overlap hero) ---- */}
       <div className="max-w-7xl mx-auto px-6 -mt-16 relative">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             icon={<Plug className="w-5 h-5" />}
-            tone="mint"
+            tone="indigo"
             value={tools.length}
             label="MCP Tools"
             hint={`${destructiveCount} approval-gated`}
@@ -239,7 +246,7 @@ export default function PluginsDashboard() {
 
       {online === false && (
         <div className="max-w-7xl mx-auto px-6 mt-6">
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
+          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center gap-2">
             <WifiOff className="w-4 h-4 shrink-0" />
             Can't reach the API at <code className="font-mono">{techitApi.baseUrl}</code>. Start the
             backend: <code className="font-mono">cd backend &amp;&amp; npm run dev</code>.
@@ -278,14 +285,14 @@ function StatusBadge({
   const text =
     online === null ? "connecting…" : online ? `online · ${workspace}` : "offline";
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-black/10 text-slate-950">
+    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-surface-primary/15 backdrop-blur ring-1 ring-white/25">
       <span className="relative flex w-2 h-2">
         {online && (
-          <span className="absolute inline-flex w-full h-full rounded-full bg-slate-950 opacity-75 motion-safe:animate-ping" />
+          <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-300 opacity-75 motion-safe:animate-ping" />
         )}
         <span
           className={`relative inline-flex w-2 h-2 rounded-full ${
-            online ? "bg-slate-950" : online === false ? "bg-red-500" : "bg-slate-700"
+            online ? "bg-emerald-300" : online === false ? "bg-red-300" : "bg-surface-primary/60"
           }`}
         />
       </span>
@@ -299,11 +306,10 @@ function StatusBadge({
 /* Stat card                                                           */
 /* ------------------------------------------------------------------ */
 const TONES: Record<string, string> = {
-  mint: "bg-[#20C997]/10 text-[#20C997]",
-  blue: "bg-[#20C997]/10 text-[#20C997]",
-  amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  slate: "bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-400",
-  emerald: "bg-[#20C997]/10 text-[#20C997]",
+  indigo: "bg-status-info-soft/10 text-brand-accent dark:text-brand-accent",
+  amber: "bg-status-warning/10 text-status-warning dark:text-status-warning",
+  slate: "bg-muted text-muted-foreground",
+  emerald: "bg-status-success/10 text-status-success dark:text-status-success",
 };
 
 function StatCard({
@@ -322,17 +328,17 @@ function StatCard({
   loading: boolean;
 }) {
   return (
-    <div className="bg-white dark:bg-[#111111] rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm p-4.5 transition-all hover:shadow-md">
+    <div className="bg-card rounded-2xl border border-border shadow-sm p-4 transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
-        <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${TONES[tone] ?? TONES.slate}`}>
+        <span className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${TONES[tone] ?? TONES.slate}`}>
           {icon}
         </span>
       </div>
-      <div className="mt-3 text-2xl font-bold text-slate-900 dark:text-white tabular-nums font-mono">
-        {loading ? <span className="inline-block w-10 h-7 rounded bg-black/[0.06] dark:bg-white/10 animate-pulse" /> : value}
+      <div className="mt-3 text-2xl font-bold text-foreground tabular-nums" style={heading}>
+        {loading ? <span className="inline-block w-10 h-7 rounded bg-muted animate-pulse" /> : value}
       </div>
-      <div className="text-sm font-bold text-slate-900 dark:text-white">{label}</div>
-      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{hint}</div>
+      <div className="text-sm font-medium text-foreground">{label}</div>
+      <div className="text-xs text-muted-foreground mt-0.5">{hint}</div>
     </div>
   );
 }
@@ -354,14 +360,14 @@ function Panel({
   action?: ReactNode;
 }) {
   return (
-    <section className="bg-white dark:bg-[#111111] rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm">
-      <div className="px-5 py-4 border-b border-black/[0.06] dark:border-white/10 flex items-center gap-2">
+    <section className="bg-card rounded-2xl border border-border shadow-sm">
+      <div className="px-5 py-3.5 border-b border-border flex items-center gap-2">
         {icon}
-        <h2 className="font-bold text-slate-900 dark:text-white" style={heading}>
+        <h2 className="font-semibold text-foreground" style={heading}>
           {title}
         </h2>
         {count !== undefined && (
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-400 bg-black/[0.04] dark:bg-white/[0.06] rounded-full px-2.5 py-0.5 tabular-nums">
+          <span className="text-xs font-semibold text-muted-foreground bg-muted rounded-full px-2 py-0.5 tabular-nums">
             {count}
           </span>
         )}
@@ -375,8 +381,8 @@ function Panel({
 function EmptyState({ icon, text }: { icon: ReactNode; text: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-8 text-center">
-      <span className="text-slate-400 dark:text-slate-500 mb-2">{icon}</span>
-      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{text}</p>
+      <span className="text-muted-foreground/40 mb-2">{icon}</span>
+      <p className="text-sm text-muted-foreground">{text}</p>
     </div>
   );
 }
@@ -388,13 +394,13 @@ function ToolCatalogue({ tools, loading }: { tools: CatalogueEntry[]; loading: b
   return (
     <Panel
       title="MCP Tool Catalogue"
-      icon={<Boxes className="w-5 h-5 text-[#20C997]" />}
+      icon={<Boxes className="w-5 h-5 text-brand-accent dark:text-brand-accent" />}
       count={tools.length}
     >
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-20 rounded-xl bg-black/[0.04] dark:bg-white/5 animate-pulse" />
+            <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
           ))}
         </div>
       ) : tools.length === 0 ? (
@@ -404,25 +410,25 @@ function ToolCatalogue({ tools, loading }: { tools: CatalogueEntry[]; loading: b
           {tools.map(({ plugin, tool }) => (
             <div
               key={`${plugin}.${tool.name}`}
-              className="group border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-3.5 transition-all hover:border-[#20C997]/40 hover:shadow-sm"
+              className="group border border-border rounded-xl p-3.5 transition-all hover:border-brand-accent/60 hover:shadow-sm motion-safe:hover:-translate-y-0.5"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 group-hover:bg-[#20C997]/10 group-hover:text-[#20C997] transition-colors shrink-0 font-bold">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-muted text-muted-foreground group-hover:bg-status-info-soft/10 group-hover:text-brand-accent transition-colors shrink-0">
                     <Plug className="w-3.5 h-3.5" />
                   </span>
-                  <code className="text-sm font-bold text-slate-900 dark:text-white font-mono truncate">
-                    <span className="text-slate-500 dark:text-slate-400">{plugin}.</span>
+                  <code className="text-sm font-semibold text-foreground font-mono truncate">
+                    <span className="text-muted-foreground">{plugin}.</span>
                     {tool.name}
                   </code>
                 </div>
                 {tool.destructive && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 bg-amber-500/10 dark:bg-amber-500/15 dark:text-amber-300 rounded-full px-2 py-0.5 shrink-0">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-status-warning bg-status-warning dark:bg-status-warning/15 dark:text-status-warning rounded-full px-2 py-0.5 shrink-0">
                     <AlertTriangle className="w-3 h-3" /> gate
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">{tool.description}</p>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{tool.description}</p>
             </div>
           ))}
         </div>
@@ -454,7 +460,7 @@ function ApprovalsPanel({
   return (
     <Panel
       title="Pending Approvals"
-      icon={<ShieldCheck className="w-5 h-5 text-amber-500" />}
+      icon={<ShieldCheck className="w-5 h-5 text-status-warning" />}
       count={pending.length}
     >
       {pending.length === 0 ? (
@@ -464,21 +470,21 @@ function ApprovalsPanel({
           {pending.map((a) => (
             <li
               key={a.id}
-              className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5"
+              className="rounded-xl border border-status-warning bg-status-warning/60 dark:border-status-warning/30 dark:bg-status-warning/10 p-3.5"
             >
               <div className="flex items-center gap-2">
-                <GitPullRequest className="w-4 h-4 text-amber-600 dark:text-amber-300 shrink-0" />
-                <code className="text-sm font-bold text-slate-900 dark:text-white font-mono truncate">
+                <GitPullRequest className="w-4 h-4 text-status-warning dark:text-status-warning shrink-0" />
+                <code className="text-sm font-semibold text-foreground font-mono truncate">
                   {a.action}
                 </code>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 by {a.requestedBy} · {timeOf(a.createdAt)}
               </p>
               <button
                 onClick={() => approve(a.id)}
                 disabled={working === a.id}
-                className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-bold px-4 py-1.5 rounded-xl bg-[#20C997] text-slate-950 hover:bg-[#1db587] disabled:opacity-60 transition-colors shadow-sm"
+                className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-status-success text-white hover:bg-status-success disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
               >
                 {working === a.id ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
@@ -503,7 +509,7 @@ function ContributionFeed({ events }: { events: ContributionEvent[] }) {
   return (
     <Panel
       title="Contribution Feed"
-      icon={<Activity className="w-5 h-5 text-[#20C997]" />}
+      icon={<Activity className="w-5 h-5 text-status-info" />}
       count={events.length}
     >
       {events.length === 0 ? (
@@ -513,13 +519,13 @@ function ContributionFeed({ events }: { events: ContributionEvent[] }) {
           {recent.map((e) => (
             <li
               key={e.id}
-              className="flex items-center gap-2 py-1.5 px-2 -mx-2 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+              className="flex items-center gap-2 py-1.5 px-2 -mx-2 rounded-lg hover:bg-muted/60 transition-colors"
             >
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 w-14 shrink-0 tabular-nums font-mono">
+              <span className="text-[11px] text-muted-foreground w-14 shrink-0 tabular-nums">
                 {timeOf(e.timestamp)}
               </span>
               <ActorChip kind={e.actorKind} name={e.actorId} />
-              <span className="ml-auto text-[11px] font-semibold text-slate-600 dark:text-slate-400 bg-black/[0.04] dark:bg-white/[0.06] rounded-full px-2.5 py-0.5">
+              <span className="ml-auto text-[11px] font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
                 {e.kind}
               </span>
             </li>
@@ -538,10 +544,10 @@ function AuditTable({ entries, loading }: { entries: AuditEntry[]; loading: bool
   return (
     <Panel
       title="Audit Log"
-      icon={<ScrollText className="w-5 h-5 text-slate-500 dark:text-slate-400" />}
+      icon={<ScrollText className="w-5 h-5 text-muted-foreground" />}
       count={entries.length}
       action={
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
           <ShieldCheck className="w-3.5 h-3.5" /> immutable
         </span>
       }
@@ -549,7 +555,7 @@ function AuditTable({ entries, loading }: { entries: AuditEntry[]; loading: bool
       {loading ? (
         <div className="space-y-2">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-9 rounded-lg bg-black/[0.04] dark:bg-white/5 animate-pulse" />
+            <div key={i} className="h-9 rounded-lg bg-muted animate-pulse" />
           ))}
         </div>
       ) : entries.length === 0 ? (
@@ -558,7 +564,7 @@ function AuditTable({ entries, loading }: { entries: AuditEntry[]; loading: bool
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide border-b border-black/[0.06] dark:border-white/10">
+              <tr className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b border-border">
                 <th className="py-2.5 pr-4">Time</th>
                 <th className="py-2.5 pr-4">Actor</th>
                 <th className="py-2.5 pr-4">Action</th>
@@ -566,18 +572,18 @@ function AuditTable({ entries, loading }: { entries: AuditEntry[]; loading: bool
                 <th className="py-2.5 pr-4">Result</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/[0.06] dark:divide-white/10">
+            <tbody>
               {rows.map((e) => (
                 <tr
                   key={e.id}
-                  className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                  className="border-b border-border/60 hover:bg-muted/50 transition-colors"
                 >
-                  <td className="py-2.5 pr-4 text-slate-500 dark:text-slate-400 tabular-nums font-mono">{timeOf(e.timestamp)}</td>
+                  <td className="py-2.5 pr-4 text-muted-foreground tabular-nums">{timeOf(e.timestamp)}</td>
                   <td className="py-2.5 pr-4">
                     <ActorChip kind={e.actorKind} name={e.actor} />
                   </td>
-                  <td className="py-2.5 pr-4 font-mono text-xs font-semibold text-slate-900 dark:text-white">{e.action}</td>
-                  <td className="py-2.5 pr-4 text-slate-500 dark:text-slate-400">{e.sourceTool}</td>
+                  <td className="py-2.5 pr-4 font-mono text-xs text-foreground">{e.action}</td>
+                  <td className="py-2.5 pr-4 text-muted-foreground">{e.sourceTool}</td>
                   <td className="py-2.5 pr-4">
                     <ResultPill result={e.result} />
                   </td>
@@ -638,17 +644,17 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
   };
 
   const selectCls =
-    "mt-1 w-full border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 text-sm bg-white dark:bg-[#111111] text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#20C997]";
+    "mt-1 w-full border border-input rounded-lg px-2.5 py-2 text-sm bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-ring";
 
   return (
     <Panel
       title="Invoke a Tool"
-      icon={<Play className="w-5 h-5 text-[#20C997]" />}
-      action={<span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">MCP Inspector</span>}
+      icon={<Play className="w-5 h-5 text-brand-accent dark:text-brand-accent" />}
+      action={<span className="text-[11px] font-medium text-muted-foreground">MCP Inspector</span>}
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="text-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tool</span>
+          <span className="text-xs font-medium text-muted-foreground">Tool</span>
           <select value={toolKey} onChange={(e) => setToolKey(e.target.value)} className={selectCls}>
             {tools.map((t) => (
               <option key={`${t.plugin}.${t.tool.name}`} value={`${t.plugin}.${t.tool.name}`}>
@@ -659,7 +665,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
           </select>
         </label>
         <label className="text-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Actor</span>
+          <span className="text-xs font-medium text-muted-foreground">Actor</span>
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as "human" | "agent")}
@@ -670,7 +676,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
           </select>
         </label>
         <label className="text-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Role</span>
+          <span className="text-xs font-medium text-muted-foreground">Role</span>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as (typeof ROLES)[number])}
@@ -686,24 +692,24 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
       </div>
 
       <label className="text-sm block mt-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Params (JSON)</span>
+        <span className="text-xs font-medium text-muted-foreground">Params (JSON)</span>
         <textarea
           value={params}
           onChange={(e) => setParams(e.target.value)}
           rows={3}
           spellCheck={false}
-          className="mt-1 w-full border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 font-mono text-xs bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#20C997]"
+          className="mt-1 w-full border border-input rounded-lg px-2.5 py-2 font-mono text-xs bg-muted/40 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-ring"
           placeholder='{"repo":"acme/app","path":"README.md"}'
         />
       </label>
 
       {selected?.tool.destructive && (
-        <p className="text-xs text-amber-700 dark:text-amber-300 mt-2 flex items-start gap-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">
-          <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-500" />
+        <p className="text-xs text-status-warning dark:text-status-warning mt-2 flex items-start gap-1.5 bg-status-warning dark:bg-status-warning/10 border border-status-warning dark:border-status-warning/20 rounded-lg px-2.5 py-2">
+          <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
           <span>
-            Destructive — first call returns <code className="font-mono font-bold">pending_approval</code>;
+            Destructive — first call returns <code className="font-mono">pending_approval</code>;
             approve it in the panel, then re-run with the{" "}
-            <code className="font-mono font-bold">approvalRequestId</code> added to params.
+            <code className="font-mono">approvalRequestId</code> added to params.
           </span>
         </p>
       )}
@@ -711,19 +717,19 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
       <button
         onClick={run}
         disabled={running}
-        className="mt-4 inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm transition-all disabled:opacity-60"
+        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-brand-accent text-white hover:bg-brand-accent disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
       >
         {running ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         Invoke
       </button>
 
-      {error && <p className="text-sm font-medium text-red-600 dark:text-red-400 mt-2">{error}</p>}
+      {error && <p className="text-sm text-status-error dark:text-status-error mt-2">{error}</p>}
       {result && (
         <pre
           className={`mt-3 text-xs rounded-xl p-3.5 overflow-x-auto ring-1 ring-inset ${
             result.ok
-              ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 ring-emerald-500/20"
-              : "bg-amber-500/10 text-amber-800 dark:text-amber-300 ring-amber-500/20"
+              ? "bg-status-success text-emerald-900 ring-emerald-600/15 dark:bg-status-success/10 dark:text-status-success dark:ring-emerald-500/25"
+              : "bg-status-warning text-amber-900 ring-amber-600/15 dark:bg-status-warning/10 dark:text-status-warning dark:ring-amber-500/25"
           }`}
         >
           {JSON.stringify(result, null, 2)}

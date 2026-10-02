@@ -59,7 +59,7 @@ export function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="mb-1 text-3xl font-semibold">{analyticsData.activeMentees + analyticsData.completedMentees}</div>
-            <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+            <div className="flex items-center gap-1 text-sm text-status-success dark:text-status-success">
               <TrendingUp className="h-4 w-4" />
               <span>+25% from last quarter</span>
             </div>
@@ -86,7 +86,7 @@ export function Analytics() {
             <div className="mb-1 text-3xl font-semibold">
               ${analyticsData.totalRevenue.toLocaleString()}
             </div>
-            <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+            <div className="flex items-center gap-1 text-sm text-status-success dark:text-status-success">
               <TrendingUp className="h-4 w-4" />
               <span>+22% from last month</span>
             </div>
@@ -212,7 +212,7 @@ export function Analytics() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <CheckCircle className="h-5 w-5 text-status-success dark:text-status-success" />
               <CardTitle>Success Rate</CardTitle>
             </div>
           </CardHeader>
@@ -225,7 +225,7 @@ export function Analytics() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <DollarSign className="h-5 w-5 text-status-pending dark:text-status-pending" />
               <CardTitle>Avg. Revenue/Mentee</CardTitle>
             </div>
           </CardHeader>
@@ -243,12 +243,12 @@ export function Analytics() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg bg-purple-50 p-3 dark:bg-purple-500/10">
+            <div className="flex items-center justify-between rounded-lg bg-status-pending p-3 dark:bg-status-pending/10">
               <div>
                 <h4 className="font-medium">Total Equity Distributed</h4>
                 <p className="text-sm text-muted-foreground">Across all equity-based mentorships</p>
               </div>
-              <div className="text-2xl font-semibold text-purple-600 dark:text-purple-400">
+              <div className="text-2xl font-semibold text-status-pending dark:text-status-pending">
                 {analyticsData.equityDistributed}%
               </div>
             </div>

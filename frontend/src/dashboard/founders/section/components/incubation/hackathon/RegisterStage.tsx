@@ -62,28 +62,28 @@ export function RegisterStage() {
   } | null>(null);
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading live hackathons...</p>;
+    return <p className="text-sm text-text-muted">Loading live hackathons...</p>;
   }
 
   if (loadError) {
-    return <p className="text-sm text-red-600">Live hackathons are unavailable: {loadError}</p>;
+    return <p className="text-sm text-status-error">Live hackathons are unavailable: {loadError}</p>;
   }
 
   if (!hackathon && !success) {
     return (
-      <div className="border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10 rounded-2xl p-5">
-        <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Pick a hackathon to register for.</p>
+      <div className="border border-status-warning bg-status-warning-soft rounded-xl p-5">
+        <p className="text-sm text-amber-900">Pick a hackathon to register for.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
           {allHackathons.map((h) => (
             <button
               key={h.id}
               type="button"
               onClick={() => setHackathonId(h.id)}
-              className="text-left border border-black/[0.08] dark:border-white/10 rounded-xl p-3.5 bg-white dark:bg-[#1a1a1a] hover:border-[#0066ff] dark:hover:border-[#58a6ff] transition-all"
+              className="text-left border border-border-default rounded-lg p-3 bg-surface-primary hover:border-violet-300"
             >
-              <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Hackathon</p>
-              <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">{h.title}</p>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">{h.theme}</p>
+              <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Hackathon</p>
+              <p className="text-sm font-semibold text-text-primary">{h.title}</p>
+              <p className="text-xs text-text-muted mt-1 line-clamp-2">{h.theme}</p>
             </button>
           ))}
         </div>
@@ -149,17 +149,15 @@ export function RegisterStage() {
   }
 
   return (
-    <div className="border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] max-w-2xl">
+    <div className="border border-border-default rounded-xl p-6 bg-surface-primary max-w-2xl">
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-xl bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]">
-          <Trophy className="w-5 h-5" />
-        </div>
-        <h2 className="text-base font-bold text-slate-900 dark:text-white">Register for {hackathon!.title}</h2>
+        <Trophy className="w-5 h-5 text-violet-600" />
+        <h2 className="text-base font-semibold text-text-primary">Register for {hackathon!.title}</h2>
       </div>
 
       <div className="space-y-5">
         <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5">
             Team name
           </label>
           <input
@@ -167,13 +165,13 @@ export function RegisterStage() {
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
             placeholder="BrightBridge"
-            className="w-full text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white focus:outline-none focus:border-[#0066ff] focus:ring-2 focus:ring-[#0066ff]/20 transition-all"
+            className="w-full text-sm border border-border-strong rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-500"
           />
-          {errors.teamName && <p className="text-xs text-rose-500 mt-1">{errors.teamName}</p>}
+          {errors.teamName && <p className="text-xs text-rose-600 mt-1">{errors.teamName}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
             Team size
           </label>
           <div className="flex gap-2">
@@ -182,41 +180,41 @@ export function RegisterStage() {
                 key={n}
                 type="button"
                 onClick={() => setTeamSize(n)}
-                className={`flex-1 py-2 text-sm font-semibold rounded-xl border transition-all ${
+                className={`flex-1 py-2 text-sm font-medium rounded-lg border ${
                   teamSize === n
-                    ? "border-[#0066ff] bg-[#0066ff]/10 text-[#0066ff] dark:text-[#58a6ff]"
-                    : "border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
+                    ? "border-violet-500 bg-violet-50 text-violet-700"
+                    : "border-border-strong text-text-secondary hover:bg-background-primary"
                 }`}
               >
                 {n}
               </button>
             ))}
           </div>
-          {errors.teamSize && <p className="text-xs text-rose-500 mt-1">{errors.teamSize}</p>}
+          {errors.teamSize && <p className="text-xs text-rose-600 mt-1">{errors.teamSize}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
             Roles to fill ({selectedRoles.length} selected)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {founderProfile.openRoles.map((role) => (
-              <label key={role} className="flex items-center gap-2.5 text-sm border border-black/[0.08] dark:border-white/10 rounded-xl px-3.5 py-2.5 cursor-pointer bg-white dark:bg-[#1a1a1a] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors">
+              <label key={role} className="flex items-center gap-2 text-sm border border-border-default rounded-lg px-3 py-2 cursor-pointer hover:bg-background-primary">
                 <input
                   type="checkbox"
                   checked={selectedRoles.includes(role)}
                   onChange={() => toggleRole(role)}
-                  className="rounded text-[#0066ff] focus:ring-[#0066ff]"
+                  className="rounded text-violet-600 focus:ring-violet-500"
                 />
-                <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">{role}</span>
+                <span className="text-text-secondary">{role}</span>
               </label>
             ))}
           </div>
-          {errors.roles && <p className="text-xs text-rose-500 mt-1">{errors.roles}</p>}
+          {errors.roles && <p className="text-xs text-rose-600 mt-1">{errors.roles}</p>}
         </div>
 
-        <div className="flex justify-between items-center pt-4 border-t border-black/[0.06] dark:border-white/10">
-          <Link to="/incubation-hub?panel=hackathon" className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition-colors">
+        <div className="flex justify-between items-center pt-3 border-t border-border-subtle">
+          <Link to="/incubation-hub?panel=hackathon" className="text-xs font-medium text-text-muted hover:text-text-primary flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" />
             Back
           </Link>
@@ -224,7 +222,7 @@ export function RegisterStage() {
             type="button"
             onClick={() => void handleSubmit()}
             disabled={submitting}
-            className="text-xs font-bold px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all disabled:opacity-40"
+            className="text-xs font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
           >
             {submitting ? "Registering..." : "Confirm & generate invite link"}
           </button>
@@ -263,42 +261,42 @@ function SuccessCard({
   const wa = `https://wa.me/?text=${encodeURIComponent(`Join ${teamName} for ${hackathonTitle}: ${url}`)}`;
 
   return (
-    <div className="border border-emerald-500/20 bg-emerald-500/10 rounded-2xl p-6 max-w-2xl">
+    <div className="border border-status-success bg-status-success-soft rounded-xl p-6 max-w-2xl">
       <div className="flex items-center gap-2 mb-3">
-        <Check className="w-5 h-5 text-emerald-500" />
-        <h2 className="text-base font-bold text-emerald-900 dark:text-emerald-200">You're registered as team leader for {hackathonTitle}</h2>
+        <Check className="w-5 h-5 text-status-success" />
+        <h2 className="text-base font-semibold text-emerald-900">You're registered as team leader for {hackathonTitle}</h2>
       </div>
-      <p className="text-sm text-emerald-800 dark:text-emerald-300 mb-4">Share this link with collaborators to invite them to {teamName}:</p>
+      <p className="text-sm text-status-success mb-4">Share this link with collaborators to invite them to {teamName}:</p>
       <div className="flex items-center gap-2 mb-4">
         <input
           type="text"
           readOnly
           value={url}
-          className="flex-1 text-xs border border-emerald-500/20 rounded-xl px-3.5 py-2.5 bg-white dark:bg-[#1a1a1a] text-slate-700 dark:text-slate-300 font-mono truncate outline-none"
+          className="flex-1 text-xs border border-status-success rounded-lg px-3 py-2 bg-surface-primary text-text-secondary font-mono truncate"
           aria-label="Invite link"
         />
         <button
           type="button"
           onClick={handleCopy}
-          className="text-xs font-bold px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-colors"
+          className="text-xs font-medium px-3 py-2 rounded-lg bg-status-success text-white hover:bg-status-success flex items-center gap-1"
         >
           {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
-        <a href={mailto} className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 bg-white dark:bg-[#1a1a1a] hover:bg-emerald-50 dark:hover:bg-emerald-500/20 flex items-center gap-1.5 transition-colors">
+        <a href={mailto} className="text-xs font-medium px-3 py-1.5 rounded-lg border border-status-success text-status-success bg-surface-primary hover:bg-status-success-soft flex items-center gap-1">
           <Mail className="w-3.5 h-3.5" />
           Email
         </a>
-        <a href={wa} target="_blank" rel="noreferrer noopener" className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 bg-white dark:bg-[#1a1a1a] hover:bg-emerald-50 dark:hover:bg-emerald-500/20 flex items-center gap-1.5 transition-colors">
+        <a href={wa} target="_blank" rel="noreferrer noopener" className="text-xs font-medium px-3 py-1.5 rounded-lg border border-status-success text-status-success bg-surface-primary hover:bg-status-success-soft flex items-center gap-1">
           <Send className="w-3.5 h-3.5" />
           WhatsApp
         </a>
         <button
           type="button"
           onClick={onFindCollaborators}
-          className="text-xs font-bold px-3.5 py-1.5 rounded-xl border border-[#0066ff]/20 text-[#0066ff] dark:text-[#58a6ff] bg-[#0066ff]/10 hover:bg-[#0066ff]/20 transition-all"
+          className="text-xs font-medium px-3 py-1.5 rounded-lg border border-violet-300 text-violet-700 bg-surface-primary hover:bg-violet-50"
         >
           Find Hackathon Collaborator →
         </button>

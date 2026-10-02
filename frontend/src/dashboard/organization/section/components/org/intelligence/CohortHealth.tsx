@@ -9,14 +9,14 @@ import {
 } from "@/lib/api/organization";
 
 const BAND_STYLES: Record<HealthBand, { dot: string; text: string; label: string }> = {
-  green: { dot: "bg-[#20C997]", text: "text-[#20C997]", label: "Healthy" },
-  amber: { dot: "bg-amber-500", text: "text-amber-600 dark:text-amber-400", label: "At risk" },
-  red: { dot: "bg-rose-500", text: "text-rose-600 dark:text-rose-400", label: "Critical" },
+  green: { dot: "bg-status-success", text: "text-status-success", label: "Healthy" },
+  amber: { dot: "bg-status-warning", text: "text-status-warning", label: "At risk" },
+  red: { dot: "bg-rose-500", text: "text-rose-700", label: "Critical" },
 };
 
 function EmptyPanel({ children }: { children: string }) {
   return (
-    <div className="flex min-h-[160px] items-center justify-center rounded-xl border border-dashed border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] px-6 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+    <div className="flex min-h-[160px] items-center justify-center rounded-lg border border-dashed border-border-default bg-background-primary px-6 text-center text-sm text-text-muted">
       {children}
     </div>
   );
@@ -70,22 +70,22 @@ export function CohortHealth() {
 
   const summaryCards = data
     ? [
-        { label: "Startups", value: data.summary.total, tone: "text-slate-900 dark:text-white" },
-        { label: "Healthy", value: data.summary.green, tone: "text-[#20C997]" },
-        { label: "At risk", value: data.summary.amber, tone: "text-amber-500 dark:text-amber-400" },
-        { label: "Critical", value: data.summary.red, tone: "text-rose-500 dark:text-rose-400" },
-        { label: "Avg GSIS", value: data.summary.avgGsis, tone: "text-[#20C997]" },
+        { label: "Startups", value: data.summary.total, tone: "text-text-primary" },
+        { label: "Healthy", value: data.summary.green, tone: "text-status-success" },
+        { label: "At risk", value: data.summary.amber, tone: "text-status-warning" },
+        { label: "Critical", value: data.summary.red, tone: "text-rose-600" },
+        { label: "Avg GSIS", value: data.summary.avgGsis, tone: "text-brand-accent" },
       ]
     : [];
 
   return (
-    <div className="space-y-6 transition-colors">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           <select
             value={stage}
             onChange={(event) => setStage(event.target.value)}
-            className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111111] px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-[#20C997] focus:ring-1 focus:ring-[#20C997]"
+            className="rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm text-text-secondary"
           >
             <option value="">All stages</option>
             {(data?.stages ?? []).map((s) => (
@@ -97,7 +97,7 @@ export function CohortHealth() {
           <select
             value={riskLevel}
             onChange={(event) => setRiskLevel(event.target.value as HealthBand | "")}
-            className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111111] px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-[#20C997] focus:ring-1 focus:ring-[#20C997]"
+            className="rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm text-text-secondary"
           >
             <option value="">All health</option>
             <option value="green">Healthy</option>
@@ -112,39 +112,39 @@ export function CohortHealth() {
             void loadInterventions();
           }}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#20C997] hover:border-[#20C997]/30 transition-all disabled:opacity-50 shadow-sm"
+          className="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-3 py-2 text-sm font-medium text-text-secondary hover:bg-background-primary disabled:opacity-50"
         >
-          <RefreshCw className={`h-4 w-4 text-[#20C997] ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </button>
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-bold text-red-600 dark:text-red-400">
-          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-status-error bg-status-error-soft px-4 py-3 text-sm text-status-error">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
       {loading && !data ? (
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-6 py-16 text-center text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+        <div className="rounded-lg border border-border-default bg-surface-primary px-6 py-12 text-center text-sm text-text-muted">
           Loading cohort health...
         </div>
       ) : data ? (
         <>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
+          <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
             {summaryCards.map((card) => (
-              <div key={card.label} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 shadow-sm transition-all hover:border-[#20C997]/30">
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{card.label}</p>
-                <p className={`mt-2 text-3xl font-black font-mono ${card.tone}`}>{card.value}</p>
+              <div key={card.label} className="rounded-lg border border-border-default bg-surface-primary p-5 shadow-sm">
+                <p className="text-sm text-text-muted">{card.label}</p>
+                <p className={`mt-2 text-3xl font-bold ${card.tone}`}>{card.value}</p>
               </div>
             ))}
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Ranked cohort grid */}
-            <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm lg:col-span-2">
-              <h2 className="mb-4 text-base font-bold text-slate-900 dark:text-white">Portfolio ranked by GSIS</h2>
+            <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm lg:col-span-2">
+              <h2 className="mb-4 text-lg font-bold text-text-primary">Portfolio ranked by GSIS</h2>
               {data.cohort.length > 0 ? (
                 <div className="space-y-3">
                   {data.cohort.map((row) => {
@@ -152,18 +152,18 @@ export function CohortHealth() {
                     return (
                       <div
                         key={row.id}
-                        className="flex items-center gap-4 rounded-xl border border-black/[0.05] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-4"
+                        className="flex items-center gap-4 rounded-lg border border-border-subtle p-4"
                       >
                         <span className={`h-3 w-3 flex-shrink-0 rounded-full ${band.dot}`} />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-bold text-slate-900 dark:text-white">{row.title}</p>
-                          <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                          <p className="truncate font-medium text-text-primary">{row.title}</p>
+                          <p className="text-xs text-text-muted">
                             {row.industry || "—"} · {row.stage} · {row.daysInactive}d inactive
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-base font-black font-mono text-slate-900 dark:text-white">{row.gsisScore}</p>
-                          <p className={`text-[10px] font-bold ${band.text}`}>{band.label}</p>
+                          <p className="text-lg font-bold text-text-primary">{row.gsisScore}</p>
+                          <p className={`text-xs font-medium ${band.text}`}>{band.label}</p>
                         </div>
                       </div>
                     );
@@ -178,16 +178,16 @@ export function CohortHealth() {
 
             {/* Alerts + AI interventions */}
             <div className="space-y-6">
-              <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
-                <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
-                  <TrendingDown className="h-5 w-5 text-amber-500 dark:text-amber-400" /> Alerts
+              <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-text-primary">
+                  <TrendingDown className="h-5 w-5 text-status-warning" /> Alerts
                 </h2>
                 {data.alerts.length > 0 ? (
                   <div className="space-y-3">
                     {data.alerts.map((alert, index) => (
-                      <div key={`${alert.projectId}-${index}`} className="flex items-start gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-300">
-                        <Clock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-500 dark:text-amber-400" />
-                        <p>{alert.message}</p>
+                      <div key={`${alert.projectId}-${index}`} className="flex items-start gap-2 text-sm">
+                        <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-status-warning" />
+                        <p className="text-text-secondary">{alert.message}</p>
                       </div>
                     ))}
                   </div>
@@ -196,23 +196,23 @@ export function CohortHealth() {
                 )}
               </section>
 
-              <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-sm">
-                <h2 className="mb-1 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
-                  <Sparkles className="h-5 w-5 text-[#20C997]" /> Interventions
+              <section className="rounded-lg border border-border-default bg-surface-primary p-6 shadow-sm">
+                <h2 className="mb-1 flex items-center gap-2 text-lg font-bold text-text-primary">
+                  <Sparkles className="h-5 w-5 text-brand-accent" /> Interventions
                 </h2>
                 {interventions && !interventions.aiAvailable && (
-                  <p className="mb-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                  <p className="mb-3 text-xs text-text-muted">
                     AI recommendations unavailable — showing rule-based guidance.
                   </p>
                 )}
                 {interventionsLoading ? (
-                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Analysing portfolio...</p>
+                  <p className="text-sm text-text-muted">Analysing portfolio...</p>
                 ) : interventions && interventions.recommendations.length > 0 ? (
                   <div className="space-y-3">
                     {interventions.recommendations.map((rec) => (
-                      <div key={rec.projectId} className="rounded-xl border border-black/[0.05] dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-3">
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">{rec.title}</p>
-                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{rec.recommendation}</p>
+                      <div key={rec.projectId} className="rounded-lg border border-border-subtle p-3">
+                        <p className="text-sm font-medium text-text-primary">{rec.title}</p>
+                        <p className="mt-1 text-sm text-text-muted">{rec.recommendation}</p>
                       </div>
                     ))}
                   </div>

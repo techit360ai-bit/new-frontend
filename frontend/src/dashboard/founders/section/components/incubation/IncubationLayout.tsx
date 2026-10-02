@@ -31,8 +31,8 @@ export default function IncubationLayout() {
   );
 
   return (
-    <div className="app-incubation-layout flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-col md:h-full md:flex-row font-bricolage bg-slate-50 dark:bg-[#0a0a0a]">
-      <aside className="flex w-full shrink-0 flex-row items-stretch gap-2 overflow-x-auto border-b border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-2 md:w-20 md:flex-col md:overflow-visible md:border-b-0 md:border-r md:py-4 transition-colors duration-200">
+    <div className="app-incubation-layout flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-col md:h-full md:flex-row">
+      <aside className="flex w-full shrink-0 flex-row items-stretch gap-2 overflow-x-auto border-b border-border-default bg-surface-primary p-2 md:w-16 md:flex-col md:overflow-visible md:border-b-0 md:border-r md:py-4">
         <SidebarPill
           label="Main"
           icon={<Brain className="w-5 h-5" />}
@@ -87,20 +87,18 @@ function SidebarPill({
     <button
       type="button"
       onClick={onClick}
-      className={`relative mx-0 flex min-w-[72px] flex-1 flex-col items-center gap-1.5 rounded-xl py-2.5 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 md:mx-2 md:min-w-0 md:flex-none md:py-3.5 group ${
+      className={`relative mx-0 flex min-w-[72px] flex-1 flex-col items-center gap-1 rounded-lg py-2 text-[10px] font-medium uppercase tracking-wider transition md:mx-2 md:min-w-0 md:flex-none md:py-3 ${
         active
-          ? "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 shadow-sm"
-          : "text-slate-500 dark:text-slate-400 hover:bg-[#20C997]/5 hover:text-[#20C997] border border-transparent"
+          ? "border-l-2 border-violet-500 bg-violet-50 text-violet-700"
+          : "text-text-muted hover:bg-background-primary"
       }`}
       aria-pressed={active}
       aria-label={label}
     >
-      <div className={`transition-transform duration-200 group-hover:scale-110 ${active ? "text-[#20C997]" : ""}`}>
-        {icon}
-      </div>
-      <span className="font-black text-[10px] tracking-wider">{label}</span>
+      {icon}
+      <span>{label}</span>
       {badge !== undefined && (
-        <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#20C997] text-slate-950 text-[10px] font-black flex items-center justify-center shadow-sm">
+        <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-status-warning-soft text-status-warning text-[10px] font-semibold flex items-center justify-center">
           {badge}
         </span>
       )}

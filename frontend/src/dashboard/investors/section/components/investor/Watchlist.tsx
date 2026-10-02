@@ -6,6 +6,7 @@ import {
   TrendingUp,
   TrendingDown,
   Bell,
+  BellOff,
   Trash2,
   ChevronDown,
   ChevronRight,
@@ -13,8 +14,6 @@ import {
   Briefcase,
   BarChart2,
   ArrowRight,
-  Sparkles,
-  X,
 } from 'lucide-react';
 
 export function Watchlist() {
@@ -22,7 +21,6 @@ export function Watchlist() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertStates, setAlertStates] = useState<WatchlistPreferences>({
     velocity: true,
     risk: true,
@@ -71,80 +69,31 @@ export function Watchlist() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-background-inverse">
       {/* Header */}
-      <div className="border-b border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-4 py-6 sm:px-8">
+      <div className="border-b border-border-inverse bg-surface-inverse px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Watchlist & Signals
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 flex items-center gap-1">
-                <Eye className="w-3 h-3" /> Live Monitor
-              </span>
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-              Track execution velocity, risk shifts, and get real-time startup performance alerts
-            </p>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">Watchlist & Signals</h1>
+            <p className="text-text-on-inverse-muted mt-1">Track execution velocity and get real-time alerts</p>
           </div>
-          <button
-            onClick={() => setShowAlertModal(!showAlertModal)}
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#20C997]/10 px-4 py-2.5 font-semibold text-[#20C997] border border-[#20C997]/20 transition-all hover:bg-[#20C997]/20"
-          >
+          <button className="app-touch-target inline-flex w-full items-center justify-center gap-2 rounded-lg bg-status-info/10 px-4 py-2 font-medium text-status-info transition-all hover:bg-status-info/20 sm:w-auto">
             <Bell className="w-4 h-4" />
-            Manage Alert Preferences
+            Manage Alerts
           </button>
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8">
         {error && (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
 
-        {/* Alert preferences panel */}
-        {showAlertModal && (
-          <div className="bg-white dark:bg-[#111111] border border-[#20C997]/30 rounded-2xl p-6 shadow-md transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Bell className="w-5 h-5 text-[#20C997]" /> Signal & Alert Thresholds
-              </h3>
-              <button
-                onClick={() => setShowAlertModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <AlertCard
-                title="Execution Velocity Shifts"
-                description="Alert when a watched startup changes speed by >15% over 7 days."
-                enabled={alertStates.velocity}
-                onToggle={() => toggleAlert('velocity')}
-              />
-              <AlertCard
-                title="Risk Level Anomalies"
-                description="Alert when compliance or burn metrics trigger high-risk status."
-                enabled={alertStates.risk}
-                onToggle={() => toggleAlert('risk')}
-              />
-              <AlertCard
-                title="Milestone Completion"
-                description="Alert when key roadmap goals or hackathon demos are verified."
-                enabled={alertStates.milestone}
-                onToggle={() => toggleAlert('milestone')}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-surface-inverse border border-border-inverse rounded-lg overflow-hidden">
           {/* Table Header */}
-          <div className="hidden grid-cols-12 gap-4 border-b border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 md:grid">
+          <div className="hidden grid-cols-12 gap-4 border-b border-border-inverse bg-surface-inverse-muted/50 px-6 py-4 text-sm font-medium text-text-on-inverse-muted md:grid">
             <div className="col-span-3">Startup</div>
             <div className="col-span-1 text-center">Readiness</div>
             <div className="col-span-1 text-center">7d Δ</div>
@@ -157,19 +106,19 @@ export function Watchlist() {
           </div>
 
           {/* Table Body */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/10">
+          <div className="divide-y divide-gray-800">
             {isLoading && (
-              <div className="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+              <div className="px-6 py-10 text-center text-sm text-text-on-inverse-muted">
                 Loading live watchlist...
               </div>
             )}
 
             {!isLoading && watchedStartups.length === 0 && (
-              <div className="px-6 py-12 text-center">
-                <Eye className="mx-auto mb-3 h-8 w-8 text-slate-400 dark:text-slate-600" />
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No live watchlist records</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
-                  Click 'Watch' on any startup in the Deal Intelligence dashboard to add it to your watchlist.
+              <div className="px-6 py-10 text-center">
+                <Eye className="mx-auto mb-3 h-8 w-8 text-text-on-inverse-disabled" />
+                <h3 className="text-lg font-semibold text-white mb-1">No live watchlist records</h3>
+                <p className="text-sm text-text-on-inverse-muted">
+                  Startups will appear after persisted investor watchlist records are created.
                 </p>
               </div>
             )}
@@ -183,13 +132,13 @@ export function Watchlist() {
                 <div key={startup.id}>
                   {/* Main row */}
                   <div
-                    className={`grid cursor-pointer grid-cols-2 gap-4 px-4 py-5 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.03] sm:px-6 md:grid-cols-12 md:py-4 ${
-                      isExpanded ? 'bg-slate-50 dark:bg-white/[0.04]' : ''
+                    className={`grid cursor-pointer grid-cols-2 gap-4 px-4 py-5 transition-colors hover:bg-surface-inverse-muted/30 sm:px-6 md:grid-cols-12 md:py-4 ${
+                      isExpanded ? 'bg-surface-inverse-muted/20' : ''
                     }`}
                     onClick={() => toggleExpanded(startup.id)}
                   >
-                    <div className="col-span-2 flex items-center gap-3 md:col-span-3">
-                      <span className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <div className="col-span-2 flex items-center gap-2 md:col-span-3">
+                      <span className="text-text-on-inverse-disabled hover:text-text-on-inverse-secondary transition-colors">
                         {isExpanded ? (
                           <ChevronDown className="w-4 h-4" />
                         ) : (
@@ -199,31 +148,31 @@ export function Watchlist() {
                       <div>
                         <Link
                           to={`/investor/risk-radar/${startup.id}`}
-                          className="font-bold text-slate-900 dark:text-white hover:text-[#20C997] dark:hover:text-[#20C997] transition-colors"
+                          className="font-semibold text-white hover:text-status-success transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {startup.name}
                         </Link>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-sm text-text-on-inverse-muted mt-0.5">
                           {startup.sector} · {startup.region}
                         </p>
                       </div>
                     </div>
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
-                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 md:hidden">Readiness</span>
-                      <p className="font-mono font-bold text-slate-900 dark:text-white">{startup.readinessScore}</p>
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-on-inverse-disabled md:hidden">Readiness</span>
+                      <p className="font-mono font-semibold text-white">{startup.readinessScore}</p>
                     </div>
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
-                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 md:hidden">7d change</span>
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-on-inverse-disabled md:hidden">7d change</span>
                       <div
-                        className={`inline-flex items-center gap-1 text-sm font-semibold ${
+                        className={`inline-flex items-center gap-1 text-sm font-medium ${
                           readinessDelta > 0
-                            ? 'text-[#20C997]'
+                            ? 'text-status-success'
                             : readinessDelta < 0
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-slate-500 dark:text-slate-400'
+                            ? 'text-status-error'
+                            : 'text-text-on-inverse-muted'
                         }`}
                       >
                         {readinessDelta > 0 ? (
@@ -237,16 +186,16 @@ export function Watchlist() {
                     </div>
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
-                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 md:hidden">Risk</span>
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-on-inverse-disabled md:hidden">Risk</span>
                       <span
-                        className={`text-xs font-semibold uppercase px-2 py-0.5 rounded-full ${
+                        className={`text-sm font-medium capitalize ${
                           startup.riskLevel === 'low'
-                            ? 'bg-[#20C997]/10 text-[#20C997]'
+                            ? 'text-status-success'
                             : startup.riskLevel === 'moderate'
-                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                            ? 'text-status-warning'
                             : startup.riskLevel === 'high'
-                            ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                            : 'text-slate-500'
+                            ? 'text-status-error'
+                            : 'text-text-on-inverse-muted'
                         }`}
                       >
                         {startup.riskLevel}
@@ -254,10 +203,10 @@ export function Watchlist() {
                     </div>
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
-                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 md:hidden">Risk change</span>
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-on-inverse-disabled md:hidden">Risk change</span>
                       <span
                         className={`text-sm font-medium ${
-                          riskDelta === 'improved' ? 'text-[#20C997]' : 'text-slate-500 dark:text-slate-400'
+                          riskDelta === 'improved' ? 'text-status-success' : 'text-text-on-inverse-muted'
                         }`}
                       >
                         {riskDelta}
@@ -265,35 +214,35 @@ export function Watchlist() {
                     </div>
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:col-span-2 md:items-center md:text-center">
-                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 md:hidden">Revenue</span>
-                      <p className="font-mono font-bold text-slate-900 dark:text-white">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-on-inverse-disabled md:hidden">Revenue</span>
+                      <p className="font-mono font-semibold text-white">
                         ${(startup.mrr / 1000).toFixed(0)}K MRR
                       </p>
                     </div>
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
-                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 md:hidden">Revenue change</span>
-                      <div className="inline-flex items-center gap-1 text-sm font-semibold text-[#20C997]">
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-on-inverse-disabled md:hidden">Revenue change</span>
+                      <div className="inline-flex items-center gap-1 text-sm font-medium text-status-success">
                         <TrendingUp className="w-4 h-4" />
                         +{startup.revenueDelta}%
                       </div>
                     </div>
 
                     <div className="col-span-1 flex flex-col items-start justify-center md:items-center md:text-center">
-                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 md:hidden">Watching</span>
-                      <p className="font-mono font-bold text-[#20C997]">{startup.investorsWatching}</p>
+                      <span className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-on-inverse-disabled md:hidden">Watching</span>
+                      <p className="font-mono text-status-info">{startup.investorsWatching}</p>
                     </div>
 
                     <div className="col-span-1 flex items-end justify-end gap-2 md:items-center">
                       <button
-                        className="p-2 rounded-xl text-slate-400 hover:text-[#20C997] hover:bg-[#20C997]/10 transition-colors"
-                        onClick={(e) => { e.stopPropagation(); setShowAlertModal(true); }}
+                        className="app-touch-target inline-flex items-center justify-center rounded text-status-info transition-colors hover:bg-status-info/10"
+                        onClick={(e) => e.stopPropagation()}
                         aria-label={`Manage alerts for ${startup.name}`}
                       >
                         <Bell className="w-4 h-4" />
                       </button>
                       <button
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                        className="app-touch-target inline-flex items-center justify-center rounded text-status-error transition-colors hover:bg-status-error/10"
                         onClick={(e) => { e.stopPropagation(); void remove(startup.id); }}
                         aria-label={`Remove ${startup.name} from watchlist`}
                       >
@@ -304,90 +253,90 @@ export function Watchlist() {
 
                   {/* About section - expanded */}
                   {isExpanded && (
-                    <div className="border-t border-black/[0.06] dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] px-4 pb-6 pt-4 sm:px-6">
-                      <div className="md:ml-6 space-y-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-semibold tracking-widest text-[#20C997] uppercase">
+                    <div className="border-t border-border-inverse/60 bg-background-inverse-secondary px-4 pb-6 pt-4 sm:px-6 md:pt-2">
+                      <div className="md:ml-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-xs font-mono font-semibold tracking-widest text-status-success uppercase">
                             Project Overview
                           </span>
-                          <div className="flex-1 h-px bg-[#20C997]/20"></div>
+                          <div className="flex-1 h-px bg-status-success/20"></div>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                           {/* What's being built */}
-                          <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 shadow-sm">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="p-1.5 bg-[#20C997]/15 rounded-lg">
-                                <Briefcase className="w-4 h-4 text-[#20C997]" />
+                          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="p-1.5 bg-status-info/15 rounded">
+                                <Briefcase className="w-4 h-4 text-status-info" />
                               </div>
-                              <span className="text-xs font-semibold text-[#20C997] uppercase tracking-wider">
+                              <span className="text-xs font-semibold text-status-info uppercase tracking-wider">
                                 What's Being Built
                               </span>
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                            <p className="text-sm text-text-on-inverse-secondary leading-relaxed">
                               {startup.about.summary || 'No live project overview is available yet.'}
                             </p>
                           </div>
 
                           {/* Use Case */}
-                          <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 shadow-sm">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="p-1.5 bg-purple-500/15 rounded-lg">
-                                <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="p-1.5 bg-status-pending/15 rounded">
+                                <Target className="w-4 h-4 text-status-pending" />
                               </div>
-                              <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+                              <span className="text-xs font-semibold text-status-pending uppercase tracking-wider">
                                 Primary Use Case
                               </span>
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                            <p className="text-sm text-text-on-inverse-secondary leading-relaxed">
                               {startup.about.useCase || 'No live use-case summary is available yet.'}
                             </p>
                           </div>
 
                           {/* Market Size */}
-                          <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 shadow-sm">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="p-1.5 bg-[#20C997]/15 rounded-lg">
-                                <BarChart2 className="w-4 h-4 text-[#20C997]" />
+                          <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="p-1.5 bg-status-success/15 rounded">
+                                <BarChart2 className="w-4 h-4 text-status-success" />
                               </div>
-                              <span className="text-xs font-semibold text-[#20C997] uppercase tracking-wider">
+                              <span className="text-xs font-semibold text-status-success uppercase tracking-wider">
                                 Market Opportunity
                               </span>
                             </div>
-                            <div className="mb-1">
-                              <span className="text-xl font-bold font-mono text-[#20C997]">
+                            <div className="mb-2">
+                              <span className="text-2xl font-bold font-mono text-status-success">
                                 {startup.about.marketSizeValue || '—'}
                               </span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400 ml-1">TAM</span>
+                              <span className="text-xs text-text-on-inverse-disabled ml-1">TAM</span>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            <p className="text-sm text-text-on-inverse-secondary leading-relaxed">
                               {startup.about.marketSize || 'No live market-size note is available yet.'}
                             </p>
                           </div>
                         </div>
 
                         {/* Quick actions */}
-                        <div className="grid gap-3 sm:grid-cols-3">
+                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
                           <Link
                             to={`/investor/risk-radar/${startup.id}`}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#20C997]/10 px-4 py-2.5 text-xs font-semibold text-[#20C997] transition-all hover:bg-[#20C997]/20"
+                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-status-success/10 px-4 py-2 text-sm font-medium text-status-success transition-all hover:bg-status-success/20"
                           >
                             Full Risk Analysis
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <ArrowRight className="w-4 h-4" />
                           </Link>
                           <Link
                             to={`/investor/data-room/${startup.id}`}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-200 dark:bg-white/[0.06] px-4 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all hover:bg-slate-300 dark:hover:bg-white/10"
+                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-status-info/10 px-4 py-2 text-sm font-medium text-status-info transition-all hover:bg-status-info/20"
                           >
                             Data Room
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <ArrowRight className="w-4 h-4" />
                           </Link>
                           <Link
                             to={`/investor/deal-room/${startup.id}`}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-500/10 px-4 py-2.5 text-xs font-semibold text-purple-600 dark:text-purple-400 transition-all hover:bg-purple-500/20"
+                            className="app-touch-target inline-flex items-center justify-center gap-2 rounded-lg bg-status-pending/10 px-4 py-2 text-sm font-medium text-status-pending transition-all hover:bg-status-pending/20"
                           >
                             Deal Room
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <ArrowRight className="w-4 h-4" />
                           </Link>
                         </div>
                       </div>
@@ -399,19 +348,42 @@ export function Watchlist() {
           </div>
         </div>
 
+        {/* Alert Settings */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <AlertCard
+            title="Velocity Spike Alert"
+            description="Get notified when execution velocity increases >20%"
+            enabled={alertStates.velocity}
+            onToggle={() => toggleAlert('velocity')}
+          />
+          <AlertCard
+            title="Risk Shift Alert"
+            description="Alert when risk level changes significantly"
+            enabled={alertStates.risk}
+            onToggle={() => toggleAlert('risk')}
+          />
+          <AlertCard
+            title="Milestone Alert"
+            description="Notification for major milestone completions"
+            enabled={alertStates.milestone}
+            onToggle={() => toggleAlert('milestone')}
+          />
+        </div>
+
         {/* Founder Notification Loop */}
-        <div className="bg-gradient-to-br from-[#20C997]/10 to-teal-500/5 border border-[#20C997]/20 rounded-2xl p-6 shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="p-2.5 bg-[#20C997]/20 rounded-xl shrink-0">
-              <Sparkles className="w-5 h-5 text-[#20C997]" />
+        <div className="mt-6 bg-gradient-to-br from-brand-primary/10 to-status-pending/10 border border-status-info/20 rounded-lg p-6">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-status-info/20 rounded-lg">
+              <Eye className="w-5 h-5 text-status-info" />
             </div>
             <div className="flex-1">
-              <h4 className="text-xs font-bold text-[#20C997] uppercase tracking-wider mb-1">Watchlist Signaling Active</h4>
-              <p className="text-slate-900 dark:text-white font-medium text-sm">
-                Founders see: &ldquo;{watchedStartups.length} verified investors are tracking your real-time metrics.&rdquo;
+              <h4 className="text-sm font-semibold text-status-info mb-2">WATCHLIST LOOP ACTIVE</h4>
+              <p className="text-white">
+                Founders see: &ldquo;{watchedStartups.length} verified investors are watching your project.&rdquo;
               </p>
-              <p className="text-slate-600 dark:text-slate-400 text-xs mt-1 leading-relaxed">
-                This creates active founder momentum, encouraging faster execution and transparent updates across your portfolio pipeline.
+              <p className="text-text-on-inverse-secondary text-sm mt-2">
+                This creates psychological momentum and signals market validation, encouraging faster
+                execution.
               </p>
             </div>
           </div>
@@ -430,23 +402,27 @@ interface AlertCardProps {
 
 function AlertCard({ title, description, enabled, onToggle }: AlertCardProps) {
   return (
-    <div className="bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/10 rounded-xl p-4 flex flex-col justify-between">
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="font-semibold text-slate-900 dark:text-white text-sm">{title}</h4>
-          <span className={`w-2.5 h-2.5 rounded-full ${enabled ? 'bg-[#20C997]' : 'bg-slate-300 dark:bg-white/20'}`} />
+    <div className="bg-surface-inverse border border-border-inverse rounded-lg p-5">
+      <div className="flex items-start justify-between mb-3">
+        <h3 className="font-semibold text-white">{title}</h3>
+        <div className={`p-1.5 rounded-lg ${enabled ? 'bg-status-success/20' : 'bg-surface-inverse-muted'}`}>
+          {enabled ? (
+            <Bell className="w-4 h-4 text-status-success" />
+          ) : (
+            <BellOff className="w-4 h-4 text-text-on-inverse-muted" />
+          )}
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">{description}</p>
       </div>
+      <p className="text-sm text-text-on-inverse-muted mb-4">{description}</p>
       <button
         onClick={onToggle}
-        className={`w-full py-2 rounded-lg text-xs font-semibold transition-all ${
+        className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
           enabled
-            ? 'bg-[#20C997]/15 text-[#20C997] hover:bg-[#20C997]/25'
-            : 'bg-slate-200 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-white/10'
+            ? 'bg-status-success/10 text-status-success hover:bg-status-success/20'
+            : 'bg-surface-inverse-muted text-text-on-inverse-muted hover:bg-gray-700'
         }`}
       >
-        {enabled ? 'Active — Click to Disable' : 'Inactive — Click to Enable'}
+        {enabled ? 'Enabled — Click to Disable' : 'Disabled — Click to Enable'}
       </button>
     </div>
   );

@@ -52,11 +52,11 @@ const AICopilot = ({
       case "critical":
         return "bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800";
       case "medium":
-        return "bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+        return "bg-status-warning-soft dark:bg-amber-950/50 text-status-warning dark:text-status-warning border-status-warning dark:border-amber-800";
       case "low":
-        return "bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800";
+        return "bg-status-info-soft dark:bg-blue-950/50 text-status-info dark:text-status-info border-status-info dark:border-blue-800";
       default:
-        return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+        return "bg-surface-secondary dark:bg-surface-inverse-muted text-text-secondary dark:text-text-on-inverse-secondary";
     }
   };
 
@@ -93,14 +93,14 @@ const AICopilot = ({
           />
 
           {/* Panel */}
-          <div className="fixed right-6 top-20 w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-2xl dark:shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="fixed right-6 top-20 w-96 bg-surface-primary dark:bg-background-inverse border border-border-default dark:border-border-inverse-strong rounded-3xl shadow-2xl dark:shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-linear-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-default dark:border-border-inverse-strong bg-linear-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 animate-pulse">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-status-success animate-pulse">
                   <div className="h-3 w-3 rounded-full bg-green-400"></div>
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">
+                <h3 className="font-semibold text-text-primary dark:text-white">
                   AI Copilot
                 </h3>
               </div>
@@ -111,14 +111,14 @@ const AICopilot = ({
                 }}
                 className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <X className="h-5 w-5 text-text-muted dark:text-text-disabled" />
               </button>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
+                <p className="text-sm font-medium text-text-muted dark:text-text-disabled mb-3">
                   Smart suggestions for right now:
                 </p>
               </div>
@@ -132,9 +132,9 @@ const AICopilot = ({
                       setIsOpen(false);
                       onClose?.();
                     }}
-                    className="w-full flex items-center justify-between p-3.5 rounded-xl border bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left group"
+                    className="w-full flex items-center justify-between p-3.5 rounded-xl border bg-surface-primary dark:bg-surface-inverse-muted/50 hover:bg-background-primary dark:hover:bg-surface-inverse-muted transition-colors text-left group"
                   >
-                    <span className="text-sm text-slate-900 dark:text-slate-100 group-hover:text-slate-700 dark:group-hover:text-white">
+                    <span className="text-sm text-text-primary dark:text-text-on-inverse group-hover:text-text-secondary dark:group-hover:text-white">
                       {suggestion.text}
                     </span>
                     <span
@@ -149,7 +149,7 @@ const AICopilot = ({
               </div>
 
               {/* Action Button */}
-              <button className="w-full mt-4 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm">
+              <button className="w-full mt-4 py-2.5 px-4 rounded-xl border border-border-default dark:border-border-inverse-strong text-text-primary dark:text-text-on-inverse font-medium hover:bg-background-primary dark:hover:bg-surface-inverse-muted transition-colors text-sm">
                 Optimize My Workload
               </button>
             </div>

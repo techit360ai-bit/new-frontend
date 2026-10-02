@@ -78,7 +78,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
       onClick={onClose}
     >
       <div
-        className="bg-bg-surface border border-border-default rounded-2xl w-full max-w-md animate-slide-in"
+        className="bg-surface-primary border border-border-default rounded-2xl w-full max-w-md animate-slide-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -89,7 +89,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted hover:text-text-primary transition-colors"
+            className="p-1.5 rounded-lg hover:bg-surface-secondary text-text-muted hover:text-text-primary transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -97,7 +97,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
 
         <div className="p-5">
           {/* Post preview */}
-          <div className="bg-bg-elevated rounded-xl p-3 mb-5 border border-border-default">
+          <div className="bg-surface-secondary rounded-xl p-3 mb-5 border border-border-default">
             <div
               className="text-[10px] font-medium uppercase tracking-wider mb-1"
               style={{ color: 'var(--text-muted)' }}
@@ -109,7 +109,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
 
           {/* Copy link row */}
           <div className="flex items-center gap-2 mb-5">
-            <div className="flex-1 bg-bg-elevated border border-border-default rounded-lg px-3 py-2.5 text-[11px] text-text-muted font-mono truncate">
+            <div className="flex-1 bg-surface-secondary border border-border-default rounded-lg px-3 py-2.5 text-[11px] text-text-muted font-mono truncate">
               {postUrl}
             </div>
             <button
@@ -134,7 +134,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
             {/* Twitter / X */}
             <button
               onClick={shareToTwitter}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-bg-elevated hover:bg-bg-overlay border border-border-default transition-all group"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-secondary hover:bg-surface-overlay border border-border-default transition-all group"
             >
               <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
             {/* LinkedIn */}
             <button
               onClick={shareToLinkedIn}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-bg-elevated hover:bg-bg-overlay border border-border-default transition-all group"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-secondary hover:bg-surface-overlay border border-border-default transition-all group"
             >
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
@@ -163,7 +163,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
             {/* WhatsApp */}
             <button
               onClick={shareToWhatsApp}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-bg-elevated hover:bg-bg-overlay border border-border-default transition-all group"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-secondary hover:bg-surface-overlay border border-border-default transition-all group"
             >
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
@@ -179,7 +179,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
             {/* Facebook */}
             <button
               onClick={shareToFacebook}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-bg-elevated hover:bg-bg-overlay border border-border-default transition-all group"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-secondary hover:bg-surface-overlay border border-border-default transition-all group"
             >
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
@@ -195,7 +195,7 @@ export function ShareModal({ postId, postTitle, postType, onClose }: ShareModalP
             {/* Telegram */}
             <button
               onClick={shareToTelegram}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-bg-elevated hover:bg-bg-overlay border border-border-default transition-all group"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-secondary hover:bg-surface-overlay border border-border-default transition-all group"
             >
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"

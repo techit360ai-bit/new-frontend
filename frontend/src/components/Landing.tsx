@@ -1,38 +1,764 @@
-import BenefitGrid from "./landing-page/BenefitGrid";
-import FAQ from "./landing-page/FAQ";
-import FeatureShowcase from "./landing-page/FeatureShowcase";
-import FinalCTA from "./landing-page/FinalCta";
-import Footer from "./landing-page/Footer";
-import Header from "./landing-page/header";
-import Hero from "./landing-page/hero";
-import DashboardShowcase from "./landing-page/DashboardShowcase";
-import HowItWorks from "./landing-page/HowItWorks";
-import HowToRegister from "./landing-page/HowToRegister";
-import Pricing from "./landing-page/Pricing";
-import Testimonials from "./landing-page/Testimonial";
-import TheProblemSolver from "./landing-page/TheProblemSolver";
-import "../Landing.css";
+import { useState, useEffect, useRef } from "react";
+import {
+  ArrowRight,
+  Zap,
+  ChevronDown,
+  Rocket,
+  Gem,
+  Building2,
+  Brain,
+  Code2,
+  Radio,
+  Star,
+  Handshake,
+  KeyRound,
+  BriefcaseBusiness,
+  Sparkles,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import CelebrationOverlay from "@/components/CelebrationOverlay";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import "@/Landing.css";
 
-export default function Landing() {
+interface RoleCard {
+  key: string;
+  icon: typeof Rocket;
+  iconBg: string;
+  accentColor: string;
+  tagline: string;
+  features: string[];
+  linkLabel: string;
+}
+
+const ROLE_CARDS: RoleCard[] = [
+  {
+    key: "Founder",
+    icon: Rocket,
+    iconBg: "var(--techit-marketing-founder-card-gradient)",
+    accentColor: "var(--techit-marketing-founder-card-accent)",
+    tagline:
+      "Launch your startup, validate ideas with AI, find your dream team",
+    features: [
+      "AI Idea Evaluation",
+      "Smart Team Matching",
+      "Investor Connect",
+      "Built-in Workspace",
+    ],
+    linkLabel: "Join as Founder",
+  },
+  {
+    key: "Collaborator",
+    icon: Zap,
+    iconBg: "var(--techit-marketing-collaborator-card-gradient)",
+    accentColor: "var(--techit-marketing-collaborator-card-accent)",
+    tagline: "Join exciting startups, earn credits & equity, build your legacy",
+    features: [
+      "Skill-matched Opportunities",
+      "Paid & Equity Deals",
+      "Credibility Score",
+      "In-platform Code Editor",
+    ],
+    linkLabel: "Join as Collaborator",
+  },
+  {
+    key: "Investor",
+    icon: Gem,
+    iconBg: "var(--techit-marketing-investor-card-gradient)",
+    accentColor: "var(--techit-marketing-investor-card-accent)",
+    tagline: "Discover pre-vetted startups, access AI-scored deal flow",
+    features: [
+      "AI-Scored Pipeline",
+      "Direct Founder Access",
+      "Portfolio Dashboard",
+      "Deal Analytics",
+    ],
+    linkLabel: "Join as Investor",
+  },
+  {
+    key: "Organisation",
+    icon: Building2,
+    iconBg: "var(--techit-marketing-organization-card-gradient)",
+    accentColor: "var(--techit-marketing-organization-card-accent)",
+    tagline:
+      "Post challenges, find tech talent, partner with builder community",
+    features: [
+      "Talent Marketplace",
+      "Innovation Challenges",
+      "Incubation Partnerships",
+      "Brand Visibility",
+    ],
+    linkLabel: "Join as Organisation",
+  },
+];
+
+const FEATURE_CARDS = [
+  {
+    icon: Brain,
+    title: "AI Matching Engine",
+    desc: "Our model analyzes skills, certifications, availability, risk appetite, and timezone to surface your most compatible collaborators.",
+  },
+  {
+    icon: Code2,
+    title: "Web Code Editor",
+    desc: "Full in-platform coding environment with Monaco Editor. Write, run, and collaborate on code without leaving TechIT Network.",
+  },
+  {
+    icon: Radio,
+    title: "Social Feed",
+    desc: "Post updates, share milestones, discover projects, and engage with the builder community. Built for builders, not vanity.",
+  },
+  {
+    icon: Star,
+    title: "Credibility Score",
+    desc: "Every shipped feature, delivered milestone, and positive review contributes to your transparent public trust score.",
+  },
+  {
+    icon: Handshake,
+    title: "Paid Collaborations",
+    desc: "Send paid or equity collaboration requests secured by the credit system. Founders set terms, collaborators negotiate.",
+  },
+  {
+    icon: KeyRound,
+    title: "Credit Economy",
+    desc: "A fair economy built for builders. Earn credits by contributing, purchase bundles, or subscribe for unlimited access.",
+  },
+];
+
+// Doubled so the CSS marquee loop is seamless (first half scrolls out, second half takes over)
+const MARQUEE_ITEMS = [
+  "AI-Powered Matching",
+  "Global Founders Network",
+  "Built-in Code Editor",
+  "Social Feed",
+  "Investor Connect",
+  "Credibility Score",
+  "Credit Economy",
+  "AI-Powered Matching",
+  "Global Founders Network",
+  "Built-in Code Editor",
+  "Social Feed",
+  "Investor Connect",
+  "Credibility Score",
+  "Credit Economy",
+];
+
+function useScrollReveal(threshold = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, visible };
+}
+
+function Reveal({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const { ref, visible } = useScrollReveal();
+
   return (
-    <>
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] font-bricolage text-[#171330] dark:text-white selection:bg-[#0068ff] selection:text-white transition-colors duration-300">
-        <Header />
-        <main className="flex flex-col gap-6 lg:gap-12 px-2 md:px-6 pt-[15px] pb-12 overflow-hidden max-w-[1600px] mx-auto">
-          <Hero />
-          <DashboardShowcase />
-          <HowItWorks />
-          <HowToRegister />
-          <FeatureShowcase />
-          <BenefitGrid />
-          <Pricing />
-          <Testimonials />
-          <TheProblemSolver />
-          <FAQ />
-          <FinalCTA />
-        </main>
-        <Footer />
-      </div>
-    </>
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0px)" : "translateY(28px)",
+        transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
   );
 }
+
+function Navbar({ onGetStarted }: { onGetStarted: () => void }) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <nav
+      className="landing-nav"
+      style={{
+        background: scrolled
+          ? "var(--nav-bg-scrolled)"
+          : "var(--nav-bg-default)",
+        borderBottomColor: scrolled
+          ? "var(--nav-border-scrolled)"
+          : "var(--nav-border-default)",
+        color: scrolled ? "var(--techit-text-on-inverse)" : "var(--nav-text-default)",
+      }}
+    >
+      {/* Logo mark + wordmark */}
+      <div className="nav-logo">
+        <div className="nav-logo-icon">
+          <Zap size={18} color="white" />
+        </div>
+        <div>
+          <div
+            className="nav-logo-name"
+            style={{ color: scrolled ? "var(--techit-text-on-inverse)" : "var(--nav-text-default)" }}
+          >
+            TECHIT
+          </div>
+          <div
+            className="nav-logo-sub"
+            style={{
+              color: scrolled
+                ? "rgba(255,255,255,0.6)"
+                : "var(--nav-text-secondary-default)",
+            }}
+          >
+            NETWORK
+          </div>
+        </div>
+      </div>
+
+      {/* Centre links — hidden below 960px via media query */}
+      <div className="nav-links">
+        {["Features", "Roles", "Credits", "AI Matching"].map((item) => (
+          <a
+            key={item}
+            href="#"
+            className="nav-link"
+            style={{
+              color: scrolled
+                ? "rgba(255,255,255,0.7)"
+                : "var(--nav-text-secondary-default)",
+            }}
+          >
+            {item}
+          </a>
+        ))}
+      </div>
+
+      {/* Sign In + Get Started */}
+      <div className="nav-actions">
+        <Link
+          to="/signin"
+          className="nav-signin"
+          style={{
+            color: scrolled
+              ? "rgba(255,255,255,0.7)"
+              : "var(--nav-text-secondary-default)",
+          }}
+        >
+          Sign In
+        </Link>
+        <button onClick={onGetStarted} className="nav-cta">
+          Get Started <ArrowRight size={14} />
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function MarqueeTicker() {
+  return (
+    <div className="marquee-outer">
+      <div className="marquee-track">
+        {MARQUEE_ITEMS.map((item, i) => (
+          <span key={i} className="marquee-item">
+            <span className="marquee-dot">●</span>
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const Landing = () => {
+  // ── Celebration states
+  // showRegistrationCelebration: fired by the navbar "Get Started" button only
+  const [showRegistrationCelebration, setShowRegistrationCelebration] =
+    useState(false);
+  // Role-specific celebrations fired by each role card / the final CTA section
+  const [showFounderCelebration, setShowFounderCelebration] = useState(false);
+  const [showCollaboratorCelebration, setShowCollaboratorCelebration] =
+    useState(false);
+  const [showInvestorCelebration, setShowInvestorCelebration] = useState(false);
+  const [showOrganizationCelebration, setShowOrganizationCelebration] =
+    useState(false);
+
+  const navigate = useNavigate();
+
+  // Prevents double-triggering if the user clicks multiple cards quickly
+  const isCelebrationActive = () =>
+    showRegistrationCelebration ||
+    showFounderCelebration ||
+    showCollaboratorCelebration ||
+    showInvestorCelebration ||
+    showOrganizationCelebration;
+
+  // ── Navbar "Get Started" handler
+  // Shows "You're starting your registration process!" then navigates to /signup
+  const handleGetStarted = () => {
+    if (isCelebrationActive()) return;
+    setShowRegistrationCelebration(true);
+    setTimeout(() => {
+      navigate("/signup", { state: { celebrate: true } });
+      setShowRegistrationCelebration(false);
+    }, 900);
+  };
+
+  // ── Role-card handlers ───────────────────────────────────────────────────────
+  const handleFounderStart = () => {
+    if (isCelebrationActive()) return;
+    setShowFounderCelebration(true);
+    setTimeout(() => {
+      navigate("/signup", { state: { celebrate: true } });
+      setShowFounderCelebration(false);
+    }, 900);
+  };
+
+  const handleCollaboratorStart = () => {
+    if (isCelebrationActive()) return;
+    setShowCollaboratorCelebration(true);
+    setTimeout(() => {
+      navigate("/collaborator/setup", { state: { celebrate: true } });
+      setShowCollaboratorCelebration(false);
+    }, 900);
+  };
+
+  const handleInvestorStart = () => {
+    if (isCelebrationActive()) return;
+    setShowInvestorCelebration(true);
+    setTimeout(() => {
+      navigate("/investor/onboarding/step-1", { state: { celebrate: true } });
+      setShowInvestorCelebration(false);
+    }, 900);
+  };
+
+  const handleOrganizationStart = () => {
+    if (isCelebrationActive()) return;
+    setShowOrganizationCelebration(true);
+    setTimeout(() => {
+      navigate("/org/onboarding/step-1", { state: { celebrate: true } });
+      setShowOrganizationCelebration(false);
+    }, 900);
+  };
+
+  // Maps role key → handler so the role-card loop stays clean
+  const getHandlerForRole = (key: string) => {
+    switch (key) {
+      case "Founder":
+        return handleFounderStart;
+      case "Collaborator":
+        return handleCollaboratorStart;
+      case "Investor":
+        return handleInvestorStart;
+      case "Organisation":
+        return handleOrganizationStart;
+      default:
+        return handleFounderStart;
+    }
+  };
+
+  return (
+    <>
+      {/* Navbar receives handleGetStarted — NOT handleFounderStart */}
+      <Navbar onGetStarted={handleGetStarted} />
+
+      <div
+        style={{
+          background: "var(--bg-primary)",
+          color: "var(--text-primary)",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          overflowX: "hidden",
+          transition: "background-color 0.3s ease, color 0.3s ease",
+        }}
+      >
+        {/* 
+            HERO
+            Full-viewport height. padding-bottom: 100px creates the gap
+            between the "Join the Network" button and the stats card below.
+        */}
+        <section className="hero-section">
+          <div className="hero-glow-purple" />
+          <div className="hero-glow-cyan" />
+
+          <div className="hero-inner">
+            {/* Animated live badge */}
+            <div className="hero-badge">
+              <span className="hero-badge-dot" />
+              Explore the platform and join the TechIT network
+            </div>
+
+            {/* Headline — each span is a block so it stacks vertically,
+                and the nth-child delays stagger the fade-up animation */}
+            <h1 className="hero-headline">
+              <span
+                className="hero-line"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Where Builders,
+              </span>
+              <span className="hero-line gradient-purple-cyan">
+                Investors &
+              </span>
+              <span className="hero-line gradient-cyan-teal">Experts</span>
+              <span
+                className="hero-line"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Connect & Ship.
+              </span>
+            </h1>
+
+            <p className="hero-subtext">
+              TechIT Network is the global platform where founders find
+              collaborators, investors discover deals, and tech experts build
+              their legacy — powered by AI matching and a real credit economy.
+            </p>
+
+            {/* CTA buttons. The section's padding-bottom handles the gap below. */}
+            <div className="hero-cta-row">
+              <button className="btn-primary" onClick={handleGetStarted}>
+                Join the Network <ArrowRight size={16} />
+              </button>
+              <button className="btn-ghost" onClick={handleGetStarted}>
+                Explore Roles <ChevronDown size={16} />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <Reveal>
+          <div className="stats-wrapper" aria-label="Platform activity">
+            <div className="stats-grid">
+              <div className="stat-cell"><div className="stat-label">Live platform metrics are available after sign-in.</div></div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* MARQUEE TICKER*/}
+        <MarqueeTicker />
+
+        {/* 
+            ROLES — "One Platform. Every Role."
+            4 cols → 2 cols (tablet) → 1 col (mobile)
+        */}
+        <section className="section">
+          <Reveal>
+            <div className="section-header">
+              <p className="section-label">// WHO IT'S FOR</p>
+              <h2 className="section-title">One Platform. Every Role.</h2>
+              <p
+                className="section-sub"
+                style={{ maxWidth: 420, margin: "14px auto 0" }}
+              >
+                Choose your path and switch anytime. TechIT Network adapts to
+                how you build.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="max-w">
+            <div className="roles-grid">
+              {ROLE_CARDS.map((card, i) => (
+                <Reveal key={card.key} delay={i * 70}>
+                  <div className="role-card">
+                    <div
+                      className="role-icon"
+                      style={{ background: card.iconBg }}
+                    >
+                      <card.icon size={24} strokeWidth={1.8} aria-hidden="true" />
+                    </div>
+                    <h3 className="role-name">{card.key}</h3>
+                    <p className="role-tagline">{card.tagline}</p>
+                    <ul className="role-features">
+                      {card.features.map((f) => (
+                        <li key={f} className="role-feature-item">
+                          <span
+                            className="role-feature-dot"
+                            style={{ background: card.accentColor }}
+                          />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    {/* Each card's handler is looked up from the map above */}
+                    <button
+                      className="role-cta"
+                      style={{ color: card.accentColor }}
+                      onClick={getHandlerForRole(card.key)}
+                    >
+                      {card.linkLabel} <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 
+            FEATURES — "Everything You Need to Build"
+            3 cols → 2 cols → 1 col
+        */}
+        <section className="section section-alt">
+          <Reveal>
+            <div className="section-header">
+              <p className="section-label">// PLATFORM FEATURES</p>
+              <h2 className="section-title">Everything You Need to Build</h2>
+            </div>
+          </Reveal>
+
+          <div className="max-w">
+            <div className="features-grid">
+              {FEATURE_CARDS.map((card, i) => (
+                <Reveal key={card.title} delay={i * 55}>
+                  <div className="feature-card">
+                    <div className="feature-emoji"><card.icon size={22} strokeWidth={1.8} aria-hidden="true" /></div>
+                    <h3 className="feature-title">{card.title}</h3>
+                    <p className="feature-desc">{card.desc}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/*SOCIAL FEED — "Build in Public. Connect in Real-Time." 2-col split → stacks on tablet/mobile*/}
+        <section className="section">
+          <div className="max-w">
+            <div className="feed-layout">
+              {/* Left — headline + tag pills */}
+              <Reveal>
+                <div>
+                  <p className="section-label">// SOCIAL FEED</p>
+                  <h2
+                    className="section-title"
+                    style={{ fontSize: "clamp(28px, 4vw, 52px)" }}
+                  >
+                    Build in Public. Connect in Real-Time.
+                  </h2>
+                  <p className="section-sub">
+                    Post wins, seek feedback, share milestones. Send
+                    collaboration requests — paid or free — directly from any
+                    post or profile.
+                  </p>
+                  <div className="feed-tags">
+                    {[
+                      {
+                        label: "PAID COLLAB",
+                        icon: Zap,
+                        bg: "var(--techit-marketing-paid-collaboration-soft)",
+                        border: "var(--techit-marketing-paid-collaboration)",
+                      },
+                      {
+                        label: "FREE COLLAB",
+                        icon: Handshake,
+                        bg: "var(--techit-marketing-free-collaboration-soft)",
+                        border: "var(--techit-marketing-free-collaboration)",
+                      },
+                      {
+                        label: "HIRING",
+                        icon: BriefcaseBusiness,
+                        bg: "var(--techit-marketing-hiring-soft)",
+                        border: "var(--techit-marketing-hiring)",
+                      },
+                    ].map((tag) => (
+                      <span
+                        key={tag.label}
+                        className="feed-tag"
+                        style={{
+                          background: tag.bg,
+                          border: `1px solid ${tag.border}`,
+                        }}
+                      >
+                        <tag.icon size={14} strokeWidth={1.8} aria-hidden="true" />{tag.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+
+            </div>
+          </div>
+        </section>
+
+        {/*FINAL CTA — "Ready to Build Something Real?"*/}
+        <section className="section">
+          <Reveal>
+            <div className="cta-card">
+              <div className="cta-star"><Sparkles size={22} strokeWidth={1.8} aria-hidden="true" /></div>
+              <h2 className="cta-title">Ready to Build Something Real?</h2>
+              <p className="cta-sub">
+                Join founders, collaborators, investors, and organisations building on TechIT Network.
+              </p>
+
+              {/* Role picker — each fires the right navigation handler */}
+              <div className="cta-role-row">
+                {[
+                  {
+                    icon: Rocket,
+                    label: "Founder",
+                    handler: handleFounderStart,
+                  },
+                  {
+                    icon: Zap,
+                    label: "Collaborator",
+                    handler: handleCollaboratorStart,
+                  },
+                  {
+                    icon: Gem,
+                    label: "Investor",
+                    handler: handleInvestorStart,
+                  },
+                  {
+                    icon: Building2,
+                    label: "Organisation",
+                    handler: handleOrganizationStart,
+                  },
+                ].map((role) => (
+                  <button
+                    key={role.label}
+                    className="cta-role-btn"
+                    onClick={role.handler}
+                  >
+                    <role.icon size={16} strokeWidth={1.8} aria-hidden="true" /> {role.label}
+                  </button>
+                ))}
+              </div>
+
+              <button className="btn-primary" onClick={handleGetStarted}>
+                Join TechIT Network <ArrowRight size={16} />
+              </button>
+            </div>
+          </Reveal>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="footer">
+          <div className="max-w">
+            <div className="footer-grid">
+              {/* Brand */}
+              <div>
+                <div className="footer-brand-logo">
+                  <div className="footer-brand-icon">
+                    <Zap size={15} color="white" />
+                  </div>
+                  <span className="footer-brand-name">TECHIT NETWORK</span>
+                </div>
+                <p className="footer-brand-desc">
+                  The global platform connecting tech founders, collaborators,
+                  investors and organisations.
+                </p>
+              </div>
+
+              <div>
+                <div className="footer-col-label">PLATFORM</div>
+                {[
+                  "Features",
+                  "AI Matching",
+                  "Incubation Hub",
+                  "Credit System",
+                ].map((item) => (
+                  <a key={item} href="#" className="footer-link">
+                    {item}
+                  </a>
+                ))}
+              </div>
+
+              <div>
+                <div className="footer-col-label">ROLES</div>
+                {[
+                  "Founders",
+                  "Collaborators",
+                  "Investors",
+                  "Organisations",
+                ].map((item) => (
+                  <a key={item} href="#" className="footer-link">
+                    {item}
+                  </a>
+                ))}
+              </div>
+
+              <div>
+                <div className="footer-col-label">COMPANY</div>
+                {[
+                  { label: "About", href: "#" },
+                  { label: "Blog", href: "#" },
+                  { label: "Privacy", href: "/privacy-policy.html" },
+                  { label: "Terms", href: "/terms-of-service.html" },
+                ].map((item) => (
+                  <a key={item.label} href={item.href} className="footer-link">
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="footer-bottom">
+              <span className="footer-copy">
+                © 2025 TechIT Network. Built for builders.
+              </span>
+              <span className="footer-version">v1.0.0 · Global</span>
+            </div>
+          </div>
+        </footer>
+
+        {/* 
+            CELEBRATION OVERLAYS
+            Each role card and the main "Get Started" button trigger a different overlay message, shown here.
+        */}
+        <CelebrationOverlay
+          visible={showRegistrationCelebration}
+          message="You're starting your registration process!"
+          label="Registration Process"
+        />
+        <CelebrationOverlay
+          visible={showFounderCelebration}
+          message="You're starting your founder journey!"
+          label="Founder Journey"
+        />
+        <CelebrationOverlay
+          visible={showCollaboratorCelebration}
+          message="You're starting your collaborator journey!"
+          label="Collaborator Journey"
+        />
+        <CelebrationOverlay
+          visible={showInvestorCelebration}
+          message="You're starting your investor journey!"
+          label="Investor Journey"
+        />
+        <CelebrationOverlay
+          visible={showOrganizationCelebration}
+          message="You're starting your organization journey!"
+          label="Organization Journey"
+        />
+      </div>
+      <ThemeToggle />
+    </>
+  );
+};
+
+export default Landing;

@@ -4,6 +4,7 @@
 // can't add packages in some environments), just native fetch + a fallback helper.
 
 import { apiUrl, apiFallbackEnabled } from "./config";
+import { fetchIdempotent } from '@/lib/resilience/retry';
 
 const env =
   typeof import.meta !== "undefined"
@@ -29,11 +30,16 @@ function timeoutSignal(init?: RequestInit): AbortSignal {
 export class ApiError extends Error {
   status: number;
   body: unknown;
+  retryAfterSeconds?: number;
   constructor(status: number, message: string, body?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.body = body;
+    const retry = typeof body === "object" && body !== null && "retryAfterSeconds" in body
+      ? Number((body as { retryAfterSeconds?: unknown }).retryAfterSeconds)
+      : NaN;
+    if (Number.isFinite(retry) && retry > 0) this.retryAfterSeconds = retry;
   }
 }
 
@@ -41,22 +47,32 @@ export class ApiError extends Error {
 let authTokenGetter: (() => string | null) | null = null;
 let accessToken: string | null = null;
 let refreshPromise: Promise<string | null> | null = null;
-function sessionValue(key: string) { try { return typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null } catch { return null } }
-function setSessionValue(key: string, value: string | null) { try { if (typeof sessionStorage !== 'undefined') { if (value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key) } } catch {} }
+const inFlightGets = new Map<string, Promise<unknown>>();
+const etags = new Map<string, string>();
+const etagBodies = new Map<string, unknown>();
+function csrfToken() { try { const part = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf=')); return part ? decodeURIComponent(part.slice('techit_csrf='.length)) : null } catch { return null } }
 export function setAuthTokenGetter(fn: () => string | null) {
   authTokenGetter = fn;
 }
 
-export function setAccessToken(token: string | null) { accessToken = token; setSessionValue('techit_access_token', token); }
+// The access token lives in memory for the current tab only. It is never
+// written to sessionStorage/localStorage: web storage is readable from DevTools
+// and by injected scripts, which turns one XSS into session theft across every
+// service sharing the platform JWT. Browser sessions use the HttpOnly
+// `techit_access` cookie instead.
+export function setAccessToken(token: string | null) { accessToken = token; }
 
 export function getAuthToken(): string | null {
-  return accessToken ?? authTokenGetter?.() ?? sessionValue('techit_access_token') ?? (import.meta.env.MODE === 'test' ? (() => { try { return localStorage.getItem('techit_token') } catch { return null } })() : null);
+  return accessToken ?? authTokenGetter?.() ?? (import.meta.env.MODE === 'test' ? (() => { try { return localStorage.getItem('techit_token') } catch { return null } })() : null);
 }
 
 function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
+  try { if (typeof localStorage !== 'undefined' && localStorage.getItem('techit-data-saver') === '1') h['X-TechIT-Data-Saver'] = '1'; } catch { /* storage unavailable */ }
   const token = getAuthToken();
   if (token) h.Authorization = `Bearer ${token}`;
+  const csrf = csrfToken();
+  if (csrf) h['X-CSRF-Token'] = csrf;
   return { ...h, ...(extra as Record<string, string>) };
 }
 
@@ -70,17 +86,46 @@ async function parse<T>(res: Response): Promise<T> {
 }
 
 async function requestWithRefresh<T>(path: string, init: RequestInit, method: string, body?: unknown): Promise<T> {
-  const run = () => fetch(apiUrl(path), { method, ...init, headers: headers(init.headers), body: body === undefined ? init.body : JSON.stringify(body), credentials: 'include', signal: timeoutSignal(init) })
-  let response = await run()
-  if (response.status === 401 && getAuthToken() && path !== '/auth/refresh' && path !== 'auth/refresh') {
-    const token = await refreshAccessToken()
-    if (token) response = await run()
+  const url = apiUrl(path);
+  const run = () => {
+    const requestHeaders = headers(init.headers) as Record<string, string>;
+    if (method === 'GET' && etags.has(url)) requestHeaders['If-None-Match'] = etags.get(url)!;
+    return fetch(url, { method, ...init, headers: requestHeaders, body: body === undefined ? init.body : JSON.stringify(body), credentials: 'include', signal: timeoutSignal(init) });
   }
-  return parse<T>(response)
+  let response = method === 'GET' ? await fetchIdempotent(run) : await run()
+  if (response.status === 401 && path !== '/auth/refresh' && path !== 'auth/refresh') {
+    // Rotate the session once, then retry. The hardened cookie flow can return
+    // no body token, so a missing in-memory token does not mean the session is
+    // unrecoverable — the HttpOnly refresh cookie may still be valid.
+    await refreshAccessToken()
+    response = await run()
+  }
+  if (method === 'GET' && response.status === 304 && etagBodies.has(url)) return etagBodies.get(url) as T;
+  const parsed = await parse<T>(response);
+  if (method === 'GET') {
+    const etag = response.headers.get('ETag');
+    if (etag) {
+      etags.set(url, etag);
+      etagBodies.set(url, parsed);
+    }
+  }
+  return parsed;
+}
+
+export function isCapacityError(error: unknown): error is ApiError {
+  return error instanceof ApiError && (error.status === 429 || error.status === 503);
 }
 
 export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
-  return requestWithRefresh<T>(path, init || {}, 'GET')
+  const token = getAuthToken() || "anonymous";
+  const key = `${token}:${path}:${JSON.stringify(init?.headers || {})}`;
+  const existing = inFlightGets.get(key);
+  if (existing) return existing as Promise<T>;
+  const request = requestWithRefresh<T>(path, init || {}, 'GET').finally(() => {
+    if (inFlightGets.get(key) === request) inFlightGets.delete(key);
+  });
+  inFlightGets.set(key, request);
+  return request;
 }
 
 export async function apiPost<T>(

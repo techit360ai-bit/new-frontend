@@ -18,7 +18,6 @@ import {
   ShieldAlert,
   TrendingUp,
   Activity,
-  ShieldCheck,
 } from 'lucide-react';
 import { fetchDealFlow, type InvestorStartup, type RiskLevel } from '@/lib/api/dealFlow';
 
@@ -35,23 +34,30 @@ function riskOrder(riskLevel: RiskLevel) {
   return { low: 0, moderate: 1, high: 2, unknown: 3 }[riskLevel];
 }
 
+function riskTextColor(riskLevel: RiskLevel) {
+  if (riskLevel === 'low') return 'text-status-success';
+  if (riskLevel === 'moderate') return 'text-status-warning';
+  if (riskLevel === 'high') return 'text-status-error';
+  return 'text-text-on-inverse-muted';
+}
+
 function riskBadgeColor(riskLevel: RiskLevel) {
-  if (riskLevel === 'low') return 'bg-[#20C997]/15 text-[#20C997] border-[#20C997]/20';
-  if (riskLevel === 'moderate') return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20';
-  if (riskLevel === 'high') return 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20';
-  return 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
+  if (riskLevel === 'low') return 'bg-status-success/20 text-status-success';
+  if (riskLevel === 'moderate') return 'bg-status-warning/20 text-status-warning';
+  if (riskLevel === 'high') return 'bg-status-error/20 text-status-error';
+  return 'bg-gray-700 text-text-on-inverse-secondary';
 }
 
 function metricColor(value: number) {
-  if (value >= 85) return 'text-[#20C997]';
-  if (value >= 70) return 'text-amber-600 dark:text-amber-400';
-  return 'text-red-600 dark:text-red-400';
+  if (value >= 85) return 'text-status-success';
+  if (value >= 70) return 'text-status-warning';
+  return 'text-status-error';
 }
 
 function metricBarColor(value: number) {
-  if (value >= 85) return 'bg-[#20C997]';
-  if (value >= 70) return 'bg-amber-500';
-  return 'bg-red-500';
+  if (value >= 85) return 'bg-status-success';
+  if (value >= 70) return 'bg-status-warning';
+  return 'bg-status-error';
 }
 
 export function RiskAnalysis() {
@@ -134,27 +140,19 @@ export function RiskAnalysis() {
   const SortIcon = sortDir === 'desc' ? SortDesc : SortAsc;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors duration-200">
-      {/* Header Banner */}
-      <div className="border-b border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] px-4 py-6 sm:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="min-h-screen bg-background-inverse">
+      <div className="border-b border-border-inverse bg-surface-inverse px-8 py-6">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Risk Analysis & Diagnostics
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> Multi-Dimensional
-              </span>
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-              Assess product, compliance, market, and execution risk scores across deal flow
+            <h1 className="text-3xl font-bold text-white">Risk Analysis</h1>
+            <p className="text-text-on-inverse-muted mt-1">
+              Multi-dimensional risk assessment across your live deal pipeline
             </p>
           </div>
           {selectedStartup && (
             <Link
               to={`/investor/risk-radar/${selectedStartup.id}`}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#20C997]/10 px-4 py-2.5 font-semibold text-[#20C997] border border-[#20C997]/20 transition-all hover:bg-[#20C997]/20 text-sm"
+              className="px-4 py-2 bg-status-success/10 hover:bg-status-success/20 text-status-success font-medium rounded-lg transition-all flex items-center gap-2"
             >
               Full Radar: {selectedStartup.name}
               <ArrowRight className="w-4 h-4" />
@@ -163,54 +161,54 @@ export function RiskAnalysis() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="p-8">
         {error && (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          <div className="mb-6 rounded-lg border border-status-error/30 bg-status-error/10 px-4 py-3 text-sm text-status-error">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <SummaryCard label="Portfolio Avg Risk" value={portfolioAvg.toFixed(0)} sublabel="out of 100" />
-          <SummaryCard label="Low Risk" value={lowCount} color="mint" icon={CheckCircle} />
+          <SummaryCard label="Low Risk" value={lowCount} color="emerald" icon={CheckCircle} />
           <SummaryCard label="Moderate Risk" value={modCount} color="amber" icon={AlertTriangle} />
           <SummaryCard label="High Risk" value={highCount} color="red" icon={ShieldAlert} />
         </div>
 
         {isLoading ? (
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-12 text-center text-slate-500 dark:text-slate-400 shadow-sm">
+          <div className="rounded-lg border border-border-inverse bg-surface-inverse p-10 text-center text-text-on-inverse-muted">
             Loading live risk analysis...
           </div>
         ) : startups.length === 0 ? (
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-12 text-center shadow-sm">
-            <ShieldAlert className="mx-auto mb-3 h-8 w-8 text-slate-400 dark:text-slate-600" />
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No live risk signals yet</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
+          <div className="rounded-lg border border-border-inverse bg-surface-inverse p-10 text-center">
+            <ShieldAlert className="mx-auto mb-3 h-8 w-8 text-text-on-inverse-disabled" />
+            <h3 className="text-xl font-semibold text-white mb-2">No live risk signals yet</h3>
+            <p className="text-sm text-text-on-inverse-muted">
               Risk analysis will populate after investor deal-flow snapshots are persisted.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
-              <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-[#111111] p-4 rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm">
-                <Filter className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-3">
+                <Filter className="w-4 h-4 text-text-on-inverse-muted" />
                 {(['all', 'low', 'moderate', 'high'] as const).map((level) => (
                   <button
                     key={level}
                     onClick={() => setFilterRisk(level)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all capitalize ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${
                       filterRisk === level
                         ? level === 'low'
-                          ? 'bg-[#20C997]/15 text-[#20C997] border border-[#20C997]/30'
+                          ? 'bg-status-success/20 text-status-success border border-status-success/30'
                           : level === 'moderate'
-                          ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                          ? 'bg-status-warning/20 text-status-warning border border-status-warning/30'
                           : level === 'high'
-                          ? 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'
-                          : 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                        : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-transparent hover:bg-slate-200 dark:hover:bg-white/10'
+                          ? 'bg-status-error/20 text-status-error border border-status-error/30'
+                          : 'bg-gray-700 text-white border border-gray-600'
+                        : 'bg-surface-inverse-muted/50 text-text-on-inverse-muted border border-border-inverse hover:bg-surface-inverse-muted'
                     }`}
                   >
-                    {level === 'all' ? 'All Risks' : level}
+                    {level === 'all' ? 'All' : level}
                   </button>
                 ))}
                 <div className="ml-auto flex gap-2">
@@ -223,9 +221,9 @@ export function RiskAnalysis() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filtered.length === 0 ? (
-                  <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-8 text-center text-slate-500 dark:text-slate-400 shadow-sm">
+                  <div className="rounded-lg border border-border-inverse bg-surface-inverse p-8 text-center text-text-on-inverse-muted">
                     No live startups match the selected risk filter.
                   </div>
                 ) : (
@@ -238,45 +236,45 @@ export function RiskAnalysis() {
                       <button
                         key={startup.id}
                         onClick={() => setSelectedId(startup.id)}
-                        className={`w-full text-left p-5 rounded-2xl border transition-all shadow-sm ${
+                        className={`w-full text-left p-5 rounded-lg border transition-all ${
                           isSelected
-                            ? 'bg-[#20C997]/5 dark:bg-[#20C997]/10 border-[#20C997]/40 ring-1 ring-[#20C997]/30'
-                            : 'bg-white dark:bg-[#111111] border-black/[0.06] dark:border-white/10 hover:border-[#20C997]/30'
+                            ? 'bg-status-success/5 border-status-success/30'
+                            : 'bg-surface-inverse border-border-inverse hover:border-border-inverse-strong'
                         }`}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div>
                             <div className="flex items-center gap-2">
-                              <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg">{startup.name}</h3>
-                              <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono border ${riskBadgeColor(startup.riskLevel)}`}>
+                              <h3 className="font-semibold text-white">{startup.name}</h3>
+                              <span className={`text-xs px-2 py-0.5 rounded font-mono ${riskBadgeColor(startup.riskLevel)}`}>
                                 {startup.riskLevel}
                               </span>
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                            <p className="text-sm text-text-on-inverse-muted mt-0.5">
                               {startup.sector} · {startup.region}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className={`text-2xl font-bold font-mono ${metricColor(avg)}`}>{avg.toFixed(0)}</p>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-medium">avg risk score</p>
+                            <p className="text-xs text-text-on-inverse-disabled">avg risk score</p>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        <div className="grid grid-cols-6 gap-2">
                           {Object.entries(startup.riskMetrics).map(([dim, val]) => (
-                            <div key={dim} className="bg-slate-50 dark:bg-white/[0.03] p-2 rounded-xl border border-black/[0.04] dark:border-white/5">
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 capitalize truncate font-medium">{dim}</p>
-                              <div className="h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                            <div key={dim}>
+                              <p className="text-xs text-text-on-inverse-disabled mb-1 capitalize truncate">{dim}</p>
+                              <div className="h-1.5 bg-surface-inverse-muted rounded-full overflow-hidden">
                                 <div className={`h-full ${metricBarColor(val)}`} style={{ width: `${val}%` }} />
                               </div>
-                              <p className="text-[10px] font-mono text-slate-700 dark:text-slate-300 mt-1 font-semibold">{val}</p>
+                              <p className="text-xs font-mono text-text-on-inverse-muted mt-0.5">{val}</p>
                             </div>
                           ))}
                         </div>
 
                         {weakest[1] < 75 && (
-                          <div className="mt-3 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl">
-                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                          <div className="mt-3 flex items-center gap-2 text-xs text-status-warning">
+                            <AlertTriangle className="w-3.5 h-3.5" />
                             <span>
                               Weakest dimension: <span className="font-semibold capitalize">{weakest[0]}</span> ({weakest[1]})
                             </span>
@@ -291,15 +289,15 @@ export function RiskAnalysis() {
 
             {selectedStartup && (
               <div className="space-y-4">
-                <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 shadow-sm sticky top-6">
+                <div className="bg-surface-inverse border border-border-inverse rounded-lg p-6 sticky top-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-lg">{selectedStartup.name}</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{selectedStartup.sector} · Risk Radar Map</p>
+                      <h3 className="font-semibold text-white">{selectedStartup.name}</h3>
+                      <p className="text-sm text-text-on-inverse-muted">{selectedStartup.sector}</p>
                     </div>
                     <Link
                       to={`/investor/risk-radar/${selectedStartup.id}`}
-                      className="p-2 bg-[#20C997]/10 hover:bg-[#20C997]/20 text-[#20C997] rounded-xl transition-all"
+                      className="p-2 bg-status-success/10 hover:bg-status-success/20 text-status-success rounded-lg transition-all"
                     >
                       <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -308,31 +306,31 @@ export function RiskAnalysis() {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart data={radarData}>
-                        <PolarGrid stroke="rgba(148, 163, 184, 0.2)" />
-                        <PolarAngleAxis dataKey="category" stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                        <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#94a3b8" tick={false} />
-                        <Radar name="Risk" dataKey="value" stroke="#20C997" fill="#20C997" fillOpacity={0.25} />
+                        <PolarGrid stroke="#333" />
+                        <PolarAngleAxis dataKey="category" stroke="#555" tick={{ fontSize: 11 }} />
+                        <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#444" tick={false} />
+                        <Radar name="Risk" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
 
                   <div className="space-y-2 mt-4">
                     {radarData.map((item) => (
-                      <div key={item.category} className="flex items-center justify-between text-xs sm:text-sm">
-                        <span className="text-slate-600 dark:text-slate-400 font-medium">{item.category}</span>
+                      <div key={item.category} className="flex items-center justify-between text-sm">
+                        <span className="text-text-on-inverse-muted">{item.category}</span>
                         <div className="flex items-center gap-2">
-                          <div className="w-24 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div className="w-20 h-1.5 bg-surface-inverse-muted rounded-full overflow-hidden">
                             <div className={`h-full ${metricBarColor(item.value)}`} style={{ width: `${item.value}%` }} />
                           </div>
-                          <span className="font-mono font-bold text-slate-900 dark:text-white w-6 text-right">{item.value}</span>
+                          <span className="font-mono text-white w-6 text-right">{item.value}</span>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-5 pt-5 border-t border-black/[0.06] dark:border-white/10 grid grid-cols-2 gap-3 text-xs">
-                    <DetailMetric icon={Activity} label="Readiness" value={selectedStartup.readinessScore} color="text-[#20C997]" />
-                    <DetailMetric icon={TrendingUp} label="Velocity" value={selectedStartup.executionVelocity} color="text-[#20C997]" />
+                  <div className="mt-5 pt-5 border-t border-border-inverse grid grid-cols-2 gap-3 text-sm">
+                    <DetailMetric icon={Activity} label="Readiness" value={selectedStartup.readinessScore} color="text-status-info" />
+                    <DetailMetric icon={TrendingUp} label="Velocity" value={selectedStartup.executionVelocity} color="text-status-success" />
                   </div>
                 </div>
               </div>
@@ -348,20 +346,20 @@ interface SummaryCardProps {
   label: string;
   value: string | number;
   sublabel?: string;
-  color?: 'mint' | 'amber' | 'red';
+  color?: 'emerald' | 'amber' | 'red';
   icon?: React.ComponentType<{ className?: string }>;
 }
 
 function SummaryCard({ label, value, sublabel = 'startups', color, icon: Icon }: SummaryCardProps) {
-  const colorClass = color === 'mint' ? 'text-[#20C997]' : color === 'amber' ? 'text-amber-600 dark:text-amber-400' : color === 'red' ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white';
-  const borderClass = color === 'mint' ? 'border-[#20C997]/20' : color === 'amber' ? 'border-amber-500/20' : color === 'red' ? 'border-red-500/20' : 'border-black/[0.06] dark:border-white/10';
+  const colorClass = color === 'emerald' ? 'text-status-success' : color === 'amber' ? 'text-status-warning' : color === 'red' ? 'text-status-error' : 'text-white';
+  const borderClass = color === 'emerald' ? 'border-status-success/20' : color === 'amber' ? 'border-status-warning/20' : color === 'red' ? 'border-status-error/20' : 'border-border-inverse';
   return (
-    <div className={`bg-white dark:bg-[#111111] border ${borderClass} rounded-2xl p-5 shadow-sm`}>
-      <p className={`text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5 ${color ? colorClass : 'text-slate-500 dark:text-slate-400'}`}>
-        {Icon && <Icon className="w-4 h-4" />} {label}
+    <div className={`bg-surface-inverse border ${borderClass} rounded-lg p-5`}>
+      <p className={`text-xs uppercase tracking-wider mb-2 flex items-center gap-1 ${color ? colorClass : 'text-text-on-inverse-muted'}`}>
+        {Icon && <Icon className="w-3.5 h-3.5" />} {label}
       </p>
       <p className={`text-3xl font-bold font-mono ${colorClass}`}>{value}</p>
-      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{sublabel}</p>
+      <p className="text-sm text-text-on-inverse-disabled mt-1">{sublabel}</p>
     </div>
   );
 }
@@ -377,10 +375,10 @@ function SortButton({ active, onClick, icon: Icon, children }: SortButtonProps) 
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
         active
-          ? 'bg-[#20C997]/15 text-[#20C997] border border-[#20C997]/30'
-          : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-transparent hover:bg-slate-200 dark:hover:bg-white/10'
+          ? 'bg-status-info/20 text-status-info border border-status-info/30'
+          : 'bg-surface-inverse-muted/50 text-text-on-inverse-muted border border-border-inverse hover:bg-surface-inverse-muted'
       }`}
     >
       {active && <Icon className="w-3.5 h-3.5" />}
@@ -398,11 +396,11 @@ interface DetailMetricProps {
 
 function DetailMetric({ icon: Icon, label, value, color }: DetailMetricProps) {
   return (
-    <div className="bg-slate-50 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/5 rounded-xl p-3">
-      <p className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-semibold mb-0.5">{label}</p>
-      <div className="flex items-center gap-1.5">
+    <div className="bg-surface-inverse-muted/50 rounded-lg p-3">
+      <p className="text-text-on-inverse-muted text-xs mb-1">{label}</p>
+      <div className="flex items-center gap-1">
         <Icon className={`w-3.5 h-3.5 ${color}`} />
-        <span className="font-mono font-bold text-slate-900 dark:text-white text-base">{value}</span>
+        <span className="font-mono font-bold text-white">{value}</span>
       </div>
     </div>
   );

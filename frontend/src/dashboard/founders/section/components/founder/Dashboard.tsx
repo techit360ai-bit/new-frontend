@@ -1,8 +1,8 @@
+// frontend/src/dashboard/founders/section/components/founder/Dashboard.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
-import { motion } from "motion/react";
-import { AlertTriangle, ArrowRight, CheckCircle, TrendingUp, Plus, Building2, Sparkles, Activity, Briefcase, Zap, Globe, Target, Calendar, Rocket } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle, TrendingUp, Plus, Building2 } from "lucide-react";
 import { useFounderProfile, type FounderStage } from "@/contexts/UserContext";
 import {
   computeGsisV2,
@@ -13,24 +13,49 @@ import {
 } from "@/lib/api/gsis";
 import { fetchAudioBriefing } from "@/lib/api/audio";
 import { runAnomalyScan, type RiskFlag } from "@/lib/api/alerts";
+import { fetchCollaboratorTasks, patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
+import { fetchCustomerValidationSessions, type CustomerValidationSession } from "@/lib/api/incubation";
+import { fetchFounderCapTable, type FounderCapTable } from "@/lib/api/founderEquity";
 import type { Hackathon } from "@/dashboard/_shared/opportunities/types";
 import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
 import { WelcomeBack } from "@/components/WelcomeBack";
+import {
+  deriveFounderSignals,
+  deriveJourney,
+  deriveRecentActivity,
+  toFounderTask,
+  validationTotals as computeValidationTotals,
+  type FounderSignal as Signal,
+  type FounderTask,
+  type JourneyStage,
+} from "@/lib/dashboard/founderIntelligence";
 
-interface Signal { id: string; message: string; href: string; }
-interface FounderTask { id: string; title: string; detail: string; priority: "overdue" | "due-soon" | "this-week"; href: string; done: boolean; }
-interface JourneyStage { id: string; label: string; status: "complete" | "active" | "upcoming"; progress: number; detail: string; }
-interface Build { id: string; name: string; logoEmoji: string; stage: FounderStage; oneLiner: string; progress: number; isPrimary: boolean; }
+interface Build {
+  id: string;
+  name: string;
+  logoEmoji: string;
+  stage: FounderStage;
+  oneLiner: string;
+  progress: number;
+  isPrimary: boolean;
+}
 
+// Captured at module load — stable reference, satisfies react-hooks/purity
 const NOW_MS = Date.now();
 
 const stageStyles: Record<string, string> = {
-  Idea:    "bg-slate-100 text-slate-600 border-slate-200 dark:bg-white/10 dark:text-white dark:border-white/20",
-  MVP:     "bg-[#0066ff]/10 text-[#0066ff] border-[#0066ff]/20 dark:bg-[#0066ff]/20 dark:text-[#58a6ff] dark:border-[#0066ff]/30",
-  Beta:    "bg-[#0066ff]/10 text-[#0066ff] border-[#0066ff]/20 dark:bg-[#0066ff]/20 dark:text-[#58a6ff] dark:border-[#0066ff]/30",
-  Launch:  "bg-[#20c937]/10 text-[#20c937] border-[#20c937]/20 dark:bg-[#20c937]/20 dark:text-[#20c937] dark:border-[#20c937]/30",
-  Growth:  "bg-[#20c937]/10 text-[#20c937] border-[#20c937]/20 dark:bg-[#20c937]/20 dark:text-[#20c937] dark:border-[#20c937]/30",
+  Idea:    "bg-surface-secondary text-text-secondary",
+  MVP:     "bg-violet-50 text-violet-700",
+  Beta:    "bg-status-warning-soft text-status-warning",
+  Launch:  "bg-status-success-soft text-status-success",
+  Growth:  "bg-status-success-soft text-status-success",
+};
+
+const priorityStyles: Record<string, string> = {
+  overdue:    "bg-status-error-soft text-status-error",
+  "due-soon": "bg-status-warning-soft text-status-warning",
+  "this-week": "bg-surface-secondary text-text-secondary",
 };
 
 function normalizedStage(stage: string | undefined): FounderStage {
@@ -50,14 +75,11 @@ function metricLabel(value: string) {
   return value.toLowerCase().replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
 }
 
-function IntelligenceMetric({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
+function IntelligenceMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 bg-[#0066ff]/[0.04] dark:bg-white/[0.04] rounded-xl p-4 border border-[#0066ff]/10 dark:border-white/10 shadow-sm hover:bg-[#0066ff]/10 dark:hover:bg-white/[0.08] transition-colors">
-      <div className="flex items-center gap-2 mb-1.5">
-        <Icon className="w-4 h-4 text-[#171330]/50 dark:text-[#58a6ff]" />
-        <p className="text-[10px] font-bold tracking-widest uppercase text-[#171330]/50 dark:text-white/50">{label}</p>
-      </div>
-      <p className="truncate text-2xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">{value}</p>
+    <div className="min-w-0">
+      <p className="truncate text-lg font-semibold text-text-primary tabular-nums">{value}</p>
+      <p className="mt-0.5 text-[11px] text-text-muted">{label}</p>
     </div>
   );
 }
@@ -65,7 +87,13 @@ function IntelligenceMetric({ label, value, icon: Icon }: { label: string; value
 export function Dashboard() {
   const navigate = useNavigate();
   const { founderProfile: p } = useFounderProfile();
+  const [tasks, setTasks] = useState<FounderTask[]>([]);
+  const [workspaceTasks, setWorkspaceTasks] = useState<CollaboratorTask[]>([]);
+  const [validationSessions, setValidationSessions] = useState<CustomerValidationSession[]>([]);
+  const [capTable, setCapTable] = useState<FounderCapTable | null>(null);
+  const [openStage, setOpenStage] = useState<string | null>(null);
 
+  // GSIS master score + alerts from ai-router (surfaced for the first time).
   const [intel, setIntel] = useState<DashboardIntelligence | null>(null);
   useEffect(() => {
     let alive = true;
@@ -73,6 +101,7 @@ export function Dashboard() {
     return () => { alive = false; };
   }, []);
 
+  // B4 — anomaly risk flags from the engine over this founder's execution signals.
   const [riskFlags, setRiskFlags] = useState<RiskFlag[]>([]);
   useEffect(() => {
     let alive = true;
@@ -81,8 +110,52 @@ export function Dashboard() {
     return () => { alive = false; };
   }, []);
 
+  // Live workspace tasks for this founder → "Today's focus" (persisted on toggle).
+  useEffect(() => {
+    let alive = true;
+    fetchCollaboratorTasks()
+      .then((snapshot) => {
+        if (!alive) return;
+        setWorkspaceTasks(snapshot.tasks);
+        setTasks(snapshot.tasks.filter((task) => task.status !== "completed").slice(0, 5).map(toFounderTask));
+      })
+      .catch(() => { if (alive) { setWorkspaceTasks([]); setTasks([]); } });
+    return () => { alive = false; };
+  }, []);
+
+  // Live customer-validation sessions → evidence metric + dashboard card.
+  useEffect(() => {
+    let alive = true;
+    fetchCustomerValidationSessions(5)
+      .then((result) => { if (alive) setValidationSessions(Array.isArray(result.sessions) ? result.sessions : []); })
+      .catch(() => { if (alive) setValidationSessions([]); });
+    return () => { alive = false; };
+  }, []);
+
+  // Committed collaborator equity per venture → cap table (derived, never invented).
+  useEffect(() => {
+    let alive = true;
+    fetchFounderCapTable()
+      .then((result) => { if (alive) setCapTable(result); })
+      .catch(() => { if (alive) setCapTable(null); });
+    return () => { alive = false; };
+  }, []);
+
+  // B5 — momentum audio briefing (TTS) on demand.
+  const [briefingUrl, setBriefingUrl] = useState<string | null>(null);
+  const [briefingLoading, setBriefingLoading] = useState(false);
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
-  const firstName = (p.name || "Founder").split(" ")[0];
+  const playBriefing = async () => {
+    setBriefingLoading(true);
+    const b = await fetchAudioBriefing(`Momentum briefing for ${firstName}: keep your build moving.`);
+    setBriefingLoading(false);
+    if (b?.audio_url) {
+      setBriefingUrl(b.audio_url);
+      try { void new Audio(b.audio_url).play(); } catch { /* autoplay may be blocked */ }
+    } else {
+      toast("Audio briefing unavailable right now.");
+    }
+  };
 
   useEffect(() => {
     let alive = true;
@@ -90,10 +163,13 @@ export function Dashboard() {
       .then((rows) => {
         if (alive) setHackathons(rows.filter((row): row is Hackathon => row.type === "hackathon"));
       })
-      .catch(() => { if (alive) setHackathons([]); });
+      .catch(() => {
+        if (alive) setHackathons([]);
+      });
     return () => { alive = false; };
   }, []);
 
+  // S7 — founder venture portfolio (multiple separate startups), from context.
   const ventures = p.founderProjects;
   const builds: Build[] = useMemo(
     () => ventures.map((v) => ({
@@ -107,12 +183,10 @@ export function Dashboard() {
     })),
     [ventures, p.logoEmoji],
   );
-  
   const [activeVentureId, setActiveVentureId] = useState<string | null>(null);
   useEffect(() => {
     setActiveVentureId((cur) => cur ?? (ventures.find((v) => v.isPrimary) ?? ventures[0])?.id ?? null);
   }, [ventures]);
-  
   const activeVenture = ventures.find((v) => v.id === activeVentureId) ?? ventures[0] ?? null;
 
   const [scorecard, setScorecard] = useState<GsisV2Scorecard | null>(null);
@@ -140,6 +214,16 @@ export function Dashboard() {
     if ((activeVenture?.progress ?? 0) > 0) {
       metrics.product = { score: activeVenture?.progress, status: "derived", evidence_level: 2, source: "project_progress", observed_at: observedAt };
     }
+    const totalResponses = validationSessions.reduce((sum, session) => sum + Number(session.totalResponseCount || 0), 0);
+    const qualifiedResponses = validationSessions.reduce((sum, session) => sum + Number(session.qualifiedResponseCount || 0), 0);
+    if (totalResponses > 0) {
+      // Observed share of validation responses that qualified (0–1 → 0–100).
+      metrics.customer_validation = { value: Math.min(1, qualifiedResponses / totalResponses), status: "observed", evidence_level: 3, source: "customer_validation", observed_at: observedAt };
+    }
+    if (workspaceTasks.length > 0) {
+      const completedTasks = workspaceTasks.filter((task) => task.status === "completed").length;
+      metrics.execution = { value: completedTasks / workspaceTasks.length, status: "derived", evidence_level: 2, source: "workspace_tasks", observed_at: observedAt };
+    }
     computeGsisV2({
       startup_id: activeVenture?.id,
       declared_stage: activeVenture?.stage ?? p.stage,
@@ -149,389 +233,623 @@ export function Dashboard() {
       metrics,
     }).then((result) => { if (alive) setScorecard(result); });
     return () => { alive = false; };
-  }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users]);
+  }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users, validationSessions, workspaceTasks]);
 
+  const signals = useMemo<Signal[]>(
+    () => deriveFounderSignals({ riskFlags, validationSessions, tasks }),
+    [riskFlags, validationSessions, tasks],
+  );
+
+  const journey = useMemo<JourneyStage[]>(
+    () => deriveJourney(activeVenture?.stage ?? p.stage, activeVenture?.progress),
+    [activeVenture, p.stage],
+  );
+
+  const evidenceSources = useMemo(
+    () => [...new Set(Object.values(scorecard?.components ?? {}).map((component) => component.source).filter(Boolean))],
+    [scorecard],
+  );
+  const evidencePlan = useMemo(() => [
+    { label: "Team size", available: p.currentTeamSize > 0, source: "founder profile" },
+    { label: "Product progress", available: (activeVenture?.progress ?? 0) > 0, source: "project" },
+    { label: "Active users", available: (activeVenture?.users ?? p.users) > 0, source: "venture" },
+    { label: "Monthly revenue", available: (activeVenture?.revenueMonthly ?? p.revenueMonthly) > 0, source: "venture" },
+    { label: "Customer validation", available: validationSessions.some((session) => Number(session.totalResponseCount || 0) > 0), source: "validation sessions" },
+    { label: "Execution evidence", available: workspaceTasks.length > 0, source: "workspace tasks" },
+  ], [p.currentTeamSize, p.users, p.revenueMonthly, activeVenture, validationSessions, workspaceTasks]);
+
+  const validationTotals = useMemo(() => computeValidationTotals(validationSessions), [validationSessions]);
+
+  const recentActivity = useMemo(
+    () => deriveRecentActivity({ workspaceTasks, validationSessions }),
+    [workspaceTasks, validationSessions],
+  );
+
+  const firstName = (p.name || "Founder").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   const weeksBuilding = useMemo(
     () => Math.max(1, Math.floor((NOW_MS - new Date(`${p.foundingYear}-01-01`).getTime()) / (7 * 86_400_000))),
     [p.foundingYear],
   );
 
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
+  const toggleTask = async (id: string) => {
+    const task = tasks.find((row) => row.id === id);
+    if (!task) return;
+    const nextStatus = task.done ? "pending" : "completed";
+    setTasks((cur) => cur.map((row) => row.id === id ? { ...row, done: !row.done } : row));
+    try {
+      await patchCollaboratorTask(
+        { id: task.id, workspaceId: task.workspaceId, projectId: task.projectId, projectName: task.projectName },
+        { status: nextStatus },
+      );
+      toast(nextStatus === "completed" ? "Task marked complete" : "Task reopened");
+    } catch {
+      setTasks((cur) => cur.map((row) => row.id === id ? { ...row, done: task.done } : row));
+      toast.error("Could not update the task.");
     }
   };
 
-  const itemVariant = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
-  };
-
   return (
-    <div className="p-4 md:p-6 lg:p-10 max-w-[1400px] mx-auto font-bricolage space-y-6 relative">
-      
-      {/* Ambient Animated Ripple Effect Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-0">
-        {/* Primary Central Ripple */}
-        <div className="absolute top-[22%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-[1100px] h-[1100px]">
-          {[0, 1, 2, 3].map((i) => (
-            <motion.div
-              key={`ripple-main-${i}`}
-              className="absolute rounded-full border border-[#0066ff]/20 dark:border-[#58a6ff]/25 shadow-[0_0_20px_rgba(0,102,255,0.06)] dark:shadow-[0_0_25px_rgba(88,166,255,0.15)]"
-              animate={{
-                width: ["160px", "1100px"],
-                height: ["160px", "1100px"],
-                opacity: [0.55, 0.25, 0],
-                scale: [0.9, 1.25],
-              }}
-              transition={{
-                duration: 9,
-                repeat: Infinity,
-                ease: [0.22, 1, 0.36, 1],
-                delay: i * 2.25,
-              }}
-            />
-          ))}
-        </div>
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      {/* Greeting */}
+      <div>
+        <h1 className="text-2xl font-bold text-text-primary">Good morning, {firstName}.</h1>
+        <p className="text-sm text-text-muted mt-0.5">{today} · Week {weeksBuilding} of building</p>
+      </div>
 
-        {/* Secondary Accent Ripple (Bottom Right) */}
-        <div className="absolute top-[65%] right-[-100px] flex items-center justify-center w-[750px] h-[750px]">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={`ripple-sub-${i}`}
-              className="absolute rounded-full border border-[#20c937]/15 dark:border-[#20c937]/20 shadow-[0_0_15px_rgba(32,201,55,0.08)]"
-              animate={{
-                width: ["120px", "750px"],
-                height: ["120px", "750px"],
-                opacity: [0.45, 0.15, 0],
-                scale: [0.9, 1.2],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: [0.22, 1, 0.36, 1],
-                delay: i * 2.6,
-              }}
-            />
-          ))}
+      {/* Welcome Back — contextual intelligence surface */}
+      <WelcomeBack />
+
+      {/* Your ventures — multi-project portfolio (S7) */}
+      <div className="border border-border-default bg-surface-primary rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary">Your ventures</h2>
+          <button
+            type="button"
+            onClick={() => navigate("/incubation-hub")}
+            className="text-xs text-violet-600 hover:underline"
+          >
+            + Analyze a new idea
+          </button>
+        </div>
+        {ventures.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {ventures.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setActiveVentureId(v.id)}
+                className={`text-left rounded-lg border px-3 py-2 transition-colors ${
+                  activeVentureId === v.id
+                    ? "border-violet-400 bg-violet-50"
+                    : "border-border-default hover:bg-background-primary"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-text-primary">{v.title}</span>
+                  {v.isPrimary && <span className="text-[10px] uppercase tracking-wide text-violet-600">Primary</span>}
+                </div>
+                <div className="flex items-center gap-3 mt-0.5">
+                  <span className="text-xs text-text-muted capitalize">{v.stage || "idea"}</span>
+                  <span className="text-xs text-text-disabled">GSIS {Math.round(v.gsisScore || 0)}</span>
+                  <span className={`text-xs ${v.hasWorkspace ? "text-status-success" : "text-text-disabled"}`}>
+                    {v.hasWorkspace ? "workspace" : "no workspace"}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-text-muted">No persisted ventures yet. Analyze an idea or promote an intake to create your first project.</p>
+        )}
+      </div>
+
+      {/* Startup hero */}
+      {p.startupName || activeVenture ? (
+      <Link to="/incubation-hub" className="block group border border-border-default bg-surface-primary rounded-xl p-6 hover:border-violet-300 transition-colors">
+        <div className="flex items-start gap-4">
+                          <Building2 className="h-9 w-9 text-text-muted" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-xl font-bold text-text-primary">{activeVenture?.title ?? p.startupName}</h2>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? "bg-surface-secondary text-text-secondary"}`}>
+                {activeVenture ? normalizedStage(activeVenture.stage) : p.stage}
+              </span>
+            </div>
+            <p className="text-sm text-text-muted mb-3">{activeVenture?.tagline ?? p.oneLiner}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">{p.users.toLocaleString()}</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Active users</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">${p.revenueMonthly.toLocaleString()}/mo</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Revenue</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">{p.openRoles.length} of 5</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Open roles</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-text-primary tabular-nums">—</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider">Top investor fit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border-subtle text-sm">
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); navigate("/founder/settings#startup"); }}
+            className="text-violet-600 hover:underline"
+          >
+            Edit startup details →
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); navigate("/founder/profile"); }}
+            className="text-violet-600 hover:underline"
+          >
+            View public profile →
+          </button>
+        </div>
+      </Link>
+      ) : null}
+
+      {/* GSIS v2 — focused operating intelligence in the existing dashboard card language. */}
+      {scorecard ? (
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-text-secondary">Startup intelligence</h2>
+                <span className="rounded bg-surface-secondary px-2 py-0.5 text-[10px] font-medium text-text-muted">{scorecard.model.version}</span>
+              </div>
+              <p className="text-xs text-text-muted mt-1">{scorecard.stage.reason}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-violet-700 tabular-nums leading-none">
+                {displayScore(scorecard.gsis)}
+              </p>
+              <p className="text-xs text-text-disabled mt-1">GSIS / 100</p>
+            </div>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-border-subtle pt-4 sm:grid-cols-3 lg:grid-cols-6">
+            <IntelligenceMetric label="Stage" value={scorecard.stage.detected_stage} />
+            <IntelligenceMetric label="Stage health" value={displayScore(scorecard.stage_health)} />
+            <IntelligenceMetric label="Momentum" value={`${scorecard.momentum.score > 0 ? "+" : ""}${scorecard.momentum.score}`} />
+            <IntelligenceMetric label="PMF" value={scorecard.pmf.score == null ? "N/A" : displayScore(scorecard.pmf.score)} />
+            <IntelligenceMetric label="Risk" value={scorecard.risk.level} />
+            <IntelligenceMetric label={`${metricLabel(scorecard.readiness.next_stage)} readiness`} value={displayScore(scorecard.readiness.score)} />
+          </div>
+          <div className="mt-5 grid gap-5 border-t border-border-subtle pt-5 lg:grid-cols-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase text-text-muted">Primary bottleneck</p>
+              <p className="mt-1 text-base font-semibold text-text-primary">{metricLabel(scorecard.bottleneck.category)}</p>
+              <p className="mt-1 text-xs text-text-muted">
+                {scorecard.bottleneck.score == null ? "More evidence is required to quantify this constraint." : `Current component score: ${Math.round(scorecard.bottleneck.score)}/100.`}
+              </p>
+            </div>
+            {scorecard.recommendation && (
+              <div className="border-l-2 border-violet-500 pl-4">
+                <p className="text-[11px] font-semibold uppercase text-violet-700">Next best action</p>
+                <p className="mt-1 text-sm font-medium text-text-primary">{scorecard.recommendation.action}</p>
+                <p className="mt-1 text-xs text-text-muted">{scorecard.recommendation.next_milestone}</p>
+              </div>
+            )}
+          </div>
+          <div className="mt-5 border-t border-border-subtle pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-medium text-text-secondary">
+                {metricLabel(scorecard.readiness.next_stage)} gate: {metricLabel(scorecard.readiness.status)}
+              </p>
+              <p className="text-xs text-text-muted">
+                {Math.round(scorecard.data_coverage * 100)}% coverage · {Math.round(scorecard.confidence * 100)}% confidence
+              </p>
+            </div>
+            {scorecard.readiness.blocking_requirements.length > 0 && (
+              <p className="mt-2 text-xs text-status-warning">
+                Missing: {scorecard.readiness.blocking_requirements.map((gate) => metricLabel(gate.metric)).join(" · ")}
+              </p>
+            )}
+          </div>
+          <div className="mt-5 border-t border-border-subtle pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold uppercase text-text-muted">Evidence sources</p>
+              {evidenceSources.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {evidenceSources.map((source) => <span key={source} className="rounded bg-surface-secondary px-2 py-0.5 text-[10px] text-text-muted">{source}</span>)}
+                </div>
+              ) : <span className="text-[11px] text-text-muted">None observed yet.</span>}
+            </div>
+            {Object.keys(scorecard.components ?? {}).length > 0 && (
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="text-text-muted">
+                    <tr>
+                      <th className="py-1 pr-3 font-medium">Component</th>
+                      <th className="py-1 pr-3 font-medium">Score</th>
+                      <th className="py-1 pr-3 font-medium">Confidence</th>
+                      <th className="py-1 pr-3 font-medium">Status</th>
+                      <th className="py-1 font-medium">Freshness</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.values(scorecard.components ?? {}).map((component) => (
+                      <tr key={component.key} className="border-t border-border-subtle">
+                        <td className="py-1 pr-3 text-text-secondary">{metricLabel(component.key)} <span className="text-text-disabled">· {component.source}</span></td>
+                        <td className="py-1 pr-3 tabular-nums text-text-primary">{Math.round(component.score)}</td>
+                        <td className="py-1 pr-3 tabular-nums text-text-muted">{Math.round(component.confidence * 100)}%</td>
+                        <td className="py-1 pr-3 text-text-muted">{component.status}</td>
+                        <td className="py-1 text-text-muted">{component.freshness}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
+              {evidencePlan.map((entry) => (
+                <p key={entry.label} className={`text-xs ${entry.available ? "text-status-success" : "text-text-muted"}`}>
+                  {entry.available ? "✓" : "○"} {entry.label} <span className="text-text-disabled">· {entry.source}</span>
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : intel?.gsis ? (
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-text-secondary">Global Startup Intelligence Score</h2>
+            <p className="text-xs text-text-muted mt-0.5">Legacy scorecard · v2 evidence is not available</p>
+          </div>
+          <p className="text-3xl font-bold text-violet-700 tabular-nums">{Math.round(intel.gsis.gsis)}</p>
+        </div>
+      ) : null}
+
+      {/* Momentum briefing (B5) + risk alerts (B4) from the AI engine */}
+      <div className="border border-border-default bg-surface-primary rounded-xl p-4 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={playBriefing}
+          disabled={briefingLoading}
+          className="text-sm px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 disabled:bg-slate-300"
+        >
+          {briefingLoading ? "Preparing…" : "▶ Play momentum briefing"}
+        </button>
+        {briefingUrl && <span className="text-xs text-text-disabled">Audio ready</span>}
+        {riskFlags.length > 0 && (
+          <div className="flex-1 min-w-[12rem]">
+            <p className="text-xs font-semibold text-status-warning mb-1">Engine risk alerts</p>
+            <ul className="space-y-0.5">
+              {riskFlags.slice(0, 3).map((f, i) => (
+                <li key={i} className="text-xs text-status-warning flex items-start gap-1.5">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{f.message ?? f.type ?? "Risk flag"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Customer evidence — composed from real validation sessions (T2.4) */}
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary">Customer evidence</h2>
+          <Link to="/incubation-hub" className="text-xs text-violet-600 hover:underline">Run validation →</Link>
+        </div>
+        {validationSessions.length > 0 ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-4">
+              <IntelligenceMetric label="Sessions" value={String(validationSessions.length)} />
+              <IntelligenceMetric label="Responses" value={validationTotals.responses.toLocaleString()} />
+              <IntelligenceMetric label="Qualified" value={validationTotals.qualified.toLocaleString()} />
+            </div>
+            <ul className="space-y-1.5 text-sm">
+              {validationSessions.slice(0, 3).map((session) => (
+                <li key={session.id} className="flex items-center justify-between gap-3">
+                  <span className="truncate text-text-secondary">{session.title}</span>
+                  <span className="shrink-0 text-xs text-text-muted">{session.qualifiedResponseCount}/{session.totalResponseCount} qualified · {session.confidenceLevel}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-sm text-text-muted">No customer-validation sessions yet. Start one to turn customer evidence into a GSIS signal.</p>
+        )}
+      </div>
+
+      {/* Cap table — committed collaborator equity (derived, never invented) */}
+      {capTable && (
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="text-sm font-semibold text-text-secondary">Equity &amp; cap table</h2>
+            <span className="text-[10px] uppercase tracking-wide text-text-muted">Derived from committed equity</span>
+          </div>
+          {capTable.totals.ventures > 0 ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <IntelligenceMetric label="Ventures" value={String(capTable.totals.ventures)} />
+                <IntelligenceMetric label="Committed grants" value={String(capTable.totals.committedGrants)} />
+                <IntelligenceMetric label="Pending proposals" value={String(capTable.totals.pendingProposals)} />
+              </div>
+              <ul className="space-y-3">
+                {capTable.ventures.map((venture) => (
+                  <li key={venture.workspaceId} className="rounded-lg border border-border-subtle p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-text-primary truncate">{venture.name}</p>
+                      <span className="text-xs text-text-muted tabular-nums">
+                        {venture.committedPercent}% committed · {venture.retainedPercent}% retained{venture.retainedDerived ? " (derived)" : ""}
+                      </span>
+                    </div>
+                    {venture.grants.length > 0 ? (
+                      <ul className="mt-2 space-y-1 text-xs text-text-secondary">
+                        {venture.grants.map((grant) => (
+                          <li key={grant.collaboratorId} className="flex items-center justify-between gap-3">
+                            <span className="truncate">{grant.collaboratorName} · {grant.role}</span>
+                            <span className="shrink-0 tabular-nums text-status-success">{grant.equityPercent}%</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-xs text-text-muted">No committed collaborator equity recorded for this venture.</p>
+                    )}
+                    {venture.pending.length > 0 && (
+                      <p className="mt-2 text-xs text-text-muted">
+                        Pending (not yet committed): {venture.pending.map((proposal) => `${proposal.collaboratorName} ${proposal.equityPercent}%`).join(" · ")}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-text-disabled">{capTable.basis}</p>
+            </div>
+          ) : (
+            <p className="text-sm text-text-muted">
+              No ventures yet. Equity you commit to collaborators through workspace invitations will appear here.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Journey strip */}
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Journey</h2>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {journey.map((s) => {
+            const isOpen = openStage === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setOpenStage(isOpen ? null : s.id)}
+                className={`text-left p-3 rounded-lg border transition-colors ${
+                  s.status === "complete" ? "border-violet-200 bg-surface-primary" :
+                  s.status === "active"   ? "border-violet-200 bg-violet-50" :
+                                            "border-border-default bg-background-primary"
+                }`}
+              >
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-1">{s.label}</p>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${
+                      s.status === "complete" ? "bg-violet-200" :
+                      s.status === "active"   ? "bg-violet-600" :
+                                                "bg-slate-200"
+                    }`}
+                    style={{ width: `${s.progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-text-secondary mt-1.5 tabular-nums">{s.progress}%</p>
+              </button>
+            );
+          })}
+        </div>
+        {openStage && (
+          <div className="mt-4 p-3 rounded-lg bg-background-primary border border-border-default text-sm text-text-secondary">
+            {journey.find((j) => j.id === openStage)?.detail}
+          </div>
+        )}
+      </div>
+
+      {/* Today's focus + Signals */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 border border-border-default bg-surface-primary rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-text-secondary">Today's focus</h2>
+            <Link to="/incubation-hub" className="text-xs text-violet-600 hover:underline">View all tasks →</Link>
+          </div>
+          {tasks.length > 0 ? (
+          <ul className="space-y-3">
+            {tasks.map((t) => (
+              <li key={t.id} className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={t.done}
+                  onChange={() => { void toggleTask(t.id); }}
+                  className="w-4 h-4 accent-violet-600 cursor-pointer"
+                />
+                <Link to={t.href} className={`flex-1 min-w-0 ${t.done ? "opacity-50 line-through" : ""}`}>
+                  <p className="text-sm font-medium text-text-primary truncate">{t.title}</p>
+                  <p className="text-xs text-text-muted">{t.detail}</p>
+                </Link>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${priorityStyles[t.priority]}`}>{t.priority}</span>
+              </li>
+            ))}
+          </ul>
+          ) : (
+            <p className="text-sm text-text-muted">No live focus tasks yet. Workspace tasks will appear here when they are assigned.</p>
+          )}
+        </div>
+        <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+          <h2 className="text-sm font-semibold text-text-secondary mb-4">Signals</h2>
+          {signals.length > 0 ? (
+          <ul className="space-y-3">
+            {signals.map((s) => (
+              <li key={s.id}>
+                <Link to={s.href} className="flex items-start gap-2 text-sm text-text-secondary hover:text-violet-600 group">
+                  <CheckCircle className="w-4 h-4 mt-0.5 text-text-disabled group-hover:text-violet-600 shrink-0" />
+                  <span className="flex-1">{s.message}</span>
+                  <ArrowRight className="w-4 h-4 mt-0.5 text-text-on-inverse-secondary group-hover:text-violet-600 shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+          ) : (
+            <p className="text-sm text-text-muted">No live signals yet.</p>
+          )}
         </div>
       </div>
 
-      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-6 relative z-10">
-        
-        {/* ======================================================== */}
-        {/* NEW GROUPED HEADER & VENTURES COMPONENT */}
-        {/* ======================================================== */}
-        <motion.div 
-          variants={itemVariant} 
-          className="rounded-[32px] bg-gradient-to-br from-[#58a6ff] to-[#58a6ff] dark:from-[#0d1f4d] dark:via-[#091536] dark:to-[#050c20] p-6 md:p-8 relative overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,102,255,0.4)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_35px_rgba(0,102,255,0.15)] dark:border dark:border-[#0066ff]/25"
-        >
-          {/* Subtle noise/glass overlay */}
-          <div className="absolute inset-0 bg-white/10 dark:bg-white/[0.03] mix-blend-overlay pointer-events-none" />
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 dark:from-[#0066ff]/25 via-transparent to-transparent blur-3xl -z-0" />
-          
-          <div className="relative z-10 flex flex-col gap-8">
-            
-            {/* Greeting Header */}
-            <div className="flex flex-col gap-1">
-              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-sm">Good morning, {firstName}.</h1>
-              <p className="text-sm font-bold text-white/80 uppercase tracking-widest">{today} &middot; Week {weeksBuilding} of building</p>
+      {/* Active builds */}
+      <div>
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">Active builds</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {builds.map((b) => (
+            <div key={b.id} className="border border-border-default bg-surface-primary rounded-xl p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <Building2 className="h-6 w-6 text-text-muted" aria-hidden="true" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-text-primary truncate">{b.name}</p>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${stageStyles[b.stage] ?? "bg-surface-secondary text-text-secondary"}`}>{b.stage}</span>
+                </div>
+              </div>
+              {b.oneLiner && <p className="text-xs text-text-muted mb-3">{b.oneLiner}</p>}
+              <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden mb-3">
+                <div className="h-full bg-violet-600" style={{ width: `${b.progress}%` }} />
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(`/workspaces/build?startup=${b.id}`)}
+                className="text-xs text-violet-600 hover:underline"
+              >
+                Open workspace →
+              </button>
             </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => navigate("/incubation-hub")}
+            className="border border-dashed border-border-strong rounded-xl p-4 text-sm text-text-muted hover:border-violet-400 hover:text-violet-600 transition-colors flex items-center justify-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Analyze a new idea
+          </button>
+        </div>
+      </div>
 
-            {/* Welcome Back Audio Briefing component - sits nicely in the header now */}
-            <div className="w-full">
-              <WelcomeBack />
-            </div>
+      {/* Recent activity */}
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-4">Recent activity</h2>
+        {recentActivity.length > 0 ? (
+          <ul className="space-y-2">
+            {recentActivity.map((item) => (
+              <li key={item.id}>
+                <Link to={item.href} className="flex items-center gap-3 text-sm text-text-secondary hover:text-violet-600">
+                  <CheckCircle className="w-4 h-4 text-text-disabled shrink-0" />
+                  <span className="flex-1">{item.message}</span>
+                  <ArrowRight className="w-4 h-4 text-text-disabled shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-text-muted">No persisted activity yet. Completed workspace tasks and validation updates will appear here.</p>
+        )}
+      </div>
 
-            {/* Your ventures - Multi-project portfolio (Glassmorphism #0066ff) */}
-            <div className="mt-4 bg-[#0066ff]/15 dark:bg-black/35 backdrop-blur-2xl border border-[#0066ff]/30 dark:border-white/10 rounded-[28px] p-6 md:p-8 shadow-[0_15px_40px_rgba(0,102,255,0.2)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
-              <div className="flex items-center justify-between mb-6 border-b border-[#0066ff]/20 dark:border-white/10 pb-4">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-white shadow-sm" />
-                  <h2 className="text-sm font-black uppercase tracking-widest text-white drop-shadow-sm">Your ventures</h2>
+      {/* Hackathon Momentum */}
+      {(() => {
+        const regs = p.hackathonRegistrations;
+        if (regs.length === 0) {
+          return (
+            <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-sm font-semibold text-text-secondary">Hackathon Momentum</h2>
+                    <TrendingUp className="w-4 h-4 text-text-disabled" />
+                  </div>
+                  <p className="text-sm text-text-muted">
+                    No active hackathons. Join a hackathon from the Opportunity Hub to see your team's momentum
+                    tracker here — 4-hour check-ins, build velocity, blockers.
+                  </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => navigate("/incubation-hub")}
-                  className="text-xs font-bold text-white hover:text-white transition-colors flex items-center gap-1 bg-[#0066ff]/30 dark:bg-[#0066ff]/25 border border-[#0066ff]/40 dark:border-[#58a6ff]/30 hover:bg-[#0066ff]/50 px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,102,255,0.2)] backdrop-blur-md"
+                  onClick={() => navigate("/opportunity-hub")}
+                  className="text-xs font-medium text-violet-700 px-3 py-1.5 rounded-lg border border-violet-200 hover:bg-violet-50 flex items-center gap-2 shrink-0"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Analyze a new idea
+                  Browse opportunities →
                 </button>
               </div>
-              
-              {ventures.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {ventures.map((v) => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => setActiveVentureId(v.id)}
-                      className={`text-left rounded-2xl border p-5 transition-all duration-300 group backdrop-blur-md shadow-[0_4px_20px_rgba(0,102,255,0.1)] ${
-                        activeVentureId === v.id
-                          ? "border-[#0066ff]/60 bg-[#0066ff]/40 dark:bg-[#0066ff]/30 dark:border-[#58a6ff]/50 text-white shadow-[0_0_20px_rgba(0,102,255,0.25)]"
-                          : "border-[#0066ff]/30 dark:border-white/10 bg-[#0066ff]/10 dark:bg-white/[0.04] hover:border-[#0066ff]/50 hover:dark:border-[#58a6ff]/30 hover:bg-[#0066ff]/30 hover:dark:bg-white/[0.08] text-white/90"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                          activeVentureId === v.id ? "bg-white text-[#0066ff] shadow-md" : "bg-[#0066ff]/30 dark:bg-white/10 border border-[#0066ff]/40 dark:border-white/10 text-white group-hover:bg-[#0066ff]/50"
-                        }`}>
-                           <Building2 className="h-5 w-5" aria-hidden="true" />
-                        </div>
-                        {v.isPrimary && <span className="text-[9px] uppercase font-bold tracking-widest text-white bg-[#0066ff]/60 border border-[#0066ff]/40 px-2 py-1 rounded-lg">Primary</span>}
-                      </div>
-                      
-                      <div className="mb-4">
-                        <p className="text-lg font-black text-white tracking-tight truncate mb-1">{v.title}</p>
-                        {v.tagline && <p className="text-xs font-medium text-white/80 line-clamp-2">{v.tagline}</p>}
-                      </div>
-
-                      <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border-t border-[#0066ff]/30 dark:border-white/10 pt-3">
-                        <span className={`px-2 py-0.5 rounded-md border ${
-                          activeVentureId === v.id ? "bg-[#0066ff]/50 text-white border-[#0066ff]/40" : "bg-[#0066ff]/20 dark:bg-white/10 text-white/90 border-[#0066ff]/30 dark:border-white/10"
-                        }`}>{v.stage || "idea"}</span>
-                        <span className="text-white/90">GSIS {Math.round(v.gsisScore || 0)}</span>
-                        <span className={`flex items-center gap-1 ${v.hasWorkspace ? "text-white" : "text-white/60"}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${v.hasWorkspace ? "bg-[#20c937] shadow-[0_0_8px_#20c937]" : "bg-white/50"}`} />
-                          {v.hasWorkspace ? "Ready" : "Setup"}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center p-8 bg-[#0066ff]/10 dark:bg-white/[0.04] backdrop-blur-md rounded-2xl border border-[#0066ff]/20 dark:border-white/10">
-                  <p className="text-white/90 font-medium mb-4">You haven't added any ventures yet.</p>
-                  <button onClick={() => navigate("/incubation-hub")} className="px-5 py-2.5 bg-[#0066ff] text-white font-bold rounded-xl hover:bg-[#0052cc] transition-all shadow-[0_4px_15px_rgba(0,102,255,0.4)]">
-                    Start your first venture
-                  </button>
-                </div>
-              )}
             </div>
-          </div>
-        </motion.div>
-
-        {/* Startup hero */}
-        {(p.startupName || activeVenture) && (
-        <motion.div variants={itemVariant}>
-          <Link to="/incubation-hub" className="block group border border-[#0066ff]/15 dark:border-white/10 shadow-[0_15px_40px_rgba(0,102,255,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] bg-[#0066ff]/[0.02] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 hover:border-[#0066ff]/30 hover:dark:border-[#0066ff]/40 hover:shadow-[0_20px_50px_rgba(0,102,255,0.15)] transition-all duration-300 relative overflow-hidden text-[#171330] dark:text-white">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0066ff]/10 to-[#58a6ff]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            
-            <div className="flex items-start gap-6 relative z-10">
-              <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-[#0066ff]/10 to-[#58a6ff]/5 dark:from-[#0066ff]/20 dark:to-[#58a6ff]/10 flex items-center justify-center shrink-0 border border-[#0066ff]/20 dark:border-[#0066ff]/30 shadow-sm group-hover:scale-110 transition-transform duration-500">
-                 <Rocket className="h-7 w-7 text-[#0066ff] dark:text-[#58a6ff]" aria-hidden="true" />
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <h2 className="text-2xl md:text-3xl font-black text-[#171330] dark:text-white tracking-tight">{activeVenture?.title ?? p.startupName}</h2>
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-widest border ${stageStyles[activeVenture ? normalizedStage(activeVenture.stage) : p.stage] ?? stageStyles.Idea}`}>
-                    {activeVenture ? normalizedStage(activeVenture.stage) : p.stage}
-                  </span>
-                </div>
-                
-                <p className="text-sm md:text-base font-medium text-[#171330]/70 dark:text-white/70 mb-8 max-w-2xl">{activeVenture?.tagline ?? p.oneLiner}</p>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-sm bg-[#0066ff]/[0.04] dark:bg-white/[0.03] rounded-2xl p-5 border border-[#0066ff]/10 dark:border-white/10">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Globe className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Active users</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">{p.users.toLocaleString()}</p>
-                  </div>
-                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 dark:border-white/10 pl-4 md:pl-6">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Activity className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Revenue</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">${p.revenueMonthly.toLocaleString()}<span className="text-sm md:text-base text-[#171330]/40 dark:text-white/40 font-bold ml-1">/mo</span></p>
-                  </div>
-                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 dark:border-white/10 pl-4 md:pl-6">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Target className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Open roles</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330] dark:text-white tabular-nums tracking-tight">{p.openRoles.length} <span className="text-sm md:text-base text-[#171330]/40 dark:text-white/40 font-bold ml-1">of 5</span></p>
-                  </div>
-                  <div className="flex flex-col gap-1 border-l border-[#0066ff]/10 dark:border-white/10 pl-4 md:pl-6">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#171330]/50 dark:text-white/50 uppercase tracking-widest"><Sparkles className="w-3 h-3 text-[#0066ff] dark:text-[#58a6ff]" /> Investor fit</div>
-                    <p className="text-3xl md:text-4xl font-black text-[#171330]/40 dark:text-white/40 tabular-nums tracking-tight">—</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-6 mt-8 pt-6 border-t border-[#0066ff]/10 dark:border-white/10 text-sm relative z-10">
-              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/settings#startup"); }} className="text-[#0066ff] dark:text-[#58a6ff] font-bold hover:text-[#0052cc] dark:hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
-                Edit details <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-              <button type="button" onClick={(e) => { e.preventDefault(); navigate("/founder/profile"); }} className="text-[#0066ff] dark:text-[#58a6ff] font-bold hover:text-[#0052cc] dark:hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest text-[10px]">
-                Public profile <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </Link>
-        </motion.div>
-        )}
-
-        {/* GSIS v2 Dashboard Card */}
-        {scorecard && (
-          <motion.div variants={itemVariant} className="border border-[#0066ff]/15 dark:border-white/10 shadow-[0_20px_60px_rgba(0,102,255,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] bg-[#0066ff]/[0.03] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-[#171330] dark:text-white">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#0066ff]/10 via-transparent to-transparent opacity-80 pointer-events-none" />
-            
-            <div className="flex flex-wrap items-start justify-between gap-6 relative z-10">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 border border-[#0066ff]/20 dark:border-[#0066ff]/30 flex items-center justify-center">
-                    <Activity className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />
-                  </div>
-                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-[#171330] dark:text-white">Startup Intelligence</h2>
-                  <span className="rounded-lg bg-[#0066ff]/5 dark:bg-white/5 border border-[#0066ff]/20 dark:border-white/10 px-2 py-1 text-[10px] font-black tracking-widest text-[#171330]/60 dark:text-white/60 uppercase">{scorecard.model.version}</span>
-                </div>
-                <p className="text-sm font-semibold text-[#171330]/70 dark:text-white/70 max-w-lg leading-relaxed mt-4">{scorecard.stage.reason}</p>
-              </div>
-              
-              <div className="text-right bg-[#0066ff]/5 dark:bg-white/[0.04] rounded-2xl p-5 border border-[#0066ff]/10 dark:border-white/10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#171330]/50 dark:text-white/50 mb-1">Global Startup Intelligence Score</p>
-                <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#0066ff] to-[#58a6ff] tabular-nums tracking-tighter leading-none [text-shadow:0_0_30px_rgba(0,102,255,0.2)]">
-                  {displayScore(scorecard.gsis)}<span className="text-2xl text-[#171330]/30 dark:text-white/30 font-bold ml-1">/100</span>
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 relative z-10">
-              <IntelligenceMetric label="Stage" value={scorecard.stage.detected_stage} icon={Target} />
-              <IntelligenceMetric label="Stage health" value={displayScore(scorecard.stage_health)} icon={Activity} />
-              <IntelligenceMetric label="Momentum" value={`${scorecard.momentum.score > 0 ? "+" : ""}${scorecard.momentum.score}`} icon={TrendingUp} />
-              <IntelligenceMetric label="PMF" value={scorecard.pmf.score == null ? "N/A" : displayScore(scorecard.pmf.score)} icon={Sparkles} />
-              <IntelligenceMetric label="Risk" value={scorecard.risk.level} icon={AlertTriangle} />
-              <IntelligenceMetric label={`${metricLabel(scorecard.readiness.next_stage)}`} value={displayScore(scorecard.readiness.score)} icon={Zap} />
-            </div>
-            
-            <div className="mt-8 grid gap-6 lg:grid-cols-2 relative z-10">
-              <div className="bg-red-500/10 rounded-2xl p-6 border border-red-500/20 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><AlertTriangle className="w-24 h-24 text-red-500" /></div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-2 flex items-center gap-1.5 relative z-10"><AlertTriangle className="w-3.5 h-3.5" /> Primary bottleneck</p>
-                <p className="text-xl font-black text-red-600 capitalize relative z-10">{metricLabel(scorecard.bottleneck.category)}</p>
-                <p className="mt-3 text-sm font-medium text-red-500/80 relative z-10">
-                  {scorecard.bottleneck.score == null ? "More evidence is required to quantify this constraint." : `Current component score: ${Math.round(scorecard.bottleneck.score)}/100.`}
-                </p>
-              </div>
-              
-              {scorecard.recommendation && (
-                <div className="bg-gradient-to-br from-[#0066ff]/10 to-[#58a6ff]/5 dark:from-[#0066ff]/20 dark:to-[#58a6ff]/10 rounded-2xl p-6 border border-[#0066ff]/20 dark:border-[#0066ff]/30 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><TrendingUp className="w-24 h-24 text-[#0066ff] dark:text-[#58a6ff]" /></div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#58a6ff] mb-2 flex items-center gap-1.5 relative z-10"><TrendingUp className="w-3.5 h-3.5" /> Next best action</p>
-                  <p className="text-xl font-black text-[#171330] dark:text-white relative z-10">{scorecard.recommendation.action}</p>
-                  <p className="mt-3 text-sm font-medium text-[#0066ff] dark:text-[#58a6ff] relative z-10">{scorecard.recommendation.next_milestone}</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="mt-8 border-t border-[#0066ff]/10 dark:border-white/10 pt-6 relative z-10 bg-[#0066ff]/[0.05] dark:bg-white/[0.02] -mx-6 md:-mx-10 -mb-6 md:-mb-10 p-6 md:p-10 rounded-b-[32px]">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] ${scorecard.readiness.status === 'READY' ? 'bg-[#20c937] text-[#20c937]' : 'bg-amber-400 text-amber-400 animate-pulse'}`} />
-                  <p className="text-sm font-bold text-[#171330] dark:text-white">
-                    <span className="capitalize">{metricLabel(scorecard.readiness.next_stage)}</span> gate: <span className={scorecard.readiness.status === 'READY' ? 'text-[#20c937]' : 'text-amber-500'}>{metricLabel(scorecard.readiness.status)}</span>
-                  </p>
-                </div>
-                <div className="flex items-center gap-4 bg-[#0066ff]/[0.04] dark:bg-white/[0.04] rounded-xl px-4 py-2 border border-[#0066ff]/10 dark:border-white/10 shadow-sm">
-                  <p className="text-[10px] font-bold text-[#171330]/60 dark:text-white/60 uppercase tracking-widest flex items-center gap-1.5">
-                    <Target className="w-3.5 h-3.5 text-[#0066ff] dark:text-[#58a6ff]" /> {Math.round(scorecard.data_coverage * 100)}% coverage
-                  </p>
-                  <div className="w-px h-3 bg-[#0066ff]/20 dark:bg-white/10" />
-                  <p className="text-[10px] font-bold text-[#171330]/60 dark:text-white/60 uppercase tracking-widest flex items-center gap-1.5">
-                    <CheckCircle className="w-3.5 h-3.5 text-[#0066ff] dark:text-[#58a6ff]" /> {Math.round(scorecard.confidence * 100)}% confidence
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Hackathon Momentum */}
-        {(() => {
-          const regs = p.hackathonRegistrations;
-          if (regs.length === 0) {
-            return (
-              <motion.div variants={itemVariant} className="border border-[#0066ff]/15 dark:border-white/10 shadow-[0_15px_40px_rgba(0,102,255,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] bg-[#0066ff]/[0.03] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 text-[#171330] dark:text-white">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#0066ff]/10 dark:bg-[#0066ff]/20 border border-[#0066ff]/20 dark:border-[#0066ff]/30 flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-[#0066ff] dark:text-[#58a6ff]" />
-                      </div>
-                      <h2 className="text-base font-black uppercase tracking-widest text-[#171330] dark:text-white">Hackathon Momentum</h2>
-                    </div>
-                    <p className="text-sm font-medium text-[#171330]/70 dark:text-white/70 max-w-2xl leading-relaxed">
-                      No active hackathons. Join a hackathon from the Opportunity Hub to see your team's momentum tracker here &mdash; 4-hour check-ins, build velocity, and blockers.
-                    </p>
-                  </div>
-                  <button type="button" onClick={() => navigate("/opportunity-hub")} className="text-[10px] uppercase tracking-widest font-black text-white bg-[#0066ff] px-6 py-4 rounded-xl hover:bg-[#0052cc] transition-colors shadow-sm shrink-0">
-                    Browse opportunities &rarr;
-                  </button>
-                </div>
-              </motion.div>
-            );
-          }
-          return (
-            <motion.div variants={itemVariant} className="border border-[#20c937]/30 dark:border-white/10 shadow-[0_20px_60px_rgba(32,201,55,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] bg-[#20c937]/[0.05] dark:bg-[#121212]/90 backdrop-blur-3xl rounded-[32px] p-6 md:p-10 relative overflow-hidden text-[#171330] dark:text-white">
-              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#20c937]/20 via-transparent to-transparent opacity-60 pointer-events-none" />
-              
-              <div className="flex items-center gap-3 mb-8 relative z-10 border-b border-[#20c937]/20 dark:border-white/10 pb-6">
-                <div className="w-12 h-12 rounded-xl bg-[#20c937]/20 border border-[#20c937]/30 flex items-center justify-center shadow-sm">
-                  <Zap className="w-6 h-6 text-[#20c937]" />
-                </div>
-                <div>
-                  <h2 className="text-lg md:text-xl font-black uppercase tracking-widest text-[#171330] dark:text-white">Hackathon Momentum</h2>
-                  <p className="text-xs font-bold text-[#171330]/60 dark:text-white/60 uppercase tracking-widest mt-1">Live tracking and velocity</p>
-                </div>
-              </div>
-              
-              <ul className="space-y-4 relative z-10">
-                {regs.map((r) => {
-                  const h = hackathons.find((o) => o.id === r.hackathonId);
-                  if (!h) return null;
-                  const memberCount = r.members.length + 1;
-                  const teamSize = r.teamSize;
-                  const startMs = new Date(h.startDate).getTime() - Date.now();
-                  const days = Math.max(0, Math.ceil(startMs / (1000 * 60 * 60 * 24)));
-                  const startsLabel = Number.isNaN(startMs) ? "Start date unavailable" : days <= 7 ? `Starts in ${days} days` : `Starts ${h.startDate}`;
-                  const momentum = computeMomentum(r, Date.now());
-                  const momColor = momentumColor(momentum.score);
-                  const ctaLabel = momentum.nextAction === "submit-brief" ? "Submit brief" : momentum.nextAction === "log-check-in" ? "Log check-in" : "Open team";
-                  const ctaStage = momentum.nextAction === "submit-brief" ? "brief" : "build";
-                  
-                  return (
-                    <li key={r.teamId} className="flex flex-col lg:flex-row lg:items-center gap-6 border border-[#20c937]/20 dark:border-white/10 bg-[#20c937]/[0.05] dark:bg-white/[0.03] rounded-2xl p-5 md:p-6 hover:border-[#20c937]/40 hover:bg-[#20c937]/10 hover:dark:bg-white/[0.06] transition-all duration-300 group shadow-sm">
-                      <div className="text-4xl shrink-0 bg-white/60 dark:bg-white/10 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm border border-[#20c937]/20 dark:border-white/10 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">{h.poster}</div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xl font-black text-[#171330] dark:text-white truncate mb-2">{h.title}</p>
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="text-[10px] font-black uppercase tracking-widest bg-[#20c937]/20 dark:bg-white/10 px-2 py-1 rounded-md text-[#171330] dark:text-white">{r.teamName}</span>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#171330]/60 dark:text-white/60 flex items-center gap-1.5"><Building2 className="w-3 h-3" /> {memberCount}/{teamSize} members</span>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#171330]/60 dark:text-white/60 flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {startsLabel}</span>
-                        </div>
-                        <p className="text-xs font-bold text-[#20c937] mt-3 uppercase tracking-widest">{momentum.nextActionLabel}</p>
-                      </div>
-                      
-                      <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 border-t border-[#20c937]/20 dark:border-white/10 lg:border-0 pt-5 lg:pt-0 lg:w-48 shrink-0">
-                        <div className="text-right flex-1 lg:flex-none">
-                          <p className={`text-4xl font-black tabular-nums tracking-tighter ${momColor.text}`}>{momentum.score}</p>
-                          <div className="h-1.5 w-full lg:w-24 rounded-full bg-[#20c937]/20 dark:bg-white/10 mt-2">
-                            <div className={`h-1.5 rounded-full ${momColor.bar} shadow-[0_0_10px_currentColor]`} style={{ width: `${momentum.score}%` }} />
-                          </div>
-                        </div>
-                        <button type="button" onClick={() => navigate(`/incubation-hub?panel=hackathon&stage=${ctaStage}`)} className="text-[10px] uppercase font-black tracking-widest px-5 py-3 rounded-xl border border-white/20 text-white hover:bg-white hover:text-[#171330] transition-all shrink-0 shadow-lg whitespace-nowrap">
-                          {ctaLabel} &rarr;
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </motion.div>
           );
-        })()}
-
-      </motion.div>
-      <div className="h-12" />
+        }
+        return (
+          <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-sm font-semibold text-text-secondary">Hackathon Momentum</h2>
+              <TrendingUp className="w-4 h-4 text-text-disabled" />
+            </div>
+            <ul className="space-y-3">
+              {regs.map((r) => {
+                const h = hackathons.find((o) => o.id === r.hackathonId);
+                if (!h) return null;
+                const memberCount = r.members.length + 1;
+                const teamSize = r.teamSize;
+                const startMs = new Date(h.startDate).getTime() - Date.now();
+                const days = Math.max(0, Math.ceil(startMs / (1000 * 60 * 60 * 24)));
+                const startsLabel = Number.isNaN(startMs)
+                  ? "Start date unavailable"
+                  : days <= 7
+                    ? `Starts in ${days} days`
+                    : `Starts ${h.startDate}`;
+                const momentum = computeMomentum(r, Date.now());
+                const momColor = momentumColor(momentum.score);
+                const ctaLabel =
+                  momentum.nextAction === "submit-brief" ? "Submit brief →"
+                  : momentum.nextAction === "log-check-in" ? "Log check-in →"
+                  : "Open team";
+                const ctaStage = momentum.nextAction === "submit-brief" ? "brief" : "build";
+                return (
+                  <li key={r.teamId} className="flex items-start gap-3 border border-border-subtle rounded-lg p-3">
+                    <span className="text-xl shrink-0" aria-hidden="true">{h.poster}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text-primary truncate">{h.title}</p>
+                      <p className="text-xs text-text-muted">
+                        {r.teamName} · {memberCount} of {teamSize} members · {startsLabel}
+                      </p>
+                      <p className="text-xs text-text-muted mt-1 font-medium">{momentum.nextActionLabel}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className={`text-2xl font-bold leading-none ${momColor.text}`}>{momentum.score}</p>
+                      <div className="h-1.5 w-16 rounded-full bg-surface-secondary mt-1 ml-auto">
+                        <div className={`h-1.5 rounded-full ${momColor.bar}`} style={{ width: `${momentum.score}%` }} />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/incubation-hub?panel=hackathon&stage=${ctaStage}`)}
+                      className="text-xs font-medium px-3 py-1.5 rounded-lg border border-border-strong text-text-secondary hover:bg-background-primary shrink-0 self-center"
+                    >
+                      {ctaLabel}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <button
+              type="button"
+              onClick={() => navigate("/opportunity-hub")}
+              className="mt-4 text-xs font-medium text-violet-700 hover:underline"
+            >
+              Browse more opportunities →
+            </button>
+          </div>
+        );
+      })()}
     </div>
   );
 }

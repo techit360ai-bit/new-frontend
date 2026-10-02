@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bot, Search } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIAgentCard } from '../components/ai/AIAgentCard';
 import type { AIAgent } from '../components/ai/AIAgentCard';
@@ -10,9 +11,17 @@ import { Transcript } from '../components/console/Transcript';
 import { Composer } from '../components/console/Composer';
 
 export function Agents() {
+  const location = useLocation();
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // Deep-linkable tab so "New Task" in Build can open the live console composer.
+  const initialTab = useMemo(
+    () => (new URLSearchParams(location.search).get('tab') === 'console' ? 'console' : 'catalog'),
+    [location.search],
+  );
+  const [tab, setTab] = useState(initialTab);
+  useEffect(() => { setTab(initialTab); }, [initialTab]);
 
   useEffect(() => {
     let alive = true;
@@ -42,31 +51,28 @@ export function Agents() {
   const filtered = agents.filter((a) => a.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
-      <div className="bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-5">
+    <div className="h-full flex flex-col bg-background-primary">
+      <div className="bg-surface-primary border-b border-border-default px-8 py-5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 bg-[#20C997]/10 rounded-xl border border-[#20C997]/20"><Bot className="w-6 h-6 text-[#20C997]" /></div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Agents</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Autonomous & assisted AI agents for your workspace</p>
-          </div>
+          <div className="p-2 bg-brand-primary/10 rounded-lg"><Bot className="w-6 h-6 text-brand-primary" /></div>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Agents</h1>
         </div>
-        <Tabs defaultValue="catalog">
-          <TabsList className="bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="catalog" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">Catalog</TabsTrigger>
-            <TabsTrigger value="console" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">Console</TabsTrigger>
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList>
+            <TabsTrigger value="catalog">Catalog</TabsTrigger>
+            <TabsTrigger value="console">Console</TabsTrigger>
           </TabsList>
 
           <TabsContent value="catalog">
             <div className="relative mt-4 mb-6 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-disabled" />
               <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search agents..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#111111] border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 text-sm transition-all" />
+                className="w-full pl-10 pr-4 py-2 bg-background-primary border border-border-default rounded-lg outline-none focus:border-brand-primary" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
               {filtered.map((a) => (<AIAgentCard key={a.id} agent={a} onToggle={handleToggle} />))}
               {filtered.length === 0 && (
-                <div className="md:col-span-2 lg:col-span-3 rounded-2xl border border-dashed border-black/[0.1] dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-md px-4 py-8 text-sm text-slate-500 dark:text-slate-400">
+                <div className="md:col-span-2 lg:col-span-3 rounded-lg border border-dashed border-border-strong bg-surface-primary px-4 py-8 text-sm text-text-muted">
                   {error ? `Live workspace agents could not be loaded: ${error}` : 'No workspace agents are recorded yet.'}
                 </div>
               )}
@@ -75,7 +81,7 @@ export function Agents() {
 
           <TabsContent value="console">
             <ConsoleProvider>
-              <div className="mt-4 flex border border-black/[0.08] dark:border-white/10 rounded-2xl overflow-hidden bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl shadow-lg" style={{ height: 'calc(100vh - 240px)' }}>
+              <div className="mt-4 flex border border-border-default rounded-lg overflow-hidden" style={{ height: 'calc(100vh - 240px)' }}>
                 <TaskList />
                 <div className="flex-1 flex flex-col">
                   <Transcript />

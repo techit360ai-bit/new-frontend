@@ -1,35 +1,132 @@
+// frontend/src/dashboard/workspaces/pages/Settings.tsx
+//
+// Workspace settings are bound to real APIs: profile → PATCH /users/me (via
+// AuthContext.updateProfile), password → POST /auth/change-password, notification
+// preferences → /api/domain/notifications/preferences, appearance → ThemeContext.
+// Anything the deployment cannot do yet is labelled, not rendered as a dead control.
+
 import { useEffect, useState } from 'react';
-import { Settings as SettingsIcon, User, Bell, Shield, Palette, Globe, Zap, Github } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Settings as SettingsIcon, User, Bell, Shield, Palette, Zap } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { getActiveSessions, revokeOtherSessions, revokeSession } from '@/lib/api/session';
+import { fetchNotificationPreferences, saveNotificationPreferences } from '@/lib/api/settings';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+
+interface NotificationSettings {
+  email: boolean;
+  push: boolean;
+  mentions: boolean;
+  buildStatus: boolean;
+  pullRequests: boolean;
+}
+
+const DEFAULT_NOTIFICATIONS: NotificationSettings = {
+  email: true,
+  push: true,
+  mentions: true,
+  buildStatus: true,
+  pullRequests: true,
+};
 
 export function Settings() {
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [autoSave, setAutoSave] = useState(true);
+  const { profile, updateProfile, changePassword } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const roleScope: 'founder' | 'collaborator' = profile?.role === 'founder' ? 'founder' : 'collaborator';
+
+  // ── Profile ────────────────────────────────────────────────
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [bio, setBio] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  useEffect(() => {
+    setFirstName(profile?.firstName ?? '');
+    setLastName(profile?.lastName ?? '');
+    setBio(profile?.bio ?? '');
+  }, [profile?.firstName, profile?.lastName, profile?.bio]);
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    const { error } = await updateProfile({ firstName, lastName, bio });
+    setSavingProfile(false);
+    if (error) toast.error(error.message);
+    else toast.success('Profile updated');
+  };
+  const resetProfile = () => {
+    setFirstName(profile?.firstName ?? '');
+    setLastName(profile?.lastName ?? '');
+    setBio(profile?.bio ?? '');
+  };
+
+  // ── Notification preferences (persisted per role) ──────────
+  const [notifications, setNotifications] = useState<NotificationSettings>(DEFAULT_NOTIFICATIONS);
+  const [savingNotifications, setSavingNotifications] = useState(false);
+  const [notificationsError, setNotificationsError] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchNotificationPreferences<NotificationSettings>(roleScope)
+      .then((prefs) => { if (alive) setNotifications({ ...DEFAULT_NOTIFICATIONS, ...prefs }); })
+      .catch(() => { if (alive) setNotificationsError('Notification preferences could not be loaded.'); });
+    return () => { alive = false; };
+  }, [roleScope]);
+
+  const persistNotifications = async (next: NotificationSettings) => {
+    setNotifications(next);
+    setSavingNotifications(true);
+    try {
+      await saveNotificationPreferences(roleScope, next);
+      setNotificationsError(null);
+    } catch (err) {
+      setNotificationsError(err instanceof Error ? err.message : 'Notification preferences could not be saved.');
+    } finally {
+      setSavingNotifications(false);
+    }
+  };
+  const toggleNotification = (key: keyof NotificationSettings, value: boolean) => {
+    void persistNotifications({ ...notifications, [key]: value });
+  };
+
+  // ── Security ───────────────────────────────────────────────
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
   const [sessions, setSessions] = useState<Awaited<ReturnType<typeof getActiveSessions>>['sessions']>([]);
   useEffect(() => { void getActiveSessions().then(data => setSessions(data.sessions)).catch(() => setSessions([])); }, []);
 
+  const submitPassword = async () => {
+    if (!currentPassword || !newPassword) { toast.error('Enter your current and new password.'); return; }
+    if (newPassword !== confirmPassword) { toast.error('New passwords do not match.'); return; }
+    setChangingPassword(true);
+    const { error } = await changePassword(currentPassword, newPassword);
+    setChangingPassword(false);
+    if (error) { toast.error(error.message); return; }
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    toast.success('Password updated');
+  };
+
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
+    <div className="h-full flex flex-col bg-background-primary">
       {/* Header */}
-      <div className="bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/10 px-8 py-6">
+      <div className="bg-surface-primary border-b border-border-default px-8 py-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#20C997]/10 rounded-xl border border-[#20C997]/20">
-            <SettingsIcon className="w-6 h-6 text-[#20C997]" />
+          <div className="p-2 bg-brand-primary/10 rounded-lg">
+            <SettingsIcon className="w-6 h-6 text-brand-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Settings
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Manage your account and preferences</p>
+            <p className="text-sm text-text-muted">Manage your account and preferences</p>
           </div>
         </div>
       </div>
@@ -37,24 +134,24 @@ export function Settings() {
       {/* Settings Content */}
       <div className="flex-1 overflow-auto px-8 py-6">
         <Tabs defaultValue="profile" className="w-full max-w-4xl">
-          <TabsList className="mb-6 bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+          <TabsList className="mb-6">
+            <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="notifications">
               <Bell className="w-4 h-4 mr-2" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="appearance" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="appearance">
               <Palette className="w-4 h-4 mr-2" />
               Appearance
             </TabsTrigger>
-            <TabsTrigger value="security" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="security">
               <Shield className="w-4 h-4 mr-2" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="integrations">
               <Zap className="w-4 h-4 mr-2" />
               Integrations
             </TabsTrigger>
@@ -62,97 +159,97 @@ export function Settings() {
 
           {/* Profile Settings */}
           <TabsContent value="profile" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
-              <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Profile Information</h2>
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
+              <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="firstName" className="text-slate-700 dark:text-slate-300">First Name</Label>
-                    <Input id="firstName" defaultValue="John" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input id="firstName" value={firstName} onChange={(event) => setFirstName(event.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="lastName" className="text-slate-700 dark:text-slate-300">Last Name</Label>
-                    <Input id="lastName" defaultValue="Doe" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input id="lastName" value={lastName} onChange={(event) => setLastName(event.target.value)} />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="email" className="text-slate-700 dark:text-slate-300">Email</Label>
-                  <Input id="email" type="email" defaultValue="john.doe@techit.com" className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={profile?.email ?? ''} readOnly disabled />
+                  <p className="mt-1 text-xs text-text-muted">Email changes are handled through account support.</p>
                 </div>
                 <div>
-                  <Label htmlFor="role" className="text-slate-700 dark:text-slate-300">Role</Label>
-                  <Select defaultValue="developer">
-                    <SelectTrigger className="mt-1.5 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-[#111111] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
-                      <SelectItem value="developer">Software Developer</SelectItem>
-                      <SelectItem value="designer">UI/UX Designer</SelectItem>
-                      <SelectItem value="manager">Project Manager</SelectItem>
-                      <SelectItem value="admin">Administrator</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="role">Role</Label>
+                  <Input id="role" value={profile?.role ?? ''} readOnly disabled className="capitalize" />
                 </div>
                 <div>
-                  <Label htmlFor="bio" className="text-slate-700 dark:text-slate-300">Bio</Label>
+                  <Label htmlFor="bio">Bio</Label>
                   <textarea
                     id="bio"
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white dark:bg-white/5 border border-black/[0.08] dark:border-white/10 rounded-xl text-slate-900 dark:text-white outline-none focus:border-[#20C997] text-sm"
+                    className="w-full px-3 py-2 border border-border-strong rounded-md"
                     rows={3}
-                    defaultValue="Full-stack developer passionate about building scalable applications"
+                    value={bio}
+                    onChange={(event) => setBio(event.target.value)}
                   />
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-2">
-                <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">Cancel</Button>
-                <Button className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Save Changes</Button>
+                <Button variant="outline" onClick={resetProfile} disabled={savingProfile}>Cancel</Button>
+                <Button className="bg-brand-primary hover:bg-brand-primary-hover" onClick={() => { void saveProfile(); }} disabled={savingProfile}>
+                  {savingProfile ? 'Saving…' : 'Save Changes'}
+                </Button>
               </div>
             </div>
           </TabsContent>
 
           {/* Notifications Settings */}
           <TabsContent value="notifications" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
-              <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Notification Preferences</h2>
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Notification Preferences</h2>
+                {savingNotifications && <span className="text-xs text-text-muted">Saving…</span>}
+              </div>
+              {notificationsError && (
+                <p className="mb-4 rounded border border-status-error bg-status-error-soft px-3 py-2 text-sm text-status-error">{notificationsError}</p>
+              )}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Email Notifications</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Receive email updates about your activity</p>
+                    <Label>Email Notifications</Label>
+                    <p className="text-sm text-text-muted">Receive email updates about your activity</p>
                   </div>
-                  <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+                  <Switch checked={notifications.email} onCheckedChange={(value) => toggleNotification('email', value)} />
                 </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
+                <Separator />
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Push Notifications</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Receive push notifications on your devices</p>
+                    <Label>Push Notifications</Label>
+                    <p className="text-sm text-text-muted">Receive push notifications on your devices</p>
                   </div>
-                  <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+                  <Switch checked={notifications.push} onCheckedChange={(value) => toggleNotification('push', value)} />
                 </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
+                <Separator />
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Comment Mentions</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Notify when someone mentions you</p>
+                    <Label>Comment Mentions</Label>
+                    <p className="text-sm text-text-muted">Notify when someone mentions you</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch checked={notifications.mentions} onCheckedChange={(value) => toggleNotification('mentions', value)} />
                 </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
+                <Separator />
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Build Status</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Get notified about build completions</p>
+                    <Label>Build Status</Label>
+                    <p className="text-sm text-text-muted">Get notified about build completions</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch checked={notifications.buildStatus} onCheckedChange={(value) => toggleNotification('buildStatus', value)} />
                 </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
+                <Separator />
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Pull Request Reviews</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Notifications for PR reviews and comments</p>
+                    <Label>Pull Request Reviews</Label>
+                    <p className="text-sm text-text-muted">Notifications for PR reviews and comments</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch checked={notifications.pullRequests} onCheckedChange={(value) => toggleNotification('pullRequests', value)} />
                 </div>
               </div>
             </div>
@@ -160,86 +257,50 @@ export function Settings() {
 
           {/* Appearance Settings */}
           <TabsContent value="appearance" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
-              <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Appearance</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Dark Mode</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Enable dark theme across the platform</p>
-                  </div>
-                  <Switch checked={darkMode} onCheckedChange={setDarkMode} />
-                </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
+              <h2 className="text-lg font-semibold mb-4">Appearance</h2>
+              <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-slate-900 dark:text-white font-medium">Theme Color</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">Choose your accent color</p>
-                  <div className="flex gap-3">
-                    <button className="w-10 h-10 rounded-xl bg-[#20C997] border-2 border-[#20C997] ring-2 ring-[#20C997]/30" />
-                    <button className="w-10 h-10 rounded-xl bg-[#20c937] border-2 border-black/[0.08] dark:border-white/10 hover:border-[#20c937]" />
-                    <button className="w-10 h-10 rounded-xl bg-amber-500 border-2 border-black/[0.08] dark:border-white/10 hover:border-amber-500" />
-                    <button className="w-10 h-10 rounded-xl bg-purple-600 border-2 border-black/[0.08] dark:border-white/10 hover:border-purple-600" />
-                    <button className="w-10 h-10 rounded-xl bg-pink-500 border-2 border-black/[0.08] dark:border-white/10 hover:border-pink-500" />
-                  </div>
+                  <Label>Dark Mode</Label>
+                  <p className="text-sm text-text-muted">Applies the dark theme across the platform. Saved on this device.</p>
                 </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
-                <div>
-                  <Label className="text-slate-900 dark:text-white font-medium">Language</Label>
-                  <Select defaultValue="en">
-                    <SelectTrigger className="mt-2 rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-[#111111] border-black/[0.08] dark:border-white/10 text-slate-900 dark:text-white">
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Español</SelectItem>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="de">Deutsch</SelectItem>
-                      <SelectItem value="zh">中文</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Auto-save</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Automatically save your work</p>
-                  </div>
-                  <Switch checked={autoSave} onCheckedChange={setAutoSave} />
-                </div>
+                <Switch checked={theme === 'dark'} onCheckedChange={(value) => setTheme(value ? 'dark' : 'light')} />
               </div>
             </div>
           </TabsContent>
 
           {/* Security Settings */}
           <TabsContent value="security" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
-              <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Security</h2>
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
+              <h2 className="text-lg font-semibold mb-4">Security</h2>
               <div className="space-y-4">
                 <div>
-                  <Label className="text-slate-900 dark:text-white font-medium">Change Password</Label>
+                  <Label>Change Password</Label>
                   <div className="space-y-2 mt-2">
-                    <Input type="password" placeholder="Current password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
-                    <Input type="password" placeholder="New password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
-                    <Input type="password" placeholder="Confirm new password" className="rounded-xl border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white" />
+                    <Input type="password" placeholder="Current password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} />
+                    <Input type="password" placeholder="New password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
+                    <Input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
                   </div>
-                  <Button className="mt-3 bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Update Password</Button>
+                  <Button className="mt-3 bg-brand-primary hover:bg-brand-primary-hover" onClick={() => { void submitPassword(); }} disabled={changingPassword}>
+                    {changingPassword ? 'Updating…' : 'Update Password'}
+                  </Button>
                 </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
+                <Separator />
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-900 dark:text-white font-medium">Two-Factor Authentication</Label>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Add an extra layer of security</p>
+                    <Label>Two-Factor Authentication</Label>
+                    <p className="text-sm text-text-muted">Not available on this deployment yet — contact support to enable 2FA.</p>
                   </div>
-                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">Enable 2FA</Button>
+                  <span className="text-xs font-medium text-text-muted">Unavailable</span>
                 </div>
-                <Separator className="bg-black/[0.06] dark:bg-white/10" />
+                <Separator />
                 <div>
-                  <Label className="text-slate-900 dark:text-white font-medium">Active Sessions</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">Manage your active sessions</p>
+                  <Label>Active Sessions</Label>
+                  <p className="text-sm text-text-muted mb-3">Manage your active sessions</p>
                   <div className="space-y-2">
-                    {sessions.map(session => <div key={session.id} className="flex items-center justify-between p-3.5 bg-black/[0.03] dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl"><div><p className="font-medium text-sm text-slate-900 dark:text-white">{session.browser} on {session.platform}</p><p className="text-xs text-slate-400 dark:text-slate-500">{session.current ? 'Current session' : `Last active ${new Date(session.lastActiveAt).toLocaleString()}`}</p></div>{session.current ? <span className="text-xs text-[#20C997] font-bold">Active now</span> : <Button variant="ghost" size="sm" className="text-red-600 dark:text-red-400 rounded-lg" onClick={() => void revokeSession(session.sessionIdentifier).then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Revoke</Button>}</div>)}
-                    {sessions.length > 1 && <Button variant="outline" size="sm" className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200" onClick={() => void revokeOtherSessions().then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Sign out other devices</Button>}
-                    {!sessions.length && <p className="text-sm text-slate-500 dark:text-slate-400">No active sessions available.</p>}
+                    {sessions.map(session => <div key={session.id} className="flex items-center justify-between p-3 bg-background-primary rounded-lg"><div><p className="font-medium text-sm">{session.browser} on {session.platform}</p><p className="text-xs text-text-muted">{session.current ? 'Current session' : `Last active ${new Date(session.lastActiveAt).toLocaleString()}`}</p></div>{session.current ? <span className="text-xs text-status-success font-medium">Active now</span> : <Button variant="ghost" size="sm" className="text-status-error" onClick={() => void revokeSession(session.sessionIdentifier).then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Revoke</Button>}</div>)}
+                    {sessions.length > 1 && <Button variant="outline" size="sm" onClick={() => void revokeOtherSessions().then(() => getActiveSessions().then(data => setSessions(data.sessions)))}>Sign out other devices</Button>}
+                    {!sessions.length && <p className="text-sm text-text-muted">No active sessions available.</p>}
                   </div>
                 </div>
               </div>
@@ -248,46 +309,15 @@ export function Settings() {
 
           {/* Integrations Settings */}
           <TabsContent value="integrations" className="space-y-6">
-            <div className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-xl rounded-2xl border border-black/[0.06] dark:border-white/10 p-6 text-slate-900 dark:text-white shadow-sm">
-              <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Connected Integrations</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.02] dark:bg-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-slate-900 dark:bg-white/10 rounded-xl">
-                      <Github className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">GitHub</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Connected as @johndoe</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" className="rounded-xl border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200">Disconnect</Button>
-                </div>
-                <div className="flex items-center justify-between p-4 border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.02] dark:bg-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-[#20C997] rounded-xl text-slate-950">
-                      <Globe className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">Slack</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Not connected</p>
-                    </div>
-                  </div>
-                  <Button className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Connect</Button>
-                </div>
-                <div className="flex items-center justify-between p-4 border border-black/[0.08] dark:border-white/10 rounded-xl bg-black/[0.02] dark:bg-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-amber-500 rounded-xl">
-                      <Zap className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">Jira</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Not connected</p>
-                    </div>
-                  </div>
-                  <Button className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-md transition-all">Connect</Button>
-                </div>
-              </div>
+            <div className="bg-surface-primary rounded-lg border border-border-default p-6">
+              <h2 className="text-lg font-semibold mb-2">Connected Integrations</h2>
+              <p className="text-sm text-text-muted mb-4">
+                Provider integrations (GitHub, Slack, Jira, …) are managed as workspace connector metadata. This deployment
+                does not perform a provider OAuth or credential handshake yet, so there is no per-account connection to show here.
+              </p>
+              <Button asChild variant="outline">
+                <Link to="/workspaces/connectors">Open workspace Connectors</Link>
+              </Button>
             </div>
           </TabsContent>
         </Tabs>

@@ -1,183 +1,116 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
-import { BlobField } from "@/components/ui/blob-field";
-import { ImageSlideshow } from "@/components/ui/image-slideshow";
-import { ArrowRight, ArrowLeft, Users, Code2, Zap, Clock, Globe, Calendar } from "lucide-react";
-
-const SLIDE_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
-const PERKS = [
-  { icon: Code2, text: "Get matched with builds that fit your stack" },
-  { icon: Users, text: "Work alongside vetted founders & teams" },
-  { icon: Zap, text: "Your profile goes live the moment you finish" },
-];
+import { CollabProgressBar } from "./CollabProgressBar";
 
 const TIMEZONES = ["WAT", "GMT", "EST", "PST", "CET", "JST", "AEST", "IST"];
+
+type EarliestStart = "this-week" | "2-weeks" | "1-month";
+type CommitmentStyle = "deep" | "parallel" | "many";
+
+const startOptions: { label: string; value: EarliestStart }[] = [
+  { label: "This week", value: "this-week" },
+  { label: "2 weeks", value: "2-weeks" },
+  { label: "1 month", value: "1-month" },
+];
+
+const commitmentOptions: { label: string; sub: string; value: CommitmentStyle }[] = [
+  { label: "One startup deeply", sub: "All-in on one build", value: "deep" },
+  { label: "2–3 in parallel", sub: "Split focus across builds", value: "parallel" },
+  { label: "Many short engagements", sub: "Short bursts, high variety", value: "many" },
+];
 
 export function CollabStep4() {
   const navigate = useNavigate();
   const { collaboratorProfile, updateCollaboratorProfile } = useCollaboratorProfile();
   const [hours, setHours]               = useState(collaboratorProfile.weeklyHours);
   const [tz, setTz]                     = useState(collaboratorProfile.timezone);
-  const [earliestStart, setEarliestStart] = useState<any>(collaboratorProfile.earliestStart);
-  const [commitmentStyle, setCommitment]  = useState<any>(collaboratorProfile.commitmentStyle);
+  const [earliestStart, setEarliestStart] = useState<EarliestStart>(collaboratorProfile.earliestStart);
+  const [commitmentStyle, setCommitment]  = useState<CommitmentStyle>(collaboratorProfile.commitmentStyle);
 
   const canContinue = hours >= 5 && tz.trim();
-  const fieldsFilled = [hours >= 5, tz.trim(), earliestStart, commitmentStyle].filter(Boolean).length;
-  const totalFields = 4;
 
   const persist = () => updateCollaboratorProfile({ weeklyHours: hours, timezone: tz, earliestStart, commitmentStyle });
   const handleNext = () => { persist(); navigate("/collaborator/onboarding/step-5"); };
   const handleBack = () => { persist(); navigate("/collaborator/onboarding/step-3"); };
   const handleSaveExit = () => { persist(); navigate("/collaborator/dashboard"); };
 
-  const fieldVariants = {
-    hidden: { opacity: 0, y: 12 },
-    show: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: 0.1 + i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
-    }),
-  };
-
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-[10px] font-bricolage">
-      <div className="w-full min-h-[calc(100vh-20px)] rounded-[32px] overflow-hidden grid lg:grid-cols-[42%_58%] border border-white/10">
+    <div className="min-h-screen bg-background-primary flex items-center justify-center p-4 md:p-8">
+      <div className="w-full max-w-2xl">
+        <div className="flex justify-end mb-4">
+          <button onClick={handleSaveExit} className="text-sm text-text-muted hover:text-text-primary">Save & exit</button>
+        </div>
+        <CollabProgressBar currentStep={4} totalSteps={6} />
 
-        {/* ===== Left Branding ===== */}
-        <div className="hidden lg:flex flex-col justify-between p-10 bg-[#121212] relative overflow-hidden border-r border-white/10">
-          <div className="relative z-10">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#20C997] bg-[#20C997]/10 px-3 py-1 rounded-full border border-[#20C997]/20">
-              Step 4 of 6
-            </span>
-            <h1 className="text-3xl font-black text-white mt-4 tracking-tight">Availability & Logistics</h1>
-            <p className="text-sm text-slate-400 mt-2 font-medium">Set your availability so projects can rely on your schedule.</p>
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-text-primary mb-2">Availability</h1>
+          <p className="text-base text-text-muted">Help us match you with builds that fit your schedule and working style.</p>
+        </div>
 
-            <div className="space-y-4 mt-8">
-              {PERKS.map((perk, i) => (
-                <div key={i} className="flex items-center gap-3 text-xs font-semibold text-slate-300 bg-white/[0.03] p-3 rounded-xl border border-white/[0.06]">
-                  <perk.icon className="w-4 h-4 text-[#20C997]" />
-                  <span>{perk.text}</span>
-                </div>
+        <div className="space-y-8">
+          <div>
+            <label className="block mb-3 text-sm font-semibold text-text-secondary">
+              Weekly hours available
+              <span className="ml-2 text-status-warning font-bold">{hours} hrs/week</span>
+            </label>
+            <input
+              type="range" min={5} max={60} value={hours}
+              onChange={(e) => setHours(Number(e.target.value))}
+              className="w-full accent-amber-500"
+            />
+            <div className="flex justify-between text-xs text-text-disabled mt-1">
+              <span>5 hrs</span><span>60 hrs</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-3 text-sm font-semibold text-text-secondary">Timezone</label>
+            <select
+              value={tz} onChange={(e) => setTz(e.target.value)}
+              className="w-full h-12 bg-surface-primary border-2 border-border-strong rounded-lg px-4 text-base outline-none focus:border-status-warning transition-colors">
+              {TIMEZONES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-3 text-sm font-semibold text-text-secondary">Earliest start</label>
+            <div className="grid grid-cols-3 gap-3">
+              {startOptions.map(({ label, value }) => (
+                <button key={value} type="button" onClick={() => setEarliestStart(value)}
+                  className={`py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                    earliestStart === value ? "border-status-warning bg-status-warning-soft text-status-warning"
+                                           : "border-border-strong bg-surface-primary text-text-secondary hover:border-status-warning"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-3 text-sm font-semibold text-text-secondary">Commitment style</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {commitmentOptions.map(({ label, sub, value }) => (
+                <button key={value} type="button" onClick={() => setCommitment(value)}
+                  className={`py-3 px-4 rounded-lg border-2 text-left transition-all ${
+                    commitmentStyle === value ? "border-status-warning bg-status-warning-soft"
+                                             : "border-border-strong bg-surface-primary hover:border-status-warning"}`}>
+                  <p className={`text-sm font-semibold ${commitmentStyle === value ? "text-status-warning" : "text-text-secondary"}`}>{label}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{sub}</p>
+                </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ===== Right Form ===== */}
-        <div className="relative flex items-center justify-center p-6 md:p-14 overflow-hidden bg-[#0a0a0a]">
-          <div className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-[32px] p-6 md:p-9 shadow-2xl">
-            <h2 className="text-xl font-black text-white mb-6">Availability Details</h2>
-
-            <div className="space-y-6">
-              <motion.div custom={0} variants={fieldVariants} initial="hidden" animate="show">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70">
-                    <Clock className="w-3.5 h-3.5 text-white/40" /> Weekly commitment
-                  </label>
-                  <span className="text-[#20C997] bg-[#20C997]/20 px-2.5 py-0.5 rounded-full text-xs font-bold">{hours} hrs/wk</span>
-                </div>
-                <input
-                  type="range"
-                  min={5}
-                  max={60}
-                  step={5}
-                  value={hours}
-                  onChange={(e) => setHours(Number(e.target.value))}
-                  className="w-full accent-[#20C997] bg-white/10 h-2 rounded-lg cursor-pointer"
-                />
-              </motion.div>
-
-              <motion.div custom={1} variants={fieldVariants} initial="hidden" animate="show">
-                <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-white/70">
-                  <Globe className="w-3.5 h-3.5 text-white/40" /> Timezone
-                </label>
-                <select
-                  value={tz}
-                  onChange={(e) => setTz(e.target.value)}
-                  className="w-full h-12 rounded-xl border border-white/20 bg-black/20 px-4 text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#20C997] focus:border-transparent transition-all backdrop-blur-sm appearance-none"
-                >
-                  {TIMEZONES.map((t) => (
-                    <option key={t} value={t} className="bg-[#141414] text-white">{t}</option>
-                  ))}
-                </select>
-              </motion.div>
-
-              <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="show">
-                <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-white/70">
-                  <Calendar className="w-3.5 h-3.5 text-white/40" /> Earliest start date
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { value: "this-week", label: "This week" },
-                    { value: "2-weeks", label: "2 weeks" },
-                    { value: "1-month", label: "1 month" },
-                  ].map(({ value, label }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setEarliestStart(value)}
-                      className={`px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                        earliestStart === value
-                          ? "border-[#20C997] bg-[#20C997]/20 text-white shadow-[0_0_10px_rgba(32,201,151,0.4)]"
-                          : "border-white/15 bg-white/5 text-white/60 hover:border-[#20C997]/60 hover:text-white"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div custom={3} variants={fieldVariants} initial="hidden" animate="show">
-                <label className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-widest text-white/70">
-                  <Zap className="w-3.5 h-3.5 text-white/40" /> Preferred engagement style
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { value: "deep", label: "Deep" },
-                    { value: "parallel", label: "Parallel" },
-                    { value: "many", label: "Burst" },
-                  ].map(({ value, label }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setCommitment(value)}
-                      className={`px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                        commitmentStyle === value
-                          ? "border-[#20C997] bg-[#20C997]/20 text-white shadow-[0_0_10px_rgba(32,201,151,0.4)]"
-                          : "border-white/15 bg-white/5 text-white/60 hover:border-[#20C997]/60 hover:text-white"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45, duration: 0.4 }}
-              className="flex justify-between mt-10"
-            >
-              <button
-                onClick={handleBack}
-                className="group px-6 py-3 rounded-2xl text-white/70 hover:text-white font-bold text-sm flex items-center gap-2 transition-all hover:bg-white/5"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={!canContinue}
-                className="group px-8 py-3.5 rounded-2xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-black text-base flex items-center gap-2 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Continue <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </motion.div>
-          </div>
+        <div className="flex justify-between mt-10">
+          <button onClick={handleBack} className="px-6 py-3 rounded-lg text-text-secondary hover:bg-surface-secondary font-semibold transition-colors">← Back</button>
+          <button onClick={handleNext} disabled={!canContinue}
+            className="px-6 py-3 rounded-lg bg-status-warning text-text-primary font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-text-disabled disabled:cursor-not-allowed transition-colors">
+            Continue →
+          </button>
         </div>
       </div>
     </div>

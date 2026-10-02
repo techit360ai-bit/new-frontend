@@ -12,7 +12,7 @@ function url(path: string): string {
   return `${BASE}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-async function request<T>(path: string, method: string, body?: unknown): Promise<T> {
+async function request<T>(path: string, method: string, body?: unknown, timeoutMs = TIMEOUT_MS): Promise<T> {
   const token = getAuthToken();
   const response = await fetch(url(path), {
     method,
@@ -22,7 +22,7 @@ async function request<T>(path: string, method: string, body?: unknown): Promise
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   const text = await response.text();
   const data = text ? JSON.parse(text) : null;
@@ -31,7 +31,7 @@ async function request<T>(path: string, method: string, body?: unknown): Promise
 }
 
 export const platformGet = <T>(path: string) => request<T>(path, 'GET');
-export const platformPost = <T>(path: string, body?: unknown) => request<T>(path, 'POST', body);
+export const platformPost = <T>(path: string, body?: unknown, timeoutMs?: number) => request<T>(path, 'POST', body, timeoutMs);
 export const platformPatch = <T>(path: string, body?: unknown) => request<T>(path, 'PATCH', body);
 export const platformDelete = <T>(path: string, body?: unknown) => request<T>(path, 'DELETE', body);
 export const platformApiOrigin = () => BASE.replace(/\/api$/, '');

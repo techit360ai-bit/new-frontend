@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, CheckCircle2, Clock, Calendar, CheckSquare, Layers, Sparkles, Filter, AlertCircle, ArrowUpRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   createCollaboratorTask,
   fetchCollaboratorTasks,
@@ -35,10 +35,10 @@ function deadlineTime(deadlineIso: string): number {
 
 function priorityPillClass(p: Priority): string {
   switch (p) {
-    case "critical": return "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20";
-    case "high":     return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
-    case "medium":   return "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20";
-    case "low":      return "bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20";
+    case "critical": return "bg-status-error-soft text-status-error";
+    case "high":     return "bg-status-warning-soft text-status-warning";
+    case "medium":   return "bg-surface-secondary text-text-secondary";
+    case "low":      return "bg-surface-secondary text-text-muted";
   }
 }
 
@@ -169,98 +169,68 @@ export function Tasks() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Sprint Tasks</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-            {loading ? "Loading live task assignments..." : (
-              <span className="flex items-center gap-2">
-                <span className="text-slate-700 dark:text-slate-200 font-semibold">{counts.open} open</span>
-                <span>•</span>
-                <span className="text-red-600 dark:text-red-400 font-semibold">{counts.critical} critical</span>
-                <span>•</span>
-                <span>{counts.dueThisWeek} due this week</span>
-              </span>
-            )}
+          <h1 className="text-2xl font-bold text-text-primary">Tasks</h1>
+          <p className="text-sm text-text-muted mt-0.5">
+            {loading ? "Loading live task assignments..." : `${counts.open} open · ${counts.critical} critical · ${counts.dueThisWeek} due this week`}
           </p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <select
-            value={projectFilter}
-            onChange={(e) => setProjectFilter(e.target.value)}
-            className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#111111] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997] shadow-sm"
-          >
-            <option value="all">All Projects</option>
+        <div className="flex items-center gap-2">
+          <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}
+            className="h-9 border border-border-strong rounded-lg px-3 text-sm bg-surface-primary">
+            <option value="all">All projects</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
-
-          <select
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs font-semibold bg-white/80 dark:bg-[#111111] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997] shadow-sm"
-          >
-            <option value="impact">Sort: Impact Score</option>
+          <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="h-9 border border-border-strong rounded-lg px-3 text-sm bg-surface-primary">
+            <option value="impact">Sort: Impact</option>
             <option value="deadline">Sort: Deadline</option>
             <option value="project">Sort: Project</option>
           </select>
-
-          <button
-            onClick={() => setAddOpen(true)}
+          <button onClick={() => setAddOpen(true)}
             disabled={loading || projects.length === 0}
-            className="h-10 px-4 bg-[#20C997] hover:bg-[#1db587] text-slate-950 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
-          >
-            <Plus className="w-4 h-4" /> Add Task
+            className="h-9 px-3 bg-status-warning hover:bg-amber-400 text-text-primary rounded-lg text-sm font-semibold flex items-center gap-1">
+            <Plus className="w-4 h-4" /> Add task
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 rounded-2xl p-5 backdrop-blur-md">
-          <p className="text-sm font-bold text-red-700 dark:text-red-400">Live tasks are unavailable.</p>
-          <p className="text-xs text-red-600 dark:text-red-300 mt-1">{error}</p>
-          <button
-            onClick={() => void loadTasks()}
-            className="mt-3 text-xs px-3.5 py-1.5 border border-red-500/30 rounded-xl text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 font-semibold"
-          >
+        <div className="border border-status-error bg-status-error-soft rounded-xl p-4">
+          <p className="text-sm font-semibold text-status-error">Live tasks are unavailable.</p>
+          <p className="text-sm text-status-error mt-1">{error}</p>
+          <button onClick={() => void loadTasks()}
+            className="mt-3 text-xs px-3 py-1.5 border border-status-error rounded-lg text-status-error hover:bg-status-error-soft">
             Try again
           </button>
         </div>
       )}
 
       {!loading && !error && taskList.length === 0 && (
-        <div className="border border-dashed border-slate-300 dark:border-white/10 bg-white/50 dark:bg-[#111111]/50 backdrop-blur-xl rounded-2xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-          <CheckSquare className="w-8 h-8 mx-auto mb-2 text-slate-400/60" />
+        <div className="border border-dashed border-border-strong bg-surface-primary rounded-xl p-5 text-sm text-text-muted">
           No live task assignments yet. Workspace tasks will appear here when assigned.
         </div>
       )}
 
       {!loading && !error && (
         <>
-          <Section title="Today" icon={<Clock className="w-4 h-4 text-amber-500" />} rows={today} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due today." />
-          <Section title="This Week" icon={<Calendar className="w-4 h-4 text-[#20C997]" />} rows={thisWeek} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due this week." />
-          <Section title="Later" icon={<Layers className="w-4 h-4 text-purple-500" />} rows={later} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="No upcoming tasks." />
+          <Section title="Today" rows={today} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due today." />
+          <Section title="This week" rows={thisWeek} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="Nothing due this week." />
+          <Section title="Later" rows={later} onComplete={handleComplete} onWorkspace={handleWorkspace} onSnooze={handleSnooze} priorityPillClass={priorityPillClass} emptyText="No upcoming tasks." />
 
-          <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
-            <button
-              onClick={() => setCompletedOpen((v) => !v)}
-              className="w-full p-4 px-5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#20C997]" />
-                <span>Completed ({completed.length})</span>
-              </div>
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">{completedOpen ? "Hide" : "Show"}</span>
+          <div className="border border-border-default bg-surface-primary rounded-xl">
+            <button onClick={() => setCompletedOpen((v) => !v)}
+              className="w-full p-4 text-left text-sm font-semibold text-text-secondary flex items-center justify-between">
+              <span>Completed ({completed.length})</span>
+              <span className="text-text-disabled">{completedOpen ? "Hide" : "Show"}</span>
             </button>
             {completedOpen && (
-              <ul className="border-t border-black/[0.06] dark:border-white/10 divide-y divide-black/[0.04] dark:divide-white/[0.06]">
-                {completed.length === 0 && <li className="p-4 px-5 text-xs text-slate-500 dark:text-slate-400 italic">No completed tasks yet.</li>}
+              <ul className="border-t border-border-subtle divide-y divide-slate-100">
+                {completed.length === 0 && <li className="p-4 text-sm text-text-muted">No completed tasks yet.</li>}
                 {completed.map((t) => (
-                  <li key={t.id} className="p-3.5 px-5 text-xs text-slate-400 dark:text-slate-500 line-through flex items-center justify-between">
-                    <span>{t.title}</span>
-                    <span className="text-[10px] uppercase font-semibold">{t.projectName}</span>
-                  </li>
+                  <li key={t.id} className="p-4 text-sm text-text-muted line-through">{t.title}</li>
                 ))}
               </ul>
             )}
@@ -269,87 +239,50 @@ export function Tasks() {
       )}
 
       <Dialog open={addOpen} onOpenChange={(o) => { setAddOpen(o); if (!o) resetForm(); }}>
-        <DialogContent className="max-w-md bg-white/95 dark:bg-[#111111]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Create Contributor Task</DialogTitle>
+            <DialogTitle>Add task</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Project</label>
-              <select
-                value={nfProject}
-                onChange={(e) => setNfProject(e.target.value)}
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
-              >
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Project</label>
+              <select value={nfProject} onChange={(e) => setNfProject(e.target.value)}
+                className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm bg-surface-primary">
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Title</label>
-              <input
-                value={nfTitle}
-                onChange={(e) => setNfTitle(e.target.value)}
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Title</label>
+              <input value={nfTitle} onChange={(e) => setNfTitle(e.target.value)}
                 placeholder="What needs to be done?"
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
-              />
+                className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm focus:outline-none focus:border-status-warning" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Due Date</label>
-              <input
-                type="date"
-                value={nfDue}
-                onChange={(e) => setNfDue(e.target.value)}
-                className="w-full h-10 border border-black/[0.08] dark:border-white/10 rounded-xl px-3 text-xs bg-slate-50 dark:bg-white/[0.05] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#20C997]/20 focus:border-[#20C997]"
-              />
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Due date</label>
+              <input type="date" value={nfDue} onChange={(e) => setNfDue(e.target.value)}
+                className="w-full h-10 border border-border-strong rounded-lg px-3 text-sm focus:outline-none focus:border-status-warning" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Priority</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Priority</label>
               <div className="grid grid-cols-4 gap-2">
                 {PRIORITIES.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setNfPriority(p)}
-                    className={`h-9 rounded-xl border text-xs font-semibold uppercase tracking-wider transition-all ${
-                      nfPriority === p
-                        ? "border-[#20C997] bg-[#20C997]/10 text-[#20C997]"
-                        : "border-black/[0.08] dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-400"
-                    }`}
-                  >
+                  <button key={p} type="button" onClick={() => setNfPriority(p)}
+                    className={`h-9 rounded-lg border-2 text-xs font-medium ${nfPriority === p ? "border-status-warning bg-status-warning-soft text-status-warning" : "border-border-strong bg-surface-primary text-text-muted"}`}>
                     {p}
                   </button>
                 ))}
               </div>
             </div>
             <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Impact Score</label>
-                <span className="text-xs font-extrabold text-[#20C997]">{nfImpact}</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={nfImpact}
-                onChange={(e) => setNfImpact(Number(e.target.value))}
-                className="w-full accent-[#20C997]"
-              />
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Impact ({nfImpact})</label>
+              <input type="range" min={0} max={100} value={nfImpact} onChange={(e) => setNfImpact(Number(e.target.value))}
+                className="w-full accent-amber-500" />
             </div>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
-            <button
-              onClick={() => setAddOpen(false)}
-              className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-700 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => void handleAdd()}
-              disabled={!canSubmit || saving}
-              className="px-4 py-2 text-xs font-bold rounded-xl bg-[#20C997] hover:bg-[#1db587] text-slate-950 shadow-sm disabled:opacity-50 transition-all"
-            >
-              {saving ? "Adding..." : "Add Task"}
-            </button>
+          <DialogFooter>
+            <button onClick={() => setAddOpen(false)} className="px-4 py-2 text-sm rounded-lg text-text-secondary hover:bg-surface-secondary">Cancel</button>
+            <button onClick={() => void handleAdd()} disabled={!canSubmit || saving}
+              className="px-4 py-2 text-sm rounded-lg bg-status-warning text-text-primary font-semibold hover:bg-amber-400 disabled:bg-slate-200 disabled:text-text-disabled">{saving ? "Adding..." : "Add"}</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -358,10 +291,9 @@ export function Tasks() {
 }
 
 function Section({
-  title, icon, rows, onComplete, onWorkspace, onSnooze, priorityPillClass, emptyText,
+  title, rows, onComplete, onWorkspace, onSnooze, priorityPillClass, emptyText,
 }: {
   title: string;
-  icon?: React.ReactNode;
   rows: CollaboratorTask[];
   onComplete: (id: string) => Promise<void>;
   onWorkspace: (projectId: string) => void;
@@ -370,66 +302,28 @@ function Section({
   emptyText: string;
 }) {
   return (
-    <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
-      <div className="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/10 flex items-center justify-between bg-slate-50/40 dark:bg-white/[0.02]">
-        <div className="flex items-center gap-2">
-          {icon}
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">{title}</h2>
-        </div>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-white/10 text-slate-700 dark:text-slate-300">
-          {rows.length}
-        </span>
+    <div className="border border-border-default bg-surface-primary rounded-xl">
+      <div className="px-5 py-3 border-b border-border-subtle">
+        <h2 className="text-sm font-semibold text-text-secondary">{title} ({rows.length})</h2>
       </div>
       {rows.length === 0 ? (
-        <p className="p-5 text-xs text-slate-500 dark:text-slate-400 italic">{emptyText}</p>
+        <p className="p-5 text-sm text-text-muted">{emptyText}</p>
       ) : (
-        <ul className="divide-y divide-black/[0.04] dark:divide-white/[0.06]">
+        <ul className="divide-y divide-slate-100">
           {rows.map((t) => (
-            <li key={t.id} className="p-4 px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-              <div className="flex items-start gap-3 min-w-0">
-                <button
-                  onClick={() => void onComplete(t.id)}
-                  className="mt-0.5 w-4 h-4 rounded border border-slate-300 dark:border-white/20 hover:border-[#20C997] flex items-center justify-center shrink-0 transition-colors"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-transparent hover:text-[#20C997]" />
-                </button>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white">{t.title}</p>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${priorityPillClass(t.priority)}`}>
-                      {t.priority}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">{t.projectName}</span>
-                    <span>•</span>
-                    <span>Impact {t.impactScore}</span>
-                    <span>•</span>
-                    <span>Due {t.deadline || "No deadline"}</span>
-                  </p>
+            <li key={t.id} className="p-4 flex items-start gap-3">
+              <input type="checkbox" checked={false} readOnly className="mt-1 accent-amber-500" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-sm text-text-primary">{t.title}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${priorityPillClass(t.priority)}`}>{t.priority}</span>
                 </div>
+                <p className="text-xs text-text-muted">{t.projectName} · Impact {t.impactScore} · Due {t.deadline || "No deadline"}</p>
               </div>
-
-              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                <button
-                  onClick={() => void onComplete(t.id)}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors"
-                >
-                  Done
-                </button>
-                <button
-                  onClick={() => onWorkspace(t.projectId)}
-                  className="text-xs font-bold px-3 py-1.5 bg-slate-900 dark:bg-white/10 dark:hover:bg-white/20 text-white rounded-xl transition-colors flex items-center gap-1"
-                >
-                  <span>Workspace</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => void onSnooze(t.id, t.deadline)}
-                  className="text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors"
-                >
-                  +1d
-                </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button onClick={() => void onComplete(t.id)} className="text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">Mark complete</button>
+                <button onClick={() => onWorkspace(t.projectId)} className="text-xs px-3 py-1.5 bg-background-inverse text-white rounded-lg hover:bg-surface-inverse-muted">Open in workspace</button>
+                <button onClick={() => void onSnooze(t.id, t.deadline)} className="text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">Snooze 1d</button>
               </div>
             </li>
           ))}

@@ -71,8 +71,8 @@ export function HackathonPanel() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-[#171330] dark:text-white">Hackathon</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <h1 className="text-xl font-semibold text-text-primary">Hackathon</h1>
+        <p className="text-sm text-text-muted mt-1">
           Browse hackathons, register a team, and ship together.
         </p>
       </div>
@@ -88,7 +88,7 @@ export function HackathonPanel() {
               onClick={() => setStage(stage.id)}
             />
             {i < STAGES.length - 1 && (
-              <span className="text-slate-300 dark:text-slate-700 text-xs">— — —</span>
+              <span className="text-text-on-inverse-secondary text-xs">— — —</span>
             )}
           </div>
         ))}
@@ -120,15 +120,15 @@ export function HackathonPanel() {
 
 function NoTeam({ onRegister }: { onRegister: () => void }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl p-12 flex flex-col items-center justify-center text-center shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-      <h2 className="text-lg font-bold text-[#171330] dark:text-white mb-2">No team yet</h2>
-      <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mb-5">
+    <div className="border border-border-default bg-surface-primary rounded-xl p-12 flex flex-col items-center justify-center text-center">
+      <h2 className="text-base font-semibold text-text-secondary mb-2">No team yet</h2>
+      <p className="text-sm text-text-muted max-w-md mb-4">
         Register a team for a hackathon to submit an idea brief and start building.
       </p>
       <button
         type="button"
         onClick={onRegister}
-        className="text-sm font-bold px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0066ff] to-[#58a6ff] hover:from-[#0052cc] hover:to-[#408fe6] text-white shadow-[0_4px_15px_rgba(0,102,255,0.25)] transition-all"
+        className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
       >
         Go to Register →
       </button>

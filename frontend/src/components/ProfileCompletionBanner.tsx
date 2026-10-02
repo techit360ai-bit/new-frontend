@@ -14,10 +14,10 @@ export function ProfileCompletionBanner({ role, profilePath }: { role: string; p
   };
 
   return (
-    <div className="mx-4 mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+    <div className="mx-4 mt-4 flex items-center gap-3 rounded-xl border border-status-warning bg-status-warning-soft px-4 py-3 text-sm text-amber-950">
       <span className="flex-1">Your account is ready. Complete your profile to improve matches and visibility.</span>
       <Link to={profilePath} className="font-semibold underline underline-offset-2">Complete profile</Link>
-      <button onClick={dismiss} aria-label="Dismiss profile reminder" className="rounded p-1 hover:bg-amber-100">
+      <button onClick={dismiss} aria-label="Dismiss profile reminder" className="rounded p-1 hover:bg-status-warning-soft">
         <X className="h-4 w-4" />
       </button>
     </div>

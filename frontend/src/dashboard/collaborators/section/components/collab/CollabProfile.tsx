@@ -1,7 +1,7 @@
 // frontend/src/dashboard/collaborators/section/components/collab/CollabProfile.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Globe, Twitter, ExternalLink, ShieldCheck, Sparkles, CheckCircle2, User, Trophy, Layers, BadgeCheck } from "lucide-react";
+import { Github, Linkedin, Globe, Twitter, ExternalLink, BadgeCheck } from "lucide-react";
 import { useCollaboratorProfile } from "@/contexts/UserContext";
 import {
   EMPTY_EQUITY,
@@ -17,17 +17,17 @@ import {
   fetchCollaboratorSummary,
   type CollaboratorLiveSummary,
 } from "@/lib/api/collaboratorSummary";
-import { fetchTrustProfile, type TrustProfile } from "@/lib/api/trust";
 import { RoleAdditionPanel } from "@/components/profile/RoleAdditionPanel";
+import { fetchTrustProfile, type TrustProfile } from "@/lib/api/trust";
 
 export function CollabProfile() {
   const { collaboratorProfile: p } = useCollaboratorProfile();
   const [summary, setSummary] = useState<CollaboratorLiveSummary | null>(null);
   const [equity, setEquity] = useState<CollaboratorEquity>(EMPTY_EQUITY);
   const [earnings, setEarnings] = useState<CollaboratorEarnings>(EMPTY_EARNINGS);
-  const [trust, setTrust] = useState<TrustProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trust, setTrust] = useState<TrustProfile | null>(null);
 
   const initials = p.name.split(" ").map((x) => x[0]).join("").toUpperCase().slice(0, 2);
 
@@ -53,7 +53,6 @@ export function CollabProfile() {
         setSummary(null);
         setEquity(EMPTY_EQUITY);
         setEarnings(EMPTY_EARNINGS);
-        setTrust(null);
         setError(err instanceof Error ? err.message : "Live collaborator profile data is unavailable.");
       })
       .finally(() => {
@@ -98,124 +97,87 @@ export function CollabProfile() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">
+    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+      <RoleAdditionPanel />
       {/* Header strip */}
-      <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-8 shadow-sm flex flex-col sm:flex-row items-start gap-6">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#20C997] to-[#128a64] text-slate-950 font-black flex items-center justify-center text-2xl shrink-0 shadow-sm">
-          {initials}
-        </div>
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6 flex items-start gap-5">
+        <div className="w-16 h-16 rounded-full bg-status-warning text-text-primary font-semibold flex items-center justify-center text-xl shrink-0">{initials}</div>
         <div className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white">{p.name}</h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
-                  Collaborator
-                </span>
-              </div>
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
-                {p.title} · {p.location} · {p.yearsExperience}y experience
-              </p>
-            </div>
-            <Link
-              to="/collaborator/settings#identity"
-              className="px-3.5 py-1.5 text-xs font-semibold border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors self-start"
-            >
-              Edit Profile
-            </Link>
-          </div>
-
-          <p className="text-xs text-slate-700 dark:text-slate-300 mt-3 italic bg-slate-50 dark:bg-white/[0.02] p-3 rounded-xl border border-slate-200 dark:border-white/10">
-            "{p.headline}"
-          </p>
-
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-[#20C997] animate-pulse"></span>
-            <span>Available · {p.weeklyHours} hrs/week · {commitmentLabel[p.commitmentStyle]}</span>
+          <h1 className="text-2xl font-bold text-text-primary">{p.name}</h1>
+          <p className="text-sm text-text-muted">{p.title} · {p.location} · {p.yearsExperience}y experience</p>
+          <p className="text-sm text-text-secondary mt-2 italic">"{p.headline}"</p>
+          <p className="text-xs text-text-muted mt-3">
+            <span className="inline-block w-2 h-2 rounded-full bg-status-success mr-1.5"></span>
+            Available · {p.weeklyHours} hrs/week · {commitmentLabel[p.commitmentStyle]}
           </p>
         </div>
+        <Link to="/collaborator/settings#identity"
+          className="text-xs px-3 py-1.5 border border-border-strong rounded-lg hover:bg-background-primary">Edit profile</Link>
       </div>
 
       {/* Reputation strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Stat label="Reputation" value={String(summary?.compositeScore ?? 0)} />
-        <Stat label="Execution Velocity" value={String(execution)} />
-        <Stat label="Completed Tasks" value={String(completedTasks)} />
+        <Stat label="Execution"  value={String(execution)} />
+        <Stat label="Completed"  value={String(completedTasks)} />
         <Stat label="Endorsements" value="0" />
       </div>
 
-      {loading && <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-4">Loading live profile data...</p>}
+      {loading && <p className="text-sm text-text-muted">Loading live profile data...</p>}
       {!loading && error && (
-        <div className="border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-2xl px-5 py-3.5 text-sm backdrop-blur-md">
-          Live profile data is unavailable: {error}
+        <div className="border border-status-error bg-status-error-soft rounded-xl p-4">
+          <p className="text-sm font-semibold text-status-error">Live profile data is unavailable.</p>
+          <p className="text-sm text-status-error mt-1">{error}</p>
         </div>
       )}
 
       {/* Discipline & skills */}
-      <div className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">
-        <h2 className="text-base font-bold text-slate-900 dark:text-white mb-3">{p.discipline || "Discipline not set"}</h2>
-        <div className="flex flex-wrap gap-1.5 mb-5">
+      <div className="border border-border-default bg-surface-primary rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">{p.discipline || "Discipline not set"}</h2>
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {p.subSkills.map((s) => (
-            <span key={s} className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
-              {s}
-            </span>
+            <span key={s} className="text-xs px-2.5 py-1 rounded-full bg-status-warning-soft text-status-warning">{s}</span>
           ))}
         </div>
-        <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-2.5">Tech Stack & Frameworks</p>
+        <p className="text-xs uppercase tracking-wider text-text-muted font-semibold mb-2">Stack</p>
         <div className="flex flex-wrap gap-1.5">
           {p.techStack.map((t) => (
-            <span key={t} className="text-xs font-medium px-3 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300">
-              {t}
-            </span>
+            <span key={t} className="text-xs px-2.5 py-1 rounded-full bg-surface-secondary text-text-muted">{t}</span>
           ))}
         </div>
-        {Array.isArray(trust?.verifiedSkills) && trust.verifiedSkills.length > 0 && (
-          <div className="mt-5 border-t border-slate-200 dark:border-white/10 pt-4">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Externally Verified Skills</p>
-            <div className="flex flex-wrap gap-2">
-              {trust.verifiedSkills.map((item) => (
-                <span key={`${item.skill}-${item.source}`} className="inline-flex items-center gap-1.5 rounded-xl border border-[#20C997]/30 bg-[#20C997]/10 px-3 py-1 text-xs font-semibold text-[#20C997]">
-                  <BadgeCheck className="h-4 w-4" />
-                  {item.skill}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        {Array.isArray(trust?.verifiedSkills) && trust.verifiedSkills.length > 0 && <div className="mt-5 border-t border-border-default pt-4"><p className="mb-2 text-xs font-semibold uppercase text-text-muted">Externally verified skills</p><div className="flex flex-wrap gap-2">{trust.verifiedSkills.map((item) => <span key={`${item.skill}-${item.source}`} className="inline-flex items-center gap-1 rounded-full border border-status-success bg-status-success-soft px-2.5 py-1 text-xs text-status-success"><BadgeCheck className="h-3.5 w-3.5" />{item.skill}</span>)}</div></div>}
       </div>
 
-      <RoleAdditionPanel />
-
       {/* Compensation philosophy */}
-      <div className="bg-[#20C997]/10 border border-[#20C997]/20 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5">Building for Equity Philosophy</h2>
-        <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-          {p.equityPreference}% equity / {100 - p.equityPreference}% cash · Min cash floor ${p.minCashFloor.toLocaleString()}/mo ·
-          {" "}{p.vestingComfort === "standard" ? "Standard" : p.vestingComfort === "1y-cliff-4y" ? "1y cliff / 4y" : "Custom"} vesting structure
+      <div className="border border-status-warning bg-status-warning-soft/30 rounded-xl p-6">
+        <h2 className="text-sm font-semibold text-status-warning mb-1">Building for Equity</h2>
+        <p className="text-sm text-text-secondary">
+          {p.equityPreference}% equity / {100 - p.equityPreference}% cash ·
+          Min cash ${p.minCashFloor.toLocaleString()}/mo ·
+          {" "}{p.vestingComfort === "standard" ? "Standard" : p.vestingComfort === "1y-cliff-4y" ? "1y cliff / 4y" : "Custom"} vesting
         </p>
       </div>
 
       {/* Active builds */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold text-slate-900 dark:text-white">Active Builds & Contributions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">Active builds</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {builds.map((build) => (
-            <div
-              key={build.id}
-              className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 shadow-sm hover:border-[#20C997]/30 transition-all"
-            >
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{build.name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{build.shipped} tasks shipped · Impact {build.impactAvg}</p>
+            <div key={build.id} className="border border-border-default bg-surface-primary rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-text-primary">{build.name}</p>
+                  <p className="text-xs text-text-muted">{build.shipped} tasks shipped · impact {build.impactAvg}</p>
+                </div>
+              </div>
               {build.equityPercent > 0 && (
-                <p className="text-xs font-bold text-[#20C997] mt-2.5">
-                  {build.equityPercent}% equity · ${(build.valueUSD / 1000).toFixed(1)}K
-                </p>
+                <p className="text-xs text-status-warning mt-2">{build.equityPercent}% equity · ${(build.valueUSD / 1000).toFixed(1)}K</p>
               )}
             </div>
           ))}
           {!loading && !error && builds.length === 0 && (
-            <div className="border border-dashed border-slate-300 dark:border-white/10 rounded-2xl p-6 text-xs text-slate-500 dark:text-slate-400 md:col-span-3 text-center bg-white/40 dark:bg-[#121212]/40">
-              No live active builds recorded yet.
+            <div className="border border-dashed border-border-strong bg-surface-primary rounded-xl p-4 text-sm text-text-muted md:col-span-3">
+              No live active builds are recorded yet.
             </div>
           )}
         </div>
@@ -223,82 +185,64 @@ export function CollabProfile() {
 
       {/* Pinned work */}
       {p.pinnedWork.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-bold text-slate-900 dark:text-white">Pinned Work & Deliverables</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div>
+          <h2 className="text-sm font-semibold text-text-secondary mb-3">Pinned work</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {p.pinnedWork.map((url, i) => (
-              <a
-                key={i}
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-2xl p-4 text-xs text-slate-700 dark:text-slate-300 hover:border-[#20C997]/40 flex items-center gap-2 transition-all shadow-sm"
-              >
-                <ExternalLink className="w-4 h-4 text-[#20C997] shrink-0" />
-                <span className="truncate font-semibold">{url}</span>
+              <a key={i} href={url} target="_blank" rel="noreferrer"
+                className="border border-border-default bg-surface-primary rounded-xl p-4 text-sm text-text-secondary hover:border-status-warning flex items-center gap-2">
+                <ExternalLink className="w-4 h-4 text-text-disabled" />
+                <span className="truncate">{url}</span>
               </a>
             ))}
           </div>
         </div>
       )}
 
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary">Recent endorsements</h2>
+          <Link to="/collaborator/reputation" className="text-xs text-status-warning hover:underline">View reputation</Link>
+        </div>
+        <div className="border border-dashed border-border-strong bg-surface-primary rounded-xl p-4 text-sm text-text-muted">
+          No live endorsements are recorded yet.
+        </div>
+      </div>
+
       {/* Badges earned */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold text-slate-900 dark:text-white">Live Achievements & Badges</h2>
-        <div className="flex flex-wrap gap-2.5">
+      <div>
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">Live achievements earned</h2>
+        <div className="flex flex-wrap gap-2">
           {earnedAchievements.map((b) => (
-            <span
-              key={b.id}
-              className="bg-white dark:bg-[#111111] border border-black/[0.06] dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-2 shadow-sm text-slate-900 dark:text-white"
-            >
-              <span className="text-lg">{b.icon}</span>
-              <span>{b.title}</span>
+            <span key={b.id} className="border border-border-default bg-surface-primary rounded-xl px-3 py-2 text-sm flex items-center gap-2">
+              <span>{b.icon}</span>
+              <span className="text-text-primary">{b.title}</span>
             </span>
           ))}
           {!loading && !error && earnedAchievements.length === 0 && (
-            <span className="text-xs text-slate-500 dark:text-slate-400 italic">No live achievements earned yet.</span>
+            <span className="text-sm text-text-muted">No live achievements earned yet.</span>
           )}
         </div>
       </div>
 
       {/* Links */}
-      <div className="flex flex-wrap gap-4 text-xs font-semibold pt-2">
-        {p.links.github && (
-          <a href={`https://${p.links.github}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#20C997]">
-            <Github className="w-4 h-4" /> <span>{p.links.github}</span>
-          </a>
-        )}
-        {p.links.linkedin && (
-          <a href={`https://${p.links.linkedin}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#20C997]">
-            <Linkedin className="w-4 h-4" /> <span>{p.links.linkedin}</span>
-          </a>
-        )}
-        {p.links.portfolio && (
-          <a href={`https://${p.links.portfolio}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-[#20C997]">
-            <Globe className="w-4 h-4" /> <span>{p.links.portfolio}</span>
-          </a>
-        )}
-        {p.links.twitter && (
-          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-            <Twitter className="w-4 h-4" /> <span>{p.links.twitter}</span>
-          </span>
-        )}
+      <div className="flex flex-wrap gap-3 text-sm">
+        {p.links.github    && <a href={`https://${p.links.github}`}    target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-text-secondary hover:text-status-warning"><Github   className="w-4 h-4" /> {p.links.github}</a>}
+        {p.links.linkedin  && <a href={`https://${p.links.linkedin}`}  target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-text-secondary hover:text-status-warning"><Linkedin className="w-4 h-4" /> {p.links.linkedin}</a>}
+        {p.links.portfolio && <a href={`https://${p.links.portfolio}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-text-secondary hover:text-status-warning"><Globe    className="w-4 h-4" /> {p.links.portfolio}</a>}
+        {p.links.twitter   && <span className="flex items-center gap-1.5 text-text-secondary"><Twitter  className="w-4 h-4" /> {p.links.twitter}</span>}
       </div>
 
-      <p className="text-[11px] text-slate-400 text-center pt-4">
-        ${earnings.totals.lifetimeUSD.toLocaleString()} cash lifetime · See{" "}
-        <Link to="/collaborator/equity" className="underline text-[#20C997]">Equity</Link> and{" "}
-        <Link to="/collaborator/earnings" className="underline text-[#20C997]">Earnings</Link>
-      </p>
+      <p className="text-xs text-text-disabled text-center pt-4">${earnings.totals.lifetimeUSD.toLocaleString()} cash lifetime · See <Link to="/collaborator/equity" className="underline hover:text-status-warning">Equity</Link> and <Link to="/collaborator/earnings" className="underline hover:text-status-warning">Earnings</Link></p>
     </div>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-5 text-center shadow-sm">
-      <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums">{value}</p>
-      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider font-bold">{label}</p>
+    <div className="border border-border-default bg-surface-primary rounded-xl p-4 text-center">
+      <p className="text-2xl font-bold text-text-primary tabular-nums">{value}</p>
+      <p className="text-xs text-text-muted mt-1 uppercase tracking-wider">{label}</p>
     </div>
   );
 }

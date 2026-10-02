@@ -1,56 +1,56 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
 
 /* ── Theme CSS Variables */
 :root,
 :root.dark {
-  --bg-primary: #020804;
-  --bg-secondary: #041008;
-  --bg-tertiary: #082010;
-  --text-primary: #ffffff;
-  --text-secondary: #b0d0b8;
-  --text-tertiary: #809084;
-  --border-color: #006400;
-  --accent-pink: #FE2784;
-  --accent-neon: #00FF00;
-  --accent-green: #006400;
+  --bg-primary: var(--landing-bg-primary);
+  --bg-secondary: var(--landing-bg-secondary);
+  --bg-tertiary: var(--landing-bg-tertiary);
+  --text-primary: var(--landing-text-primary);
+  --text-secondary: var(--landing-text-secondary);
+  --text-tertiary: var(--landing-text-tertiary);
+  --border-color: var(--landing-border);
+  --accent-purple: var(--landing-accent-primary);
+  --accent-cyan: var(--landing-accent-secondary);
+  --accent-green: var(--landing-accent-success);
   --shadow-color: rgba(0, 0, 0, 0.5);
-  --nav-bg: rgba(2, 8, 4, 0.8);
-  --nav-bg-default: rgba(2, 8, 4, 0.6);
-  --nav-bg-scrolled: rgba(2, 8, 4, 0.94);
+  --nav-bg: rgba(5, 5, 15, 0.8);
+  --nav-bg-default: rgba(5, 5, 15, 0.6);
+  --nav-bg-scrolled: rgba(5, 5, 15, 0.94);
   --nav-border-default: transparent;
-  --nav-border-scrolled: rgba(0, 255, 0, 0.1);
-  --nav-text: #ffffff;
-  --nav-text-default: #ffffff;
-  --nav-text-secondary-default: #b0d0b8;
+  --nav-border-scrolled: rgba(255, 255, 255, 0.07);
+  --nav-text: var(--landing-text-primary);
+  --nav-text-default: var(--landing-text-primary);
+  --nav-text-secondary-default: var(--landing-text-secondary);
 }
 
 :root.light {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9f9ff;
-  --bg-tertiary: #f0f0fa;
-  --text-primary: #050515;
-  --text-secondary: #666680;
-  --text-tertiary: #999999;
-  --border-color: #e5e5e8;
-  --accent-purple: #7c3aed;
-  --accent-cyan: #0891b2;
-  --accent-green: #059669;
+  --bg-primary: var(--landing-bg-primary);
+  --bg-secondary: var(--landing-bg-secondary);
+  --bg-tertiary: var(--landing-bg-tertiary);
+  --text-primary: var(--landing-text-primary);
+  --text-secondary: var(--landing-text-secondary);
+  --text-tertiary: var(--landing-text-tertiary);
+  --border-color: var(--landing-border);
+  --accent-purple: var(--landing-accent-primary);
+  --accent-cyan: var(--landing-accent-secondary);
+  --accent-green: var(--landing-accent-success);
   --shadow-color: rgba(0, 0, 0, 0.1);
   --nav-bg: rgba(255, 255, 255, 0.7);
   --nav-bg-default: rgba(255, 255, 255, 0.7);
   --nav-bg-scrolled: rgba(5, 5, 15, 0.94);
   --nav-border-default: transparent;
   --nav-border-scrolled: rgba(255, 255, 255, 0.07);
-  --nav-text: #050515;
-  --nav-text-default: #050515;
-  --nav-text-secondary-default: #666680;
+  --nav-text: var(--landing-text-primary);
+  --nav-text-default: var(--landing-text-primary);
+  --nav-text-secondary-default: var(--landing-text-secondary);
   --badge-bg: rgba(124, 58, 237, 0.08);
   --badge-border: rgba(124, 58, 237, 0.2);
-  --badge-text: #666680;
+  --badge-text: var(--landing-text-secondary);
   --stats-bg: rgba(124, 58, 237, 0.08);
-  --marquee-text: #808090;
+  --marquee-text: var(--landing-text-tertiary);
   --section-alt-bg: rgba(124, 58, 237, 0.03);
-  --feed-actions-color: #999999;
+  --feed-actions-color: var(--landing-text-tertiary);
   --cta-btn-bg: rgba(124, 58, 237, 0.08);
   --cta-btn-bg-hover: rgba(124, 58, 237, 0.12);
 }
@@ -96,10 +96,10 @@ body {
 @keyframes pulseGlow {
   0%,
   100% {
-    box-shadow: 0 0 18px rgba(254, 39, 132, 0.3);
+    box-shadow: 0 0 18px rgba(124, 58, 237, 0.3);
   }
   50% {
-    box-shadow: 0 0 36px rgba(254, 39, 132, 0.6);
+    box-shadow: 0 0 36px rgba(124, 58, 237, 0.6);
   }
 }
 
@@ -147,7 +147,7 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,7 +158,7 @@ body {
   font-weight: 800;
   color: var(--text-primary);
   letter-spacing: 0.1em;
-  font-family: "Outfit", sans-serif;
+  font-family: "Space Mono", monospace;
   line-height: 1;
 }
 
@@ -166,7 +166,7 @@ body {
   font-size: 9px;
   color: var(--text-secondary);
   letter-spacing: 0.2em;
-  font-family: "Outfit", sans-serif;
+  font-family: "Space Mono", monospace;
 }
 
 .nav-links {
@@ -210,7 +210,7 @@ body {
   gap: 6px;
   padding: 9px 22px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
   color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
@@ -247,7 +247,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(254, 39, 132, 0.18) 0%,
+    rgba(124, 58, 237, 0.18) 0%,
     transparent 70%
   );
   filter: blur(60px);
@@ -263,7 +263,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(0, 255, 0, 0.14) 0%,
+    rgba(6, 182, 212, 0.14) 0%,
     transparent 70%
   );
   filter: blur(60px);
@@ -282,7 +282,7 @@ body {
   align-items: center;
   gap: 8px;
   background: var(--badge-bg, rgba(255, 255, 255, 0.06));
-  border: 1px solid var(--badge-border, rgba(254, 39, 132, 0.1));
+  border: 1px solid var(--badge-border, rgba(124, 58, 237, 0.1));
   border-radius: 100px;
   padding: 6px 18px;
   font-size: 13px;
@@ -294,7 +294,7 @@ body {
 :root,
 :root.dark {
   --badge-bg: rgba(255, 255, 255, 0.06);
-  --badge-border: rgba(254, 39, 132, 0.1);
+  --badge-border: rgba(124, 58, 237, 0.1);
   --badge-text: rgba(255, 255, 255, 0.7);
 }
 
@@ -302,7 +302,7 @@ body {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #a855f7;
+  background: var(--techit-status-pending);
   animation: dotPulse 2s ease infinite;
 }
 
@@ -338,7 +338,7 @@ body {
 
 /* Reusable gradient-text helpers */
 .gradient-purple-cyan {
-  background: linear-gradient(90deg, var(--accent-pink), var(--accent-neon));
+  background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -346,11 +346,11 @@ body {
 
 :root.light .gradient-purple-cyan {
   -webkit-text-fill-color: unset;
-  color: var(--accent-pink);
+  color: var(--accent-purple);
 }
 
 .gradient-cyan-teal {
-  background: linear-gradient(90deg, var(--accent-neon), var(--accent-green));
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -358,7 +358,7 @@ body {
 
 :root.light .gradient-cyan-teal {
   -webkit-text-fill-color: unset;
-  color: var(--accent-neon);
+  color: var(--accent-cyan);
 }
 
 .hero-subtext {
@@ -385,7 +385,7 @@ body {
   gap: 8px;
   padding: 14px 32px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
   color: var(--text-primary);
   font-weight: 700;
   font-size: 15px;
@@ -418,7 +418,7 @@ body {
 
 .btn-ghost:hover {
   border-color: var(--text-secondary);
-  background: rgba(254, 39, 132, 0.05);
+  background: rgba(124, 58, 237, 0.05);
 }
 
 /* ── Stats bar */
@@ -432,7 +432,7 @@ body {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  background: var(--stats-bg, rgba(254, 39, 132, 0.05));
+  background: var(--stats-bg, rgba(124, 58, 237, 0.05));
   border: 1px solid var(--border-color);
   border-radius: 20px;
   overflow: hidden;
@@ -440,7 +440,7 @@ body {
 
 :root,
 :root.dark {
-  --stats-bg: rgba(254, 39, 132, 0.05);
+  --stats-bg: rgba(124, 58, 237, 0.05);
 }
 
 .stat-cell {
@@ -490,7 +490,7 @@ body {
   font-size: 13px;
   letter-spacing: 0.08em;
   color: var(--marquee-text, rgba(255, 255, 255, 0.45));
-  font-family: "Outfit", sans-serif;
+  font-family: "Space Mono", monospace;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -503,7 +503,7 @@ body {
 
 .marquee-dot {
   font-size: 7px;
-  color: #FE2784;
+  color: var(--landing-accent-primary);
 }
 
 /* ── Shared section layout  */
@@ -520,8 +520,8 @@ body {
 .section-label {
   font-size: 11px;
   letter-spacing: 0.16em;
-  color: #FE2784;
-  font-family: "Outfit", sans-serif;
+  color: var(--landing-accent-primary);
+  font-family: "Space Mono", monospace;
   margin-bottom: 14px;
 }
 
@@ -572,7 +572,7 @@ body {
 }
 
 .role-card:hover {
-  border-color: var(--accent-pink);
+  border-color: var(--accent-purple);
   transform: translateY(-4px);
   background: var(--bg-tertiary);
 }
@@ -662,7 +662,7 @@ body {
 }
 
 .feature-card:hover {
-  background: rgba(254, 39, 132, 0.1);
+  background: rgba(124, 58, 237, 0.1);
 }
 
 .feature-emoji {
@@ -706,7 +706,7 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: 0.06em;
-  font-family: "Outfit", sans-serif;
+  font-family: "Space Mono", monospace;
 }
 
 .feed-posts {
@@ -739,7 +739,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-pink), var(--accent-neon));
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -767,7 +767,7 @@ body {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.07em;
-  font-family: "Outfit", sans-serif;
+  font-family: "Space Mono", monospace;
 }
 
 .feed-post-text {
@@ -791,7 +791,7 @@ body {
 }
 
 .feed-collab-btn {
-  color: #FE2784;
+  color: var(--landing-accent-primary);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -915,7 +915,7 @@ body {
 }
 
 .balance-row-cost {
-  color: #7c3aed;
+  color: var(--landing-accent-primary);
   font-family: "Space Mono", monospace;
   font-size: 12px;
 }

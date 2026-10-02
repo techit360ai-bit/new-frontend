@@ -110,9 +110,6 @@ test("msgPost, msgPatch, and msgDelete preserve auth headers after spreading ini
 
 test("messaging withFallback returns fallback data on failures", async () => {
   const previousFallback = env.VITE_API_FALLBACK;
-  const previousStrict = env.VITE_API_STRICT;
-  delete env.VITE_API_STRICT;
-  if (typeof process !== "undefined" && process.env) delete process.env.VITE_API_STRICT;
   env.VITE_API_FALLBACK = "1";
   const warn = captureWarn();
 
@@ -131,8 +128,6 @@ test("messaging withFallback returns fallback data on failures", async () => {
   } finally {
     if (previousFallback === undefined) delete env.VITE_API_FALLBACK;
     else env.VITE_API_FALLBACK = previousFallback;
-    if (previousStrict === undefined) delete env.VITE_API_STRICT;
-    else env.VITE_API_STRICT = previousStrict;
     warn.restore();
   }
 });
@@ -198,5 +193,34 @@ test("messaging withFallback rethrows failures when strict API mode is enabled",
     if (previous === undefined) delete env.VITE_API_STRICT;
     else env.VITE_API_STRICT = previous;
     warn.restore();
+  }
+});
+
+function stubCookie(value: string) {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "document");
+  const doc = { cookie: value } as Document;
+  Object.defineProperty(globalThis, "document", { configurable: true, value: doc });
+  return {
+    restore: () => {
+      if (original) Object.defineProperty(globalThis, "document", original);
+      else delete (globalThis as { document?: unknown }).document;
+    },
+  };
+}
+
+test("msgPost forwards the double-submit CSRF cookie for cookie-authenticated writes", async () => {
+  const cookie = stubCookie("techit_csrf=csrf-token-123");
+  const fetchMock = stubFetch(async () => response({ id: "p1" }));
+
+  try {
+    await msgPost("/posts", { body: "hello" });
+
+    const [url, init] = fetchMock.calls[0] as [string, RequestInit];
+    expect(url).toBe("http://localhost:8080/api/v1/posts");
+    const requestHeaders = init.headers as Record<string, string>;
+    expect(requestHeaders["X-CSRF-Token"]).toBe("csrf-token-123");
+  } finally {
+    fetchMock.restore();
+    cookie.restore();
   }
 });

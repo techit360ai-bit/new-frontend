@@ -13,7 +13,7 @@ const ChatTabs = ({ activeTab, onTabChange }: ChatTabsProps) => {
   ];
 
   return (
-    <div className="flex gap-6 border-b border-slate-800 mb-6 overflow-x-auto">
+    <div className="flex gap-6 border-b border-border-inverse mb-6 overflow-x-auto">
       {tabs.map((tab) => (
         <button
           key={tab}
@@ -21,7 +21,7 @@ const ChatTabs = ({ activeTab, onTabChange }: ChatTabsProps) => {
           className={`pb-3 px-2 text-sm font-medium whitespace-nowrap transition-colors ${
             activeTab === tab
               ? "text-white border-b-2 border-cyan-400"
-              : "text-slate-400 hover:text-slate-300"
+              : "text-text-disabled hover:text-text-on-inverse-secondary"
           }`}
         >
           {tab}

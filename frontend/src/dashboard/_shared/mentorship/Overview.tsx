@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { fetchMentorshipAnalytics, getMentorshipRoom, listMentorshipApplications, listMentorshipRooms, type MentorshipAnalytics, type MentorshipRoom } from "@/lib/api/mentorship";
 import { ACCENT_SOLID, ACCENT_TEXT, ACCENT_SOFT, HERO_GRADIENT } from "./theme";
+import { fetchMentorRecommendations } from "@/lib/api/recommendationIntelligence";
 
 const BASE = "/investor/mentorship";
 
@@ -19,6 +20,7 @@ export function Overview() {
   const [analytics, setAnalytics] = useState<MentorshipAnalytics | null>(null);
   const [mentees, setMentees] = useState<Array<Record<string, unknown>>>([]);
   const [pendingApplications, setPendingApplications] = useState(0);
+  const [mentorRecommendations, setMentorRecommendations] = useState<Array<{ startup?: { id: string; name: string; stage?: string; skills?: string[] }; score: number; reasons: string[] }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,6 +45,8 @@ export function Overview() {
     return () => { alive = false; };
   }, []);
 
+  useEffect(() => { fetchMentorRecommendations({ limit: 6 }).then((result) => setMentorRecommendations(result.recommendations as typeof mentorRecommendations)).catch(() => setMentorRecommendations([])); }, []);
+
   const activeMentees = analytics?.activeMentees ?? 0;
   const totalMentees = activeMentees + (analytics?.completedMentees ?? 0);
   const totalTasks = analytics?.totalTasks ?? 0;
@@ -59,17 +63,17 @@ export function Overview() {
         </p>
         <div className="flex flex-wrap gap-2">
           <Link to={`${BASE}/create-room`}>
-            <button className="rounded-lg bg-white px-4 py-2 text-sm text-blue-600 transition-colors hover:bg-blue-50 dark:text-emerald-700">
+            <button className="rounded-lg bg-surface-primary px-4 py-2 text-sm text-status-info transition-colors hover:bg-status-info-soft dark:text-status-success">
               Create Your First Room
             </button>
           </Link>
           <Link to={`${BASE}/applications`}>
-            <button className="rounded-lg bg-white/20 px-4 py-2 text-sm text-white transition-colors hover:bg-white/30">
+            <button className="rounded-lg bg-surface-primary/20 px-4 py-2 text-sm text-white transition-colors hover:bg-surface-primary/30">
               View Applications ({pendingApplications} Pending)
             </button>
           </Link>
           <Link to={`${BASE}/hub`}>
-            <button className="rounded-lg bg-white/20 px-4 py-2 text-sm text-white transition-colors hover:bg-white/30">
+            <button className="rounded-lg bg-surface-primary/20 px-4 py-2 text-sm text-white transition-colors hover:bg-surface-primary/30">
               Explore Advanced Hub
             </button>
           </Link>
@@ -80,6 +84,8 @@ export function Overview() {
         <h1 className="mb-1 text-3xl">Dashboard</h1>
         <p className="text-muted-foreground">Manage your mentorship rooms and track progress</p>
       </div>
+
+      {mentorRecommendations.length > 0 && <Card><CardHeader><CardTitle>Recommended founders and startups</CardTitle></CardHeader><CardContent className="grid gap-3 md:grid-cols-2">{mentorRecommendations.map((row) => <div key={String(row.startup?.id)} className="rounded border p-3"><div className="flex items-center justify-between"><span className="font-medium">{row.startup?.name || "Startup"}</span><span className={ACCENT_TEXT}>{Math.round(row.score)}%</span></div><p className="mt-1 text-xs text-muted-foreground">{row.startup?.stage || "Stage unavailable"} · {(row.startup?.skills || []).slice(0, 3).join(", ")}</p><p className="mt-2 text-xs text-muted-foreground">{row.reasons.join(" · ")}</p></div>)}</CardContent></Card>}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
@@ -97,7 +103,7 @@ export function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <DollarSign className="h-4 w-4 text-status-success dark:text-status-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">Not tracked</div>
@@ -108,7 +114,7 @@ export function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Equity Distributed</CardTitle>
-            <Award className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <Award className="h-4 w-4 text-status-pending dark:text-status-pending" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">Not tracked</div>
@@ -119,7 +125,7 @@ export function Overview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            <TrendingUp className="h-4 w-4 text-status-warning dark:text-status-warning" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">{averageProgress}%</div>
