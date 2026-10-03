@@ -1,0 +1,42 @@
+name: TECHIT Platform — Drift and readiness check
+
+on:
+  schedule:
+    # Every 6 hours. Compares deployed build identity to the default branch SHA
+    # and probes readiness on all three services plus the payment gateway.
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    name: Probe production services
+    runs-on: ubuntu-latest
+    env:
+      FRONTEND_URL: https://beta.techitnetwork.com
+      VITE_API_URL: https://backend.techitnetwork.com/api
+      VITE_TECHIT_API: https://backend.techitnetwork.com/api/mcp
+      VITE_API_BASE_URL: https://api.techitnetwork.com
+      VITE_MESSAGING_BASE_URL: https://messaging.techitnetwork.com
+      VITE_PAYMENT_GATEWAY_URL: ${{ vars.PAYMENT_GATEWAY_URL }}
+      SMOKE_TIMEOUT_MS: "10000"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Health + deployed build identity (enforced)
+        env:
+          SMOKE_EXPECT_SHA: ${{ github.sha }}
+        run: node frontend/scripts/smoke.mjs
+
+      - name: Readiness (advisory until AWS origin/URL env is finalized)
+        continue-on-error: true
+        env:
+          SMOKE_REQUIRE_READY: "1"
+        run: node frontend/scripts/smoke.mjs
