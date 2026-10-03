@@ -51,3 +51,30 @@ jobs:
             --distribution-id ${{ secrets.FRONTEND_CF_DISTRIBUTION_ID }} \
             --paths "/*"
           echo "✅ Frontend deployed and cache invalidated"
+
+      - name: Post-deploy platform smoke (health + build identity)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          FRONTEND_URL: https://beta.techitnetwork.com
+          VITE_API_URL: https://backend.techitnetwork.com/api
+          VITE_TECHIT_API: https://backend.techitnetwork.com/api/mcp
+          VITE_API_BASE_URL: https://api.techitnetwork.com
+          VITE_MESSAGING_BASE_URL: https://messaging.techitnetwork.com
+          VITE_PAYMENT_GATEWAY_URL: ${{ vars.PAYMENT_GATEWAY_URL }}
+          SMOKE_EXPECT_SHA: ${{ github.sha }}
+          SMOKE_TIMEOUT_MS: "10000"
+        run: node frontend/scripts/smoke.mjs
+
+      - name: Post-deploy readiness (advisory until AWS env finalized)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        continue-on-error: true
+        env:
+          FRONTEND_URL: https://beta.techitnetwork.com
+          VITE_API_URL: https://backend.techitnetwork.com/api
+          VITE_TECHIT_API: https://backend.techitnetwork.com/api/mcp
+          VITE_API_BASE_URL: https://api.techitnetwork.com
+          VITE_MESSAGING_BASE_URL: https://messaging.techitnetwork.com
+          VITE_PAYMENT_GATEWAY_URL: ${{ vars.PAYMENT_GATEWAY_URL }}
+          SMOKE_REQUIRE_READY: "1"
+          SMOKE_TIMEOUT_MS: "10000"
+        run: node frontend/scripts/smoke.mjs
