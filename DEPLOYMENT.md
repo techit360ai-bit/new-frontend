@@ -12,6 +12,21 @@
 
 All three backends must share the same `JWT_SECRET` so tokens issued by `BACKEND/api/auth/signin` verify on the AI router (`get_user_context` in `main.py`), the Go messaging service (`internal/auth/jwt.go`), and the MCP routes (`Plugins-MCP/server/mount.ts` `resolveActor`).
 
+### Production browser origin (CORS)
+
+The deployed SPA is served at **`https://beta.techitnetwork.com`**. Every backend
+must list that exact origin or the browser blocks all cross-origin calls (which
+surfaces in the UI as "Failed to fetch" / "you are offline"):
+
+- `BACKEND/backend`: `CORS_ORIGINS=https://beta.techitnetwork.com`
+- `BACKEND/messaging-backend`: `CORS_ORIGINS=https://beta.techitnetwork.com`
+- `ai-router`: `ALLOWED_ORIGINS=https://beta.techitnetwork.com`
+
+This is encoded in each service's `.env.example` and asserted by tests. The
+CloudFront/S3 origin value lives in GitHub Actions secrets, so the **runtime AWS
+value must still be confirmed/set** — `/ready` on each service reports whether
+the configured allow-list includes the expected origin.
+
 Local dev defaults assume:
 - BACKEND on `http://localhost:3000`
 - ai-router on `http://localhost:8000`

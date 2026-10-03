@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { fetchPostsPage } from '@/lib/messaging/feed';
 import type { WirePost } from '@/lib/messaging/types';
 import { cacheSnapshot, readSnapshot } from '@/lib/resilience/cache';
-import { isNetworkFailure } from '@/lib/resilience/connectivity';
+import { failureMessage } from '@/lib/resilience/connectivity';
 
 export function useFeedPosts(zone: 'global' | 'tribe' = 'global', category = 'for-you') {
   const [posts, setPosts] = useState<WirePost[]>([]);
@@ -20,7 +20,7 @@ export function useFeedPosts(zone: 'global' | 'tribe' = 'global', category = 'fo
       .catch((err) => {
         return readSnapshot<WirePost[]>(key).then(snapshot => {
           if (snapshot) { setPosts(snapshot.value); setStale(true); setLastSyncedAt(snapshot.updatedAt); setError(null); }
-          else { setPosts([]); setError(isNetworkFailure(err) ? 'You are offline and no cached posts are available.' : (err instanceof Error ? err.message : 'Live posts are unavailable.')); }
+          else { setPosts([]); setError(failureMessage(err, 'feed')); }
         });
       })
       .finally(() => setLoading(false));
@@ -28,6 +28,14 @@ export function useFeedPosts(zone: 'global' | 'tribe' = 'global', category = 'fo
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  // Refresh automatically when connectivity returns, so a stale/empty feed
+  // recovers without a manual pull-to-refresh.
+  useEffect(() => {
+    const onOnline = () => { void load(); };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
   }, [load]);
 
   return { posts, loading, error, stale, lastSyncedAt, reload: load };

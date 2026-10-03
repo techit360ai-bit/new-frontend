@@ -23,6 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
+import { failureMessage } from "@/lib/resilience/connectivity";
 import {
   runVenturePipeline,
   analyzeUnicorn,
@@ -309,8 +310,7 @@ export function MainIncubationPanel() {
       }
       toast.success("Full pipeline analysis complete");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Analysis failed";
-      toast.error(message);
+      toast.error(failureMessage(err, "incubation"));
     } finally {
       setAnalyzing(false);
     }
@@ -396,8 +396,7 @@ export function MainIncubationPanel() {
       setAnalysisResult(persistedResult);
       toast.success(`${ANALYSIS_TYPES.find((a) => a.id === type)?.label} complete`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Analysis failed";
-      toast.error(message);
+      toast.error(failureMessage(err, "incubation"));
     } finally {
       setAnalyzing(false);
     }
