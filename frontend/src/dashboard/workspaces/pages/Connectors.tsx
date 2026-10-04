@@ -60,9 +60,9 @@ export function Connectors() {
         </div>
       </div>
       <div className="border-b border-border-default bg-status-warning-soft px-8 py-3 text-sm text-status-warning">
-        Connecting a connector requires a provider token, which is sealed at rest and stored outside the connector list.
-        This is a credential handshake, not a browser OAuth redirect (no OAuth callback endpoint exists in this
-        deployment), and no provider API is called until an agent explicitly invokes a tool.
+        Connectors are workspace-scoped: the secret is stored in this workspace&apos;s vault and never returned to the
+        browser. GitHub can connect through the platform OAuth flow; other providers use an API key/token. Agents only
+        reach a provider when they explicitly invoke a tool, and destructive tools route through the approval gate.
       </div>
       <div className="flex-1 overflow-auto p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

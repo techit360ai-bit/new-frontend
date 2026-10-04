@@ -116,6 +116,38 @@ export interface ActorInput {
   toolsAllowed?: string[];
 }
 
+/**
+ * Connector credential status. Mirrors BACKEND `ConnectionStatus` — it carries
+ * presence/metadata ONLY and never a secret value (ADR-2: the vault never
+ * returns a credential to a client).
+ */
+export interface ConnectionStatus {
+  plugin: string;
+  label: string;
+  kind: "oauth_token" | "api_key" | "rpc_url";
+  /** True when a credential is stored in THIS workspace's canonical vault lane. */
+  connected: boolean;
+  /** `vault` is the canonical source; `legacy-bootstrap`/`none` are not active. */
+  source: "vault" | "legacy-bootstrap" | "none";
+  expiresAt?: string;
+  mode: "real" | "fake";
+  optional: boolean;
+  /** Legacy env credential still present (deprecated) — remove it. */
+  deprecatedEnv?: boolean;
+  /** Disconnect is not permanent while bootstrap import is enabled. */
+  envFallback?: boolean;
+  /** Granted scope set recorded with the credential (empty when unknown). */
+  scopes?: string[];
+  /** True when the granted scopes were known and cover what the connector requires. */
+  scopesVerified?: boolean;
+}
+
+export interface HealthStatus {
+  ok: boolean;
+  workspaceId: string;
+  actor?: { id: string; kind: "human" | "agent"; role: string };
+}
+
 function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   const token = tokenGetter();
@@ -151,13 +183,35 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return parseJson<T>(path, res);
 }
 
+async function delJson<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "DELETE",
+    headers: headers(),
+    credentials: "include",
+  });
+  return parseJson<T>(path, res);
+}
+
 export const techitApi = {
   baseUrl: BASE,
-  health: () => getJson<{ ok: boolean; workspaceId: string }>("/health"),
+  health: () => getJson<HealthStatus>("/health"),
   tools: () => getJson<CatalogueEntry[]>("/tools"),
   audit: () => getJson<AuditEntry[]>("/audit"),
   contributions: () => getJson<ContributionEvent[]>("/contributions"),
   approvals: () => getJson<ApprovalRequest[]>("/approvals"),
+  // Connector credentials are workspace-scoped (ADR-1). The backend derives the
+  // workspace from the verified JWT; the client never sends one.
+  connections: () => getJson<ConnectionStatus[]>("/connections"),
+  connect: (plugin: string, credential: string, ttlSeconds?: number, scopes?: string[]) =>
+    postJson<{ ok: boolean; connection: ConnectionStatus }>(`/connections/${encodeURIComponent(plugin)}`, {
+      credential,
+      ttlSeconds,
+      scopes,
+    }),
+  disconnect: (plugin: string) =>
+    delJson<{ ok: boolean; connection: ConnectionStatus; removed: boolean; envFallback: boolean }>(
+      `/connections/${encodeURIComponent(plugin)}`,
+    ),
   invoke: (plugin: string, tool: string, params: unknown, actor?: ActorInput) =>
     postJson<InvokeResult>("/invoke", { plugin, tool, params, actor }),
   approve: (id: string, decidedBy = "founder") =>

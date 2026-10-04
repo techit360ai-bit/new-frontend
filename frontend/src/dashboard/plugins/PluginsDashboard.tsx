@@ -26,12 +26,16 @@ import {
   GitPullRequest,
   Bot,
   User,
+  Link2,
+  Unlink,
+  KeyRound,
 } from "lucide-react";
 import {
   techitApi,
   type ApprovalRequest,
   type AuditEntry,
   type CatalogueEntry,
+  type ConnectionStatus,
   type ContributionEvent,
   type InvokeResult,
 } from "@/lib/techitApi";
@@ -113,6 +117,8 @@ export default function PluginsDashboard() {
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [contribs, setContribs] = useState<ContributionEvent[]>([]);
   const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
+  const [connections, setConnections] = useState<ConnectionStatus[]>([]);
+  const [actor, setActor] = useState<{ id: string; kind: "human" | "agent"; role: string } | undefined>();
 
   const refresh = useCallback(async () => {
     setBusy(true);
@@ -126,10 +132,13 @@ export default function PluginsDashboard() {
       ]);
       setOnline(true);
       setWorkspace(h.workspaceId);
+      setActor(h.actor);
       setTools(t);
       setAudit(a);
       setContribs(c);
       setApprovals(ap);
+      // Resilient: an older backend without /connections must not break the page.
+      setConnections(await techitApi.connections().catch(() => [] as ConnectionStatus[]));
       setUpdatedAt(new Date().toLocaleTimeString());
     } catch {
       setOnline(false);
@@ -258,10 +267,11 @@ export default function PluginsDashboard() {
       <main className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <ToolCatalogue tools={tools} loading={!loaded} />
-          <Invoker tools={tools} onDone={refresh} />
+          <Invoker tools={tools} onDone={refresh} actorRole={actor?.role} />
         </div>
         <div className="space-y-6">
           <ApprovalsPanel pending={pending} onApprove={refresh} />
+          <ConnectionsPanel connections={connections} actorRole={actor?.role} onChanged={refresh} />
           <ContributionFeed events={contribs} />
         </div>
         <div className="xl:col-span-3">
@@ -600,13 +610,18 @@ function AuditTable({ entries, loading }: { entries: AuditEntry[]; loading: bool
 /* ------------------------------------------------------------------ */
 /* Live tool invoker (in-browser MCP Inspector)                        */
 /* ------------------------------------------------------------------ */
-const ROLES = ["viewer", "editor", "admin", "owner"] as const;
-
-function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => void }) {
+function Invoker({
+  tools,
+  onDone,
+  actorRole,
+}: {
+  tools: CatalogueEntry[];
+  onDone: () => void;
+  actorRole?: string;
+}) {
   const [toolKey, setToolKey] = useState("");
   const [params, setParams] = useState("{}");
   const [kind, setKind] = useState<"human" | "agent">("human");
-  const [role, setRole] = useState<(typeof ROLES)[number]>("owner");
   const [result, setResult] = useState<InvokeResult | null>(null);
   const [error, setError] = useState("");
   const [running, setRunning] = useState(false);
@@ -631,8 +646,11 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
       setError("Params must be valid JSON.");
       return;
     }
-    const actor =
-      kind === "agent" ? { kind, role, toolsAllowed: [toolKey] } : { kind, role };
+    // The server derives the actor and role from the verified JWT — the body
+    // actor is ignored, so the UI must not offer a role picker that would be
+    // silently overridden. We only vary human/agent, which changes the tool
+    // allow-list shape for agents.
+    const actor = kind === "agent" ? { kind, toolsAllowed: [toolKey] } : { kind };
     setRunning(true);
     try {
       const res = await techitApi.invoke(selected.plugin, selected.tool.name, parsed, actor);
@@ -676,18 +694,13 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
           </select>
         </label>
         <label className="text-sm">
-          <span className="text-xs font-medium text-muted-foreground">Role</span>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as (typeof ROLES)[number])}
-            className={selectCls}
+          <span className="text-xs font-medium text-muted-foreground">Role (from token)</span>
+          <div
+            className="mt-1 w-full border border-border rounded-lg px-2.5 py-2 text-sm bg-muted/50 text-muted-foreground"
+            title="Resolved server-side from your verified JWT"
           >
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+            {actorRole ?? "unknown"}
+          </div>
         </label>
       </div>
 
@@ -736,5 +749,172 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
         </pre>
       )}
     </Panel>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Connections panel — workspace-scoped connector credentials (ADR-1)  */
+/* ------------------------------------------------------------------ */
+function ConnectionsPanel({
+  connections,
+  actorRole,
+  onChanged,
+}: {
+  connections: ConnectionStatus[];
+  actorRole?: string;
+  onChanged: () => void;
+}) {
+  const [openFor, setOpenFor] = useState<string | null>(null);
+  const [value, setValue] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const canManage = actorRole === "owner" || actorRole === "admin";
+  const active = connections.filter((c) => c.connected).length;
+
+  async function connect(plugin: string) {
+    if (!value.trim()) {
+      setErr("Paste a credential first.");
+      return;
+    }
+    setBusy(true);
+    setErr("");
+    try {
+      await techitApi.connect(plugin, value.trim());
+      setValue("");
+      setOpenFor(null);
+      onChanged();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "connect failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function disconnect(plugin: string) {
+    setBusy(true);
+    setErr("");
+    try {
+      await techitApi.disconnect(plugin);
+      onChanged();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "disconnect failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-muted-foreground" />
+          <h2 className="font-semibold text-foreground" style={heading}>
+            Connector Credentials
+          </h2>
+        </div>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {active}/{connections.length} connected
+        </span>
+      </header>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Scoped to this workspace and stored server-side in the vault — a credential is
+        never shown again after saving.
+      </p>
+
+      <ul className="mt-4 space-y-2">
+        {connections.length === 0 && (
+          <li className="text-sm text-muted-foreground">No connectors reported.</li>
+        )}
+        {connections.map((c) => (
+          <li key={c.plugin} className="rounded-xl border border-border bg-background p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">{c.label}</span>
+                  <span
+                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ring-1 ring-inset ${
+                      c.mode === "real"
+                        ? "bg-status-success text-status-success ring-emerald-600/20 dark:bg-status-success/15"
+                        : "bg-muted text-muted-foreground ring-border"
+                    }`}
+                  >
+                    {c.mode}
+                  </span>
+                  {c.connected && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      <CircleCheck className="w-3 h-3" /> connected
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {c.connected
+                    ? `source: ${c.source}${c.expiresAt ? ` · expires ${c.expiresAt.slice(0, 10)}` : " · no expiry"}`
+                    : c.source === "legacy-bootstrap"
+                      ? "legacy env credential present (deprecated)"
+                      : c.optional
+                        ? "optional — works without a credential"
+                        : "not connected"}
+                  {c.deprecatedEnv ? " · remove legacy env var" : ""}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {c.connected ? (
+                  <button
+                    onClick={() => disconnect(c.plugin)}
+                    disabled={busy || !canManage}
+                    title={canManage ? "Disconnect" : "Admin or owner only"}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Unlink className="w-3.5 h-3.5" /> Disconnect
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setOpenFor(openFor === c.plugin ? null : c.plugin);
+                      setValue("");
+                      setErr("");
+                    }}
+                    disabled={!canManage}
+                    title={canManage ? "Connect" : "Admin or owner only"}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Link2 className="w-3.5 h-3.5" /> Connect
+                  </button>
+                )}
+              </div>
+            </div>
+            {openFor === c.plugin && (
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="password"
+                  autoComplete="off"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder={`Paste ${c.kind === "rpc_url" ? "an RPC URL" : "a token"} (never shown again)`}
+                  aria-label={`Credential for ${c.plugin}`}
+                  className="flex-1 text-sm rounded-lg border border-border bg-background px-2.5 py-1.5"
+                />
+                <button
+                  onClick={() => connect(c.plugin)}
+                  disabled={busy}
+                  className="text-xs px-2.5 py-1.5 rounded-lg bg-brand-accent text-white hover:opacity-90 disabled:opacity-40"
+                >
+                  Save
+                </button>
+              </div>
+            )}
+            {openFor === c.plugin && err && (
+              <p className="mt-1 text-xs text-destructive">{err}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+      {!canManage && (
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          {actorRole ? `Signed in as ${actorRole}. ` : ""}
+          Connecting or disconnecting a credential requires a human admin or owner.
+        </p>
+      )}
+    </section>
   );
 }

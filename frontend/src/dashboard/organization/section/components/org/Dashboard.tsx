@@ -32,6 +32,7 @@ import {
 } from "@/lib/api/organization";
 import { WelcomeBack } from "@/components/WelcomeBack";
 import { OrganizationIntelligencePanel } from "./OrganizationIntelligencePanel";
+import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 import { OrganizationLicensingPanel } from "./OrganizationLicensingPanel";
 
 interface MetricCard {
@@ -152,6 +153,11 @@ export function Dashboard() {
       </div>
 
       <OrganizationIntelligencePanel />
+
+      {/* Canonical workspace execution intelligence — same view every surface reads (WS-H) */}
+      <div className="mb-6">
+        <ExecutionIntelligencePanel role="organisation" />
+      </div>
 
       <OrganizationLicensingPanel />
 

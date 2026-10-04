@@ -10,6 +10,7 @@ import { fetchCollaboratorScores, type CollaboratorScores } from "@/lib/api/coll
 import { fetchCollaboratorSummary, type CollaboratorLiveSummary } from "@/lib/api/collaboratorSummary";
 import { patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
 import { WelcomeBack } from "@/components/WelcomeBack";
+import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 
 interface BuildSummary {
   id: string;
@@ -148,6 +149,9 @@ export function Dashboard() {
 
       {/* Welcome Back — contextual intelligence surface */}
       <WelcomeBack />
+
+      {/* Execution intelligence — the collaborator's own canonical view (WS-H) */}
+      <ExecutionIntelligencePanel role="collaborator" />
 
       {loadError && (
         <div className="border border-status-error bg-status-error-soft text-status-error rounded-xl px-4 py-3 text-sm">

@@ -50,7 +50,7 @@ export function ConnectorDrawer({ connector, activity, open, onOpenChange, onCre
     setSaving(true); setError(null);
     try {
       const updated = await removeConnectorCredential(connector.id);
-      setStatus({ credential: null, handshake: 'credential', oauthRedirectSupported: false });
+      setStatus({ credential: null, handshake: 'credential', oauthRedirectSupported: connector.id === 'github', scopes: [], scopesVerified: false });
       if (updated) onCredentialChange?.(updated);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Credential could not be removed.');
@@ -72,9 +72,9 @@ export function ConnectorDrawer({ connector, activity, open, onOpenChange, onCre
                   <div className="flex items-start gap-2 text-xs text-text-muted">
                     <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-status-warning" />
                     <p>
-                      This stores a provider token, sealed at rest with the platform encryption key, and keeps the raw value
-                      out of the connector list. It is <strong>not</strong> a browser OAuth redirect — this deployment has
-                      no OAuth callback endpoint.
+                      Credentials are stored <strong>per workspace</strong> in the canonical vault, sealed at rest, and never
+                      returned to the browser, logs, or model context. GitHub can connect through the platform OAuth flow
+                      (one connect powers both surfaces); other providers use an API key / token here.
                     </p>
                   </div>
                   {status?.credential ? (
@@ -82,7 +82,20 @@ export function ConnectorDrawer({ connector, activity, open, onOpenChange, onCre
                       <p className="flex items-center gap-2 text-sm text-status-success">
                         <CheckCircle2 className="h-4 w-4" /> Connected as <code className="text-xs">{status.credential.maskedIdentifier}</code>
                       </p>
-                      <p className="text-xs text-text-muted">{status.credential.label} · since {new Date(status.credential.connectedAt).toLocaleString()}</p>
+                      <p className="text-xs text-text-muted">
+                        {status.credential.label}
+                        {status.credential.connectedAt ? ` · expires ${new Date(status.credential.connectedAt).toLocaleString()}` : ''}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {status.scopes.length === 0
+                          ? 'Granted scopes are not recorded for this credential (opaque token).'
+                          : `Scopes: ${status.scopes.join(', ')} `}
+                        {status.scopesVerified ? (
+                          <Badge className="bg-status-success-soft text-status-success ml-1 text-xs">verified</Badge>
+                        ) : (
+                          <Badge className="bg-status-warning-soft text-status-warning ml-1 text-xs">unverified</Badge>
+                        )}
+                      </p>
                       <Button variant="outline" disabled={saving} onClick={() => void disconnect()}>Remove credential</Button>
                     </div>
                   ) : (
