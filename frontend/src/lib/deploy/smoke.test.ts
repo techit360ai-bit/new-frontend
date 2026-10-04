@@ -10,6 +10,7 @@ type SmokeCheck = {
   expectJson?: Record<string, string | number | boolean>;
   optional?: boolean;
   shaPath?: string;
+  shaEnv?: string;
 };
 
 type SmokeModule = {
@@ -120,9 +121,62 @@ test("frontend deploy smoke checks build identity on every service", async () =>
   const checks = buildChecks({});
   const byName = Object.fromEntries(checks.map((check) => [check.name, check]));
 
-  expect(byName["node-backend-version"]).toMatchObject({ path: "/health", shaPath: "sha" });
-  expect(byName["ai-router-version"]).toMatchObject({ path: "/version", shaPath: "sha" });
-  expect(byName["messaging-version"]).toMatchObject({ path: "/health", shaPath: "sha" });
+  expect(byName["node-backend-version"]).toMatchObject({ path: "/health", shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_NODE_BACKEND" });
+  expect(byName["ai-router-version"]).toMatchObject({ path: "/version", shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_AI_ROUTER" });
+  expect(byName["messaging-version"]).toMatchObject({ path: "/health", shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_MESSAGING" });
+});
+
+test("build identity compares each service against its own repository SHA, not the frontend SHA", async () => {
+  const { probe } = await loadSmokeScript();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ sha: "backend-sha" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+
+  const check = {
+    name: "node-backend-version",
+    env: "VITE_API_URL",
+    strip: "/api",
+    path: "/health",
+    statuses: [200],
+    shaPath: "sha",
+    shaEnv: "SMOKE_EXPECT_SHA_NODE_BACKEND",
+  };
+
+  try {
+    // Matches the service's own repo head -> passes.
+    await expect(
+      probe(check, {
+        VITE_API_URL: "https://api.techit.example/api",
+        SMOKE_EXPECT_SHA_NODE_BACKEND: "backend-sha",
+        SMOKE_TIMEOUT_MS: "1000",
+      }),
+    ).resolves.toBeDefined();
+
+    // ...and still passes when an unrelated global (frontend) SHA is present.
+    await expect(
+      probe(check, {
+        VITE_API_URL: "https://api.techit.example/api",
+        SMOKE_EXPECT_SHA_NODE_BACKEND: "backend-sha",
+        SMOKE_EXPECT_SHA: "frontend-sha",
+        SMOKE_TIMEOUT_MS: "1000",
+      }),
+    ).resolves.toBeDefined();
+
+    // A real drift against the service's own repo head must fail.
+    await expect(
+      probe(check, {
+        VITE_API_URL: "https://api.techit.example/api",
+        SMOKE_EXPECT_SHA_NODE_BACKEND: "other-sha",
+        SMOKE_TIMEOUT_MS: "1000",
+      }),
+    ).rejects.toThrow(/sha=backend-sha/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test("readiness checks are advisory by default and enforced with SMOKE_REQUIRE_READY", async () => {

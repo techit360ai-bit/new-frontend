@@ -29,12 +29,12 @@ export const baseChecks = [
 // SMOKE_EXPECT_SHA is set they fail on drift (deployed commit != expected).
 export function versionChecks(env = process.env) {
   const checks = [
-    { name: "node-backend-version", env: "VITE_API_URL", strip: "/api", path: "/health", statuses: [200], shaPath: "sha" },
-    { name: "ai-router-version", env: "VITE_API_BASE_URL", path: "/version", statuses: [200], shaPath: "sha" },
-    { name: "messaging-version", env: "VITE_MESSAGING_BASE_URL", path: "/health", statuses: [200], shaPath: "sha" },
+    { name: "node-backend-version", env: "VITE_API_URL", strip: "/api", path: "/health", statuses: [200], shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_NODE_BACKEND" },
+    { name: "ai-router-version", env: "VITE_API_BASE_URL", path: "/version", statuses: [200], shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_AI_ROUTER" },
+    { name: "messaging-version", env: "VITE_MESSAGING_BASE_URL", path: "/health", statuses: [200], shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_MESSAGING" },
   ];
   if (env.VITE_PAYMENT_GATEWAY_URL) {
-    checks.push({ name: "payment-gateway-version", env: "VITE_PAYMENT_GATEWAY_URL", path: "/health", statuses: [200], shaPath: "sha" });
+    checks.push({ name: "payment-gateway-version", env: "VITE_PAYMENT_GATEWAY_URL", path: "/health", statuses: [200], shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_PAYMENT_GATEWAY" });
   }
   return checks;
 }
@@ -108,9 +108,14 @@ export async function assertExpectedSha(check, res, url, env = process.env) {
     return;
   }
   const sha = readPath(body, check.shaPath);
-  console.log(`sha ${check.name} ${String(sha)}`);
-  if (env.SMOKE_EXPECT_SHA && sha && sha !== "unknown" && sha !== env.SMOKE_EXPECT_SHA) {
-    throw new Error(`${url} sha=${String(sha)}; expected ${env.SMOKE_EXPECT_SHA}`);
+  // Each service ships from its own repository, so its deployed SHA is compared
+  // with that repository's own `main` head (SMOKE_EXPECT_SHA_<SERVICE>), never
+  // with the caller's commit — the frontend SHA is never a backend SHA.
+  // SMOKE_EXPECT_SHA stays as a single global fallback for ad-hoc runs.
+  const expected = (check.shaEnv && env[check.shaEnv]) || env.SMOKE_EXPECT_SHA;
+  console.log(`sha ${check.name} ${String(sha)}${expected ? ` (expected ${expected})` : ""}`);
+  if (expected && sha && sha !== "unknown" && sha !== expected) {
+    throw new Error(`${url} sha=${String(sha)}; expected ${expected}`);
   }
 }
 

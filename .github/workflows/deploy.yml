@@ -52,6 +52,26 @@ jobs:
             --paths "/*"
           echo "✅ Frontend deployed and cache invalidated"
 
+      - name: Resolve platform source-of-truth SHAs
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          # Each service is compared with its OWN repository's main head, not the
+          # frontend commit — node-backend and messaging ship from BACKEND and
+          # ai-router ships from ai-router. All repos are public, so the
+          # unauthenticated API suffices; if a lookup fails the value stays unset
+          # and that service degrades to log-only instead of a false drift fail.
+          resolve() {
+            curl -fsS "https://api.github.com/repos/$1/commits/main" 2>/dev/null | jq -r '.sha // empty' || true
+          }
+          BACKEND_SHA="$(resolve techit360ai-bit/BACKEND)"
+          AI_ROUTER_SHA="$(resolve techit360ai-bit/ai-router)"
+          {
+            echo "SMOKE_EXPECT_SHA_NODE_BACKEND=$BACKEND_SHA"
+            echo "SMOKE_EXPECT_SHA_MESSAGING=$BACKEND_SHA"
+            echo "SMOKE_EXPECT_SHA_AI_ROUTER=$AI_ROUTER_SHA"
+          } >> "$GITHUB_ENV"
+          echo "platform SHAs -> backend/messaging=$BACKEND_SHA ai-router=$AI_ROUTER_SHA"
+
       - name: Post-deploy platform smoke (health + build identity)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:
@@ -61,7 +81,6 @@ jobs:
           VITE_API_BASE_URL: https://api.techitnetwork.com
           VITE_MESSAGING_BASE_URL: https://messaging.techitnetwork.com
           VITE_PAYMENT_GATEWAY_URL: ${{ vars.PAYMENT_GATEWAY_URL }}
-          SMOKE_EXPECT_SHA: ${{ github.sha }}
           SMOKE_TIMEOUT_MS: "10000"
         run: node frontend/scripts/smoke.mjs
 
