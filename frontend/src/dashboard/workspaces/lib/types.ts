@@ -2,7 +2,9 @@
 // Mirrors the backend Plugin Contract (see docs/techit-integration-guide.md).
 
 // --- Connectors / MCP ---
-export type ConnectorId = 'github' | 'figma' | 'notion' | 'ml' | 'web3';
+// Mirrors the live MCP connector registry (BACKEND Plugins-MCP). The old seeded
+// 'ml' pseudo-connector is gone; gitlab/bitbucket/ai are real MCP connectors.
+export type ConnectorId = 'github' | 'gitlab' | 'bitbucket' | 'notion' | 'figma' | 'web3' | 'ai';
 export type Capability = 'read' | 'write' | 'execute';
 export type ConnectorStatus = 'connected' | 'disconnected' | 'error' | 'pending';
 
@@ -18,7 +20,7 @@ export interface Connector {
   name: string;
   category: string;
   status: ConnectorStatus;
-  authType: 'oauth2' | 'api_key' | 'service_account';
+  authType: 'oauth2' | 'api_key' | 'rpc_url' | 'service_account';
   capabilities: Capability[];
   tools: MCPTool[];
   resources: string[];

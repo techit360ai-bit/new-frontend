@@ -136,6 +136,10 @@ export interface ConnectionStatus {
   deprecatedEnv?: boolean;
   /** Disconnect is not permanent while bootstrap import is enabled. */
   envFallback?: boolean;
+  /** Granted scope set recorded with the credential (empty when unknown). */
+  scopes?: string[];
+  /** True when the granted scopes were known and cover what the connector requires. */
+  scopesVerified?: boolean;
 }
 
 export interface HealthStatus {
@@ -198,10 +202,11 @@ export const techitApi = {
   // Connector credentials are workspace-scoped (ADR-1). The backend derives the
   // workspace from the verified JWT; the client never sends one.
   connections: () => getJson<ConnectionStatus[]>("/connections"),
-  connect: (plugin: string, credential: string, ttlSeconds?: number) =>
+  connect: (plugin: string, credential: string, ttlSeconds?: number, scopes?: string[]) =>
     postJson<{ ok: boolean; connection: ConnectionStatus }>(`/connections/${encodeURIComponent(plugin)}`, {
       credential,
       ttlSeconds,
+      scopes,
     }),
   disconnect: (plugin: string) =>
     delJson<{ ok: boolean; connection: ConnectionStatus; removed: boolean; envFallback: boolean }>(

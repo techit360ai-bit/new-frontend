@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { listActivity, listConnectors } from '../lib/api/connectors';
-import { workspacePost } from '../lib/api/client';
 import type { ActivityEvent, Connector } from '../lib/types';
 
 function formatTimestamp(value?: string): string {
@@ -127,25 +126,14 @@ export function GitHub() {
             </Button>
             <Button
               className="bg-brand-primary hover:bg-brand-primary-hover"
-              onClick={async () => {
-                const repoName = window.prompt('Enter the GitHub repository URL or name:');
-                if (!repoName?.trim()) return;
-                try {
-                  await workspacePost('/connectors', {
-                    id: 'github',
-                    name: 'GitHub',
-                    category: 'Source Control',
-                    status: 'connected',
-                    authType: 'oauth2',
-                    capabilities: ['read', 'write'],
-                    tools: [],
-                    resources: [...resources, repoName.trim()],
-                  });
-                  toast.success(`Repository "${repoName.trim()}" added successfully.`);
-                  load();
-                } catch (err) {
-                  toast.error(err instanceof Error ? err.message : 'Failed to add repository connector.');
-                }
+              onClick={() => {
+                // Repositories are discovered from the connected MCP account; the
+                // old flow posted a fake connector into the seeded workspace store.
+                toast.info(
+                  github?.status === 'connected'
+                    ? 'Repositories are discovered from your connected GitHub account.'
+                    : 'Connect GitHub from Workspace → Connectors to discover repositories.',
+                );
               }}
             >
               <Github className="w-4 h-4 mr-2" />

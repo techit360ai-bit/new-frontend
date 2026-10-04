@@ -1,14 +1,15 @@
 import type { ReactNode } from 'react';
-import { Plug, Github, Figma, FileText, Brain, Boxes, ExternalLink } from 'lucide-react';
+import { Plug, Github, Gitlab, GitBranch, Figma, FileText, Brain, Boxes, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Connector, ConnectorId, ConnectorStatus } from '../../lib/types';
 
 const ICONS: Record<ConnectorId, ReactNode> = {
-  github: <Github className="w-6 h-6" />, figma: <Figma className="w-6 h-6" />,
-  notion: <FileText className="w-6 h-6" />, ml: <Brain className="w-6 h-6" />,
-  web3: <Boxes className="w-6 h-6" />,
+  github: <Github className="w-6 h-6" />, gitlab: <Gitlab className="w-6 h-6" />,
+  bitbucket: <GitBranch className="w-6 h-6" />, notion: <FileText className="w-6 h-6" />,
+  figma: <Figma className="w-6 h-6" />, web3: <Boxes className="w-6 h-6" />,
+  ai: <Brain className="w-6 h-6" />,
 };
 
 const STATUS_STYLES: Record<ConnectorStatus, string> = {
