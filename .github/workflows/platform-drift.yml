@@ -23,10 +23,10 @@ jobs:
       VITE_PAYMENT_GATEWAY_URL: ${{ vars.PAYMENT_GATEWAY_URL }}
       SMOKE_TIMEOUT_MS: "10000"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
