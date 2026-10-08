@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useFounderProfile, type FounderExperience } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { roleDashboardPath } from "@/lib/roleRoutes";
@@ -30,10 +31,10 @@ export function FounderStep1() {
     persist();
     setFinishing(true);
     const activated = await activateRole("founder", { name, title, location, yearsBuilding: years, founderType: type, headline });
-    if (activated.error) { setFinishing(false); return; }
+    if (activated.error) { setFinishing(false); toast.error("We couldn't set up your account. Please try again."); return; }
     // Onboarded now; the rest of the profile is completed later (banner prompts them).
     const { error } = await updateProfile({ isOnboarded: true, title, country: location, yearsBuilding: years, founderType: type, bio: headline });
-    if (error) { setFinishing(false); return; }
+    if (error) { setFinishing(false); toast.error("We couldn't save your profile. Please try again."); return; }
     localStorage.setItem("techit_profile_completion_pending", "founder");
     navigate(roleDashboardPath.founder, { replace: true });
   };
