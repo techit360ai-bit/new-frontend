@@ -28,6 +28,10 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 650,
+    // Source maps are OFF in normal builds (they would publish the full
+    // TypeScript source). A temporary, access-controlled debug deploy can opt
+    // in with VITE_BUILD_SOURCEMAP=1. See docs/FRONTEND_DEBUG_ACCESS.md.
+    sourcemap: process.env.VITE_BUILD_SOURCEMAP === '1',
     rollupOptions: {
       output: {
         manualChunks(id) {
