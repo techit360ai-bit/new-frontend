@@ -154,6 +154,19 @@ try { localStorage.removeItem('techit_token') } catch {}
 const saveToken = persistAccessToken
 const saveUser  = (u: User | null)   => u ? localStorage.setItem(USER_KEY, JSON.stringify(u)) : localStorage.removeItem(USER_KEY)
 
+// Double-submit CSRF header (BACKEND src/middlewares/csrf.js). Every
+// state-changing request must echo the non-HttpOnly techit_csrf cookie, even
+// the pre-session auth calls: a lingering techit_access cookie from an earlier
+// session otherwise makes the backend reject signup/signin with
+// `csrf_token_invalid`.
+function csrfHeader(): Record<string, string> {
+  try {
+    const cookie = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf='))
+    if (cookie) return { 'X-CSRF-Token': decodeURIComponent(cookie.slice('techit_csrf='.length)) }
+  } catch {}
+  return {}
+}
+
 // ── API base URL ──────────────────────────────────────────────
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 const normalizeContextRole = (value: unknown): Role => String(value || '').toLowerCase() === 'organization' ? 'organisation' : (String(value || 'explorer') as Role)
@@ -263,7 +276,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${API}/auth/signup`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'X-TechIT-Client': 'web' },
+        headers: { 'Content-Type': 'application/json', 'X-TechIT-Client': 'web', ...csrfHeader() },
         body: JSON.stringify(referralId ? { ...data, referralId } : data),
       })
       const json = await res.json()
@@ -280,7 +293,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${API}/auth/signin`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'X-TechIT-Client': 'web' },
+        headers: { 'Content-Type': 'application/json', 'X-TechIT-Client': 'web', ...csrfHeader() },
         body: JSON.stringify({ email, password }),
       })
       const json = await res.json()
