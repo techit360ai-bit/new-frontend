@@ -49,10 +49,12 @@ const sourceLabels: Record<string, string> = {
   domain: "Domain",
   website: "Website",
   organization: "Organization",
-  deployment: "Deployment",
+  deployment: "Shipping & deployment",
   product_analytics: "Product activity",
   team: "Team",
   milestone: "Milestone",
+  revenue: "Revenue",
+  identity: "Founder identity",
 };
 
 function statusClass(status?: string) {
@@ -83,6 +85,18 @@ function formatFrequency(seconds: number) {
   if (hours < 24) return `${hours}h`;
   const days = Math.round(hours / 24);
   return `${days}d`;
+}
+
+const availabilityLabels: Record<string, string> = {
+  pending_dpia_approval: "Coming soon — pending DPIA approval",
+  awaiting_provider_credentials: "Coming soon — awaiting provider credentials",
+  ai_router_not_configured: "Coming soon — verification service not configured",
+  producer_not_wired: "Coming soon",
+  feature_disabled: "Coming soon",
+};
+
+function availabilityLabel(reason?: string | null) {
+  return availabilityLabels[reason ?? ""] ?? "Coming soon";
 }
 
 function historyToPreviewEvents(history: TrustHistoryItem[]) {
@@ -364,9 +378,10 @@ export function TrustCenter() {
           </div>
         </div>
         <div className="grid gap-3 xl:grid-cols-2">
-          {integrations.map((manifest) => {
+          {integrations.filter((manifest) => manifest.connected).map((manifest) => {
             const latest = latestBySource.get(manifest.source);
-            const disabled = busySource === manifest.source;
+            const comingSoon = Boolean(manifest.coming_soon || manifest.availability === "coming_soon");
+            const disabled = busySource === manifest.source || comingSoon;
             return (
               <div key={manifest.provider} className="rounded-lg border border-border-default p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -376,6 +391,11 @@ export function TrustCenter() {
                       <Badge className={statusClass(String(latest?.status ?? "pending"))} variant="outline">
                         {latest?.status ?? "not verified"}
                       </Badge>
+                      {comingSoon ? (
+                        <Badge className="border-border-default bg-background-primary text-text-muted" variant="outline">
+                          {availabilityLabel(manifest.availability_reason)}
+                        </Badge>
+                      ) : null}
                       <Badge className="border-border-default bg-background-primary text-text-muted" variant="outline">
                         {formatFrequency(manifest.sync_frequency_seconds)}
                       </Badge>
@@ -431,21 +451,7 @@ export function TrustCenter() {
           </div>
         </div>
         {(() => {
-          const allSources = [
-            "email",
-            "phone",
-            "github",
-            "linkedin",
-            "domain",
-            "website",
-            "organization",
-            "deployment",
-            "product_analytics",
-            "team",
-            "milestone",
-          ];
-          const connectedSources = new Set(integrations.map((i) => i.source));
-          const unconnectedSources = allSources.filter((s) => !connectedSources.has(s));
+          const unconnectedSources = integrations.filter((manifest) => !manifest.connected);
 
           if (unconnectedSources.length === 0) {
             return (
@@ -457,23 +463,34 @@ export function TrustCenter() {
 
           return (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {unconnectedSources.map((source) => {
-                const disabled = busySource === source;
+              {unconnectedSources.map((manifest) => {
+                const source = manifest.source;
+                const comingSoon = Boolean(manifest.coming_soon || manifest.availability === "coming_soon");
+                const disabled = busySource === source || comingSoon;
                 return (
                   <div
-                    key={source}
+                    key={manifest.provider}
                     className="flex items-center justify-between rounded-lg border border-violet-200 bg-violet-50 p-4"
                   >
-                    <p className="font-medium text-violet-700">
-                      {sourceLabels[source] ?? source}
-                    </p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-violet-700">
+                        {manifest.display_name ?? sourceLabels[source] ?? source}
+                      </p>
+                      {comingSoon ? (
+                        <p className="mt-1 text-xs text-violet-500" title={manifest.availability_reason ?? undefined}>
+                          {availabilityLabel(manifest.availability_reason)}
+                        </p>
+                      ) : null}
+                    </div>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
                       className="border-violet-200 text-violet-700 hover:bg-violet-100"
                       disabled={disabled}
+                      title={comingSoon ? availabilityLabel(manifest.availability_reason) : undefined}
                       onClick={async () => {
+                        if (comingSoon) return;
                         setBusySource(source);
                         try {
                           if (source === "domain" || source === "website") {
@@ -514,12 +531,12 @@ export function TrustCenter() {
                         }
                       }}
                     >
-                      {disabled ? (
+                      {comingSoon ? null : busySource === source ? (
                         <RefreshCw className="animate-spin" />
                       ) : (
                         <Plus className="w-4 h-4" />
                       )}
-                      Connect
+                      {comingSoon ? "Coming soon" : "Connect"}
                     </Button>
                   </div>
                 );
