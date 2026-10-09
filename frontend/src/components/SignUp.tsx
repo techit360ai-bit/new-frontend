@@ -29,6 +29,18 @@ import {
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
+// Echo the non-HttpOnly double-submit cookie (BACKEND src/middlewares/csrf.js)
+// on every state-changing auth call. Without it, a lingering techit_access
+// cookie from an earlier session makes send-otp / verify-otp / signup fail with
+// `csrf_token_invalid`.
+function csrfHeader(): Record<string, string> {
+  try {
+    const cookie = document.cookie.split(";").map((v) => v.trim()).find((v) => v.startsWith("techit_csrf="));
+    if (cookie) return { "X-CSRF-Token": decodeURIComponent(cookie.slice("techit_csrf=".length)) };
+  } catch {}
+  return {};
+}
+
 type Role = "explorer" | "founder" | "collaborator" | "investor" | "organisation";
 
 // Enhanced Toast Component
@@ -248,7 +260,8 @@ export default function Signup() {
     try {
       const response = await fetch(`${API}/auth/send-otp`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...csrfHeader() },
         body: JSON.stringify({ email: form.email }),
       });
       const json = await response.json();
@@ -290,7 +303,8 @@ export default function Signup() {
     try {
       const response = await fetch(`${API}/auth/verify-otp`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...csrfHeader() },
         body: JSON.stringify({ email: form.email, code: otpCode }),
       });
       const json = await response.json();
