@@ -1,5 +1,6 @@
 import { apiGet, apiPost, getAuthToken } from "./client";
 import { env } from "./config";
+import { trustPath } from "./trustRoutes";
 
 const BACKEND_API = String((env as Record<string, unknown>).VITE_API_URL || "http://localhost:3000/api").replace(/\/$/, "");
 const TRUST_AUTHORITY_API = (env.MODE === "production" || typeof (env as Record<string, unknown>).VITE_TRUST_AUTHORITY_URL === "string") ? BACKEND_API : "";
@@ -39,6 +40,16 @@ export interface TrustProfile {
   [key: string]: unknown;
 }
 
+export interface TrustProofDetail {
+  status?: TrustStatus | string | null;
+  confidence?: number | null;
+  attestation_level?: string;
+  issued_at?: string | null;
+  expires_at?: string | null;
+  metrics?: Record<string, unknown> | null;
+  manual_review?: boolean;
+}
+
 export interface TrustBadge {
   badge_type: string;
   label: string;
@@ -47,6 +58,9 @@ export interface TrustBadge {
   issued_at?: string;
   expires_at?: string;
   active?: boolean;
+  confidence?: number | null;
+  attestation_level?: string;
+  manual_review?: boolean;
 }
 
 export interface TrustHistoryItem {
@@ -81,6 +95,7 @@ export interface TrustIntegrationManifest {
   availability_reason?: string | null;
   coming_soon?: boolean;
   connected?: boolean;
+  latest_proof?: TrustProofDetail | null;
 }
 
 export interface TrustNotificationIntent {
@@ -137,87 +152,122 @@ export interface FounderTrustAccessRequest {
 }
 
 export function fetchTrustProfile(): Promise<TrustProfile> {
-  return TRUST_AUTHORITY_API ? backendRequest<TrustProfile>("/trust/profile", "GET") : apiGet<TrustProfile>("/trust/profile");
+  return TRUST_AUTHORITY_API ? backendRequest<TrustProfile>(trustPath("profile"), "GET") : apiGet<TrustProfile>(trustPath("profile"));
 }
 
 export function fetchTrustBadges(): Promise<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }> {
-  return TRUST_AUTHORITY_API ? backendRequest<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }>("/trust/badges", "GET") : apiGet<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }>("/trust/badges");
+  return TRUST_AUTHORITY_API ? backendRequest<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }>(trustPath("badges"), "GET") : apiGet<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }>(trustPath("badges"));
 }
 
 export function fetchTrustHistory(limit = 25): Promise<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }> {
-  return TRUST_AUTHORITY_API ? backendRequest<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }>(`/trust/history?limit=${limit}`, "GET") : apiGet<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }>(`/trust/history?limit=${limit}`);
+  return TRUST_AUTHORITY_API ? backendRequest<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }>(`${trustPath("history")}?limit=${limit}`, "GET") : apiGet<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }>(`${trustPath("history")}?limit=${limit}`);
 }
 
 export function fetchTrustIntegrations(): Promise<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }> {
-  return TRUST_AUTHORITY_API ? backendRequest<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }>("/trust/integrations", "GET") : apiGet<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }>("/trust/integrations");
+  return TRUST_AUTHORITY_API ? backendRequest<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }>(trustPath("integrations"), "GET") : apiGet<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }>(trustPath("integrations"));
 }
 
 export function refreshTrustSource(source: string): Promise<TrustVerificationResult> {
-  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(`/trust/refresh/${encodeURIComponent(source)}`, "POST", {}) : apiPost<TrustVerificationResult>(`/trust/refresh/${encodeURIComponent(source)}`, {});
+  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(trustPath("refreshSource", { source }), "POST", {}) : apiPost<TrustVerificationResult>(trustPath("refreshSource", { source }), {});
 }
 
 export function disconnectTrustSource(source: string): Promise<TrustVerificationResult> {
-  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(`/trust/disconnect/${encodeURIComponent(source)}`, "POST", {}) : apiPost<TrustVerificationResult>(`/trust/disconnect/${encodeURIComponent(source)}`, {});
+  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(trustPath("disconnectSource", { source }), "POST", {}) : apiPost<TrustVerificationResult>(trustPath("disconnectSource", { source }), {});
 }
 
 export function connectTrustSource(source: string): Promise<TrustVerificationResult> {
-  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(`/trust/verify/${encodeURIComponent(source)}`, "POST", {}) : apiPost<TrustVerificationResult>(`/trust/verify/${encodeURIComponent(source)}`, {});
+  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(trustPath("verifySource", { source }), "POST", {}) : apiPost<TrustVerificationResult>(trustPath("verifySource", { source }), {});
 }
 
-export function createTrustDomainChallenge(input: Record<string, unknown> = {}) { return backendRequest<Record<string, unknown>>("/trust/domain/challenge", "POST", input); }
-export function verifyTrustDomainChallenge(challengeId: string) { return backendRequest<Record<string, unknown>>(`/trust/domain/challenge/${encodeURIComponent(challengeId)}/verify`, "POST", {}); }
-export function fetchFounderTrustAccessRequests() { return backendRequest<{ ok: boolean; requests: FounderTrustAccessRequest[] }>("/authorization/founder/trust/access-requests?status=pending", "GET"); }
-export function decideFounderTrustAccessRequest(requestId: string, decision: "approved" | "rejected", note = "") { return backendRequest<{ ok: boolean; request: FounderTrustAccessRequest }>(`/authorization/founder/trust/access-requests/${encodeURIComponent(requestId)}/decision`, "POST", { decision, note }); }
+export function createTrustDomainChallenge(input: Record<string, unknown> = {}) { return backendRequest<Record<string, unknown>>(trustPath("domainChallenge"), "POST", input); }
+export function verifyTrustDomainChallenge(challengeId: string) { return backendRequest<Record<string, unknown>>(trustPath("domainChallengeVerify", { challengeId }), "POST", {}); }
+export function fetchFounderTrustAccessRequests() { return backendRequest<{ ok: boolean; requests: FounderTrustAccessRequest[] }>(`${trustPath("founderAccessRequests")}?status=pending`, "GET"); }
+export function decideFounderTrustAccessRequest(requestId: string, decision: "approved" | "rejected", note = "") { return backendRequest<{ ok: boolean; request: FounderTrustAccessRequest }>(trustPath("founderAccessDecision", { requestId }), "POST", { decision, note }); }
 
 export function previewTrustNotifications(events: Array<Record<string, unknown>>): Promise<TrustNotificationPreview> {
-  return apiPost<TrustNotificationPreview>("/trust/notifications/preview", { events });
+  return apiPost<TrustNotificationPreview>(trustPath("notificationsPreview"), { events });
 }
 
 export function previewTrustShare(input: Record<string, unknown> = {}) {
-  return apiPost<Record<string, unknown>>("/trust/share-profile/preview", input);
+  return apiPost<Record<string, unknown>>(trustPath("shareProfilePreview"), input);
 }
 
 export function verifyTrustAdapter(provider: string, input: Record<string, unknown> = {}) {
-  return apiPost<TrustVerificationResult>(`/trust/adapters/${encodeURIComponent(provider)}/verify`, input);
+  return apiPost<TrustVerificationResult>(trustPath("adapterVerify", { provider }), input);
 }
 
 export function createTrustRefreshPlan(connections: Array<Record<string, unknown>>) {
-  return apiPost<Record<string, unknown>>("/trust/refresh-plan", { connections });
+  return apiPost<Record<string, unknown>>(trustPath("refreshPlan"), { connections });
 }
 
 export function runContinuousTrustVerification(input: { connections?: Array<Record<string, unknown>>; adapter_payloads?: Record<string, unknown>; execute?: boolean } = {}) {
-  return apiPost<Record<string, unknown>>("/trust/continuous-verification/run", input);
+  return apiPost<Record<string, unknown>>(trustPath("continuousVerification"), input);
 }
 
 // --- WS7 outcomes / milestone attestation (node-local) ---
 // Evidence is uploaded, scanned, and hashed before a milestone can be reviewed;
 // only third-party attestation (e-sign / letter / notary) reaches full weight.
 export function fetchMilestones() {
-  return backendRequest<{ ok: boolean; milestones: Array<Record<string, unknown>> }>("/trust/milestone", "GET");
+  return backendRequest<{ ok: boolean; milestones: Array<Record<string, unknown>> }>(trustPath("milestoneList"), "GET");
 }
 
 export function createMilestoneEvidenceUpload(contentType: string, sizeBytes: number) {
-  return backendRequest<{ ok: boolean; evidence: { id: string; status: string }; uploadUrl: string; requiredHeaders: Record<string, string> }>("/trust/milestone/evidence", "POST", { contentType, sizeBytes });
+  return backendRequest<{ ok: boolean; evidence: { id: string; status: string }; uploadUrl: string; requiredHeaders: Record<string, string> }>(trustPath("milestoneEvidenceUpload"), "POST", { contentType, sizeBytes });
 }
 
 export function finalizeMilestoneEvidence(evidenceId: string) {
-  return backendRequest<{ ok: boolean; evidence: { id: string; status: string; sha256?: string } }>(`/trust/milestone/evidence/${encodeURIComponent(evidenceId)}/finalize`, "POST", {});
+  return backendRequest<{ ok: boolean; evidence: { id: string; status: string; sha256?: string } }>(trustPath("milestoneEvidenceFinalize", { evidenceId }), "POST", {});
 }
 
 export function submitTrustMilestone(input: Record<string, unknown>) {
-  return backendRequest<TrustVerificationResult>("/trust/milestone", "POST", input);
+  return backendRequest<TrustVerificationResult>(trustPath("milestoneSubmit"), "POST", input);
 }
 
 export function reviewTrustMilestone(input: Record<string, unknown>) {
-  return backendRequest<Record<string, unknown>>("/trust/milestone/review", "POST", input);
+  return backendRequest<Record<string, unknown>>(trustPath("milestoneReview"), "POST", input);
+}
+
+// --- WS8 founder identity / KYC + sanctions screening ---
+// KYC/registry verification is server-observed and node-local; running a
+// screening appends an append-only result row.
+export function connectIdentityCredential(provider: string, credential: string, subject?: string) {
+  return backendRequest<{ ok: boolean; kind: string; credential: RevenueCredentialDescriptor }>(trustPath("identityConnect"), "POST", subject ? { provider, credential, subject } : { provider, credential });
+}
+
+export function fetchIdentityCredentials() {
+  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>(trustPath("identityCredentials"), "GET");
+}
+
+export function fetchIdentity() {
+  return backendRequest<{ ok: boolean; verifications: Array<Record<string, unknown>>; screening: Array<Record<string, unknown>>; screening_due: boolean; rescreen_days: number }>(trustPath("identityList"), "GET");
+}
+
+export function verifyIdentityKyc(provider: string, reference: string, country?: string) {
+  return backendRequest<TrustVerificationResult>(trustPath("identityVerify"), "POST", country ? { provider, reference, country } : { provider, reference });
+}
+
+export function verifyIdentityRegistry(provider: string, companyNumber: string, founderName: string) {
+  return backendRequest<TrustVerificationResult>(trustPath("identityRegistryVerify"), "POST", { provider, companyNumber, founderName });
+}
+
+export function runIdentityScreening(provider: string, name: string, country?: string) {
+  return backendRequest<Record<string, unknown>>(trustPath("identityScreeningRun"), "POST", country ? { provider, name, country } : { provider, name });
+}
+
+export function fetchIdentityScreening() {
+  return backendRequest<{ ok: boolean; screening: Array<Record<string, unknown>> }>(trustPath("identityScreeningList"), "GET");
+}
+
+export function disconnectIdentityCredential(provider: string) {
+  return backendRequest<Record<string, unknown>>(trustPath("identityDisconnect", { provider }), "DELETE");
 }
 
 export function inviteTrustTeamMember(input: Record<string, unknown>) {
-  return apiPost<Record<string, unknown>>("/trust/team/invite", input);
+  return apiPost<Record<string, unknown>>(trustPath("teamInvite"), input);
 }
 
 export function verifyTrustTeamMember(input: Record<string, unknown>) {
-  return apiPost<Record<string, unknown>>("/trust/team/verify", input);
+  return apiPost<Record<string, unknown>>(trustPath("teamVerify"), input);
 }
 
 // --- WS3 revenue verification ---
@@ -236,38 +286,38 @@ export interface RevenueCredentialDescriptor {
 }
 
 export function connectRevenueCredential(provider: string, credential: string) {
-  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>("/trust/revenue/connect", "POST", { provider, credential });
+  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>(trustPath("revenueConnect"), "POST", { provider, credential });
 }
 
 export function fetchRevenueCredentials() {
-  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>("/trust/revenue/credentials", "GET");
+  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>(trustPath("revenueCredentials"), "GET");
 }
 
 export function verifyRevenueSource(provider: string) {
-  return backendRequest<Record<string, unknown>>("/trust/revenue/verify", "POST", { provider });
+  return backendRequest<Record<string, unknown>>(trustPath("revenueVerify"), "POST", { provider });
 }
 
 export function disconnectRevenueSource(provider: string) {
-  return backendRequest<Record<string, unknown>>(`/trust/revenue/${encodeURIComponent(provider)}`, "DELETE");
+  return backendRequest<Record<string, unknown>>(trustPath("revenueDisconnect", { provider }), "DELETE");
 }
 
 // --- WS4 product analytics verification ---
 // Provider-observed MAU/DAU/retention only; `connectAnalyticsCredential` stores
 // an encrypted read-only key (plus the project/property id) and never mints a proof.
 export function connectAnalyticsCredential(provider: string, credential: string, subject?: string) {
-  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>("/trust/analytics/connect", "POST", subject ? { provider, credential, subject } : { provider, credential });
+  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>(trustPath("analyticsConnect"), "POST", subject ? { provider, credential, subject } : { provider, credential });
 }
 
 export function fetchAnalyticsCredentials() {
-  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>("/trust/analytics/credentials", "GET");
+  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>(trustPath("analyticsCredentials"), "GET");
 }
 
 export function verifyAnalyticsSource(provider: string) {
-  return backendRequest<Record<string, unknown>>("/trust/analytics/verify", "POST", { provider });
+  return backendRequest<Record<string, unknown>>(trustPath("analyticsVerify"), "POST", { provider });
 }
 
 export function disconnectAnalyticsSource(provider: string) {
-  return backendRequest<Record<string, unknown>>(`/trust/analytics/${encodeURIComponent(provider)}`, "DELETE");
+  return backendRequest<Record<string, unknown>>(trustPath("analyticsDisconnect", { provider }), "DELETE");
 }
 
 // --- WS5 shipping / deployment cadence verification ---
@@ -275,48 +325,91 @@ export function disconnectAnalyticsSource(provider: string) {
 // stores an encrypted read-only token (plus the repo/service/site id) and never
 // mints a proof. The verified proof carries cadence metrics, not raw payloads.
 export function connectShippingCredential(provider: string, credential: string, subject?: string) {
-  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>("/trust/shipping/connect", "POST", subject ? { provider, credential, subject } : { provider, credential });
+  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>(trustPath("shippingConnect"), "POST", subject ? { provider, credential, subject } : { provider, credential });
 }
 
 export function fetchShippingCredentials() {
-  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>("/trust/shipping/credentials", "GET");
+  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>(trustPath("shippingCredentials"), "GET");
 }
 
 export function verifyShippingSource(provider: string) {
-  return backendRequest<Record<string, unknown>>("/trust/shipping/verify", "POST", { provider });
+  return backendRequest<Record<string, unknown>>(trustPath("shippingVerify"), "POST", { provider });
 }
 
 export function disconnectShippingSource(provider: string) {
-  return backendRequest<Record<string, unknown>>(`/trust/shipping/${encodeURIComponent(provider)}`, "DELETE");
+  return backendRequest<Record<string, unknown>>(trustPath("shippingDisconnect", { provider }), "DELETE");
 }
 
 // --- WS6 team / work-email / registry / HRIS verification ---
 // Work-email proofs require a domain the founder already verified; registry and
 // HRIS reads are server-observed aggregates (roles/headcount only, no PII).
 export function requestTeamWorkEmailChallenge(email: string, role?: string) {
-  return backendRequest<{ ok: boolean; challenge: Record<string, unknown>; dev_code?: string }>("/trust/team/work-email/challenge", "POST", role ? { email, role } : { email });
+  return backendRequest<{ ok: boolean; challenge: Record<string, unknown>; dev_code?: string }>(trustPath("teamWorkEmailChallenge"), "POST", role ? { email, role } : { email });
 }
 
 export function verifyTeamWorkEmailChallenge(challengeId: string, code: string) {
-  return backendRequest<Record<string, unknown>>("/trust/team/work-email/verify", "POST", { challengeId, code });
+  return backendRequest<Record<string, unknown>>(trustPath("teamWorkEmailVerify"), "POST", { challengeId, code });
 }
 
 export function connectTeamCredential(kind: "registry" | "hris", provider: string, credential: string, subject?: string) {
-  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>("/trust/team/connect", "POST", subject ? { kind, provider, credential, subject } : { kind, provider, credential });
+  return backendRequest<{ ok: boolean; credential: RevenueCredentialDescriptor }>(trustPath("teamConnect"), "POST", subject ? { kind, provider, credential, subject } : { kind, provider, credential });
 }
 
 export function fetchTeamCredentials() {
-  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>("/trust/team/credentials", "GET");
+  return backendRequest<{ ok: boolean; credentials: RevenueCredentialDescriptor[] }>(trustPath("teamCredentials"), "GET");
 }
 
 export function verifyTeamRegistrySource(provider: string, input?: { companyNumber?: string; subject?: string; founderName?: string }) {
-  return backendRequest<Record<string, unknown>>("/trust/team/registry/verify", "POST", { provider, ...(input || {}) });
+  return backendRequest<Record<string, unknown>>(trustPath("teamRegistryVerify"), "POST", { provider, ...(input || {}) });
 }
 
 export function verifyTeamHrisSource(provider: string) {
-  return backendRequest<Record<string, unknown>>("/trust/team/hris/verify", "POST", { provider });
+  return backendRequest<Record<string, unknown>>(trustPath("teamHrisVerify"), "POST", { provider });
 }
 
 export function disconnectTeamCredential(provider: string) {
-  return backendRequest<Record<string, unknown>>(`/trust/team/credential/${encodeURIComponent(provider)}`, "DELETE");
+  return backendRequest<Record<string, unknown>>(trustPath("teamDisconnect", { provider }), "DELETE");
+}
+
+// --- WS9 manual overrides + re-verification (admin / founder-visible) ---
+// Overrides are admin-only and always reason-coded + time-boxed; the founder
+// Trust Center only reads them (surfaced through the profile breakdown as
+// `manual_override`). The reverification-due view is a read-only preview of
+// proofs/skills whose TTL has lapsed.
+export interface TrustOverrideRecord {
+  id: string;
+  userId: string;
+  delta: number;
+  reasonCode: string;
+  source?: string | null;
+  projectId?: string | null;
+  note?: string | null;
+  expiresAt?: string | null;
+  adminId?: string;
+  revokedAt?: string | null;
+  revokedBy?: string | null;
+  createdAt?: string;
+}
+
+export interface TrustReverificationDue {
+  now: string;
+  due_proof_count: number;
+  due_skill_count: number;
+  sources: string[];
+}
+
+export function fetchTrustReverificationDue() {
+  return backendRequest<TrustReverificationDue>(trustPath("reverificationDue"), "GET");
+}
+
+export function applyTrustOverride(input: { userId: string; delta: number; reasonCode: string; expiresAt: string; note?: string; source?: string }) {
+  return backendRequest<{ ok: boolean; override: TrustOverrideRecord; score?: Record<string, unknown> }>(trustPath("overrideApply"), "POST", input);
+}
+
+export function fetchUserTrustOverrides(userId: string) {
+  return backendRequest<{ ok: boolean; overrides: TrustOverrideRecord[] }>(trustPath("overrideList", { userId }), "GET");
+}
+
+export function revokeTrustOverride(userId: string, overrideId: string) {
+  return backendRequest<{ ok: boolean; override: TrustOverrideRecord; score?: Record<string, unknown> }>(trustPath("overrideRevoke", { userId, overrideId }), "DELETE");
 }

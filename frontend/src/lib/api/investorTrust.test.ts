@@ -74,6 +74,22 @@ test("fetchInvestorTrustDashboard calls the selected startup trust endpoint", as
   }
 });
 
+test("fetchInvestorTrustDashboard forwards granted consent scopes only when present", async () => {
+  const fetchMock = stubFetch(async () => response({ startup: { startupId: "1" } }));
+
+  try {
+    await fetchInvestorTrustDashboard("1", ["revenue_metrics", " founder_identity "]);
+    const [scopedUrl] = fetchMock.calls[0] as [string, RequestInit];
+    expect(scopedUrl).toBe("http://localhost:8000/api/v1/investor/trust/1?scopes=revenue_metrics%2Cfounder_identity");
+
+    await fetchInvestorTrustDashboard("1", []);
+    const [unscopedUrl] = fetchMock.calls[1] as [string, RequestInit];
+    expect(unscopedUrl).toBe("http://localhost:8000/api/v1/investor/trust/1");
+  } finally {
+    fetchMock.restore();
+  }
+});
+
 test("saveInvestorTrustNotes keeps notes private behind the investor trust notes endpoint", async () => {
   const notes = {
     note: "Persisted diligence note",

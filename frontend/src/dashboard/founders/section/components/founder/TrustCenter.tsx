@@ -7,12 +7,14 @@ import {
   CheckCircle2,
   Clock,
   History,
+  Gauge,
   Info,
   Link2,
   Lock,
   Plus,
   RefreshCw,
   ShieldCheck,
+  SlidersHorizontal,
   Unplug,
   X,
 } from "lucide-react";
@@ -99,6 +101,68 @@ function availabilityLabel(reason?: string | null) {
   return availabilityLabels[reason ?? ""] ?? "Coming soon";
 }
 
+// WS10: human-readable scoring + attestation vocabulary so the founder can see
+// *why* a score is what it is instead of raw snake_case keys.
+const breakdownLabels: Record<string, string> = {
+  email: "Email",
+  phone: "Phone",
+  github: "GitHub",
+  github_activity: "GitHub activity",
+  linkedin: "LinkedIn",
+  domain: "Domain",
+  website: "Website",
+  organization: "Organization",
+  deployment: "Shipping & deployment",
+  deployment_activity: "Deploy cadence",
+  product_analytics: "Product activity",
+  revenue: "Revenue",
+  team: "Team",
+  milestone: "Milestones",
+  identity: "Founder identity",
+  verified_skills: "Verified skills",
+  manual_override: "Manual adjustment",
+};
+
+function humanBreakdownKey(key: string) {
+  return breakdownLabels[key] ?? key.replaceAll("_", " ");
+}
+
+const attestationLabels: Record<string, string> = {
+  self: "Self-reported",
+  provider_observed: "Provider-observed",
+  third_party_attested: "Third-party attested",
+};
+
+function formatAttestation(level?: string | null) {
+  return attestationLabels[level ?? ""] ?? (level ? level.replaceAll("_", " ") : "—");
+}
+
+function formatConfidence(value?: number | null) {
+  return typeof value === "number" ? `${Math.round(value * 100)}%` : "—";
+}
+
+const METRIC_LABELS: Record<string, string> = {
+  mrr: "MRR", arr: "ARR", payingCustomers: "Paying customers", currency: "Currency",
+  mau: "MAU", dau: "DAU", wau: "WAU", retentionD7: "D7 retention", retentionD30: "D30 retention",
+  deployments30d: "Deploys 30d", mergedPrs30d: "Merged PRs 30d", releases30d: "Releases 30d",
+  uptime30d: "Uptime 30d", verifiedCount: "Verified members", headcount: "Headcount",
+  companyNumber: "Company no.", jurisdiction: "Jurisdiction", kycStatus: "KYC status",
+  screeningStatus: "Screening", country: "Country",
+};
+
+function formatMetricValue(value: unknown) {
+  if (typeof value === "number") return new Intl.NumberFormat().format(value);
+  if (typeof value === "boolean") return value ? "yes" : "no";
+  if (Array.isArray(value)) return value.slice(0, 4).join(", ");
+  return String(value).slice(0, 40);
+}
+
+function metricEntries(metrics?: Record<string, unknown> | null): Array<[string, unknown]> {
+  if (!metrics) return [];
+  const skip = new Set(["provider", "credentialSource", "method", "verifiedAt", "asOf", "metricWindow", "windowDays", "freshnessHours", "livemode", "currencies"]);
+  return Object.entries(metrics).filter(([key, value]) => !skip.has(key) && value !== null && value !== undefined && value !== "").slice(0, 6).map(([key, value]) => [METRIC_LABELS[key] ?? key, value]);
+}
+
 function historyToPreviewEvents(history: TrustHistoryItem[]) {
   return history.map((item) => ({
     notification_type:
@@ -174,6 +238,10 @@ export function TrustCenter() {
   const actionRequired = notifications.filter((n) => n.action_required);
   const activeBadges = badges.filter((b) => b.active !== false);
   const expiringBadges = badges.filter((b) => b.expires_at && b.active !== false).slice(0, 4);
+  const breakdownEntries = Object.entries(profile?.breakdown ?? {}) as Array<[string, number]>;
+  const signals = Array.isArray(profile?.signals) ? profile.signals : [];
+  const manualOverride = Number(profile?.breakdown?.manual_override ?? 0);
+  const manualReviewBadges = badges.filter((b) => b.manual_review);
 
   const refreshSource = async (source: string) => {
     setBusySource(source);
@@ -269,13 +337,47 @@ export function TrustCenter() {
             </div>
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-4">
-            {Object.entries(profile?.breakdown ?? {}).slice(0, 8).map(([key, value]) => (
-              <div key={key} className="rounded-lg bg-background-primary p-3">
-                <p className="text-xs text-text-muted">{key.replaceAll("_", " ")}</p>
-                <p className="mt-1 text-lg font-semibold tabular-nums text-text-primary">{Math.round(value)}</p>
+          {manualOverride !== 0 && (
+            <div className="mt-5 flex items-start gap-2 rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm text-violet-900">
+              <SlidersHorizontal className="mt-0.5 h-4 w-4 shrink-0 text-violet-700" />
+              <p>
+                <span className="font-semibold">Manual adjustment active.</span>{" "}
+                A compliance adjustment of {manualOverride > 0 ? "+" : ""}{manualOverride} points is applied to your score.
+                The reason code and expiry are recorded in the append-only audit log.
+              </p>
+            </div>
+          )}
+
+          <div className="mt-5 rounded-lg border border-border-default p-4">
+            <div className="flex items-center gap-2">
+              <Gauge className="h-4 w-4 text-cyan-600" />
+              <p className="text-sm font-semibold text-text-secondary">Why this score</p>
+            </div>
+            <p className="mt-1 text-xs text-text-muted">
+              Each verified source contributes weighted points. Provider-observed sources carry more weight than self-reported
+              ones, and a manual adjustment (if any) is applied last, clamped to 0–100.
+            </p>
+            <div className="mt-3 grid gap-3 md:grid-cols-4">
+              {breakdownEntries.length === 0 ? (
+                <p className="text-sm text-text-muted md:col-span-4">No scoring signals yet — connect a source to start earning trust.</p>
+              ) : (
+                breakdownEntries.slice(0, 12).map(([key, value]) => (
+                  <div key={key} className={`rounded-lg p-3 ${key === "manual_override" ? "bg-violet-50" : "bg-background-primary"}`}>
+                    <p className="text-xs text-text-muted">{humanBreakdownKey(key)}</p>
+                    <p className="mt-1 text-lg font-semibold tabular-nums text-text-primary">{key === "manual_override" && value > 0 ? "+" : ""}{Math.round(value)}</p>
+                  </div>
+                ))
+              )}
+            </div>
+            {signals.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {signals.map((signal) => (
+                  <span key={signal} className={`rounded px-2 py-1 text-xs ${signal === "manual_override" ? "bg-violet-100 text-violet-700" : "bg-surface-secondary text-text-muted"}`}>
+                    {humanBreakdownKey(String(signal))}
+                  </span>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </section>
 
@@ -367,6 +469,11 @@ export function TrustCenter() {
             Next expiry: {expiringBadges[0].label} on {formatDate(expiringBadges[0].expires_at)}.
           </div>
         )}
+        {manualReviewBadges.length > 0 && (
+          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            {manualReviewBadges.length} source(s) have a manual review note: {manualReviewBadges.map((b) => b.label).join(", ")}.
+          </div>
+        )}
       </section>
 
       <section className="rounded-xl border border-border-default bg-surface-primary p-5">
@@ -429,6 +536,38 @@ export function TrustCenter() {
                     </Button>
                   </div>
                 </div>
+                <div className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
+                  <div>
+                    <p className="text-text-disabled">Last verified</p>
+                    <p className="mt-0.5 font-medium text-text-primary">{formatDate(manifest.latest_proof?.issued_at)}</p>
+                  </div>
+                  <div>
+                    <p className="text-text-disabled">Expires</p>
+                    <p className="mt-0.5 font-medium text-text-primary">{formatDate(manifest.latest_proof?.expires_at)}</p>
+                  </div>
+                  <div>
+                    <p className="text-text-disabled">Confidence</p>
+                    <p className="mt-0.5 font-medium text-text-primary">{formatConfidence(manifest.latest_proof?.confidence)}</p>
+                  </div>
+                  <div>
+                    <p className="text-text-disabled">Attestation</p>
+                    <p className="mt-0.5 font-medium text-text-primary">{formatAttestation(manifest.latest_proof?.attestation_level)}</p>
+                  </div>
+                </div>
+                {manifest.latest_proof?.manual_review && (
+                  <p className="mt-3 inline-flex items-center gap-1 rounded bg-amber-50 px-2 py-1 text-xs text-amber-700">
+                    <AlertTriangle className="h-3 w-3" /> Manual review recorded for this source.
+                  </p>
+                )}
+                {manifest.latest_proof?.metrics && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {metricEntries(manifest.latest_proof.metrics).map(([key, value]) => (
+                      <span key={key} className="rounded bg-background-primary px-2 py-1 text-xs text-text-muted">
+                        {key}: <span className="font-medium text-text-primary">{formatMetricValue(value)}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {manifest.stored_fields.slice(0, 5).map((field) => (
                     <span key={field} className="rounded bg-surface-secondary px-2 py-1 text-xs text-text-muted">

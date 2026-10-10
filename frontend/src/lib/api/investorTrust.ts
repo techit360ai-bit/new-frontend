@@ -1,5 +1,6 @@
 import { apiGet, apiPost, getAuthToken } from "./client";
 import { env } from "./config";
+import { trustPath } from "./trustRoutes";
 
 const BACKEND_API = String((env as Record<string, unknown>).VITE_API_URL || "http://localhost:3000/api").replace(/\/$/, "");
 async function backendTrustAccess<T>(path: string, method: "GET" | "POST", body?: unknown): Promise<T> {
@@ -238,11 +239,16 @@ export interface InvestorTrustAccessRequest {
 }
 
 export function fetchInvestorTrustStartups(): Promise<InvestorTrustDashboardList> {
-  return apiGet<InvestorTrustDashboardList>("/investor/trust/startups");
+  return apiGet<InvestorTrustDashboardList>(trustPath("investorStartups"));
 }
 
-export function fetchInvestorTrustDashboard(startupId: string): Promise<InvestorTrustDashboard> {
-  return apiGet<InvestorTrustDashboard>(`/investor/trust/${encodeURIComponent(startupId)}`);
+// `scopes` carries the consent scopes the investor has been granted; the
+// AI-router only returns sensitive sources (revenue metrics, identity/screening)
+// when their scope is present. Omit it and those sources stay hidden.
+export function fetchInvestorTrustDashboard(startupId: string, scopes?: string[]): Promise<InvestorTrustDashboard> {
+  const path = trustPath("investorDashboard", { startupId });
+  const granted = (scopes ?? []).map((scope) => scope.trim()).filter(Boolean);
+  return apiGet<InvestorTrustDashboard>(granted.length ? `${path}?scopes=${encodeURIComponent(granted.join(","))}` : path);
 }
 
 export function saveInvestorTrustNotes(
@@ -250,15 +256,15 @@ export function saveInvestorTrustNotes(
   notes: InvestorTrustNote,
 ): Promise<{ ok: boolean; investorNotes: InvestorTrustNote }> {
   return apiPost<{ ok: boolean; investorNotes: InvestorTrustNote }>(
-    `/investor/trust/${encodeURIComponent(startupId)}/notes`,
+    trustPath("investorNotes", { startupId }),
     notes,
   );
 }
 
 export function fetchInvestorTrustAccessRequest(startupId: string) {
-  return backendTrustAccess<{ ok: boolean; request: InvestorTrustAccessRequest | null; requestAccessAllowed: boolean }>(`/authorization/investor/trust/${encodeURIComponent(startupId)}/access-request`, "GET");
+  return backendTrustAccess<{ ok: boolean; request: InvestorTrustAccessRequest | null; requestAccessAllowed: boolean }>(trustPath("investorAccessRequest", { startupId }), "GET");
 }
 
 export function requestInvestorTrustAccess(startupId: string, purpose: string) {
-  return backendTrustAccess<{ ok: boolean; created: boolean; request: InvestorTrustAccessRequest }>(`/authorization/investor/trust/${encodeURIComponent(startupId)}/access-request`, "POST", { purpose, requestedScopes: ["approved_evidence_metadata"] });
+  return backendTrustAccess<{ ok: boolean; created: boolean; request: InvestorTrustAccessRequest }>(trustPath("investorAccessRequestCreate", { startupId }), "POST", { purpose, requestedScopes: ["approved_evidence_metadata"] });
 }

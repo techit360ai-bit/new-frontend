@@ -124,17 +124,31 @@ export function InvestorTrustDashboard() {
   useEffect(() => {
     if (!selectedId) return;
     let alive = true;
-    fetchInvestorTrustDashboard(selectedId).then((data) => {
-      if (!alive) return;
-      setDashboard(data);
-      setNotes(data.investorNotes);
-      setSaved(false);
-    }).catch(() => {
-      if (!alive) return;
-      setDashboard(null);
-      setNotes(null);
-    });
-    fetchInvestorTrustAccessRequest(selectedId).then((data) => { if (alive) setAccessRequest(data.request); }).catch(() => { if (alive) setAccessRequest(null); });
+    // Resolve consent scopes first so the dashboard request only asks for
+    // sources the investor is actually approved to see. Sensitive sources
+    // (revenue metrics, founder identity/screening) are fail-closed on the
+    // read model without a matching scope.
+    fetchInvestorTrustAccessRequest(selectedId)
+      .then((data) => {
+        if (alive) setAccessRequest(data.request);
+        return data.request?.status === 'approved' ? data.request.requestedScopes : [];
+      })
+      .catch(() => {
+        if (alive) setAccessRequest(null);
+        return [] as string[];
+      })
+      .then((scopes) => fetchInvestorTrustDashboard(selectedId, scopes))
+      .then((data) => {
+        if (!alive) return;
+        setDashboard(data);
+        setNotes(data.investorNotes);
+        setSaved(false);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setDashboard(null);
+        setNotes(null);
+      });
     return () => { alive = false; };
   }, [selectedId]);
 
