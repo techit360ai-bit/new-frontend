@@ -8,8 +8,11 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
   notificationSnapshotInfo,
+  muteNotificationType,
   type FeedNotification,
+  type FeedNotificationType,
 } from '@/lib/api/notifications';
+import { toast } from 'sonner';
 import { NotificationsPanel } from './NotificationsPanel';
 import { useMobileChromeVisibility } from '@/components/mobile/useMobileChromeVisibility';
 
@@ -49,6 +52,12 @@ export function Layout({ children }: { children: ReactNode }) {
       .catch((err) => setError(err instanceof Error ? err.message : 'Notification update failed.'));
   };
 
+  const muteType = (type: FeedNotificationType) => {
+    muteNotificationType(type)
+      .then(() => toast.success('Similar notifications turned off. Re-enable them any time in Settings.'))
+      .catch(() => toast.error('Could not update notification preferences.'));
+  };
+
   return (
     <div className="min-h-screen bg-background-primary text-text-primary">
       <GlobalNav
@@ -65,6 +74,7 @@ export function Layout({ children }: { children: ReactNode }) {
         error={error}
         onRead={markRead}
         onMarkAllRead={markAllRead}
+        onMuteType={muteType}
         cachedAt={cachedAt}
       />
     </div>

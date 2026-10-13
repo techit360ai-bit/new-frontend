@@ -162,3 +162,24 @@ test('feed notification normalizer tolerates partial live rows', () => {
   expect(normalizeFeedNotification({ content: 'Legacy link', linkTo: '/post/post_2' }).linkTo)
     .toBe('/feed/post/post_2');
 });
+
+test('muting a notification type disables exactly that category', async () => {
+  setAuthTokenGetter(() => 'jwt-mute');
+  const fetchMock = stubFetch(async () => response({ preferences: { categories: { publicity: false } } }));
+  try {
+    const { muteNotificationType } = await import('./notifications');
+    await muteNotificationType('publicity');
+    const [url, init] = fetchMock.calls[0] as [string, RequestInit];
+    expect(url).toBe('http://localhost:3000/api/domain/notifications/preferences');
+    expect(init.method).toBe('PATCH');
+    expect(JSON.parse(String(init.body))).toEqual({ scope: 'categories', preferences: { publicity: false } });
+  } finally {
+    fetchMock.restore();
+    setAuthTokenGetter(() => null);
+  }
+});
+
+test('publicity notifications normalize to the publicity filter type', () => {
+  const row = normalizeFeedNotification({ id: 'n1', type: 'publicity', content: 'Nova launched', read: false });
+  expect(row.type).toBe('publicity');
+});

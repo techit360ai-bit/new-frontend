@@ -1,4 +1,4 @@
-import { X, Bell, CheckCheck, Flame, MessageCircle, Users, ArrowUp, Zap, AtSign, Star } from 'lucide-react';
+import { X, Bell, BellOff, CheckCheck, Flame, MessageCircle, Users, ArrowUp, Zap, AtSign, Star, Megaphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import type { FeedNotification, FeedNotificationType } from '@/lib/api/notifications';
@@ -12,6 +12,7 @@ function NotificationIcon({ type }: { type: FeedNotificationType }) {
     milestone: <Zap className="h-3 w-3" />,
     mention: <AtSign className="h-3 w-3" />,
     answer: <Star className="h-3 w-3" />,
+    publicity: <Megaphone className="h-3 w-3" />,
   };
   return (
     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-primary/15 text-accent-primary">
@@ -24,34 +25,49 @@ function NotificationItem({
   notification,
   onRead,
   onClose,
+  onMute,
 }: {
   notification: FeedNotification;
   onRead: (id: string) => void;
   onClose: () => void;
+  onMute: (type: FeedNotificationType) => void;
 }) {
   return (
-    <Link
-      to={notification.linkTo}
-      onClick={() => {
-        onRead(notification.id);
-        onClose();
-      }}
-      className="flex items-start gap-3 border-b border-border-default/40 px-4 py-3 transition-colors hover:bg-surface-secondary"
+    <div
+      className="group relative flex items-stretch border-b border-border-default/40 transition-colors hover:bg-surface-secondary"
       style={{ backgroundColor: !notification.read ? 'rgba(79,110,247,0.04)' : undefined }}
     >
-      <div className="relative mt-0.5 shrink-0">
-        <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${notification.avatar}`} />
-        <div className="absolute -bottom-1 -right-1"><NotificationIcon type={notification.type} /></div>
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs leading-snug text-text-primary">
-          <span className="font-medium">{notification.author}</span>{' '}
-          <span className="text-text-secondary">{notification.content}</span>
-        </p>
-        <p className="mt-0.5 text-[11px] text-text-muted">{notification.timeAgo}</p>
-      </div>
-      {!notification.read && <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent-primary" />}
-    </Link>
+      <Link
+        to={notification.linkTo}
+        onClick={() => {
+          onRead(notification.id);
+          onClose();
+        }}
+        className="flex flex-1 items-start gap-3 px-4 py-3"
+      >
+        <div className="relative mt-0.5 shrink-0">
+          <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${notification.avatar}`} />
+          <div className="absolute -bottom-1 -right-1"><NotificationIcon type={notification.type} /></div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs leading-snug text-text-primary">
+            <span className="font-medium">{notification.author}</span>{' '}
+            <span className="text-text-secondary">{notification.content}</span>
+          </p>
+          <p className="mt-0.5 text-[11px] text-text-muted">{notification.timeAgo}</p>
+        </div>
+        {!notification.read && <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent-primary" />}
+      </Link>
+      <button
+        type="button"
+        onClick={(event) => { event.preventDefault(); event.stopPropagation(); onMute(notification.type); }}
+        className="mr-2 my-3 shrink-0 self-start rounded-md border border-transparent px-1.5 py-0.5 text-[10px] text-text-muted opacity-0 transition-opacity hover:border-border-default hover:text-text-primary focus:opacity-100 group-hover:opacity-100"
+        title="Turn off similar notifications"
+        aria-label="Turn off similar notifications"
+      >
+        <BellOff className="h-3.5 w-3.5" />
+      </button>
+    </div>
   );
 }
 
@@ -63,6 +79,7 @@ export function NotificationsPanel({
   error,
   onRead,
   onMarkAllRead,
+  onMuteType,
   cachedAt,
 }: {
   open: boolean;
@@ -72,6 +89,7 @@ export function NotificationsPanel({
   error: string | null;
   onRead: (id: string) => void;
   onMarkAllRead: () => void;
+  onMuteType?: (type: FeedNotificationType) => void;
   cachedAt?: string | null;
 }) {
   if (!open) return null;
@@ -112,7 +130,7 @@ export function NotificationsPanel({
             <>
               <p className="px-4 pb-1.5 pt-3 text-[10px] font-medium uppercase text-text-muted">New · {unread.length}</p>
               {unread.map((notification) => (
-                <NotificationItem key={notification.id} notification={notification} onRead={onRead} onClose={onClose} />
+                <NotificationItem key={notification.id} notification={notification} onRead={onRead} onClose={onClose} onMute={onMuteType ?? (() => {})} />
               ))}
             </>
           )}
@@ -120,7 +138,7 @@ export function NotificationsPanel({
             <>
               <p className="px-4 pb-1.5 pt-4 text-[10px] font-medium uppercase text-text-muted">Earlier</p>
               {read.map((notification) => (
-                <NotificationItem key={notification.id} notification={notification} onRead={onRead} onClose={onClose} />
+                <NotificationItem key={notification.id} notification={notification} onRead={onRead} onClose={onClose} onMute={onMuteType ?? (() => {})} />
               ))}
             </>
           )}

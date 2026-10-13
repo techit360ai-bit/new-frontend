@@ -36,6 +36,35 @@ const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   pullRequests: true,
 };
 
+interface NotificationCategorySettings {
+  publicity: boolean;
+  milestone: boolean;
+  collab: boolean;
+  comments: boolean;
+  mentions: boolean;
+  gsis: boolean;
+}
+
+// Default ON (opt-out): users receive every category unless they explicitly turn
+// it off here or via the inline "turn off similar" action on a notification.
+const DEFAULT_NOTIFICATION_CATEGORIES: NotificationCategorySettings = {
+  publicity: true,
+  milestone: true,
+  collab: true,
+  comments: true,
+  mentions: true,
+  gsis: true,
+};
+
+const NOTIFICATION_CATEGORY_FIELDS: Array<{ key: keyof NotificationCategorySettings; label: string; description: string }> = [
+  { key: 'publicity', label: 'Launch publicity & announcements', description: 'Free publicity of your launches and milestones to the community.' },
+  { key: 'milestone', label: 'Milestones', description: 'Milestone and progress achievements.' },
+  { key: 'collab', label: 'Collaboration invites', description: 'Team and collaborator invitations.' },
+  { key: 'comments', label: 'Comments & answers', description: 'Replies on your posts and questions.' },
+  { key: 'mentions', label: 'Mentions', description: 'When someone mentions you.' },
+  { key: 'gsis', label: 'Score & growth updates', description: 'GSIS and growth-signal changes.' },
+];
+
 export function Settings() {
   const { profile, updateProfile, changePassword } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -91,6 +120,22 @@ export function Settings() {
   };
   const toggleNotification = (key: keyof NotificationSettings, value: boolean) => {
     void persistNotifications({ ...notifications, [key]: value });
+  };
+
+  // ── Notification categories (default on, opt-out per type) ──
+  const [categories, setCategories] = useState<NotificationCategorySettings>(DEFAULT_NOTIFICATION_CATEGORIES);
+  useEffect(() => {
+    let alive = true;
+    fetchNotificationPreferences<NotificationCategorySettings>('categories')
+      .then((prefs) => { if (alive) setCategories({ ...DEFAULT_NOTIFICATION_CATEGORIES, ...prefs }); })
+      .catch(() => { /* keep defaults (on) when the read fails */ });
+    return () => { alive = false; };
+  }, []);
+  const toggleCategory = (key: keyof NotificationCategorySettings, value: boolean) => {
+    const next = { ...categories, [key]: value };
+    setCategories(next);
+    void saveNotificationPreferences('categories', next).catch(() =>
+      setNotificationsError('Notification categories could not be saved.'));
   };
 
   // ── Security ───────────────────────────────────────────────
@@ -251,6 +296,23 @@ export function Settings() {
                   </div>
                   <Switch checked={notifications.pullRequests} onCheckedChange={(value) => toggleNotification('pullRequests', value)} />
                 </div>
+              </div>
+
+              <Separator className="my-6" />
+              <h3 className="mb-1 text-sm font-semibold">By notification type</h3>
+              <p className="mb-4 text-sm text-text-muted">
+                You receive these by default. Turn one off to stop similar notifications.
+              </p>
+              <div className="space-y-4">
+                {NOTIFICATION_CATEGORY_FIELDS.map((field) => (
+                  <div key={field.key} className="flex items-center justify-between">
+                    <div>
+                      <Label>{field.label}</Label>
+                      <p className="text-sm text-text-muted">{field.description}</p>
+                    </div>
+                    <Switch checked={categories[field.key]} onCheckedChange={(value) => toggleCategory(field.key, value)} />
+                  </div>
+                ))}
               </div>
             </div>
           </TabsContent>

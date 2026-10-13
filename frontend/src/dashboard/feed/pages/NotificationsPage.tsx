@@ -10,6 +10,7 @@ import {
   CheckCheck,
   AtSign,
   Star,
+  Megaphone,
 } from 'lucide-react';
 import {
   listFeedNotifications,
@@ -36,6 +37,7 @@ const TYPE_CONFIG: Record<FeedNotificationType, { icon: React.ReactNode; label: 
   milestone: { icon: <Zap className="h-3.5 w-3.5" />, label: 'Milestones' },
   mention: { icon: <AtSign className="h-3.5 w-3.5" />, label: 'Mentions' },
   answer: { icon: <Star className="h-3.5 w-3.5" />, label: 'Answers' },
+  publicity: { icon: <Megaphone className="h-3.5 w-3.5" />, label: 'Publicity' },
 };
 
 type FilterTab = 'all' | FeedNotificationType;

@@ -14,7 +14,23 @@ const BACKEND_API_BASE_URL =
   (env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/$/, '');
 
 export type WorkspaceNotificationType = 'message' | 'mention' | 'pr' | 'build' | 'meeting' | 'system';
-export type FeedNotificationType = 'fire' | 'comment' | 'collab' | 'gsis' | 'milestone' | 'mention' | 'answer';
+export type FeedNotificationType = 'fire' | 'comment' | 'collab' | 'gsis' | 'milestone' | 'mention' | 'answer' | 'publicity';
+
+/**
+ * Notification type → notification-preference category. Users receive every
+ * category by default; muting one stores `false` under the `categories` scope so
+ * senders (e.g. launch publicity) stop delivering that type.
+ */
+export const NOTIFICATION_CATEGORY_BY_TYPE: Record<FeedNotificationType, string> = {
+  publicity: 'publicity',
+  milestone: 'milestone',
+  collab: 'collab',
+  comment: 'comments',
+  answer: 'comments',
+  mention: 'mentions',
+  fire: 'gsis',
+  gsis: 'gsis',
+};
 
 export interface WorkspaceNotification {
   id: string;
@@ -62,6 +78,7 @@ const FEED_NOTIFICATION_TYPES = new Set<FeedNotificationType>([
   'milestone',
   'mention',
   'answer',
+  'publicity',
 ]);
 
 function timeoutSignal(init?: RequestInit): AbortSignal {
@@ -208,4 +225,15 @@ export async function deleteNotification(id: string): Promise<void> {
   await request<{ ok: boolean }>(`/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   });
+}
+
+/**
+ * Turn off similar notifications for one type. Partial by design: the backend
+ * merges within the `categories` scope so sibling categories are preserved.
+ */
+export async function muteNotificationType(type: FeedNotificationType): Promise<void> {
+  const category = NOTIFICATION_CATEGORY_BY_TYPE[type];
+  if (!category) return;
+  const { saveNotificationPreferences } = await import('./settings');
+  await saveNotificationPreferences('categories', { [category]: false });
 }
