@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertCircle, Briefcase, DollarSign, Download, Rocket, TrendingUp } from "lucide-react";
-import { fetchImpact, type ImpactReport } from "@/lib/api/organization";
+import { AlertCircle, Boxes, Briefcase, DollarSign, Download, Flag, PackageCheck, Rocket, TrendingUp } from "lucide-react";
+import { fetchImpact, fetchPlatformMetrics, type ImpactReport, type PlatformMetrics } from "@/lib/api/organization";
 
 const TEMPLATES = [
   { value: "quarterly", label: "Quarterly" },
@@ -22,6 +22,7 @@ function EmptyPanel({ children }: { children: string }) {
 export function ImpactReporting() {
   const [template, setTemplate] = useState("quarterly");
   const [report, setReport] = useState<ImpactReport | null>(null);
+  const [platform, setPlatform] = useState<PlatformMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +30,12 @@ export function ImpactReporting() {
     setLoading(true);
     setError(null);
     try {
-      setReport(await fetchImpact(template));
+      const [nextReport, nextPlatform] = await Promise.all([
+        fetchImpact(template),
+        fetchPlatformMetrics().catch(() => null),
+      ]);
+      setReport(nextReport);
+      setPlatform(nextPlatform);
     } catch (loadError) {
       setReport(null);
       setError(loadError instanceof Error ? loadError.message : "Impact report is unavailable.");
@@ -52,6 +58,15 @@ export function ImpactReporting() {
     : [];
 
   const hasData = report && report.metrics.startups > 0;
+
+  const platformCards = platform
+    ? [
+        { label: "Prototypes Built", value: platform.totals.prototypes, icon: Boxes, tone: "text-brand-accent", bg: "bg-status-info-soft" },
+        { label: "MVPs Completed", value: platform.totals.mvpCompleted, icon: PackageCheck, tone: "text-status-success", bg: "bg-status-success-soft" },
+        { label: "Launches Tracked", value: platform.totals.productsLaunched, icon: Rocket, tone: "text-status-warning", bg: "bg-status-warning-soft" },
+        { label: "Milestones Done", value: platform.totals.completedMilestones, icon: Flag, tone: "text-brand-accent", bg: "bg-status-info-soft" },
+      ]
+    : [];
 
   return (
     <div>
@@ -90,6 +105,33 @@ export function ImpactReporting() {
         </div>
       ) : hasData ? (
         <>
+          {platformCards.length > 0 && (
+            <section className="mb-8">
+              <h2 className="mb-4 text-lg font-bold text-text-primary">Platform execution</h2>
+              <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+                {platformCards.map((card) => {
+                  const Icon = card.icon;
+                  return (
+                    <div key={card.label} className="rounded-lg border border-border-default bg-surface-primary p-5 shadow-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-sm text-text-muted">{card.label}</p>
+                          <p className={`mt-2 text-3xl font-bold ${card.tone}`}>{card.value}</p>
+                        </div>
+                        <div className={`rounded-lg p-3 ${card.bg}`}>
+                          <Icon className={`h-6 w-6 ${card.tone}`} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-3 text-xs text-text-disabled">
+                Counted from every founder&apos;s evidence-derived execution ledger
+                ({platform?.totals.startups ?? 0} startups across {platform?.totals.founders ?? 0} founders).
+              </p>
+            </section>
+          )}
           <div className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
             {cards.map((card) => {
               const Icon = card.icon;

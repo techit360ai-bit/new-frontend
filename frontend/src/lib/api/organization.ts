@@ -445,6 +445,55 @@ export async function fetchImpact(template = "quarterly"): Promise<ImpactReport>
   );
 }
 
+// Phase M: one aggregate reading of the execution ledger. Founders get the
+// platform totals plus their own row; organizations/admins also get per-founder.
+export interface PlatformMetricTotals {
+  startups: number;
+  prototypes: number;
+  mvpCompleted: number;
+  productsLaunched: number;
+  growth: number;
+  milestones: number;
+  completedMilestones: number;
+  founders: number;
+}
+
+export interface PlatformMetrics {
+  ok: boolean;
+  scope: "platform" | "founder";
+  totals: PlatformMetricTotals;
+  founder?: (PlatformMetricTotals & { founderId: string }) | null;
+  perFounder?: (PlatformMetricTotals & { founderId: string })[];
+  generatedAt: string;
+}
+
+export async function fetchPlatformMetrics(): Promise<PlatformMetrics> {
+  const root = asRecord(await domainGet<unknown>("/platform/metrics"));
+  const totals = asRecord(root.totals);
+  const row = (value: unknown): PlatformMetricTotals & { founderId: string } => {
+    const record = asRecord(value);
+    return {
+      founderId: asText(record.founderId),
+      startups: asNumber(record.startups),
+      prototypes: asNumber(record.prototypes),
+      mvpCompleted: asNumber(record.mvpCompleted),
+      productsLaunched: asNumber(record.productsLaunched),
+      growth: asNumber(record.growth),
+      milestones: asNumber(record.milestones),
+      completedMilestones: asNumber(record.completedMilestones),
+      founders: asNumber(record.founders),
+    };
+  };
+  return {
+    ok: root.ok !== false,
+    scope: asText(root.scope) === "founder" ? "founder" : "platform",
+    totals: row(totals),
+    founder: root.founder ? row(root.founder) : null,
+    perFounder: Array.isArray(root.perFounder) ? root.perFounder.map(row) : undefined,
+    generatedAt: asText(root.generatedAt),
+  };
+}
+
 export async function fetchKpiTargets(): Promise<KpiTarget[]> {
   const root = asRecord(await domainGet<unknown>("/organization/kpi-targets"));
   return asRows(root.targets)

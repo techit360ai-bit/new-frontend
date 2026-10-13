@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { useExecutionIntelligence } from '@/hooks/useExecutionIntelligence';
 import type { ExecutionIntelligenceRole } from '@/lib/api/executionIntelligence';
 import { ExecutionProgress } from './ExecutionProgress';
+import { PlatformMetricsStrip } from './PlatformMetricsStrip';
 
 interface Props {
   /** Which consumer surface this is. The server shapes `roleFocus` accordingly. */
@@ -90,6 +91,8 @@ export function ExecutionIntelligencePanel({
           <p className="mt-3 text-xs text-text-disabled">
             Canonical view · execution from the workspace, trust from the Trust Engine.
           </p>
+
+          <PlatformMetricsStrip className="mt-4" />
         </>
       )}
     </section>
