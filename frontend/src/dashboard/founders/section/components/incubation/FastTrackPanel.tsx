@@ -45,6 +45,18 @@ const STAGE_LABELS: Record<Stage, string> = {
   growth: "Growth",
 };
 
+// Product maturity is separate from funding stage: it is what tells the platform
+// (and the agents) whether this is MVP code or an already-launched product.
+const PRODUCT_STAGES = ["idea", "prototype", "mvp", "beta", "launched"] as const;
+type ProductStage = (typeof PRODUCT_STAGES)[number];
+const PRODUCT_STAGE_LABELS: Record<ProductStage, string> = {
+  idea: "Idea",
+  prototype: "Prototype",
+  mvp: "MVP",
+  beta: "Beta",
+  launched: "Launched",
+};
+
 const PIPELINE_STEPS = [
   "Fetching codebase signals...",
   "Analyzing document context...",
@@ -68,6 +80,8 @@ export function FastTrackPanel() {
   const [startupName, setStartupName] = useState("");
   const [industry, setIndustry] = useState("");
   const [stage, setStage] = useState<Stage>("seed");
+  const [productStage, setProductStage] = useState<ProductStage>("mvp");
+  const [alreadyLaunched, setAlreadyLaunched] = useState(false);
   const [oneLiner, setOneLiner] = useState("");
   const [repoUrl, setRepoUrl] = useState("");
   const [targetGeography, setTargetGeography] = useState("");
@@ -121,6 +135,8 @@ export function FastTrackPanel() {
       startup_name: startupName.trim(),
       industry: industry.trim(),
       stage,
+      product_stage: alreadyLaunched ? "launched" : productStage,
+      already_launched: alreadyLaunched,
       one_liner: oneLiner.trim(),
       repo_url: repoUrl.trim() || undefined,
       document_id: docId || undefined,
@@ -217,6 +233,8 @@ export function FastTrackPanel() {
     setStartupName("");
     setIndustry("");
     setStage("seed");
+    setProductStage("mvp");
+    setAlreadyLaunched(false);
     setOneLiner("");
     setRepoUrl("");
     setTargetGeography("");
@@ -292,6 +310,42 @@ export function FastTrackPanel() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Product stage (drives MVP vs launched detection) */}
+            <div>
+              <label className="block mb-3 text-sm font-semibold text-text-secondary">
+                Product stage
+              </label>
+              <div className="grid grid-cols-5 gap-2">
+                {PRODUCT_STAGES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => { setProductStage(s); setAlreadyLaunched(s === "launched"); }}
+                    className={`px-3 py-2.5 rounded-lg border-2 text-xs font-medium transition-all ${
+                      (alreadyLaunched ? "launched" : productStage) === s
+                        ? "border-violet-500 bg-violet-50 text-violet-700"
+                        : "border-border-strong bg-surface-primary text-text-secondary hover:border-violet-300"
+                    }`}
+                  >
+                    {PRODUCT_STAGE_LABELS[s]}
+                  </button>
+                ))}
+              </div>
+              <label className="mt-3 flex items-center gap-2 text-sm text-text-secondary">
+                <input
+                  type="checkbox"
+                  checked={alreadyLaunched}
+                  onChange={(e) => {
+                    const next = e.target.checked;
+                    setAlreadyLaunched(next);
+                    if (next) setProductStage("launched");
+                  }}
+                  className="h-4 w-4 rounded border-border-strong"
+                />
+                This product is already launched (live users or revenue).
+              </label>
             </div>
 
             {/* One-liner */}
@@ -470,6 +524,22 @@ export function FastTrackPanel() {
             </span>
           )}
         </div>
+
+        {blueprint?.stage_detection && (
+          <div className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-border-subtle bg-surface-secondary px-4 py-3 text-sm">
+            <span className="text-text-muted">Product stage:</span>
+            <span className="font-semibold text-text-primary capitalize">
+              {blueprint.stage_detection.stage}
+            </span>
+            <span className="text-xs text-text-disabled">
+              {blueprint.stage_detection.source === "manual" ? "your selection" : "auto-detected"}
+              {blueprint.stage_detection.mismatch
+                ? ` · evidence suggests ${blueprint.stage_detection.inferred}`
+                : ""}
+              {` · ${blueprint.stage_detection.confidence} confidence`}
+            </span>
+          </div>
+        )}
 
         {/* Hero Score Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { setAuthTokenGetter } from "./client";
-import { analyzePivot, createCustomerValidationSession, createCustomerValidationShare, createSandboxBuild, fetchValidationSession, fetchValidationSessions, runVenturePipeline, startValidation, submitFounderAnswers } from "./incubation";
+import { analyzePivot, createCustomerValidationSession, createCustomerValidationShare, createSandboxBuild, fetchValidationSession, fetchValidationSessions, runFastTrack, runVenturePipeline, startValidation, submitFounderAnswers } from "./incubation";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -17,6 +17,25 @@ test("pipeline forwards founder geography without requiring a model override", a
   vi.stubGlobal("fetch", fetchMock);
   await expect(runVenturePipeline({ startup_name: "Venture", target_geography: "Hungary" })).resolves.toMatchObject({ project_id: "p1" });
   expect((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]).toMatchObject({ body: JSON.stringify({ startup_name: "Venture", target_geography: "Hungary" }) });
+});
+
+test("fast-track forwards the product stage and the already-launched override", async () => {
+  setAuthTokenGetter(() => "jwt-incubation");
+  const fetchMock = vi.fn(async () => response({
+    project_id: "p1",
+    stage_detection: { stage: "launched", inferred: "idea", source: "manual", mismatch: true, confidence: "low", rationale: "founder selected 'launched'" },
+  }));
+  vi.stubGlobal("fetch", fetchMock);
+  const payload = {
+    startup_name: "Venture",
+    industry: "fintech",
+    stage: "seed",
+    product_stage: "launched",
+    already_launched: true,
+    one_liner: "Payments for SMBs",
+  };
+  await expect(runFastTrack(payload)).resolves.toMatchObject({ project_id: "p1", stage_detection: { stage: "launched", source: "manual" } });
+  expect((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]).toMatchObject({ body: JSON.stringify(payload) });
 });
 
 test("pivot contract wraps venture data and score", async () => {

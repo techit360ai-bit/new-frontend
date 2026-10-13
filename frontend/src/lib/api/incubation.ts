@@ -7,6 +7,16 @@ import { apiGet, apiPost, apiUpload, getAuthToken, withFallback } from "./client
 import { apiUrl } from "./config";
 import { domainPost } from "@/lib/domainApi";
 
+export interface StageDetection {
+  stage: string;
+  inferred: string;
+  source: 'auto' | 'manual';
+  manual?: string | null;
+  mismatch: boolean;
+  confidence: 'low' | 'high';
+  rationale: string;
+}
+
 export interface PipelineBlueprint {
   project_id?: string;
   venture_name?: string;
@@ -16,6 +26,8 @@ export interface PipelineBlueprint {
   workspace_id?: string;
   incubation_session_id?: string;
   validation?: ValidationStartResult;
+  /** Evidence-derived product stage returned by FastTrack. */
+  stage_detection?: StageDetection;
   [k: string]: unknown;
 }
 
@@ -379,7 +391,12 @@ export const fetchSandboxPreview = (buildId: string) => authenticatedBuildBlob(b
 export interface FastTrackPayload {
   startup_name: string;
   industry: string;
+  /** Funding stage (pre-seed, seed, ...). */
   stage: string;
+  /** Product maturity: idea | prototype | mvp | beta | launched. */
+  product_stage?: string;
+  /** Explicit answer to "is this already launched?" (manual override). */
+  already_launched?: boolean;
   one_liner: string;
   repo_url?: string;
   document_id?: string;
