@@ -30,14 +30,18 @@ export function PlatformMetricsStrip({ className = '' }: { className?: string })
 
   if (!metrics) return null;
   const totals = metrics.totals;
+  const heading = metrics.scope === 'platform' ? 'Platform execution' : metrics.scope === 'organization' ? 'Program execution' : 'Your execution';
+  const scopeNote = metrics.scope === 'platform'
+    ? `${totals.startups} startups · ${totals.founders} founders`
+    : metrics.scope === 'organization'
+      ? `${totals.startups} startups in your programs`
+      : `${totals.startups} startups`;
 
   return (
     <section className={`rounded-xl border border-border-default bg-surface-primary p-5 ${className}`}>
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h3 className="font-semibold">Platform execution</h3>
-        <span className="text-xs text-text-disabled">
-          {totals.startups} startups · {totals.founders} founders
-        </span>
+        <h3 className="font-semibold">{heading}</h3>
+        <span className="text-xs text-text-disabled">{scopeNote}</span>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Cell icon={<Briefcase className="h-3.5 w-3.5" />} label="Startups" value={String(totals.startups)} />
@@ -46,7 +50,7 @@ export function PlatformMetricsStrip({ className = '' }: { className?: string })
         <Cell icon={<Rocket className="h-3.5 w-3.5" />} label="Launched" value={String(totals.productsLaunched)} />
         <Cell icon={<Flag className="h-3.5 w-3.5" />} label="Milestones" value={`${totals.completedMilestones}/${totals.milestones}`} />
       </div>
-      {metrics.founder && (
+      {metrics.scope === 'founder' && metrics.founder && (
         <p className="mt-3 text-xs text-text-disabled">
           Your progress: {metrics.founder.startups} startups · {metrics.founder.mvpCompleted} MVPs ·{' '}
           {metrics.founder.productsLaunched} launched · {metrics.founder.completedMilestones} milestones done.

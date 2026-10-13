@@ -460,7 +460,7 @@ export interface PlatformMetricTotals {
 
 export interface PlatformMetrics {
   ok: boolean;
-  scope: "platform" | "founder";
+  scope: "platform" | "organization" | "founder";
   totals: PlatformMetricTotals;
   founder?: (PlatformMetricTotals & { founderId: string }) | null;
   perFounder?: (PlatformMetricTotals & { founderId: string })[];
@@ -484,9 +484,11 @@ export async function fetchPlatformMetrics(): Promise<PlatformMetrics> {
       founders: asNumber(record.founders),
     };
   };
+  const rawScope = asText(root.scope);
+  const scope = rawScope === "founder" ? "founder" : rawScope === "organization" ? "organization" : "platform";
   return {
     ok: root.ok !== false,
-    scope: asText(root.scope) === "founder" ? "founder" : "platform",
+    scope,
     totals: row(totals),
     founder: root.founder ? row(root.founder) : null,
     perFounder: Array.isArray(root.perFounder) ? root.perFounder.map(row) : undefined,
@@ -596,4 +598,83 @@ export async function fetchInvestorMatches(projectId: string): Promise<InvestorM
       reasons: Array.isArray(row.reasons) ? row.reasons.map((r) => asText(r)).filter(Boolean) : [],
     }))
     .filter((row) => row.investorId);
+}
+
+// --- Organization programs: invites + founder enrollment (Phase O) -----------
+
+export interface ProgramRosterProject {
+  id: string;
+  title: string;
+  stage: string;
+  industry: string;
+  progress: number;
+}
+
+export interface ProgramEnrollment {
+  id: string;
+  programId: string;
+  organizationId: string;
+  projectId: string | null;
+  founderId: string;
+  cohortId: string | null;
+  status: string;
+  token?: string;
+  createdAt?: string;
+  acceptedAt?: string | null;
+  programName?: string;
+  project?: ProgramRosterProject | null;
+  founder?: { id: string; name: string; email: string };
+  milestones?: { total: number; completed: number };
+}
+
+function normalizeEnrollment(value: unknown): ProgramEnrollment {
+  const row = asRecord(value);
+  const project = asRecord(row.project);
+  const founder = asRecord(row.founder);
+  const milestones = asRecord(row.milestones);
+  return {
+    id: asText(row.id),
+    programId: asText(row.programId),
+    organizationId: asText(row.organizationId),
+    projectId: asText(row.projectId) || null,
+    founderId: asText(row.founderId),
+    cohortId: asText(row.cohortId) || null,
+    status: asText(row.status),
+    token: asText(row.token) || undefined,
+    createdAt: asText(row.createdAt),
+    acceptedAt: asText(row.acceptedAt) || null,
+    programName: asText(row.programName) || undefined,
+    project: row.project ? {
+      id: asText(project.id),
+      title: asText(project.title),
+      stage: asText(project.stage) || "idea",
+      industry: asText(project.industry),
+      progress: asNumber(project.progress),
+    } : null,
+    founder: row.founder ? { id: asText(founder.id), name: asText(founder.name), email: asText(founder.email) } : undefined,
+    milestones: row.milestones ? { total: asNumber(milestones.total), completed: asNumber(milestones.completed) } : undefined,
+  };
+}
+
+export async function createProgramInvitation(programId: string, input: { email?: string; founderId?: string; projectId?: string; cohortId?: string }): Promise<ProgramEnrollment> {
+  const payload = asRecord(await domainPost<unknown>(`/organization/programs/${encodeURIComponent(programId)}/invitations`, input));
+  return normalizeEnrollment(payload.enrollment);
+}
+
+export async function fetchProgramEnrollments(programId: string): Promise<{ program: { id: string; name: string }; enrollments: ProgramEnrollment[] }> {
+  const root = asRecord(await domainGet<unknown>(`/organization/programs/${encodeURIComponent(programId)}/enrollments`));
+  return {
+    program: { id: asText(asRecord(root.program).id), name: asText(asRecord(root.program).name) },
+    enrollments: asRows(root.enrollments).map(normalizeEnrollment),
+  };
+}
+
+export async function fetchMyProgramEnrollments(): Promise<ProgramEnrollment[]> {
+  const root = asRecord(await domainGet<unknown>("/organization/enrollments"));
+  return asRows(root.enrollments).map(normalizeEnrollment);
+}
+
+export async function acceptProgramInvitation(token: string): Promise<{ ok: boolean; projectId: string | null; enrollment: ProgramEnrollment }> {
+  const root = asRecord(await domainPost<unknown>("/organization/enrollments/accept", { token }));
+  return { ok: root.ok !== false, projectId: asText(root.projectId) || null, enrollment: normalizeEnrollment(root.enrollment) };
 }

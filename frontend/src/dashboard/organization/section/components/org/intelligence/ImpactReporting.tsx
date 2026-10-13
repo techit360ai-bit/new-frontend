@@ -67,6 +67,10 @@ export function ImpactReporting() {
         { label: "Milestones Done", value: platform.totals.completedMilestones, icon: Flag, tone: "text-brand-accent", bg: "bg-status-info-soft" },
       ]
     : [];
+  const platformHeading = platform?.scope === "platform" ? "Platform execution" : "Program execution";
+  const platformNote = platform?.scope === "platform"
+    ? `Counted across every founder's evidence-derived execution ledger (${platform?.totals.startups ?? 0} startups, ${platform?.totals.founders ?? 0} founders).`
+    : `Counted from the startups enrolled in your programs (${platform?.totals.startups ?? 0} startups, ${platform?.totals.founders ?? 0} founders).`;
 
   return (
     <div>
@@ -107,7 +111,7 @@ export function ImpactReporting() {
         <>
           {platformCards.length > 0 && (
             <section className="mb-8">
-              <h2 className="mb-4 text-lg font-bold text-text-primary">Platform execution</h2>
+              <h2 className="mb-4 text-lg font-bold text-text-primary">{platformHeading}</h2>
               <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
                 {platformCards.map((card) => {
                   const Icon = card.icon;
@@ -127,8 +131,7 @@ export function ImpactReporting() {
                 })}
               </div>
               <p className="mt-3 text-xs text-text-disabled">
-                Counted from every founder&apos;s evidence-derived execution ledger
-                ({platform?.totals.startups ?? 0} startups across {platform?.totals.founders ?? 0} founders).
+                {platformNote}
               </p>
             </section>
           )}
