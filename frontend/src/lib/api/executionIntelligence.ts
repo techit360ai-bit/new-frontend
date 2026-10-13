@@ -46,6 +46,17 @@ export interface ExecutionIntelligenceView {
     projectId?: string;
     artifactId?: string;
   }>;
+  /**
+   * How far the founder has come vs. their own start, plus cumulative totals.
+   * Derived server-side from the same persisted execution events.
+   */
+  progress: {
+    lifetime: { events: number; weight: number; artifacts: number; activeActors: number; activeTools: number; projects: number };
+    baseline: { label: string; at: string | null; events: number; weight: number; artifacts: number; activeActors: number; activeTools: number; projects: number };
+    delta: { events: number; weight: number; artifacts: number; activeActors: number };
+    perDay: Array<{ date: string; events: number; weight: number }>;
+    cumulative: { firstEventAt: string | null; lastEventAt: string | null; spanDays: number; eventsPerActiveDay: number };
+  };
   /** Actor trust composed from the canonical Trust Engine. */
   trust: Array<Record<string, unknown> & { subjectId: string }>;
 }

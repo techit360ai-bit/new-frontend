@@ -2,6 +2,7 @@ import { Activity, BadgeCheck, Boxes, Gauge, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useExecutionIntelligence } from '@/hooks/useExecutionIntelligence';
 import type { ExecutionIntelligenceRole } from '@/lib/api/executionIntelligence';
+import { ExecutionProgress } from './ExecutionProgress';
 
 interface Props {
   /** Which consumer surface this is. The server shapes `roleFocus` accordingly. */
@@ -62,6 +63,8 @@ export function ExecutionIntelligencePanel({
             <Stat icon={<Boxes className="h-3.5 w-3.5" />} label="Artifacts" value={String(view.signals.artifacts)} />
             <Stat icon={<Gauge className="h-3.5 w-3.5" />} label="Events / day" value={view.velocity.eventsPerDay.toFixed(1)} />
           </div>
+
+          {view.progress && <ExecutionProgress progress={view.progress} />}
 
           {view.highlights.length > 0 && (
             <ul className="mt-4 space-y-1.5">
