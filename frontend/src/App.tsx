@@ -34,6 +34,7 @@ const MatchResults = lazy(() => import("@/dashboard/matchResults"));
 const OpportunityHub = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityHub"));
 const OpportunityDetail = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityDetail"));
 const InviteAcceptPage = lazy(() => import("@/dashboard/founders/section/components/founder/InviteAcceptPage"));
+const ProgramInviteAccept = lazy(() => import("@/dashboard/founders/section/components/founder/ProgramInviteAccept").then((m) => ({ default: m.ProgramInviteAccept })));
 const WorkspaceInvitationPage = lazy(() => import("@/dashboard/workspaces/pages/WorkspaceInvitationPage").then((m) => ({ default: m.WorkspaceInvitationPage })));
 const ContractSigningPage = lazy(() => import("@/dashboard/founders/section/components/founder/ContractSigningPage"));
 const Wallet = lazy(() => import("@/TechitWallet/Wallet"));
@@ -285,6 +286,7 @@ const App = () => {
         <Route path="/moments/:slug" element={<PublicMomentPage />} />
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
+        <Route path="/programs/accept" element={<RequireAuth><ProgramInviteAccept /></RequireAuth>} />
         <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
 
         <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
