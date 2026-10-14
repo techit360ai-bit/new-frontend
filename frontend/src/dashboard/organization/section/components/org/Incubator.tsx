@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { GraduationCap, Plus, RefreshCw, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,6 +22,8 @@ import {
  * project stage + milestone progress.
  */
 export function Incubator() {
+  const { activeContext } = useAuth();
+  const organizationId = activeContext?.organizationId || undefined;
   const [programs, setPrograms] = useState<OrganizationLiveRecord[]>([]);
   const [selected, setSelected] = useState<OrganizationLiveRecord | null>(null);
   const [enrollments, setEnrollments] = useState<ProgramEnrollment[]>([]);
@@ -180,6 +184,16 @@ export function Incubator() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Phase O: the program's execution intelligence, scoped to this
+                  program/cohort — the same canonical projection every surface reads. */}
+              <ExecutionIntelligencePanel
+                role="organisation"
+                organizationId={organizationId}
+                programId={selected.id}
+                cohortId={(selected as { cohort?: string }).cohort || undefined}
+                title={`Program execution — ${String(selected.name || selected.title || "program")}`}
+              />
             </>
           ) : (
             <Card><CardContent className="py-12 text-center text-muted-foreground">Select or create a program to manage it.</CardContent></Card>

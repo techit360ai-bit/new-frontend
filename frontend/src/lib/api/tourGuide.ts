@@ -1,4 +1,4 @@
-import { apiPost, withFallback } from "./client";
+import { apiPost } from "./client";
 
 export type TourGuideRole = "founder" | "collaborator";
 
@@ -41,11 +41,7 @@ export interface TourGuideCheckIn {
 export function fetchTourGuideCheckIn(
   payload: TourGuideCheckInPayload,
 ): Promise<TourGuideCheckIn | null> {
-  return withFallback(
-    () => apiPost<TourGuideCheckIn>("/tour-guide/daily-check-in", payload),
-    () => null,
-    "tour guide check-in",
-  );
+  return apiPost<TourGuideCheckIn>("/tour-guide/daily-check-in", payload);
 }
 
 export interface TourGuideConversationResponse {
@@ -63,9 +59,5 @@ export function converseWithHavi(payload: {
   conversation: Array<{ role: "user" | "assistant"; content: string }>;
   message: string;
 }): Promise<TourGuideConversationResponse | null> {
-  return withFallback(
-    () => apiPost<TourGuideConversationResponse>("/tour-guide/conversation", payload),
-    () => null,
-    "havi conversation",
-  );
+  return apiPost<TourGuideConversationResponse>("/tour-guide/conversation", payload);
 }

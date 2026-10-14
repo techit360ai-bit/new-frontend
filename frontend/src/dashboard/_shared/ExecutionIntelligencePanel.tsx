@@ -11,6 +11,8 @@ interface Props {
   actorId?: string;
   projectId?: string;
   organizationId?: string;
+  programId?: string;
+  cohortId?: string;
   hackathonId?: string;
   title?: string;
   className?: string;
@@ -35,11 +37,13 @@ export function ExecutionIntelligencePanel({
   actorId,
   projectId,
   organizationId,
+  programId,
+  cohortId,
   hackathonId,
   title = 'Execution intelligence',
   className = '',
 }: Props) {
-  const { view, loading, error } = useExecutionIntelligence({ role, actorId, projectId, organizationId, hackathonId });
+  const { view, loading, error } = useExecutionIntelligence({ role, actorId, projectId, organizationId, programId, cohortId, hackathonId });
 
   return (
     <section className={`rounded-xl border border-border-default bg-surface-primary p-5 ${className}`}>
@@ -65,7 +69,7 @@ export function ExecutionIntelligencePanel({
             <Stat icon={<Gauge className="h-3.5 w-3.5" />} label="Events / day" value={view.velocity.eventsPerDay.toFixed(1)} />
           </div>
 
-          {view.progress && <ExecutionProgress progress={view.progress} />}
+          {view.progress && <ExecutionProgress progress={view.progress} cohort={view.cohort} />}
 
           {view.highlights.length > 0 && (
             <ul className="mt-4 space-y-1.5">

@@ -12,6 +12,7 @@ import type { ExecutionIntelligenceView } from '@/lib/api/executionIntelligence'
 const VISUAL_CAPABILITY = 'ADVANCED_WORKSPACE_AI';
 
 type Progress = ExecutionIntelligenceView['progress'];
+type Cohort = NonNullable<ExecutionIntelligenceView['cohort']>;
 
 function Sparkline({ points }: { points: number[] }) {
   if (points.length < 2) {
@@ -44,7 +45,7 @@ function DeltaChip({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function ExecutionProgress({ progress }: { progress: Progress }) {
+export function ExecutionProgress({ progress, cohort }: { progress: Progress; cohort?: Cohort }) {
   const [decision, setDecision] = useState<TvceDecision | null>(null);
   const [checked, setChecked] = useState(false);
 
@@ -98,6 +99,17 @@ export function ExecutionProgress({ progress }: { progress: Progress }) {
         <span>Projects: <strong className="text-text-primary">{lifetime.projects}</strong></span>
         <span>Span: <strong className="text-text-primary">{cumulative.spanDays}d</strong></span>
       </div>
+
+      {cohort?.available ? (
+        <div className="mt-3 rounded-md border border-border-subtle bg-surface-primary px-3 py-2 text-xs text-text-muted">
+          <span className="font-medium text-text-primary">Ahead of {cohort.percentile}%</span> of {cohort.size} similar{' '}
+          {cohort.industry}{cohort.stage ? ` / ${cohort.stage}` : ''} startups (anonymous cohort; stage-based).
+        </div>
+      ) : cohort ? (
+        <p className="mt-3 text-xs text-text-disabled">
+          Cohort comparison unlocks as more similar-stage startups join TechIT.
+        </p>
+      ) : null}
       <p className="mt-2 text-xs text-text-disabled">
         Baseline = the first week ({baseline.events} events{baseline.at ? ` from ${new Date(baseline.at).toLocaleDateString()}` : ''}).
       </p>

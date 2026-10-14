@@ -3,7 +3,7 @@
 // Adaptive Training — ai-router /api/v1/training/* (time-to-MVP curriculum engine).
 // Surfaces the curriculum engine the Academy page never connected to.
 
-import { apiPost, withFallback } from "./client";
+import { apiPost } from "./client";
 
 export interface CurriculumModule {
   id?: string;
@@ -21,18 +21,10 @@ export interface Curriculum {
 
 /** POST /api/v1/training/curriculum/generate — adaptive curriculum (time-to-MVP driven). */
 export function generateCurriculum(profile: Record<string, unknown>): Promise<Curriculum | null> {
-  return withFallback(
-    () => apiPost<Curriculum>("/training/curriculum/generate", profile),
-    () => null,
-    "generate curriculum",
-  );
+  return apiPost<Curriculum>("/training/curriculum/generate", profile);
 }
 
 /** POST /api/v1/training/progress/update — mark a module complete / update progress. */
 export function updateTrainingProgress(body: Record<string, unknown>): Promise<{ ok?: boolean } | null> {
-  return withFallback(
-    () => apiPost<{ ok?: boolean }>("/training/progress/update", body),
-    () => ({ ok: true }),
-    "update training progress",
-  );
+  return apiPost<{ ok?: boolean }>("/training/progress/update", body);
 }

@@ -3,7 +3,7 @@
 // Anomaly scan + stagnation roster — ai-router /api/v1/admin/* .
 // Surfaces engine alerts that no screen previously showed.
 
-import { apiPost, withFallback } from "./client";
+import { apiPost } from "./client";
 
 export interface RiskFlag {
   type?: string;
@@ -19,11 +19,7 @@ export interface AnomalyScanResult {
 
 /** POST /api/v1/admin/monitor/scan — anomaly scan over signals. */
 export function runAnomalyScan(signals: Record<string, unknown>[]): Promise<AnomalyScanResult> {
-  return withFallback(
-    () => apiPost<AnomalyScanResult>("/admin/monitor/scan", { signals }),
-    { risk_flags: [] },
-    "anomaly scan",
-  );
+  return apiPost<AnomalyScanResult>("/admin/monitor/scan", { signals });
 }
 
 export interface StagnatingProject {
@@ -43,9 +39,5 @@ export interface StagnationRoster {
 
 /** POST /api/v1/admin/stagnation-roster — decay-based stagnating-project roster. */
 export function fetchStagnationRoster(projects: Record<string, unknown>[]): Promise<StagnationRoster> {
-  return withFallback(
-    () => apiPost<StagnationRoster>("/admin/stagnation-roster", { projects }),
-    { stagnating_count: 0, total_projects: projects.length, stagnating_list: [] },
-    "stagnation roster",
-  );
+  return apiPost<StagnationRoster>("/admin/stagnation-roster", { projects });
 }

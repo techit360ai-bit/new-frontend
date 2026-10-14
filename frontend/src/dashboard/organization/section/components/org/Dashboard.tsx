@@ -31,6 +31,7 @@ import {
   type OrganizationDashboardData,
 } from "@/lib/api/organization";
 import { WelcomeBack } from "@/components/WelcomeBack";
+import { useAuth } from "@/contexts/AuthContext";
 import { OrganizationIntelligencePanel } from "./OrganizationIntelligencePanel";
 import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 import { OrganizationLicensingPanel } from "./OrganizationLicensingPanel";
@@ -99,6 +100,8 @@ function EmptyPanel({ children }: { children: string }) {
 }
 
 export function Dashboard() {
+  const { activeContext } = useAuth();
+  const organizationId = activeContext?.organizationId || undefined;
   const [dashboard, setDashboard] = useState<OrganizationDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -156,7 +159,7 @@ export function Dashboard() {
 
       {/* Canonical workspace execution intelligence — same view every surface reads (WS-H) */}
       <div className="mb-6">
-        <ExecutionIntelligencePanel role="organisation" />
+        <ExecutionIntelligencePanel role="organisation" organizationId={organizationId} />
       </div>
 
       <OrganizationLicensingPanel />

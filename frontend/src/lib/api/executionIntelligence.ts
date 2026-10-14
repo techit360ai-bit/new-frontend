@@ -57,6 +57,24 @@ export interface ExecutionIntelligenceView {
     perDay: Array<{ date: string; events: number; weight: number }>;
     cumulative: { firstEventAt: string | null; lastEventAt: string | null; spanDays: number; eventsPerActiveDay: number };
   };
+  /**
+   * Anonymous cohort comparison (Phase E): how the caller's project compares to
+   * other projects in the same industry + lifecycle stage. Aggregates only, and
+   * unavailable until the cohort reaches the server's minimum size.
+   */
+  cohort?: {
+    available: boolean;
+    reason?: string;
+    anonymous?: boolean;
+    industry?: string | null;
+    stage?: string;
+    size?: number;
+    minimum?: number;
+    metric?: string;
+    value?: number;
+    percentile?: number;
+    median?: number;
+  };
   /** Actor trust composed from the canonical Trust Engine. */
   trust: Array<Record<string, unknown> & { subjectId: string }>;
 }

@@ -3,7 +3,7 @@
 // Dashboard intelligence / GSIS — ai-router /api/v1/dashboard/intelligence + /gsis/compute.
 // Surfaces the master Global Startup Intelligence Score the frontend never showed.
 
-import { apiGet, apiPost, withFallback } from "./client";
+import { apiGet, apiPost } from "./client";
 
 export interface GsisScore {
   gsis: number;
@@ -109,18 +109,9 @@ export interface GsisV2Scorecard {
   weakest_area?: { category: string; score: number } | null;
 }
 
-const FALLBACK_INTEL: DashboardIntelligence = {
-  gsis: null,
-  alerts: [],
-};
-
 /** GET /api/v1/dashboard/intelligence — real-time GSIS + alerts for the dashboard. */
 export function fetchDashboardIntelligence(): Promise<DashboardIntelligence> {
-  return withFallback(
-    () => apiGet<DashboardIntelligence>("/dashboard/intelligence"),
-    FALLBACK_INTEL,
-    "dashboard intelligence",
-  );
+  return apiGet<DashboardIntelligence>("/dashboard/intelligence");
 }
 
 /** POST /api/v1/gsis/compute — compute GSIS from component scores. */
@@ -130,19 +121,11 @@ export function computeGsis(componentScores: Record<string, number>): Promise<Gs
 
 /** Deterministic role-specific GSIS v2 scorecard. Missing evidence remains unknown. */
 export function computeGsisV2(payload: GsisV2Input): Promise<GsisV2Scorecard | null> {
-  return withFallback(
-    () => apiPost<GsisV2Scorecard>("/api/v2/gsis/scorecard", payload),
-    null,
-    "GSIS v2 scorecard",
-  );
+  return apiPost<GsisV2Scorecard>("/api/v2/gsis/scorecard", payload);
 }
 
 /** Batch GSIS v2 projections for Deal Intelligence. */
 export function computeGsisV2Batch(payloads: GsisV2Input[]): Promise<GsisV2Scorecard[]> {
-  return withFallback(
-    () => apiPost<{ scorecards: GsisV2Scorecard[] }>("/api/v2/gsis/scorecards", { startups: payloads })
-      .then((data) => data.scorecards),
-    [],
-    "GSIS v2 scorecards",
-  );
+  return apiPost<{ scorecards: GsisV2Scorecard[] }>("/api/v2/gsis/scorecards", { startups: payloads })
+      .then((data) => data.scorecards);
 }
