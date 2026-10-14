@@ -3,7 +3,7 @@
 // Incubation Hub pipeline — ai-router /api/v1/incubation/pipeline/run.
 // Returns the persisted project_id so the analyzed venture can flow into a workspace.
 
-import { apiGet, apiPost, apiUpload, getAuthToken, withFallback } from "./client";
+import { apiGet, apiPost, apiUpload, getAuthToken } from "./client";
 import { apiUrl } from "./config";
 import { domainPost } from "@/lib/domainApi";
 
@@ -185,11 +185,7 @@ export interface SandboxBuild {
 
 /** POST /api/v1/incubation/pipeline/run — runs the venture pipeline, persists an analysis. */
 export function runVenturePipeline(ventureData: Record<string, unknown>): Promise<PipelineBlueprint | null> {
-  return withFallback(
-    () => apiPost<PipelineBlueprint>("/incubation/pipeline/run", ventureData),
-    () => null,
-    "venture pipeline",
-  );
+  return apiPost<PipelineBlueprint>("/incubation/pipeline/run", ventureData);
 }
 
 export interface IdeaDiagnostic {
@@ -202,133 +198,85 @@ export interface IdeaDiagnostic {
 
 /** POST /api/v1/incubation/idea/diagnose — quick idea diagnostic. */
 export function diagnoseIdea(ideaData: Record<string, unknown>): Promise<IdeaDiagnostic | null> {
-  return withFallback(
-    () => apiPost<IdeaDiagnostic>("/incubation/idea/diagnose", ideaData),
-    () => null,
-    "idea diagnostic",
-  );
+  return apiPost<IdeaDiagnostic>("/incubation/idea/diagnose", ideaData);
 }
 
 /** POST /api/v1/incubation/unicorn/analyze — unicorn potential analysis. */
 export function analyzeUnicorn(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/unicorn/analyze", ventureData),
-    () => null,
-    "unicorn analysis",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/unicorn/analyze", ventureData);
 }
 
 /** POST /api/v1/incubation/market/analyze — market validation analysis. */
 export function analyzeMarket(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/market/analyze", ventureData),
-    () => null,
-    "market analysis",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/market/analyze", ventureData);
 }
 
 /** POST /api/v1/incubation/strategy/generate — startup strategy generation. */
 export function generateStrategy(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/strategy/generate", ventureData),
-    () => null,
-    "strategy generation",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/strategy/generate", ventureData);
 }
 
 /** POST /api/v1/incubation/business-plan/generate — business plan generation. */
 export function generateBusinessPlan(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/business-plan/generate", ventureData),
-    () => null,
-    "business plan generation",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/business-plan/generate", ventureData);
 }
 
 /** POST /api/v1/incubation/pivot/analyze — pivot analysis. */
 export function analyzePivot(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/pivot/analyze", {
+  return apiPost<Record<string, unknown>>("/incubation/pivot/analyze", {
       venture_data: ventureData,
       unicorn_score: ventureData.unicorn_potential_score ?? 0,
-    }),
-    () => null,
-    "pivot analysis",
-  );
+    });
 }
 
-function runAnalysis(path: string, ventureData: Record<string, unknown>, label: string) {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>(path, ventureData),
-    () => null,
-    label,
-  );
+function runAnalysis(path: string, ventureData: Record<string, unknown>) {
+  return apiPost<Record<string, unknown>>(path, ventureData);
 }
 
 export const analyzePMF = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/pmf/validate", data, "PMF validation");
+  runAnalysis("/incubation/pmf/validate", data);
 export const analyzeSWOT = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/swot/analyze", data, "SWOT analysis");
+  runAnalysis("/incubation/swot/analyze", data);
 export const analyzeMonetization = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/monetization/analyze", data, "monetization analysis");
+  runAnalysis("/incubation/monetization/analyze", data);
 export const analyzeCompanyBuilding = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/company/analyze", data, "company-building analysis");
+  runAnalysis("/incubation/company/analyze", data);
 export const analyzeMarketIntelligence = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/intelligence/analyze", data, "market intelligence");
+  runAnalysis("/incubation/intelligence/analyze", data);
 export const analyzeImpact = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/impact/analyze", data, "impact analysis");
+  runAnalysis("/incubation/impact/analyze", data);
 export const generateRoadmap = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/roadmap/generate", data, "MVP roadmap");
+  runAnalysis("/incubation/roadmap/generate", data);
 export const simulateMarketSurvey = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/survey/simulate", data, "market survey simulation");
+  runAnalysis("/incubation/survey/simulate", data);
 export const generateRecommendations = (data: Record<string, unknown>) =>
-  runAnalysis("/incubation/recommendations/generate", data, "recommendations");
+  runAnalysis("/incubation/recommendations/generate", data);
 
 /** POST /api/v1/incubation/investor-readiness/generate — investor readiness report. */
 export function generateInvestorReadiness(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/investor-readiness/generate", ventureData),
-    () => null,
-    "investor readiness",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/investor-readiness/generate", ventureData);
 }
 
 /** POST /api/v1/incubation/finance/analyze — finance strategy analysis. */
 export function analyzeFinance(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/finance/analyze", ventureData),
-    () => null,
-    "finance analysis",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/finance/analyze", ventureData);
 }
 
 /** POST /api/v1/incubation/feasibility/analyze — feasibility analysis. */
 export function analyzeFeasibility(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/feasibility/analyze", ventureData),
-    () => null,
-    "feasibility analysis",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/feasibility/analyze", ventureData);
 }
 
 /** POST /api/v1/incubation/tech-stack/design — tech architecture design. */
 export function designTechStack(ventureData: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-  return withFallback(
-    () => apiPost<Record<string, unknown>>("/incubation/tech-stack/design", ventureData),
-    () => null,
-    "tech stack design",
-  );
+  return apiPost<Record<string, unknown>>("/incubation/tech-stack/design", ventureData);
 }
 
 /** POST /api/v1/incubation/document/upload — upload a document for AI diagnosis. */
 export function uploadIncubationDocument(file: File): Promise<Record<string, unknown> | null> {
   const formData = new FormData();
   formData.append("file", file);
-  return withFallback(
-    () => apiUpload<Record<string, unknown>>("/incubation/document/upload", formData),
-    () => null,
-    "document upload",
-  );
+  return apiUpload<Record<string, unknown>>("/incubation/document/upload", formData);
 }
 
 export function persistIndividualAnalysis(
@@ -420,19 +368,11 @@ export interface IncubationJobStatus extends IncubationJobResponse {
 
 /** POST /api/v1/incubation/fast-track/run — enriched pipeline for existing startups. */
 export function runFastTrack(payload: FastTrackPayload, init?: RequestInit): Promise<(PipelineBlueprint & { job_id?: never }) | IncubationJobResponse | null> {
-  return withFallback(
-    () => apiPost<PipelineBlueprint | IncubationJobResponse>("/incubation/fast-track/run", payload, init),
-    () => null,
-    "fast-track pipeline",
-  );
+  return apiPost<PipelineBlueprint | IncubationJobResponse>("/incubation/fast-track/run", payload, init);
 }
 
 export function getIncubationJobStatus(jobId: string): Promise<IncubationJobStatus | null> {
-  return withFallback(
-    () => apiGet<IncubationJobStatus>(`/incubation/jobs/${encodeURIComponent(jobId)}`),
-    () => null,
-    "incubation job status",
-  );
+  return apiGet<IncubationJobStatus>(`/incubation/jobs/${encodeURIComponent(jobId)}`);
 }
 
 /** POST /api/domain/incubation/publish — publish a scored project to investor deal flow. */
