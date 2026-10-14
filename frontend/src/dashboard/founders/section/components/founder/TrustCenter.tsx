@@ -25,9 +25,11 @@ import {
   createTrustDomainChallenge,
   verifyTrustDomainChallenge,
   disconnectTrustSource,
+  consentScopeLabel,
   decideFounderTrustAccessRequest,
   fetchTrustBadges,
   fetchFounderTrustAccessRequests,
+  isSensitiveConsentScope,
   fetchTrustHistory,
   fetchTrustIntegrations,
   fetchTrustProfile,
@@ -191,6 +193,7 @@ export function TrustCenter() {
   const [notifications, setNotifications] = useState<TrustNotificationIntent[]>([]);
   const [busySource, setBusySource] = useState<string | null>(null);
   const [accessRequests, setAccessRequests] = useState<FounderTrustAccessRequest[]>([]);
+  const [grantScopes, setGrantScopes] = useState<Record<string, string[]>>({});
   const [introDismissed, setIntroDismissed] = useState(false);
 
   const load = useCallback(async () => {
@@ -272,10 +275,24 @@ export function TrustCenter() {
   const score = Math.round(profile?.trust_score ?? 0);
   const dismissIntro = () => { setIntroDismissed(true); try { sessionStorage.setItem("techit:trust-center-intro:dismissed", "1"); } catch { /* storage unavailable */ } };
 
-  const decideAccess = async (requestId: string, decision: "approved" | "rejected") => {
+  // Scopes the founder is prepared to share: any explicit selection, otherwise
+  // only the non-sensitive requested scopes (execution/cohort stay private).
+  const selectedScopes = (request: FounderTrustAccessRequest): string[] =>
+    grantScopes[request.id] ?? request.requestedScopes.filter((scope) => !isSensitiveConsentScope(scope));
+
+  const toggleScope = (request: FounderTrustAccessRequest, scope: string) => {
+    setGrantScopes((current) => {
+      const base = current[request.id] ?? request.requestedScopes.filter((s) => !isSensitiveConsentScope(s));
+      const next = base.includes(scope) ? base.filter((s) => s !== scope) : [...base, scope];
+      return { ...current, [request.id]: next };
+    });
+  };
+
+  const decideAccess = async (requestId: string, decision: "approved" | "rejected", request?: FounderTrustAccessRequest) => {
     setBusySource(requestId);
     try {
-      await decideFounderTrustAccessRequest(requestId, decision);
+      const grantedScopes = decision === "approved" && request ? selectedScopes(request) : undefined;
+      await decideFounderTrustAccessRequest(requestId, decision, "", grantedScopes);
       await load();
     } finally {
       setBusySource(null);
@@ -428,7 +445,41 @@ export function TrustCenter() {
           </div>
         </div>
         <div className="space-y-3">
-          {accessRequests.length === 0 ? <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">No pending investor access requests.</div> : accessRequests.map((request) => <div key={request.id} className="rounded-lg border border-border-default p-4"><p className="font-medium text-text-primary">Investor {request.investorId}</p><p className="mt-1 text-sm text-text-muted">{request.purpose || "Investment due diligence"}</p><p className="mt-2 text-xs text-text-disabled">Startup {request.projectId} · {request.requestedScopes.join(", ")}</p><div className="mt-3 flex gap-2"><Button size="sm" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "approved")}>Approve</Button><Button size="sm" variant="outline" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "rejected")}>Reject</Button></div></div>)}
+          {accessRequests.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border-strong p-4 text-sm text-text-muted">No pending investor access requests.</div>
+          ) : (
+            accessRequests.map((request) => {
+              const selected = selectedScopes(request);
+              return (
+                <div key={request.id} className="rounded-lg border border-border-default p-4">
+                  <p className="font-medium text-text-primary">Investor {request.investorId}</p>
+                  <p className="mt-1 text-sm text-text-muted">{request.purpose || "Investment due diligence"}</p>
+                  <p className="mt-2 text-xs text-text-disabled">Startup {request.projectId}</p>
+                  <div className="mt-3 space-y-2">
+                    {request.requestedScopes.map((scope) => (
+                      <label key={scope} className="flex items-start gap-2 text-sm text-text-secondary">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5"
+                          checked={selected.includes(scope)}
+                          disabled={busySource === request.id}
+                          onChange={() => toggleScope(request, scope)}
+                        />
+                        <span>
+                          {consentScopeLabel(scope)}
+                          {isSensitiveConsentScope(scope) ? <span className="ml-1 text-xs text-status-warning">sensitive</span> : null}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Button size="sm" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "approved", request)}>Approve selected</Button>
+                    <Button size="sm" variant="outline" disabled={busySource === request.id} onClick={() => void decideAccess(request.id, "rejected", request)}>Reject</Button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
 

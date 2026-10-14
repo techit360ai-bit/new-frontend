@@ -148,7 +148,33 @@ export interface FounderTrustAccessRequest {
   status: "pending" | "approved" | "rejected";
   purpose: string;
   requestedScopes: string[];
+  grantedScopes?: string[];
   createdAt: string;
+}
+
+export interface ConsentScopeOption {
+  scope: string;
+  label: string;
+  sensitive: boolean;
+}
+
+/**
+ * Investor consent scopes (Phase C). Mirrors the backend catalog: the baseline
+ * metadata scope is shareable by default, while execution and cohort scopes are
+ * SENSITIVE and a founder must opt into them explicitly.
+ */
+export const CONSENT_SCOPE_OPTIONS: ConsentScopeOption[] = [
+  { scope: "approved_evidence_metadata", label: "Approved evidence metadata", sensitive: false },
+  { scope: "execution_metrics", label: "Execution progress and velocity", sensitive: true },
+  { scope: "cohort_benchmarks", label: "Anonymous cohort comparison", sensitive: true },
+];
+
+export function consentScopeLabel(scope: string): string {
+  return CONSENT_SCOPE_OPTIONS.find((option) => option.scope === scope)?.label ?? scope;
+}
+
+export function isSensitiveConsentScope(scope: string): boolean {
+  return CONSENT_SCOPE_OPTIONS.find((option) => option.scope === scope)?.sensitive === true;
 }
 
 export function fetchTrustProfile(): Promise<TrustProfile> {
@@ -182,7 +208,13 @@ export function connectTrustSource(source: string): Promise<TrustVerificationRes
 export function createTrustDomainChallenge(input: Record<string, unknown> = {}) { return backendRequest<Record<string, unknown>>(trustPath("domainChallenge"), "POST", input); }
 export function verifyTrustDomainChallenge(challengeId: string) { return backendRequest<Record<string, unknown>>(trustPath("domainChallengeVerify", { challengeId }), "POST", {}); }
 export function fetchFounderTrustAccessRequests() { return backendRequest<{ ok: boolean; requests: FounderTrustAccessRequest[] }>(`${trustPath("founderAccessRequests")}?status=pending`, "GET"); }
-export function decideFounderTrustAccessRequest(requestId: string, decision: "approved" | "rejected", note = "") { return backendRequest<{ ok: boolean; request: FounderTrustAccessRequest }>(trustPath("founderAccessDecision", { requestId }), "POST", { decision, note }); }
+export function decideFounderTrustAccessRequest(requestId: string, decision: "approved" | "rejected", note = "", grantedScopes?: string[]) {
+  return backendRequest<{ ok: boolean; request: FounderTrustAccessRequest }>(
+    trustPath("founderAccessDecision", { requestId }),
+    "POST",
+    grantedScopes ? { decision, note, grantedScopes } : { decision, note },
+  );
+}
 
 export function previewTrustNotifications(events: Array<Record<string, unknown>>): Promise<TrustNotificationPreview> {
   return apiPost<TrustNotificationPreview>(trustPath("notificationsPreview"), { events });

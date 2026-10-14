@@ -232,6 +232,8 @@ export interface InvestorTrustAccessRequest {
   status: "pending" | "approved" | "rejected" | "cancelled" | "expired";
   purpose: string;
   requestedScopes: string[];
+  /** Scopes the founder actually approved (subset of requestedScopes; [] until approved). */
+  grantedScopes: string[];
   decisionNote?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -266,5 +268,7 @@ export function fetchInvestorTrustAccessRequest(startupId: string) {
 }
 
 export function requestInvestorTrustAccess(startupId: string, purpose: string) {
-  return backendTrustAccess<{ ok: boolean; created: boolean; request: InvestorTrustAccessRequest }>(trustPath("investorAccessRequestCreate", { startupId }), "POST", { purpose, requestedScopes: ["approved_evidence_metadata"] });
+  // Request the full catalog; the founder decides which scopes to GRANT
+  // (execution/cohort stay private unless explicitly approved).
+  return backendTrustAccess<{ ok: boolean; created: boolean; request: InvestorTrustAccessRequest }>(trustPath("investorAccessRequestCreate", { startupId }), "POST", { purpose, requestedScopes: ["approved_evidence_metadata", "execution_metrics", "cohort_benchmarks"] });
 }

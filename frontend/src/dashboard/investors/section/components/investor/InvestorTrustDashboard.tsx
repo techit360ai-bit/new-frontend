@@ -131,7 +131,8 @@ export function InvestorTrustDashboard() {
     fetchInvestorTrustAccessRequest(selectedId)
       .then((data) => {
         if (alive) setAccessRequest(data.request);
-        return data.request?.status === 'approved' ? data.request.requestedScopes : [];
+        // Only the scopes the FOUNDER granted are sent on the read request.
+        return data.request?.status === 'approved' ? data.request.grantedScopes : [];
       })
       .catch(() => {
         if (alive) setAccessRequest(null);

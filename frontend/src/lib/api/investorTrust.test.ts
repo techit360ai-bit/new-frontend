@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import {
   fetchInvestorTrustDashboard,
   fetchInvestorTrustStartups,
+  requestInvestorTrustAccess,
   saveInvestorTrustNotes,
 } from "./investorTrust";
 
@@ -110,5 +111,33 @@ test("saveInvestorTrustNotes keeps notes private behind the investor trust notes
     expect(init.body).toBe(JSON.stringify(notes));
   } finally {
     fetchMock.restore();
+  }
+});
+
+test("requestInvestorTrustAccess asks for the full consent catalog so the founder can choose", async () => {
+  const { calls, restore } = stubFetch(() =>
+    response({ ok: true, created: true, request: { id: "req-1", grantedScopes: [] } }),
+  );
+  try {
+    await requestInvestorTrustAccess("startup-1", "Due diligence");
+    const [url, init] = calls[0];
+    expect(url).toContain("/investor/trust/startup-1/access-request");
+    expect(init?.method).toBe("POST");
+    expect(JSON.parse(String(init?.body))).toMatchObject({
+      purpose: "Due diligence",
+      requestedScopes: ["approved_evidence_metadata", "execution_metrics", "cohort_benchmarks"],
+    });
+  } finally {
+    restore();
+  }
+});
+
+test("fetchInvestorTrustDashboard only forwards the granted consent scopes", async () => {
+  const { calls, restore } = stubFetch(() => response({ privacy: {} }));
+  try {
+    await fetchInvestorTrustDashboard("startup-1", ["approved_evidence_metadata", "execution_metrics"]);
+    expect(calls[0][0]).toContain("scopes=approved_evidence_metadata%2Cexecution_metrics");
+  } finally {
+    restore();
   }
 });
