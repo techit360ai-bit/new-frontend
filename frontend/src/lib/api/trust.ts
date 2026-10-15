@@ -159,14 +159,16 @@ export interface ConsentScopeOption {
 }
 
 /**
- * Investor consent scopes (Phase C). Mirrors the backend catalog: the baseline
- * metadata scope is shareable by default, while execution and cohort scopes are
- * SENSITIVE and a founder must opt into them explicitly.
+ * Investor consent scopes (Phase C, revised). Mirrors the backend catalog:
+ * execution progress/velocity and anonymous cohort comparison are non-sensitive
+ * execution data, so only REVENUE metrics are SENSITIVE and a founder must opt
+ * into sharing them explicitly.
  */
 export const CONSENT_SCOPE_OPTIONS: ConsentScopeOption[] = [
   { scope: "approved_evidence_metadata", label: "Approved evidence metadata", sensitive: false },
-  { scope: "execution_metrics", label: "Execution progress and velocity", sensitive: true },
-  { scope: "cohort_benchmarks", label: "Anonymous cohort comparison", sensitive: true },
+  { scope: "execution_metrics", label: "Execution progress and velocity", sensitive: false },
+  { scope: "cohort_benchmarks", label: "Anonymous cohort comparison", sensitive: false },
+  { scope: "revenue_metrics", label: "Revenue metrics", sensitive: true },
 ];
 
 export function consentScopeLabel(scope: string): string {

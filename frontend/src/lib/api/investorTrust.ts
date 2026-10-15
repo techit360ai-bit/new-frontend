@@ -268,7 +268,8 @@ export function fetchInvestorTrustAccessRequest(startupId: string) {
 }
 
 export function requestInvestorTrustAccess(startupId: string, purpose: string) {
-  // Request the full catalog; the founder decides which scopes to GRANT
-  // (execution/cohort stay private unless explicitly approved).
-  return backendTrustAccess<{ ok: boolean; created: boolean; request: InvestorTrustAccessRequest }>(trustPath("investorAccessRequestCreate", { startupId }), "POST", { purpose, requestedScopes: ["approved_evidence_metadata", "execution_metrics", "cohort_benchmarks"] });
+  // Request the full catalog; the founder decides which scopes to GRANT.
+  // Only revenue is sensitive and needs an explicit grant; execution/cohort are
+  // non-sensitive execution data that travel with the baseline approval.
+  return backendTrustAccess<{ ok: boolean; created: boolean; request: InvestorTrustAccessRequest }>(trustPath("investorAccessRequestCreate", { startupId }), "POST", { purpose, requestedScopes: ["approved_evidence_metadata", "execution_metrics", "cohort_benchmarks", "revenue_metrics"] });
 }

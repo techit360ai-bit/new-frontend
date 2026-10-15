@@ -125,7 +125,7 @@ test("requestInvestorTrustAccess asks for the full consent catalog so the founde
     expect(init?.method).toBe("POST");
     expect(JSON.parse(String(init?.body))).toMatchObject({
       purpose: "Due diligence",
-      requestedScopes: ["approved_evidence_metadata", "execution_metrics", "cohort_benchmarks"],
+      requestedScopes: ["approved_evidence_metadata", "execution_metrics", "cohort_benchmarks", "revenue_metrics"],
     });
   } finally {
     restore();
