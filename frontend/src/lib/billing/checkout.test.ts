@@ -82,9 +82,23 @@ test("startCheckout surfaces the backend reason instead of a fake success", asyn
   });
 });
 
+test("startCheckout forwards a per-attempt idempotency key", async () => {
+  mockedCheckout.mockResolvedValue({
+    ok: true,
+    checkoutUrl: "https://pay.test/session/2",
+    paymentIntent: { id: "pay_3", amount: 500, currency: "USD", credits: 100, status: "pending" },
+  });
+  await startCheckout(
+    { packageId: "pack_1", amount: 500, currency: "USD" },
+    { providers: ALL_PROVIDERS, origin: "https://app.techit.test", idempotencyKey: "checkout-click-1" },
+  );
+  expect(mockedCheckout).toHaveBeenCalledWith(expect.objectContaining({ idemKey: "checkout-click-1" }));
+});
+
 test("describeCheckoutFailure maps auth and unknown failures honestly", () => {
   expect(describeCheckoutFailure(new ApiError(401, "unauthorized")).code).toBe("not_authorized");
   expect(describeCheckoutFailure(new ApiError(402, "payment_required")).code).toBe("payment_required");
+  expect(describeCheckoutFailure(new ApiError(409, "checkout_in_progress", { error: "checkout_in_progress" })).code).toBe("checkout_in_progress");
   expect(checkoutErrorCode(new Error("boom"))).toBeNull();
   expect(describeCheckoutFailure(new Error("boom")).code).toBe("network_error");
 });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AlertCircle, ArrowRight, Lock, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,7 @@ const PROVIDERS: CheckoutProvider[] = ["stripe", "paystack", "flutterwave"];
 export default function PaymentModal({ isOpen, item, providers, email, onClose }: PaymentModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
 
   if (!isOpen || !item) return null;
 
@@ -40,23 +41,26 @@ export default function PaymentModal({ isOpen, item, providers, email, onClose }
   const canContinue = Boolean(item.id) && enabledProviders.length > 0;
 
   const handleClose = () => {
+    submittingRef.current = false;
     setLoading(false);
     setError(null);
     onClose();
   };
 
   const handleContinue = async () => {
-    if (!canContinue || loading) return;
+    if (!canContinue || loading || submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
     setError(null);
     const target: CheckoutTarget = item.kind === "package"
       ? { packageId: item.id, amount: item.amount, currency: item.currency, credits: item.credits, name: item.name }
       : { planId: item.id, amount: item.amount, currency: item.currency, name: item.name };
-    const outcome = await startCheckout(target, { providers, email });
+    const outcome = await startCheckout(target, { providers, email, idempotencyKey: `checkout-${crypto.randomUUID()}` });
     if (outcome.status === "redirecting") {
       window.location.assign(outcome.checkoutUrl);
       return;
     }
+    submittingRef.current = false;
     setLoading(false);
     setError(outcome.message);
   };

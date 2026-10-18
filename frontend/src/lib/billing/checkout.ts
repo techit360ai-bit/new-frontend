@@ -35,6 +35,18 @@ const ERROR_MESSAGES: Record<string, string> = {
   stripe_checkout_failed: "Stripe rejected the checkout session. Nothing was charged.",
   paystack_checkout_failed: "Paystack rejected the checkout session. Nothing was charged.",
   flutterwave_checkout_failed: "Flutterwave rejected the checkout session. Nothing was charged.",
+  payment_intent_already_completed: "This payment has already completed. Refresh your wallet to see the credits.",
+  payment_intent_expired: "This checkout expired. Start a new purchase.",
+  payment_provider_mismatch: "This checkout was opened with a different payment provider. Start a new purchase.",
+  checkout_in_progress: "Checkout is already being opened. Wait a moment before trying again.",
+  purchase_velocity_exceeded: "Too many purchase attempts were started recently. Wait a few minutes and try again.",
+  too_many_pending_payment_intents: "You already have open checkout sessions. Complete or wait for them to expire before starting another.",
+  monthly_credit_purchase_limit_exceeded: "This purchase would exceed the monthly credit purchase limit. Contact support if you need a higher limit.",
+  monthly_purchase_amount_limit_exceeded: "This purchase would exceed the monthly payment limit. Contact support if you need a higher limit.",
+  purchase_risk_review_required: "This account requires a payment risk review before another purchase can start.",
+  kyc_required_for_high_value_purchase: "Identity verification is required before a purchase of this size.",
+  kyc_required_for_elevated_risk: "Identity verification is required before this account can make another purchase.",
+  finance_write_temporarily_unavailable: "Billing is temporarily unavailable. Nothing was charged; try again shortly.",
 };
 
 export function providerLabel(provider: CheckoutProvider): string {
@@ -71,6 +83,7 @@ export interface StartCheckoutOptions {
   providers: ProviderAvailability;
   email?: string;
   origin?: string;
+  idempotencyKey?: string;
 }
 
 export function checkoutErrorCode(error: unknown): string | null {
@@ -137,7 +150,7 @@ export async function startCheckout(
       email: options.email,
       successUrl,
       cancelUrl,
-      idemKey: `${reference}-${provider}-${String(currency).toUpperCase()}`,
+      idemKey: options.idempotencyKey || `${reference}-${provider}-${String(currency).toUpperCase()}-${crypto.randomUUID()}`,
     });
     const checkoutUrl = result.checkoutUrl || result.paymentIntent?.checkoutUrl || "";
     if (!result.ok || !checkoutUrl) {
