@@ -106,7 +106,8 @@
   },
   "overrides": {
     "monaco-editor": {
-      "dompurify": "3.4.15"
-    }
+      "dompurify": "3.4.17"
+    },
+    "source-map-js": "1.2.2"
   }
 }
