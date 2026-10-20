@@ -72,20 +72,20 @@ export function fetchCofounderInvitation(relationshipId: string): Promise<{ ok: 
   return apiGet(`${BASE}/invitations/${encodeURIComponent(relationshipId)}`)
 }
 
-export function acceptCofounderDiscussion(relationshipId: string): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
-  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/accept-discussion`)
+export function acceptCofounderDiscussion(relationshipId: string, version?: number): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
+  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/accept-discussion`, version == null ? {} : { version })
 }
 
-export function requestCofounderChanges(relationshipId: string, requestedChanges: string): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
-  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/request-changes`, { requestedChanges })
+export function requestCofounderChanges(relationshipId: string, requestedChanges: string, version?: number): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
+  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/request-changes`, { requestedChanges, ...(version == null ? {} : { version }) })
 }
 
-export function declineCofounderInvitation(relationshipId: string, reason?: string): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
-  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/decline`, { reason })
+export function declineCofounderInvitation(relationshipId: string, reason?: string, version?: number): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
+  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/decline`, { reason, ...(version == null ? {} : { version }) })
 }
 
-export function withdrawCofounderInvitation(relationshipId: string, reason?: string): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
-  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/withdraw`, { reason })
+export function withdrawCofounderInvitation(relationshipId: string, reason?: string, version?: number): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
+  return apiPost(`${BASE}/invitations/${encodeURIComponent(relationshipId)}/withdraw`, { reason, ...(version == null ? {} : { version }) })
 }
 
 export function advanceCofounderRelationship(relationshipId: string, body: Record<string, unknown>): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
@@ -110,16 +110,16 @@ export function fetchCofounderWorkspace(relationshipId: string): Promise<{ ok: b
   return apiGet(`${BASE}/relationships/${encodeURIComponent(relationshipId)}/workspace`)
 }
 
-export function pauseCofounderRelationship(relationshipId: string): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
-  return apiPost(`${BASE}/relationships/${encodeURIComponent(relationshipId)}/pause`)
+export function pauseCofounderRelationship(relationshipId: string, version?: number): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
+  return apiPost(`${BASE}/relationships/${encodeURIComponent(relationshipId)}/pause`, version == null ? {} : { version })
 }
 
-export function resumeCofounderRelationship(relationshipId: string): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
-  return apiPost(`${BASE}/relationships/${encodeURIComponent(relationshipId)}/resume`)
+export function resumeCofounderRelationship(relationshipId: string, version?: number): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
+  return apiPost(`${BASE}/relationships/${encodeURIComponent(relationshipId)}/resume`, version == null ? {} : { version })
 }
 
-export function endCofounderRelationship(relationshipId: string, reason?: string): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
-  return apiPost(`${BASE}/relationships/${encodeURIComponent(relationshipId)}/end`, { reason })
+export function endCofounderRelationship(relationshipId: string, reason?: string, version?: number): Promise<{ ok: boolean; relationship: CofounderRelationship }> {
+  return apiPost(`${BASE}/relationships/${encodeURIComponent(relationshipId)}/end`, { reason, ...(version == null ? {} : { version }) })
 }
 
 export function fetchCofounderResponsibilities(relationshipId: string): Promise<{ ok: boolean; responsibilities: CofounderResponsibility[] }> {

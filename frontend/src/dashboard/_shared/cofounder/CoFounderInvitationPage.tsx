@@ -11,6 +11,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 import {
   acceptCofounderDiscussion,
   acceptCofounderProposal,
@@ -46,6 +47,7 @@ function apiMessage(error: unknown): string {
 
 export function CoFounderInvitationPage() {
   const { relationshipId = '' } = useParams()
+  const { profile } = useAuth()
   const enabled = cofounderFrontendEnabled()
   const [relationship, setRelationship] = useState<CofounderRelationship | null>(null)
   const [loading, setLoading] = useState(true)
@@ -106,12 +108,13 @@ export function CoFounderInvitationPage() {
   }
 
   if (error || !relationship) {
+    const fallbackDashboard = profile?.role === 'founder' ? '/founder/dashboard' : '/collaborator/dashboard'
     return (
       <div className="mx-auto max-w-3xl px-6 py-16 text-center">
         <XCircle className="mx-auto h-8 w-8 text-status-error" />
         <h1 className="mt-3 text-xl font-semibold text-text-primary">Invitation unavailable</h1>
         <p className="mt-2 text-sm text-text-muted">{error || 'This invitation is unavailable or you do not have access to it.'}</p>
-        <Link to="/collaborator/dashboard" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-brand-accent">
+        <Link to={fallbackDashboard} className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-brand-accent">
           <ArrowLeft className="h-4 w-4" /> Back to dashboard
         </Link>
       </div>
@@ -127,6 +130,7 @@ export function CoFounderInvitationPage() {
     status === 'MUTUAL_INTEREST' ? 'Mutual interest confirmation' : status === 'DUE_DILIGENCE' ? 'Due diligence start' : 'Proposal send',
     () => advanceCofounderRelationship(relationship.id, {
       status,
+      version: relationship.version,
       ...(status === 'COFOUNDER_PROPOSAL' ? {
         proposedTerms: {
           roleTitle: proposedTerms.roleTitle || relationship.roleTitle,
@@ -245,13 +249,13 @@ export function CoFounderInvitationPage() {
 
             {candidate && relationship.status === 'INVITED' && (
               <div className="space-y-2">
-                <button type="button" disabled={Boolean(busy)} onClick={() => void run('Accept discussion', () => acceptCofounderDiscussion(relationship.id))} className="w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60">
+                <button type="button" disabled={Boolean(busy)} onClick={() => void run('Accept discussion', () => acceptCofounderDiscussion(relationship.id, relationship.version))} className="w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60">
                   {busy === 'Accept discussion' ? 'Accepting…' : 'Accept Discussion'}
                 </button>
                 <button type="button" onClick={() => setChangesOpen((current) => !current)} className="w-full rounded-lg border border-border-default px-4 py-2.5 text-sm font-medium text-text-secondary">
                   Request Changes
                 </button>
-                <button type="button" disabled={Boolean(busy)} onClick={() => void run('Decline invitation', () => declineCofounderInvitation(relationship.id))} className="w-full rounded-lg border border-status-error bg-status-error-soft px-4 py-2.5 text-sm font-medium text-status-error disabled:opacity-60">
+                <button type="button" disabled={Boolean(busy)} onClick={() => void run('Decline invitation', () => declineCofounderInvitation(relationship.id, undefined, relationship.version))} className="w-full rounded-lg border border-status-error bg-status-error-soft px-4 py-2.5 text-sm font-medium text-status-error disabled:opacity-60">
                   Decline
                 </button>
               </div>
@@ -262,7 +266,7 @@ export function CoFounderInvitationPage() {
                 onSubmit={(event) => {
                   event.preventDefault()
                   if (!changes.trim()) return
-                  void run('Request changes', () => requestCofounderChanges(relationship.id, changes.trim()))
+                  void run('Request changes', () => requestCofounderChanges(relationship.id, changes.trim(), relationship.version))
                 }}
                 className="rounded-xl border border-border-default p-4"
               >
@@ -299,6 +303,7 @@ export function CoFounderInvitationPage() {
                 type="button"
                 disabled={Boolean(busy)}
                 onClick={() => void run('Activate relationship', () => acceptCofounderProposal(relationship.id, {
+                  version: relationship.version,
                   idempotencyKey: `cofounder-accept-${relationship.id}-${relationship.version}`,
                   acceptedTerms: proposedTerms,
                 }))}
@@ -309,19 +314,19 @@ export function CoFounderInvitationPage() {
             )}
 
             {!candidate && isPreActiveCofounder(relationship.status) && (
-              <button type="button" disabled={Boolean(busy)} onClick={() => void run('Withdraw invitation', () => withdrawCofounderInvitation(relationship.id))} className="w-full rounded-lg border border-border-default px-4 py-2.5 text-sm font-medium text-text-secondary disabled:opacity-60">
+              <button type="button" disabled={Boolean(busy)} onClick={() => void run('Withdraw invitation', () => withdrawCofounderInvitation(relationship.id, undefined, relationship.version))} className="w-full rounded-lg border border-border-default px-4 py-2.5 text-sm font-medium text-text-secondary disabled:opacity-60">
                 Withdraw invitation
               </button>
             )}
 
             {relationship.status === 'ACTIVE' && (
-              <button type="button" disabled={Boolean(busy)} onClick={() => void run('Pause relationship', () => pauseCofounderRelationship(relationship.id))} className="flex w-full items-center justify-center gap-2 rounded-lg border border-status-warning bg-status-warning-soft px-4 py-2.5 text-sm font-medium text-status-warning disabled:opacity-60">
+              <button type="button" disabled={Boolean(busy)} onClick={() => void run('Pause relationship', () => pauseCofounderRelationship(relationship.id, relationship.version))} className="flex w-full items-center justify-center gap-2 rounded-lg border border-status-warning bg-status-warning-soft px-4 py-2.5 text-sm font-medium text-status-warning disabled:opacity-60">
                 <Pause className="h-4 w-4" /> Pause relationship
               </button>
             )}
 
             {relationship.status === 'PAUSED' && (
-              <button type="button" disabled={Boolean(busy)} onClick={() => void run('Resume relationship', () => resumeCofounderRelationship(relationship.id))} className="flex w-full items-center justify-center gap-2 rounded-lg bg-status-success px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60">
+              <button type="button" disabled={Boolean(busy)} onClick={() => void run('Resume relationship', () => resumeCofounderRelationship(relationship.id, relationship.version))} className="flex w-full items-center justify-center gap-2 rounded-lg bg-status-success px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60">
                 <Play className="h-4 w-4" /> Resume relationship
               </button>
             )}
@@ -330,7 +335,7 @@ export function CoFounderInvitationPage() {
               <form
                 onSubmit={(event) => {
                   event.preventDefault()
-                  void run('End relationship', () => endCofounderRelationship(relationship.id, endReason.trim()))
+                  void run('End relationship', () => endCofounderRelationship(relationship.id, endReason.trim(), relationship.version))
                 }}
                 className="rounded-xl border border-status-error bg-status-error-soft p-3"
               >

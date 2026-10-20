@@ -102,6 +102,7 @@ export function CoFounderWorkspace() {
   const [tab, setTab] = useState<WorkspaceTab>('overview')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const fallbackDashboard = profile?.role === 'founder' ? '/founder/dashboard' : '/collaborator/dashboard'
 
   const [objectiveOpen, setObjectiveOpen] = useState(false)
   const [objectiveTitle, setObjectiveTitle] = useState('')
@@ -270,7 +271,7 @@ export function CoFounderWorkspace() {
       <div className="mx-auto max-w-3xl p-8 text-center">
         <h1 className="text-xl font-semibold text-text-primary">Workspace unavailable</h1>
         <p className="mt-2 text-sm text-text-muted">{error || 'Only active co-founder relationship parties can open this workspace.'}</p>
-        <Link to="/collaborator/dashboard" className="mt-4 inline-flex items-center gap-2 text-sm text-brand-accent"><ArrowLeft className="h-4 w-4" /> Back to dashboard</Link>
+        <Link to={fallbackDashboard} className="mt-4 inline-flex items-center gap-2 text-sm text-brand-accent"><ArrowLeft className="h-4 w-4" /> Back to dashboard</Link>
       </div>
     )
   }
@@ -280,6 +281,9 @@ export function CoFounderWorkspace() {
   const openTasks = tasks.filter((task) => !['completed', 'done'].includes(String(task.status || '').toLowerCase())).length
   const milestoneObjectives = objectives.filter((objective) => objective.milestoneIds.length || objective.publishedMilestoneId)
   const backLink = relationship.role === 'founder' ? '/founder/dashboard' : '/collaborator/dashboard'
+  const messageLink = relationship.role === 'founder'
+    ? `/founder/messages?recipient=${encodeURIComponent(relationship.otherParty.id)}`
+    : `/collaborator/messages?recipient=${encodeURIComponent(relationship.otherParty.id)}`
 
   return (
     <div className="mx-auto max-w-7xl p-4 lg:p-8">
@@ -481,7 +485,7 @@ export function CoFounderWorkspace() {
             <p className="mt-1 text-xs text-text-muted">Use the existing workspace chat or direct messaging. Co-founder Mode does not create a second communication system.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link to={`/workspaces/chat?workspace=${encodeURIComponent(workspace.id)}`} className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-medium text-white">Open workspace chat</Link>
-              <Link to={`/founder/messages?recipient=${encodeURIComponent(relationship.otherParty.id)}`} className="rounded-lg border border-border-default px-3 py-2 text-xs font-medium text-text-secondary">Direct message</Link>
+              <Link to={messageLink} className="rounded-lg border border-border-default px-3 py-2 text-xs font-medium text-text-secondary">Direct message</Link>
             </div>
           </section>
         )}
