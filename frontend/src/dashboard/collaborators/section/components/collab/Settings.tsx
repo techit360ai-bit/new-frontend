@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { User, Briefcase, Bell, UserCog, LogOut } from "lucide-react";
+import { User, Briefcase, Bell, UserCog, LogOut, Users } from "lucide-react";
 import {
   useCollaboratorProfile,
   useActiveRoles,
@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { roleDashboardPath, roleOnboardingPath } from "@/lib/roleRoutes";
 import { fetchNotificationPreferences, saveNotificationPreferences } from "@/lib/api/settings";
+import { CofounderProfileSettings } from "@/dashboard/_shared/cofounder/CofounderProfileSettings";
 
 const disciplines: CollaboratorDiscipline[] = [
   "Engineering", "Design", "Product", "Data & ML",
@@ -33,6 +34,7 @@ const subSkillsByDiscipline: Record<CollaboratorDiscipline, string[]> = {
 const sections = [
   { id: "identity",      label: "Account & Identity",   icon: User },
   { id: "skills",        label: "Skills & Availability", icon: Briefcase },
+  { id: "cofounder",     label: "Co-founder Matching",   icon: Users },
   { id: "notifications", label: "Notifications",         icon: Bell },
   { id: "roles",         label: "Roles & Switching",     icon: UserCog },
 ];
@@ -87,10 +89,11 @@ export function Settings() {
   // Anchor scroll on mount
   const identityRef      = useRef<HTMLDivElement>(null);
   const skillsRef        = useRef<HTMLDivElement>(null);
+  const cofounderRef     = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const rolesRef         = useRef<HTMLDivElement>(null);
   const sectionRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
-    identity: identityRef, skills: skillsRef, notifications: notificationsRef, roles: rolesRef,
+    identity: identityRef, skills: skillsRef, cofounder: cofounderRef, notifications: notificationsRef, roles: rolesRef,
   };
 
   useEffect(() => {
@@ -355,6 +358,10 @@ export function Settings() {
               </button>
             </div>
           </section>
+
+          <div ref={cofounderRef}>
+            <CofounderProfileSettings />
+          </div>
 
           {/* Notifications */}
           <section ref={notificationsRef} id="notifications" className="border border-border-default bg-surface-primary rounded-xl p-6">

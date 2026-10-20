@@ -97,6 +97,26 @@ export interface Profile {
   equityPreference?: number
   minCashFloor?: number
   vestingComfort?: string
+  cofounderPreferences?: {
+    commitment?: string | null
+    visionAnswers?: string
+    workingStyle?: string
+    riskTolerance?: string
+    communicationPreference?: string
+    timeCommitment?: string
+    decisionStyle?: string
+    longTermAmbition?: string
+    timezoneCompatibility?: string
+    contributionExpectations?: string
+    equityDiscussionPreference?: string
+  }
+  cofounderExperience?: {
+    currentlyCofounder?: boolean
+    currentVentureCount?: number
+    previousCofounderCount?: number
+    previousVentures?: string[]
+    summary?: string
+  }
   certifications: Array<{
     id: string; name: string; issuer: string; verified: boolean; issued_at: string
   }>

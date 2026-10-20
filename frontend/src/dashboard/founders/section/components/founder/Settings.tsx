@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  User, Briefcase, BadgeCheck, Bell, UserCog, LogOut, Github, Check,
+  User, Briefcase, BadgeCheck, Bell, UserCog, LogOut, Github, Check, Users,
 } from "lucide-react";
 import {
   useFounderProfile, useActiveRoles,
@@ -15,10 +15,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { uploadProfileAvatar } from "@/lib/api/users";
 import { roleDashboardPath, roleOnboardingPath } from "@/lib/roleRoutes";
 import { fetchNotificationPreferences, saveNotificationPreferences } from "@/lib/api/settings";
+import { CofounderProfileSettings } from "@/dashboard/_shared/cofounder/CofounderProfileSettings";
 
 const sections = [
   { id: "identity",      label: "Account & Identity",  icon: User },
   { id: "startup",       label: "Startup & Roles",     icon: Briefcase },
+  { id: "cofounder",     label: "Co-founder Matching", icon: Users },
   { id: "verification",  label: "Verification",        icon: BadgeCheck },
   { id: "notifications", label: "Notifications",       icon: Bell },
   { id: "roles",         label: "Roles & Switching",   icon: UserCog },
@@ -131,6 +133,7 @@ export function Settings() {
   const refs = {
     identity:      useRef<HTMLDivElement>(null),
     startup:       useRef<HTMLDivElement>(null),
+    cofounder:     useRef<HTMLDivElement>(null),
     verification:  useRef<HTMLDivElement>(null),
     notifications: useRef<HTMLDivElement>(null),
     roles:         useRef<HTMLDivElement>(null),
@@ -492,6 +495,9 @@ export function Settings() {
               </button>
             </div>
           </section>
+          <div ref={refs.cofounder}>
+            <CofounderProfileSettings />
+          </div>
           {/* VERIFICATION */}
           <section ref={refs.verification} id="verification" className="border border-border-default bg-surface-primary rounded-xl p-6 scroll-mt-6">
             <h2 className="text-lg font-semibold text-text-primary mb-1">Verification</h2>
