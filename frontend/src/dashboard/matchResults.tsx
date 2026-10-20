@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import {
   Mail,
   MessageCircle,
+  GitCompare,
   Star,
   Award,
   FileText,
@@ -31,6 +32,20 @@ import {
   type CollaborationInviteDraft,
 } from "@/lib/collaborationMatching";
 import { fetchFounderCollaboratorRecommendations } from "@/lib/api/recommendationIntelligence";
+import {
+  cofounderFrontendEnabled,
+  createCofounderInvitation,
+  fetchCofounderRecommendations,
+  fetchCofounderRequirements,
+} from "@/lib/api/cofounder";
+import { CoFounderComparison } from "@/dashboard/_shared/cofounder/CoFounderComparison";
+import { CoFounderRequirementBuilder } from "@/dashboard/_shared/cofounder/CoFounderRequirementBuilder";
+import { formatCommitment } from "@/dashboard/_shared/cofounder/helpers";
+import type {
+  CofounderRecommendation,
+  CofounderRecommendationsResponse,
+  CofounderRequirement,
+} from "@/dashboard/_shared/cofounder/types";
 import {
   markValidationStoryShown,
   ValidationStoryDialog,
@@ -93,6 +108,153 @@ function matchingOpenRole(match: Match, openRoles: string[]): string {
     ?? "";
 }
 
+function recommendationInitials(name: string): string {
+  return initials(name);
+}
+
+function EvidencePill({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-lg border border-border-subtle bg-background-primary px-2.5 py-2">
+      <p className="text-xs font-semibold tabular-nums text-text-primary">{value}</p>
+      <p className="text-[9px] uppercase tracking-wider text-text-muted">{label}</p>
+    </div>
+  );
+}
+
+function CofounderCandidateCard({
+  recommendation,
+  invited,
+  inviting,
+  compared,
+  onInvite,
+  onCompare,
+}: {
+  recommendation: CofounderRecommendation;
+  invited: boolean;
+  inviting: boolean;
+  compared: boolean;
+  onInvite: () => void;
+  onCompare: () => void;
+}) {
+  const dimensions = Object.entries(recommendation.breakdown || {})
+    .filter(([, dimension]) => dimension.value != null)
+    .sort((left, right) => right[1].weight - left[1].weight)
+    .slice(0, 5);
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-xl border border-border bg-card p-4 lg:p-6"
+    >
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="flex shrink-0 items-start gap-3 sm:w-40 sm:flex-col sm:items-center sm:text-center">
+          <div className="flex size-16 items-center justify-center rounded-full bg-linear-to-br from-violet-600 to-cyan-500 text-xl font-bold text-white">
+            {recommendationInitials(recommendation.candidate.name)}
+          </div>
+          <div>
+            <div className="rounded-full border border-violet-300 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
+              {recommendation.cofounderFit == null ? 'Insufficient evidence' : `${recommendation.cofounderFit}% co-founder fit`}
+            </div>
+            <p className="mt-1 text-[10px] text-text-muted">{Math.round(recommendation.confidence * 100)}% confidence</p>
+            <p className="mt-1 text-[10px] font-mono text-text-muted">{recommendation.policyVersion}</p>
+          </div>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h3 className="text-lg font-bold text-text-primary">{recommendation.candidate.name}</h3>
+              <p className="text-sm text-text-muted">{recommendation.candidate.title || recommendation.claimed.title || 'Candidate'}</p>
+              <p className="mt-1 text-xs text-text-muted">
+                {[recommendation.candidate.country, recommendation.candidate.timezone].filter(Boolean).join(' · ') || 'Location not provided'}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 rounded-full bg-status-success-soft px-2.5 py-1 text-xs font-medium text-status-success">
+              <Star className="size-3.5" /> {recommendation.label}
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {recommendation.claimed.skills.slice(0, 10).map((skill) => (
+              <span key={skill} className="rounded-full bg-status-info-soft px-2 py-1 text-xs text-brand-accent">{skill}</span>
+            ))}
+            {recommendation.claimed.skills.length === 0 && <span className="text-xs text-text-muted">No claimed skills recorded.</span>}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <EvidencePill label="Trust" value={recommendation.verified.trustScore == null ? 'Missing' : recommendation.verified.trustScore} />
+            <EvidencePill label="Execution" value={recommendation.observed.executionScore == null ? 'Missing' : Math.round(recommendation.observed.executionScore)} />
+            <EvidencePill label="Reliability" value={recommendation.observed.deliveryReliability == null ? 'Missing' : `${Math.round(recommendation.observed.deliveryReliability)}%`} />
+            <EvidencePill label="Availability" value={recommendation.claimed.availabilityHours == null ? 'Missing' : `${recommendation.claimed.availabilityHours}h`} />
+          </div>
+
+          {dimensions.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {dimensions.map(([key, dimension]) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-text-secondary">{recommendation.strengths.find((item) => item.dimension === key)?.label || key.replace(/([A-Z])/g, ' $1')}</span>
+                    <span className="font-semibold tabular-nums text-text-primary">{Math.round(dimension.value || 0)}%</span>
+                  </div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-secondary">
+                    <div className="h-full rounded-full bg-violet-500" style={{ width: `${Math.max(0, Math.min(100, dimension.value || 0))}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {recommendation.reasons.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {recommendation.reasons.map((reason) => (
+                <span key={reason} className="rounded-full border border-status-success bg-status-success-soft px-2 py-1 text-[10px] font-medium text-status-success">{reason}</span>
+              ))}
+            </div>
+          )}
+
+          {recommendation.concerns.length > 0 && (
+            <div className="mt-3 rounded-lg border border-status-warning bg-status-warning-soft px-3 py-2 text-[11px] text-status-warning">
+              {recommendation.concerns.map((concern) => `${concern.label}: ${concern.reason}`).join(' ')}
+            </div>
+          )}
+
+          {recommendation.missingEvidence.length > 0 && (
+            <p className="mt-2 text-[11px] text-text-muted">
+              Missing evidence: {recommendation.missingEvidence.map((item) => item.label).join(', ')}
+            </p>
+          )}
+
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              disabled={invited || inviting}
+              onClick={onInvite}
+              className="flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {invited ? <CheckCircle2 className="size-4" /> : <Mail className="size-4" />}
+              {invited ? 'Invitation sent' : inviting ? 'Sending…' : 'Invite to co-founder discussion'}
+            </button>
+            <button
+              type="button"
+              onClick={onCompare}
+              className={`flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium ${compared ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-border-default text-text-secondary'}`}
+            >
+              <GitCompare className="size-4" /> {compared ? 'Selected to compare' : 'Compare'}
+            </button>
+            <button
+              type="button"
+              onClick={() => window.open(`/founder/messages?recipient=${encodeURIComponent(recommendation.candidate.id)}`, '_self')}
+              className="flex items-center justify-center gap-2 rounded-lg bg-surface-secondary px-4 py-2 text-sm font-medium text-text-secondary"
+            >
+              <MessageCircle className="size-4" /> Message
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
 export default function MatchResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -118,10 +280,26 @@ export default function MatchResults() {
   const [workspaces, setWorkspaces] = useState<WorkspaceRef[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
   const [workspaceAccess, setWorkspaceAccess] = useState<"contributor" | "viewer">("contributor");
+  const [relationshipType, setRelationshipType] = useState<"collaborator" | "co_founder">(
+    searchParams.get("relationshipType") === "co_founder" ? "co_founder" : "collaborator",
+  );
+  const [cofounderProjectId, setCofounderProjectId] = useState(searchParams.get("project") || "");
+  const [cofounderRequirement, setCofounderRequirement] = useState<CofounderRequirement | null>(null);
+  const [cofounderResults, setCofounderResults] = useState<CofounderRecommendationsResponse | null>(null);
+  const [cofounderRefresh, setCofounderRefresh] = useState(0);
+  const [cofounderInvitedIds, setCofounderInvitedIds] = useState<Set<string>>(new Set());
+  const [cofounderInvitingId, setCofounderInvitingId] = useState<string | null>(null);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
   const invitationDraft = useMemo<CollaborationInviteDraft | null>(
     () => projectId ? loadCollaborationInvite(projectId) : null,
     [projectId],
   );
+  const primaryVentureId = founderProfile.founderProjects.find((venture) => venture.isPrimary)?.id
+    || founderProfile.founderProjects[0]?.id
+    || "";
+  const effectiveCofounderProjectId = cofounderProjectId || projectId || primaryVentureId;
+  const selectedCofounderProject = founderProfile.founderProjects.find((venture) => venture.id === effectiveCofounderProjectId) || null;
 
   useEffect(() => {
     if (invitationDraft && validationStoryDue()) {
@@ -131,6 +309,7 @@ export default function MatchResults() {
   }, [invitationDraft]);
 
   useEffect(() => {
+    if (relationshipType === "co_founder") return;
     let alive = true;
     setLoading(true);
     setError(null);
@@ -173,7 +352,52 @@ export default function MatchResults() {
         if (alive) setLoading(false);
       });
     return () => { alive = false; };
-    }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft, projectId]);
+    }, [authProfile?.country, authProfile?.timezone, hackathonId, invitationDraft, projectId, relationshipType]);
+
+  useEffect(() => {
+    if (relationshipType !== "co_founder") return;
+    if (!cofounderFrontendEnabled()) {
+      setLoading(false);
+      setError("Co-founder Mode is not enabled for this frontend deployment.");
+      return;
+    }
+    if (!effectiveCofounderProjectId) {
+      setLoading(false);
+      setCofounderRequirement(null);
+      setCofounderResults(null);
+      setError(null);
+      return;
+    }
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    setMatches([]);
+    setHackathon(null);
+    fetchCofounderRequirements(effectiveCofounderProjectId)
+      .then(async (requirementResult) => {
+        if (!alive) return;
+        setCofounderRequirement(requirementResult.requirement);
+        if (!requirementResult.requirement) {
+          setCofounderResults(null);
+          return;
+        }
+        const results = await fetchCofounderRecommendations(effectiveCofounderProjectId, {
+          requirementId: requirementResult.requirement.id,
+          requirementVersion: requirementResult.requirement.version,
+          limit: 50,
+        });
+        if (alive) setCofounderResults(results);
+      })
+      .catch((loadError) => {
+        if (!alive) return;
+        setCofounderResults(null);
+        setError(loadError instanceof Error ? loadError.message : "Co-founder recommendations are unavailable.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, [cofounderRefresh, effectiveCofounderProjectId, relationshipType]);
 
   useEffect(() => {
     if (!projectName) {
@@ -270,6 +494,47 @@ export default function MatchResults() {
     }
   };
 
+  const handleCofounderInvite = async (recommendation: CofounderRecommendation) => {
+    if (!cofounderRequirement || !effectiveCofounderProjectId) {
+      toast.error("Save co-founder requirements before sending an invitation.");
+      return;
+    }
+    setCofounderInvitingId(recommendation.candidate.id);
+    try {
+      await createCofounderInvitation({
+        idempotencyKey: `cofounder-invite-${effectiveCofounderProjectId}-${recommendation.candidate.id}-${cofounderRequirement.version}`,
+        projectId: effectiveCofounderProjectId,
+        candidateId: recommendation.candidate.id,
+        roleTitle: cofounderRequirement.roleTitle || recommendation.candidate.title || "Co-founder",
+        responsibilities: cofounderRequirement.responsibilities,
+        commitment: cofounderRequirement.commitment,
+        ventureStage: cofounderRequirement.ventureStage,
+        initialPeriodMonths: 3,
+        equityDiscussionStatus: String(cofounderRequirement.compatibility?.equityDiscussionPreference || "to_be_discussed"),
+        proposedTerms: {
+          roleTitle: cofounderRequirement.roleTitle,
+          responsibilities: cofounderRequirement.responsibilities,
+          commitment: cofounderRequirement.commitment,
+          ventureStage: cofounderRequirement.ventureStage,
+          initialPeriodMonths: 3,
+          equityDiscussionStatus: String(cofounderRequirement.compatibility?.equityDiscussionPreference || "to_be_discussed"),
+        },
+      });
+      setCofounderInvitedIds((current) => new Set(current).add(recommendation.candidate.id));
+      toast.success(`Co-founder discussion invitation sent to ${recommendation.candidate.name}.`);
+    } catch (inviteError) {
+      toast.error(inviteError instanceof Error ? inviteError.message : "The co-founder invitation could not be sent.");
+    } finally {
+      setCofounderInvitingId(null);
+    }
+  };
+
+  const toggleCompare = (candidateId: string) => {
+    setCompareIds((current) => current.includes(candidateId)
+      ? current.filter((id) => id !== candidateId)
+      : [...current, candidateId].slice(-4));
+  };
+
   return (
     <div className="min-h-screen w-full bg-background text-foreground">
       <main className="flex-1 overflow-y-auto bg-linear-to-b from-slate-100 via-indigo-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-6 lg:py-12">
@@ -277,14 +542,32 @@ export default function MatchResults() {
           {/* Header */}
           <div className="mb-6 lg:mb-8">
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-              Collaborator Directory
+              {relationshipType === "co_founder" ? "Co-founder Discovery" : "Collaborator Directory"}
             </h1>
             <p className="text-sm lg:text-base text-muted-foreground">
-              Live collaborator profiles from the authenticated TechIT directory
+              {relationshipType === "co_founder"
+                ? "Deterministic, relationship-aware co-founder recommendations"
+                : "Live collaborator profiles from the authenticated TechIT directory"}
             </p>
+            <div className="mt-4 inline-flex rounded-xl border border-border-default bg-surface-primary p-1">
+              <button
+                type="button"
+                onClick={() => { setRelationshipType("collaborator"); setError(null); }}
+                className={`rounded-lg px-3 py-2 text-xs font-medium ${relationshipType === "collaborator" ? "bg-brand-accent text-white" : "text-text-secondary"}`}
+              >
+                Core Team Member
+              </button>
+              <button
+                type="button"
+                onClick={() => { setRelationshipType("co_founder"); setError(null); }}
+                className={`rounded-lg px-3 py-2 text-xs font-medium ${relationshipType === "co_founder" ? "bg-violet-600 text-white" : "text-text-secondary"}`}
+              >
+                Co-founder
+              </button>
+            </div>
           </div>
 
-          {invitationDraft && (
+          {relationshipType === "collaborator" && invitationDraft && (
             <div className="mb-6 rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm text-violet-950">
               <p className="font-semibold">Profile-based matches for {invitationDraft.projectName}</p>
               <p className="mt-1 text-xs text-violet-800">{invitationDraft.summary}</p>
@@ -309,8 +592,93 @@ export default function MatchResults() {
             </div>
           )}
 
+          {relationshipType === "co_founder" && (
+            <div className="mb-6 space-y-4">
+              <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm text-violet-950 dark:border-violet-900/60 dark:bg-violet-950/20 dark:text-violet-100">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="font-semibold">Co-founder fit is calculated only by the backend.</p>
+                    <p className="mt-1 text-xs opacity-80">Ranking uses the versioned {cofounderResults?.policy.version || "cofounder-fit-v1"} policy. Missing compatibility evidence stays missing and is never imputed.</p>
+                  </div>
+                  {founderProfile.founderProjects.length > 0 && (
+                    <label className="text-xs font-semibold">
+                      Venture
+                      <select
+                        value={effectiveCofounderProjectId}
+                        onChange={(event) => {
+                          setCofounderProjectId(event.target.value);
+                          setCompareIds([]);
+                          setComparisonOpen(false);
+                        }}
+                        className="mt-1 w-full rounded-lg border border-violet-200 bg-surface-primary px-3 py-2 text-sm text-text-primary sm:w-64"
+                      >
+                        {founderProfile.founderProjects.map((venture) => (
+                          <option key={venture.id} value={venture.id}>{venture.title}</option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                </div>
+                {cofounderResults && (
+                  <div className="mt-3 flex flex-wrap gap-3 text-[11px] opacity-80">
+                    <span>Requirement v{cofounderResults.requirementVersion}</span>
+                    <span>{cofounderResults.meta.returned as number} of {cofounderResults.meta.totalCandidates as number} eligible candidates</span>
+                    <span>{cofounderResults.context.roleTitle ? String(cofounderResults.context.roleTitle) : "Role title not set"}</span>
+                    <span>{typeof cofounderResults.context.commitment === "object" ? formatCommitment(cofounderResults.context.commitment as Record<string, unknown>) : "Commitment not specified"}</span>
+                  </div>
+                )}
+              </div>
+
+              {effectiveCofounderProjectId ? (
+                <CoFounderRequirementBuilder
+                  key={effectiveCofounderProjectId}
+                  ventureId={effectiveCofounderProjectId}
+                  compact
+                  onSaved={(requirement) => {
+                    setCofounderRequirement(requirement);
+                    setCofounderRefresh((current) => current + 1);
+                  }}
+                />
+              ) : (
+                <div className="rounded-xl border border-border-default bg-surface-primary p-5 text-sm text-text-muted">
+                  Create or analyze a venture before running co-founder discovery.
+                </div>
+              )}
+
+              {cofounderResults?.recommendedCandidate && (
+                <div className="rounded-xl border border-status-success bg-status-success-soft p-4 text-sm text-status-success">
+                  <p className="font-semibold">Highest deterministic fit: {cofounderResults.recommendedCandidate.name}</p>
+                  <p className="mt-1 text-xs">{cofounderResults.recommendedCandidate.explanation}</p>
+                  {cofounderResults.recommendedCandidate.missingEvidence.length > 0 && (
+                    <p className="mt-1 text-[11px]">Missing evidence: {cofounderResults.recommendedCandidate.missingEvidence.map((item) => item.label).join(", ")}</p>
+                  )}
+                </div>
+              )}
+
+              {compareIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setComparisonOpen((current) => !current)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-3 py-2 text-xs font-medium text-white"
+                >
+                  <GitCompare className="size-4" /> {comparisonOpen ? "Hide comparison" : `Compare selected (${compareIds.length})`}
+                </button>
+              )}
+
+              {comparisonOpen && cofounderResults && (
+                <CoFounderComparison
+                  recommendations={cofounderResults.recommendations}
+                  candidateIds={compareIds}
+                  onClose={() => setComparisonOpen(false)}
+                  onInvite={(recommendation) => void handleCofounderInvite(recommendation)}
+                  invitationDisabled={!cofounderRequirement}
+                />
+              )}
+            </div>
+          )}
+
           {/* Project + Equity Allocation Summary */}
-          <div className="bg-card rounded-xl border border-border p-4 lg:p-5 mb-6 lg:mb-8">
+          {relationshipType === "collaborator" && <div className="bg-card rounded-xl border border-border p-4 lg:p-5 mb-6 lg:mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex-1">
                 <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
@@ -375,13 +743,13 @@ export default function MatchResults() {
                 Total equity exceeds 100%. Reduce one or more proposals before generating contracts.
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Match Cards Grid */}
-          {hackathonId && <HackathonMatchBanner hackathon={hackathon} teamName={registration?.teamName ?? null} />}
+          {relationshipType === "collaborator" && hackathonId && <HackathonMatchBanner hackathon={hackathon} teamName={registration?.teamName ?? null} />}
           {loading && (
             <div className="border border-border rounded-xl bg-card p-8 text-center">
-              <p className="text-sm text-muted-foreground">Loading live collaborator profiles...</p>
+              <p className="text-sm text-muted-foreground">{relationshipType === "co_founder" ? "Computing deterministic co-founder matches..." : "Loading live collaborator profiles..."}</p>
             </div>
           )}
           {!loading && error && (
@@ -389,17 +757,35 @@ export default function MatchResults() {
               {error}
             </div>
           )}
-          {!loading && !error && visibleMatches.length === 0 && (
+          {!loading && !error && (relationshipType === "co_founder" ? !cofounderResults?.recommendations.length : visibleMatches.length === 0) && (
             <div className="border border-border-default rounded-xl bg-surface-primary p-8 text-center">
               <p className="text-sm text-text-secondary font-medium">
-                {hackathonId
-                  ? "No live collaborator profiles match the team's open roles."
-                  : "No collaborator profiles are available yet."}
+                {relationshipType === "co_founder"
+                  ? !effectiveCofounderProjectId
+                    ? "Select or create a venture to begin co-founder discovery."
+                    : !cofounderRequirement
+                      ? "Save the explicit co-founder requirements to generate matches."
+                      : "No eligible co-founder candidates are available for this requirement yet."
+                  : hackathonId
+                    ? "No live collaborator profiles match the team's open roles."
+                    : "No collaborator profiles are available yet."}
               </p>
             </div>
           )}
           <div className="grid gap-6">
-            {visibleMatches.map((match, index) => {
+            {relationshipType === "co_founder" ? (
+              (cofounderResults?.recommendations || []).map((recommendation) => (
+                <CofounderCandidateCard
+                  key={recommendation.candidate.id}
+                  recommendation={recommendation}
+                  invited={cofounderInvitedIds.has(recommendation.candidate.id)}
+                  inviting={cofounderInvitingId === recommendation.candidate.id}
+                  compared={compareIds.includes(recommendation.candidate.id)}
+                  onInvite={() => void handleCofounderInvite(recommendation)}
+                  onCompare={() => toggleCompare(recommendation.candidate.id)}
+                />
+              ))
+            ) : visibleMatches.map((match, index) => {
               const pct = equity[match.id] ?? 0;
               const invitationRole = registration ? matchingOpenRole(match, registration.openRoles) : "";
               const inviting = invitingIds.has(match.id);

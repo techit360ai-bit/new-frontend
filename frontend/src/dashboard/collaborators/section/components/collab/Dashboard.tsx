@@ -11,6 +11,7 @@ import { fetchCollaboratorSummary, type CollaboratorLiveSummary } from "@/lib/ap
 import { patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
 import { WelcomeBack } from "@/components/WelcomeBack";
 import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
+import { CoFounderRelationshipCard } from "@/dashboard/_shared/cofounder/CoFounderRelationshipCard";
 
 interface BuildSummary {
   id: string;
@@ -149,6 +150,8 @@ export function Dashboard() {
 
       {/* Welcome Back — contextual intelligence surface */}
       <WelcomeBack />
+
+      <CoFounderRelationshipCard />
 
       {/* Execution intelligence — the collaborator's own canonical view (WS-H) */}
       <ExecutionIntelligencePanel role="collaborator" />

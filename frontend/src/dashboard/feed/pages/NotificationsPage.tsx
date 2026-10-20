@@ -10,6 +10,7 @@ import {
   CheckCheck,
   AtSign,
   Star,
+  Handshake,
 } from 'lucide-react';
 import {
   listFeedNotifications,
@@ -32,6 +33,7 @@ const TYPE_CONFIG: Record<FeedNotificationType, { icon: React.ReactNode; label: 
   fire: { icon: <Flame className="h-3.5 w-3.5" />, label: 'Reactions' },
   comment: { icon: <MessageCircle className="h-3.5 w-3.5" />, label: 'Comments' },
   collab: { icon: <Users className="h-3.5 w-3.5" />, label: 'Collab' },
+  cofounder: { icon: <Handshake className="h-3.5 w-3.5" />, label: 'Co-founder' },
   gsis: { icon: <ArrowUp className="h-3.5 w-3.5" />, label: 'GSIS' },
   milestone: { icon: <Zap className="h-3.5 w-3.5" />, label: 'Milestones' },
   mention: { icon: <AtSign className="h-3.5 w-3.5" />, label: 'Mentions' },
@@ -105,6 +107,7 @@ export function NotificationsPage() {
     { id: 'comment', label: 'Comments' },
     { id: 'fire', label: 'Reactions' },
     { id: 'collab', label: 'Collab' },
+    { id: 'cofounder', label: 'Co-founder' },
     { id: 'mention', label: 'Mentions' },
     { id: 'gsis', label: 'GSIS' },
   ];

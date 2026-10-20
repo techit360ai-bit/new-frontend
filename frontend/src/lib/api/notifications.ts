@@ -14,7 +14,7 @@ const BACKEND_API_BASE_URL =
   (env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/$/, '');
 
 export type WorkspaceNotificationType = 'message' | 'mention' | 'pr' | 'build' | 'meeting' | 'system';
-export type FeedNotificationType = 'fire' | 'comment' | 'collab' | 'gsis' | 'milestone' | 'mention' | 'answer';
+export type FeedNotificationType = 'fire' | 'comment' | 'collab' | 'cofounder' | 'gsis' | 'milestone' | 'mention' | 'answer';
 
 export interface WorkspaceNotification {
   id: string;
@@ -58,6 +58,7 @@ const FEED_NOTIFICATION_TYPES = new Set<FeedNotificationType>([
   'fire',
   'comment',
   'collab',
+  'cofounder',
   'gsis',
   'milestone',
   'mention',
