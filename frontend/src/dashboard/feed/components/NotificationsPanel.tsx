@@ -1,4 +1,4 @@
-import { X, Bell, CheckCheck, Flame, MessageCircle, Users, ArrowUp, Zap, AtSign, Star } from 'lucide-react';
+import { X, Bell, CheckCheck, Flame, MessageCircle, Users, ArrowUp, Zap, AtSign, Star, Handshake } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import type { FeedNotification, FeedNotificationType } from '@/lib/api/notifications';
@@ -8,6 +8,7 @@ function NotificationIcon({ type }: { type: FeedNotificationType }) {
     fire: <Flame className="h-3 w-3" />,
     comment: <MessageCircle className="h-3 w-3" />,
     collab: <Users className="h-3 w-3" />,
+    cofounder: <Handshake className="h-3 w-3" />,
     gsis: <ArrowUp className="h-3 w-3" />,
     milestone: <Zap className="h-3 w-3" />,
     mention: <AtSign className="h-3 w-3" />,

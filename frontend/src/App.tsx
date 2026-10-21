@@ -31,6 +31,8 @@ const IncubationHub = lazy(() => import("@/dashboard/incubationHub"));
 const PublicValidation = lazy(() => import("@/dashboard/PublicValidation"));
 const PublicEvidenceSummary = lazy(() => import("@/dashboard/PublicEvidenceSummary"));
 const MatchResults = lazy(() => import("@/dashboard/matchResults"));
+const CoFounderInvitationPage = lazy(() => import("@/dashboard/_shared/cofounder/CoFounderInvitationPage").then((m) => ({ default: m.CoFounderInvitationPage })));
+const CoFounderWorkspace = lazy(() => import("@/dashboard/_shared/cofounder/CoFounderWorkspace").then((m) => ({ default: m.CoFounderWorkspace })));
 const OpportunityHub = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityHub"));
 const OpportunityDetail = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityDetail"));
 const InviteAcceptPage = lazy(() => import("@/dashboard/founders/section/components/founder/InviteAcceptPage"));
@@ -286,6 +288,7 @@ const App = () => {
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
         <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
+        <Route path="/cofounder-invitations/:relationshipId" element={<RequireAuth><CoFounderInvitationPage /></RequireAuth>} />
 
         <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
           <Route path="/founder/dashboard" element={<Dashboard />} />
@@ -318,6 +321,7 @@ const App = () => {
         {/* Collaborative Project Workspace */}
         <Route path="/workspaces" element={<RequireAuth><WorkspacesLayout /></RequireAuth>}>
           <Route index element={<Navigate to="build" replace />} />
+          <Route path="cofounder/:relationshipId" element={<CoFounderWorkspace />} />
           <Route path="build" element={<WsBuild />} />
           <Route path="code" element={<CodeErrorBoundary><WsCode /></CodeErrorBoundary>} />
           <Route path="connectors" element={<WsConnectors />} />

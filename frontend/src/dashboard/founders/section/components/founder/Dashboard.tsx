@@ -21,6 +21,7 @@ import { fetchFounderOpportunityCatalog } from "@/lib/api/opportunities";
 import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/momentum";
 import { WelcomeBack } from "@/components/WelcomeBack";
 import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
+import { CoFounderMode } from "@/dashboard/_shared/cofounder/CoFounderMode";
 import {
   deriveFounderSignals,
   deriveJourney,
@@ -300,6 +301,8 @@ export function Dashboard() {
 
       {/* Welcome Back — contextual intelligence surface */}
       <WelcomeBack />
+
+      <CoFounderMode ventureId={activeVenture?.id ?? null} />
 
       {/* Execution intelligence — the canonical workspace view every surface shares (WS-H) */}
       <ExecutionIntelligencePanel role="founder" />
