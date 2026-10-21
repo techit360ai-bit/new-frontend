@@ -37,6 +37,7 @@ import {
   createCofounderInvitation,
   fetchCofounderRecommendations,
   fetchCofounderRequirements,
+  recordCofounderCandidateEvent,
 } from "@/lib/api/cofounder";
 import { CoFounderComparison } from "@/dashboard/_shared/cofounder/CoFounderComparison";
 import { CoFounderRequirementBuilder } from "@/dashboard/_shared/cofounder/CoFounderRequirementBuilder";
@@ -386,7 +387,17 @@ export default function MatchResults() {
           requirementVersion: requirementResult.requirement.version,
           limit: 50,
         });
-        if (alive) setCofounderResults(results);
+        if (alive) {
+          setCofounderResults(results);
+          const candidateIds = results.recommendations.map((row) => row.candidate.id).slice(0, 20);
+          if (candidateIds.length > 0) {
+            void recordCofounderCandidateEvent('cofounder_candidate_viewed', {
+              projectId: effectiveCofounderProjectId,
+              candidateIds,
+              requirementVersion: results.requirementVersion,
+            }).catch(() => {});
+          }
+        }
       })
       .catch((loadError) => {
         if (!alive) return;
@@ -530,9 +541,17 @@ export default function MatchResults() {
   };
 
   const toggleCompare = (candidateId: string) => {
-    setCompareIds((current) => current.includes(candidateId)
-      ? current.filter((id) => id !== candidateId)
-      : [...current, candidateId].slice(-4));
+    const next = compareIds.includes(candidateId)
+      ? compareIds.filter((id) => id !== candidateId)
+      : [...compareIds, candidateId].slice(-4);
+    setCompareIds(next);
+    if (next.includes(candidateId) && cofounderResults) {
+      void recordCofounderCandidateEvent('cofounder_candidate_compared', {
+        projectId: effectiveCofounderProjectId,
+        candidateIds: next,
+        requirementVersion: cofounderResults.requirementVersion,
+      }).catch(() => {});
+    }
   };
 
   return (

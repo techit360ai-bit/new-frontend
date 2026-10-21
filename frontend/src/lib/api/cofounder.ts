@@ -60,6 +60,15 @@ export function fetchCofounderRecommendations(
   )
 }
 
+export type CofounderCandidateEvent = 'cofounder_candidate_viewed' | 'cofounder_candidate_compared'
+
+export function recordCofounderCandidateEvent(
+  eventType: CofounderCandidateEvent,
+  body: { projectId: string; candidateIds: string[]; requirementVersion?: number },
+): Promise<{ ok: boolean; recorded: boolean }> {
+  return apiPost(`${BASE}/events`, { eventType, ...body })
+}
+
 export function createCofounderInvitation(body: Record<string, unknown>): Promise<{ ok: boolean; relationship: CofounderRelationship; idempotent?: boolean }> {
   return apiPost(`${BASE}/invitations`, body)
 }
