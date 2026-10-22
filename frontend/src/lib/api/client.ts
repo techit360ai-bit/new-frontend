@@ -148,9 +148,10 @@ export async function apiDelete<T>(path: string, init?: RequestInit): Promise<T>
   return requestWithRefresh<T>(path, init || {}, 'DELETE')
 }
 
+function csrfHeaders(): Record<string, string> { try { const c = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf=')); if (c) return { 'X-CSRF-Token': decodeURIComponent(c.slice('techit_csrf='.length)) } } catch {} return {} }
 export async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
-  refreshPromise = fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' } })
+  refreshPromise = fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json', ...csrfHeaders() } })
     .then(async response => { if (!response.ok) return null; const data = await response.json() as { token?: string }; setAccessToken(data.token || null); return data.token || null })
     .catch(() => null)
     .finally(() => { refreshPromise = null });
