@@ -63,7 +63,7 @@
     "js-yaml": "4.3.2",
     "livekit-client": "^2.22.2",
     "lucide-react": "^0.563.0",
-    "motion": "^12.38.0",
+    "motion": "^14.6.0",
     "nanoid": "3.3.18",
     "node-diff3": "^3.2.1",
     "postcss": "8.5.28",
