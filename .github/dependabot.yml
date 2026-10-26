@@ -12,6 +12,23 @@ updates:
       # range required by vitest 5 and supported by the current plugins.
       - dependency-name: "vite"
         update-types: ["version-update:semver-major"]
+      # Major bumps that broke `npm ci` / the build when merged unreviewed
+      # (Oct 2026): typescript 7 and @eslint/js 10 are outside typescript-eslint
+      # 8's peer range; lucide-react 1.x removed the brand icons (Github, Linkedin,
+      # Twitter, Gitlab, Figma) the app imports; react-router 8 and js-yaml 5 were
+      # reverted in the same restore. Each needs a deliberate, tested migration.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-router"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-router-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "js-yaml"
+        update-types: ["version-update:semver-major"]
     groups:
       # react-router and react-router-dom must move together: a mismatched pair
       # installs two react-router copies and crashes every route at runtime.
