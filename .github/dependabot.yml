@@ -29,6 +29,15 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "js-yaml"
         update-types: ["version-update:semver-major"]
+      # eslint 10 sits outside the typescript-eslint / react-hooks plugin range we
+      # pin; date-fns 4 and react-day-picker 10 change the date UI and must move
+      # together. Each needs a deliberate, tested migration.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "date-fns"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-day-picker"
+        update-types: ["version-update:semver-major"]
     groups:
       # react-router and react-router-dom must move together: a mismatched pair
       # installs two react-router copies and crashes every route at runtime.
