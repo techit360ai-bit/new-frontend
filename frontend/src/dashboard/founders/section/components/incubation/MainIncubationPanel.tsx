@@ -628,13 +628,27 @@ export function MainIncubationPanel() {
           {/* Success Banner */}
           {blueprintData && projectId && (
             <div className="mb-6 border border-status-success bg-status-success-soft rounded-lg p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-status-success" />
                   <div>
                     <p className="font-semibold text-emerald-900">{ventureName} analyzed successfully</p>
                     <p className="text-xs text-status-success">Project ID: {projectId}</p>
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => navigate("/opportunity-hub")}
+                    className="px-3 py-1.5 bg-violet-600 text-white text-xs font-semibold rounded-lg hover:bg-violet-700"
+                  >
+                    Find Collaborators
+                  </button>
+                  <button
+                    onClick={() => navigate("/opportunity-hub")}
+                    className="px-3 py-1.5 bg-emerald-700 text-white text-xs font-semibold rounded-lg hover:bg-emerald-800"
+                  >
+                    List an Opportunity (Free)
+                  </button>
                 </div>
               </div>
             </div>
