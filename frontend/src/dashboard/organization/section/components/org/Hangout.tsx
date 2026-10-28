@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function Hangout() { return <LiveCollectionPage section="community" title="Hangout" description="Publish and manage organization community updates." itemLabel="Post" fields={[{ key: "title", label: "Post title" }, { key: "content", label: "Content", multiline: true }, { key: "visibility", label: "Visibility", placeholder: "public or internal" }, { key: "topic", label: "Topic" }]} />; }

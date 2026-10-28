@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function Marketplace() { return <LiveCollectionPage section="marketplace" title="Marketplace" description="Manage real organization marketplace listings and partnerships." itemLabel="Listing" fields={[{ key: "name", label: "Listing name" }, { key: "description", label: "Description", multiline: true }, { key: "category", label: "Category" }, { key: "url", label: "Product URL", type: "url" }]} />; }

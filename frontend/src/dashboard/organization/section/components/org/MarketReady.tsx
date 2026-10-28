@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function MarketReady() { return <LiveCollectionPage section="market-readiness" title="Market Ready" description="Track readiness assessments from persisted organization records." itemLabel="Assessment" fields={[{ key: "name", label: "Project or assessment" }, { key: "description", label: "Assessment notes", multiline: true }, { key: "score", label: "Readiness score", type: "number" }, { key: "stage", label: "Stage" }]} />; }

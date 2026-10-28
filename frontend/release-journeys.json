@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "journeys": [
+    {
+      "id": "auth-account-recovery",
+      "description": "Signup, login, session restore, password reset, and logout boundaries.",
+      "routes": ["/signup", "/signin", "/forgot-password", "/reset-password"],
+      "apiModules": ["src/contexts/AuthContext.tsx"],
+      "tests": [
+        "src/components/auth/RouteGuards.test.ts",
+        "src/lib/api/client.test.ts"
+      ]
+    },
+    {
+      "id": "onboarding-role-access",
+      "description": "Role onboarding, dashboard redirects, and forbidden role access.",
+      "routes": [
+        "/founder/onboarding/step-1",
+        "/collaborator/onboarding/step-1",
+        "/investor/onboarding/step-1",
+        "/org/onboarding/step-1",
+        "/dashboard",
+        "/collaborator/dashboard",
+        "/investor/dashboard",
+        "/org/dashboard"
+      ],
+      "apiModules": ["src/components/auth/RouteGuards.tsx"],
+      "tests": ["src/components/auth/RouteGuards.test.ts"]
+    },
+    {
+      "id": "messaging-feed-demo",
+      "description": "Messaging, feed, demo room, Q&A, RTC token, and WebSocket state.",
+      "routes": ["/feed", "/demos", "/demos/new", "/demos/:id"],
+      "apiModules": [
+        "src/lib/messaging/client.ts",
+        "src/lib/messaging/ws.ts",
+        "src/lib/demo/client.ts",
+        "src/lib/demo/qa.ts",
+        "src/lib/demo/rtc.ts"
+      ],
+      "tests": [
+        "src/lib/messaging/client.test.ts",
+        "src/lib/messaging/wsReducer.test.ts",
+        "src/lib/demo/client.test.ts",
+        "src/lib/demo/qa.test.ts",
+        "src/lib/demo/rtc.test.ts"
+      ]
+    },
+    {
+      "id": "ai-request-credit",
+      "description": "AI-backed dashboard/workspace requests route through the ai-router client.",
+      "routes": ["/workspaces", "/workspaces/agents", "/investor/deal-intelligence"],
+      "apiModules": [
+        "src/lib/api/client.ts",
+        "src/lib/api/workspace.ts",
+        "src/lib/api/dealFlow.ts"
+      ],
+      "tests": [
+        "src/lib/api/client.test.ts",
+        "src/lib/api/health.test.ts"
+      ]
+    },
+    {
+      "id": "mcp-access-approval",
+      "description": "Plugin/MCP health, tools, invocation, approval, and audit surfaces.",
+      "routes": ["/plugins", "/workspaces/connectors", "/workspaces/github"],
+      "apiModules": ["src/lib/techitApi.ts"],
+      "tests": ["src/lib/techitApi.test.ts"]
+    }
+  ]
+}

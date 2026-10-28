@@ -1,0 +1,12 @@
+import { useEffect, useState } from 'react'
+import { ArrowUpRight, Gauge } from 'lucide-react'
+import { fetchNextBestAction, fetchProgress, type TvceProgress } from '@/lib/api/tvce'
+
+export function ProgressMeter() {
+  const [progress, setProgress] = useState<TvceProgress | null>(null)
+  const [next, setNext] = useState<{ action: string; reason: string; expectedValue: string; metering: string; usageEstimateRequired: boolean } | null>(null)
+  useEffect(() => { let active = true; Promise.all([fetchProgress(), fetchNextBestAction()]).then(([meter, action]) => { if (!active) return; setProgress(meter); setNext(action) }).catch(() => undefined); return () => { active = false } }, [])
+  if (!progress) return null
+  const rows = [['Idea clarity', progress.meter.ideaClarity], ['Validation', progress.meter.validation], ['Execution readiness', progress.meter.executionReadiness], ['Investor readiness', progress.meter.investorReadiness]] as const
+  return <section className="rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl p-6 shadow-xl"><div className="flex items-center gap-2.5"><div className="rounded-xl bg-emerald-500/10 p-2 text-emerald-400 ring-1 ring-emerald-500/20"><Gauge className="h-5 w-5" /></div><h2 className="font-bricolage text-lg font-bold text-slate-100">TechIT progress</h2></div><div className="mt-5 grid gap-4 sm:grid-cols-2">{rows.map(([label, value]) => <div key={label}><div className="mb-1.5 flex justify-between text-xs"><span className="text-slate-400 font-medium">{label}</span><span className="font-semibold text-emerald-400">{value}%</span></div><div className="h-2.5 overflow-hidden rounded-full bg-slate-800"><div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style={{ width: `${value}%` }} /></div></div>)}</div>{next && <div className="mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-bricolage">Next best action</p><p className="mt-1 font-semibold text-slate-100 capitalize">{next.action.replaceAll('_', ' ')}</p><p className="mt-1 text-xs text-slate-300">{next.reason}</p></div><ArrowUpRight className="h-4 w-4 text-emerald-400 shrink-0" /></div><p className="mt-2.5 text-xs text-slate-400">{next.expectedValue}{next.usageEstimateRequired ? ' · usage is metered at runtime' : ''}</p></div>}</section>
+}

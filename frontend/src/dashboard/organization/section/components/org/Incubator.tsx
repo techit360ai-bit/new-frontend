@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function Incubator() { return <LiveCollectionPage section="programs" title="Incubator" description="Create and operate live incubation and accelerator programs." itemLabel="Program" fields={[{ key: "name", label: "Program name" }, { key: "description", label: "Description", multiline: true }, { key: "stage", label: "Stage" }, { key: "cohort", label: "Cohort" }, { key: "startDate", label: "Start date", type: "date" }]} />; }

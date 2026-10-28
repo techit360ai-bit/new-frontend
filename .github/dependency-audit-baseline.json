@@ -1,0 +1,10 @@
+{
+  "expires": "2026-09-30",
+  "knownPackages": {
+    "react-router": "Upgrade to a fixed 7.x release without bypassing route regression tests.",
+    "react-router-dom": "Upgrade with react-router as a coordinated pair.",
+    "vite": "Development/build-time advisory; upgrade separately with a Vite compatibility review.",
+    "nanoid": "Transitive build dependency; upgrade with lockfile validation.",
+    "postcss": "Transitive build dependency; upgrade with CSS build regression tests."
+  }
+}

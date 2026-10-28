@@ -1,0 +1,2 @@
+import { LiveCollectionPage } from "./LiveCollectionPage";
+export function AIOps() { return <LiveCollectionPage section="ai-operations" title="AI Operations" description="Live automation and agent operations owned by your organization." itemLabel="Operation" fields={[{ key: "name", label: "Operation name" }, { key: "description", label: "Description", multiline: true }, { key: "agent", label: "Agent" }, { key: "workflow", label: "Workflow" }]} />; }
