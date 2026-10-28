@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { Opportunity, OpportunityType, OpportunityStatus } from "@/dashboard/_shared/opportunities/types";
 import { fetchFounderOpportunityCatalog, createOpportunity, fetchEngagements, type Engagement, type Deliverable } from "@/lib/api/opportunities";
 import { OpportunityCard } from "./OpportunityCard";
+import OpportunityAdminMetrics from "./OpportunityAdminMetrics";
 import { useAuth } from "@/contexts/AuthContext";
 
 type TypeFilter = "all" | OpportunityType;
@@ -160,6 +161,8 @@ export default function OpportunityHub() {
           <Plus className="w-4 h-4" /> Post an Opportunity
         </button>
       </header>
+
+      <OpportunityAdminMetrics />
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex flex-wrap gap-2">
