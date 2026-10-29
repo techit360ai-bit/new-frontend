@@ -1,3 +1,5 @@
+import { OrganizationLicensingPanel } from "./OrganizationLicensingPanel";
+import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
@@ -153,6 +155,9 @@ export function Dashboard() {
       </div>
 
       <OrganizationIntelligencePanel />
+        <OrganizationLicensingPanel />
+        <ExecutionIntelligencePanel role="organisation" />
+
 
       {error && (
         <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400">

@@ -1,3 +1,4 @@
+import { CofounderProfileSettings } from "@/dashboard/_shared/cofounder/CofounderProfileSettings";
 // frontend/src/dashboard/collaborators/section/components/collab/Settings.tsx
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +34,7 @@ const subSkillsByDiscipline: Record<CollaboratorDiscipline, string[]> = {
 const sections = [
   { id: "identity",      label: "Account & Identity",   icon: User },
   { id: "skills",        label: "Skills & Availability", icon: Briefcase },
+  { id: "cofounder", label: "Co-founder Matching", icon: Briefcase },
   { id: "notifications", label: "Notifications",         icon: Bell },
   { id: "roles",         label: "Roles & Switching",     icon: UserCog },
 ];
@@ -102,10 +104,11 @@ export function Settings() {
   // Anchor scroll on mount
   const identityRef      = useRef<HTMLDivElement>(null);
   const skillsRef        = useRef<HTMLDivElement>(null);
+  const cofounderRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const rolesRef         = useRef<HTMLDivElement>(null);
   const sectionRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
-    identity: identityRef, skills: skillsRef, notifications: notificationsRef, roles: rolesRef,
+    identity: identityRef, skills: skillsRef, cofounder: cofounderRef, notifications: notificationsRef, roles: rolesRef,
   };
 
   useEffect(() => {
@@ -437,6 +440,8 @@ export function Settings() {
               </button>
             </div>
           </section>
+
+          <div ref={cofounderRef}><CofounderProfileSettings /></div>
 
           {/* Notifications */}
           <section ref={notificationsRef} id="notifications" className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 lg:p-7 shadow-sm">

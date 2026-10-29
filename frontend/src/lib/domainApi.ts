@@ -17,7 +17,8 @@ export const DOMAIN_API_BASE_URL =
 const DOMAIN_PREFIX = "/domain";
 
 function timeoutSignal(init?: RequestInit): AbortSignal {
-  return init?.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
+  const deadline = AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
+  return init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
 }
 
 function domainUrl(path: string): string {
@@ -29,6 +30,10 @@ function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   const token = getAuthToken();
   if (token) h.Authorization = `Bearer ${token}`;
+  try {
+    const cookie = document.cookie.split(';').map(value => value.trim()).find(value => value.startsWith('techit_csrf='));
+    if (cookie) h['X-CSRF-Token'] = decodeURIComponent(cookie.slice('techit_csrf='.length));
+  } catch { /* Non-browser callers have no CSRF cookie. */ }
   return { ...h, ...(extra as Record<string, string>) };
 }
 
@@ -44,6 +49,7 @@ async function parse<T>(res: Response): Promise<T> {
 export async function domainGet<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(domainUrl(path), {
     method: "GET",
+    credentials: "include",
     ...init,
     headers: headers(init?.headers),
     signal: timeoutSignal(init),
@@ -58,6 +64,7 @@ export async function domainPost<T>(
 ): Promise<T> {
   const res = await fetch(domainUrl(path), {
     method: "POST",
+    credentials: "include",
     ...init,
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -73,6 +80,7 @@ export async function domainPatch<T>(
 ): Promise<T> {
   const res = await fetch(domainUrl(path), {
     method: "PATCH",
+    credentials: "include",
     ...init,
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -87,6 +95,7 @@ export async function domainDelete<T>(
 ): Promise<T> {
   const res = await fetch(domainUrl(path), {
     method: "DELETE",
+    credentials: "include",
     ...init,
     headers: headers(init?.headers),
     signal: timeoutSignal(init),

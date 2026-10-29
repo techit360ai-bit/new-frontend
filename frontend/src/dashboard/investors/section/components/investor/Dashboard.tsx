@@ -1,3 +1,4 @@
+import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Shield, DollarSign, Activity, Zap, ArrowRight, Sparkles, X } from 'lucide-react';
@@ -79,6 +80,9 @@ export function Dashboard() {
       </div>
 
       <InvestorIntelligencePanel />
+
+        <ExecutionIntelligencePanel role="investor" />
+
 
       {thesisRecommendations.length > 0 && (
         <section className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] p-5 shadow-sm">

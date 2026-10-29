@@ -1,9 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test.setTimeout(90_000);
+
 async function openVerificationStep(page: Page) {
+  await page.route("https://fonts.googleapis.com/**", route => route.fulfill({ contentType: "text/css", body: "" }));
   await page.addInitScript(() => {
     localStorage.setItem("techit_cookie_consent", "essential-only");
   });
+  // Cookie-based bootstrap probes the server even when web storage is empty.
+  await page.route("**/auth/session", route => route.fulfill({ status: 401, json: { error: "unauthenticated" } }));
+  await page.route("**/auth/refresh", route => route.fulfill({ status: 401, json: { error: "unauthenticated" } }));
   await page.route("**/auth/send-otp", async (route) => {
     await route.fulfill({
       status: 200,
@@ -12,13 +18,13 @@ async function openVerificationStep(page: Page) {
     });
   });
 
-  await page.goto("/signup");
-  await page.getByPlaceholder("First Name").fill("Eli");
-  await page.getByPlaceholder("Last Name").fill("Explorer");
+  await page.goto("/signup", { waitUntil: "domcontentloaded" });
+  await page.getByRole("textbox", { name: "First name" }).fill("Eli");
+  await page.getByRole("textbox", { name: "Last name" }).fill("Explorer");
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByPlaceholder("Email Address").fill("eli@example.com");
-  await page.getByRole("button", { name: "Send Verification Code" }).click();
-  await expect(page.getByText("Step 03")).toBeVisible();
+  await page.getByRole("textbox", { name: "Email address" }).fill("eli@example.com");
+  await page.getByRole("button", { name: /send verification code/i }).click();
+  await expect(page.getByText(/step 03/i)).toBeVisible();
 
   return {
     input: page.locator("[data-input-otp]"),
@@ -48,7 +54,7 @@ test.describe("signup verification code", () => {
     await expect(slots).toHaveText(["1", "2", "3", "4", "5", ""]);
 
     await input.press("6");
-    await page.getByRole("button", { name: "Verify Code" }).click();
+    await page.getByRole("button", { name: /verify code/i }).click();
     await expect.poll(() => submittedCode).toBe("123456");
   });
 

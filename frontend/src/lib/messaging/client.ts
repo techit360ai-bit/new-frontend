@@ -4,6 +4,7 @@ import {
   messagingToken,
   messagingFallbackEnabled,
 } from "./config";
+import { fetchIdempotent } from '@/lib/resilience/retry';
 
 // See lib/api/client.ts for the rationale — raw fetch has no timeout, and a
 // hung Go messaging service would otherwise lock UI surfaces indefinitely.
@@ -19,23 +20,46 @@ function timeoutSignal(init?: RequestInit): AbortSignal {
 
 function headers(extra?: HeadersInit): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
+  try { if (typeof localStorage !== 'undefined' && localStorage.getItem('techit-data-saver') === '1') h['X-TechIT-Data-Saver'] = '1'; } catch { /* storage unavailable */ }
   const t = messagingToken();
   if (t) h.Authorization = `Bearer ${t}`;
+  // The browser session is an ambient HttpOnly cookie, so a state-changing
+  // request must also carry the double-submit token (mirrors lib/api/client.ts
+  // and the Go service's csrfOK check). Harmless when a bearer token is used.
+  const csrf = csrfToken();
+  if (csrf) h['X-CSRF-Token'] = csrf;
   return { ...h, ...(extra as Record<string, string>) };
 }
 
+function csrfToken(): string | null {
+  try {
+    const part = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf='));
+    return part ? decodeURIComponent(part.slice('techit_csrf='.length)) : null;
+  } catch {
+    return null;
+  }
+}
+
 async function parse<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error(`messaging ${res.status}`);
-  return (await res.json()) as T;
+  let body: { error?: string; message?: string } | null = null;
+  if (typeof (res as Response & { text?: unknown }).text === "function") {
+    const text = await res.text();
+    body = text ? JSON.parse(text) as { error?: string; message?: string } : null;
+  } else if (typeof (res as Response & { json?: unknown }).json === "function") {
+    body = await res.json() as { error?: string; message?: string };
+  }
+  if (!res.ok) throw new Error(body?.message || body?.error || `messaging ${res.status}`);
+  return body as T;
 }
 
 export async function msgGet<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(messagingUrl(path), {
+  const res = await fetchIdempotent(() => fetch(messagingUrl(path), {
     method: "GET",
     ...init,
+    credentials: "include",
     headers: headers(init?.headers),
     signal: timeoutSignal(init),
-  });
+  }));
   return parse<T>(res);
 }
 
@@ -43,6 +67,7 @@ export async function msgPost<T>(path: string, body?: unknown, init?: RequestIni
   const res = await fetch(messagingUrl(path), {
     method: "POST",
     ...init,
+    credentials: "include",
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: timeoutSignal(init),
@@ -51,7 +76,7 @@ export async function msgPost<T>(path: string, body?: unknown, init?: RequestIni
 }
 
 export async function msgPut<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
-  const res = await fetch(messagingUrl(path), { method: "PUT", ...init, headers: headers(init?.headers), body: body === undefined ? undefined : JSON.stringify(body), signal: timeoutSignal(init) });
+  const res = await fetch(messagingUrl(path), { method: "PUT", ...init, credentials: "include", headers: headers(init?.headers), body: body === undefined ? undefined : JSON.stringify(body), signal: timeoutSignal(init) });
   return parse<T>(res);
 }
 
@@ -59,6 +84,7 @@ export async function msgPatch<T>(path: string, body?: unknown, init?: RequestIn
   const res = await fetch(messagingUrl(path), {
     method: "PATCH",
     ...init,
+    credentials: "include",
     headers: headers(init?.headers),
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: timeoutSignal(init),
@@ -70,6 +96,7 @@ export async function msgDelete<T>(path: string, init?: RequestInit): Promise<T>
   const res = await fetch(messagingUrl(path), {
     method: "DELETE",
     ...init,
+    credentials: "include",
     headers: headers(init?.headers),
     signal: timeoutSignal(init),
   });

@@ -25,6 +25,7 @@ import { VirtualizedList } from '@/components/mobile/VirtualizedList';
 const TYPE_CONFIG: Record<FeedNotificationType, { icon: React.ReactNode; label: string }> = {
   fire: { icon: <Flame className="h-3.5 w-3.5" />, label: 'Reactions' },
   comment: { icon: <MessageCircle className="h-3.5 w-3.5" />, label: 'Comments' },
+  cofounder: { icon: <Users className="h-3.5 w-3.5" />, label: 'Co-founder' },
   collab: { icon: <Users className="h-3.5 w-3.5" />, label: 'Collab' },
   gsis: { icon: <ArrowUp className="h-3.5 w-3.5" />, label: 'GSIS' },
   milestone: { icon: <Zap className="h-3.5 w-3.5" />, label: 'Milestones' },

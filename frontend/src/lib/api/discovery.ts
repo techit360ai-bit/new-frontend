@@ -52,6 +52,9 @@ export interface RecommendationResponse {
     returned?: number
     configVersion?: string
     coldStart?: boolean
+    /** Wall-clock time the recommendation set was generated (for freshness). */
+    generatedAt?: string
+    cached?: boolean
   }
 }
 
@@ -80,10 +83,17 @@ function token() {
 
 async function coreRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const authToken = token()
+  const csrf: Record<string, string> = {};
+  try {
+    const cookie = document.cookie.split(';').map(value => value.trim()).find(value => value.startsWith('techit_csrf='));
+    if (cookie) csrf['X-CSRF-Token'] = decodeURIComponent(cookie.slice('techit_csrf='.length));
+  } catch { /* Non-browser callers have no CSRF cookie. */ }
   const response = await fetch(`${CORE_API}${path}`, {
+    credentials: 'include',
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      ...csrf,
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       ...(init.headers as Record<string, string> | undefined),
     },

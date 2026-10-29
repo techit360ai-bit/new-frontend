@@ -16,7 +16,7 @@ jobs:
     if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
-      - uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2
+      - uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
         id: metadata
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,19 +35,36 @@ jobs:
           fi
 
   dependency-review:
-    if: github.event_name == 'pull_request' && github.event.repository.private == false
+    # dependency-review-action requires GitHub Advanced Security on private
+    # repos (the dependency-graph compare API returns 403 without it). Skipping
+    # the job on private repos silently disabled the gate where the sensitive
+    # code lives, so private repos now run an equivalent lockfile-integrity gate
+    # here while the npm-audit job below enforces the vulnerability gate.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/dependency-review-action@56339e523c0409420f6c2c9a2f4292bbb3c07dd3 # v4.8.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        if: github.event.repository.private == true
+        with:
+          node-version: "22"
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        if: github.event.repository.private == false
         with:
           fail-on-severity: high
           deny-licenses: GPL-3.0-only,AGPL-3.0-only
+      - name: Private-repo dependency gate (GHAS substitute)
+        if: github.event.repository.private == true
+        run: |
+          # Fails closed on a missing, malformed, or out-of-sync lockfile, which
+          # is what silently broke this workflow on main.
+          npm ci --prefix frontend --dry-run --ignore-scripts --no-audit --no-fund
 
   npm-audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "22"
           cache: npm
@@ -56,8 +73,9 @@ jobs:
       - name: Audit for new high/critical findings
         run: |
           npm audit --prefix frontend --audit-level=high --omit=dev --json > /tmp/npm-audit.json || true
+          test -s /tmp/npm-audit.json
           node .github/scripts/npm-audit-regression.mjs
-      - uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+      - uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           path: frontend
           artifact-name: frontend-sbom.spdx.json
@@ -66,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297 # master
+      - uses: aquasecurity/trivy-action@8f28faec26515256b6d22074d1d2a8986f4cbd87 # master
         with:
           scan-type: fs
           scan-ref: .

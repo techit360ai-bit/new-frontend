@@ -12,6 +12,7 @@ export interface DomainFileItem {
   name: string;
   type: DomainFileType;
   size?: string;
+  sizeBytes?: number;
   modified: string;
   fileType?: DomainFileKind;
 }
@@ -52,6 +53,12 @@ function formatModified(value: string): string {
   return new Date(time).toLocaleString();
 }
 
+function sizeBytesFor(record: FileRecord): number | undefined {
+  const raw = record.sizeBytes ?? record.size_bytes ?? record.bytes;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
 export function normalizeDomainFile(value: unknown): DomainFileItem {
   const record = asRecord(value);
   const name = firstString(record, ["name", "filename", "title"], "Untitled file");
@@ -62,6 +69,7 @@ export function normalizeDomainFile(value: unknown): DomainFileItem {
     name,
     type,
     size: firstString(record, ["size", "sizeLabel", "bytesLabel"]) || undefined,
+    sizeBytes: sizeBytesFor(record),
     modified: formatModified(firstString(record, ["modified", "updatedAt", "createdAt", "uploadedAt"])),
     fileType: type === "file" ? kindFor(record) : undefined,
   };

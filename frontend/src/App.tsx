@@ -30,6 +30,8 @@ const CollabSettings = lazy(() => import("@/dashboard/collaborators/section/comp
 const IncubationHub = lazy(() => import("@/dashboard/incubationHub"));
 const PublicValidation = lazy(() => import("@/dashboard/PublicValidation"));
 const PublicEvidenceSummary = lazy(() => import("@/dashboard/PublicEvidenceSummary"));
+const CoFounderInvitationPage = lazy(() => import("@/dashboard/_shared/cofounder/CoFounderInvitationPage").then((m) => ({ default: m.CoFounderInvitationPage })));
+const CoFounderWorkspace = lazy(() => import("@/dashboard/_shared/cofounder/CoFounderWorkspace").then((m) => ({ default: m.CoFounderWorkspace })));
 const MatchResults = lazy(() => import("@/dashboard/matchResults"));
 const OpportunityHub = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityHub"));
 const OpportunityDetail = lazy(() => import("@/dashboard/founders/section/components/founder/OpportunityDetail"));
@@ -288,6 +290,7 @@ const App = () => {
         <Route path="/moments/:slug" element={<PublicMomentPage />} />
 
         <Route path="/h/:hackathonId/team/:teamId" element={<RequireAuth><InviteAcceptPage /></RequireAuth>} />
+        <Route path="/cofounder-invitations/:relationshipId" element={<RequireAuth><CoFounderInvitationPage /></RequireAuth>} />
         <Route path="/workspace-invitations/:invitationId" element={<RequireAuth><WorkspaceInvitationPage /></RequireAuth>} />
 
         <Route element={<RequireRole allowed={["founder"]}><FounderLayout /></RequireRole>}>
@@ -329,6 +332,7 @@ const App = () => {
         {/* Collaborative Project Workspace */}
         <Route path="/workspaces" element={<RequireAuth><WorkspacesLayout /></RequireAuth>}>
           <Route index element={<Navigate to="build" replace />} />
+          <Route path="cofounder/:relationshipId" element={<CoFounderWorkspace />} />
           <Route path="build" element={<WsBuild />} />
           <Route path="code" element={<CodeErrorBoundary><WsCode /></CodeErrorBoundary>} />
           <Route path="connectors" element={<WsConnectors />} />
@@ -342,7 +346,7 @@ const App = () => {
           <Route path="notifications" element={<WsNotifications />} />
           <Route path="settings" element={<WsSettings />} />
         </Route>
-        <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />
+        {import.meta.env.DEV && <Route path="/workspaces/components" element={<RequireAuth><WsComponentLibrary /></RequireAuth>} />}
 
         {/* Organization onboarding (flat, outside layout) */}
         <Route path="/org/onboarding/step-1" element={<RequireRole allowed={["organisation"]}><OrgStep1 /></RequireRole>} />

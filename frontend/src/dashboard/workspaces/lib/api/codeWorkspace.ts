@@ -1,4 +1,3 @@
-import { apiPost } from '@/lib/api/client';
 import { platformDelete, platformGet, platformPatch, platformPost } from '@/lib/platformApi';
 
 export interface CodeFileMeta { id: string; workspaceId: string; projectId: string; path: string; language: string; sizeBytes: number; version: number; contentHash: string; updatedAt: string; updatedBy: string }
@@ -7,6 +6,9 @@ export interface CodeSnapshot { workspace: { id: string; projectId: string; name
 export interface ProjectAdapter { adapter: 'react' | 'nextjs' | 'node' | 'python' | 'static'; packageManager: 'npm' | 'pnpm' | 'yarn' | null; commands: { install: string | null; dev: string | null; test: string | null; build: string | null }; supportedInBrowser: boolean; deterministic: true }
 
 const base = (workspaceId: string) => `/code/${encodeURIComponent(workspaceId)}`;
+// Coding-intelligence generation can outrun the default request budget; the backend
+// caps the AI-router call at 45s, so allow a slightly longer window before aborting.
+const CODE_AI_TIMEOUT_MS = 60_000;
 export const listCodeFiles = (workspaceId: string) => platformGet<{ files: CodeFileMeta[] }>(`${base(workspaceId)}/files`).then(row => row.files);
 export const readCodeFile = (workspaceId: string, path: string) => platformGet<{ file: CodeFile }>(`${base(workspaceId)}/file?path=${encodeURIComponent(path)}`).then(row => row.file);
 export const saveCodeFile = (workspaceId: string, input: { path: string; content: string; expectedVersion?: number; source?: string }) => platformPost<{ file: CodeFile }>(`${base(workspaceId)}/file`, input).then(row => row.file);
@@ -33,9 +35,10 @@ export const recordCodeReview = (workspaceId: string, runId: string, body: Recor
 export const finalizeCodeExecutionRun = (workspaceId: string, runId: string) => platformPost<{ run: CodeExecutionRun }>(`${base(workspaceId)}/execution-runs/${encodeURIComponent(runId)}/finalize`, {}).then(row => row.run);
 export const applyCodeExecutionRun = (workspaceId: string, runId: string, changes: Array<{ path: string; content?: string; expectedVersion: number }>) => platformPost<{ run: CodeExecutionRun; applied: Array<{ path: string; version: number; contentHash: string }> }>(`${base(workspaceId)}/execution-runs/${encodeURIComponent(runId)}/apply`, { changes });
 
-export interface CodePlanResponse { plan: { summary: string; existingSystems: string[]; changes: Array<{ path: string; action: string; reason: string }>; tests: string[]; securityChecks: string[]; recommendedAgentFlow: string[] }; context_injected: boolean; authoritative: false }
-export const planCodeTask = (body: Record<string, unknown>) => apiPost<CodePlanResponse>('/workspace/code/plan', body);
-export interface CodeProposalResponse { proposal: { summary: string; changes: Array<{ path: string; content: string; reason: string }>; tests: string[]; securityNotes: string[] }; authoritative: false; applied: false }
-export const proposeCodeChanges = (body: Record<string, unknown>) => apiPost<CodeProposalResponse>('/workspace/code/propose', body);
-export interface CodeOrchestrationResponse { orchestration: { summary: string; stages: Array<{ stage: CodeExecutionStage; agent: string; summary: string; actions: string[]; risks: string[]; requiresEvidence: string[] }> }; authoritative: false; execution: { performed: false; requires_backend_run: true; requires_mcp: true; mutation_free: true } }
-export const orchestrateCodeTask = (body: Record<string, unknown>) => apiPost<CodeOrchestrationResponse>('/workspace/code/orchestrate', body);
+export interface CodeAiRouting { requested: 'platform' | 'byok'; applied: 'platform' | 'byok'; reason: string | null; connectionId: string | null; connectionName: string | null; modelId: string | null }
+export interface CodePlanResponse { plan: { summary: string; existingSystems: string[]; changes: Array<{ path: string; action: string; reason: string }>; tests: string[]; securityChecks: string[]; recommendedAgentFlow: string[]; aiNarrative?: string | null; aiModel?: string | null }; context_injected: boolean; authoritative: false; ai_routing: CodeAiRouting }
+export const planCodeTask = (workspaceId: string, body: Record<string, unknown>) => platformPost<CodePlanResponse>(`${base(workspaceId)}/plan`, body);
+export interface CodeProposalResponse { proposal: { summary: string; changes: Array<{ path: string; content: string; reason: string }>; tests: string[]; securityNotes: string[] }; authoritative: false; applied: false; ai_routing: CodeAiRouting; ai_model: string | null }
+export const proposeCodeChanges = (workspaceId: string, body: Record<string, unknown>) => platformPost<CodeProposalResponse>(`${base(workspaceId)}/propose`, body, CODE_AI_TIMEOUT_MS);
+export interface CodeOrchestrationResponse { orchestration: { summary: string; stages: Array<{ stage: CodeExecutionStage; agent: string; summary: string; actions: string[]; risks: string[]; requiresEvidence: string[] }>; recommendedFlow: string[] }; authoritative: false; execution: { performed: false; requires_backend_run: true; requires_mcp: true; mutation_free: true }; ai_routing: CodeAiRouting }
+export const orchestrateCodeTask = (workspaceId: string, body: Record<string, unknown>) => platformPost<CodeOrchestrationResponse>(`${base(workspaceId)}/orchestrate`, body);

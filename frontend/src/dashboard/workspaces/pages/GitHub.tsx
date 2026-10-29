@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { discoverGithubRepositories } from "../lib/api/githubRepositories";
 import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Code, GitBranch, GitCommit, Github, GitPullRequest, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { listActivity, listConnectors } from '../lib/api/connectors';
-import { workspacePost } from '../lib/api/client';
 import type { ActivityEvent, Connector } from '../lib/types';
 
 function formatTimestamp(value?: string): string {
@@ -31,13 +32,13 @@ function resourceName(resource: string): string {
 function statusClass(status: Connector['status'] | undefined): string {
   switch (status) {
     case 'connected':
-      return 'bg-green-500';
+      return 'bg-status-success';
     case 'pending':
-      return 'bg-yellow-500';
+      return 'bg-status-warning';
     case 'error':
-      return 'bg-red-500';
+      return 'bg-status-error';
     default:
-      return 'bg-gray-500';
+      return 'bg-status-inactive';
   }
 }
 
@@ -67,6 +68,9 @@ function ActivityRow({ activity }: { activity: ActivityEvent }) {
 }
 
 export function GitHub() {
+  const navigate = useNavigate();
+  const [repositories, setRepositories] = useState<string[]>([]);
+  const [repositoryError, setRepositoryError] = useState<string | null>(null);
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,10 +79,21 @@ export function GitHub() {
   const load = () => {
     setLoading(true);
     setError(null);
+    setRepositories([]);
+    setRepositoryError(null);
     Promise.all([listConnectors(), listActivity('github')])
-      .then(([connectorRows, activityRows]) => {
+      .then(async ([connectorRows, activityRows]) => {
         setConnectors(connectorRows);
         setActivity(activityRows);
+        const connected = connectorRows.find(row => row.id === 'github' && row.status === 'connected');
+        if (connected) {
+          if (!connected.tools.some(tool => tool.name === 'list_repositories')) {
+            setRepositoryError('This connection does not expose repository discovery. Review its granted scopes and available tools.');
+          } else {
+            try { setRepositories(await discoverGithubRepositories()); }
+            catch (cause) { setRepositoryError(cause instanceof Error ? cause.message : 'Repository discovery failed. Review your GitHub connection and retry.'); }
+          }
+        }
       })
       .catch((err) => {
         setConnectors([]);
@@ -93,7 +108,7 @@ export function GitHub() {
   }, []);
 
   const github = connectors.find((connector) => connector.id === 'github');
-  const resources = github?.resources ?? [];
+  const resources = repositories;
   const pullRequestActivity = useMemo(
     () => activity.filter((item) => /pull request|\bpr\b|merge/i.test(item.summary)),
     [activity],
@@ -121,35 +136,17 @@ export function GitHub() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={load} disabled={loading} className="rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
-              <RefreshCw className="w-4 h-4 mr-2 text-[#20C997]" />
+            <Button variant="outline" onClick={load} disabled={loading}>
+              <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
             <Button
               className="bg-[#20C997] hover:bg-[#1db587] text-slate-950 font-bold rounded-xl shadow-sm transition-all"
-              onClick={async () => {
-                const repoName = window.prompt('Enter the GitHub repository URL or name:');
-                if (!repoName?.trim()) return;
-                try {
-                  await workspacePost('/connectors', {
-                    id: 'github',
-                    name: 'GitHub',
-                    category: 'Source Control',
-                    status: 'connected',
-                    authType: 'oauth2',
-                    capabilities: ['read', 'write'],
-                    tools: [],
-                    resources: [...resources, repoName.trim()],
-                  });
-                  toast.success(`Repository "${repoName.trim()}" added successfully.`);
-                  load();
-                } catch (err) {
-                  toast.error(err instanceof Error ? err.message : 'Failed to add repository connector.');
-                }
-              }}
+              disabled={loading}
+              onClick={() => github?.status === 'connected' ? load() : navigate('/workspaces/connectors')}
             >
               <Github className="w-4 h-4 mr-2" />
-              New Repository
+              {github?.status === 'connected' ? 'Discover repositories' : 'Connect GitHub'}
             </Button>
           </div>
         </div>
@@ -168,10 +165,10 @@ export function GitHub() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-2.5 h-2.5 rounded-full ${statusClass(github?.status)}`} />
-                <h2 className="font-bold text-slate-900 dark:text-white">{github?.name ?? 'GitHub connector'}</h2>
-                <Badge variant="outline" className="border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300">{github?.status ?? 'missing'}</Badge>
+                <h2 className="font-semibold text-slate-900 dark:text-white">{github?.name ?? 'GitHub connector'}</h2>
+                <Badge variant="outline">{github?.status ?? 'missing'}</Badge>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 {github
                   ? `${github.capabilities.length} capabilities, ${github.tools.length} tools, ${resources.length} linked resources`
                   : 'Connect GitHub from workspace connectors to populate live repository resources.'}
@@ -182,26 +179,28 @@ export function GitHub() {
         </div>
 
         <Tabs defaultValue="repos" className="w-full">
-          <TabsList className="mb-6 bg-slate-100 dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-xl p-1">
-            <TabsTrigger value="repos" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+          <TabsList className="mb-6">
+            <TabsTrigger value="repos">
               <Code className="w-4 h-4 mr-2" />
               Repositories
             </TabsTrigger>
-            <TabsTrigger value="prs" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="prs">
               <GitPullRequest className="w-4 h-4 mr-2" />
               Pull Requests
             </TabsTrigger>
-            <TabsTrigger value="branches" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="branches">
               <GitBranch className="w-4 h-4 mr-2" />
               Branches
             </TabsTrigger>
-            <TabsTrigger value="activity" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-[#111111] data-[state=active]:text-[#20C997] font-medium text-xs">
+            <TabsTrigger value="activity">
               <GitCommit className="w-4 h-4 mr-2" />
               Activity
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="repos" className="space-y-4">
+            {loading && <p role="status" className="text-sm text-text-muted">Discovering repositories...</p>}
+            {repositoryError && <div role="alert" className="rounded-xl border border-status-error/30 bg-status-error-soft p-4 text-sm text-status-error"><p>{repositoryError}</p><Button variant="outline" className="mt-3 min-h-11" onClick={load} disabled={loading}>Retry discovery</Button></div>}
             {resources.map((resource) => (
               <div
                 key={resource}
@@ -222,8 +221,8 @@ export function GitHub() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl border border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                     onClick={() => {
+                      // Try to open as URL; if not a valid URL, show toast with name
                       const url = resource.startsWith('http')
                         ? resource
                         : resource.includes('/')
@@ -250,7 +249,7 @@ export function GitHub() {
             {pullRequestActivity.map((item) => (
               <div key={item.id} className="bg-white dark:bg-[#111111] backdrop-blur-xl border border-black/[0.06] dark:border-white/10 rounded-2xl p-6 text-slate-900 dark:text-white">
                 <div className="flex items-start gap-4">
-                  <div className={`w-2.5 h-2.5 rounded-full ${statusClass(github?.status)} mt-2`} />
+                  <div className={`w-2 h-2 rounded-full ${statusClass(github?.status)} mt-2`} />
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900 dark:text-white mb-1">{item.summary || item.kind}</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400">{formatTimestamp(item.at)}</p>
@@ -275,7 +274,7 @@ export function GitHub() {
                       <p className="text-sm text-slate-500 dark:text-slate-400">Updated {formatTimestamp(item.at)}</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="border-black/[0.08] dark:border-white/10 text-slate-700 dark:text-slate-300">{item.kind}</Badge>
+                  <Badge variant="outline">{item.kind}</Badge>
                 </div>
               </div>
             ))}

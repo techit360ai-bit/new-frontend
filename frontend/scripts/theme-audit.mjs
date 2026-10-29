@@ -31,7 +31,7 @@ const productCounts = Object.fromEntries(Object.keys(patterns).map(key => [key, 
 const hotspots = []
 const productHotspots = []
 for (const { file, text } of source) {
-  const row = { file: path.relative(process.cwd(), file), matches: 0 }
+  const row = { file: path.relative(process.cwd(), file).split(path.sep).join('/'), matches: 0 }
   for (const [key, pattern] of Object.entries(patterns)) {
     const matches = text.match(pattern) || []
     counts[key] += matches.length

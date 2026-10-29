@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ExplorerDataState, useExplorerRecommendations, explorerDestination } from "../useExplorerRecommendations";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -5,8 +7,9 @@ import { Search, Filter, Sparkles, Building2, Users, FolderKanban, Award, Chevro
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
 interface NetworkEntity {
+  href: string;
   id: string;
-  type: "startup" | "founder" | "collaborator" | "project" | "mentor";
+  type: string;
   name: string;
   tagline: string;
   category: string;
@@ -17,89 +20,17 @@ interface NetworkEntity {
   metrics?: { label: string; value: string };
 }
 
-const MOCK_ENTITIES: NetworkEntity[] = [
-  {
-    id: "1",
-    type: "startup",
-    name: "AuraAI",
-    tagline: "Autonomous Agentic Code Review & Security Sentinel",
-    category: "AI & DevTools",
-    location: "San Francisco, CA",
-    matchScore: 98,
-    tags: ["TypeScript", "Python", "LLMs", "Rust"],
-    avatarEmoji: "⚡",
-    metrics: { label: "Stage", value: "MVP / Beta" }
-  },
-  {
-    id: "2",
-    type: "project",
-    name: "Nexus Protocol",
-    tagline: "Decentralized Micro-Equity vesting contract framework",
-    category: "Fintech & Web3",
-    location: "Remote / Global",
-    matchScore: 94,
-    tags: ["Solidity", "React", "Zero Knowledge"],
-    avatarEmoji: "🌐",
-    metrics: { label: "Recruiting", value: "2 Developers" }
-  },
-  {
-    id: "3",
-    type: "founder",
-    name: "Elena Rostova",
-    tagline: "Serial Founder building next-gen developer productivity suite",
-    category: "SaaS / Founder",
-    location: "Austin, TX",
-    matchScore: 91,
-    tags: ["Product Strategy", "Go-To-Market", "B2B SaaS"],
-    avatarEmoji: "👩‍💻",
-    metrics: { label: "Looking For", value: "Technical Co-Founder" }
-  },
-  {
-    id: "4",
-    type: "collaborator",
-    name: "David Kalu",
-    tagline: "Senior Full-Stack & Smart Contract Engineer",
-    category: "Engineer",
-    location: "London, UK",
-    matchScore: 89,
-    tags: ["React", "Node.js", "GraphQL", "Docker"],
-    avatarEmoji: "🛠️",
-    metrics: { label: "Availability", value: "20 hrs/week" }
-  },
-  {
-    id: "5",
-    type: "mentor",
-    name: "Marcus Vance",
-    tagline: "Ex-VP Engineering @ Stripe. Angel investor in dev tools.",
-    category: "Advisor",
-    location: "New York, NY",
-    matchScore: 95,
-    tags: ["Scaling", "Architecture", "Fundraising"],
-    avatarEmoji: "🏆",
-    metrics: { label: "Office Hours", value: "Thursdays" }
-  },
-  {
-    id: "6",
-    type: "startup",
-    name: "BioSynth AI",
-    tagline: "Generative protein engineering models for biotech research",
-    category: "DeepTech / Biotech",
-    location: "Boston, MA",
-    matchScore: 88,
-    tags: ["PyTorch", "Bioinformatics", "GenAI"],
-    avatarEmoji: "🧬",
-    metrics: { label: "Stage", value: "Seed / Launch" }
-  }
-];
 
 export function ExplorerDiscover() {
   const navigate = useNavigate();
+  const { rows, loading, error, retry } = useExplorerRecommendations();
+  const entities: NetworkEntity[] = useMemo(() => rows.map(({ entity: e, score }) => ({ id: e.entityId, href: explorerDestination(e.url), type: e.type === 'person' ? e.role || 'person' : e.type, name: e.title, tagline: e.description || e.subtitle || '', category: e.industries?.join(', ') || e.role || e.type, location: e.geography || 'Not specified', matchScore: score, tags: e.skills || [], avatarEmoji: e.title.slice(0, 1) })), [rows]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedEntity, setSelectedEntity] = useState<NetworkEntity | null>(null);
 
   const filteredEntities = useMemo(() => {
-    return MOCK_ENTITIES.filter((entity) => {
+    return entities.filter((entity) => {
       const matchesSearch =
         entity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entity.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,7 +41,7 @@ export function ExplorerDiscover() {
 
       return matchesSearch && matchesType;
     });
-  }, [searchQuery, selectedType]);
+  }, [entities, searchQuery, selectedType]);
 
   const typePills = [
     { id: "all", label: "All Entities" },
@@ -124,6 +55,7 @@ export function ExplorerDiscover() {
   return (
     <ExplorerLayout>
       <div className="space-y-6 max-w-7xl mx-auto font-bricolage">
+        <ExplorerDataState loading={loading} error={error} empty={filteredEntities.length === 0} retry={retry} />
         {/* Header Title */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -238,7 +170,7 @@ export function ExplorerDiscover() {
 
         {/* Entity Detail Drawer Modal */}
         {selectedEntity && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <Dialog open onOpenChange={open => { if (!open) setSelectedEntity(null); }}><DialogContent aria-describedby={undefined} className="max-w-lg border-0 bg-transparent p-0 shadow-none"><DialogTitle className="sr-only">{selectedEntity.name}</DialogTitle>
             <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-2xl space-y-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -285,17 +217,17 @@ export function ExplorerDiscover() {
                 <button
                   type="button"
                   onClick={() => {
-                    toast.success(`Connection request sent to ${selectedEntity.name}!`);
+
                     setSelectedEntity(null);
-                    navigate("/feed/messages");
+                    navigate(selectedEntity.href);
                   }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
-                  Connect in Messages
+                  View Profile
                 </button>
               </div>
             </div>
-          </div>
+          </DialogContent></Dialog>
         )}
       </div>
     </ExplorerLayout>

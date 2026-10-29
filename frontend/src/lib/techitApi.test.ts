@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { TechitApiError, setTechitApiTokenGetter, techitApi } from "./techitApi";
 
 function response(body: unknown, init: ResponseInit = {}) {
@@ -110,6 +110,47 @@ test("MCP POST requests preserve bearer auth for invoke and approval decisions",
   } finally {
     fetchMock.restore();
     resetTokenGetter();
+  }
+});
+
+// WS-01 removed the sessionStorage writer for the access token. This locks the
+// default getter to the tab-scoped in-memory token so the MCP/plugins surface
+// cannot silently fall back to reading a key that no longer exists.
+test("default token getter uses the in-memory token and ignores legacy sessionStorage", async () => {
+  const reads: string[] = [];
+  const originalStorage = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+  Object.defineProperty(globalThis, "sessionStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => {
+        reads.push(key);
+        return key === "techit_access_token" ? "legacy-storage-token" : null;
+      },
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {},
+    },
+  });
+
+  vi.resetModules();
+  const client = await import("./api/client");
+  client.setAccessToken("in-memory-token");
+
+  const fetchMock = stubFetch(() => response({ ok: true, workspaceId: "w1" }));
+  try {
+    const fresh = await import("./techitApi");
+    await fresh.techitApi.health();
+
+    const sent = (fetchMock.calls[0][1]?.headers ?? {}) as Record<string, string>;
+    expect(sent.Authorization).toBe("Bearer in-memory-token");
+    expect(sent.Authorization).not.toContain("legacy-storage-token");
+    expect(reads).not.toContain("techit_access_token");
+  } finally {
+    fetchMock.restore();
+    client.setAccessToken(null);
+    if (originalStorage) Object.defineProperty(globalThis, "sessionStorage", originalStorage);
+    else delete (globalThis as { sessionStorage?: unknown }).sessionStorage;
+    vi.resetModules();
   }
 });
 

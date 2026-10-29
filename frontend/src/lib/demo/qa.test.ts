@@ -3,10 +3,9 @@ import { listQuestions, askQuestion } from "./qa";
 
 test("listQuestions returns rows on success", async () => {
   const orig = globalThis.fetch;
-  globalThis.fetch = (async () => ({
-    ok: true,
-    json: async () => ({ questions: [{ id: "q1", eventId: "e1", askerId: "u1", body: "why?", state: "open", votes: 2, mine: true, createdAt: "t" }] }),
-  })) as unknown as typeof fetch;
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    questions: [{ id: "q1", eventId: "e1", askerId: "u1", body: "why?", state: "open", votes: 2, mine: true, createdAt: "t" }],
+  }), { status: 200, headers: { "Content-Type": "application/json" } })) as typeof fetch;
   try {
     const qs = await listQuestions("e1");
     expect(qs).toHaveLength(1);

@@ -14,15 +14,15 @@ const destinations = [
   { href: "/feed/messages", label: "Messages & Direct Chat", icon: MessageCircle, description: "Continue conversations where TechIT enables direct collaboration.", category: "Connect" },
   { href: "/support", label: "Support & Help Desk", icon: Ticket, description: "Open and track customer support tickets or ask for platform help.", category: "Help" },
   { href: "/demos", label: "Events & Hackathons", icon: CalendarDays, description: "Join challenges and meet teams building solutions to real-world problems.", category: "Events" },
-  { href: "/matches", label: "Opportunity Matching", icon: Users, description: "Find build opportunities where your skills and interests add real value.", category: "Growth" },
-  { href: "/workspaces", label: "AI Guide & Learning", icon: Sparkles, description: "Learn the ecosystem architecture and receive contextual guidance.", category: "AI Tools" },
+  { href: "/explore/opportunities", label: "Opportunity Matching", icon: Users, description: "Find build opportunities where your skills and interests add real value.", category: "Growth" },
+  { href: "/explore/ai-guide", label: "AI Guide & Learning", icon: Sparkles, description: "Learn the ecosystem architecture and receive contextual guidance.", category: "AI Tools" },
 ];
 
 const STATS = [
-  { label: "Active Startups", value: "128+", change: "+14 this week", icon: Building2, color: "from-[#20C997] to-[#1db587]" },
-  { label: "Live Projects", value: "340+", change: "28 recruiting", icon: FolderKanban, color: "from-[#20C997] to-teal-500" },
-  { label: "Open Gigs & Roles", value: "85", change: "40% cash + equity", icon: Zap, color: "from-[#20C997] to-emerald-400" },
-  { label: "Upcoming Events", value: "12", change: "2 hackathons today", icon: CalendarDays, color: "from-[#20C997] to-teal-400" },
+  { label: "Active Startups", value: "Discover", change: "Browse published startups", icon: Building2, color: "from-[#20C997] to-[#1db587]" },
+  { label: "Live Projects", value: "Explore", change: "Find projects to follow", icon: FolderKanban, color: "from-[#20C997] to-teal-500" },
+  { label: "Open Gigs & Roles", value: "Browse", change: "View current opportunities", icon: Zap, color: "from-[#20C997] to-emerald-400" },
+  { label: "Upcoming Events", value: "Events", change: "See published events", icon: CalendarDays, color: "from-[#20C997] to-teal-400" },
 ];
 
 export default function ExplorerHome() {

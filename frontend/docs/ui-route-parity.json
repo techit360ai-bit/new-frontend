@@ -1,0 +1,720 @@
+{
+  "baseline": "20277492b1fe4642709ddd42d2b6e48b15a61a95",
+  "baselineRouteEntries": 170,
+  "currentRouteEntries": 178,
+  "missing": [],
+  "routes": [
+    {
+      "route": "/",
+      "element": "<RedirectAuthenticated><Landing /></RedirectAuthenticated>"
+    },
+    {
+      "route": "/plugins",
+      "element": "<RequirePluginsAccess> <PluginsDashboard /> </RequirePluginsAccess>"
+    },
+    {
+      "route": "/founder/onboarding/step-1",
+      "element": "<RequireRole allowed={[\"founder\"]}><FounderStep1 /></RequireRole>"
+    },
+    {
+      "route": "/founder/onboarding/step-2",
+      "element": "<RequireRole allowed={[\"founder\"]}><FounderStep2 /></RequireRole>"
+    },
+    {
+      "route": "/founder/onboarding/step-3",
+      "element": "<RequireRole allowed={[\"founder\"]}><FounderStep3 /></RequireRole>"
+    },
+    {
+      "route": "/founder/onboarding/step-4",
+      "element": "<RequireRole allowed={[\"founder\"]}><FounderStep4 /></RequireRole>"
+    },
+    {
+      "route": "/founder/onboarding/step-5",
+      "element": "<RequireRole allowed={[\"founder\"]}><FounderStep5 /></RequireRole>"
+    },
+    {
+      "route": "/founder/onboarding/step-6",
+      "element": "<RequireRole allowed={[\"founder\"]}><FounderStep6 /></RequireRole>"
+    },
+    {
+      "route": "/founder/setup",
+      "element": "<Navigate to=\"/founder/onboarding/step-1\" replace />"
+    },
+    {
+      "route": "/founder/summary",
+      "element": "<Navigate to=\"/founder/dashboard\" replace />"
+    },
+    {
+      "route": "/collaborator/onboarding/step-1",
+      "element": "<RequireRole allowed={[\"collaborator\"]}><CollabStep1 /></RequireRole>"
+    },
+    {
+      "route": "/collaborator/onboarding/step-2",
+      "element": "<RequireRole allowed={[\"collaborator\"]}><CollabStep2 /></RequireRole>"
+    },
+    {
+      "route": "/collaborator/onboarding/step-3",
+      "element": "<RequireRole allowed={[\"collaborator\"]}><CollabStep3 /></RequireRole>"
+    },
+    {
+      "route": "/collaborator/onboarding/step-4",
+      "element": "<RequireRole allowed={[\"collaborator\"]}><CollabStep4 /></RequireRole>"
+    },
+    {
+      "route": "/collaborator/onboarding/step-5",
+      "element": "<RequireRole allowed={[\"collaborator\"]}><CollabStep5 /></RequireRole>"
+    },
+    {
+      "route": "/collaborator/onboarding/step-6",
+      "element": "<RequireRole allowed={[\"collaborator\"]}><CollabStep6 /></RequireRole>"
+    },
+    {
+      "route": "/collaborator",
+      "element": "<RequireRole allowed={[\"collaborator\"]}><CollabLayout /></RequireRole>"
+    },
+    {
+      "route": "/collaborator [index]",
+      "element": "<Navigate to=\"/collaborator/dashboard\" replace />"
+    },
+    {
+      "route": "/collaborator/dashboard",
+      "element": "<CollabDashboard />"
+    },
+    {
+      "route": "/collaborator/equity",
+      "element": "<CollabEquity />"
+    },
+    {
+      "route": "/collaborator/tasks",
+      "element": "<CollabTasks />"
+    },
+    {
+      "route": "/collaborator/performance",
+      "element": "<CollabPerformance />"
+    },
+    {
+      "route": "/collaborator/earnings",
+      "element": "<CollabEarnings />"
+    },
+    {
+      "route": "/collaborator/opportunities",
+      "element": "<CollabOpportunities />"
+    },
+    {
+      "route": "/collaborator/reputation",
+      "element": "<CollabReputation />"
+    },
+    {
+      "route": "/collaborator/messages",
+      "element": "<CollabMessages />"
+    },
+    {
+      "route": "/collaborator/academy",
+      "element": "<CollabAcademy />"
+    },
+    {
+      "route": "/collaborator/tools",
+      "element": "<CollabTools />"
+    },
+    {
+      "route": "/collaborator/profile",
+      "element": "<CollabProfile />"
+    },
+    {
+      "route": "/collaborator/settings",
+      "element": "<CollabSettings />"
+    },
+    {
+      "route": "/collaborator/setup",
+      "element": "<Navigate to=\"/collaborator/onboarding/step-1\" replace />"
+    },
+    {
+      "route": "/collaborator/summary",
+      "element": "<Navigate to=\"/collaborator/dashboard\" replace />"
+    },
+    {
+      "route": "/investor/onboarding/step-1",
+      "element": "<RequireRole allowed={[\"investor\"]}><InvestorStep1 /></RequireRole>"
+    },
+    {
+      "route": "/investor/onboarding/step-2",
+      "element": "<RequireRole allowed={[\"investor\"]}><InvestorStep2 /></RequireRole>"
+    },
+    {
+      "route": "/investor/onboarding/step-3",
+      "element": "<RequireRole allowed={[\"investor\"]}><InvestorStep3 /></RequireRole>"
+    },
+    {
+      "route": "/investor/onboarding/step-4",
+      "element": "<RequireRole allowed={[\"investor\"]}><InvestorStep4 /></RequireRole>"
+    },
+    {
+      "route": "/investor/onboarding/step-5",
+      "element": "<RequireRole allowed={[\"investor\"]}><InvestorStep5 /></RequireRole>"
+    },
+    {
+      "route": "/investor/setup",
+      "element": "<Navigate to=\"/investor/onboarding/step-1\" replace />"
+    },
+    {
+      "route": "/investor",
+      "element": "<RequireRole allowed={[\"investor\"]}><InvestorLayout /></RequireRole>"
+    },
+    {
+      "route": "/investor [index]",
+      "element": "<InvestorDashboard />"
+    },
+    {
+      "route": "/investor/dashboard",
+      "element": "<InvestorDashboard />"
+    },
+    {
+      "route": "/investor/deal-intelligence",
+      "element": "<CapabilityGate capability=\"investor.intelligence.view\" role=\"investor\"><InvestorDealIntelligence /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/risk-analysis",
+      "element": "<CapabilityGate capability=\"investor.risk.monitor\" role=\"investor\"><InvestorRiskAnalysis /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/startup/:startupId",
+      "element": "<InvestorStartupOverview />"
+    },
+    {
+      "route": "/investor/risk-radar/:startupId",
+      "element": "<CapabilityGate capability=\"investor.risk.monitor\" role=\"investor\"><InvestorRiskRadar /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/allocation",
+      "element": "<CapabilityGate capability=\"investor.portfolio.analytics\" role=\"investor\"><InvestorAllocationEngine /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/watchlist",
+      "element": "<InvestorWatchlist />"
+    },
+    {
+      "route": "/investor/trust",
+      "element": "<CapabilityGate capability=\"investor.intelligence.view\" role=\"investor\"><InvestorTrustDashboard /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/trust/:startupId",
+      "element": "<CapabilityGate capability=\"investor.intelligence.view\" role=\"investor\"><InvestorTrustDashboard /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/capital-pools",
+      "element": "<CapabilityGate capability=\"investor.portfolio.analytics\" role=\"investor\"><InvestorCapitalPools /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/heatmap",
+      "element": "<CapabilityGate capability=\"investor.intelligence.view\" role=\"investor\"><InvestorHeatmap /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/data-rooms",
+      "element": "<CapabilityGate capability=\"dealroom.access\" role=\"investor\"><InvestorDataRooms /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/data-room/:startupId",
+      "element": "<CapabilityGate capability=\"dealroom.access\" role=\"investor\"><InvestorDataRoom /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/deal-rooms",
+      "element": "<CapabilityGate capability=\"dealroom.access\" role=\"investor\"><InvestorDealRooms /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/deal-room/:startupId",
+      "element": "<CapabilityGate capability=\"dealroom.access\" role=\"investor\"><InvestorDealRoom /></CapabilityGate>"
+    },
+    {
+      "route": "/investor/reputation",
+      "element": "<InvestorReputation />"
+    },
+    {
+      "route": "/investor/profile",
+      "element": "<InvestorProfile />"
+    },
+    {
+      "route": "/investor/deals",
+      "element": "<InvestorDealPipeline />"
+    },
+    {
+      "route": "/investor/deals/:dealId",
+      "element": "<InvestorDealRoomPage />"
+    },
+    {
+      "route": "/investor/intelligence/startups/:startupId",
+      "element": "<InvestorIntelligenceDetail />"
+    },
+    {
+      "route": "/investor/mentorship",
+      "element": "<RequireRole allowed={[\"investor\"]}><MentorshipGate /></RequireRole>"
+    },
+    {
+      "route": "/investor/mentorship [index]",
+      "element": "<MentorshipOverview />"
+    },
+    {
+      "route": "/investor/mentorship/room/:roomId",
+      "element": "<MentorshipRoom />"
+    },
+    {
+      "route": "/investor/mentorship/applications",
+      "element": "<MentorshipApplications />"
+    },
+    {
+      "route": "/investor/mentorship/create-room",
+      "element": "<MentorshipCreateRoom />"
+    },
+    {
+      "route": "/investor/mentorship/analytics",
+      "element": "<MentorshipAnalytics />"
+    },
+    {
+      "route": "/investor/mentorship/payments",
+      "element": "<MentorshipPayments />"
+    },
+    {
+      "route": "/investor/mentorship/hub",
+      "element": "<MentorshipAdvancedHub />"
+    },
+    {
+      "route": "/mentorship/invite/:token",
+      "element": "<RequireAuth><MentorshipInviteAccept /></RequireAuth>"
+    },
+    {
+      "route": "/validate/:token",
+      "element": "<PublicValidation />"
+    },
+    {
+      "route": "/validation-evidence/:token",
+      "element": "<PublicEvidenceSummary />"
+    },
+    {
+      "route": "/moments/:slug",
+      "element": "<PublicMomentPage />"
+    },
+    {
+      "route": "/h/:hackathonId/team/:teamId",
+      "element": "<RequireAuth><InviteAcceptPage /></RequireAuth>"
+    },
+    {
+      "route": "/cofounder-invitations/:relationshipId",
+      "element": "<RequireAuth><CoFounderInvitationPage /></RequireAuth>"
+    },
+    {
+      "route": "/workspace-invitations/:invitationId",
+      "element": "<RequireAuth><WorkspaceInvitationPage /></RequireAuth>"
+    },
+    {
+      "route": "/",
+      "element": "<RequireRole allowed={[\"founder\"]}><FounderLayout /></RequireRole>"
+    },
+    {
+      "route": "/founder/dashboard",
+      "element": "<Dashboard />"
+    },
+    {
+      "route": "/dashboard",
+      "element": "<Navigate to=\"/founder/dashboard\" replace />"
+    },
+    {
+      "route": "/team-workspace/:teamId",
+      "element": "<TeamWorkspaceView />"
+    },
+    {
+      "route": "/founder/trust",
+      "element": "<TrustCenter />"
+    },
+    {
+      "route": "/founder/mentorship",
+      "element": "<FounderMentorshipHub />"
+    },
+    {
+      "route": "/founder/mentorship/rooms/:roomId",
+      "element": "<MentorshipRoom />"
+    },
+    {
+      "route": "/founder/profile",
+      "element": "<FounderProfile />"
+    },
+    {
+      "route": "/founder/settings",
+      "element": "<FounderSettings />"
+    },
+    {
+      "route": "/founder/messages",
+      "element": "<FounderMessages />"
+    },
+    {
+      "route": "/incubation-hub",
+      "element": "<IncubationHub />"
+    },
+    {
+      "route": "/opportunity-hub",
+      "element": "<OpportunityHub />"
+    },
+    {
+      "route": "/opportunity-hub/:opportunityId",
+      "element": "<OpportunityDetail />"
+    },
+    {
+      "route": "/chat",
+      "element": "<Chat />"
+    },
+    {
+      "route": "/matches",
+      "element": "<MatchResults />"
+    },
+    {
+      "route": "/contracts/sign",
+      "element": "<ContractSigningPage />"
+    },
+    {
+      "route": "/wallet",
+      "element": "<RequireAuth><Wallet /></RequireAuth>"
+    },
+    {
+      "route": "/explore",
+      "element": "<RequireAuth><ExplorerHome /></RequireAuth>"
+    },
+    {
+      "route": "/explore/discover",
+      "element": "<RequireAuth><ExplorerDiscover /></RequireAuth>"
+    },
+    {
+      "route": "/explore/startups",
+      "element": "<RequireAuth><ExplorerStartups /></RequireAuth>"
+    },
+    {
+      "route": "/explore/projects",
+      "element": "<RequireAuth><ExplorerProjects /></RequireAuth>"
+    },
+    {
+      "route": "/explore/opportunities",
+      "element": "<RequireAuth><ExplorerOpportunities /></RequireAuth>"
+    },
+    {
+      "route": "/explore/events",
+      "element": "<RequireAuth><ExplorerEvents /></RequireAuth>"
+    },
+    {
+      "route": "/explore/ai-guide",
+      "element": "<RequireAuth><ExplorerAIGuide /></RequireAuth>"
+    },
+    {
+      "route": "/explore/profile",
+      "element": "<RequireAuth><ExplorerProfile /></RequireAuth>"
+    },
+    {
+      "route": "/explore/settings",
+      "element": "<RequireAuth><ExplorerSettings /></RequireAuth>"
+    },
+    {
+      "route": "/explorer",
+      "element": "<Navigate to=\"/explore\" replace />"
+    },
+    {
+      "route": "/verification/:role",
+      "element": "<RequireAuth><VerificationCenter /></RequireAuth>"
+    },
+    {
+      "route": "/security/mfa",
+      "element": "<RequireAuth><MfaSetup /></RequireAuth>"
+    },
+    {
+      "route": "/compliance",
+      "element": "<RequireAuth><ComplianceCenter /></RequireAuth>"
+    },
+    {
+      "route": "/signup",
+      "element": "<RedirectAuthenticated><Signup /></RedirectAuthenticated>"
+    },
+    {
+      "route": "/signin",
+      "element": "<RedirectAuthenticated><Login /></RedirectAuthenticated>"
+    },
+    {
+      "route": "/forgot-password",
+      "element": "<RedirectAuthenticated><ForgotPassword /></RedirectAuthenticated>"
+    },
+    {
+      "route": "/reset-password",
+      "element": "<RedirectAuthenticated><ResetPassword /></RedirectAuthenticated>"
+    },
+    {
+      "route": "/workspaces",
+      "element": "<RequireAuth><WorkspacesLayout /></RequireAuth>"
+    },
+    {
+      "route": "/workspaces [index]",
+      "element": "<Navigate to=\"build\" replace />"
+    },
+    {
+      "route": "/workspaces/cofounder/:relationshipId",
+      "element": "<CoFounderWorkspace />"
+    },
+    {
+      "route": "/workspaces/build",
+      "element": "<WsBuild />"
+    },
+    {
+      "route": "/workspaces/code",
+      "element": "<CodeErrorBoundary><WsCode /></CodeErrorBoundary>"
+    },
+    {
+      "route": "/workspaces/connectors",
+      "element": "<WsConnectors />"
+    },
+    {
+      "route": "/workspaces/agents",
+      "element": "<WsAgents />"
+    },
+    {
+      "route": "/workspaces/ai-agents",
+      "element": "<Navigate to=\"/workspaces/agents\" replace />"
+    },
+    {
+      "route": "/workspaces/chat",
+      "element": "<WsChat />"
+    },
+    {
+      "route": "/workspaces/copilot",
+      "element": "<WsCopilot />"
+    },
+    {
+      "route": "/workspaces/files",
+      "element": "<WsFiles />"
+    },
+    {
+      "route": "/workspaces/github",
+      "element": "<WsGitHub />"
+    },
+    {
+      "route": "/workspaces/reports",
+      "element": "<WsReports />"
+    },
+    {
+      "route": "/workspaces/notifications",
+      "element": "<WsNotifications />"
+    },
+    {
+      "route": "/workspaces/settings",
+      "element": "<WsSettings />"
+    },
+    {
+      "route": "/workspaces/components",
+      "element": "<RequireAuth><WsComponentLibrary /></RequireAuth>"
+    },
+    {
+      "route": "/org/onboarding/step-1",
+      "element": "<RequireRole allowed={[\"organisation\"]}><OrgStep1 /></RequireRole>"
+    },
+    {
+      "route": "/org/onboarding/step-2",
+      "element": "<RequireRole allowed={[\"organisation\"]}><OrgStep2 /></RequireRole>"
+    },
+    {
+      "route": "/org/onboarding/step-3",
+      "element": "<RequireRole allowed={[\"organisation\"]}><OrgStep3 /></RequireRole>"
+    },
+    {
+      "route": "/org/onboarding/step-4",
+      "element": "<RequireRole allowed={[\"organisation\"]}><OrgStep4 /></RequireRole>"
+    },
+    {
+      "route": "/org/onboarding/step-5",
+      "element": "<RequireRole allowed={[\"organisation\"]}><OrgStep5 /></RequireRole>"
+    },
+    {
+      "route": "/org/setup",
+      "element": "<Navigate to=\"/org/onboarding/step-1\" replace />"
+    },
+    {
+      "route": "/organisation/setup",
+      "element": "<Navigate to=\"/org/setup\" replace />"
+    },
+    {
+      "route": "/org",
+      "element": "<RequireRole allowed={[\"organisation\"]}><OrgLayout /></RequireRole>"
+    },
+    {
+      "route": "/org [index]",
+      "element": "<OrgDashboard />"
+    },
+    {
+      "route": "/org/dashboard",
+      "element": "<OrgDashboard />"
+    },
+    {
+      "route": "/org/intelligence",
+      "element": "<OrgIntelligenceLayout />"
+    },
+    {
+      "route": "/org/intelligence [index]",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgCohortHealth /></CapabilityGate>"
+    },
+    {
+      "route": "/org/intelligence/cohort-health",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgCohortHealth /></CapabilityGate>"
+    },
+    {
+      "route": "/org/intelligence/impact",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgImpactReporting /></CapabilityGate>"
+    },
+    {
+      "route": "/org/intelligence/demo-day",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgDemoDayPipeline /></CapabilityGate>"
+    },
+    {
+      "route": "/org/intelligence/allocation",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgResourceAllocation /></CapabilityGate>"
+    },
+    {
+      "route": "/org/intelligence/alumni",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgAlumniOutcomes /></CapabilityGate>"
+    },
+    {
+      "route": "/org/intelligence/benchmarks",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgCohortBenchmarks /></CapabilityGate>"
+    },
+    {
+      "route": "/org/teams",
+      "element": "<OrgTeams />"
+    },
+    {
+      "route": "/org/projects",
+      "element": "<OrgProjects />"
+    },
+    {
+      "route": "/org/incubator",
+      "element": "<OrgIncubator />"
+    },
+    {
+      "route": "/org/hackathons",
+      "element": "<OrgHackathons />"
+    },
+    {
+      "route": "/org/hackathons/new",
+      "element": "<OrgHackathonCreate />"
+    },
+    {
+      "route": "/org/hackathons/:id",
+      "element": "<OrgHackathonDetail />"
+    },
+    {
+      "route": "/org/talent",
+      "element": "<CapabilityGate capability=\"organization.recruit\" role=\"organization\"><OrgTalentPool /></CapabilityGate>"
+    },
+    {
+      "route": "/org/ai-ops",
+      "element": "<OrgAIOps />"
+    },
+    {
+      "route": "/org/analytics",
+      "element": "<CapabilityGate capability=\"organization.analytics\" role=\"organization\"><OrgAnalytics /></CapabilityGate>"
+    },
+    {
+      "route": "/org/marketplace",
+      "element": "<CapabilityGate capability=\"organization.opportunity.create\" role=\"organization\"><OrgMarketplace /></CapabilityGate>"
+    },
+    {
+      "route": "/org/market-ready",
+      "element": "<OrgMarketReady />"
+    },
+    {
+      "route": "/org/hangout",
+      "element": "<OrgHangout />"
+    },
+    {
+      "route": "/org/integrations",
+      "element": "<OrgIntegrations />"
+    },
+    {
+      "route": "/org/billing",
+      "element": "<OrgBilling />"
+    },
+    {
+      "route": "/org/settings",
+      "element": "<OrgSettings />"
+    },
+    {
+      "route": "/org/profile",
+      "element": "<OrgProfile />"
+    },
+    {
+      "route": "/feed",
+      "element": "<RequireAuth><FeedLayout /></RequireAuth>"
+    },
+    {
+      "route": "/feed [index]",
+      "element": "<FeedPage />"
+    },
+    {
+      "route": "/feed/discover",
+      "element": "<DiscoveryPage />"
+    },
+    {
+      "route": "/feed/tribe",
+      "element": "<TribePage />"
+    },
+    {
+      "route": "/feed/build-log",
+      "element": "<BuildLogPage />"
+    },
+    {
+      "route": "/feed/questions",
+      "element": "<QuestionsPage />"
+    },
+    {
+      "route": "/feed/problems",
+      "element": "<ProblemsPage />"
+    },
+    {
+      "route": "/feed/notifications",
+      "element": "<FeedNotificationsPage />"
+    },
+    {
+      "route": "/feed/my-log",
+      "element": "<MyLogPage />"
+    },
+    {
+      "route": "/feed/post/:postId",
+      "element": "<PostDetailPage />"
+    },
+    {
+      "route": "/feed/problem/:problemId",
+      "element": "<PostDetailPage />"
+    },
+    {
+      "route": "/feed/profile/:userId",
+      "element": "<UserProfilePage />"
+    },
+    {
+      "route": "/feed/messages",
+      "element": "<MessagesInboxPage />"
+    },
+    {
+      "route": "/feed/messages/:userId",
+      "element": "<DirectMessagePage />"
+    },
+    {
+      "route": "/support",
+      "element": "<RequireAuth><SupportCenter /></RequireAuth>"
+    },
+    {
+      "route": "/demos",
+      "element": "<RequireAuth><DemoList /></RequireAuth>"
+    },
+    {
+      "route": "/demos/new",
+      "element": "<RequireAuth><DemoCreate /></RequireAuth>"
+    },
+    {
+      "route": "/demos/:id",
+      "element": "<RequireAuth><DemoRoom /></RequireAuth>"
+    },
+    {
+      "route": "*",
+      "element": "<NotFound />"
+    }
+  ]
+}

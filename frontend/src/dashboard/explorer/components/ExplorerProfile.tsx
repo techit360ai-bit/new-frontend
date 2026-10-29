@@ -8,15 +8,11 @@ export function ExplorerProfile() {
   const { profile } = useAuth();
 
   const name = profile?.firstName ? `${profile.firstName} ${profile.lastName || ""}` : "Explorer User";
-  const bio = profile?.bio || "Exploring innovative early-stage startups, AI agent tools, and open build projects across the TechIT ecosystem.";
+  const bio = profile?.bio || "Add a bio in settings to introduce yourself to the community.";
 
-  const INTERESTS = ["AI Agents", "Developer Tools", "Web3 Infrastructure", "Biotech", "Fintech", "Open Source"];
+  const INTERESTS = profile?.industries || [];
 
-  const SAVED_ITEMS = [
-    { title: "AuraAI", type: "Startup", tagline: "Autonomous Code Review Sentinel", icon: "⚡" },
-    { title: "AI Agentic Hackathon 2026", type: "Event", tagline: "Sep 15 - Sep 18 • $25k Prize Pool", icon: "🏆" },
-    { title: "Lead AI Engineer & Co-Founder", type: "Opportunity", tagline: "$4,500/mo + 15% Equity", icon: "💼" },
-  ];
+  const SAVED_ITEMS: Array<{ title: string; type: string; tagline: string; icon: string }> = [];
 
   return (
     <ExplorerLayout>
@@ -60,6 +56,7 @@ export function ExplorerProfile() {
               <h2 className="text-sm font-bold text-slate-900 dark:text-white">Exploration Interests</h2>
             </div>
             <div className="flex flex-wrap gap-2">
+              {INTERESTS.length === 0 && <p className="text-xs text-slate-500 dark:text-slate-400">No interests added yet.</p>}
               {INTERESTS.map((interest) => (
                 <span
                   key={interest}
@@ -82,6 +79,7 @@ export function ExplorerProfile() {
             </div>
 
             <div className="space-y-2">
+              {SAVED_ITEMS.length === 0 && <p className="text-xs text-slate-500 dark:text-slate-400">Saved items are not available here yet. Discover people and projects in your feed.</p>}
               {SAVED_ITEMS.map((item) => (
                 <div
                   key={item.title}

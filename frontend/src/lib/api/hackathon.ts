@@ -69,6 +69,28 @@ export interface InviteDetails {
   invitedRole?: string;
 }
 
+export interface AttachedProjectEntry {
+  id: string;
+  hackathonId: string;
+  teamId: string;
+  projectId: string;
+  workspaceId: string;
+  entryMode: "attached";
+  visibility: "private";
+  judgeAccess?: Record<string, unknown>;
+  consent: boolean;
+  status: string;
+  createdAt: string;
+}
+
+export function attachExistingProject(hackathonId: string, teamId: string, input: { projectId: string; workspaceId: string; consent: boolean; judgeAccess?: Record<string, unknown> }): Promise<{ ok: boolean; entry?: AttachedProjectEntry; error?: string }> {
+  return domainPost<{ ok: boolean; entry?: AttachedProjectEntry; error?: string }>(`/hackathons/${encodeURIComponent(hackathonId)}/teams/${encodeURIComponent(teamId)}/project-entry`, { ...input });
+}
+
+export function fetchAttachedProject(hackathonId: string, teamId: string): Promise<AttachedProjectEntry | null> {
+  return domainGet<{ entry: AttachedProjectEntry }>(`/hackathons/${encodeURIComponent(hackathonId)}/teams/${encodeURIComponent(teamId)}/project-entry`).then((result) => result.entry).catch(() => null);
+}
+
 export interface HackathonInvitation {
   id: string;
   hackathonId: string;
@@ -468,35 +490,3 @@ export function reportTeamToOrganizers(
     report,
   );
 }
-
-export interface AttachedProjectEntry {
-  projectId: string;
-  projectName?: string;
-  workspaceId?: string;
-  repoUrl?: string;
-  attachedAt?: string;
-}
-
-export async function attachExistingProject(
-  id: string,
-  teamId: string,
-  input: string | { projectId: string; workspaceId?: string; consent?: boolean; judgeAccess?: Record<string, unknown> },
-): Promise<{ ok: boolean; project?: AttachedProjectEntry; error?: string }> {
-  const payload = typeof input === "string" ? { projectId: input } : input;
-  return domainPost<{ ok: boolean; project?: AttachedProjectEntry; error?: string }>(
-    `/hackathons/${encodeURIComponent(id)}/teams/${encodeURIComponent(teamId)}/attach-project`,
-    payload,
-  );
-}
-
-
-export async function fetchAttachedProject(
-  id: string,
-  teamId: string,
-): Promise<AttachedProjectEntry | null> {
-  const data = await domainGet<{ project?: AttachedProjectEntry }>(
-    `/hackathons/${encodeURIComponent(id)}/teams/${encodeURIComponent(teamId)}/attached-project`,
-  );
-  return data.project || null;
-}
-

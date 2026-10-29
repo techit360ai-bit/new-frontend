@@ -7,6 +7,7 @@ function NotificationIcon({ type }: { type: FeedNotificationType }) {
   const icons: Record<FeedNotificationType, React.ReactNode> = {
     fire: <Flame className="h-3 w-3" />,
     comment: <MessageCircle className="h-3 w-3" />,
+    cofounder: <Users className="h-4 w-4" />,
     collab: <Users className="h-3 w-3" />,
     gsis: <ArrowUp className="h-3 w-3" />,
     milestone: <Zap className="h-3 w-3" />,

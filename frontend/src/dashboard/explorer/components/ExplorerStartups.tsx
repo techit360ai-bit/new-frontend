@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ExplorerDataState, useExplorerRecommendations, explorerDestination } from "../useExplorerRecommendations";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -5,83 +7,24 @@ import { Search, Building2, Rocket, Users, ShieldCheck, ExternalLink, ArrowRight
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
 interface StartupItem {
+  href: string;
   id: string;
   name: string;
   oneLiner: string;
-  stage: "Idea" | "MVP" | "Beta" | "Launch" | "Growth";
+  stage: string;
   sector: string;
-  teamSize: number;
-  openRolesCount: number;
+  teamSize: string;
+  openRolesCount: string;
   funding: string;
   logoEmoji: string;
   tags: string[];
 }
 
-const MOCK_STARTUPS: StartupItem[] = [
-  {
-    id: "st-1",
-    name: "AuraAI",
-    oneLiner: "Autonomous AI Agent suite for automated code reviews and vulnerability detection.",
-    stage: "Beta",
-    sector: "AI & Developer Tools",
-    teamSize: 6,
-    openRolesCount: 3,
-    funding: "$1.2M Pre-Seed",
-    logoEmoji: "⚡",
-    tags: ["Rust", "TypeScript", "LLM Fine-Tuning"]
-  },
-  {
-    id: "st-2",
-    name: "Nexus Protocol",
-    oneLiner: "On-chain revenue share and milestone-based equity distribution smart contracts.",
-    stage: "MVP",
-    sector: "Fintech & Web3",
-    teamSize: 4,
-    openRolesCount: 2,
-    funding: "Bootstrapped",
-    logoEmoji: "🌐",
-    tags: ["Solidity", "React", "Zero Knowledge"]
-  },
-  {
-    id: "st-3",
-    name: "BioSynth AI",
-    oneLiner: "Generative protein engineering models for targeted therapeutics discovery.",
-    stage: "Launch",
-    sector: "DeepTech / Biotech",
-    teamSize: 12,
-    openRolesCount: 4,
-    funding: "$3.5M Seed",
-    logoEmoji: "🧬",
-    tags: ["PyTorch", "Biophysics", "GenAI"]
-  },
-  {
-    id: "st-4",
-    name: "HyperScale Cloud",
-    oneLiner: "Edge micro-datacenter orchestration engine for ultra-low latency compute.",
-    stage: "Growth",
-    sector: "Cloud Infrastructure",
-    teamSize: 18,
-    openRolesCount: 5,
-    funding: "$8.0M Series A",
-    logoEmoji: "☁️",
-    tags: ["Go", "Kubernetes", "eBPF"]
-  },
-  {
-    id: "st-5",
-    name: "EcoTrack Network",
-    oneLiner: "Real-time carbon footprint verification and ESG compliance reporting.",
-    stage: "Idea",
-    sector: "ClimateTech",
-    teamSize: 2,
-    openRolesCount: 1,
-    funding: "Grant Funded",
-    logoEmoji: "🌱",
-    tags: ["Python", "IoT", "React Native"]
-  }
-];
 
 export function ExplorerStartups() {
   const navigate = useNavigate();
+  const { rows, loading, error, retry } = useExplorerRecommendations("startup");
+  const startups: StartupItem[] = useMemo(() => rows.map(({ entity: e }) => ({ id: e.entityId, href: explorerDestination(e.url), name: e.title, oneLiner: e.description || e.subtitle || '', stage: e.stage || 'Not specified', sector: e.industries?.join(', ') || 'Not specified', teamSize: 'Not available', openRolesCount: 'Not available', funding: 'Not disclosed', logoEmoji: e.title.slice(0, 1), tags: e.skills || [] })), [rows]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStage, setSelectedStage] = useState<string>("all");
   const [activeStartup, setActiveStartup] = useState<StartupItem | null>(null);
@@ -89,7 +32,7 @@ export function ExplorerStartups() {
   const stages = ["all", "Idea", "MVP", "Beta", "Launch", "Growth"];
 
   const filteredStartups = useMemo(() => {
-    return MOCK_STARTUPS.filter((s) => {
+    return startups.filter((s) => {
       const matchesSearch =
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.oneLiner.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,11 +42,12 @@ export function ExplorerStartups() {
 
       return matchesSearch && matchesStage;
     });
-  }, [searchQuery, selectedStage]);
+  }, [startups, searchQuery, selectedStage]);
 
   return (
     <ExplorerLayout>
       <div className="space-y-6 max-w-7xl mx-auto font-bricolage">
+        <ExplorerDataState loading={loading} error={error} empty={filteredStartups.length === 0} retry={retry} />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -207,7 +151,7 @@ export function ExplorerStartups() {
 
         {/* Startup Detail Modal */}
         {activeStartup && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <Dialog open onOpenChange={open => { if (!open) setActiveStartup(null); }}><DialogContent aria-describedby={undefined} className="max-w-lg border-0 bg-transparent p-0 shadow-none"><DialogTitle className="sr-only">{activeStartup.name}</DialogTitle>
             <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-2xl space-y-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -254,17 +198,17 @@ export function ExplorerStartups() {
                 <button
                   type="button"
                   onClick={() => {
-                    toast.info(`Viewing open positions for ${activeStartup.name}...`);
+
                     setActiveStartup(null);
-                    navigate("/explore/opportunities");
+                    navigate(activeStartup.href);
                   }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
-                  Explore Open Roles
+                  View Startup
                 </button>
               </div>
             </div>
-          </div>
+          </DialogContent></Dialog>
         )}
       </div>
     </ExplorerLayout>

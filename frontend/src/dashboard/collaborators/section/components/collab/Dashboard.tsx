@@ -1,3 +1,8 @@
+import { toast } from "sonner";
+import { fetchCollaboratorSummary, type CollaboratorLiveSummary } from "@/lib/api/collaboratorSummary";
+import { patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
+import { CoFounderRelationshipCard } from "@/dashboard/_shared/cofounder/CoFounderRelationshipCard";
+import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 // frontend/src/dashboard/collaborators/section/components/collab/Dashboard.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
@@ -46,6 +51,41 @@ export function Dashboard() {
       });
     return () => { alive = false; };
   }, []);
+
+  const [summary, setSummary] = useState<CollaboratorLiveSummary | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchCollaboratorSummary()
+      .then((data) => { if (alive) setSummary(data); })
+      .catch(() => { if (alive) setSummary(null); });
+    return () => { alive = false; };
+  }, []);
+
+  const focusTasks = useMemo(
+    () => (summary?.tasks ?? []).filter((task) => task.status !== "completed").slice(0, 5),
+    [summary],
+  );
+  const recentActivity = useMemo(
+    () => (summary?.tasks ?? [])
+      .filter((task) => task.status === "completed")
+      .slice(0, 5)
+      .map((task) => ({ id: `task-${task.id}`, message: `Completed “${task.title}” in ${task.projectName}`, href: `/workspaces/build?startup=${task.projectId}` })),
+    [summary],
+  );
+
+  const completeTask = async (task: CollaboratorTask) => {
+    const nextStatus = task.status === "completed" ? "pending" : "completed";
+    try {
+      await patchCollaboratorTask(
+        { id: task.id, workspaceId: task.workspaceId, projectId: task.projectId, projectName: task.projectName },
+        { status: nextStatus },
+      );
+      setSummary((cur) => cur ? { ...cur, tasks: cur.tasks.map((row) => row.id === task.id ? { ...row, status: nextStatus } : row) } : cur);
+      toast(nextStatus === "completed" ? "Task marked complete" : "Task reopened");
+    } catch {
+      toast.error("Could not update the task.");
+    }
+  };
 
   const firstName = (collaboratorProfile.name || "Collaborator").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -139,6 +179,22 @@ export function Dashboard() {
 
       {/* Welcome Back — contextual intelligence surface */}
       <WelcomeBack />
+        <CoFounderRelationshipCard />
+        <ExecutionIntelligencePanel role="collaborator" />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#111111]">
+          <h2 className="text-lg font-bold text-text-primary">Today's focus</h2>
+          {focusTasks.length === 0 && <p className="mt-3 text-sm text-text-muted">No pending tasks are recorded. Visit your tasks to plan your next contribution.</p>}
+          <ul className="mt-3 space-y-2">{focusTasks.map(task => <li key={task.id} className="flex items-center gap-3 rounded-xl border border-border-subtle p-3"><button type="button" onClick={() => void completeTask(task)} aria-label={`Complete ${task.title}`} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border-default"><CheckCircle2 className="h-4 w-4" /></button><div className="min-w-0"><p className="text-sm font-semibold text-text-primary">{task.title}</p><p className="text-xs text-text-muted">{task.projectName}</p></div></li>)}</ul>
+        </section>
+        <section className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#111111]">
+          <h2 className="text-lg font-bold text-text-primary">Recent activity</h2>
+          {recentActivity.length === 0 && <p className="mt-3 text-sm text-text-muted">Completed contributions will appear here.</p>}
+          <ul className="mt-3 space-y-3">{recentActivity.map(item => <li key={item.id}><Link to={item.href} className="text-sm text-brand-primary">{item.message}</Link></li>)}</ul>
+        </section>
+      </div>
+
+
 
       {loadError && (
         <div className="border border-red-500/20 bg-red-50/80 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-2xl px-5 py-3.5 text-sm backdrop-blur-md flex items-center gap-3">

@@ -19,6 +19,7 @@ export interface PublicUserActivity {
 export interface PublicUserProfile {
   id: string;
   name: string;
+  username?: string | null;
   role: string;
   category: string;
   stage: string;
@@ -29,7 +30,16 @@ export interface PublicUserProfile {
   bio: string;
   website: string;
   avatar: string;
+  avatarUrl?: string;
+  isVerified?: boolean;
+  credibilityScore?: number;
+  credibilityLevel?: string;
+  subscriber?: boolean;
+  subscriptionLabel?: string | null;
+  sharedContext?: boolean;
   isOwnProfile: boolean;
+  connectionStatus?: 'self' | 'connected' | 'pending' | 'incoming' | 'none';
+  connectionRequestId?: string | null;
   stats: {
     decay: number;
     stageProgress: number;
@@ -38,12 +48,15 @@ export interface PublicUserProfile {
     connections: number;
   };
   skills: string[];
+  trust?: { trust_score: number; tier: string; verification_status: string; confidence_score: number; proof_count?: number };
+  verifiedSkills?: Array<{ skill: string; source: string; confidence: number; verifiedAt?: string; expiresAt?: string }>;
   recentActivity: PublicUserActivity[];
 }
 
 export interface CollaboratorDirectoryEntry {
   id: string;
   name: string;
+  username?: string | null;
   role: string;
   title: string;
   headline: string;
@@ -62,6 +75,12 @@ export interface CollaboratorDirectoryEntry {
   avatarUrl: string;
   credibilityScore: number;
   isVerified: boolean;
+  subscriber?: boolean;
+  subscriptionLabel?: string | null;
+  credibilityLevel?: string;
+  sharedContext?: boolean;
+  trust?: { trust_score: number; tier: string; verification_status: string; confidence_score: number };
+  verifiedSkills?: Array<{ skill: string; source: string; confidence: number; verifiedAt?: string; expiresAt?: string }>;
 }
 
 export interface CollaborationInvitation {
@@ -116,11 +135,49 @@ export function fetchCollaboratorDirectory(): Promise<CollaboratorDirectoryEntry
     .then((data) => Array.isArray(data.users) ? data.users : []);
 }
 
-export async function connectWithUser(userId: string, invitation?: CollaborationInvitation): Promise<void> {
-  await request<{ ok: boolean }>(`/${encodeURIComponent(userId)}/connect`, {
+export interface ConnectionRequest {
+  id: string;
+  fromUserId: string;
+  name: string;
+  avatar: string;
+  role: string;
+  username: string | null;
+  message: string;
+  createdAt: string;
+  status: string;
+}
+
+export interface ConnectionSummary {
+  id: string;
+  name: string;
+  username: string | null;
+  role: string;
+  avatar: string;
+  headline: string;
+}
+
+export async function connectWithUser(userId: string, invitation?: CollaborationInvitation): Promise<{ ok: boolean; connectionRequestId?: string; status?: string }> {
+  return request<{ ok: boolean; connectionRequestId?: string; status?: string }>(`/${encodeURIComponent(userId)}/connect`, {
     method: 'POST',
     body: invitation ? JSON.stringify({ invitation }) : undefined,
   });
+}
+
+export function fetchConnectionRequests(): Promise<ConnectionRequest[]> {
+  return request<{ requests?: ConnectionRequest[] }>('/connections/requests')
+    .then((data) => Array.isArray(data.requests) ? data.requests : []);
+}
+
+export function respondConnectionRequest(requestId: string, decision: 'accept' | 'decline'): Promise<{ ok: boolean; status: string }> {
+  return request<{ ok: boolean; status: string }>(`/connections/requests/${encodeURIComponent(requestId)}/${decision}`, {
+    method: 'POST',
+    body: JSON.stringify({ decision }),
+  });
+}
+
+export function fetchConnections(): Promise<ConnectionSummary[]> {
+  return request<{ connections?: ConnectionSummary[] }>('/connections')
+    .then((data) => Array.isArray(data.connections) ? data.connections : []);
 }
 
 export async function uploadProfileAvatar(file: File): Promise<{ avatarUrl: string }> {
@@ -138,12 +195,3 @@ export async function uploadProfileAvatar(file: File): Promise<{ avatarUrl: stri
 export async function removeProfileAvatar(): Promise<void> {
   await request<void>("/me/avatar", { method: "DELETE" })
 }
-
-export async function activateRole(role: string, payload?: Record<string, unknown>): Promise<{ ok: boolean; error?: { message: string } }> {
-  return request<{ ok: boolean; error?: { message: string } }>("/me/role", {
-    method: "POST",
-    body: JSON.stringify({ role, ...payload }),
-  });
-}
-
-

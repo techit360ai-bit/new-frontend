@@ -1,3 +1,9 @@
+import { fetchCollaboratorTasks, patchCollaboratorTask, type CollaboratorTask } from "@/lib/api/collaboratorTasks";
+import { fetchCustomerValidationSessions, type CustomerValidationSession } from "@/lib/api/incubation";
+import { fetchFounderCapTable, type FounderCapTable } from "@/lib/api/founderEquity";
+import { deriveFounderSignals, deriveJourney, deriveRecentActivity, toFounderTask, validationTotals as computeValidationTotals, type FounderTask } from "@/lib/dashboard/founderIntelligence";
+import { CoFounderMode } from "@/dashboard/_shared/cofounder/CoFounderMode";
+import { ExecutionIntelligencePanel } from "@/dashboard/_shared/ExecutionIntelligencePanel";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
@@ -19,7 +25,6 @@ import { computeMomentum, momentumColor } from "@/dashboard/_shared/hackathon/mo
 import { WelcomeBack } from "@/components/WelcomeBack";
 
 interface Signal { id: string; message: string; href: string; }
-interface FounderTask { id: string; title: string; detail: string; priority: "overdue" | "due-soon" | "this-week"; href: string; done: boolean; }
 interface JourneyStage { id: string; label: string; status: "complete" | "active" | "upcoming"; progress: number; detail: string; }
 interface Build { id: string; name: string; logoEmoji: string; stage: FounderStage; oneLiner: string; progress: number; isPrimary: boolean; }
 
@@ -65,7 +70,13 @@ function IntelligenceMetric({ label, value, icon: Icon }: { label: string; value
 export function Dashboard() {
   const navigate = useNavigate();
   const { founderProfile: p } = useFounderProfile();
+  const [tasks, setTasks] = useState<FounderTask[]>([]);
+  const [workspaceTasks, setWorkspaceTasks] = useState<CollaboratorTask[]>([]);
+  const [validationSessions, setValidationSessions] = useState<CustomerValidationSession[]>([]);
+  const [capTable, setCapTable] = useState<FounderCapTable | null>(null);
+  const [openStage, setOpenStage] = useState<string | null>(null);
 
+  // GSIS master score + alerts from ai-router (surfaced for the first time).
   const [intel, setIntel] = useState<DashboardIntelligence | null>(null);
   useEffect(() => {
     let alive = true;
@@ -73,6 +84,7 @@ export function Dashboard() {
     return () => { alive = false; };
   }, []);
 
+  // B4 — anomaly risk flags from the engine over this founder's execution signals.
   const [riskFlags, setRiskFlags] = useState<RiskFlag[]>([]);
   useEffect(() => {
     let alive = true;
@@ -81,8 +93,52 @@ export function Dashboard() {
     return () => { alive = false; };
   }, []);
 
+  // Live workspace tasks for this founder → "Today's focus" (persisted on toggle).
+  useEffect(() => {
+    let alive = true;
+    fetchCollaboratorTasks()
+      .then((snapshot) => {
+        if (!alive) return;
+        setWorkspaceTasks(snapshot.tasks);
+        setTasks(snapshot.tasks.filter((task) => task.status !== "completed").slice(0, 5).map(toFounderTask));
+      })
+      .catch(() => { if (alive) { setWorkspaceTasks([]); setTasks([]); } });
+    return () => { alive = false; };
+  }, []);
+
+  // Live customer-validation sessions → evidence metric + dashboard card.
+  useEffect(() => {
+    let alive = true;
+    fetchCustomerValidationSessions(5)
+      .then((result) => { if (alive) setValidationSessions(Array.isArray(result.sessions) ? result.sessions : []); })
+      .catch(() => { if (alive) setValidationSessions([]); });
+    return () => { alive = false; };
+  }, []);
+
+  // Committed collaborator equity per venture → cap table (derived, never invented).
+  useEffect(() => {
+    let alive = true;
+    fetchFounderCapTable()
+      .then((result) => { if (alive) setCapTable(result); })
+      .catch(() => { if (alive) setCapTable(null); });
+    return () => { alive = false; };
+  }, []);
+
+  // B5 — momentum audio briefing (TTS) on demand.
+  const [briefingUrl, setBriefingUrl] = useState<string | null>(null);
+  const [briefingLoading, setBriefingLoading] = useState(false);
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
-  const firstName = (p.name || "Founder").split(" ")[0];
+  const playBriefing = async () => {
+    setBriefingLoading(true);
+    const b = await fetchAudioBriefing(`Momentum briefing for ${firstName}: keep your build moving.`);
+    setBriefingLoading(false);
+    if (b?.audio_url) {
+      setBriefingUrl(b.audio_url);
+      try { void new Audio(b.audio_url).play(); } catch { /* autoplay may be blocked */ }
+    } else {
+      toast("Audio briefing unavailable right now.");
+    }
+  };
 
   useEffect(() => {
     let alive = true;
@@ -90,10 +146,13 @@ export function Dashboard() {
       .then((rows) => {
         if (alive) setHackathons(rows.filter((row): row is Hackathon => row.type === "hackathon"));
       })
-      .catch(() => { if (alive) setHackathons([]); });
+      .catch(() => {
+        if (alive) setHackathons([]);
+      });
     return () => { alive = false; };
   }, []);
 
+  // S7 — founder venture portfolio (multiple separate startups), from context.
   const ventures = p.founderProjects;
   const builds: Build[] = useMemo(
     () => ventures.map((v) => ({
@@ -107,12 +166,10 @@ export function Dashboard() {
     })),
     [ventures, p.logoEmoji],
   );
-  
   const [activeVentureId, setActiveVentureId] = useState<string | null>(null);
   useEffect(() => {
     setActiveVentureId((cur) => cur ?? (ventures.find((v) => v.isPrimary) ?? ventures[0])?.id ?? null);
   }, [ventures]);
-  
   const activeVenture = ventures.find((v) => v.id === activeVentureId) ?? ventures[0] ?? null;
 
   const [scorecard, setScorecard] = useState<GsisV2Scorecard | null>(null);
@@ -140,6 +197,16 @@ export function Dashboard() {
     if ((activeVenture?.progress ?? 0) > 0) {
       metrics.product = { score: activeVenture?.progress, status: "derived", evidence_level: 2, source: "project_progress", observed_at: observedAt };
     }
+    const totalResponses = validationSessions.reduce((sum, session) => sum + Number(session.totalResponseCount || 0), 0);
+    const qualifiedResponses = validationSessions.reduce((sum, session) => sum + Number(session.qualifiedResponseCount || 0), 0);
+    if (totalResponses > 0) {
+      // Observed share of validation responses that qualified (0–1 → 0–100).
+      metrics.customer_validation = { value: Math.min(1, qualifiedResponses / totalResponses), status: "observed", evidence_level: 3, source: "customer_validation", observed_at: observedAt };
+    }
+    if (workspaceTasks.length > 0) {
+      const completedTasks = workspaceTasks.filter((task) => task.status === "completed").length;
+      metrics.execution = { value: completedTasks / workspaceTasks.length, status: "derived", evidence_level: 2, source: "workspace_tasks", observed_at: observedAt };
+    }
     computeGsisV2({
       startup_id: activeVenture?.id,
       declared_stage: activeVenture?.stage ?? p.stage,
@@ -149,14 +216,61 @@ export function Dashboard() {
       metrics,
     }).then((result) => { if (alive) setScorecard(result); });
     return () => { alive = false; };
-  }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users]);
+  }, [activeVenture, p.currentTeamSize, p.launchStatus, p.location, p.revenueMonthly, p.stage, p.startupName, p.users, validationSessions, workspaceTasks]);
 
+  const signals = useMemo<Signal[]>(
+    () => deriveFounderSignals({ riskFlags, validationSessions, tasks }),
+    [riskFlags, validationSessions, tasks],
+  );
+
+  const journey = useMemo<JourneyStage[]>(
+    () => deriveJourney(activeVenture?.stage ?? p.stage, activeVenture?.progress),
+    [activeVenture, p.stage],
+  );
+
+  const evidenceSources = useMemo(
+    () => [...new Set(Object.values(scorecard?.components ?? {}).map((component) => component.source).filter(Boolean))],
+    [scorecard],
+  );
+  const evidencePlan = useMemo(() => [
+    { label: "Team size", available: p.currentTeamSize > 0, source: "founder profile" },
+    { label: "Product progress", available: (activeVenture?.progress ?? 0) > 0, source: "project" },
+    { label: "Active users", available: (activeVenture?.users ?? p.users) > 0, source: "venture" },
+    { label: "Monthly revenue", available: (activeVenture?.revenueMonthly ?? p.revenueMonthly) > 0, source: "venture" },
+    { label: "Customer validation", available: validationSessions.some((session) => Number(session.totalResponseCount || 0) > 0), source: "validation sessions" },
+    { label: "Execution evidence", available: workspaceTasks.length > 0, source: "workspace tasks" },
+  ], [p.currentTeamSize, p.users, p.revenueMonthly, activeVenture, validationSessions, workspaceTasks]);
+
+  const validationTotals = useMemo(() => computeValidationTotals(validationSessions), [validationSessions]);
+
+  const recentActivity = useMemo(
+    () => deriveRecentActivity({ workspaceTasks, validationSessions }),
+    [workspaceTasks, validationSessions],
+  );
+
+  const firstName = (p.name || "Founder").split(" ")[0];
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   const weeksBuilding = useMemo(
     () => Math.max(1, Math.floor((NOW_MS - new Date(`${p.foundingYear}-01-01`).getTime()) / (7 * 86_400_000))),
     [p.foundingYear],
   );
 
+  const toggleTask = async (id: string) => {
+    const task = tasks.find((row) => row.id === id);
+    if (!task) return;
+    const nextStatus = task.done ? "pending" : "completed";
+    setTasks((cur) => cur.map((row) => row.id === id ? { ...row, done: !row.done } : row));
+    try {
+      await patchCollaboratorTask(
+        { id: task.id, workspaceId: task.workspaceId, projectId: task.projectId, projectName: task.projectName },
+        { status: nextStatus },
+      );
+      toast(nextStatus === "completed" ? "Task marked complete" : "Task reopened");
+    } catch {
+      setTasks((cur) => cur.map((row) => row.id === id ? { ...row, done: task.done } : row));
+      toast.error("Could not update the task.");
+    }
+  };
   const staggerContainer = {
     hidden: { opacity: 0 },
     show: {
@@ -313,6 +427,40 @@ export function Dashboard() {
             </div>
           </div>
         </motion.div>
+
+
+        <CoFounderMode ventureId={activeVenture?.id ?? null} />
+        <ExecutionIntelligencePanel role="founder" projectId={activeVenture?.id} />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className="rounded-3xl border border-[#0066ff]/15 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-[#121212]/90">
+            <h2 className="text-lg font-bold text-text-primary">Today's focus</h2>
+            {tasks.length === 0 && <p className="mt-3 text-sm text-text-muted">No pending workspace tasks. Open a workspace to plan your next milestone.</p>}
+            <ul className="mt-3 space-y-2">{tasks.map(task => <li key={task.id} className="flex items-center gap-3 rounded-xl border border-border-subtle p-3"><input type="checkbox" checked={task.done} aria-label={`Complete ${task.title}`} onChange={() => void toggleTask(task.id)} className="h-5 w-5" /><Link to={task.href} className="min-w-0 text-sm text-text-primary"><span className="block font-semibold">{task.title}</span><span className="text-xs text-text-muted">{task.detail}</span></Link></li>)}</ul>
+            {signals.length > 0 && <ul className="mt-4 space-y-2">{signals.map(signal => <li key={signal.id}><Link to={signal.href} className="text-sm text-brand-primary">{signal.message}</Link></li>)}</ul>}
+          </section>
+          <section className="rounded-3xl border border-[#0066ff]/15 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-[#121212]/90">
+            <h2 className="text-lg font-bold text-text-primary">Customer validation & evidence</h2>
+            <p className="mt-2 text-sm text-text-muted">{validationTotals.responses} responses · {validationTotals.qualified} qualified</p>
+            <ul className="mt-4 space-y-2">{evidencePlan.map(item => <li key={item.label} className="flex justify-between gap-3 text-sm"><span className="text-text-secondary">{item.label}</span><span className={item.available ? 'text-status-success' : 'text-text-muted'}>{item.available ? 'Evidence available' : 'Not recorded'}</span></li>)}</ul>
+            <Link to="/incubation-hub" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-brand-primary">Review validation</Link>
+          </section>
+          <section className="rounded-3xl border border-[#0066ff]/15 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-[#121212]/90">
+            <h2 className="text-lg font-bold text-text-primary">Venture journey</h2>
+            <ol className="mt-4 space-y-3">{journey.map(stage => <li key={stage.id} className="text-sm"><div className="flex justify-between gap-3"><span className="font-semibold text-text-primary">{stage.label}</span><span className="text-text-muted">{stage.status}</span></div><p className="mt-1 text-xs text-text-muted">{stage.detail}</p></li>)}</ol>
+          </section>
+          <section className="rounded-3xl border border-[#0066ff]/15 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-[#121212]/90">
+            <h2 className="text-lg font-bold text-text-primary">Recent execution</h2>
+            {recentActivity.length === 0 && <p className="mt-3 text-sm text-text-muted">Recorded workspace activity and validation updates will appear here.</p>}
+            <ul className="mt-3 space-y-3">{recentActivity.map(item => <li key={item.id}><Link to={item.href} className="text-sm text-brand-primary">{item.message}</Link></li>)}</ul>
+          </section>
+        </div>
+
+        <section className="rounded-3xl border border-[#0066ff]/15 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-[#121212]/90">
+          <h2 className="text-lg font-bold text-text-primary">Recorded collaborator equity</h2>
+          {!capTable && <p className="mt-3 text-sm text-text-muted">The cap table is not available right now.</p>}
+          {capTable?.ventures.length === 0 && <p className="mt-3 text-sm text-text-muted">No collaborator equity commitments are recorded yet.</p>}
+          {capTable && <><p className="mt-2 text-xs text-text-muted">{capTable.basis || 'These records cover collaborator commitments made through TechIT. External holdings are not included.'}</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{capTable.ventures.map(venture => <div key={venture.workspaceId} className="rounded-xl border border-border-subtle p-4"><h3 className="font-semibold text-text-primary">{venture.name}</h3><p className="mt-2 text-sm text-text-secondary">{venture.committedPercent}% committed · {venture.retainedPercent}% remaining in recorded commitments</p><p className="mt-1 text-xs text-text-muted">{venture.grants.length} grants · {venture.pending.length} pending proposals</p></div>)}</div></>}
+        </section>
 
         {/* Startup hero */}
         {(p.startupName || activeVenture) && (

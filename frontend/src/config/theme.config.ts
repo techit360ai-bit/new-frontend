@@ -6,8 +6,8 @@
  */
 export const techITTheme = {
   brand: {
-    primary: '#2196f3',
-    primaryHover: '#1976d2',
+    primary: '#0066ff',
+    primaryHover: '#0052cc',
     secondary: '#0a1929',
     accent: '#4f6ef7',
     premium: '#ffd700',

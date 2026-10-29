@@ -1,4 +1,20 @@
-import { apiGet, apiPost } from "./client";
+import { apiGet, apiPost, getAuthToken } from "./client";
+import { env } from "./config";
+
+const BACKEND_API = String((env as Record<string, unknown>).VITE_API_URL || "http://localhost:3000/api").replace(/\/$/, "");
+const TRUST_AUTHORITY_API = (env.MODE === "production" || typeof (env as Record<string, unknown>).VITE_TRUST_AUTHORITY_URL === "string") ? BACKEND_API : "";
+function backendHeaders() {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = getAuthToken(); if (token) headers.Authorization = `Bearer ${token}`;
+  try { const csrf = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith("techit_csrf=")); if (csrf) headers["X-CSRF-Token"] = decodeURIComponent(csrf.slice("techit_csrf=".length)); } catch {}
+  return headers;
+}
+async function backendRequest<T>(path: string, method: "GET" | "POST", body?: unknown): Promise<T> {
+  const response = await fetch(`${BACKEND_API}${path}`, { method, credentials: "include", headers: backendHeaders(), body: body === undefined ? undefined : JSON.stringify(body) });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(String((payload as { error?: unknown }).error || `Trust API ${response.status}`));
+  return payload as T;
+}
 
 export type TrustStatus = "unverified" | "pending" | "verified" | "expired" | "failed" | "disconnected";
 
@@ -11,6 +27,7 @@ export interface TrustProfile {
   signals?: string[];
   breakdown?: Record<string, number>;
   last_sync_at?: string | null;
+  verifiedSkills?: Array<{ skill: string; source: string; confidence: number; verifiedAt?: string; expiresAt?: string }>;
   computed_at?: string;
   privacy?: {
     metadata_only?: boolean;
@@ -86,6 +103,7 @@ export interface TrustVerificationResult {
   expires_at?: string;
   persisted?: boolean;
   next_action?: string;
+  authorizationUrl?: string;
   verification?: TrustHistoryItem & {
     subject_id?: string;
     subject_type?: string;
@@ -103,33 +121,48 @@ export interface TrustNotificationPreview {
   owner_ids_exposed_to_investors?: boolean;
 }
 
+export interface FounderTrustAccessRequest {
+  id: string;
+  projectId: string;
+  investorId: string;
+  status: "pending" | "approved" | "rejected";
+  purpose: string;
+  requestedScopes: string[];
+  createdAt: string;
+}
+
 export function fetchTrustProfile(): Promise<TrustProfile> {
-  return apiGet<TrustProfile>("/trust/profile");
+  return TRUST_AUTHORITY_API ? backendRequest<TrustProfile>("/trust/profile", "GET") : apiGet<TrustProfile>("/trust/profile");
 }
 
 export function fetchTrustBadges(): Promise<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }> {
-  return apiGet<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }>("/trust/badges");
+  return TRUST_AUTHORITY_API ? backendRequest<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }>("/trust/badges", "GET") : apiGet<{ badges: TrustBadge[]; active_badges?: string[]; privacy?: string }>("/trust/badges");
 }
 
 export function fetchTrustHistory(limit = 25): Promise<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }> {
-  return apiGet<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }>(`/trust/history?limit=${limit}`);
+  return TRUST_AUTHORITY_API ? backendRequest<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }>(`/trust/history?limit=${limit}`, "GET") : apiGet<{ history: TrustHistoryItem[]; append_only?: boolean; privacy?: string }>(`/trust/history?limit=${limit}`);
 }
 
 export function fetchTrustIntegrations(): Promise<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }> {
-  return apiGet<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }>("/trust/integrations");
+  return TRUST_AUTHORITY_API ? backendRequest<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }>("/trust/integrations", "GET") : apiGet<{ integrations: TrustIntegrationManifest[]; privacy?: Record<string, unknown> }>("/trust/integrations");
 }
 
 export function refreshTrustSource(source: string): Promise<TrustVerificationResult> {
-  return apiPost<TrustVerificationResult>(`/trust/refresh/${encodeURIComponent(source)}`, {});
+  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(`/trust/refresh/${encodeURIComponent(source)}`, "POST", {}) : apiPost<TrustVerificationResult>(`/trust/refresh/${encodeURIComponent(source)}`, {});
 }
 
 export function disconnectTrustSource(source: string): Promise<TrustVerificationResult> {
-  return apiPost<TrustVerificationResult>(`/trust/disconnect/${encodeURIComponent(source)}`, {});
+  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(`/trust/disconnect/${encodeURIComponent(source)}`, "POST", {}) : apiPost<TrustVerificationResult>(`/trust/disconnect/${encodeURIComponent(source)}`, {});
 }
 
 export function connectTrustSource(source: string): Promise<TrustVerificationResult> {
-  return apiPost<TrustVerificationResult>(`/trust/verify/${encodeURIComponent(source)}`, {});
+  return TRUST_AUTHORITY_API ? backendRequest<TrustVerificationResult>(`/trust/verify/${encodeURIComponent(source)}`, "POST", {}) : apiPost<TrustVerificationResult>(`/trust/verify/${encodeURIComponent(source)}`, {});
 }
+
+export function createTrustDomainChallenge(input: Record<string, unknown> = {}) { return backendRequest<Record<string, unknown>>("/trust/domain/challenge", "POST", input); }
+export function verifyTrustDomainChallenge(challengeId: string) { return backendRequest<Record<string, unknown>>(`/trust/domain/challenge/${encodeURIComponent(challengeId)}/verify`, "POST", {}); }
+export function fetchFounderTrustAccessRequests() { return backendRequest<{ ok: boolean; requests: FounderTrustAccessRequest[] }>("/authorization/founder/trust/access-requests?status=pending", "GET"); }
+export function decideFounderTrustAccessRequest(requestId: string, decision: "approved" | "rejected", note = "") { return backendRequest<{ ok: boolean; request: FounderTrustAccessRequest }>(`/authorization/founder/trust/access-requests/${encodeURIComponent(requestId)}/decision`, "POST", { decision, note }); }
 
 export function previewTrustNotifications(events: Array<Record<string, unknown>>): Promise<TrustNotificationPreview> {
   return apiPost<TrustNotificationPreview>("/trust/notifications/preview", { events });

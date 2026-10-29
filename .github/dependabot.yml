@@ -5,7 +5,44 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # Vite majors must go through an engineer-led compatibility review
+      # (see .github/DEPENDENCY_POLICY.md and dependency-audit-baseline.json).
+      # The repo is pinned to the patched vite 6.4.x line, which is the version
+      # range required by vitest 5 and supported by the current plugins.
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      # Major bumps that broke `npm ci` / the build when merged unreviewed
+      # (Oct 2026): typescript 7 and @eslint/js 10 are outside typescript-eslint
+      # 8's peer range; lucide-react 1.x removed the brand icons (Github, Linkedin,
+      # Twitter, Gitlab, Figma) the app imports; react-router 8 and js-yaml 5 were
+      # reverted in the same restore. Each needs a deliberate, tested migration.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-router"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-router-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "js-yaml"
+        update-types: ["version-update:semver-major"]
+      # eslint 10 sits outside the typescript-eslint / react-hooks plugin range we
+      # pin; date-fns 4 and react-day-picker 10 change the date UI and must move
+      # together. Each needs a deliberate, tested migration.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "date-fns"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-day-picker"
+        update-types: ["version-update:semver-major"]
     groups:
+      # react-router and react-router-dom must move together: a mismatched pair
+      # installs two react-router copies and crashes every route at runtime.
+      react-router:
+        patterns: ["react-router", "react-router-dom"]
       frontend-patch-minor:
         update-types: ["patch", "minor"]
   - package-ecosystem: github-actions

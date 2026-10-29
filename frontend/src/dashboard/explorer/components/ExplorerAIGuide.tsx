@@ -43,7 +43,7 @@ export function ExplorerAIGuide() {
         message: text,
       });
 
-      const replyText = response?.message || `Here is what I found regarding "${text}": TechIT provides automated smart contracts for equity vesting, live match indicators, and direct developer tools integration. You can switch to Founder or Collaborator mode anytime from your TopBar menu or Explorer settings.`;
+      const replyText = response?.message || "Havi did not return a response. Please try again.";
 
       setMessages((prev) => [
         ...prev,
@@ -57,7 +57,7 @@ export function ExplorerAIGuide() {
         ...prev,
         {
           sender: "havi" as const,
-          text: `Here is what I found regarding "${text}": TechIT provides automated smart contracts for equity vesting, live match indicators, and direct developer tools integration. You can switch to Founder or Collaborator mode anytime from your TopBar menu or Explorer settings.`,
+          text: "Havi is unavailable right now. Please try again shortly.",
         },
       ]);
     } finally {

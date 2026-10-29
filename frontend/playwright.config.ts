@@ -16,7 +16,10 @@ export default defineConfig({
       : undefined,
   },
   webServer: {
-    command: "npx vite --host 127.0.0.1 --port 4173",
+    command: process.env.PLAYWRIGHT_USE_PREVIEW === "1"
+      ? "node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173"
+      : "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4173",
+    timeout: 90_000,
     url: "http://127.0.0.1:4173",
     reuseExistingServer: true,
   },

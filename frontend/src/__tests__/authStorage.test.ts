@@ -19,11 +19,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-test('keeps the signed-in access token available for onboarding mutations', () => {
+test('keeps the access token in memory without persisting it to web storage', () => {
   persistAccessToken('access-token');
 
-  expect(sessionStorage.getItem('techit_access_token')).toBe('access-token');
   expect(getAuthToken()).toBe('access-token');
+  expect(sessionStorage.getItem('techit_access_token')).toBeNull();
 });
 
 test('clears the access token on sign out', () => {
@@ -32,4 +32,13 @@ test('clears the access token on sign out', () => {
 
   expect(sessionStorage.getItem('techit_access_token')).toBeNull();
   expect(getAuthToken()).toBeNull();
+});
+
+test('purges a token left in sessionStorage by an earlier build', () => {
+  sessionStorage.setItem('techit_access_token', 'legacy-token');
+
+  persistAccessToken('access-token');
+
+  expect(sessionStorage.getItem('techit_access_token')).toBeNull();
+  expect(getAuthToken()).toBe('access-token');
 });

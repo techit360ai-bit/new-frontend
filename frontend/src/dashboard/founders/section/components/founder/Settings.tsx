@@ -1,3 +1,4 @@
+import { CofounderProfileSettings } from "@/dashboard/_shared/cofounder/CofounderProfileSettings";
 // frontend/src/dashboard/founders/section/components/founder/Settings.tsx
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,7 @@ const sections = [
   { id: "identity",      label: "Account & Identity",  icon: User },
   { id: "startup",       label: "Startup & Roles",     icon: Briefcase },
   { id: "verification",  label: "Verification",        icon: BadgeCheck },
+  { id: "cofounder", label: "Co-founder Matching", icon: Briefcase },
   { id: "notifications", label: "Notifications",       icon: Bell },
   { id: "roles",         label: "Roles & Switching",   icon: UserCog },
 ] as const;
@@ -131,6 +133,7 @@ export function Settings() {
   const refs = {
     identity:      useRef<HTMLDivElement>(null),
     startup:       useRef<HTMLDivElement>(null),
+    cofounder: useRef<HTMLDivElement>(null),
     verification:  useRef<HTMLDivElement>(null),
     notifications: useRef<HTMLDivElement>(null),
     roles:         useRef<HTMLDivElement>(null),
@@ -509,6 +512,8 @@ export function Settings() {
               </button>
             </div>
           </section>
+
+          <div ref={refs.cofounder}><CofounderProfileSettings /></div>
 
           {/* VERIFICATION */}
           <section ref={refs.verification} id="verification" className="border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-[#121212]/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] scroll-mt-6">

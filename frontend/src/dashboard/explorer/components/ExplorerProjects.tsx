@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ExplorerDataState, useExplorerRecommendations, explorerDestination } from "../useExplorerRecommendations";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -5,71 +7,24 @@ import { FolderKanban, GitBranch, GitCommit, Users, Zap, Search, ArrowUpRight, C
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
 interface BuildProject {
+  href: string;
   id: string;
   name: string;
   repoName: string;
   description: string;
   techStack: string[];
-  contributorsCount: number;
-  commitsCount: number;
-  openIssuesCount: number;
-  status: "Active Building" | "Sprint Mode" | "Beta Launch";
+  contributorsCount: string;
+  commitsCount: string;
+  openIssuesCount: string;
+  status: string;
   updatedAt: string;
 }
 
-const MOCK_PROJECTS: BuildProject[] = [
-  {
-    id: "proj-1",
-    name: "Aura Agentic Core",
-    repoName: "aura-ai/agentic-core",
-    description: "High-performance Rust execution engine for multi-agent LLM task orchestration.",
-    techStack: ["Rust", "Tokio", "gRPC", "WebAssembly"],
-    contributorsCount: 8,
-    commitsCount: 342,
-    openIssuesCount: 12,
-    status: "Sprint Mode",
-    updatedAt: "2 hours ago"
-  },
-  {
-    id: "proj-2",
-    name: "Nexus Vesting Contracts",
-    repoName: "nexus-protocol/contracts",
-    description: "Audited Solidity smart contracts for non-custodial milestone equity vesting.",
-    techStack: ["Solidity", "Hardhat", "Foundry", "OpenZeppelin"],
-    contributorsCount: 5,
-    commitsCount: 184,
-    openIssuesCount: 4,
-    status: "Active Building",
-    updatedAt: "5 hours ago"
-  },
-  {
-    id: "proj-3",
-    name: "BioSynth Pipeline UI",
-    repoName: "biosynth/pipeline-frontend",
-    description: "Interactive 3D molecular visualization dashboard for protein structure candidates.",
-    techStack: ["React", "Three.js", "TypeScript", "Tailwind CSS"],
-    contributorsCount: 6,
-    commitsCount: 210,
-    openIssuesCount: 7,
-    status: "Beta Launch",
-    updatedAt: "1 day ago"
-  },
-  {
-    id: "proj-4",
-    name: "HyperScale Edge Mesh",
-    repoName: "hyperscale/edge-mesh",
-    description: "eBPF-powered network routing layer for global edge computing nodes.",
-    techStack: ["Go", "eBPF", "C++", "Docker"],
-    contributorsCount: 11,
-    commitsCount: 512,
-    openIssuesCount: 15,
-    status: "Sprint Mode",
-    updatedAt: "30 mins ago"
-  }
-];
 
 export function ExplorerProjects() {
   const navigate = useNavigate();
+  const { rows, loading, error, retry } = useExplorerRecommendations("project");
+  const projects: BuildProject[] = useMemo(() => rows.map(({ entity: e }) => ({ id: e.entityId, href: explorerDestination(e.url), name: e.title, repoName: e.subtitle || 'Repository not disclosed', description: e.description || '', techStack: e.skills || [], contributorsCount: 'Not available', commitsCount: 'Not available', openIssuesCount: 'Not available', status: e.stage || 'Not specified', updatedAt: 'Not available' })), [rows]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTech, setSelectedTech] = useState<string>("all");
   const [activeProject, setActiveProject] = useState<BuildProject | null>(null);
@@ -77,7 +32,7 @@ export function ExplorerProjects() {
   const techFilters = ["all", "Rust", "TypeScript", "React", "Solidity", "Go", "PyTorch"];
 
   const filteredProjects = useMemo(() => {
-    return MOCK_PROJECTS.filter((p) => {
+    return projects.filter((p) => {
       const matchesSearch =
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -87,11 +42,12 @@ export function ExplorerProjects() {
 
       return matchesSearch && matchesTech;
     });
-  }, [searchQuery, selectedTech]);
+  }, [projects, searchQuery, selectedTech]);
 
   return (
     <ExplorerLayout>
       <div className="space-y-6 max-w-7xl mx-auto font-bricolage">
+        <ExplorerDataState loading={loading} error={error} empty={filteredProjects.length === 0} retry={retry} />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -201,7 +157,7 @@ export function ExplorerProjects() {
 
         {/* Project Detail Modal */}
         {activeProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <Dialog open onOpenChange={open => { if (!open) setActiveProject(null); }}><DialogContent aria-describedby={undefined} className="max-w-lg border-0 bg-transparent p-0 shadow-none"><DialogTitle className="sr-only">{activeProject.name}</DialogTitle>
             <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-2xl space-y-5">
               <div className="flex items-start justify-between">
                 <div>
@@ -247,17 +203,17 @@ export function ExplorerProjects() {
                 <button
                   type="button"
                   onClick={() => {
-                    toast.info(`Opening IDE workspace for ${activeProject.name}...`);
+
                     setActiveProject(null);
-                    navigate("/workspaces");
+                    navigate(activeProject.href);
                   }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
                 >
-                  Open in Workspace IDE
+                  View Project
                 </button>
               </div>
             </div>
-          </div>
+          </DialogContent></Dialog>
         )}
       </div>
     </ExplorerLayout>

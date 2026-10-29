@@ -8,11 +8,15 @@ type SmokeCheck = {
   strip?: string;
   token?: string;
   expectJson?: Record<string, string | number | boolean>;
+  optional?: boolean;
+  shaPath?: string;
+  shaEnv?: string;
 };
 
 type SmokeModule = {
   buildChecks: (env?: Record<string, string | undefined>) => SmokeCheck[];
   probe: (check: SmokeCheck, env?: Record<string, string | undefined>) => Promise<void>;
+  runSmoke: (env?: Record<string, string | undefined>) => Promise<void>;
 };
 
 const smokeScriptPath = "../../../scripts/smoke.mjs";
@@ -107,6 +111,141 @@ test("frontend deploy smoke validates service identity from response JSON", asyn
     }
 
     expect(thrown?.message).toContain("expected TechIT API running");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("frontend deploy smoke checks build identity on every service", async () => {
+  const { buildChecks } = await loadSmokeScript();
+  const checks = buildChecks({});
+  const byName = Object.fromEntries(checks.map((check) => [check.name, check]));
+
+  expect(byName["node-backend-version"]).toMatchObject({ path: "/health", shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_NODE_BACKEND" });
+  expect(byName["ai-router-version"]).toMatchObject({ path: "/version", shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_AI_ROUTER" });
+  expect(byName["messaging-version"]).toMatchObject({ path: "/health", shaPath: "sha", shaEnv: "SMOKE_EXPECT_SHA_MESSAGING" });
+});
+
+test("build identity compares each service against its own repository SHA, not the frontend SHA", async () => {
+  const { probe } = await loadSmokeScript();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ sha: "backend-sha" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+
+  const check = {
+    name: "node-backend-version",
+    env: "VITE_API_URL",
+    strip: "/api",
+    path: "/health",
+    statuses: [200],
+    shaPath: "sha",
+    shaEnv: "SMOKE_EXPECT_SHA_NODE_BACKEND",
+  };
+
+  try {
+    // Matches the service's own repo head -> passes.
+    await expect(
+      probe(check, {
+        VITE_API_URL: "https://api.techit.example/api",
+        SMOKE_EXPECT_SHA_NODE_BACKEND: "backend-sha",
+        SMOKE_TIMEOUT_MS: "1000",
+      }),
+    ).resolves.toBeDefined();
+
+    // ...and still passes when an unrelated global (frontend) SHA is present.
+    await expect(
+      probe(check, {
+        VITE_API_URL: "https://api.techit.example/api",
+        SMOKE_EXPECT_SHA_NODE_BACKEND: "backend-sha",
+        SMOKE_EXPECT_SHA: "frontend-sha",
+        SMOKE_TIMEOUT_MS: "1000",
+      }),
+    ).resolves.toBeDefined();
+
+    // A real drift against the service's own repo head must fail.
+    await expect(
+      probe(check, {
+        VITE_API_URL: "https://api.techit.example/api",
+        SMOKE_EXPECT_SHA_NODE_BACKEND: "other-sha",
+        SMOKE_TIMEOUT_MS: "1000",
+      }),
+    ).rejects.toThrow(/sha=backend-sha/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("readiness checks are advisory by default and enforced with SMOKE_REQUIRE_READY", async () => {
+  const { buildChecks } = await loadSmokeScript();
+
+  const advisory = buildChecks({});
+  expect(advisory.find((check) => check.name === "ai-router-ready")?.optional).toBe(true);
+  expect(advisory.find((check) => check.name === "node-backend-ready")?.optional).toBe(true);
+
+  const strict = buildChecks({ SMOKE_REQUIRE_READY: "1" });
+  expect(strict.find((check) => check.name === "ai-router-ready")?.optional).toBe(false);
+  expect(strict.find((check) => check.name === "messaging-ready")?.optional).toBe(false);
+});
+
+test("frontend deploy smoke fails on deployed SHA drift when expected is set", async () => {
+  const { probe } = await loadSmokeScript();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ sha: "abc123" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+
+  try {
+    await expect(
+      probe(
+        {
+          name: "node-backend-version",
+          env: "VITE_API_URL",
+          strip: "/api",
+          path: "/health",
+          statuses: [200],
+          shaPath: "sha",
+        },
+        {
+          VITE_API_URL: "https://api.techit.example/api",
+          SMOKE_EXPECT_SHA: "def456",
+          SMOKE_TIMEOUT_MS: "1000",
+        },
+      ),
+    ).rejects.toThrow(/sha=abc123/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("frontend deploy smoke reports every hard failure instead of stopping at the first", async () => {
+  const { runSmoke } = await loadSmokeScript();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => new Response(null, { status: 500 })) as typeof fetch;
+
+  try {
+    let thrown: Error | undefined;
+    try {
+      await runSmoke({
+        FRONTEND_URL: "https://beta.techitnetwork.com",
+        VITE_API_URL: "https://backend.techitnetwork.com/api",
+        VITE_API_BASE_URL: "https://api.techitnetwork.com",
+        VITE_MESSAGING_BASE_URL: "https://messaging.techitnetwork.com",
+        SMOKE_TIMEOUT_MS: "1000",
+      });
+    } catch (error) {
+      thrown = error as Error;
+    }
+
+    expect(thrown?.message).toMatch(/check\(s\) failed/);
+    expect(thrown?.message).toContain("frontend");
+    expect(thrown?.message).toContain("messaging");
   } finally {
     globalThis.fetch = originalFetch;
   }

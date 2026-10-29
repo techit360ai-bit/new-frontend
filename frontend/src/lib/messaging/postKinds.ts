@@ -63,13 +63,13 @@ export const KIND_META: Record<string, { label: string; icon: LucideIcon }> = {
 
 /** Semantic styling shared by composer, cards, and post detail. */
 export const KIND_COLOR_CLASS: Record<string, string> = {
-  milestone: 'border-amber-400 text-amber-400', insight: 'border-sky-400 text-sky-400',
-  'build-update': 'border-violet-400 text-violet-400', 'collab-call': 'border-emerald-400 text-emerald-400',
+  milestone: 'border-status-warning text-status-warning', insight: 'border-status-info text-status-info',
+  'build-update': 'border-violet-400 text-violet-400', 'collab-call': 'border-status-success text-status-success',
   question: 'border-cyan-400 text-cyan-400', problem: 'border-rose-400 text-rose-400',
-  'contribution-update': 'border-orange-400 text-orange-400', 'skill-showcase': 'border-fuchsia-400 text-fuchsia-400',
-  'role-available': 'border-lime-400 text-lime-400', 'investment-signal': 'border-green-400 text-green-400',
-  'portfolio-update': 'border-indigo-400 text-indigo-400', 'thesis-post': 'border-teal-400 text-teal-400',
-  'opportunity-post': 'border-blue-400 text-blue-400', 'programme-announcement': 'border-purple-400 text-purple-400',
+  'contribution-update': 'border-status-warning text-status-warning', 'skill-showcase': 'border-fuchsia-400 text-fuchsia-400',
+  'role-available': 'border-lime-400 text-lime-400', 'investment-signal': 'border-status-success text-status-success',
+  'portfolio-update': 'border-brand-accent text-brand-accent', 'thesis-post': 'border-teal-400 text-teal-400',
+  'opportunity-post': 'border-status-info text-status-info', 'programme-announcement': 'border-status-pending text-status-pending',
   'community-spotlight': 'border-pink-400 text-pink-400',
 };
 

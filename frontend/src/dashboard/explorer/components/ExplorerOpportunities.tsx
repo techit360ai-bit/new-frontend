@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ExplorerDataState, useExplorerRecommendations, explorerDestination } from "../useExplorerRecommendations";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -5,11 +7,12 @@ import { Sparkles, DollarSign, PieChart, Clock, Award, Search, ArrowRight, Zap, 
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
 interface OpportunityItem {
+  href: string;
   id: string;
   title: string;
   startupName: string;
-  type: "Co-Founder" | "Paid Gig" | "Bounty" | "Equity Role";
-  compStyle: "Cash + Equity" | "Equity Only" | "Bounty Cash";
+  type: string;
+  compStyle: string;
   compDetails: string;
   commitment: string;
   matchScore: number;
@@ -18,58 +21,19 @@ interface OpportunityItem {
   postedAt: string;
 }
 
-const MOCK_OPPORTUNITIES: OpportunityItem[] = [
-  {
-    id: "opp-1",
-    title: "Lead AI Engineer & Technical Co-Founder",
-    startupName: "AuraAI",
-    type: "Co-Founder",
-    compStyle: "Cash + Equity",
-    compDetails: "$4,500/mo + 15% Equity (4y vesting)",
-    commitment: "Full-Time (40h/wk)",
-    matchScore: 97,
-    requiredSkills: ["TypeScript", "Python", "LLMs", "System Design"],
-    description: "Architect core agentic execution framework and lead our 4-person engineering team.",
-    postedAt: "1 day ago"
-  },
-  {
-    id: "opp-2",
-    title: "Smart Contract Audit & Micro-Grant Bounty",
-    startupName: "Nexus Protocol",
-    type: "Bounty",
-    compStyle: "Bounty Cash",
-    compDetails: "$2,500 USDC Bounty",
-    commitment: "Project-Based",
-    matchScore: 92,
-    requiredSkills: ["Solidity", "Hardhat", "Security Audit"],
-    description: "Audit automated vesting vault smart contracts prior to mainnet deployment.",
-    postedAt: "3 days ago"
-  },
-  {
-    id: "opp-3",
-    title: "Senior React / Three.js Frontend Contributor",
-    startupName: "BioSynth AI",
-    type: "Paid Gig",
-    compStyle: "Cash + Equity",
-    compDetails: "$3,800/mo + 2% Equity",
-    commitment: "Part-Time (20h/wk)",
-    matchScore: 89,
-    requiredSkills: ["React", "Three.js", "WebGL", "TypeScript"],
-    description: "Build 3D interactive molecular renderer for protein folding candidate web application.",
-    postedAt: "Just now"
-  }
-];
 
 export function ExplorerOpportunities() {
   const navigate = useNavigate();
+  const { rows, loading, error, retry } = useExplorerRecommendations("opportunity");
+  const opportunities: OpportunityItem[] = useMemo(() => rows.map(({ entity: e, score }) => ({ id: e.entityId, href: explorerDestination(e.url), title: e.title, startupName: e.subtitle || 'Not specified', type: 'Opportunity', compStyle: 'Not disclosed', compDetails: 'See opportunity details', commitment: 'See opportunity details', matchScore: score, requiredSkills: e.skills || [], description: e.description || '', postedAt: 'Published opportunity' })), [rows]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [activeOpp, setActiveOpp] = useState<OpportunityItem | null>(null);
 
-  const types = ["all", "Co-Founder", "Paid Gig", "Bounty", "Equity Role"];
+  const types = ["all", "Opportunity"];
 
   const filteredOpps = useMemo(() => {
-    return MOCK_OPPORTUNITIES.filter((opp) => {
+    return opportunities.filter((opp) => {
       const matchesSearch =
         opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         opp.startupName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,11 +43,12 @@ export function ExplorerOpportunities() {
 
       return matchesSearch && matchesType;
     });
-  }, [searchQuery, selectedType]);
+  }, [opportunities, searchQuery, selectedType]);
 
   return (
     <ExplorerLayout>
       <div className="space-y-6 max-w-7xl mx-auto font-bricolage">
+        <ExplorerDataState loading={loading} error={error} empty={filteredOpps.length === 0} retry={retry} />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -181,7 +146,7 @@ export function ExplorerOpportunities() {
 
         {/* Application Modal */}
         {activeOpp && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <Dialog open onOpenChange={open => { if (!open) setActiveOpp(null); }}><DialogContent aria-describedby={undefined} className="max-w-lg border-0 bg-transparent p-0 shadow-none"><DialogTitle className="sr-only">{activeOpp.title}</DialogTitle>
             <div className="relative w-full max-w-lg rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] p-6 shadow-2xl space-y-5">
               <div className="flex items-start justify-between">
                 <div>
@@ -217,18 +182,18 @@ export function ExplorerOpportunities() {
                 <button
                   type="button"
                   onClick={() => {
-                    toast.success(`Application submitted for ${activeOpp.title}! The startup team will review your profile.`);
+
                     setActiveOpp(null);
-                    navigate("/opportunity-hub");
+                    navigate(activeOpp.href);
                   }}
                   className="px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Submit Application</span>
+                  <span>View Opportunity</span>
                 </button>
               </div>
             </div>
-          </div>
+          </DialogContent></Dialog>
         )}
       </div>
     </ExplorerLayout>

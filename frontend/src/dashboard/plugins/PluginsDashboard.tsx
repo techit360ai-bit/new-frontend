@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Wifi,
   WifiOff,
+  ArrowLeft,
   CircleCheck,
   CircleX,
   Clock,
@@ -25,13 +26,16 @@ import {
   GitPullRequest,
   Bot,
   User,
+  Link2,
+  Unlink,
+  KeyRound,
 } from "lucide-react";
-import { BackButton } from "@/dashboard/feed/components/BackButton";
 import {
   techitApi,
   type ApprovalRequest,
   type AuditEntry,
   type CatalogueEntry,
+  type ConnectionStatus,
   type ContributionEvent,
   type InvokeResult,
 } from "@/lib/techitApi";
@@ -49,12 +53,12 @@ const RESULT_META: Record<
   { cls: string; icon: ReactNode; label: string }
 > = {
   success: {
-    cls: "bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-400 dark:ring-emerald-500/30",
+    cls: "bg-status-success text-status-success ring-emerald-600/20 dark:bg-status-success/15 dark:text-status-success dark:ring-emerald-500/30",
     icon: <CircleCheck className="w-3.5 h-3.5" />,
     label: "success",
   },
   failure: {
-    cls: "bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/15 dark:text-red-400 dark:ring-red-500/30",
+    cls: "bg-status-error text-status-error ring-red-600/20 dark:bg-status-error/15 dark:text-status-error dark:ring-red-500/30",
     icon: <CircleX className="w-3.5 h-3.5" />,
     label: "failure",
   },
@@ -64,7 +68,7 @@ const RESULT_META: Record<
     label: "denied",
   },
   pending_approval: {
-    cls: "bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-400 dark:ring-amber-500/30",
+    cls: "bg-status-warning text-status-warning ring-amber-600/20 dark:bg-status-warning/15 dark:text-status-warning dark:ring-amber-500/30",
     icon: <Clock className="w-3.5 h-3.5" />,
     label: "pending",
   },
@@ -113,6 +117,8 @@ export default function PluginsDashboard() {
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [contribs, setContribs] = useState<ContributionEvent[]>([]);
   const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
+  const [connections, setConnections] = useState<ConnectionStatus[]>([]);
+  const [actor, setActor] = useState<{ id: string; kind: "human" | "agent"; role: string } | undefined>();
 
   const refresh = useCallback(async () => {
     setBusy(true);
@@ -126,10 +132,13 @@ export default function PluginsDashboard() {
       ]);
       setOnline(true);
       setWorkspace(h.workspaceId);
+      setActor(h.actor);
       setTools(t);
       setAudit(a);
       setContribs(c);
       setApprovals(ap);
+      // Resilient: an older backend without /connections must not break the page.
+      setConnections(await techitApi.connections().catch(() => [] as ConnectionStatus[]));
       setUpdatedAt(new Date().toLocaleTimeString());
     } catch {
       setOnline(false);
@@ -149,21 +158,28 @@ export default function PluginsDashboard() {
   const destructiveCount = tools.filter((t) => t.tool.destructive).length;
 
   return (
+    // Theme-driven: tokens flip with the global light/dark/auto toggle.
+    // color-scheme follows the theme so native <select> dropdowns stay readable.
     <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white pb-16 transition-colors">
-      {/* ---- Hero ---- */}
+      {/* ---- Gradient hero (reads well in both themes) ---- */}
       <header className="relative overflow-hidden bg-[#20C997] text-slate-950">
         <div
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 20%, black 1px, transparent 1px)",
+              "radial-gradient(circle at 20% 20%, white 1px, transparent 1px)",
             backgroundSize: "28px 28px",
           }}
           aria-hidden
         />
         <div className="relative max-w-7xl mx-auto px-6 pt-6 pb-24">
           <div className="flex items-center justify-between gap-4">
-            <BackButton label="Back" fallback="/feed" className="text-slate-950 bg-black/10 hover:bg-black/20 border-none shadow-none text-xs font-bold" />
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <ArrowLeft className="w-4 h-4" /> Home
+            </Link>
             <div className="flex items-center gap-2">
               <StatusBadge online={online} workspace={workspace} />
               <button
@@ -199,12 +215,12 @@ export default function PluginsDashboard() {
         </div>
       </header>
 
-      {/* ---- KPI stat cards ---- */}
+      {/* ---- KPI stat cards (overlap hero) ---- */}
       <div className="max-w-7xl mx-auto px-6 -mt-16 relative">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             icon={<Plug className="w-5 h-5" />}
-            tone="mint"
+            tone="indigo"
             value={tools.length}
             label="MCP Tools"
             hint={`${destructiveCount} approval-gated`}
@@ -241,8 +257,8 @@ export default function PluginsDashboard() {
         <div className="max-w-7xl mx-auto px-6 mt-6">
           <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
             <WifiOff className="w-4 h-4 shrink-0" />
-            Can't reach the API at <code className="font-mono">{techitApi.baseUrl}</code>. Start the
-            backend: <code className="font-mono">cd backend &amp;&amp; npm run dev</code>.
+            Can't reach the API at <code className="font-mono font-bold">{techitApi.baseUrl}</code>. Start the
+            backend: <code className="font-mono font-bold">cd backend &amp;&amp; npm run dev</code>.
           </div>
         </div>
       )}
@@ -251,10 +267,11 @@ export default function PluginsDashboard() {
       <main className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <ToolCatalogue tools={tools} loading={!loaded} />
-          <Invoker tools={tools} onDone={refresh} />
+          <Invoker tools={tools} onDone={refresh} actorRole={actor?.role} />
         </div>
         <div className="space-y-6">
           <ApprovalsPanel pending={pending} onApprove={refresh} />
+          <ConnectionsPanel connections={connections} actorRole={actor?.role} onChanged={refresh} />
           <ContributionFeed events={contribs} />
         </div>
         <div className="xl:col-span-3">
@@ -285,7 +302,7 @@ function StatusBadge({
         )}
         <span
           className={`relative inline-flex w-2 h-2 rounded-full ${
-            online ? "bg-slate-950" : online === false ? "bg-red-500" : "bg-slate-700"
+            online ? "bg-emerald-300" : online === false ? "bg-red-300" : "bg-surface-primary/60"
           }`}
         />
       </span>
@@ -299,11 +316,10 @@ function StatusBadge({
 /* Stat card                                                           */
 /* ------------------------------------------------------------------ */
 const TONES: Record<string, string> = {
-  mint: "bg-[#20C997]/10 text-[#20C997]",
-  blue: "bg-[#20C997]/10 text-[#20C997]",
-  amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  slate: "bg-black/[0.04] dark:bg-white/[0.06] text-slate-600 dark:text-slate-400",
-  emerald: "bg-[#20C997]/10 text-[#20C997]",
+  indigo: "bg-status-info-soft/10 text-brand-accent dark:text-brand-accent",
+  amber: "bg-status-warning/10 text-status-warning dark:text-status-warning",
+  slate: "bg-muted text-muted-foreground",
+  emerald: "bg-status-success/10 text-status-success dark:text-status-success",
 };
 
 function StatCard({
@@ -324,11 +340,11 @@ function StatCard({
   return (
     <div className="bg-white dark:bg-[#111111] rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-sm p-4.5 transition-all hover:shadow-md">
       <div className="flex items-center justify-between">
-        <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${TONES[tone] ?? TONES.slate}`}>
+        <span className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${TONES[tone] ?? TONES.slate}`}>
           {icon}
         </span>
       </div>
-      <div className="mt-3 text-2xl font-bold text-slate-900 dark:text-white tabular-nums font-mono">
+      <div className="mt-3 text-2xl font-bold text-slate-900 dark:text-white tabular-nums font-mono" style={heading}>
         {loading ? <span className="inline-block w-10 h-7 rounded bg-black/[0.06] dark:bg-white/10 animate-pulse" /> : value}
       </div>
       <div className="text-sm font-bold text-slate-900 dark:text-white">{label}</div>
@@ -566,7 +582,7 @@ function AuditTable({ entries, loading }: { entries: AuditEntry[]; loading: bool
                 <th className="py-2.5 pr-4">Result</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/[0.06] dark:divide-white/10">
+            <tbody>
               {rows.map((e) => (
                 <tr
                   key={e.id}
@@ -594,13 +610,18 @@ function AuditTable({ entries, loading }: { entries: AuditEntry[]; loading: bool
 /* ------------------------------------------------------------------ */
 /* Live tool invoker (in-browser MCP Inspector)                        */
 /* ------------------------------------------------------------------ */
-const ROLES = ["viewer", "editor", "admin", "owner"] as const;
-
-function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => void }) {
+function Invoker({
+  tools,
+  onDone,
+  actorRole,
+}: {
+  tools: CatalogueEntry[];
+  onDone: () => void;
+  actorRole?: string;
+}) {
   const [toolKey, setToolKey] = useState("");
   const [params, setParams] = useState("{}");
   const [kind, setKind] = useState<"human" | "agent">("human");
-  const [role, setRole] = useState<(typeof ROLES)[number]>("owner");
   const [result, setResult] = useState<InvokeResult | null>(null);
   const [error, setError] = useState("");
   const [running, setRunning] = useState(false);
@@ -625,8 +646,11 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
       setError("Params must be valid JSON.");
       return;
     }
-    const actor =
-      kind === "agent" ? { kind, role, toolsAllowed: [toolKey] } : { kind, role };
+    // The server derives the actor and role from the verified JWT — the body
+    // actor is ignored, so the UI must not offer a role picker that would be
+    // silently overridden. We only vary human/agent, which changes the tool
+    // allow-list shape for agents.
+    const actor = kind === "agent" ? { kind, toolsAllowed: [toolKey] } : { kind };
     setRunning(true);
     try {
       const res = await techitApi.invoke(selected.plugin, selected.tool.name, parsed, actor);
@@ -638,7 +662,7 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
   };
 
   const selectCls =
-    "mt-1 w-full border border-black/[0.08] dark:border-white/10 rounded-xl px-3 py-2 text-sm bg-white dark:bg-[#111111] text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#20C997]";
+    "mt-1 w-full border border-input rounded-lg px-2.5 py-2 text-sm bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-ring";
 
   return (
     <Panel
@@ -670,18 +694,13 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
           </select>
         </label>
         <label className="text-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Role</span>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as (typeof ROLES)[number])}
-            className={selectCls}
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Role (from token)</span>
+          <div
+            className="mt-1 w-full border border-border rounded-lg px-2.5 py-2 text-sm bg-muted/50 text-muted-foreground"
+            title="Resolved server-side from your verified JWT"
           >
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+            {actorRole ?? "unknown"}
+          </div>
         </label>
       </div>
 
@@ -722,13 +741,180 @@ function Invoker({ tools, onDone }: { tools: CatalogueEntry[]; onDone: () => voi
         <pre
           className={`mt-3 text-xs rounded-xl p-3.5 overflow-x-auto ring-1 ring-inset ${
             result.ok
-              ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 ring-emerald-500/20"
-              : "bg-amber-500/10 text-amber-800 dark:text-amber-300 ring-amber-500/20"
+              ? "bg-status-success text-emerald-900 ring-emerald-600/15 dark:bg-status-success/10 dark:text-status-success dark:ring-emerald-500/25"
+              : "bg-status-warning text-amber-900 ring-amber-600/15 dark:bg-status-warning/10 dark:text-status-warning dark:ring-amber-500/25"
           }`}
         >
           {JSON.stringify(result, null, 2)}
         </pre>
       )}
     </Panel>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Connections panel — workspace-scoped connector credentials (ADR-1)  */
+/* ------------------------------------------------------------------ */
+function ConnectionsPanel({
+  connections,
+  actorRole,
+  onChanged,
+}: {
+  connections: ConnectionStatus[];
+  actorRole?: string;
+  onChanged: () => void;
+}) {
+  const [openFor, setOpenFor] = useState<string | null>(null);
+  const [value, setValue] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const canManage = actorRole === "owner" || actorRole === "admin";
+  const active = connections.filter((c) => c.connected).length;
+
+  async function connect(plugin: string) {
+    if (!value.trim()) {
+      setErr("Paste a credential first.");
+      return;
+    }
+    setBusy(true);
+    setErr("");
+    try {
+      await techitApi.connect(plugin, value.trim());
+      setValue("");
+      setOpenFor(null);
+      onChanged();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "connect failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function disconnect(plugin: string) {
+    setBusy(true);
+    setErr("");
+    try {
+      await techitApi.disconnect(plugin);
+      onChanged();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "disconnect failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-muted-foreground" />
+          <h2 className="font-bold text-slate-900 dark:text-white" style={heading}>
+            Connector Credentials
+          </h2>
+        </div>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {active}/{connections.length} connected
+        </span>
+      </header>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Scoped to this workspace and stored server-side in the vault — a credential is
+        never shown again after saving.
+      </p>
+
+      <ul className="mt-4 space-y-2">
+        {connections.length === 0 && (
+          <li className="text-sm text-slate-500 dark:text-slate-400 font-medium">No connectors reported.</li>
+        )}
+        {connections.map((c) => (
+          <li key={c.plugin} className="rounded-xl border border-border bg-background p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">{c.label}</span>
+                  <span
+                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ring-1 ring-inset ${
+                      c.mode === "real"
+                        ? "bg-status-success text-status-success ring-emerald-600/20 dark:bg-status-success/15"
+                        : "bg-muted text-muted-foreground ring-border"
+                    }`}
+                  >
+                    {c.mode}
+                  </span>
+                  {c.connected && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      <CircleCheck className="w-3 h-3" /> connected
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {c.connected
+                    ? `source: ${c.source}${c.expiresAt ? ` · expires ${c.expiresAt.slice(0, 10)}` : " · no expiry"}`
+                    : c.source === "legacy-bootstrap"
+                      ? "legacy env credential present (deprecated)"
+                      : c.optional
+                        ? "optional — works without a credential"
+                        : "not connected"}
+                  {c.deprecatedEnv ? " · remove legacy env var" : ""}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {c.connected ? (
+                  <button
+                    onClick={() => disconnect(c.plugin)}
+                    disabled={busy || !canManage}
+                    title={canManage ? "Disconnect" : "Admin or owner only"}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Unlink className="w-3.5 h-3.5" /> Disconnect
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setOpenFor(openFor === c.plugin ? null : c.plugin);
+                      setValue("");
+                      setErr("");
+                    }}
+                    disabled={!canManage}
+                    title={canManage ? "Connect" : "Admin or owner only"}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Link2 className="w-3.5 h-3.5" /> Connect
+                  </button>
+                )}
+              </div>
+            </div>
+            {openFor === c.plugin && (
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="password"
+                  autoComplete="off"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder={`Paste ${c.kind === "rpc_url" ? "an RPC URL" : "a token"} (never shown again)`}
+                  aria-label={`Credential for ${c.plugin}`}
+                  className="flex-1 text-sm rounded-lg border border-border bg-background px-2.5 py-1.5"
+                />
+                <button
+                  onClick={() => connect(c.plugin)}
+                  disabled={busy}
+                  className="text-xs px-2.5 py-1.5 rounded-lg bg-brand-accent text-white hover:opacity-90 disabled:opacity-40"
+                >
+                  Save
+                </button>
+              </div>
+            )}
+            {openFor === c.plugin && err && (
+              <p className="mt-1 text-xs text-destructive">{err}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+      {!canManage && (
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          {actorRole ? `Signed in as ${actorRole}. ` : ""}
+          Connecting or disconnecting a credential requires a human admin or owner.
+        </p>
+      )}
+    </section>
   );
 }

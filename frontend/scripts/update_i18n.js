@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'node:fs';
 let code = fs.readFileSync('src/app/lib/i18n.ts', 'utf8');
 
 // 1. Add types to Translations
@@ -52,27 +52,27 @@ let newCode = "";
 const locales = ["en", "es", "fr", "zh", "pt", "ar", "hi"];
 
 for (const lang of locales) {
-  const lines = code.split("\\n");
+  const lines = code.split("\n");
   let inLang = false;
   let newLines = [];
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line.trim() === \`\${lang}: {\`) {
+    if (line.trim() === `${lang}: {`) {
       inLang = true;
     }
     
     if (inLang && line.includes("poweredBy:")) {
       newLines.push(line);
-      newLines.push(\`    notFound: \${JSON.stringify(additions[lang].notFound)},\`);
-      newLines.push(\`    login: \${JSON.stringify(additions[lang].login)},\`);
-      newLines.push(\`    signup: \${JSON.stringify(additions[lang].signup)},\`);
+      newLines.push(`    notFound: ${JSON.stringify(additions[lang].notFound)},`);
+      newLines.push(`    login: ${JSON.stringify(additions[lang].login)},`);
+      newLines.push(`    signup: ${JSON.stringify(additions[lang].signup)},`);
       inLang = false; // Done for this language
     } else {
       newLines.push(line);
     }
   }
-  code = newLines.join("\\n");
+  code = newLines.join("\n");
 }
 
 // Extract English object completely

@@ -366,70 +366,63 @@ function normalizedFounderExperience(value: string | null | undefined): FounderE
 }
 
 function normalizedCollaboratorDiscipline(value: string | null | undefined): CollaboratorDiscipline | "" {
-  const str = String(value ?? "").toLowerCase();
-  if (str.includes("eng") || str.includes("dev") || str.includes("fullstack") || str.includes("code") || str.includes("software")) return "Engineering";
-  if (str.includes("design") || str.includes("ui") || str.includes("ux")) return "Design";
-  if (str.includes("product") || str.includes("pm")) return "Product";
-  if (str.includes("data") || str.includes("ml") || str.includes("ai")) return "Data & ML";
-  if (str.includes("devops") || str.includes("cloud") || str.includes("infra")) return "DevOps";
-  if (str.includes("sec")) return "Security";
-  if (str.includes("market") || str.includes("growth")) return "Marketing";
-  if (str.includes("research")) return "Research";
   return [
     "Engineering", "Design", "Product", "Data & ML",
     "DevOps", "Security", "Marketing", "Research",
   ].includes(String(value))
-    ? (value as CollaboratorDiscipline)
+    ? value as CollaboratorDiscipline
     : "";
 }
 
 function emptyInvestorProfile(profile: AuthProfile | null = null): InvestorProfile {
+  const role = (profile?.roleProfiles?.investor ?? {}) as Partial<InvestorProfile>;
   return {
-    investorType: "",
-    location: profile?.country ?? "",
-    fundSize: "",
-    yearsInvesting: 0,
-    industries: profile?.investmentFocus ?? [],
-    stage: "",
-    checkSize: profile?.ticketSize ?? "",
-    portfolio: [],
-    riskAppetite: profile?.riskTolerance ?? "",
-    dashboardMetrics: [],
+    investorType: role.investorType ?? "",
+    location: role.location ?? profile?.country ?? "",
+    fundSize: role.fundSize ?? "",
+    yearsInvesting: Number(role.yearsInvesting ?? 0),
+    industries: Array.isArray(role.industries) ? role.industries : (profile?.investmentFocus ?? []),
+    stage: role.stage ?? "",
+    checkSize: role.checkSize ?? profile?.ticketSize ?? "",
+    portfolio: Array.isArray(role.portfolio) ? role.portfolio as PortfolioCompany[] : [],
+    riskAppetite: role.riskAppetite ?? profile?.riskTolerance ?? "",
+    dashboardMetrics: Array.isArray(role.dashboardMetrics) ? role.dashboardMetrics : [],
   };
 }
 
 function emptyOrgProfile(profile: AuthProfile | null = null): OrgProfile {
+  const role = (profile?.roleProfiles?.organization ?? profile?.roleProfiles?.organisation ?? {}) as Partial<OrgProfile>;
   return {
-    orgName: profile?.orgName ?? "",
-    orgType: profile?.orgType ?? "",
-    location: profile?.country ?? "",
-    registrationNumber: "",
-    foundingYear: new Date().getFullYear(),
-    website: profile?.website ?? "",
-    verificationStatus: profile?.isVerified ? "verified" : "unverified",
-    verificationDocs: [],
-    businessEmailDomain: profile?.website ? profile.website.replace(/^https?:\/\//, "").split("/")[0] : "",
-    programmes: [],
-    sectors: profile?.industries ?? [],
-    geographies: profile?.country ? [profile.country] : [],
-    teamMembers: [],
-    plan: "free",
+    orgName: role.orgName ?? profile?.orgName ?? "",
+    orgType: role.orgType ?? profile?.orgType ?? "",
+    location: role.location ?? profile?.country ?? "",
+    registrationNumber: role.registrationNumber ?? "",
+    foundingYear: Number(role.foundingYear ?? new Date().getFullYear()),
+    website: role.website ?? profile?.website ?? "",
+    verificationStatus: role.verificationStatus ?? (profile?.isVerified ? "verified" : "unverified"),
+    verificationDocs: Array.isArray(role.verificationDocs) ? role.verificationDocs : [],
+    businessEmailDomain: role.businessEmailDomain ?? (profile?.website ? profile.website.replace(/^https?:\/\//, "").split("/")[0] : ""),
+    programmes: Array.isArray(role.programmes) ? role.programmes : [],
+    sectors: Array.isArray(role.sectors) ? role.sectors : (profile?.industries ?? []),
+    geographies: Array.isArray(role.geographies) ? role.geographies : (profile?.country ? [profile.country] : []),
+    teamMembers: Array.isArray(role.teamMembers) ? role.teamMembers as OrgTeamMember[] : [],
+    plan: role.plan ?? "free",
   };
 }
 
 function emptyCollaboratorProfile(profile: AuthProfile | null = null): CollaboratorProfile {
   return {
-    name: displayName(profile) || "Alex Chen",
-    title: profile?.title ?? "Senior Full-Stack Engineer",
-    location: profile?.country ?? "San Francisco, CA",
-    yearsExperience: profile?.yearsExperience ?? 6,
-    headline: profile?.bio ?? "Passionate engineer building next-gen developer tools and web applications.",
+    name: displayName(profile),
+    title: profile?.title ?? "",
+    location: profile?.country ?? "",
+    yearsExperience: profile?.yearsExperience ?? 0,
+    headline: profile?.bio ?? "",
     avatarUrl: profile?.avatarUrl ?? "",
-    discipline: normalizedCollaboratorDiscipline(profile?.discipline) || "Engineering",
-    subSkills: profile?.subSkills ?? (profile?.skills && profile.skills.length > 0 ? profile.skills : ["React", "TypeScript", "Node.js", "GraphQL", "Tailwind CSS"]),
-    techStack: profile?.techStack ?? (profile?.skills && profile.skills.length > 0 ? profile.skills : ["React", "Next.js", "TypeScript", "PostgreSQL", "Docker", "Python"]),
-    weeklyHours: profile?.weeklyHours ?? 20,
-    timezone: profile?.timezone ?? "UTC-8 (PST)",
+    discipline: normalizedCollaboratorDiscipline(profile?.discipline),
+    subSkills: profile?.subSkills ?? profile?.skills ?? [],
+    techStack: profile?.techStack ?? profile?.skills ?? [],
+    weeklyHours: profile?.weeklyHours ?? 0,
+    timezone: profile?.timezone ?? "",
     earliestStart:
       profile?.earliestStart === "2-weeks" || profile?.earliestStart === "1-month"
         ? profile.earliestStart
@@ -438,21 +431,21 @@ function emptyCollaboratorProfile(profile: AuthProfile | null = null): Collabora
       profile?.commitmentStyle === "parallel" || profile?.commitmentStyle === "many"
         ? profile.commitmentStyle
         : "deep",
-    equityPreference: profile?.equityPreference ?? 40,
-    minCashFloor: profile?.minCashFloor ?? 3500,
+    equityPreference: profile?.equityPreference ?? 0,
+    minCashFloor: profile?.minCashFloor ?? 0,
     vestingComfort:
       profile?.vestingComfort === "1y-cliff-4y" || profile?.vestingComfort === "custom"
         ? profile.vestingComfort
         : "standard",
     links: {
-      github: profile?.githubUrl ?? "https://github.com/alexchen",
-      linkedin: profile?.linkedinUrl ?? "https://linkedin.com/in/alexchen",
-      portfolio: profile?.portfolioUrl ?? "https://alexchen.dev",
+      github: profile?.githubUrl ?? "",
+      linkedin: profile?.linkedinUrl ?? "",
+      portfolio: profile?.portfolioUrl ?? "",
       twitter: "",
     },
-    whyHere: "Looking to build high-impact early-stage startups and collaborate with visionary founders.",
+    whyHere: "",
     pinnedWork: [],
-    onboardingComplete: Boolean(profile?.isOnboarded && hasRole(profile, "collaborator")) || true,
+    onboardingComplete: Boolean(profile?.isOnboarded && hasRole(profile, "collaborator")),
     notifications: DEFAULT_NOTIFICATIONS,
   };
 }
@@ -617,10 +610,16 @@ function mergeAuthInvestorProfile(prev: InvestorProfile, profile: AuthProfile): 
   const base = emptyInvestorProfile(profile);
   return {
     ...prev,
+    investorType: prev.investorType || base.investorType,
     location: prev.location || base.location,
+    fundSize: prev.fundSize || base.fundSize,
+    yearsInvesting: prev.yearsInvesting || base.yearsInvesting,
     industries: prev.industries.length ? prev.industries : base.industries,
+    stage: prev.stage || base.stage,
     checkSize: prev.checkSize || base.checkSize,
+    portfolio: prev.portfolio.length ? prev.portfolio : base.portfolio,
     riskAppetite: prev.riskAppetite || base.riskAppetite,
+    dashboardMetrics: prev.dashboardMetrics.length ? prev.dashboardMetrics : base.dashboardMetrics,
   };
 }
 
@@ -632,10 +631,16 @@ function mergeAuthOrgProfile(prev: OrgProfile, profile: AuthProfile): OrgProfile
     orgType: prev.orgType || base.orgType,
     location: prev.location || base.location,
     website: prev.website || base.website,
+    registrationNumber: prev.registrationNumber || base.registrationNumber,
+    foundingYear: prev.foundingYear || base.foundingYear,
     verificationStatus: prev.verificationStatus !== "unverified" ? prev.verificationStatus : base.verificationStatus,
+    verificationDocs: prev.verificationDocs.length ? prev.verificationDocs : base.verificationDocs,
     businessEmailDomain: prev.businessEmailDomain || base.businessEmailDomain,
+    programmes: prev.programmes.length ? prev.programmes : base.programmes,
     sectors: prev.sectors.length ? prev.sectors : base.sectors,
     geographies: prev.geographies.length ? prev.geographies : base.geographies,
+    teamMembers: prev.teamMembers.length ? prev.teamMembers : base.teamMembers,
+    plan: prev.plan !== "free" ? prev.plan : base.plan,
   };
 }
 
@@ -850,7 +855,7 @@ export function useActiveRoles(): { activeRoles: Set<Role>; currentRole: Role } 
   const location = useLocation();
 
   const activeRoles = useMemo(() => {
-    const s = new Set<Role>(["founder", "collaborator", "investor", "org"]);
+    const s = new Set<Role>();
     if (profile?.isOnboarded) {
       if (hasRole(profile, "founder")) s.add("founder");
       if (hasRole(profile, "collaborator")) s.add("collaborator");

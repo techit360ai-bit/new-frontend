@@ -16,8 +16,8 @@ import {
   Check,
 } from "lucide-react";
 
-import { createVerificationRequest, createEvidenceUpload, finalizeEvidenceUpload, submitEvidence } from "@/lib/api/authorization";
-import { activateRole } from "@/lib/api/users";
+import { requestVerification, createEvidenceUpload, finalizeEvidenceUpload, submitEvidence } from "@/lib/api/authorization";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SLIDE_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
 
@@ -29,6 +29,7 @@ const PERKS = [
 
 export function OrgStep2() {
   const navigate = useNavigate();
+  const { activateRole } = useAuth();
   const { orgProfile, updateOrgProfile } = useOrgProfile();
   const [docs, setDocs] = useState<string[]>(orgProfile.verificationDocs || []);
   const [emailDomain, setEmailDomain] = useState(orgProfile.businessEmailDomain || "");
@@ -50,7 +51,7 @@ export function OrgStep2() {
     try {
       let activeRequestId = requestId;
       if (!activeRequestId) {
-        const created = await createVerificationRequest("organization");
+        const created = await requestVerification("organisation");
         activeRequestId = created.request.id;
       }
       setRequestId(activeRequestId);

@@ -1,17 +1,47 @@
-import { useState } from "react";
+import { fetchNotificationPreferences, saveNotificationPreferences } from "@/lib/api/settings";
+import { useEffect, useState } from "react";
 import { Settings as SettingsIcon, Rocket, Users, ShieldCheck, Bell, Save, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
 export function ExplorerSettings() {
-  const { profile, activateRole } = useAuth();
+  const { profile, activateRole, updateProfile } = useAuth();
   const [saved, setSaved] = useState(false);
+  const [firstName, setFirstName] = useState(profile?.firstName || "");
+  const [lastName, setLastName] = useState(profile?.lastName || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [interests, setInterests] = useState((profile?.industries || []).join(', '));
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
+  const saveProfile = async () => {
+    setProfileBusy(true); setProfileMessage("");
+    try {
+      const result = await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim(), bio: bio.trim(), industries: interests.split(',').map(value => value.trim()).filter(Boolean) });
+      setProfileMessage(result.error ? result.error.message : 'Profile saved.');
+    } catch (cause) { setProfileMessage(cause instanceof Error ? cause.message : 'Profile could not be saved.'); }
+    finally { setProfileBusy(false); }
+  };
+
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [inAppNotifs, setInAppNotifs] = useState(true);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const [busy, setBusy] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+  const [loadRevision, setLoadRevision] = useState(0);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let alive = true; setBusy(true); setError("");
+    fetchNotificationPreferences<{ email: boolean; inApp: boolean }>("explorer")
+      .then(prefs => { if (alive) { setEmailNotifs(prefs.email ?? true); setInAppNotifs(prefs.inApp ?? true); setLoaded(true); } })
+      .catch(() => { if (alive) setError("Preferences could not be loaded. Please reload before saving."); })
+      .finally(() => { if (alive) setBusy(false); });
+    return () => { alive = false; };
+  }, [loadRevision]);
+  const handleSave = async () => {
+    setBusy(true); setSaved(false); setError("");
+    try { await saveNotificationPreferences("explorer", { email: emailNotifs, inApp: inAppNotifs }); setSaved(true); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Preferences could not be saved."); }
+    finally { setBusy(false); }
   };
 
   return (
@@ -61,6 +91,19 @@ export function ExplorerSettings() {
           </div>
         </div>
 
+        {error && <div role="alert" className="text-sm text-red-600 dark:text-red-400">{error}{!loaded && <button type="button" onClick={() => setLoadRevision(value => value + 1)} className="ml-3 min-h-11 rounded-xl border border-current px-4">Retry loading preferences</button>}</div>}
+        <form onSubmit={event => { event.preventDefault(); void saveProfile(); }} className="space-y-4 rounded-3xl border border-black/[0.08] bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-[#111111]/90">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">Your Explorer profile</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">First name<input required value={firstName} onChange={event => setFirstName(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 bg-transparent px-3 dark:border-white/10" /></label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Last name<input value={lastName} onChange={event => setLastName(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 bg-transparent px-3 dark:border-white/10" /></label>
+          </div>
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Bio<textarea value={bio} onChange={event => setBio(event.target.value)} rows={3} className="mt-2 w-full rounded-xl border border-black/10 bg-transparent p-3 dark:border-white/10" /></label>
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Interests, separated by commas<input value={interests} onChange={event => setInterests(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 bg-transparent px-3 dark:border-white/10" /></label>
+          {profileMessage && <p role="status" className="text-sm text-slate-600 dark:text-slate-300">{profileMessage}</p>}
+          <button type="submit" disabled={profileBusy} className="min-h-11 rounded-xl bg-[#20C997] px-4 text-sm font-bold text-slate-950 disabled:opacity-50">{profileBusy ? 'Saving profile...' : 'Save profile'}</button>
+        </form>
+
         {/* Notifications Card */}
         <div className="rounded-3xl border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-[#111111]/90 p-6 backdrop-blur-xl shadow-sm space-y-4">
           <div className="flex items-center gap-2">
@@ -74,7 +117,8 @@ export function ExplorerSettings() {
               <input
                 type="checkbox"
                 checked={emailNotifs}
-                onChange={(e) => setEmailNotifs(e.target.checked)}
+                disabled={busy}
+                onChange={(e) => { setSaved(false); setEmailNotifs(e.target.checked); }}
                 className="h-4 w-4 rounded border-slate-300 text-[#20C997] focus:ring-[#20C997]"
               />
             </label>
@@ -84,7 +128,8 @@ export function ExplorerSettings() {
               <input
                 type="checkbox"
                 checked={inAppNotifs}
-                onChange={(e) => setInAppNotifs(e.target.checked)}
+                disabled={busy}
+                onChange={(e) => { setSaved(false); setInAppNotifs(e.target.checked); }}
                 className="h-4 w-4 rounded border-slate-300 text-[#20C997] focus:ring-[#20C997]"
               />
             </label>
@@ -93,11 +138,12 @@ export function ExplorerSettings() {
           <div className="pt-4 flex justify-end">
             <button
               type="button"
-              onClick={handleSave}
+              disabled={busy || !loaded}
+              onClick={() => void handleSave()}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#20C997] hover:bg-[#1db587] text-xs font-bold text-slate-950 shadow-md transition-all"
             >
               {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-              <span>{saved ? "Preferences Saved" : "Save Preferences"}</span>
+              <span>{busy ? "Please wait..." : saved ? "Preferences Saved" : "Save Preferences"}</span>
             </button>
           </div>
         </div>

@@ -1,11 +1,10 @@
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ClipboardEvent,
-  type KeyboardEvent,
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -113,80 +112,42 @@ const getSetupPath = (role: Role) => {
   return `/${role}/setup`;
 };
 
-function OtpInput({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-}) {
-  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = value.padEnd(6, "").split("").slice(0, 6);
-
-  const handleChange = (index: number, rawValue: string) => {
-    const digit = rawValue.replace(/\D/g, "").slice(-1);
-    const next = digits
-      .map((current, currentIndex) =>
-        currentIndex === index ? digit : current,
-      )
-      .join("")
-      .slice(0, 6);
-    onChange(next);
-    if (digit && index < 5) inputsRef.current[index + 1]?.focus();
-  };
-
-  const handleKeyDown = (index: number, event: KeyboardEvent) => {
-    if (event.key === "Backspace" && !digits[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
-      onChange(
-        digits
-          .map((current, currentIndex) =>
-            currentIndex === index - 1 ? "" : current,
-          )
-          .join(""),
-      );
-    }
-  };
-
-  const handlePaste = (event: ClipboardEvent) => {
-    event.preventDefault();
-    const pasted = event.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-    onChange(pasted);
-    inputsRef.current[Math.min(pasted.length, 5)]?.focus();
-  };
-
+function OtpInput({ value, onChange, disabled }: { value: string; onChange: (value: string) => void; disabled?: boolean }) {
   return (
-    <div className="flex gap-2 justify-between" onPaste={handlePaste}>
-      {Array.from({ length: 6 }, (_, index) => (
-        <input
-          key={index}
-          ref={(element) => {
-            inputsRef.current[index] = element;
-          }}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={digits[index] || ""}
-          onChange={(event) => handleChange(index, event.target.value)}
-          onKeyDown={(event) => handleKeyDown(index, event)}
-          disabled={disabled}
-          className={cn(
-            "h-14 w-12 rounded-2xl border-2 text-center text-xl font-bold transition-all backdrop-blur-sm",
-            "focus:outline-none focus:ring-2 focus:ring-[#0068ff] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed",
-            digits[index]
-              ? "border-[#0068ff] bg-[#0068ff]/20 text-white"
-              : "border-white/30 bg-white/10 text-white",
-            "placeholder:text-white/50",
-          )}
-        />
-      ))}
-    </div>
+    <InputOTP
+      maxLength={6}
+      value={value}
+      onChange={next => onChange(next.replace(/\D/g, '').slice(0, 6))}
+      pasteTransformer={text => text.replace(/\D/g, '').slice(0, 6)}
+      inputMode="numeric"
+      autoComplete="one-time-code"
+      aria-label="Email verification code"
+      pattern="[0-9]*"
+      disabled={disabled}
+      containerClassName="w-full"
+    >
+      <InputOTPGroup className="w-full justify-between gap-2">
+        {Array.from({ length: 6 }, (_, index) => (
+          <InputOTPSlot
+            key={index}
+            index={index}
+            className={cn(
+              'h-14 w-12 rounded-2xl border-2 first:rounded-2xl last:rounded-2xl text-center text-xl font-bold backdrop-blur-sm transition-all',
+              'data-[active=true]:border-[#0068ff] data-[active=true]:ring-[#0068ff]/40',
+              value[index] ? 'border-[#0068ff] bg-[#0068ff]/20 text-white' : 'border-white/30 bg-white/10 text-white dark:bg-white/10',
+            )}
+          />
+        ))}
+      </InputOTPGroup>
+    </InputOTP>
   );
+}
+
+function csrfHeaders(): Record<string, string> {
+  try {
+    const cookie = document.cookie.split(';').map(value => value.trim()).find(value => value.startsWith('techit_csrf='));
+    return cookie ? { 'X-CSRF-Token': decodeURIComponent(cookie.slice('techit_csrf='.length)) } : {};
+  } catch { return {}; }
 }
 
 export default function Signup() {
@@ -298,7 +259,8 @@ export default function Signup() {
     try {
       const response = await fetch(`${API}/auth/send-otp`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...csrfHeaders() },
         body: JSON.stringify({ email: form.email }),
       });
       const json = await response.json();
@@ -340,7 +302,8 @@ export default function Signup() {
     try {
       const response = await fetch(`${API}/auth/verify-otp`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...csrfHeaders() },
         body: JSON.stringify({ email: form.email, code: otpCode }),
       });
       const json = await response.json();
@@ -586,6 +549,8 @@ export default function Signup() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <input
+                      aria-label="First name"
+                      autoComplete="given-name"
                       value={form.firstName}
                       onChange={(e) => set("firstName", e.target.value)}
                       placeholder={signup.namePlaceholder}
@@ -600,6 +565,8 @@ export default function Signup() {
                   </div>
                   <div>
                     <input
+                      aria-label="Last name"
+                      autoComplete="family-name"
                       value={form.lastName}
                       onChange={(e) => set("lastName", e.target.value)}
                       placeholder={signup.namePlaceholder}
@@ -660,6 +627,8 @@ export default function Signup() {
                 <div>
                   <input
                     type="email"
+                    aria-label="Email address"
+                    autoComplete="email"
                     value={form.email}
                     onChange={(e) => set("email", e.target.value)}
                     placeholder={signup.emailPlaceholder}

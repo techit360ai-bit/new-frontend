@@ -4,10 +4,9 @@ import { fetchRtcToken } from "./rtc";
 
 test("fetchRtcToken returns the session on success", async () => {
   const orig = globalThis.fetch;
-  globalThis.fetch = (async () => ({
-    ok: true,
-    json: async () => ({ token: "t", url: "wss://x", room: "e1", identity: "u1", canPublish: true }),
-  })) as unknown as typeof fetch;
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    token: "t", url: "wss://x", room: "e1", identity: "u1", canPublish: true,
+  }), { status: 200, headers: { "Content-Type": "application/json" } })) as typeof fetch;
   try {
     const s = await fetchRtcToken("e1");
     expect(s?.token).toBe("t");

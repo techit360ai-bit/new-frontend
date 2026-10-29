@@ -1,4 +1,6 @@
-import { apiGet, apiPost } from '@/lib/api/client'
+// TVCE endpoints live on the BACKEND service (/api/tvce/*), not the ai-router.
+// apiUrl() points at the ai-router, so use the generic BACKEND client.
+import { platformGet as apiGet, platformPost as apiPost } from '@/lib/platformApi'
 
 export interface TvceDecision {
   allowed: boolean
@@ -73,4 +75,15 @@ export interface TvceCheckoutResponse {
 
 export function createTvceCheckout(input: TvceCheckoutRequest) {
   return apiPost<TvceCheckoutResponse>('/tvce/checkout/session', input)
+}
+
+export type CheckoutProvider = 'stripe' | 'paystack' | 'flutterwave'
+
+/** Booleans only — which hosted checkout providers this deployment can actually reach. */
+export interface CheckoutProvidersResponse {
+  providers: Record<CheckoutProvider, boolean>
+}
+
+export function fetchCheckoutProviders() {
+  return apiGet<CheckoutProvidersResponse>('/tvce/checkout/providers')
 }

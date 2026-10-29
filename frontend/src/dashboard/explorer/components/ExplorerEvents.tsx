@@ -1,4 +1,10 @@
-import { useState } from "react";
+import { Link } from "react-router-dom";
+import { domainGet } from "@/lib/domainApi";
+import { normalizePublishedOpportunity, normalizePublishedHackathon } from "@/lib/api/opportunities";
+import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
+import { ExplorerDataState } from "../useExplorerRecommendations";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
 import { CalendarDays, Trophy, Users, MapPin, ExternalLink, Clock, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
 import { ExplorerLayout } from "../layout/ExplorerLayout";
 
@@ -6,64 +12,60 @@ interface EcosystemEvent {
   id: string;
   title: string;
   organizer: string;
-  type: "Hackathon" | "Demo Day" | "Webinar" | "AMA Session";
+  type: string;
   dateRange: string;
   prizePool?: string;
-  participantsCount: number;
+  participantsCount: number | string;
   location: string;
-  status: "Live Now" | "Upcoming" | "Completed";
+  status: string;
   description: string;
 }
 
-const MOCK_EVENTS: EcosystemEvent[] = [
-  {
-    id: "evt-1",
-    title: "AI Agentic Hackathon 2026",
-    organizer: "TechIT Global Incubator",
-    type: "Hackathon",
-    dateRange: "Sep 15 - Sep 18, 2026",
-    prizePool: "$25,000 + TechIT Credits",
-    participantsCount: 420,
-    location: "Global Virtual",
-    status: "Upcoming",
-    description: "48-hour build marathon focused on autonomous AI agents, tool invocation pipelines, and LLM dev tools."
-  },
-  {
-    id: "evt-2",
-    title: "TechIT Q3 Global Demo Day",
-    organizer: "TechIT Investor Network",
-    type: "Demo Day",
-    dateRange: "Sep 22, 2026",
-    prizePool: "$100,000 Investment Pool",
-    participantsCount: 180,
-    location: "San Francisco & Stream",
-    status: "Upcoming",
-    description: "Top 15 graduated startups from the incubation cohort pitch live to accredited angel investors & VCs."
-  },
-  {
-    id: "evt-3",
-    title: "Building Micro-Equity Cap Tables on Web3",
-    organizer: "Nexus Protocol Team",
-    type: "Webinar",
-    dateRange: "Sep 12, 2026 (Today)",
-    participantsCount: 95,
-    location: "Live Stream",
-    status: "Live Now",
-    description: "Deep dive workshop into vesting schedules, smart contract security, and fair founder-collaborator splits."
-  }
-];
 
 export function ExplorerEvents() {
   const [selectedType, setSelectedType] = useState<string>("all");
-  const [registeredEvents, setRegisteredEvents] = useState<Record<string, boolean>>({});
+  const [events, setEvents] = useState<EcosystemEvent[]>([]);
+  const [activeEvent, setActiveEvent] = useState<EcosystemEvent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    let alive = true; setLoading(true); setError(null);
+    Promise.all([
+      domainGet<{ opportunities?: unknown[] }>("/opportunities"),
+      domainGet<{ hackathons?: unknown[] }>("/hackathons"),
+    ]).then(([catalog, hackathons]) => {
+      if (!alive) return;
+      const entries = [
+        ...(catalog.opportunities ?? []).filter(row => {
+          const audience = (row as { audienceRoles?: string[] }).audienceRoles;
+          return !audience?.length || audience.includes('explorer');
+        }).map(normalizePublishedOpportunity),
+        ...(hackathons.hackathons ?? []).map(normalizePublishedHackathon),
+      ].filter((entry): entry is Opportunity => Boolean(entry));
+      const unique = [...new Map(entries.map(entry => [entry.id, entry])).values()];
+      setEvents(unique.filter(entry => entry.type === 'event' || entry.type === 'hackathon').map(entry => {
+        const start = 'startDate' in entry && entry.startDate ? new Date(entry.startDate) : null;
+        return {
+          id: entry.id, title: entry.title, organizer: entry.organizer.name,
+          type: entry.type === 'hackathon' ? 'Hackathon' : 'format' in entry && entry.format === 'demo-day' ? 'Demo Day' : 'format' in entry && entry.format === 'ama' ? 'AMA Session' : 'Webinar',
+          dateRange: start && !Number.isNaN(start.getTime()) ? start.toLocaleDateString() : 'Date not published',
+          prizePool: 'prizePool' in entry ? entry.prizePool : undefined,
+          participantsCount: 'registrants' in entry ? entry.registrants : 'Not published',
+          location: 'isVirtual' in entry ? entry.isVirtual ? 'Online' : 'See organizer details' : 'See organizer details',
+          status: entry.type === 'hackathon' ? entry.hackathonStatus === 'live' ? 'Live Now' : entry.hackathonStatus === 'completed' ? 'Completed' : 'Upcoming' : start && start.getTime() < Date.now() ? 'Completed' : 'Upcoming',
+          description: entry.summary,
+        };
+      }));
+    }).catch((cause: unknown) => { if (alive) { setEvents([]); setError(cause instanceof Error ? cause.message : 'Events could not be loaded.'); } })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [revision]);
 
   const types = ["all", "Hackathon", "Demo Day", "Webinar", "AMA Session"];
 
-  const toggleRegister = (id: string) => {
-    setRegisteredEvents((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
-  const filteredEvents = MOCK_EVENTS.filter((e) => selectedType === "all" || e.type === selectedType);
+  const filteredEvents = events.filter((e) => selectedType === "all" || e.type === selectedType);
 
   return (
     <ExplorerLayout>
@@ -99,10 +101,11 @@ export function ExplorerEvents() {
           ))}
         </div>
 
+        <ExplorerDataState loading={loading} error={error} empty={filteredEvents.length === 0} retry={() => setRevision(value => value + 1)} />
         {/* Events Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredEvents.map((evt) => {
-            const isRegistered = Boolean(registeredEvents[evt.id]);
+            const isRegistered = false;
 
             return (
               <div
@@ -154,7 +157,7 @@ export function ExplorerEvents() {
 
                   <button
                     type="button"
-                    onClick={() => toggleRegister(evt.id)}
+                    onClick={() => setActiveEvent(evt)}
                     className={`w-full py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                       isRegistered
                         ? "bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/30"
@@ -168,7 +171,7 @@ export function ExplorerEvents() {
                       </>
                     ) : (
                       <>
-                        <span>RSVP / Register Now</span>
+                        <span>View event details</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </>
                     )}
@@ -179,6 +182,14 @@ export function ExplorerEvents() {
           })}
         </div>
       </div>
+      <Dialog open={Boolean(activeEvent)} onOpenChange={open => { if (!open) setActiveEvent(null); }}>
+        <DialogContent className="rounded-3xl bg-white text-slate-900 dark:bg-[#111111] dark:text-white">
+          <DialogHeader><DialogTitle>{activeEvent?.title}</DialogTitle><DialogDescription>{activeEvent?.organizer} · {activeEvent?.dateRange}</DialogDescription></DialogHeader>
+          <p className="text-sm">{activeEvent?.description}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">To participate, activate a Founder or Collaborator profile and complete the event's registration flow. Viewing this event does not register you.</p>
+          <Link to="/explore/settings" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#20C997] px-4 font-semibold text-slate-950">Set up a participant profile</Link>
+        </DialogContent>
+      </Dialog>
     </ExplorerLayout>
   );
 }

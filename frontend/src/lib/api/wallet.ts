@@ -15,6 +15,7 @@ export interface WalletSummary {
   subscriptionUsage?: SubscriptionUsage;
   freePlan?: FreePlanInfo;
   restriction?: WalletRestriction | null;
+  consumedThisPeriod?: number;
   lifetimeCreditsUsed: number;
   pendingPayments: number;
 }
@@ -24,7 +25,13 @@ export interface WalletExpirationAlert { walletId: string; message: string; expi
 export interface SubscriptionUsage { included: number; consumed: number; remaining: number; renewalAt?: string | null; effectiveValue?: string; }
 export interface FreePlanInfo { welcomeCredits: number; monthlyCredits: number; eligibleTasks: string[]; restrictions: string[]; upgradeReason?: string | null; }
 export interface WalletRestriction { reason: string; currentPlan?: string; missingCapability?: string; creditsRequired?: number; recommendedPlan?: string; benefits?: string[]; }
-export interface WalletAnalytics { period: string; points: Array<{ label: string; credits: number; displayPercent: number; walletSource: string }>; sourceTotals: Record<string, number>; }
+export interface WalletAnalytics {
+  period: string;
+  points: Array<{ label: string; credits: number; displayPercent: number; walletSource: string; walletLabel?: string }>;
+  sourceTotals: Record<string, number>;
+  sourceLabels?: Record<string, string>;
+  totalConsumed?: number;
+}
 
 export interface WalletUsageEvent {
   id: string;

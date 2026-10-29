@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { setAuthTokenGetter } from "./client";
 import {
   createWalletPaymentIntent,
+  fetchWalletAnalytics,
   fetchBillingPlans,
   fetchCreditPackages,
   fetchWalletSummary,
@@ -98,6 +99,26 @@ test("wallet API creates payment intents without local fake payments", async () 
       idemKey: "idem-wallet",
     }));
     expect(result.paymentIntent.status).toBe("pending");
+  } finally {
+    fetchMock.restore();
+  }
+});
+
+test("wallet API reads the consumption analytics endpoint", async () => {
+  const fetchMock = stubFetch(async (url) => {
+    if (url.endsWith("/wallet/analytics?period=weekly")) {
+      return response({ period: "weekly", points: [], sourceTotals: { payg: 12 }, sourceLabels: { payg: "Pay-as-you-go credits" }, totalConsumed: 12 });
+    }
+    throw new Error(`unexpected ${url}`);
+  });
+
+  try {
+    const result = await fetchWalletAnalytics("weekly");
+    expect(result.period).toBe("weekly");
+    expect(result.totalConsumed).toBe(12);
+    expect(fetchMock.calls.map(([url]) => url)).toEqual([
+      "http://localhost:3000/api/domain/wallet/analytics?period=weekly",
+    ]);
   } finally {
     fetchMock.restore();
   }

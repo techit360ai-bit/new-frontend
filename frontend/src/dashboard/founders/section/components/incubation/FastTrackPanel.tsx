@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import {
   runFastTrack,
+  getIncubationJobStatus,
   uploadIncubationDocument,
   publishToInvestors,
   generateBusinessPlan,
@@ -116,11 +117,6 @@ export function FastTrackPanel() {
     setPipelineError(null);
     setProgressIndex(0);
 
-    // Simulate progress steps while waiting for the actual pipeline
-    const interval = setInterval(() => {
-      setProgressIndex((prev) => Math.min(prev + 1, PIPELINE_STEPS.length - 1));
-    }, 3000);
-
     const payload: FastTrackPayload = {
       startup_name: startupName.trim(),
       industry: industry.trim(),
@@ -133,8 +129,22 @@ export function FastTrackPanel() {
       founder_constraints: { preferred_mvp_timeline: timeConstraint },
     };
 
-    const result = await runFastTrack(payload);
-    clearInterval(interval);
+    const asyncMode = import.meta.env.VITE_AI_ASYNC_JOBS === "true";
+    const submitted = await runFastTrack(payload, asyncMode ? { headers: { "X-TechIT-Async": "true", "Idempotency-Key": crypto.randomUUID() } } : undefined);
+    let result: PipelineBlueprint | null = submitted && !("job_id" in submitted)
+      ? submitted
+      : null;
+    if (submitted && "job_id" in submitted && submitted.job_id) {
+      const pollLimit = Number(import.meta.env.VITE_AI_JOB_POLL_LIMIT || "180") || 180;
+      for (let attempt = 0; attempt < pollLimit; attempt += 1) {
+        const status = await getIncubationJobStatus(submitted.job_id);
+        if (!status) break;
+        if (status.status === "completed" && status.result) { result = status.result; break; }
+        if (["failed", "revoked"].includes(status.status)) { setPipelineError(status.error || "Pipeline failed. Please retry."); result = null; break; }
+        setProgressIndex(status.status === "queued" ? 0 : status.status === "progress" ? 1 : 2);
+        await new Promise((resolve) => window.setTimeout(resolve, 2000));
+      }
+    }
 
     if (result) {
       setProgressIndex(PIPELINE_STEPS.length);
@@ -231,7 +241,7 @@ export function FastTrackPanel() {
               </div>
               <h1 className="text-2xl font-black text-slate-900 dark:text-white">Fast-Track Intake</h1>
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Already building? Plug in your codebase and business plan. Our AI agents will
               analyze everything, compute your GSIS and execution scores, and make you visible to
               investors.
@@ -272,10 +282,10 @@ export function FastTrackPanel() {
                     key={s}
                     type="button"
                     onClick={() => setStage(s)}
-                    className={`px-3 py-2.5 rounded-xl border text-xs transition-all ${
+                    className={`px-3 py-2.5 rounded-lg border-2 text-xs font-medium transition-all ${
                       stage === s
-                        ? "border-[#20C997] bg-[#20C997]/15 text-[#20C997] font-bold shadow-sm"
-                        : "border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#111111] text-slate-700 dark:text-slate-300 hover:border-[#20C997]/40 font-medium"
+                        ? "border-violet-500 bg-violet-50 text-violet-700"
+                        : "border-border-strong bg-surface-primary text-text-secondary hover:border-violet-300"
                     }`}
                   >
                     {STAGE_LABELS[s]}
@@ -322,28 +332,8 @@ export function FastTrackPanel() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="block">
-                <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Target geography</span>
-                <input
-                  value={targetGeography}
-                  onChange={(event) => setTargetGeography(event.target.value)}
-                  placeholder="e.g. Budapest, Hungary or West Africa"
-                  className="h-12 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.04] px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#20C997] focus:ring-2 focus:ring-[#20C997]/20 transition-all"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Preferred MVP timeline</span>
-                <select
-                  value={timeConstraint}
-                  onChange={(event) => setTimeConstraint(event.target.value)}
-                  className="h-12 w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-[#111111] px-4 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#20C997]"
-                >
-                  <option value="1 day" className="dark:bg-[#111111]">1 day</option>
-                  <option value="3 days" className="dark:bg-[#111111]">3 days</option>
-                  <option value="1 week" className="dark:bg-[#111111]">1 week</option>
-                  <option value="2–6 weeks" className="dark:bg-[#111111]">2–6 weeks</option>
-                </select>
-              </label>
+              <label className="block"><span className="mb-2 block text-sm font-semibold text-text-secondary">Target geography</span><input value={targetGeography} onChange={(event) => setTargetGeography(event.target.value)} placeholder="e.g. Budapest, Hungary or West Africa" className="h-12 w-full rounded-lg border-2 border-border-strong bg-surface-primary px-4 text-sm outline-none focus:border-violet-500" /></label>
+              <label className="block"><span className="mb-2 block text-sm font-semibold text-text-secondary">Preferred MVP timeline</span><select value={timeConstraint} onChange={(event) => setTimeConstraint(event.target.value)} className="h-12 w-full rounded-lg border-2 border-border-strong bg-surface-primary px-4 text-sm"><option>1 day</option><option>3 days</option><option>1 week</option><option>2–6 weeks</option></select></label>
             </div>
 
             {/* Document Upload */}
@@ -362,7 +352,7 @@ export function FastTrackPanel() {
                 ) : (
                   <Plus className="w-5 h-5 text-slate-400" />
                 )}
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <span className="text-sm text-slate-500 dark:text-slate-400">
                   {uploading
                     ? "Uploading..."
                     : docFile
@@ -402,7 +392,7 @@ export function FastTrackPanel() {
         <div className="mx-auto max-w-lg">
           <div className="mb-8 text-center">
             <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">Analyzing {startupName}</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Our AI agents are evaluating your startup across 10 dimensions...
             </p>
           </div>
@@ -423,10 +413,10 @@ export function FastTrackPanel() {
                   <span
                     className={`text-sm ${
                       done
-                        ? "text-slate-800 dark:text-slate-200 font-medium"
+                        ? "text-text-secondary"
                         : active
-                          ? "text-[#20C997] font-bold"
-                          : "text-slate-400 dark:text-slate-500"
+                          ? "text-violet-700 font-medium"
+                          : "text-text-disabled"
                     }`}
                   >
                     {label}
@@ -486,17 +476,17 @@ export function FastTrackPanel() {
           <ScoreHeroCard
             label="GSIS Score"
             value={scores.gsis}
-            gradient="from-[#20C997] to-[#128a66]"
+            gradient="from-violet-500 to-brand-accent"
           />
           <ScoreHeroCard
             label="Unicorn Potential"
             value={scores.unicorn}
-            gradient="from-[#1baa80] to-[#0f6c50]"
+            gradient="from-amber-500 to-orange-600"
           />
           <ScoreHeroCard
             label="Investment Score"
             value={scores.investment}
-            gradient="from-[#20C997] to-[#149d74]"
+            gradient="from-emerald-500 to-teal-600"
           />
         </div>
 
@@ -675,7 +665,7 @@ function ScoreHeroCard({
   gradient: string;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-5 text-slate-950 font-extrabold shadow-sm`}>
+    <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${gradient} p-5 text-white`}>
       <p className="text-xs font-bold opacity-90">{label}</p>
       <p className="text-3xl font-black mt-1">{Math.round(value)}</p>
       <p className="text-xs opacity-80 mt-1 font-bold">/ 100</p>
@@ -701,12 +691,12 @@ function ScoreCircle({ label, value }: { label: string; value: number }) {
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (value / 100) * circumference;
-  const color = value >= 70 ? "#20C997" : value >= 40 ? "#f59e0b" : "#ef4444";
+  const color = value >= 70 ? "#22c55e" : value >= 40 ? "#f59e0b" : "#ef4444";
 
   return (
     <div className="flex flex-col items-center gap-1">
       <svg className="w-16 h-16" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r={radius} fill="none" className="stroke-black/10 dark:stroke-white/10" strokeWidth="5" />
+        <circle cx="32" cy="32" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="5" />
         <circle
           cx="32"
           cy="32"
@@ -730,7 +720,7 @@ function ScoreCircle({ label, value }: { label: string; value: number }) {
 }
 
 function EvaluationBar({ label, value }: { label: string; value: number }) {
-  const color = value >= 70 ? "bg-[#20C997]" : value >= 40 ? "bg-amber-500" : "bg-red-500";
+  const color = value >= 70 ? "bg-status-success-soft" : value >= 40 ? "bg-status-warning" : "bg-status-error-soft";
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 w-40 shrink-0 truncate">{label}</span>
