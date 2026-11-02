@@ -6,6 +6,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import { fetchTranslations } from "@/lib/api/translations";
 
 export type LocaleCode = "en" | "es" | "fr" | "zh" | "pt" | "ar" | "hi" | "ng";
 
@@ -142,6 +143,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = option.code;
     document.documentElement.dir = option.dir;
     localStorage.setItem(STORAGE_KEY, option.code);
+    if (option.code !== "en") {
+      void fetchTranslations(option.code).catch(() => undefined);
+    }
   }, []);
 
   const setLocale = useCallback(
