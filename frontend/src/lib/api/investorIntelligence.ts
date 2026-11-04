@@ -9,6 +9,22 @@ export interface InvestorIntelligenceStartup {
 }
 export interface InvestorIntelligenceOverview { portfolio: { total: number; healthy: number; onTrack: number; highRisk: number }; startups: InvestorIntelligenceStartup[]; changes: Array<{ startupId: string; name: string; type: string; summary: string; severity: string }>; generatedAt: string; deterministic: boolean }
 export interface InvestorAdvisoryResponse { advisory: unknown; evidence: { scope: string; startups: InvestorIntelligenceStartup[] }; deterministic: boolean; aiAvailable: boolean; advisoryOnly: boolean }
+
+export interface InvestmentIntelligenceProfile {
+  projectId: string;
+  profileHeader: Record<string, unknown>;
+  investmentReadinessScore: {
+    tirsScore: number;
+    stageAware: string;
+    dimensions: Record<string, number>;
+  };
+  investmentAttractivenessScore: {
+    tasScore: number;
+    thesisAlignment: string;
+  };
+  overviewModule: Record<string, unknown>;
+}
+
 export const fetchInvestorIntelligenceOverview = () => apiGet<Partial<InvestorIntelligenceOverview>>("/investor-intelligence/overview").then((data): InvestorIntelligenceOverview => ({
   portfolio: {
     total: Number(data.portfolio?.total) || 0,
@@ -42,3 +58,4 @@ export const fetchInvestorAlerts = () => apiGet<{ alerts?: InvestorAlert[]; gene
 export const fetchInvestorReports = () => apiGet<{ reports?: InvestorReport[]; deterministic?: boolean }>("/investor-intelligence/reports").then((data) => ({ reports: Array.isArray(data.reports) ? data.reports : [], deterministic: data.deterministic !== false }));
 export const fetchInvestorStartupIntelligence = (startupId: string) => apiGet<{ startup: InvestorIntelligenceStartup; deterministic: boolean }>(`/investor-intelligence/startups/${encodeURIComponent(startupId)}`);
 export const calculateInvestorEvi = (startupId: string) => apiPost<Record<string, unknown>>(`/investor-intelligence/startups/${encodeURIComponent(startupId)}/evi`);
+export const fetchInvestmentIntelligenceProfile = (projectId: string) => apiGet<InvestmentIntelligenceProfile>(`/investor-intelligence/startups/${encodeURIComponent(projectId)}/intelligence`);
