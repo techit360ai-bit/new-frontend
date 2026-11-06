@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Building2, Trash2, AlertCircle } from "lucide-react";
+import { handleActionError } from "@/lib/actionGuidance";
 import { toast } from "sonner";
 import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
 import { applyToOpportunity, fetchFounderOpportunity, deleteOpportunity, patchCollaboratorOpportunityStatus } from "@/lib/api/opportunities";
@@ -211,7 +212,7 @@ export default function OpportunityDetail() {
                         setApplied(true);
                         toast.info("You have already applied");
                       } else {
-                        toast.error(msg);
+                        handleActionError(err);
                       }
                     } finally {
                       setApplying(false);

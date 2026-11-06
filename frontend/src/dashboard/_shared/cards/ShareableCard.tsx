@@ -24,6 +24,7 @@ export interface ShareableCardData {
   badgeText?: string;
   metadata?: Record<string, unknown>;
   actionLabel?: string;
+  actionPath?: string;
   onAction?: () => void;
   onShare?: () => void;
 }
@@ -80,9 +81,9 @@ export function ShareableCard({ card }: { card: ShareableCardData }) {
       {/* Footer / Action */}
       <div className="flex items-center justify-between pt-3 border-t border-white/10 text-[11px]">
         <span className="opacity-60 italic">Powered by TechIT Network • No Idea Should Be Lost</span>
-        {card.actionLabel && card.onAction && (
+        {card.actionLabel && (card.onAction || card.actionPath) && (
           <button
-            onClick={card.onAction}
+            onClick={card.onAction || (() => { if (card.actionPath) window.location.href = card.actionPath; })}
             className="flex items-center gap-1 font-semibold text-accent-primary hover:underline"
           >
             {card.actionLabel} <ArrowRight className="w-3.5 h-3.5" />
