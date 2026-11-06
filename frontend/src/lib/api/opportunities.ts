@@ -2,7 +2,7 @@
 //
 // Collaborator opportunities - BACKEND /api/domain/opportunities.
 
-import { domainGet, domainPatch, domainPost } from "@/lib/domainApi";
+import { domainGet, domainPatch, domainPost, domainDelete } from "@/lib/domainApi";
 import type { Event, Funding, Hackathon, Opportunity, Program } from "@/dashboard/_shared/opportunities/types";
 import type { CollaborationAudienceRole, CollaborationInviteDraft } from "@/lib/collaborationMatching";
 
@@ -343,6 +343,11 @@ export async function fetchFounderOpportunityCatalog(): Promise<Opportunity[]> {
 export async function fetchFounderOpportunity(id: string): Promise<Opportunity | null> {
   const rows = await fetchFounderOpportunityCatalog();
   return rows.find((item) => item.id === id) ?? null;
+}
+
+export async function deleteOpportunity(id: string): Promise<boolean> {
+  const data = await domainDelete<{ ok?: boolean }>(`/opportunities/${id}`);
+  return data.ok !== false;
 }
 
 export interface Deliverable {
