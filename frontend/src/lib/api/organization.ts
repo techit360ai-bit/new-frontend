@@ -548,3 +548,15 @@ export async function fetchInvestorMatches(projectId: string): Promise<InvestorM
     }))
     .filter((row) => row.investorId);
 }
+
+export async function importOrganizationCommunityContacts(organizationId: string, contacts: Array<{ name: string; email: string; role?: string }>, programId?: string) {
+  return domainPost<any>('/organization/community/import', { organizationId, contacts, programId });
+}
+
+export async function applyToProgram(programId: string, payload: { name: string; email: string; startupName: string; pitch: string; pitchDeckUrl?: string }) {
+  return domainPost<any>(`/programs/${encodeURIComponent(programId)}/apply`, payload);
+}
+
+export async function evaluateProgramApplication(evaluationId: string, payload: { decision?: string; score?: number; feedback?: string }) {
+  return domainPost<any>(`/organization/programs/evaluations/${encodeURIComponent(evaluationId)}`, payload);
+}

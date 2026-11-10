@@ -344,3 +344,72 @@ export async function fetchFounderOpportunity(id: string): Promise<Opportunity |
   const rows = await fetchFounderOpportunityCatalog();
   return rows.find((item) => item.id === id) ?? null;
 }
+
+export interface Deliverable {
+  id: string;
+  engagementId: string;
+  title: string;
+  description: string;
+  owner: string;
+  dueDate: string;
+  status: "not-started" | "in-progress" | "submitted" | "approved" | "changes-requested" | "blocked";
+  submissions?: { id: string; description: string; artifactRef?: string; submittedAt: string; status: string }[];
+  feedback?: string;
+}
+
+export interface Engagement {
+  id: string;
+  opportunityId: string;
+  opportunityTitle: string;
+  creatorId: string;
+  participantId: string;
+  status: "draft" | "agreed" | "active" | "completed" | "disputed";
+  deliverables: Deliverable[];
+  startDate: string;
+  expectedCompletionDate: string;
+}
+
+export async function createOpportunity(payload: {
+  title: string;
+  description: string;
+  type: string;
+  category: string;
+  requiredSkills: string[];
+  compensationType: string;
+  compensationMin?: number;
+  compensationMax?: number;
+  compensationCurrency?: string;
+  isStartupListing?: boolean;
+  deliverables?: { title: string; description: string; dueDate: string }[];
+  role?: string;
+}): Promise<Opportunity> {
+  const data = await domainPost<{ opportunity?: unknown }>("/opportunities", payload);
+  const normalized = normalizePublishedOpportunity(data.opportunity);
+  if (!normalized) throw new Error("Failed to create opportunity");
+  return normalized;
+}
+
+export async function fetchEngagements(): Promise<Engagement[]> {
+  try {
+    const data = await domainGet<{ engagements?: Engagement[] }>("/opportunities/engagements");
+    return Array.isArray(data.engagements) ? data.engagements : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createEngagement(opportunityId: string, participantId: string, deliverables: { title: string; description: string; dueDate: string; owner: string }[]): Promise<Engagement> {
+  const data = await domainPost<{ engagement: Engagement }>(`/opportunities/${opportunityId}/engagements`, { participantId, deliverables });
+  return data.engagement;
+}
+
+export async function submitDeliverableProof(deliverableId: string, description: string, artifactRef?: string): Promise<Deliverable> {
+  const data = await domainPost<{ deliverable: Deliverable }>(`/opportunities/deliverables/${deliverableId}/submit`, { description, artifactRef });
+  return data.deliverable;
+}
+
+export async function reviewDeliverable(deliverableId: string, decision: "approved" | "changes-requested" | "disputed", feedback: string): Promise<Deliverable> {
+  const data = await domainPost<{ deliverable: Deliverable }>(`/opportunities/deliverables/${deliverableId}/review`, { decision, feedback });
+  return data.deliverable;
+}
+
