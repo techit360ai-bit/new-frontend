@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Building2, Trash2, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Building2, Trash2 } from "lucide-react";
 import { handleActionError } from "@/lib/actionGuidance";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
-import { applyToOpportunity, fetchFounderOpportunity, deleteOpportunity, patchCollaboratorOpportunityStatus } from "@/lib/api/opportunities";
+import { applyToOpportunity, fetchFounderOpportunity, deleteOpportunity } from "@/lib/api/opportunities";
 
 const TYPE_LABEL: Record<Opportunity["type"], string> = {
   hackathon: "HACKATHON",
@@ -17,6 +18,7 @@ const TYPE_LABEL: Record<Opportunity["type"], string> = {
 export default function OpportunityDetail() {
   const { opportunityId } = useParams<{ opportunityId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [opp, setOpp] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,22 +164,24 @@ export default function OpportunityDetail() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!confirm("Are you sure you want to delete this opportunity?")) return;
-                  try {
-                    await deleteOpportunity(opp.id);
-                    toast.success("Opportunity deleted successfully");
-                    navigate("/opportunity-hub");
-                  } catch (err) {
-                    toast.error(err instanceof Error ? err.message : "Failed to delete opportunity");
-                  }
-                }}
-                className="text-xs font-medium px-3 py-2 rounded-lg border border-border-default text-text-secondary hover:text-status-error hover:border-status-error inline-flex items-center gap-1"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Delete
-              </button>
+              {Boolean(user && (opp.organizer?.id === user.id || (opp as unknown as Record<string, unknown>).ownerId === user.id || (opp as unknown as Record<string, unknown>).userId === user.id || opp.poster === user.id || (opp as unknown as Record<string, unknown>).createdBy === user.id)) && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!confirm("Are you sure you want to delete this opportunity?")) return;
+                    try {
+                      await deleteOpportunity(opp.id);
+                      toast.success("Opportunity deleted successfully");
+                      navigate("/opportunity-hub");
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Failed to delete opportunity");
+                    }
+                  }}
+                  className="text-xs font-medium px-3 py-2 rounded-lg border border-border-default text-text-secondary hover:text-status-error hover:border-status-error inline-flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </button>
+              )}
 
               {opp.type === "hackathon" ? (
                 <button
