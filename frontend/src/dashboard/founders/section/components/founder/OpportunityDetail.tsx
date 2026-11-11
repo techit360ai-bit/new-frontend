@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Building2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Building2, Trash2 } from "lucide-react";
+import { handleActionError } from "@/lib/actionGuidance";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Opportunity } from "@/dashboard/_shared/opportunities/types";
-import { applyToOpportunity, fetchFounderOpportunity } from "@/lib/api/opportunities";
+import { applyToOpportunity, fetchFounderOpportunity, deleteOpportunity } from "@/lib/api/opportunities";
 
 const TYPE_LABEL: Record<Opportunity["type"], string> = {
   hackathon: "HACKATHON",
@@ -16,6 +18,7 @@ const TYPE_LABEL: Record<Opportunity["type"], string> = {
 export default function OpportunityDetail() {
   const { opportunityId } = useParams<{ opportunityId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [opp, setOpp] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -153,48 +156,78 @@ export default function OpportunityDetail() {
             ))}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-border-subtle flex items-center justify-between gap-3">
-            <span className="text-xs text-text-muted">Apply by {opp.applyDeadline}</span>
-            {opp.type === "hackathon" ? (
-              <button
-                type="button"
-                onClick={() => navigate(`/incubation-hub?panel=hackathon&h=${opp.id}&stage=register`)}
-                className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
-              >
-                Register team →
-              </button>
-            ) : applied ? (
-              <span className="text-sm font-medium px-4 py-2 rounded-lg bg-status-success-soft text-status-success border border-status-success">
-                <><CheckCircle className="h-4 w-4" aria-hidden="true" /> Applied</>
-              </span>
-            ) : (
-              <button
-                type="button"
-                disabled={applying}
-                onClick={async () => {
-                  if (!opp.id) return;
-                  setApplying(true);
-                  try {
-                    await applyToOpportunity(opp.id, `Applying to ${opp.title}`);
-                    setApplied(true);
-                    toast.success("Application submitted!");
-                  } catch (err) {
-                    const msg = err instanceof Error ? err.message : "Application failed";
-                    if (msg.includes("already_applied")) {
-                      setApplied(true);
-                      toast.info("You have already applied");
-                    } else {
-                      toast.error(msg);
+          <div className="mt-6 pt-6 border-t border-border-subtle flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-muted">Apply by {opp.applyDeadline}</span>
+              {opp.status === "closed" && (
+                <span className="text-xs px-2 py-0.5 rounded bg-status-error-soft text-status-error border border-status-error font-medium">Closed / Filled</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {Boolean(user && (opp.organizer?.id === user.id || (opp as unknown as Record<string, unknown>).ownerId === user.id || (opp as unknown as Record<string, unknown>).userId === user.id || opp.poster === user.id || (opp as unknown as Record<string, unknown>).createdBy === user.id)) && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!confirm("Are you sure you want to delete this opportunity?")) return;
+                    try {
+                      await deleteOpportunity(opp.id);
+                      toast.success("Opportunity deleted successfully");
+                      navigate("/opportunity-hub");
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Failed to delete opportunity");
                     }
-                  } finally {
-                    setApplying(false);
-                  }
-                }}
-                className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
-              >
-                {applying ? "Submitting..." : opp.type === "event" ? "RSVP →" : "Apply →"}
-              </button>
-            )}
+                  }}
+                  className="text-xs font-medium px-3 py-2 rounded-lg border border-border-default text-text-secondary hover:text-status-error hover:border-status-error inline-flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </button>
+              )}
+
+              {opp.type === "hackathon" ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/incubation-hub?panel=hackathon&h=${opp.id}&stage=register`)}
+                  className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
+                >
+                  Register team →
+                </button>
+              ) : applied ? (
+                <span className="text-sm font-medium px-4 py-2 rounded-lg bg-status-success-soft text-status-success border border-status-success inline-flex items-center gap-1">
+                  <CheckCircle className="h-4 w-4" aria-hidden="true" /> Applied
+                </span>
+              ) : opp.status === "closed" ? (
+                <span className="text-sm font-medium px-4 py-2 rounded-lg bg-surface-secondary text-text-muted cursor-not-allowed">
+                  Opportunity Closed
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  disabled={applying}
+                  onClick={async () => {
+                    if (!opp.id) return;
+                    setApplying(true);
+                    try {
+                      await applyToOpportunity(opp.id, `Applying to ${opp.title}`);
+                      setApplied(true);
+                      toast.success("Application submitted!");
+                    } catch (err) {
+                      const msg = err instanceof Error ? err.message : "Application failed";
+                      if (msg.includes("already_applied")) {
+                        setApplied(true);
+                        toast.info("You have already applied");
+                      } else {
+                        handleActionError(err);
+                      }
+                    } finally {
+                      setApplying(false);
+                    }
+                  }}
+                  className="text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
+                >
+                  {applying ? "Submitting..." : opp.type === "event" ? "RSVP →" : "Apply →"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
