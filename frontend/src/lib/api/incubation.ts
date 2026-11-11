@@ -144,7 +144,7 @@ export function openCustomerValidationStream(sessionId: string, onSnapshot: (sna
 }
 
 export async function fetchPublicCustomerValidation(token: string) {
-  const response = await fetch(apiUrl(`/validate/${encodeURIComponent(token)}`));
+  const response = await fetch(apiUrl(`/validate/${encodeURIComponent(token)}`, "router"));
   if (!response.ok) throw new Error("Validation link is unavailable");
   return response.json() as Promise<CustomerValidationSession>;
 }
@@ -153,7 +153,7 @@ export async function submitPublicCustomerValidation(token: string, answers: Rec
   const anonymousKey = "techit_validation_anonymous_id";
   let anonymousId = localStorage.getItem(anonymousKey);
   if (!anonymousId) { anonymousId = crypto.randomUUID(); localStorage.setItem(anonymousKey, anonymousId); }
-  const response = await fetch(apiUrl(`/validate/${encodeURIComponent(token)}`), {
+  const response = await fetch(apiUrl(`/validate/${encodeURIComponent(token)}`, "router"), {
     method: "POST", headers: { "Content-Type": "application/json", "X-Validation-Anonymous-Id": anonymousId },
     body: JSON.stringify({ answers }),
   });

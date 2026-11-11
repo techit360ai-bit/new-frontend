@@ -6,7 +6,7 @@ export default function PublicEvidenceSummary() {
   const { token = "" } = useParams();
   const [report, setReport] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { fetch(apiUrl(`/validate/evidence/${encodeURIComponent(token)}`)).then(async (response) => { if (!response.ok) throw new Error("Evidence summary unavailable"); return response.json(); }).then(setReport).catch((cause) => setError(cause instanceof Error ? cause.message : "Evidence summary unavailable")); }, [token]);
+  useEffect(() => { fetch(apiUrl(`/validate/evidence/${encodeURIComponent(token)}`, "router")).then(async (response) => { if (!response.ok) throw new Error("Evidence summary unavailable"); return response.json(); }).then(setReport).catch((cause) => setError(cause instanceof Error ? cause.message : "Evidence summary unavailable")); }, [token]);
   if (error) return <main className="mx-auto flex min-h-screen max-w-xl items-center p-6"><p className="rounded-xl border p-5 text-sm">{error}</p></main>;
   if (!report) return <main className="mx-auto flex min-h-screen max-w-xl items-center p-6"><p className="text-sm text-text-muted">Loading evidence summary…</p></main>;
   const findings = (report.findings || {}) as Record<string, unknown>;

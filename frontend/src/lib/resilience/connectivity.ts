@@ -48,7 +48,7 @@ export function classifyFailure(error: unknown): FailureKind {
   if (typeof error === 'object' && error !== null) {
     const status = Number((error as { status?: unknown }).status);
     if (Number.isFinite(status)) {
-      if (status === 401 || status === 403) return 'auth';
+      if (status === 401) return 'auth';
       if (status >= 500) return 'server';
       if (status >= 400) return 'client';
     }
@@ -93,6 +93,7 @@ export function failureMessage(
     case 'auth':
       return 'Your session has expired. Please sign in again.';
     case 'client':
+      if (Number((error as { status?: unknown } | null)?.status) === 403) return 'You do not have access to that. If this looks wrong, contact support.';
       return error instanceof Error && error.message ? error.message : 'That request was rejected. Please check your input.';
     default:
       return error instanceof Error && error.message ? error.message : 'Something went wrong. Please try again.';
