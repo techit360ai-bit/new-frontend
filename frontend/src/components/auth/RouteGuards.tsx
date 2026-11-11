@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { type Role, useAuth } from "@/contexts/AuthContext";
 import {
@@ -7,6 +7,7 @@ import {
   homePathFor,
   roleRedirectPath,
   setupPathFor,
+  type RouteGuardRole,
 } from "./routeGuardPaths";
 
 function AuthLoading() {
@@ -41,14 +42,39 @@ export function RequireRole({
   allowed: Role[];
   children: ReactNode;
 }) {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, activeContext, roleAssignments, loading } = useAuth();
   const location = useLocation();
+
+  const activeRole = (activeContext?.role || profile?.activeRole || profile?.role || null) as RouteGuardRole | null;
+
+  const availableRoles = useMemo(() => {
+    const roles = new Set<RouteGuardRole>();
+    if (activeRole) roles.add(activeRole);
+    if (profile?.role) roles.add(profile.role as RouteGuardRole);
+    if (profile?.activeRole) roles.add(profile.activeRole as RouteGuardRole);
+    if (activeContext?.role) roles.add(activeContext.role as RouteGuardRole);
+    if (Array.isArray(profile?.secondaryRoles)) {
+      for (const r of profile.secondaryRoles) {
+        if (r) roles.add(r as RouteGuardRole);
+      }
+    }
+    if (Array.isArray(roleAssignments)) {
+      for (const a of roleAssignments) {
+        if (a.status === "active" && a.role) {
+          roles.add(a.role as RouteGuardRole);
+        }
+      }
+    }
+    return Array.from(roles);
+  }, [activeRole, profile?.role, profile?.activeRole, activeContext?.role, profile?.secondaryRoles, roleAssignments]);
+
   const redirect = roleRedirectPath({
     loading,
     hasUser: Boolean(user),
-    profileRole: profile?.role ?? null,
+    profileRole: activeRole,
+    availableRoles,
     isOnboarded: Boolean(profile?.isOnboarded),
-    allowed,
+    allowed: allowed as RouteGuardRole[],
     currentPath: location.pathname,
   });
 
@@ -61,11 +87,12 @@ export function RequireRole({
 }
 
 export function RedirectAuthenticated({ children }: { children: ReactNode }) {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, activeContext, loading } = useAuth();
+  const activeRole = (activeContext?.role || profile?.activeRole || profile?.role || null) as RouteGuardRole | null;
   const redirect = authenticatedRedirectPath({
     loading,
     hasUser: Boolean(user),
-    profileRole: profile?.role ?? null,
+    profileRole: activeRole,
     isOnboarded: Boolean(profile?.isOnboarded),
     lastRoute: sessionStorage.getItem('techit_last_route'),
   });

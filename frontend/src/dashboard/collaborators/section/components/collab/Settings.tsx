@@ -57,7 +57,7 @@ export function Settings() {
   const navigate = useNavigate();
   const { collaboratorProfile, updateCollaboratorProfile } = useCollaboratorProfile();
   const { activeRoles, currentRole } = useActiveRoles();
-  const { profile, updateProfile, changePassword, signOut } = useAuth();
+  const { profile, updateProfile, changePassword, signOut, switchContext } = useAuth();
   const [saving, setSaving] = useState<string | null>(null);
 
   // Identity form state
@@ -203,8 +203,15 @@ export function Settings() {
 
   const handleRoleAction = (role: Role) => {
     if (role === currentRole) return;
-    if (activeRoles.has(role)) navigate(roleDashboardPath[role]);
-    else                       navigate(roleOnboardingPath[role]);
+    const authRole = role === "org" ? "organisation" : role;
+    if (activeRoles.has(role)) {
+      if (switchContext) {
+        void switchContext({ role: authRole as "founder" | "collaborator" | "investor" | "organisation" }).catch(() => {});
+      }
+      navigate(roleDashboardPath[role]);
+    } else {
+      navigate(roleOnboardingPath[role]);
+    }
   };
 
   const updateNotifGroup = (key: "opportunities" | "deadlines" | "payments" | "equityEvents", channel: "email" | "inApp", value: boolean) => {

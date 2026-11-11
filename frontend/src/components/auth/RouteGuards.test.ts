@@ -96,3 +96,46 @@ test("RedirectAuthenticated sends users to setup until onboarding is complete", 
     isOnboarded: false,
   })).toBeNull();
 });
+
+test("RequireRole supports role switching and multi-role assignments", () => {
+  // A founder who activated and switched to the investor context can access investor dashboard
+  expect(roleRedirectPath({
+    loading: false,
+    hasUser: true,
+    profileRole: "investor",
+    availableRoles: ["investor", "founder"],
+    allowed: ["investor"],
+    currentPath: "/investor/dashboard",
+  })).toBeNull();
+
+  // A user whose active role is investor can also access founder dashboard if founder is in availableRoles
+  expect(roleRedirectPath({
+    loading: false,
+    hasUser: true,
+    profileRole: "investor",
+    availableRoles: ["investor", "founder"],
+    allowed: ["founder"],
+    currentPath: "/founder/dashboard",
+  })).toBeNull();
+
+  // A user with founder and investor roles is rejected when accessing collaborator dashboard
+  expect(roleRedirectPath({
+    loading: false,
+    hasUser: true,
+    profileRole: "investor",
+    availableRoles: ["investor", "founder"],
+    allowed: ["collaborator"],
+    currentPath: "/collaborator/dashboard",
+  })).toEqual({ to: "/investor/dashboard" });
+
+  // A founder who switched to collaborator gets redirected away from collaborator onboarding if onboarded
+  expect(roleRedirectPath({
+    loading: false,
+    hasUser: true,
+    profileRole: "collaborator",
+    availableRoles: ["collaborator", "founder"],
+    isOnboarded: true,
+    allowed: ["collaborator"],
+    currentPath: "/collaborator/onboarding/step-2",
+  })).toEqual({ to: "/collaborator/dashboard" });
+});
