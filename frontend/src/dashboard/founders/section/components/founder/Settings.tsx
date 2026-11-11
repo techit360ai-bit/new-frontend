@@ -79,7 +79,7 @@ export function Settings() {
   const navigate = useNavigate();
   const { founderProfile, updateFounderProfile } = useFounderProfile();
   const { activeRoles, currentRole } = useActiveRoles();
-  const { profile, updateProfile, changePassword, signOut } = useAuth();
+  const { profile, updateProfile, changePassword, signOut, switchContext } = useAuth();
   const [saving, setSaving] = useState<string | null>(null);
 
   // Identity state
@@ -284,8 +284,15 @@ export function Settings() {
   // Role handlers
   const handleRoleAction = (role: Role) => {
     if (role === currentRole) return;
-    if (activeRoles.has(role)) navigate(roleDashboardPath[role]);
-    else                       navigate(roleOnboardingPath[role]);
+    const authRole = role === "org" ? "organisation" : role;
+    if (activeRoles.has(role)) {
+      if (switchContext) {
+        void switchContext({ role: authRole as "founder" | "collaborator" | "investor" | "organisation" }).catch(() => {});
+      }
+      navigate(roleDashboardPath[role]);
+    } else {
+      navigate(roleOnboardingPath[role]);
+    }
   };
 
   // Industry / role chip toggles

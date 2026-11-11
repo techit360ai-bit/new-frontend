@@ -16,7 +16,7 @@ const roleLabel: Record<Role, string> = {
 export function TopBarRoleMenu() {
   const navigate = useNavigate();
   const { founderProfile } = useUser();
-  const { signOut } = useAuth();
+  const { signOut, switchContext } = useAuth();
   const { activeRoles, currentRole } = useActiveRoles();
   const [open, setOpen] = useState(false);
 
@@ -26,8 +26,15 @@ export function TopBarRoleMenu() {
 
   const handleRoleClick = (role: Role) => {
     setOpen(false);
-    if (activeRoles.has(role)) navigate(roleDashboardPath[role]);
-    else                       navigate(roleOnboardingPath[role]);
+    const authRole = role === "org" ? "organisation" : role;
+    if (activeRoles.has(role)) {
+      if (switchContext) {
+        void switchContext({ role: authRole as "founder" | "collaborator" | "investor" | "organisation" }).catch(() => {});
+      }
+      navigate(roleDashboardPath[role]);
+    } else {
+      navigate(roleOnboardingPath[role]);
+    }
   };
 
   const handleLogout = async () => { setOpen(false); await signOut(); };

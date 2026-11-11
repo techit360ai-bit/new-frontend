@@ -29,6 +29,7 @@ export function roleRedirectPath({
   loading,
   hasUser,
   profileRole,
+  availableRoles,
   isOnboarded = false,
   allowed,
   currentPath,
@@ -36,17 +37,34 @@ export function roleRedirectPath({
   loading: boolean;
   hasUser: boolean;
   profileRole: RouteGuardRole | null;
+  availableRoles?: RouteGuardRole[];
   isOnboarded?: boolean;
   allowed: RouteGuardRole[];
   currentPath: string;
 }) {
   if (loading) return null;
   if (!hasUser) return { to: "/signin", state: { from: currentPath } };
-  if (!profileRole) return { to: "/" };
-  if (!allowed.includes(profileRole)) return { to: homePathFor(profileRole) };
-  const onboardingRoot = setupPathFor(profileRole).replace(/\/step-1$/, "");
+
+  const effectiveRoles = availableRoles && availableRoles.length > 0
+    ? availableRoles
+    : profileRole ? [profileRole] : [];
+
+  if (effectiveRoles.length === 0) return { to: "/" };
+
+  // If the active role matches the allowed route roles, use it;
+  // otherwise check if any assigned/secondary role matches.
+  const matchedRole = (profileRole && allowed.includes(profileRole))
+    ? profileRole
+    : allowed.find((r) => effectiveRoles.includes(r));
+
+  if (!matchedRole) {
+    const fallbackRole = profileRole || effectiveRoles[0];
+    return { to: homePathFor(fallbackRole) };
+  }
+
+  const onboardingRoot = setupPathFor(matchedRole).replace(/\/step-1$/, "");
   if (isOnboarded && currentPath.startsWith(onboardingRoot)) {
-    return { to: homePathFor(profileRole) };
+    return { to: homePathFor(matchedRole) };
   }
   return null;
 }
