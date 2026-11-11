@@ -32,6 +32,7 @@ jobs:
           VITE_MESSAGING_BASE_URL: https://messaging.techitnetwork.com
           VITE_MESSAGING_WS_URL: wss://messaging.techitnetwork.com/ws
           VITE_TRUST_AUTHORITY_URL: https://backend.techitnetwork.com/api
+          VITE_GATEWAY_BASE_URL: https://backend.techitnetwork.com
           VITE_API_STRICT: "1"
 
       - name: Deploy to S3

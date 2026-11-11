@@ -4,7 +4,7 @@
 // service root (NOT under /api/v1), so it bypasses apiUrl() and hits
 // API_BASE_URL directly. Useful for a connection indicator / pre-demo check.
 
-import { API_BASE_URL, apiFallbackEnabled } from "./config";
+import { ROUTER_BASE_URL as API_BASE_URL, apiFallbackEnabled } from "./config";
 
 export interface HealthStatus {
   ok: boolean;

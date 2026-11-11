@@ -17,10 +17,19 @@ export const env: ViteEnv =
  * Override per environment with VITE_API_BASE_URL.
  * Default matches the backend dev server (uvicorn main:app --port 8000).
  */
-export const API_BASE_URL: string =
+export const ROUTER_BASE_URL: string =
   (typeof env.VITE_API_BASE_URL === "string"
     ? env.VITE_API_BASE_URL.replace(/\/$/, "")
     : undefined) ?? "http://localhost:8000";
+
+/**
+ * Authenticated AI calls go through the backend gateway, which signs the execution
+ * grant. Set VITE_GATEWAY_BASE_URL to its origin; without it the router is called directly.
+ */
+export const API_BASE_URL: string =
+  (typeof env.VITE_GATEWAY_BASE_URL === "string" && env.VITE_GATEWAY_BASE_URL
+    ? env.VITE_GATEWAY_BASE_URL.replace(/\/$/, "")
+    : undefined) ?? ROUTER_BASE_URL;
 
 /** API version prefix used by every ai-router endpoint. */
 export const API_PREFIX = "/api/v1";
@@ -50,7 +59,8 @@ export function apiFallbackEnabled(source: ViteEnv = env): boolean {
 }
 
 /** Build a full URL for an ai-router path (with or without leading slash). */
-export function apiUrl(path: string): string {
+export function apiUrl(path: string, target: "gateway" | "router" = "gateway"): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${clean.startsWith("/api/") ? "" : API_PREFIX}${clean}`;
+  const base = target === "router" ? ROUTER_BASE_URL : API_BASE_URL;
+  return `${base}${clean.startsWith("/api/") ? "" : API_PREFIX}${clean}`;
 }
