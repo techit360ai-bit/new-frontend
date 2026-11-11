@@ -308,6 +308,47 @@ export function designTechStack(ventureData: Record<string, unknown>): Promise<R
   );
 }
 
+export interface WorkspaceMessage {
+  id?: string;
+  conversationId?: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  createdAt?: string;
+}
+
+export interface WorkspaceConversation {
+  id: string;
+  title: string;
+  workspaceId?: string;
+  messages: WorkspaceMessage[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export function fetchWorkspaceConversations() {
+  return withFallback(
+    () => apiGet<{ conversations: WorkspaceConversation[] }>("/domain/workspace/conversations"),
+    () => ({ conversations: [] }),
+    "fetch workspace conversations"
+  );
+}
+
+export function createWorkspaceConversation(body: Record<string, unknown>) {
+  return withFallback(
+    () => apiPost<{ conversation: WorkspaceConversation }>("/domain/workspace/conversations", body),
+    () => ({ conversation: { id: "local-convo", title: "Incubation Chat", messages: [] } }),
+    "create workspace conversation"
+  );
+}
+
+export function addWorkspaceMessage(conversationId: string, body: Record<string, unknown>) {
+  return withFallback(
+    () => apiPost<{ message: WorkspaceMessage }>(`/domain/workspace/conversations/${conversationId}/messages`, body),
+    () => ({ message: { role: 'assistant', content: String(body.content || "Acknowledged.") } }),
+    "add workspace message"
+  );
+}
+
 /** POST /api/v1/incubation/document/upload — upload a document for AI diagnosis. */
 export function uploadIncubationDocument(file: File): Promise<Record<string, unknown> | null> {
   const formData = new FormData();

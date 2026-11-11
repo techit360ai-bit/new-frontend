@@ -48,6 +48,9 @@ import {
   fetchValidationSession,
   fetchValidationSessions,
   persistIndividualAnalysis,
+  fetchWorkspaceConversations,
+  createWorkspaceConversation,
+  addWorkspaceMessage,
   type PipelineBlueprint,
   type ValidationSessionSummary,
   type ValidationStartResult,
@@ -173,6 +176,8 @@ export function MainIncubationPanel() {
   const [copilotInput, setCopilotInput] = useState("");
   const [copilotMessages, setCopilotMessages] = useState<WorkspaceConversationMessage[]>([]);
   const [copilotLoading, setCopilotLoading] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [agentPersona, setAgentPersona] = useState<"copilot" | "architect" | "analyst" | "validator">("copilot");
   const [analyzing, setAnalyzing] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1280);
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
@@ -209,6 +214,20 @@ export function MainIncubationPanel() {
     void checkHealth().then((health) => {
       if (active) setEngineOnline(health.ok);
     });
+    void fetchWorkspaceConversations().then(async (res) => {
+      if (!active) return;
+      if (res.conversations && res.conversations.length > 0) {
+        const convo = res.conversations[0];
+        setActiveConversationId(convo.id);
+        setCopilotMessages((convo.messages || []) as WorkspaceConversationMessage[]);
+      } else {
+        const created = await createWorkspaceConversation({ title: "Incubation Hub Command Chat" });
+        if (active && created.conversation) {
+          setActiveConversationId(created.conversation.id);
+          setCopilotMessages((created.conversation.messages || []) as WorkspaceConversationMessage[]);
+        }
+      }
+    }).catch(() => {});
     return () => {
       active = false;
     };
@@ -428,6 +447,8 @@ export function MainIncubationPanel() {
     const text = copilotInput.trim();
     if (!text || copilotLoading) return;
     const prior = copilotMessages;
+    const personaPrefix = agentPersona !== "copilot" ? `[Persona: @${agentPersona}] ` : "";
+    const fullText = personaPrefix + text;
     setCopilotMessages([...prior, { role: "user", content: text }]);
     setCopilotInput("");
     setCopilotLoading(true);
@@ -446,10 +467,15 @@ export function MainIncubationPanel() {
       }
       const response = await apiPost<{ message: string }>("/workspace/conversation", {
         workspace_id: workspaceId,
-        message: text,
+        message: fullText,
         messages: prior,
       });
-      setCopilotMessages((current) => [...current, { role: "assistant", content: response.message }]);
+      const reply = response.message || "Processed successfully.";
+      setCopilotMessages((current) => [...current, { role: "assistant", content: reply }]);
+      if (activeConversationId) {
+        await addWorkspaceMessage(activeConversationId, { content: text, role: "user" });
+        await addWorkspaceMessage(activeConversationId, { content: reply, role: "assistant" });
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Copilot request failed");
     } finally {
@@ -512,6 +538,19 @@ export function MainIncubationPanel() {
 
         <div className="border-t border-border-default p-4">
           <h3 className="text-xs font-semibold text-text-muted mb-2">AI Copilot</h3>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-medium text-text-muted">Agent Persona:</span>
+            <select
+              value={agentPersona}
+              onChange={(e) => setAgentPersona(e.target.value as any)}
+              className="text-xs border border-border-default rounded px-1.5 py-0.5 bg-surface-primary text-text-primary"
+            >
+              <option value="copilot">General Copilot</option>
+              <option value="architect">System Architect</option>
+              <option value="analyst">Financial Analyst</option>
+              <option value="validator">Market Validator</option>
+            </select>
+          </div>
           {copilotMessages.length > 0 && (
             <div className="mb-2 max-h-48 space-y-2 overflow-y-auto" aria-live="polite">
               {copilotMessages.map((message, index) => (
