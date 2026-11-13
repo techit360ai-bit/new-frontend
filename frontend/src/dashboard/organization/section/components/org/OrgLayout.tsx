@@ -31,6 +31,7 @@ import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { RoleMobileMenu } from "@/components/RoleMobileMenu";
 import { NextBestActionNote } from "@/components/authorization/NextBestActionNote";
 import { ContinuousIntelligencePanel } from "@/components/intelligence/ContinuousIntelligencePanel";
+import { TopBarRoleMenu } from "@/components/navigation/TopBarRoleMenu";
 
 interface NavItem {
   name: string;
@@ -175,15 +176,28 @@ export function OrgLayout() {
           active: item.path === "/org/profile" ? location.pathname === item.path : isActive(item.path),
         }))}
         primaryItems={[navigation[0], navigation[1], navigation[12], navigation[2], navigation[3]].map((item) => ({ label: item.name, path: item.path, icon: item.icon, active: isActive(item.path) }))}
-        headerActions={<><Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link><Link to="/org/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link></>}
+        headerActions={<>
+          <Link to="/org/hangout" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open messages"><MessageSquare className="h-5 w-5" /></Link>
+          <Link to="/support" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open support tickets"><Ticket className="h-5 w-5" /></Link>
+          <Link to="/org/profile" className="app-touch-target inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Open profile"><UserCircle className="h-5 w-5" /></Link>
+        </>}
       />
 
       {/* Main Content */}
-      <main className="app-role-content flex-1 overflow-y-auto pt-14 lg:pt-0">
-        <ProfileCompletionBanner role="organisation" profilePath="/org/profile" />
-        <NextBestActionNote role="organisation" />
-        <ContinuousIntelligencePanel role="organisation" />
-        <Outlet />
+      <main className="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
+        <header className="hidden min-h-14 items-center justify-between border-b border-border-default bg-surface-primary px-4 lg:flex lg:px-6">
+          <div className="text-sm text-text-muted">
+            {navigation.find((n) => isActive(n.path))?.name ?? (location.pathname === "/org/profile" ? "Profile" : "")}
+          </div>
+          <TopBarRoleMenu />
+        </header>
+
+        <div className="app-role-content flex-1 overflow-y-auto">
+          <ProfileCompletionBanner role="organisation" profilePath="/org/profile" />
+          <NextBestActionNote role="organisation" />
+          <ContinuousIntelligencePanel role="organisation" />
+          <Outlet />
+        </div>
       </main>
     </div>
   );

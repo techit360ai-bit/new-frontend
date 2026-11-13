@@ -26,6 +26,7 @@ import { RecommendationCard } from '../components/RecommendationCard';
 import { CaughtUpNotice, ReturnSummaryBanner } from '../components/ReturnIntelligence';
 import { VirtualizedList } from '@/components/mobile/VirtualizedList';
 import { FeedSearchPopover } from '../components/FeedSearchPopover';
+import { CohortFeedModule } from '../components/CohortFeedModule';
 
 const CATEGORY_IDS: Record<string, string> = {
   'For You': 'for-you', Following: 'following', Startups: 'startups', Funding: 'funding',
@@ -216,6 +217,8 @@ export function FeedPage() {
             {returnSummary?.available && <div className="pt-4 sm:px-4"><ReturnSummaryBanner summary={returnSummary} onStart={() => setCatchUpMode(true)} /></div>}
             {caughtUp && <div className="pt-4 sm:px-4"><CaughtUpNotice /></div>}
             {stale && <div className="mx-4 mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">Showing posts from your last sync{lastSyncedAt ? ` · ${new Date(lastSyncedAt).toLocaleString()}` : ''}.</div>}
+
+            <CohortFeedModule />
 
             <div className="px-4 pt-4">
               <PostComposer

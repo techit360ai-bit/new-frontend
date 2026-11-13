@@ -46,8 +46,9 @@ export interface SessionContext {
   weeklyPriority: WeeklyPriority | null;
 }
 
-export async function fetchSessionContext(): Promise<SessionContext> {
-  const data = await domainGet<Partial<SessionContext>>("/context/session");
+export async function fetchSessionContext(role?: string): Promise<SessionContext> {
+  const path = role ? `/context/session?role=${encodeURIComponent(role)}` : "/context/session";
+  const data = await domainGet<Partial<SessionContext>>(path);
   return {
     greeting: data.greeting || "Welcome back",
     awayMessage: data.awayMessage ?? null,

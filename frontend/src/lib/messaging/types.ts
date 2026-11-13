@@ -111,5 +111,7 @@ export interface UIConversation {
   participantCredibilityScore?: number;
   requestStatus?: "active" | "pending" | "declined";
   initiatedBy?: string;
+  isCohort?: boolean;
+  cohortId?: string;
   thread: UIMessage[];
 }

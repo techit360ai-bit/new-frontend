@@ -29,6 +29,7 @@ import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { RoleMobileMenu } from '@/components/RoleMobileMenu';
 import { NextBestActionNote } from '@/components/authorization/NextBestActionNote';
 import { ContinuousIntelligencePanel } from '@/components/intelligence/ContinuousIntelligencePanel';
+import { TopBarRoleMenu } from '@/components/navigation/TopBarRoleMenu';
 
 interface NavItem {
   path: string;
@@ -187,11 +188,20 @@ export function InvestorLayout() {
       />
 
       {/* Main Content */}
-      <main className="app-role-content flex-1 overflow-auto pt-14 lg:pt-0">
-        <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
-        <NextBestActionNote role="investor" />
-        <ContinuousIntelligencePanel role="investor" />
-        <Outlet />
+      <main className="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
+        <header className="hidden min-h-14 items-center justify-between border-b border-border-inverse bg-surface-inverse px-4 lg:flex lg:px-6">
+          <div className="text-sm text-text-on-inverse-muted">
+            {navItems.find((n) => isActive(n.path))?.label ?? ""}
+          </div>
+          <TopBarRoleMenu />
+        </header>
+
+        <div className="app-role-content flex-1 overflow-y-auto">
+          <ProfileCompletionBanner role="investor" profilePath="/investor/profile" />
+          <NextBestActionNote role="investor" />
+          <ContinuousIntelligencePanel role="investor" />
+          <Outlet />
+        </div>
       </main>
     </div>
   );

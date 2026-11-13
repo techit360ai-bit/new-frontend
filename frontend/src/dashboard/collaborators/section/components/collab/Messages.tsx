@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { Paperclip, Send, Ticket } from "lucide-react";
+import { Paperclip, Send, Ticket, GraduationCap } from "lucide-react";
 import { acceptMessageRequest, createConversation, declineMessageRequest, fetchConversations, fetchHistory, markConvRead, restSendDM } from "@/lib/messaging/conversations";
+import { fetchMyCohorts, fetchCohortMessages, sendCohortChatMessage } from "@/lib/api/cohortCollaboration";
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
 import type { MessageIdentity, UIConversation, UIMessage } from "@/lib/messaging/types";
 import { useMessaging } from "@/contexts/MessagingProvider";
@@ -39,12 +40,30 @@ export function Messages() {
     let alive = true;
     setLoading(true);
     setError(null);
-    fetchConversations()
-      .then((list) => {
+    Promise.all([
+      fetchConversations().catch(() => []),
+      fetchMyCohorts().catch(() => []),
+    ])
+      .then(([list, myCohorts]) => {
         if (!alive) return;
-        const mapped = list.map(mapConvSummary);
-        setConvos(mapped);
-        setActiveId((current) => current || mapped[0]?.id || "");
+        const mappedDms = list.map(mapConvSummary);
+        const mappedCohorts: UIConversation[] = myCohorts.map((c) => ({
+          id: `cohort_${c.id}`,
+          cohortId: c.id,
+          isCohort: true,
+          participantName: c.name,
+          participantAvatar: "👥",
+          projectName: c.organizationName,
+          subject: c.lastMessage?.text || "Cohort group discussion",
+          unread: false,
+          requestStatus: "active",
+          participantRole: "organization",
+          participantVerified: true,
+          thread: [],
+        }));
+        const combined = [...mappedCohorts, ...mappedDms];
+        setConvos(combined);
+        setActiveId((current) => current || combined[0]?.id || "");
       })
       .catch((err) => {
         if (!alive) return;
@@ -60,6 +79,30 @@ export function Messages() {
   useEffect(() => {
     if (!activeId) return;
     let alive = true;
+    const currentActive = convos.find((c) => c.id === activeId);
+
+    if (currentActive?.isCohort && currentActive.cohortId) {
+      fetchCohortMessages(currentActive.cohortId)
+        .then((res) => {
+          if (!alive) return;
+          const thread: UIMessage[] = (res.messages || []).map((m) => ({
+            id: m.id,
+            fromMe: m.senderId === user?.id,
+            authorName: m.senderName,
+            body: m.text,
+            timestamp: m.createdAt,
+          }));
+          const lastMessageId = thread[thread.length - 1]?.id;
+          setConvos((current) =>
+            current.map((c) =>
+              c.id === activeId ? { ...c, thread, lastMessageId } : c
+            )
+          );
+        })
+        .catch(() => {});
+      return;
+    }
+
     fetchHistory(activeId)
       .then((msgs) => {
         if (!alive || msgs.length === 0) return;
@@ -105,12 +148,34 @@ export function Messages() {
 
   const handleSend = async () => {
     if (!draft.trim() || !activeId) return;
+    const body = draft.trim();
+
+    if (active?.isCohort && active.cohortId) {
+      setSending(true);
+      try {
+        const res = await sendCohortChatMessage(active.cohortId, { text: body });
+        const newMsg: UIMessage = {
+          id: res.message.id,
+          fromMe: true,
+          authorName: "You",
+          body,
+          timestamp: res.message.createdAt,
+        };
+        appendMessage(activeId, newMsg);
+        setDraft("");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Message was not sent.");
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+
     const clientMsgId = `cm-${Date.now()}`;
     const msg: UIMessage = {
       id: clientMsgId, fromMe: true, authorName: "You",
-      body: draft.trim(), timestamp: new Date().toISOString(),
+      body, timestamp: new Date().toISOString(),
     };
-    const body = draft.trim();
     setSending(true);
     try {
       if (socket) {
@@ -240,14 +305,23 @@ export function Messages() {
             ) : (
               <>
                 <div className="px-5 py-3 border-b border-border-subtle">
-                  <p className="flex items-center gap-1.5 font-semibold text-text-primary">{active.participantName}<IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} /></p>
-                  <p className="text-xs text-text-muted">{active.participantUsername ? `@${active.participantUsername} · ` : ''}{active.requestStatus === 'pending' ? 'Message request' : metaLine(active) || "Conversation"}</p>
+                  <p className="flex items-center gap-1.5 font-semibold text-text-primary">
+                    {active.isCohort && <GraduationCap className="h-4 w-4 text-role-organization shrink-0" />}
+                    {active.participantName}
+                    <IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} />
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {active.isCohort ? `Cohort Discussion · ${active.projectName}` : (active.participantUsername ? `@${active.participantUsername} · ` : '') + (active.requestStatus === 'pending' ? 'Message request' : metaLine(active) || "Conversation")}
+                  </p>
                 </div>
                 {active.requestStatus === 'pending' && <div className="flex items-center justify-between gap-3 border-b border-status-warning bg-status-warning px-5 py-3 text-sm text-amber-950"><span>{active.initiatedBy === user?.id ? 'Waiting for this member to accept your message request.' : 'This member sent you a message request.'}</span>{active.initiatedBy !== user?.id && <span className="flex gap-2"><button type="button" onClick={() => void respondToRequest('declined')} className="rounded border border-status-warning px-3 py-1.5 text-xs font-medium">Decline</button><button type="button" onClick={() => void respondToRequest('active')} className="rounded bg-status-warning px-3 py-1.5 text-xs font-medium text-text-primary">Accept</button></span>}</div>}
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   {active.thread.map((m) => (
                     <div key={m.id} className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-md px-3 py-2 rounded-lg text-sm ${m.fromMe ? "bg-status-warning text-text-primary" : "bg-surface-secondary text-text-primary"}`}>
+                        {!m.fromMe && active.isCohort && m.authorName && (
+                          <p className="text-[11px] font-semibold text-role-organization mb-0.5">{m.authorName}</p>
+                        )}
                         <MentionText body={m.body} mentions={m.mentions} />
                         {m.pending && <p className="text-[10px] mt-1 text-amber-700">Saved locally · waiting for connection</p>}
                         <p className={`text-[10px] mt-1 ${m.fromMe ? "text-text-primary/70" : "text-text-muted"}`}>{new Date(m.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
@@ -261,7 +335,7 @@ export function Messages() {
                     rows={2}
                     className="flex-1 resize-none border border-border-strong rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-status-warning" />
                   <button onClick={handleAttach} className="h-9 w-9 text-text-muted hover:bg-surface-secondary rounded-lg flex items-center justify-center"><Paperclip className="w-4 h-4" /></button>
-                  <button onClick={() => void handleSend()} disabled={!draft.trim() || sending || active.requestStatus !== 'active'}
+                  <button onClick={() => void handleSend()} disabled={!draft.trim() || sending || (active.requestStatus !== 'active' && !active.isCohort)}
                     className="h-9 px-4 bg-status-warning text-text-primary font-semibold rounded-lg hover:bg-amber-400 disabled:bg-slate-200 disabled:text-text-disabled flex items-center gap-1.5">
                     <Send className="w-3.5 h-3.5" /> Send
                   </button>

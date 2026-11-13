@@ -180,16 +180,76 @@ export function fetchConnections(): Promise<ConnectionSummary[]> {
     .then((data) => Array.isArray(data.connections) ? data.connections : []);
 }
 
+function csrfToken() {
+  try {
+    const part = document.cookie.split(';').map(v => v.trim()).find(v => v.startsWith('techit_csrf='));
+    return part ? decodeURIComponent(part.slice('techit_csrf='.length)) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function uploadProfileAvatar(file: File): Promise<{ avatarUrl: string }> {
-  const base = BACKEND_API_BASE_URL
-  const headers: Record<string, string> = { "Content-Type": "application/json" }
-  const token = getAuthToken(); if (token) headers.Authorization = `Bearer ${token}`
-  const start = await fetch(`${base}/users/me/avatar/upload-url`, { method: "POST", headers, body: JSON.stringify({ contentType: file.type, sizeBytes: file.size }) })
-  const upload = await parse<{ uploadUrl: string; objectKey: string; requiredHeaders?: Record<string, string> }>(start)
-  const objectResponse = await fetch(upload.uploadUrl, { method: "PUT", headers: upload.requiredHeaders, body: file })
-  if (!objectResponse.ok) throw new Error("Avatar upload failed")
-  const finalize = await fetch(`${base}/users/me/avatar/finalize`, { method: "POST", headers, body: JSON.stringify({ objectKey: upload.objectKey, contentType: file.type, sizeBytes: file.size }) })
-  return parse<{ avatarUrl: string }>(finalize)
+  const base = BACKEND_API_BASE_URL;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = getAuthToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const csrf = csrfToken();
+  if (csrf) headers['X-CSRF-Token'] = csrf;
+
+  // 1. Try S3 presigned URL workflow
+  try {
+    const start = await fetch(`${base}/users/me/avatar/upload-url`, {
+      method: "POST",
+      headers,
+      credentials: "include",
+      body: JSON.stringify({ contentType: file.type, sizeBytes: file.size }),
+    });
+
+    if (start.ok) {
+      const upload = await parse<{ uploadUrl: string; objectKey: string; requiredHeaders?: Record<string, string> }>(start);
+      // PUT directly to S3 / R2
+      const objectResponse = await fetch(upload.uploadUrl, {
+        method: "PUT",
+        headers: { ...(upload.requiredHeaders || {}), 'Content-Type': file.type },
+        body: file,
+      });
+
+      if (objectResponse.ok) {
+        const finalize = await fetch(`${base}/users/me/avatar/finalize`, {
+          method: "POST",
+          headers,
+          credentials: "include",
+          body: JSON.stringify({ objectKey: upload.objectKey, contentType: file.type, sizeBytes: file.size }),
+        });
+        if (finalize.ok) {
+          return parse<{ avatarUrl: string }>(finalize);
+        }
+      }
+    }
+  } catch {
+    // If S3 presigned URL or direct PUT fails (e.g. CORS, bucket unconfigured, network timeout),
+    // proceed to direct proxy upload below
+  }
+
+  // 2. Fallback: Authenticated direct server upload via POST /api/users/me/avatar/upload
+  const uploadHeaders: Record<string, string> = { "Content-Type": file.type || "application/octet-stream" };
+  if (token) uploadHeaders.Authorization = `Bearer ${token}`;
+  if (csrf) uploadHeaders['X-CSRF-Token'] = csrf;
+
+  const directUpload = await fetch(`${base}/users/me/avatar/upload`, {
+    method: "POST",
+    headers: uploadHeaders,
+    credentials: "include",
+    body: file,
+  });
+
+  if (!directUpload.ok) {
+    const errText = await directUpload.text().catch(() => "");
+    throw new Error(`Avatar upload failed: ${directUpload.status} ${errText}`);
+  }
+
+  return parse<{ avatarUrl: string }>(directUpload);
 }
 
 export async function removeProfileAvatar(): Promise<void> {

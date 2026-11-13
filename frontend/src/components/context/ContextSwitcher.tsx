@@ -50,6 +50,12 @@ export function ContextSwitcher() {
   const choose = async (role: Role, active: boolean) => {
     if (!active) {
       if (role === "explorer") return;
+      const isInstitutional = role === "investor" || role === "organisation";
+      if (isInstitutional) {
+        setOpen(false);
+        navigate(onboardingPath[role] || "/explore");
+        return;
+      }
       const activated = await activateRole(roleForBackend(role) as Role);
       if (activated.error) return;
     }
