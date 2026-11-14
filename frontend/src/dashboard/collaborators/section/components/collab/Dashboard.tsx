@@ -149,7 +149,7 @@ export function Dashboard() {
       </div>
 
       {/* Welcome Back — contextual intelligence surface */}
-      <WelcomeBack />
+      <WelcomeBack role="collaborator" />
 
       <CoFounderRelationshipCard />
 

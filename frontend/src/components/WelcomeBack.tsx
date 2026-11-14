@@ -66,17 +66,17 @@ const roleThemes = {
 
 type RoleKey = keyof typeof roleThemes;
 
-export function WelcomeBack() {
-  const { profile } = useAuth();
+export function WelcomeBack({ role: roleProp }: { role?: RoleKey } = {}) {
+  const { profile, activeContext } = useAuth();
   const [context, setContext] = useState<SessionContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [returnSummary, setReturnSummary] = useState<ReturnSummary | null>(null);
-  const role: RoleKey = (profile?.role as RoleKey) || "founder";
-  const theme = roleThemes[role];
+  const role: RoleKey = roleProp || (activeContext?.role as RoleKey) || (profile?.role as RoleKey) || "founder";
+  const theme = roleThemes[role] || roleThemes.founder;
 
   useEffect(() => {
     let alive = true;
-    Promise.allSettled([fetchSessionContext(), getReturnSummary()])
+    Promise.allSettled([fetchSessionContext(role), getReturnSummary()])
       .then(([contextResult, returnResult]) => {
         if (!alive) return;
         if (contextResult.status === 'fulfilled') setContext(contextResult.value);
@@ -89,7 +89,7 @@ export function WelcomeBack() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [role]);
 
   if (loading || !context) return null;
 
@@ -146,8 +146,8 @@ export function WelcomeBack() {
         </div>
       )}
 
-      {/* Decay Status (founders primarily, but shown for any role) */}
-      {context.decayStatus && (
+      {/* Decay Status (founder momentum decay only) */}
+      {role === "founder" && context.decayStatus && (
         <div className="flex items-center gap-2 text-sm">
           {context.decayStatus.level === "healthy" && (
             <CheckCircle2 className={`w-4 h-4 ${theme.decayHealthy}`} />

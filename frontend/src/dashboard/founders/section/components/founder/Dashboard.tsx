@@ -300,7 +300,7 @@ export function Dashboard() {
       </div>
 
       {/* Welcome Back — contextual intelligence surface */}
-      <WelcomeBack />
+      <WelcomeBack role="founder" />
 
       <CoFounderMode ventureId={activeVenture?.id ?? null} />
 

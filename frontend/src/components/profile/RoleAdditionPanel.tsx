@@ -27,6 +27,15 @@ export function RoleAdditionPanel() {
   const addRole = async (role: Exclude<Role, "explorer">, path: string) => {
     setBusy(role);
     setError(null);
+    const isInstitutional = role === "investor" || role === "organisation";
+    if (isInstitutional) {
+      // Institutional roles must complete onboarding & verification prerequisites
+      // before active role activation and context switching are granted
+      setOpen(false);
+      setBusy(null);
+      navigate(path);
+      return;
+    }
     const activated = await activateRole(role);
     if (activated.error) {
       setError(activated.error.message);

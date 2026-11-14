@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Paperclip, Send, Ticket } from "lucide-react";
+import { Paperclip, Send, Ticket, GraduationCap } from "lucide-react";
 import {
   createConversation,
   acceptMessageRequest,
@@ -12,6 +12,11 @@ import {
   restSendDM,
   searchMessageRecipients,
 } from "@/lib/messaging/conversations";
+import {
+  fetchMyCohorts,
+  fetchCohortMessages,
+  sendCohortChatMessage,
+} from "@/lib/api/cohortCollaboration";
 import { mapConvSummary, mapMessage } from "@/lib/messaging/map";
 import type { MessageIdentity, UIConversation, UIMessage } from "@/lib/messaging/types";
 import { useMessaging } from "@/contexts/MessagingProvider";
@@ -69,12 +74,30 @@ export function Messages() {
     let alive = true;
     setLoading(true);
     setError(null);
-    fetchConversations()
-      .then((list) => {
+    Promise.all([
+      fetchConversations().catch(() => []),
+      fetchMyCohorts().catch(() => []),
+    ])
+      .then(([list, myCohorts]) => {
         if (!alive) return;
-        const mapped = list.map(mapConvSummary);
-        setConversations(mapped);
-        setActiveId((current) => current || mapped[0]?.id || "");
+        const mappedDms = list.map(mapConvSummary);
+        const mappedCohorts: UIConversation[] = myCohorts.map((c) => ({
+          id: `cohort_${c.id}`,
+          cohortId: c.id,
+          isCohort: true,
+          participantName: c.name,
+          participantAvatar: "👥",
+          projectName: c.organizationName,
+          subject: c.lastMessage?.text || "Cohort group discussion",
+          unread: false,
+          requestStatus: "active",
+          participantRole: "organization",
+          participantVerified: true,
+          thread: [],
+        }));
+        const combined = [...mappedCohorts, ...mappedDms];
+        setConversations(combined);
+        setActiveId((current) => current || combined[0]?.id || "");
       })
       .catch((err) => {
         if (!alive) return;
@@ -93,6 +116,30 @@ export function Messages() {
   useEffect(() => {
     if (!activeId) return;
     let alive = true;
+    const currentActive = conversations.find((c) => c.id === activeId);
+
+    if (currentActive?.isCohort && currentActive.cohortId) {
+      fetchCohortMessages(currentActive.cohortId)
+        .then((res) => {
+          if (!alive) return;
+          const thread: UIMessage[] = (res.messages || []).map((m) => ({
+            id: m.id,
+            fromMe: m.senderId === user?.id,
+            authorName: m.senderName,
+            body: m.text,
+            timestamp: m.createdAt,
+          }));
+          const lastMessageId = thread[thread.length - 1]?.id;
+          setConversations((current) =>
+            current.map((c) =>
+              c.id === activeId ? { ...c, thread, lastMessageId } : c
+            )
+          );
+        })
+        .catch(() => {});
+      return;
+    }
+
     fetchHistory(activeId)
       .then((messages) => {
         if (!alive || messages.length === 0) return;
@@ -173,6 +220,28 @@ export function Messages() {
   const handleSend = async () => {
     const body = draft.trim();
     if (!body || !activeId) return;
+
+    if (active?.isCohort && active.cohortId) {
+      setSending(true);
+      try {
+        const res = await sendCohortChatMessage(active.cohortId, { text: body });
+        const newMsg: UIMessage = {
+          id: res.message.id,
+          fromMe: true,
+          authorName: "You",
+          body,
+          timestamp: res.message.createdAt,
+        };
+        appendMessage(activeId, newMsg);
+        setDraft("");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Message was not sent.");
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+
     const clientMsgId = `cm-${Date.now()}`;
     const optimisticMessage: UIMessage = {
       id: clientMsgId,
@@ -362,9 +431,13 @@ export function Messages() {
             ) : (
               <>
                 <div className="px-5 py-3 border-b border-border-subtle">
-                  <p className="flex items-center gap-1.5 font-semibold text-text-primary">{active.participantName}<IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} /></p>
+                  <p className="flex items-center gap-1.5 font-semibold text-text-primary">
+                    {active.isCohort && <GraduationCap className="h-4 w-4 text-role-organization shrink-0" />}
+                    {active.participantName}
+                    <IdentityBadges verified={active.participantVerified} subscriber={active.participantSubscriber} credibilityScore={active.participantCredibilityScore} />
+                  </p>
                   <p className="text-xs text-text-muted">
-                    {active.participantUsername ? `@${active.participantUsername} · ` : ''}{active.requestStatus === 'pending' ? 'Message request' : conversationMeta(active) || "Conversation"}
+                    {active.isCohort ? `Cohort Discussion · ${active.projectName}` : (active.participantUsername ? `@${active.participantUsername} · ` : '') + (active.requestStatus === 'pending' ? 'Message request' : conversationMeta(active) || "Conversation")}
                   </p>
                 </div>
                 {active.requestStatus === 'pending' && (
@@ -389,6 +462,9 @@ export function Messages() {
                             : "bg-surface-secondary text-text-primary"
                         }`}
                       >
+                        {!message.fromMe && active.isCohort && message.authorName && (
+                          <p className="text-[11px] font-semibold text-role-organization mb-0.5">{message.authorName}</p>
+                        )}
                         <MentionText body={message.body} mentions={message.mentions} />
                         {message.pending && <p className="text-[10px] mt-1 text-amber-200">Saved locally · waiting for connection</p>}
                         <p
@@ -429,7 +505,7 @@ export function Messages() {
                   </button>
                   <button
                     onClick={() => void handleSend()}
-                    disabled={!draft.trim() || sending || active.requestStatus !== 'active'}
+                    disabled={!draft.trim() || sending || (active.requestStatus !== 'active' && !active.isCohort)}
                     className="h-9 px-4 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-500 disabled:bg-slate-200 disabled:text-text-disabled flex items-center gap-1.5 transition-colors"
                   >
                     <Send className="w-3.5 h-3.5" />

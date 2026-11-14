@@ -79,7 +79,7 @@ export function Dashboard() {
       <div className="p-8">
         {/* Welcome Back — contextual intelligence surface */}
         <div className="mb-6">
-          <WelcomeBack />
+          <WelcomeBack role="investor" />
         </div>
 
         <InvestorIntelligencePanel />
